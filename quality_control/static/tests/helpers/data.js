@@ -1,7 +1,6 @@
 import { defineModels, fields, onRpc } from "@web/../tests/web_test_helpers";
 import { SpreadsheetMixin } from "@spreadsheet/../tests/helpers/data";
 
-
 class QualityCheckSpreadsheet extends SpreadsheetMixin {
     _name = "quality.check.spreadsheet";
 
@@ -13,31 +12,33 @@ class QualityCheckSpreadsheet extends SpreadsheetMixin {
             id: 1,
             name: "My quality check spreadsheet",
             spreadsheet_data: "{}",
-            check_cell: "A1"
+            check_cell: "A1",
         },
         {
             id: 1111,
             name: "My quality check spreadsheet",
             spreadsheet_data: "{}",
-            check_cell: "A1"
+            check_cell: "A1",
         },
     ];
 
     dispatch_spreadsheet_message() {}
 }
 
-onRpc("/spreadsheet/data/quality.check.spreadsheet/*", async function (request) {
-    const resId = parseInt(request.url.split('/').at(-1));
-    const spreadsheet = this.env["quality.check.spreadsheet"].find((r) =>  r.id === resId);
-    return {
-        data: JSON.parse(spreadsheet.spreadsheet_data),
-        name: spreadsheet.name,
-        revisions: [],
-        isReadonly: false,
-        quality_check_display_name: "The check name",
-        quality_check_cell: spreadsheet.check_cell,
-    };
-}, { pure: true });
+onRpc(
+    "/spreadsheet/data/<string:res_model>/<int:res_id>",
+    function (_request, { res_model, res_id }) {
+        const [record] = this.env[res_model].search_read([["id", "=", parseInt(res_id)]]);
+        return {
+            data: JSON.parse(record.spreadsheet_data),
+            name: record.name,
+            revisions: [],
+            isReadonly: false,
+            quality_check_display_name: "The check name",
+            quality_check_cell: record.check_cell,
+        };
+    }
+);
 
 export function defineQualitySpreadsheetModels() {
     defineModels({

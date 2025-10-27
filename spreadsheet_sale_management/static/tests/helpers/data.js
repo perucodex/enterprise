@@ -47,11 +47,10 @@ export class SaleOrderSpreadsheet extends SpreadsheetMixin {
 
 export function defineSpreadsheetSaleModels() {
     onRpc(
-        "/spreadsheet/data/sale.order.spreadsheet/*",
-        function (request) {
-            const resId = parseInt(request.url.split("/").at(-1));
-            const spreadsheet = this.env["sale.order.spreadsheet"].find((r) => r.id === resId);
-            const order = this.env["sale.order"].find((r) => r.id === spreadsheet.order_id);
+        "/spreadsheet/data/<string:res_model>/<int:res_id>",
+        function (_request, { res_model, res_id }) {
+            const [spreadsheet] = this.env[res_model].browse(parseInt(res_id));
+            const [order] = this.env["sale.order"].browse(spreadsheet.order_id);
             return {
                 data: JSON.parse(spreadsheet.spreadsheet_data),
                 name: spreadsheet.name,
@@ -60,8 +59,7 @@ export function defineSpreadsheetSaleModels() {
                 order_id: order?.id,
                 order_display_name: order?.display_name,
             };
-        },
-        { pure: true }
+        }
     );
     defineModels({
         SaleOrder,

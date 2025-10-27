@@ -1,8 +1,7 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from lxml import etree
 
-from odoo import api, models
+from odoo import _, api, models
+from odoo.exceptions import UserError
 
 
 class AccountJournal(models.Model):
@@ -15,10 +14,23 @@ class AccountJournal(models.Model):
         se_bban_journals.sepa_pain_version = 'pain.001.001.03'
         super(AccountJournal, self - se_bban_journals)._compute_sepa_pain_version()
 
-    def _is_se_bban(self, payment_method_code):
+    def _is_se_bban(self, payment_method_code, partner_acc_type=None):
+        """ Whenever this journal should be considered as a swedish bban, plusgiro or bankgiro
+            in a batch payment.
+
+            :param payment_method_code: The payment method used for the payment
+            :param partner_acc_type: A set containing the different acc_type of all the payments
+                                     we want to add in the xml file.
+
+            :return: True if the payment method is set to **iso20022_se** and either the bank account
+                     is not IBAN or there is any IBAN payments, else False.
+        """
         return (
             payment_method_code == 'iso20022_se'
-            and self.bank_account_id.acc_type in ('bban_se', 'plusgiro', 'bankgiro')
+            and (
+                self.bank_account_id.acc_type in {'bban_se', 'plusgiro', 'bankgiro'}
+                or len({'bban_se', 'plusgiro', 'bankgiro', *(partner_acc_type or {})}) == 3
+            )
         )
 
     def _get_CtgyPurp(self, payment_method_code):
@@ -30,16 +42,41 @@ class AccountJournal(models.Model):
         Cd.text = 'SALA' if self.env.context.get('sepa_payroll_sala') else 'SUPP'
         return CtgyPurp
 
-    def _get_DbtrAcctOthr(self, payment_method_code=None):
-        Othr = super()._get_DbtrAcctOthr(payment_method_code)
-        if self._is_se_bban(payment_method_code):
-            SchmeNm = etree.SubElement(Othr, "SchmeNm")
-            if self.bank_account_id.acc_type == 'bankgiro':
-                Prtry = etree.SubElement(SchmeNm, "Prtry")
-                Prtry.text = 'BGNR'
-            else:
-                Cd = etree.SubElement(SchmeNm, "Cd")
-                Cd.text = 'BBAN'
+    def _get_DbtrAcct(self, payment_method_code=None, payments=None):
+        # EXTEND of account_iso20022
+        payments = payments or []
+        acc_types = {payment['acc_type'] for payment in payments}
+        if payment_method_code != 'iso20022_se' or 'iban' in acc_types:
+            return super()._get_DbtrAcct(payment_method_code, payments)
+
+        if not self.bank_account_id.sanitized_acc_number:
+            raise UserError(_("This journal does not have a bank account defined."))
+        DbtrAcct = etree.Element("DbtrAcct")
+        Id = etree.SubElement(DbtrAcct, "Id")
+        Id.append(self._get_DbtrAcctOthr(payment_method_code, acc_types))
+        Ccy = etree.SubElement(DbtrAcct, "Ccy")
+        Ccy.text = self.currency_id.name or self.company_id.currency_id.name
+        return DbtrAcct
+
+    def _get_DbtrAcctOthr(self, payment_method_code=None, partner_acc_type=None):
+        # EXTEND of account_iso20022
+        if not self._is_se_bban(payment_method_code, partner_acc_type):
+            return super()._get_DbtrAcctOthr(payment_method_code, partner_acc_type)
+
+        Othr = etree.Element("Othr")
+        OthrId = etree.SubElement(Othr, "Id")
+        if self.bank_account_id.sanitized_acc_number.isdigit():
+            OthrId.text = self.bank_account_id.sanitized_acc_number
+        else:
+            bank_code, account_number, _checksum = self.bank_account_id._se_get_acc_number_data(self.bank_account_id.sanitized_acc_number)
+            OthrId.text = f"{bank_code}{account_number}"
+        SchmeNm = etree.SubElement(Othr, "SchmeNm")
+        if self.bank_account_id.acc_type == 'bankgiro':
+            Prtry = etree.SubElement(SchmeNm, "Prtry")
+            Prtry.text = 'BGNR'
+        else:
+            Cd = etree.SubElement(SchmeNm, "Cd")
+            Cd.text = 'BBAN'
         return Othr
 
     def _get_CdtrAcctIdOthr(self, bank_account, payment_method_code=None):

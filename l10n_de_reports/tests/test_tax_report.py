@@ -84,6 +84,7 @@ class GermanTaxReportTest(AccountSalesReportCommon):
                     <Kz81>150</Kz81>
                     <Kz89>75</Kz89>
                     <Kz61>14.25</Kz61>
+                    <Kz83>28.50</Kz83>
                 </Umsatzsteuervoranmeldung>
             </Steuerfall>
         </Anmeldungssteuern>

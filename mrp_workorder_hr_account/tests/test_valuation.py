@@ -4,7 +4,8 @@
 from freezegun import freeze_time
 
 from odoo.addons.mrp_account.tests.test_valuation_layers import TestMrpValuationCommon
-from odoo.tests import Form
+from odoo.fields import Command
+from odoo.tests import Form, tagged
 
 from datetime import datetime, timedelta
 
@@ -166,3 +167,56 @@ class TestMrpWorkorderHrValuation(TestMrpValuationCommon):
             finished_product_svl,
             [{'value': 215.0}],
         )
+
+
+@tagged('post_install', '-at_install')
+class TestMrpWorkorderHrValuationPostInstall(TestMrpValuationCommon):
+    """
+    Some tests rely on accounting operations. However, the Chart of Accounts is created
+    only after all modules were loaded. Therefore, these tests need to be post_install.
+    """
+    def test_wip_accounting_01(self):
+        """
+        This test runs a WIP accounting for a workorder currently runnning.
+        """
+        self.env.user.write({'group_ids': [Command.link(self.ref('mrp.group_mrp_routings'))]})
+        employee = self.env['hr.employee'].create({
+            'name': 'Jean Michel',
+            'hourly_cost': 100,
+            'user_id': self.env.user.id,
+        })
+        employee_center = self.env['mrp.workcenter'].create({
+            'name': 'Jean Michel\'s Center',
+            'costs_hour': 10,
+            'employee_ids': [Command.link(employee.id)],
+        })
+        bom_1 = self.env['mrp.bom'].create({
+            'product_id': self.product1.id,
+            'product_tmpl_id': self.product1.product_tmpl_id.id,
+            'product_qty': 1.0,
+            'operation_ids': [
+                Command.create({
+                    'name': 'Fun Operation',
+                    'workcenter_id': employee_center.id,
+                    'time_mode': 'manual',
+                    'time_cycle_manual': 20,
+                    'sequence': 1,
+                }),
+            ],
+        })
+
+        with freeze_time('2027-09-01 10:00:00'):
+            mo_form = Form(self.env['mrp.production'])
+            mo_form.product_id = self.product1
+            mo_form.bom_id = bom_1
+            mo_form.product_qty = 1
+            mo = mo_form.save()
+        # post a WIP for a valid MO - no WO time completed, but time running, no valuated components consumed => nothing to debit/credit
+        with freeze_time('2027-10-01 10:00:00'):
+            mo.workorder_ids.button_start()
+        with freeze_time('2027-10-01 10:30:00'):
+            wizard = Form(self.env['mrp.account.wip.accounting'].with_context({'active_ids': [mo.id]}))
+            wizard.save().confirm()
+        wip_empty_entries = self.env['account.move'].search([('ref', 'ilike', 'WIP - ' + mo.name)])
+        self.assertEqual(len(wip_empty_entries), 2, "Should be 2 journal entries: 1 for the WIP accounting + 1 for their reversals")
+        self.assertEqual(wip_empty_entries[0].wip_production_count, 1, "WIP MOs should be linked to entries even if no 'done' work")

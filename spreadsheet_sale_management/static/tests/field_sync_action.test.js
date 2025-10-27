@@ -124,38 +124,34 @@ describe("field sync action", () => {
     });
 
     test("auto resize list columns", async () => {
-        onRpc(
-            "/spreadsheet/data/sale.order.spreadsheet/*",
-            () => {
-                const data = getSaleOrderSpreadsheetData();
-                const commands = [
+        onRpc("/spreadsheet/data/sale.order.spreadsheet/*", () => {
+            const data = getSaleOrderSpreadsheetData();
+            const commands = [
+                {
+                    type: "RE_INSERT_ODOO_LIST",
+                    sheetId: data.sheets[0].id,
+                    col: 0,
+                    row: 0,
+                    id: "1",
+                    linesNumber: 20,
+                    columns: [{ name: "product_uom_qty", type: "float" }],
+                },
+            ];
+            return {
+                name: "my spreadsheet",
+                data,
+                isReadonly: false,
+                revisions: [
                     {
-                        type: "RE_INSERT_ODOO_LIST",
-                        sheetId: data.sheets[0].id,
-                        col: 0,
-                        row: 0,
-                        id: "1",
-                        linesNumber: 20,
-                        columns: [{ name: "product_uom_qty", type: "float" }],
+                        serverRevisionId: "START_REVISION",
+                        nextRevisionId: "abcd",
+                        version: "1",
+                        type: "REMOTE_REVISION",
+                        commands,
                     },
-                ];
-                return {
-                    name: "my spreadsheet",
-                    data,
-                    isReadonly: false,
-                    revisions: [
-                        {
-                            serverRevisionId: "START_REVISION",
-                            nextRevisionId: "abcd",
-                            version: "1",
-                            type: "REMOTE_REVISION",
-                            commands,
-                        },
-                    ],
-                };
-            },
-            { pure: true }
-        );
+                ],
+            };
+        });
         const { model } = await mountSaleOrderSpreadsheetAction();
         const sheetId = model.getters.getActiveSheetId();
         expect(getCellContent(model, "A1")).toBe('=ODOO.LIST.HEADER(1,"product_uom_qty")');

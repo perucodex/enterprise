@@ -19,6 +19,11 @@ class TestCommercialEvents(TestCoDianCommon):
             freeze_date=cls.yesterday,
         )
 
+        cls.bill_pending_document_data = {
+            'state': 'invoice_accepted',
+            'commercial_state': 'pending',
+        }
+
     # -------------------------------------------------------------------------
     # HELPERS
     # -------------------------------------------------------------------------
@@ -45,7 +50,7 @@ class TestCommercialEvents(TestCoDianCommon):
         self._mock_send_and_print(move=self.invoice, response_file='SendBillSync_warnings.xml')
         self.assertTrue(self.invoice.l10n_co_dian_attachment_id)
         self.assertTrue(self.invoice.l10n_co_edi_cufe_cude_ref)
-        self.assertTrue(len(self.invoice.l10n_co_dian_document_ids.sorted()), 1)
+        self.assertEqual(len(self.invoice.l10n_co_dian_document_ids), 1)
         invoice_document_pending_values = {
             'state': 'invoice_accepted',
             'commercial_state': 'pending',
@@ -57,13 +62,13 @@ class TestCommercialEvents(TestCoDianCommon):
             bill.l10n_co_dian_send_event_update_status_received()
         bill_identifier = bill.l10n_co_edi_cufe_cude_ref
         self.assertTrue(bill_identifier)
-        self.assertTrue(len(bill.l10n_co_dian_document_ids.sorted()), 1)
-        self.assertTrue(bill.l10n_co_dian_document_ids[0].identifier, 1)
+        self.assertEqual(len(bill.l10n_co_dian_document_ids), 2)
+        self.assertTrue(bill.l10n_co_dian_document_ids[0].identifier)
         bill_document_received_values = {
             'state': 'invoice_accepted',
             'commercial_state': 'received',
         }
-        self.assertRecordValues(bill.l10n_co_dian_document_ids.sorted(), [bill_document_received_values])
+        self.assertRecordValues(bill.l10n_co_dian_document_ids.sorted(), [bill_document_received_values, self.bill_pending_document_data])
 
         # The document contains a history of the events, so will be different after each state change. It will be sent
         # by email to the vendor when the commercial state is updated, check if it is correct.
@@ -74,7 +79,7 @@ class TestCommercialEvents(TestCoDianCommon):
         with self._mock_build_and_send_request('CommercialEvent.xml'):
             bill.l10n_co_dian_send_event_update_status_goods_received()
         self.assertRecordValues(bill, [{'l10n_co_edi_cufe_cude_ref': bill_identifier}])
-        self.assertTrue(len(bill.l10n_co_dian_document_ids.sorted()), 2)
+        self.assertEqual(len(bill.l10n_co_dian_document_ids), 3)
         bill_document_goods_received_values = {
             'state': 'invoice_accepted',
             'commercial_state': 'goods_received',
@@ -82,12 +87,13 @@ class TestCommercialEvents(TestCoDianCommon):
         self.assertRecordValues(bill.l10n_co_dian_document_ids.sorted(), [
             bill_document_goods_received_values,
             bill_document_received_values,
+            self.bill_pending_document_data,
         ])
 
         with self._mock_build_and_send_request('CommercialEvent.xml'):
             bill.l10n_co_dian_send_event_update_status_accepted()
         self.assertRecordValues(bill, [{'l10n_co_edi_cufe_cude_ref': bill_identifier}])
-        self.assertTrue(len(bill.l10n_co_dian_document_ids.sorted()), 3)
+        self.assertEqual(len(bill.l10n_co_dian_document_ids), 4)
         bill_document_accepted_values = {
             'state': 'invoice_accepted',
             'commercial_state': 'accepted',
@@ -96,12 +102,13 @@ class TestCommercialEvents(TestCoDianCommon):
             bill_document_accepted_values,
             bill_document_goods_received_values,
             bill_document_received_values,
+            self.bill_pending_document_data,
         ])
 
     def test_get_status_event(self):
         self._mock_send_and_print(move=self.invoice, response_file='SendBillSync_warnings.xml')
         self.assertTrue(self.invoice.l10n_co_dian_attachment_id)
-        self.assertTrue(len(self.invoice.l10n_co_dian_document_ids.sorted()), 1)
+        self.assertEqual(len(self.invoice.l10n_co_dian_document_ids), 1)
         invoice_document_pending_values = {
             'state': 'invoice_accepted',
             'commercial_state': 'pending',
@@ -116,7 +123,7 @@ class TestCommercialEvents(TestCoDianCommon):
 
         # GetStatusEvent while no events have been sent yet
         self._get_status_event(self.invoice, 'GetStatusEvent_no_events.xml')
-        self.assertEqual(len(self.invoice.l10n_co_dian_document_ids.sorted()), 2)
+        self.assertEqual(len(self.invoice.l10n_co_dian_document_ids), 2)
         invoice_rejected_document_values = {
             'state': 'invoice_rejected',
             'commercial_state': False,
@@ -136,12 +143,12 @@ class TestCommercialEvents(TestCoDianCommon):
         # GetStatusEvent after event has been sent
         with self._mock_build_and_send_request('CommercialEvent.xml'):
             bill.l10n_co_dian_send_event_update_status_received()
-        self.assertTrue(len(bill.l10n_co_dian_document_ids.sorted()), 1)
+        self.assertEqual(len(bill.l10n_co_dian_document_ids), 2)
         bill_document_received_values = {
             'state': 'invoice_accepted',
             'commercial_state': 'received',
         }
-        self.assertRecordValues(bill.l10n_co_dian_document_ids.sorted(), [bill_document_received_values])
+        self.assertRecordValues(bill.l10n_co_dian_document_ids.sorted(), [bill_document_received_values, self.bill_pending_document_data])
 
         self._get_status_event(self.invoice, 'GetStatusEvent_received.xml')
         documents = self.invoice.l10n_co_dian_document_ids.sorted()
@@ -161,7 +168,7 @@ class TestCommercialEvents(TestCoDianCommon):
         # GetStatusEvent after a second event
         with self._mock_build_and_send_request('CommercialEvent.xml'):
             bill.l10n_co_dian_send_event_update_status_goods_received()
-        self.assertTrue(len(bill.l10n_co_dian_document_ids.sorted()), 3)
+        self.assertEqual(len(bill.l10n_co_dian_document_ids), 3)
         bill_document_goods_received_values = {
             'state': 'invoice_accepted',
             'commercial_state': 'goods_received',
@@ -169,6 +176,7 @@ class TestCommercialEvents(TestCoDianCommon):
         self.assertRecordValues(bill.l10n_co_dian_document_ids.sorted(), [
             bill_document_goods_received_values,
             bill_document_received_values,
+            self.bill_pending_document_data,
         ])
 
         self._get_status_event(self.invoice, 'GetStatusEvent_goods_received.xml')

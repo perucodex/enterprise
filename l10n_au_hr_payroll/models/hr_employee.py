@@ -54,7 +54,7 @@ class HrEmployee(models.Model):
     l10n_au_tax_treatment_option_voluntary = fields.Selection(readonly=False, related="version_id.l10n_au_tax_treatment_option_voluntary", inherited=True, groups="hr_payroll.group_hr_payroll_user")
     l10n_au_tax_treatment_option_seniors = fields.Selection(readonly=False, related="version_id.l10n_au_tax_treatment_option_seniors", inherited=True, groups="hr_payroll.group_hr_payroll_user")
     l10n_au_comissioners_installment_rate = fields.Float(readonly=False, related="version_id.l10n_au_comissioners_installment_rate", inherited=True, groups="hr_payroll.group_hr_payroll_user")
-    l10n_au_tax_treatment_code = fields.Char(readonly=False, related="version_id.l10n_au_tax_treatment_code", inherited=True, groups="hr_payroll.group_hr_payroll_user")
+    l10n_au_tax_treatment_code = fields.Char(related="version_id.l10n_au_tax_treatment_code", inherited=True, groups="hr_payroll.group_hr_payroll_user")
     l10n_au_work_country_id = fields.Many2one(readonly=False, related="version_id.l10n_au_work_country_id", inherited=True, groups="hr_payroll.group_hr_payroll_user")
     l10n_au_withholding_variation = fields.Selection(readonly=False, related="version_id.l10n_au_withholding_variation", inherited=True, groups="hr_payroll.group_hr_payroll_user")
     l10n_au_withholding_variation_amount = fields.Float(readonly=False, related="version_id.l10n_au_withholding_variation_amount", inherited=True, groups="hr_payroll.group_hr_payroll_user")

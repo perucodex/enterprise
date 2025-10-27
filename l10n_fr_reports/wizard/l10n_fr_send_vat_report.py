@@ -249,8 +249,8 @@ class L10n_Fr_ReportsSendVatReport(models.TransientModel):
         return {
             'street': company.street[:30],
             'complement': f"{company.street[30:]} {company.street2}"[:35],
-            'postal_code': company.zip,
-            'city': company.city,
+            'postal_code': company.zip[:17],
+            'city': company.city[:35],
             'country_code': company.country_id.code,
         }
 

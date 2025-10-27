@@ -200,7 +200,7 @@ class AccountFecImportWizard(models.TransientModel):
                 *self.env['account.account']._check_company_domain(self.company_id),
                 ('code', '=like', code),
             ], order='code', limit=1)
-            for code in ('6580%', '7580%')
+            for code in ('658%', '7580%')
         )
 
         # Check the moves for rounding issues

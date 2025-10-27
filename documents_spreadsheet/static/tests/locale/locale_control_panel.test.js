@@ -29,48 +29,36 @@ const fr_FR = {
 };
 
 test("No locale icon if user locale matched spreadsheet locale", async function () {
-    onRpc(
-        "/spreadsheet/data/*",
-        () => ({
-            name: "Untitled spreadsheet",
-            user_locale: en_US,
-            data: {
-                settings: { locale: en_US },
-            },
-        }),
-        { pure: true }
-    );
+    onRpc("/spreadsheet/data/*", () => ({
+        name: "Untitled spreadsheet",
+        user_locale: en_US,
+        data: {
+            settings: { locale: en_US },
+        },
+    }));
     await createSpreadsheet();
     expect(".o-spreadsheet-topbar .fa-globe").not.toHaveCount();
 });
 
 test("No locale icon if no user locale is given", async function () {
-    onRpc(
-        "/spreadsheet/data/*",
-        () => ({
-            name: "Untitled spreadsheet",
-            data: {
-                settings: { locale: en_US },
-            },
-        }),
-        { pure: true }
-    );
+    onRpc("/spreadsheet/data/*", () => ({
+        name: "Untitled spreadsheet",
+        data: {
+            settings: { locale: en_US },
+        },
+    }));
     await createSpreadsheet();
     expect(".o-spreadsheet-topbar .fa-globe").not.toHaveCount();
 });
 
 test("Different locales between user and spreadsheet: display icon as info", async function () {
-    onRpc(
-        "/spreadsheet/data/*",
-        () => ({
-            name: "Untitled spreadsheet",
-            user_locale: fr_FR,
-            data: {
-                settungs: { locale: en_US },
-            },
-        }),
-        { pure: true }
-    );
+    onRpc("/spreadsheet/data/*", () => ({
+        name: "Untitled spreadsheet",
+        user_locale: fr_FR,
+        data: {
+            settungs: { locale: en_US },
+        },
+    }));
     await createSpreadsheet();
     expect(".o-spreadsheet-topbar .fa-globe.text-info").toHaveProperty(
         "title",
@@ -81,33 +69,25 @@ test("Different locales between user and spreadsheet: display icon as info", asy
 });
 
 test("no warning with different locale codes but same formats", async function () {
-    onRpc(
-        "/spreadsheet/data/*",
-        () => ({
-            name: "Untitled spreadsheet",
-            user_locale: { ...fr_FR, code: "fr_BE" },
-            data: {
-                settings: { locale: fr_FR },
-            },
-        }),
-        { pure: true }
-    );
+    onRpc("/spreadsheet/data/*", () => ({
+        name: "Untitled spreadsheet",
+        user_locale: { ...fr_FR, code: "fr_BE" },
+        data: {
+            settings: { locale: fr_FR },
+        },
+    }));
     await createSpreadsheet();
     expect(".o-spreadsheet-topbar .fa-globe").not.toHaveCount();
 });
 
 test("changing spreadsheet locale to user locale: remove icon", async function () {
-    onRpc(
-        "/spreadsheet/data/*",
-        () => ({
-            name: "Untitled spreadsheet",
-            user_locale: en_US,
-            data: {
-                settings: { locale: fr_FR },
-            },
-        }),
-        { pure: true }
-    );
+    onRpc("/spreadsheet/data/*", () => ({
+        name: "Untitled spreadsheet",
+        user_locale: en_US,
+        data: {
+            settings: { locale: fr_FR },
+        },
+    }));
     const { model } = await createSpreadsheet();
     expect(".o-spreadsheet-topbar .fa-globe").toHaveCount(1);
     model.dispatch("UPDATE_LOCALE", { locale: en_US });

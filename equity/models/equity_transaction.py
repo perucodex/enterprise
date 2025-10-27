@@ -64,7 +64,7 @@ class EquityTransaction(models.Model):
         comodel_name='res.partner',
         string="Subscriber",
         tracking=True,
-        help="Recipient of the shares/options of the transaction.",
+        help="Recipient of the securities of the transaction.",
     )
     subscriber_id_placeholder = fields.Char(compute='_compute_subscriber_id_placeholder')
 
@@ -255,11 +255,19 @@ class EquityTransaction(models.Model):
             else:
                 transaction.subscriber_id_placeholder = ""
 
-    @api.depends('partner_id.display_name', 'transaction_type')
+    @api.depends('transaction_type', 'securities', 'security_class_id.name')
     def _compute_display_name(self):
-        type_values = dict(self._fields['transaction_type'].selection)
+        type_values = dict(self._fields['transaction_type']._description_selection(self.env))
         for transaction in self:
-            transaction.display_name = f'{transaction.partner_id.display_name} [{type_values.get(transaction.transaction_type)}]'
+            if transaction.transaction_type and transaction.securities and transaction.security_class_id:
+                transaction.display_name = self.env._(
+                    "%(transaction_type)s %(securities).2f %(class_name)s",
+                    transaction_type=type_values.get(transaction.transaction_type),
+                    securities=transaction.securities,
+                    class_name=transaction.security_class_id.name,
+                )
+            else:
+                transaction.display_name = ""
 
     @api.model_create_multi
     def create(self, vals_list):

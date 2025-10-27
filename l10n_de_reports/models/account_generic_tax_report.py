@@ -74,19 +74,22 @@ class L10n_DeTaxReportHandler(models.AbstractModel):
 
         report_lines = report._get_lines(options)
         colname_to_idx = {col['expression_label']: idx for idx, col in enumerate(options.get('columns', []))}
-        report_line_ids = [line['columns'][colname_to_idx['balance']]['report_line_id'] for line in report_lines]
+        report_line_ids = [line['columns'][0]['report_line_id'] for line in report_lines]
         codes_context = {}
         for record in self.env['account.report.line'].browse(report_line_ids):
             codes_context[record.id] = record.code
 
         for line in report_lines:
-            line_code = codes_context[line['columns'][colname_to_idx['balance']]['report_line_id']]
+            line_code = codes_context[line['columns'][0]['report_line_id']]
             if not (line_code and line_code.startswith('DE') and not line_code.endswith('TAX')):
                 continue
             line_code = line_code.split('_')[1]
             # all "Kz" may be supplied as negative, except "Kz37", "Kz39", "Kz50"
-            line_value = line['columns'][colname_to_idx['balance']]['no_format']
-            if line_value and (line_code not in ("37", "39", "50") or line_value > 0):
+            if 'balance' in colname_to_idx:
+                line_value = line['columns'][colname_to_idx['balance']]['no_format']
+            else:
+                line_value = line['columns'][colname_to_idx['base']]['no_format'] or line['columns'][colname_to_idx['tax']]['no_format']
+            if line_value and (line_code not in ("37", "39", "50") or line_value > 0) and line_code.isnumeric():
                 elem = etree.SubElement(taxes, "Kz" + line_code)
                 # These can not be supplied with decimals
                 if line_code in ("21", "35", "41", "42", "43", "44", "45", "46", "48", "49", "50", "60", "73",

@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 from collections import defaultdict
 
 from odoo import Command, _, models
+from odoo.exceptions import RedirectWarning, UserError
 from odoo.addons.base.models.res_bank import sanitize_account_number
-from odoo.exceptions import UserError, RedirectWarning
 
 
 class AccountJournal(models.Model):

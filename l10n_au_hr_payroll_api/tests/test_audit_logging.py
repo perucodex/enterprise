@@ -165,12 +165,12 @@ class TestAuditLogging(TestL10nAUPayrollAPICommon):
         self.assertTrue(any(log_message in log for log in user_logs), "There should be a log for adding Payroll / Administrator group")
 
     def test_user_groups_audit_logging(self):
-        user = self.env["res.users"].search([("login", "=", "demo")])
+        user = self.employee_user_1
         # Write on res.group user_ids
         with self.with_user("admin"):
             self.hr_group.user_ids += user
         user_logs = self._get_logs(user)
-        log_message = f"User Marc Demo (model: res.users, id:{user.id}) was granted access to group {self.hr_group.display_name} by {self.env.user.display_name}"
+        log_message = f"User mel (base.group_user) (model: res.users, id:{user.id}) was granted access to group {self.hr_group.display_name} by {self.env.user.display_name}"
         self.assertIn(log_message, user_logs[0], "There should be a log for adding Test HR Group group")
 
         self.Logs.search([]).unlink()
@@ -178,14 +178,14 @@ class TestAuditLogging(TestL10nAUPayrollAPICommon):
         with self.with_user("admin"):
             user.group_ids -= self.hr_group
         user_logs = self._get_logs(user)
-        log_message = f"User Marc Demo (model: res.users, id:{user.id}) was removed from group {self.hr_group.display_name} by {self.env.user.display_name}"
+        log_message = f"User mel (base.group_user) (model: res.users, id:{user.id}) was removed from group {self.hr_group.display_name} by {self.env.user.display_name}"
         self.assertIn(log_message, user_logs[0], "There should be a log for removing Test HR Group group")
 
     def test_reified_groups_audit_logs(self):
         """Test that a change on a reified fields trigger the onchange of groups_id."""
         group_payroll_manager = self.env.ref('hr_payroll.group_hr_payroll_manager')
 
-        user = self.env["res.users"].search([("login", "=", "demo")])
+        user = self.employee_user_1
         with self.debug_mode():
             user_form = Form(user, view='base.view_users_form')
 
@@ -193,7 +193,7 @@ class TestAuditLogging(TestL10nAUPayrollAPICommon):
         user_form.save()
         user_logs = self._get_logs(user)
 
-        log_message = f"User Marc Demo (model: res.users, id:{user.id}) was granted access to group Payroll / Administrator by {self.env.user.display_name}"
+        log_message = f"User mel (base.group_user) (model: res.users, id:{user.id}) was granted access to group Payroll / Administrator by {self.env.user.display_name}"
         self.assertTrue(any(log_message in log for log in user_logs), "There should be a log for adding Payroll / Administrator group")
 
     def test_sync_audit_logs(self):

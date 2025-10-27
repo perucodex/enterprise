@@ -47,7 +47,10 @@ class FetchmailServer(models.Model):
         # TODO This reimplements the logic from the mail module to connect to a
         # server, we should instead handle the message in `mail.thread.message_process`.
         # The logic seems to have drifted away, even before refactoring to use `commit_progress`.
-        for server in self.filtered(lambda s: s.l10n_cl_is_dte).try_lock_for_update():
+        for server in self.filtered(lambda s: s.l10n_cl_is_dte):
+            if not server.try_lock_for_update():
+                continue
+
             _logger.info('Start checking for new emails on %s IMAP server %s', server.server_type, server.name)
 
             # prevents the process from timing out when connecting for the first time
@@ -56,10 +59,10 @@ class FetchmailServer(models.Model):
             # based on their IMAP uid
             default_batch_size = kw.get('batch_limit') or 50
 
-            count, failed = 0, 0
+            fetched_messages = []
             imap_server = None
             try:
-                imap_server = server.connect()
+                imap_server = server._connect__()
                 imap_server.select()
 
                 result, data = imap_server.uid('search', None, '(UID %s:*)' % server.l10n_cl_last_uid)
@@ -86,34 +89,35 @@ class FetchmailServer(models.Model):
                         message = bytes(message.data)
                     if isinstance(message, str):
                         message = message.encode('utf-8')
-                    msg_txt = email.message_from_bytes(message, policy=email.policy.SMTP)
-                    try:
-                        with self.env.cr.savepoint():
-                            # using a savepoint instead of a new transaction to
-                            # avoid impacting this process while rolling back
-                            # properly on failures
-                            server._process_incoming_email(msg_txt)
-                            new_max_uid = max(new_max_uid, int(uid))
-                            server.write({'l10n_cl_last_uid': new_max_uid})
-                    except Exception:  # noqa: BLE001
-                        _logger.info('Failed to process mail from %s server %s.', server.server_type, server.name,
-                                     exc_info=True)
-                        failed += 1
-                    count += 1
-                    self.env.cr.commit()
-                server.write({'l10n_cl_last_uid': new_max_uid})
-                _logger.info('Fetched %d email(s) on %s server %s; %d succeeded, %d failed.', count, server.server_type,
-                             server.name, (count - failed), failed)
+                    fetched_messages.append((uid, message))
+
             except Exception:  # noqa: BLE001
-                _logger.info('General failure when trying to fetch mail from %s server %s.', server.server_type,
-                             server.name, exc_info=True)
+                _logger.info(
+                    'General failure when trying to fetch mail from %s server %s.',
+                    server.server_type,
+                    server.name,
+                    exc_info=True,
+                )
             finally:
                 if imap_server:
                     try:
                         imap_server.close()
                         imap_server.logout()
-                    except Exception:  # pylint: disable=broad-except
+                    except Exception:  # noqa: BLE001
                         _logger.warning('Failed to properly finish connection: %s.', server.name, exc_info=True)
+
+            for uid, message in fetched_messages:
+                msg_txt = email.message_from_bytes(message, policy=email.policy.SMTP)
+
+                # Because `_extend_with_attachments` (called by `_process_incoming_email`)
+                # commits the cursor, any failure will not rollback any invoice that
+                # is already successfully decoded.
+                server._process_incoming_email(msg_txt)
+                new_max_uid = max(new_max_uid, int(uid))
+                server.write({'l10n_cl_last_uid': new_max_uid})
+
+            _logger.info('Fetched %d email(s) on %s server %s.', len(fetched_messages), server.server_type, server.name)
+
             server.write({'date': fields.Datetime.now()})
             self.env.cr.commit()
         return super(FetchmailServer, self.filtered(lambda s: not s.l10n_cl_is_dte))._fetch_mail(**kw)

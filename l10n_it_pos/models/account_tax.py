@@ -23,22 +23,25 @@ class AccountTax(models.Model):
         ):
             new_base_line = self._prepare_base_line_for_taxes_computation(base_line, quantity=1, discount=0)
             super()._add_tax_details_in_base_line(new_base_line, company, rounding_method=rounding_method)
-            super()._round_base_lines_tax_details([new_base_line], company)
-            tax_details = new_base_line['tax_details']
-            price_unit_included = tax_details['total_included_currency']
-            new_base_line = self._prepare_base_line_for_taxes_computation(
-                base_line,
-                price_unit=price_unit_included,
-                special_mode='total_included',
+            self._round_base_lines_tax_details([new_base_line], company)
+            target_total_amount_currency = base_line['currency_id'].round(
+                new_base_line['tax_details']['total_included_currency']
+                * base_line['quantity']
+                * (1 - (base_line['discount'] / 100.0))
             )
+            new_base_line = self._prepare_base_line_for_taxes_computation(base_line)
             super()._add_tax_details_in_base_line(new_base_line, company, rounding_method=rounding_method)
-            super()._round_base_lines_tax_details([new_base_line], company)
-            tax_details = new_base_line['tax_details']
-            base_line['manual_tax_amounts'] = {
-                str(tax_data['tax'].id): {
-                    'tax_amount_currency': tax_data['tax_amount_currency'],
-                    'base_amount_currency': tax_data['base_amount_currency'],
-                }
-                for tax_data in tax_details['taxes_data']
-            }
+            self._round_base_lines_tax_details([new_base_line], company)
+            new_base_line = self._reduce_base_lines_to_target_amount(
+                base_lines=[new_base_line],
+                company=company,
+                amount_type='fixed',
+                amount=target_total_amount_currency,
+            )[0]
+            self._fix_base_lines_tax_details_on_manual_tax_amounts(
+                base_lines=[new_base_line],
+                company=company,
+            )
+            for key in ('manual_total_excluded_currency', 'manual_total_excluded', 'manual_tax_amounts'):
+                base_line[key] = new_base_line[key]
         super()._add_tax_details_in_base_line(base_line, company, rounding_method=rounding_method)

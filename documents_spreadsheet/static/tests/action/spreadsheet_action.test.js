@@ -66,9 +66,7 @@ const TEST_LOCALES = [
 
 test("open spreadsheet with deprecated `active_id` params", async function () {
     await prepareWebClientForSpreadsheet();
-    onRpc("/spreadsheet/data/documents.document/1", () => expect.step("spreadsheet-loaded"), {
-        pure: true,
-    });
+    onRpc("/spreadsheet/data/documents.document/1", () => expect.step("spreadsheet-loaded"));
     await makeDocumentsSpreadsheetMockEnv({
         serverData: { models: getBasicData() },
     });
@@ -87,16 +85,10 @@ test("open spreadsheet with deprecated `active_id` params", async function () {
 });
 
 test("should redirect to home menu when spreadsheet is not found", async function () {
-    onRpc(
-        "/spreadsheet/data/documents.document/2",
-        () => {
-            expect.step("try-open-spreadsheet");
-            return new Response("{}", { status: 404 });
-        },
-        {
-            pure: true,
-        }
-    );
+    onRpc("/spreadsheet/data/documents.document/2", () => {
+        expect.step("try-open-spreadsheet");
+        return new Response("{}", { status: 404 });
+    });
     mockService("action", {
         doAction(actionRequest) {
             if (actionRequest === "menu") {
@@ -118,16 +110,10 @@ test("should redirect to home menu when spreadsheet is not found", async functio
 });
 
 test("should redirect to home menu when spreadsheet access is denied", async function () {
-    onRpc(
-        "/spreadsheet/data/documents.document/2",
-        () => {
-            expect.step("try-open-spreadsheet");
-            return new Response("{}", { status: 403 });
-        },
-        {
-            pure: true,
-        }
-    );
+    onRpc("/spreadsheet/data/documents.document/2", () => {
+        expect.step("try-open-spreadsheet");
+        return new Response("{}", { status: 403 });
+    });
     mockService("action", {
         doAction(actionRequest) {
             if (actionRequest === "menu") {
@@ -187,36 +173,28 @@ test("breadcrumb is rendered the navbar", async function () {
 });
 
 test("Can open a spreadsheet in readonly", async function () {
-    onRpc(
-        "/spreadsheet/data/documents.document/*",
-        () => ({
-            data: {},
-            name: "name",
-            revisions: [],
-            isReadonly: true,
-        }),
-        { pure: true }
-    );
+    onRpc("/spreadsheet/data/documents.document/*", () => ({
+        data: {},
+        name: "name",
+        revisions: [],
+        isReadonly: true,
+    }));
     const { model } = await createSpreadsheet();
     expect(model.getters.isReadonly()).toBe(true);
 });
 
 test("format menu with default currency", async function () {
-    onRpc(
-        "/spreadsheet/data/documents.document/*",
-        () => ({
-            data: {},
-            name: "name",
-            revisions: [],
-            default_currency: {
-                code: "θdoo",
-                symbol: "θ",
-                position: "after",
-                decimalPlaces: 2,
-            },
-        }),
-        { pure: true }
-    );
+    onRpc("/spreadsheet/data/documents.document/*", () => ({
+        data: {},
+        name: "name",
+        revisions: [],
+        default_currency: {
+            code: "θdoo",
+            symbol: "θ",
+            position: "after",
+            decimalPlaces: 2,
+        },
+    }));
     const { model, env } = await createSpreadsheet();
     await doMenuAction(
         topbarMenuRegistry,

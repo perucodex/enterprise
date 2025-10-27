@@ -249,7 +249,7 @@ export class BankRecStatementLine extends KanbanRecord {
     get amountClasses() {
         const classes = this.recordData.foreign_currency_id ? "w-50" : "w-100";
         if (this.recordData.amount > 0) {
-            return `${classes} text-success fw-bold`;
+            return `${classes} fw-bold`;
         }
         if (this.recordData.amount < 0) {
             return `${classes} text-danger fw-bold`;

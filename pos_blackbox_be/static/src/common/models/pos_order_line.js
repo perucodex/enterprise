@@ -68,7 +68,7 @@ patch(PosOrderline.prototype, {
 
         let amount = this._getAmountForPlu();
         let description = this.getProduct().display_name;
-        let price_in_eurocent = this.getDisplayPrice() * 100;
+        let price_in_eurocent = this.prices.total_included * 100;
         const tax_labels = this.getLineTaxLabels();
 
         amount = this._prepareNumberForPlu(amount, 4);

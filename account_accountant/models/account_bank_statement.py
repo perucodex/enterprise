@@ -3,7 +3,7 @@ import re
 import string
 
 from markupsafe import Markup
-from itertools import product
+from itertools import takewhile
 
 from odoo import Command, SUPERUSER_ID, _, api, fields, models, modules, tools
 from odoo.exceptions import ValidationError
@@ -28,6 +28,19 @@ class AccountBankStatement(models.Model):
             },
             extra_domain=[('statement_id', '=', self.id)]
         )
+
+    def action_open_journal_invalid_statements(self):
+        self.ensure_one()
+        return {
+            'name': _('Invalid Bank Statements'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.bank.statement',
+            'view_mode': 'list',
+            'context': {
+                'search_default_journal_id': self.journal_id.id,
+                'search_default_invalid': True,
+            },
+        }
 
     def action_generate_attachment(self):
         ir_actions_report_sudo = self.env['ir.actions.report'].sudo()
@@ -996,6 +1009,7 @@ class AccountBankStatementLine(models.Model):
         # 3. From the common substrings, select the longest one using `max` with `key=len`.
         # 4. If no common substring exists, return an empty string as the default.
         substring = max(set.intersection(*map(get_all_substrings, normalised)), key=len, default="")
+        substring = substring.rstrip(r'\\')
 
         return substring if len(substring) >= 10 else None
 
@@ -1055,6 +1069,21 @@ class AccountBankStatementLine(models.Model):
             # If we could not find a valid code due to multiple journals with the same name,
             # do it with the journal name and the journal code (which is unique)
             create_reco_model_xml_id(f'Fees ({journal.name} - {journal.code})', journal)
+
+    def _is_company_amount_exceeded(self, company_currency, cumulated_balance, company_amount):
+        """
+        Helper to check if a transaction amount is already exceeded by the cumulated balance
+        Its main purpose is to have more readable conditions in `set_line_bank_statement_line` method
+        """
+        return company_currency.compare_amounts(abs(cumulated_balance), abs(company_amount)) > 0
+
+    def _will_company_amount_exceed(self, company_currency, cumulated_balance, next_balance, company_amount):
+        """
+        Helper to check if a transaction amount will be exceeded by `cumulated balance + next_balance`
+        Its main purpose is to have more readable conditions in `set_line_bank_statement_line` method
+        """
+        return (self._is_company_amount_exceeded(company_currency, cumulated_balance, company_amount)
+                and company_currency.compare_amounts(abs(cumulated_balance + next_balance), abs(company_amount)) > 0)
 
     def set_line_bank_statement_line(self, move_lines_ids):
         """ Sets the specified move lines to the bank statement line and performs reconciliation.
@@ -1122,17 +1151,35 @@ class AccountBankStatementLine(models.Model):
         is_early_payment_discount = self._qualifies_for_early_payment(transaction_currency, open_amount_currency, total_early_payment_discount)
         has_exchange_diff = False
         residual_amount = company_amount + sum(line.balance for line in other_lines)
-        for index, move_line in enumerate(move_lines):
-            exchange_diff_balance = self._lines_get_account_balance_exchange_diff(move_line.currency_id, move_line.amount_residual, move_line.amount_residual_currency)
-            has_exchange_diff = not move_line.currency_id.is_zero(exchange_diff_balance)
-            current_balance = -(move_line.amount_residual + exchange_diff_balance)
+        cumulated_balance = 0
+        next_balance = 0
+        exchange_diffs = {}
+
+        move_lines_to_process = takewhile(lambda x: not self._will_company_amount_exceed(company_currency, cumulated_balance, next_balance, company_amount), move_lines)
+        for index, move_line in enumerate(move_lines_to_process):
+            if move_line not in exchange_diffs:
+                exchange_diffs[move_line] = self._lines_get_account_balance_exchange_diff(move_line.currency_id, move_line.amount_residual, move_line.amount_residual_currency)
+            has_exchange_diff = not move_line.currency_id.is_zero(exchange_diffs[move_line])
+            current_balance = -(move_line.amount_residual + exchange_diffs[move_line])
             residual_amount += current_balance
+            cumulated_balance += current_balance
+            # We need to calculate the balance of the next line as we want to calculate partial amount and stop iterating
+            # as soon as we know that the transaction amount will be exceeded
+            if index < len(move_lines) - 1:
+                next_line = move_lines[index + 1]
+                exchange_diffs[next_line] = self._lines_get_account_balance_exchange_diff(next_line.currency_id, next_line.amount_residual, next_line.amount_residual_currency)
+                next_balance = -(next_line.amount_residual + exchange_diffs[next_line])
 
             new_line_balance = current_balance
             new_amount_currency = -move_line.amount_residual_currency
 
-            # Partial amount will be calculated only on the last invoice of the one selected by the user.
-            if index == len(move_lines) - 1:
+            # Since we look at the next line to be added, we need a special case when the first line already exceed the amount
+            if index == 0 and len(move_lines) > 1 and self._is_company_amount_exceeded(company_currency, cumulated_balance, company_amount):
+                new_line_balance = -company_amount
+                new_amount_currency = -transaction_amount
+            # Partial amount will be calculated either on the last invoice of the one selected by the user
+            # or on the one that will make exceed the transaction amount
+            elif index == len(move_lines) - 1 or self._will_company_amount_exceed(company_currency, cumulated_balance, next_balance, company_amount):
                 partial_amounts = (
                     self._get_partial_amounts(current_balance, move_line, open_amount_currency, open_balance)
                     if (company_currency.compare_amounts(residual_amount, 0) < 0 if company_currency.compare_amounts(company_amount, 0) > 0 else company_currency.compare_amounts(residual_amount, 0) > 0)
@@ -1164,9 +1211,8 @@ class AccountBankStatementLine(models.Model):
             return (
                 currency.compare_amounts(open_amount, 0) > 0
                 and currency.compare_amounts(current_amount, 0) > 0
-                and currency.compare_amounts(current_amount, open_amount) > 0
             )
-        transaction_amount, transaction_currency, _journal_amount, _journal_currency, company_amount, company_currency = self._get_accounting_amounts_and_currencies()
+        transaction_amount, transaction_currency, journal_amount, _journal_currency, company_amount, company_currency = self._get_accounting_amounts_and_currencies()
         has_enough_comp_debit = has_enough(company_currency, open_balance, current_balance)
         has_enough_comp_credit = has_enough(company_currency, -open_balance, -current_balance)
         current_amount_currency = -move_line.amount_residual_currency
@@ -1175,11 +1221,15 @@ class AccountBankStatementLine(models.Model):
 
         tolerance = self._get_payment_tolerance()
         if move_line.currency_id == transaction_currency and (has_enough_curr_debit or has_enough_curr_credit):
+            new_amount_currency = current_amount_currency - open_amount_currency
+            if has_enough_curr_debit and move_line.currency_id.compare_amounts(current_amount_currency, open_amount_currency) < 0 \
+                or has_enough_curr_credit and move_line.currency_id.compare_amounts(-current_amount_currency, -open_amount_currency) < 0:
+                new_amount_currency = -(current_amount_currency + journal_amount)
             new_amount_currency = (
                 current_amount_currency
                 # If the open amount is small, fully reconcile the move_line and not the transaction
                 if not float_is_zero(tolerance, 6) and move_line.currency_id.compare_amounts(abs(open_amount_currency), tolerance * abs(current_amount_currency)) < 0
-                else current_amount_currency - open_amount_currency
+                else new_amount_currency
             )
             rate = abs(company_amount / transaction_amount) if transaction_amount else 0.0
 
@@ -1191,11 +1241,15 @@ class AccountBankStatementLine(models.Model):
             }
         elif has_enough_comp_debit or has_enough_comp_credit:
             # Compute the new value for balance.
+            balance_after_partial = current_balance - open_balance
+            if has_enough_comp_debit and move_line.currency_id.compare_amounts(current_balance, open_balance) < 0 \
+                or has_enough_comp_credit and move_line.currency_id.compare_amounts(-current_balance, -open_balance) < 0:
+                balance_after_partial = -(current_balance + company_amount)
             balance_after_partial = (
                 current_balance
                 # If the open amount is small, fully reconcile the move_line and not the transaction
                 if not float_is_zero(tolerance, 6) and move_line.currency_id.compare_amounts(abs(open_balance), tolerance * abs(current_balance)) < 0
-                else current_balance - open_balance
+                else balance_after_partial
             )
             # Get the rate of the original journal item.
             rate = move_line.currency_rate
@@ -1216,6 +1270,8 @@ class AccountBankStatementLine(models.Model):
         return None
 
     def _get_payment_tolerance(self):
+        if self.env.context.get('skip_payment_tolerance'):
+            return 0
         try:
             payment_tolerance = float(self.env['ir.config_parameter'].sudo().get_param('account_accountant.bank_rec_payment_tolerance', 0))
         # In case the payment tolerance is not a float

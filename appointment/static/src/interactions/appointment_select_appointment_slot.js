@@ -106,7 +106,7 @@ export class appointmentSlotSelect extends Interaction {
         const capacitySelect = document.querySelector("select[name='resourceCapacity']");
         const resourceId = document.querySelector("#slots_form select[name='resource_id']")?.value;
 
-        if (resourceId && capacitySelect.value) {
+        if (resourceId && capacitySelect?.value) {
             const max_resource_capacity = parseInt(
                 document.querySelector("input[name='max_resource_capacity']")?.value || 0
             );

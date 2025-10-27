@@ -48,6 +48,21 @@ class AccountJournal(models.Model):
             },
         )
 
+    def open_invalid_statements_action(self):
+        # EXTENDS account
+        self.ensure_one()
+        if self.env['account.bank.statement'].search([('journal_id', '=', self.id), ('first_line_index', '=', False)], limit=1):
+            # Empty statements are not shown in the bank reco widget
+            return super().open_invalid_statements_action()
+        return self.env['account.bank.statement.line']._action_open_bank_reconciliation_widget(
+            extra_domain=[('line_ids.account_id', '=', self.default_account_id.id)],
+            default_context={
+                'default_journal_id': self.id,
+                'search_default_journal_id': self.id,
+                'search_default_invalid_statement': True,
+            },
+        )
+
     def open_action(self):
         # EXTENDS account
         # set default action for liquidity journals in dashboard
@@ -71,4 +86,4 @@ class AccountJournal(models.Model):
                 self.current_statement_balance,
                 currency_obj=self.currency_id or self.company_id.sudo().currency_id,
             )
-        return {'balance_amount': balance}
+        return {'balance_amount': balance, 'has_invalid_statements': self.has_invalid_statements}

@@ -20,7 +20,7 @@ class SocialPostTemplate(models.Model):
     instagram_image_ids = fields.Many2many(
         'ir.attachment', 'template_instagram_image_ids_rel', string='Instagram Images',
         help='Will attach images to your posts.',
-        compute='_compute_images_by_media', store=True, readonly=False)
+        compute='_compute_images_by_media', store=True, readonly=False, bypass_search_access=True)
 
     instagram_access_token = fields.Char('Access Token', default=lambda self: self._get_default_access_token(), copy=False,
         help="Used to allow access to Instagram to retrieve the post image")

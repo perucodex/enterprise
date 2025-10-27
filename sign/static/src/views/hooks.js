@@ -113,8 +113,13 @@ export function useSignViewButtons() {
     };
 
     useBus(env.bus, "change_file_input", async (ev) => {
+        if (component.constructor.name === 'SignActionHelper') {
+            // Skip processing in SignActionHelper(signRenderer) call to prevent double handling
+            // because its triggered from signController too.
+            return;
+        }
         fileInput.el.files = ev.detail.files;
-        resModel = ev.detail.resModel
+        resModel = ev.detail.resModel;
         await upload.onFileInputChange(ev);
     });
 

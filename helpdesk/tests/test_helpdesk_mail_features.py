@@ -131,6 +131,24 @@ class TestHelpdeskMailFeatures(HelpdeskCommon, MailCommon):
         self.assertTrue(partner0 in helpdesk_ticket0.message_partner_ids)
         self.assertTrue(partner1 in helpdesk_ticket1.message_partner_ids)
 
+        # Test case: partner already existing in company A sends email to team alias in company B.
+        partner_client_a = Partner.search([('email', 'in', ['client_a@someprovider.com'])])
+        self.assertEqual(partner_client_a.company_id, company0)
+
+        with self.mock_mail_gateway():
+            helpdesk_ticket_cross = self.format_and_process(
+                MAIL_TEMPLATE,
+                'A client <client_a@someprovider.com>',
+                mail_alias1.display_name,
+                subject='Cross-company ticket',
+                target_model='helpdesk.ticket',
+            )
+
+        self.assertEqual(helpdesk_ticket_cross.team_id, team1)
+        self.assertEqual(helpdesk_ticket_cross.company_id, company1)
+        self.assertEqual(helpdesk_ticket_cross.partner_id.company_id, company1, "A new partner should have been created in company of helpdesk team.")
+        self.assertTrue(helpdesk_ticket_cross.partner_id in helpdesk_ticket_cross.message_follower_ids.mapped('partner_id'))
+
     def test_mailgateway_with_template(self):
         """ Portal / internal users receive an email when they create a ticket """
         internal_followers = self.helpdesk_user.partner_id

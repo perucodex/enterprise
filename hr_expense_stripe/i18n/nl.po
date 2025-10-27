@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-10-08 18:44+0000\n"
-"PO-Revision-Date: 2025-10-16 10:53+0000\n"
+"PO-Revision-Date: 2025-10-24 16:21+0000\n"
 "Last-Translator: Bren Driesen <brdri@odoo.com>\n"
 "Language-Team: Dutch <https://translate.odoo.com/projects/odoo-19/"
 "hr_expense_stripe/nl/>\n"
@@ -24,7 +24,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/private_card_view_action.js:0
 msgid "(Fetching...)"
-msgstr ""
+msgstr "(Aan het ophalen...)"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_kanban
@@ -82,8 +82,9 @@ msgstr "<span>per transactie</span>"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
+#, fuzzy
 msgid "<span>per</span>"
-msgstr ""
+msgstr "<span>per</span>"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_topup_wizard_form
@@ -91,6 +92,8 @@ msgid ""
 "<strong>Top up your Stripe Issuing account to ensure your balance covers "
 "upcoming expenses.</strong>"
 msgstr ""
+"<strong>Herlaad je Stripe Issuing-account aan om ervoor te zorgen dat je "
+"saldo de komende uitgaven dekt.</strong>"
 
 #. module: hr_expense_stripe
 #: model:mail.template,body_html:hr_expense_stripe.email_template_hr_expense_stripe_card_canceled
@@ -203,6 +206,114 @@ msgid ""
 "            </table>\n"
 "        "
 msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td align=\""
+"center\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width="
+"\"590\" style=\"padding: 16px; background-color: white; color: #454748; "
+"border-collapse:separate;\">\n"
+"            <tbody>\n"
+"            <!-- HEADER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\">\n"
+"                    <t t-set=\"company\" t-value=\"object.company_id\"/>\n"
+"                    <span style=\"font-size: 10px;\">Bericht over verzending "
+"van je kaart</span><br/>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\">Je "
+"kaart is geannuleerd</span>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"right\" t-if="
+"\"not company.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?company={{ company.id }}\" "
+"style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-alt="
+"\"company.name\"/>\n"
+"                    </td></tr>\n"
+"                    <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- CONTENT -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    Hallo <t t-out="
+"\"ctx.get('recipient_name', object.user_id.name)\">[Kaarthouder]</t>,<br/><"
+"br/>\n"
+"                    We willen je graag informeren dat de verzending is "
+"geannuleerd.<br/>\n"
+"                    Wil je de kaart toch nog ontvangen? Plaats dan gerust "
+"een nieuwe bestelling wanneer het jou uitkomt.<br/><br/>\n"
+"                    Als je vragen hebt of hulp nodig hebt, staat ons team "
+"graag voor je klaar.<br/><br/>\n"
+"                    Met vriendelijke groeten,<br/>\n"
+"                   <t t-out=\"company.name or ''\">[Bedrijfsnaam]</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- FOOTER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\" align=\"left\">\n"
+"                        <t t-out=\"company.name or ''\">JouwBedrijf</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"left\" style="
+"\"opacity: 0.7;\">\n"
+"                    <t t-if=\"company.phone\">\n"
+"                       <t t-out=\"company.phone or ''\">+1 650-123-4567</t> |"
+"\n"
+"                    </t>\n"
+"                    <t t-if=\"company.email\">\n"
+"                        i <a t-attf-href="
+"\"'mailto:%s' % {{ company.email }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"company.email or ''\">info@jouwbedrijf.com</a>\n"
+"                    </t>\n"
+"                    <t t-if=\"company.website\">\n"
+"                        <a t-attf-href=\"'%s' % {{ company.website }}\" style"
+"=\"text-decoration:none; color: #454748;\" t-out=\"company.website or ''\""
+">http://www.voorbeeld.com</a>\n"
+"                    </t>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            </tbody>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            <!-- POWERED BY -->\n"
+"            <tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width="
+"\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; "
+"padding: 8px; border-collapse:separate;\">\n"
+"            <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"                Mogelijk gemaakt door <a target=\"_blank\" href="
+"\"https://www.odoo.com?utm_source=db&amp;utm_medium=mail\" t-attf-style="
+"\"color: {{company.email_secondary_color or '#875A7B'}};\">Odoo</a>\n"
+"            </td></tr>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            </table>\n"
+"        "
 
 #. module: hr_expense_stripe
 #: model:mail.template,body_html:hr_expense_stripe.email_template_hr_expense_stripe_card_ordered
@@ -572,17 +683,17 @@ msgstr "Er bestaat al een Webhook URL voor dit bedrijf."
 #: code:addons/hr_expense_stripe/controllers/main.py:0
 #: code:addons/hr_expense_stripe/models/account_bank_statement_line.py:0
 msgid "A card that doesn't exist on the database was used"
-msgstr ""
+msgstr "Er is een kaart gebruikt die niet bestaat in de database"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_hr_expense_stripe_card_block_wizard
 msgid "A wizard used to block a card"
-msgstr ""
+msgstr "Een wizard die gebruikt wordt om een kaart te blokkeren"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_hr_expense_stripe_card_receive_wizard
 msgid "A wizard used to first active a card when received"
-msgstr ""
+msgstr "Een wizard die wordt gebruikt om een kaart te activeren bij ontvangst"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.ac_refrigeration_repair
@@ -614,39 +725,39 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_needaction
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_needaction
 msgid "Action Needed"
-msgstr ""
+msgstr "Actie vereist"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_receive_wizard_form
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Activate"
-msgstr ""
+msgstr "Activeren"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__state__active
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 msgid "Active"
-msgstr ""
+msgstr "Actief"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.advertising_services
 msgid "Advertising Services"
-msgstr ""
+msgstr "Reclamediensten"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_search
 msgid "Agricultural services"
-msgstr ""
+msgstr "Agrarische diensten"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.airlines_air_carriers
 msgid "Airlines Air Carriers"
-msgstr ""
+msgstr "Luchtvaartmaatschappijen"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.airports_flying_fields
 msgid "Airports Flying Fields"
-msgstr ""
+msgstr "Vliegvelden"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__spending_policy_interval__all_time
@@ -656,55 +767,55 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_list
 msgid "All countries"
-msgstr ""
+msgstr "Alle landen"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_list
 msgid "All valid MCCs"
-msgstr ""
+msgstr "Alle geldige MCC's"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Allow All"
-msgstr ""
+msgstr "Alles toestaan"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_search
 msgid "Allowed codes"
-msgstr ""
+msgstr "Toegestane codes"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_form
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_list
 msgid "Always refuse transactions"
-msgstr ""
+msgstr "Transacties altijd weigeren"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.ambulance_services
 msgid "Ambulance Services"
-msgstr ""
+msgstr "Ambulancediensten"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__amount
 msgid "Amount"
-msgstr ""
+msgstr "Bedrag"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.amusement_parks_carnivals
 msgid "Amusement Parks Carnivals"
-msgstr ""
+msgstr "Pretparken en jaarmarkten"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/models/hr_expense.py:0
 msgid "An Expense card that doesn't exist on the database was used"
-msgstr ""
+msgstr "Er is een onkostenkaart gebruikt die niet bestaat in de database"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/utils.py:0
 msgid "An insecure authorization method was used"
-msgstr ""
+msgstr "Er is een onveilige autorisatiemethode gebruikt"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.antique_reproductions
@@ -714,12 +825,13 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.antique_shops
 msgid "Antique Shops"
-msgstr ""
+msgstr "Antiekwinkels"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.aquariums
+#, fuzzy
 msgid "Aquariums"
-msgstr ""
+msgstr "Aquariums"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.architectural_surveying_services
@@ -729,28 +841,28 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.art_dealers_and_galleries
 msgid "Art Dealers and Galleries"
-msgstr ""
+msgstr "Kunsthandelaren en galeries"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.artists_supply_and_craft_shops
 msgid "Artists Supply and Craft Shops"
-msgstr ""
+msgstr "Kunstnijverheidswinkels"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_attachment_count
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_attachment_count
 msgid "Attachment Count"
-msgstr ""
+msgstr "Aantal bijlagen"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.auto_body_repair_shops
 msgid "Auto Body Repair Shops"
-msgstr ""
+msgstr "Carrosserieën"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.auto_paint_shops
 msgid "Auto Paint Shops"
-msgstr ""
+msgstr "Autospuiterijen"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.auto_service_shops
@@ -1570,7 +1682,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_config_settings__display_name
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_users__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "Weergavenaam"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.doctors

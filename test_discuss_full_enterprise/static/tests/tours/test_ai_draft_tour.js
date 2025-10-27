@@ -97,6 +97,10 @@ registry.category("web_tour.tours").add("test_ai_draft_chatter_button", {
             trigger: ".odoo-editor-editable:eq(1):has(p:contains('This is dummy ai response'))",
         },
         {
+            content: "The default recipients should be set in the composer dialog",
+            trigger: ".o_mail_composer_form_view div[name='partner_ids'] .badge[title='Freddy']",
+        },
+        {
             content: "Close the composer dialog",
             trigger: ".btn-close",
             run: "click",
@@ -127,6 +131,116 @@ registry.category("web_tour.tours").add("test_ai_draft_chatter_button", {
         {
             content: "Check the the AI response was actually posted as a note",
             trigger: ".o-mail-Message-body:eq(0):has(p:contains('This is dummy ai response'))",
+        },
+        {
+            content: "Close chat",
+            trigger: ".o-mail-ChatWindow-header .oi-close",
+            run: "click",
+        },
+        ...stepUtils.toggleHomeMenu(),
+        ...stepUtils.goToAppSteps("ai_app.ai_menu_root"),
+        // agent has no chatter but has a prompt button
+        {
+            trigger: ".o_ai_agent_kanban .o_dropdown_kanban:not(:visible) .btn",
+            run: "click",
+        },
+        {
+            trigger: ".o_kanban_card_manage_pane a.oe_kanban_action",
+            run: "click",
+        },
+        {
+            content: "Waiting for form view",
+            trigger: ".o_form_view",
+        },
+        {
+            trigger: ".o_menu_systray button[title='Ask AI']",
+            run: "click",
+        },
+        {
+            content: "Chatter related prompt buttons should not be shown",
+            trigger: ".o-mail-Thread:not(:has(button:contains('Write a followup answer')))",
+        },
+        {
+            trigger: ".o-mail-Thread:not(:has(button:contains('Summarize the chatter')))",
+        },
+        {
+            content: "The prompt button created for the agent should be shown",
+            trigger: ".o-mail-Thread button:contains('agent prompt button')",
+            run: "click",
+        },
+        {
+            trigger: ".o-mail-Message:contains('This is dummy ai response')",
+            run: "hover",
+        },
+        {
+            trigger:
+                ".o-mail-Message:contains('This is dummy ai response') .o-mail-Message-actions",
+        },
+        {
+            content: "Chatter related actions should not be shown",
+            trigger:
+                ".o-mail-Message:contains('This is dummy ai response'):not(:has(button[name='send-message-direct']))",
+        },
+        {
+            trigger:
+                ".o-mail-Message:contains('This is dummy ai response'):not(:has(button[name='log-note-direct']))",
+        },
+        {
+            trigger: ".o-mail-ChatWindow-header .oi-close",
+            run: "click",
+        },
+        {
+            trigger: ".o_menu_sections button[data-menu-xmlid='ai_app.ai_menu']",
+            run: "click",
+        },
+        // topic has no chatter and no prompt button
+        {
+            trigger: "a[data-menu-xmlid='ai_app.ai_topic_menu_action']",
+            run: "click",
+        },
+        {
+            trigger: ".o_list_renderer .o_data_cell[name='name']",
+            run: "click",
+        },
+        {
+            content: "Waiting for form view",
+            trigger: ".o_form_view",
+        },
+        {
+            trigger: ".o_menu_systray button[title='Ask AI']",
+            run: "click",
+        },
+        {
+            content: "Chatter related prompt buttons should not be shown",
+            trigger: ".o-mail-Thread:not(:has(button:contains('Write a followup answer')))",
+        },
+        {
+            trigger: ".o-mail-Thread:not(:has(button:contains('Summarize the chatter')))",
+        },
+        {
+            trigger: ".o-mail-Composer-inputContainer textarea",
+            run: "edit Hi",
+        },
+        {
+            trigger: ".o-mail-Composer-quickActions button[name='send-message']",
+            run: "click",
+        },
+        {
+            trigger: ".o-mail-Message:contains('This is dummy ai response')",
+            run: "hover",
+        },
+        {
+            trigger:
+                ".o-mail-Message:contains('This is dummy ai response') .o-mail-Message-actions",
+        },
+        {
+            content: "Chatter related actions should not be shown",
+            trigger:
+                ".o-mail-Message:contains('This is dummy ai response'):not(:has(button[name='send-message-direct']))",
+        },
+        {
+            trigger:
+                ".o-mail-Message:contains('This is dummy ai response'):not(:has(button[name='log-note-direct']))",
         },
     ],
 });

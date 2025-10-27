@@ -6,8 +6,35 @@ import { WarningDialog } from "@web/core/errors/error_dialogs";
 
 import { AbstractSpreadsheetAction } from "@spreadsheet_edition/bundle/actions/abstract_spreadsheet_action";
 
-import { useSubEnv } from "@odoo/owl";
-import { useSpreadsheetFieldSyncExtension } from "../field_sync_extension_hook";
+import { onWillUnmount, useSubEnv } from "@odoo/owl";
+import {
+    addSpreadsheetFieldSyncExtensionWithCleanUp,
+    useSpreadsheetFieldSyncStore,
+} from "../field_sync_extension_hook";
+import { SpreadsheetComponent } from "@spreadsheet/actions/spreadsheet_component";
+import { SpreadsheetName } from "@spreadsheet_edition/bundle/actions/control_panel/spreadsheet_name";
+import { SpreadsheetNavbar } from "@spreadsheet_edition/bundle/components/spreadsheet_navbar/spreadsheet_navbar";
+import { VersionHistoryAction } from "@spreadsheet_edition/bundle/version_history/version_history_action";
+import { VersionHistorySidePanel } from "@spreadsheet_edition/bundle/version_history/side_panel/version_history_side_panel";
+
+class SpreadsheetComponentSync extends SpreadsheetComponent {
+    setup() {
+        super.setup();
+        useSpreadsheetFieldSyncStore();
+    }
+}
+export class FieldSyncVersionHistoryAction extends VersionHistoryAction {
+    static components = {
+        SpreadsheetComponent: SpreadsheetComponentSync,
+        SpreadsheetName,
+        SpreadsheetNavbar,
+        VersionHistorySidePanel,
+    };
+    setup() {
+        addSpreadsheetFieldSyncExtensionWithCleanUp(onWillUnmount);
+        super.setup();
+    }
+}
 
 export class SpreadsheetFieldSyncAction extends AbstractSpreadsheetAction {
     static template = "spreadsheet_sale_management.SpreadsheetFieldSyncAction";
@@ -20,9 +47,10 @@ export class SpreadsheetFieldSyncAction extends AbstractSpreadsheetAction {
         super.setup();
         useSubEnv({
             makeCopy: this.makeCopy.bind(this),
+            showHistory: this.showHistory.bind(this),
         });
-
-        useSpreadsheetFieldSyncExtension();
+        addSpreadsheetFieldSyncExtensionWithCleanUp(onWillUnmount);
+        useSpreadsheetFieldSyncStore();
     }
 
     async execInitCallbacks() {
@@ -85,8 +113,21 @@ export class SpreadsheetFieldSyncAction extends AbstractSpreadsheetAction {
             };
         }
     }
+
+    showHistory() {
+        this.actionService.doAction(
+            {
+                type: "ir.actions.act_url",
+                target: "new",
+                tag: "action_sale_order_spreadsheet_history",
+                url: `/odoo/sale-order-spreadsheet-history?spreadsheet_id=${this.resId}&res_model=${this.resModel}`,
+            },
+            { newWindow: true }
+        );
+    }
 }
 
 registry
     .category("actions")
-    .add("action_sale_order_spreadsheet", SpreadsheetFieldSyncAction, { force: true });
+    .add("action_sale_order_spreadsheet", SpreadsheetFieldSyncAction, { force: true })
+    .add("action_sale_order_spreadsheet_history", FieldSyncVersionHistoryAction, { force: true });

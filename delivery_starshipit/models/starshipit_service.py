@@ -218,6 +218,7 @@ class Starshipit:
         self._validate_partner_fields(origin_partner)
         return self._send_request('deliveryservices', method='POST', data={
             'street': ' '.join(filter(None, [origin_partner.street, origin_partner.street2])),
+            'city': origin_partner.city,
             'post_code': origin_partner.zip,
             'country_code': origin_partner.country_code,
             'packages': [{}],

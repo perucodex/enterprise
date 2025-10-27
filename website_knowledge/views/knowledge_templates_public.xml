@@ -23,7 +23,7 @@
     <template id="website_knowledge.article_public_content" name="Knowledge Public Article Content">
         <div class="o_knowledge_public_content d-flex flex-column h-100">
             <!-- Article header -->
-            <header class="o_knowledge_header o_knowledge_header_line d-flex p-3">
+            <header class="o_knowledge_header o_knowledge_header_line d-flex d-print-none p-3">
                 <button t-if="show_sidebar" class="o_knowledge_sidebar_enabler_button o_toggle_public_sidebar btn py-1 px-2 me-2">
                     <i class="oi oi-lg oi-panel-right" title="Show Sidebar"/>
                 </button>
@@ -38,7 +38,7 @@
                         class="o_knowledge_article_log_in nav-link fw-bold text-nowrap">Sign in</a>
                 </div>
             </header>
-            <main class="flex-grow-1 overflow-y-scroll">
+            <main class="o_knowledge_body flex-grow-1">
                 <!-- Article Cover -->
                 <div class="pt-md-5" t-if="not article['cover_image_id']"/>
                 <div t-if="article['cover_image_id']" class="o_knowledge_cover">
@@ -58,7 +58,11 @@
 
     <template id="website_knowledge.article_view_public" name="Knowledge Public">
         <t t-call="website_knowledge.layout">
-            <div class="o_knowledge_public_view d-flex h-100 overflow-hidden" t-att-data-res_id="article['id']">
+            <t t-set="head">
+                <t t-call-assets="website_knowledge.assets_knowledge_print" media="print" t-js="false"/>
+                <t t-out="head or ''"/>
+            </t>
+            <div class="o_knowledge_public_view d-flex h-100" t-att-data-res_id="article['id']">
                 <div class="o_knowledge_sidebar_container o_knowledge_sidebar_loading bg-100 border-end" t-if="show_sidebar"/>
                 <div class="flex-grow-1 min-w-0 o_knowledge_public_content_container">
                     <t t-call="website_knowledge.article_public_content"/>

@@ -5,6 +5,7 @@ import {
     ClientDisconnectedError,
 } from "@spreadsheet/o_spreadsheet/o_spreadsheet";
 import { usePopover } from "@web/core/popover/popover_hook";
+import { _t } from "@web/core/l10n/translation";
 
 const { useStore, ClientFocusStore } = stores;
 const { topbarComponentRegistry } = registries;
@@ -20,6 +21,10 @@ class SpreadsheetUsersTooltip extends Component {
         onClick: Function,
         close: { optional: true, type: Function },
     };
+
+    getDataTooltip(userName) {
+        return _t("Go to %(userName)s", { userName });
+    }
 }
 
 export class CollaborativeStatus extends Component {
@@ -77,6 +82,10 @@ export class CollaborativeStatus extends Component {
 
     get tooltipInfo() {
         return this.connectedUsers.slice(SHOWN_USER_THUMBNAIL);
+    }
+
+    getDataTooltip(userName) {
+        return _t("Go to %(userName)s", { userName });
     }
 
     openPopover(ev) {

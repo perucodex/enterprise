@@ -42,7 +42,7 @@ patch(router, {
         if (url.startsWith("/odoo/documents") && state.access_token) {
             return (
                 `/odoo/documents/${encodeURIComponent(state.access_token)}` +
-                (odoo.debug ? `?debug=${odoo.debug}` : "")
+                (Object.hasOwn(state, "debug") ? `?debug=${state.debug}` : "")
             );
         }
         return url;

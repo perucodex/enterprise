@@ -19,8 +19,8 @@
                         </group>
                         <group>
                             <label for="focused_models" string="On the Model"/>
-                            <field name="focused_models" widget="many2many_tags" readonly="is_system_default" placeholder="All Models" nolabel="1" invisible="is_system_default and not focused_models"/>
-                            <span class="text-muted" invisible="not is_system_default or focused_models">All Models</span>
+                            <field name="focused_models" widget="many2many_tags" readonly="is_system_default" placeholder="All Models" nolabel="1" invisible="is_system_default and not focused_models or interface_key == 'systray_ai_button'"/>
+                            <span class="text-muted" invisible="(not is_system_default or focused_models) and interface_key != 'systray_ai_button'">All Models</span>
                         </group>
                         <group>
                             <field name="ai_agent" widget="many2one_avatar" options="{'no_create': True}" string="Call the Agent"/>

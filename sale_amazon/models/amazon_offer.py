@@ -273,9 +273,10 @@ class AmazonOffer(models.Model):
             )
         else:
             _logger.info(
-                "Sent inventory availability notification (feed_ref %s) to amazon for offers with"
-                " SKU %s.",
+                "Sent inventory availability notification (feed_ref %s) to Amazon for account ID"
+                " %s. SKUs: %s.",
                 feed_ref,
+                account.id,
                 ', '.join(self.mapped('sku')),
             )
             self.amazon_sync_status = 'processing'

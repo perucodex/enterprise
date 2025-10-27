@@ -191,7 +191,7 @@ class IoTController(http.Controller):
             create_update_value['name'] = ensure_unique_name(name)
             icp_sudo = request.env['ir.config_parameter'].sudo()
             iot_token = icp_sudo.get_param('iot.iot_token')
-            if iot_token == iot_box['token']:
+            if iot_token and iot_token == iot_box['token']:
                 create_update_value['identifier'] = iot_identifier
                 _logger.info('Creating IoT with data: %s', create_update_value)
                 box = request.env['iot.box'].sudo().create(create_update_value)

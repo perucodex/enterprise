@@ -179,16 +179,10 @@ test("Freeze&Share a spreadsheet with an odoo list", async function () {
             expect.step("open_share");
         },
     });
-    onRpc(
-        "/spreadsheet/data/documents.document/2",
-        () => ({
-            data: model.exportData(),
-            revisions: [],
-        }),
-        {
-            pure: true,
-        }
-    );
+    onRpc("/spreadsheet/data/documents.document/2", () => ({
+        data: model.exportData(),
+        revisions: [],
+    }));
     await makeDocumentsSpreadsheetMockEnv({
         serverData,
         mockRPC: async function (route, args) {

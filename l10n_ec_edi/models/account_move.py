@@ -1105,10 +1105,16 @@ class AccountMove(models.Model):
         taxes = self.env['account.tax'].search([('tax_group_id', 'in', tax_groups.ids)]).grouped(lambda tax: tax.tax_group_id.l10n_ec_type)
 
         for node in line_nodes:
+            # Since descuento is the amount discounted we need to compute the percentage
+            gross_total = float(node.find('cantidad').text) * float(node.find('precioUnitario').text)
+            discount = '0.00'
+            if gross_total:
+                discount = str(float_round((float(node.find('descuento').text) / gross_total * 100.0), precision_digits=2))
             new_line_val = {
                 'move_id': bill.id,
                 'quantity': node.find('cantidad').text,
                 'price_unit': node.find('precioUnitario').text,
+                'discount': discount,
             }
             if existing_products.get(node.find('codigoPrincipal').text):
                 new_line_val['product_id'] = existing_products[node.find('codigoPrincipal').text].id

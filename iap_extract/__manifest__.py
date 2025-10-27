@@ -18,6 +18,9 @@
     'assets': {
         'web.assets_backend': [
             'iap_extract/static/src/components/**/*',
-        ]
+        ],
+        'web.assets_unit_tests': [
+            'iap_extract/static/tests/**/*',
+        ],
     }
 }

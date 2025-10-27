@@ -52,7 +52,9 @@ export class DndSelector extends Component {
     }
 
     get isMutedForever() {
-        return this.doNotDisturbUntilDt && this.doNotDisturbUntilDt.toMillis() === FOREVER.toMillis();
+        return (
+            this.doNotDisturbUntilDt && this.doNotDisturbUntilDt.toMillis() === FOREVER.toMillis()
+        );
     }
 
     get statusText() {

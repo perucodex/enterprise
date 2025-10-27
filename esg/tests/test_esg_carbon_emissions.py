@@ -2,6 +2,8 @@ from dateutil.relativedelta import relativedelta
 from freezegun import freeze_time
 
 from odoo import fields
+from odoo.fields import Command
+from odoo.fields import Domain
 from odoo.tools import float_compare
 from odoo.exceptions import ValidationError
 
@@ -428,3 +430,164 @@ class TestEsgCarbonEmission(TestEsgCommon):
             self.emission_factor_computers_production,
             'The assignation rule matches the product, so it should be used to assign this emission factor to the move line',
         )
+
+    def test_auto_generate_assignation_rules(self):
+        bill_line_1, bill_line_2, bill_line_3, bill_line_4 = self.env['account.move.line'].with_context(auto_generate_esg_assignation_rule=False).create([
+            {
+                'move_id': self.bill_1.id,
+                'product_id': self.product_a.id,
+                'price_unit': 250.0,
+                'account_id': self.expense_account.id,
+            },
+            {
+                'move_id': self.bill_1.id,
+                'product_id': self.product_b.id,
+                'price_unit': 150.0,
+                'account_id': self.expense_account.id,
+            },
+            {
+                'move_id': self.bill_1.id,
+                'product_id': self.product_a.id,
+                'quantity': 50,
+                'account_id': self.expense_account.id,
+                'esg_emission_factor_id': self.emission_factor_delivery_transportation.id,
+            },
+            {
+                'move_id': self.bill_1.id,
+                'product_id': self.product_b.id,
+                'quantity': 200,
+                'account_id': self.expense_account.id,
+                'esg_emission_factor_id': self.emission_factor_delivery_transportation.id,
+            },
+        ]).with_context(auto_generate_esg_assignation_rule=True)
+        emission_factors = self.emission_factor_delivery_transportation + self.emission_factor_electricity_consumption + self.emission_factor_computers_production
+        esg_assignation_rules_domain = Domain('esg_emission_factor_id', 'in', emission_factors.ids)
+        assignation_rules = self.env['esg.assignation.line'].search(esg_assignation_rules_domain)
+        self.assertFalse(assignation_rules, "No rule should exist for the emission factors selected for the test.")
+        bill2 = self.bill_1.copy({'line_ids': []})
+        _bill2_line_1, bill2_line_2, _bill2_line_3, bill2_line_4 = (bill_line_1 + bill_line_2 + bill_line_3 + bill_line_4).with_context(auto_generate_esg_assignation_rule=True).copy({'move_id': bill2.id})
+        assignation_rules = self.env['esg.assignation.line'].search(esg_assignation_rules_domain)
+        self.assertEqual(len(assignation_rules), 2, "2 rules should have been created for the emission factors used on the bill lines.")
+        for rule in assignation_rules:
+            self.assertEqual(rule.esg_emission_factor_id, self.emission_factor_delivery_transportation)
+            self.assertEqual(rule.partner_id, self.bill_1.partner_id)
+            self.assertEqual(rule.account_id, self.expense_account)
+        rule1, rule2 = assignation_rules
+        self.assertEqual(rule1.product_id, bill_line_3.product_id)
+        self.assertEqual(rule2.product_id, bill_line_4.product_id)
+
+        bill2_line_4.esg_emission_factor_id = self.emission_factor_computers_production
+        assignation_rules = self.env['esg.assignation.line'].search(esg_assignation_rules_domain)
+        self.assertEqual(len(assignation_rules), 1, "1 rule should exist, one should be removed since the rule has been breaking because of the changes on the AML.")
+        self.assertEqual(assignation_rules, rule1, "The remaining rule should be the one checked.")
+        bill2_line_4.account_id = self.expense_direct_cost_account
+        bill2_line_4.esg_emission_factor_id = self.emission_factor_delivery_transportation
+        assignation_rules = self.env['esg.assignation.line'].search(esg_assignation_rules_domain)
+        self.assertEqual(len(assignation_rules), 2, "2 rules should have been created for the emission factors used on the bill lines.")
+        for rule in assignation_rules:
+            self.assertEqual(rule.esg_emission_factor_id, self.emission_factor_delivery_transportation)
+            self.assertEqual(rule.partner_id, self.bill_1.partner_id)
+        rule1, rule2 = assignation_rules
+        self.assertEqual(rule1.product_id, bill_line_3.product_id)
+        self.assertEqual(rule1.account_id, self.expense_account)
+        self.assertFalse(rule2.product_id)
+        self.assertFalse(rule2.account_id)
+        (bill_line_2 + bill2_line_2).write({'esg_emission_factor_id': self.emission_factor_delivery_transportation.id})
+        assignation_rules = self.env['esg.assignation.line'].search(esg_assignation_rules_domain)
+        self.assertEqual(len(assignation_rules), 3, "3 rules should have been created for the emission factors used on the bill lines.")
+        for rule in assignation_rules:
+            self.assertEqual(rule.partner_id, self.bill_1.partner_id)
+            self.assertEqual(rule.partner_id, self.bill_1.partner_id)
+            self.assertEqual(rule.partner_id, self.bill_1.partner_id)
+        rule1, rule2, rule3 = assignation_rules
+        self.assertEqual(rule1.product_id, self.product_a)
+        self.assertFalse(rule2.product_id)
+        self.assertEqual(rule3.product_id, self.product_b)
+        self.assertEqual(rule1.account_id, self.expense_account)
+        self.assertFalse(rule2.account_id)
+        self.assertEqual(rule3.account_id, self.expense_account)
+
+    def test_auto_generate_assignation_rules_when_2_fields_common(self):
+        partner_c = self.env['res.partner'].create({'name': 'Partner C'})
+        self.bill_1.copy({'line_ids': [Command.create({'product_id': self.product_b.id, 'account_id': self.expense_account.id, 'esg_emission_factor_id': self.emission_factor_computers_production.id})], 'partner_id': self.partner_b.id})
+        self.bill_1.copy({'line_ids': [Command.create({'product_id': self.product_b.id, 'account_id': self.expense_account.id, 'esg_emission_factor_id': self.emission_factor_computers_production.id})], 'partner_id': partner_c.id})
+        assignation_rules_domain = [
+            ('esg_emission_factor_id', 'in', (self.emission_factor_delivery_transportation + self.emission_factor_computers_production).ids)
+        ]
+        self.assertFalse(self.env['esg.assignation.line'].search(assignation_rules_domain), "No rule should exist for the emission factors selected for the test.")
+        self.env['account.move.line'].create([
+            {'move_id': self.bill_1.id, 'product_id': self.product_a.id, 'account_id': self.expense_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+            {'move_id': self.bill_1.id, 'product_id': self.product_a.id, 'account_id': self.expense_direct_cost_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+            {'move_id': self.bill_1.id, 'product_id': self.product_a.id, 'account_id': self.expense_other_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+            {'move_id': self.bill_1.id, 'product_id': self.product_b.id, 'account_id': self.expense_account.id, 'esg_emission_factor_id': self.emission_factor_computers_production.id},
+        ])
+        assignation_rules = self.env['esg.assignation.line'].search(assignation_rules_domain)
+        self.assertEqual(len(assignation_rules), 2, "2 rules should have been created")
+        rule1, rule2 = assignation_rules
+        self.assertEqual(rule1.esg_emission_factor_id, self.emission_factor_delivery_transportation)
+        self.assertEqual(rule1.partner_id, self.partner_a)
+        self.assertEqual(rule1.product_id, self.product_a)
+        self.assertFalse(rule1.account_id)
+        self.assertEqual(rule2.esg_emission_factor_id, self.emission_factor_computers_production)
+        self.assertFalse(rule2.partner_id)
+        self.assertEqual(rule2.product_id, self.product_b)
+        self.assertEqual(rule2.account_id, self.expense_account)
+
+    def test_auto_generate_assignation_rules_when_partner_in_common(self):
+        assignation_rules_domain = [
+            ('esg_emission_factor_id', '=', self.emission_factor_delivery_transportation.id),
+        ]
+        self.assertFalse(self.env['esg.assignation.line'].search(assignation_rules_domain), "No rule should exist for the emission factors selected for the test.")
+        self.env['account.move.line'].create([
+            {'move_id': self.bill_1.id, 'product_id': self.product_a.id, 'account_id': self.expense_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+            {'move_id': self.bill_1.id, 'product_id': self.product_b.id, 'account_id': self.expense_direct_cost_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+            {'move_id': self.bill_1.id, 'product_id': self.product_a.id, 'account_id': self.expense_other_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+            {'move_id': self.bill_1.id, 'product_id': self.product_b.id, 'account_id': self.asset_fixed_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+        ])
+        assignation_rules = self.env['esg.assignation.line'].search(assignation_rules_domain)
+        self.assertEqual(len(assignation_rules), 1, "1 rules should have been created")
+        rule = assignation_rules
+        self.assertEqual(rule.esg_emission_factor_id, self.emission_factor_delivery_transportation)
+        self.assertEqual(rule.partner_id, self.partner_a)
+        self.assertFalse(rule.product_id)
+        self.assertFalse(rule.account_id)
+
+    def test_auto_generate_assignation_rules_when_product_in_common(self):
+        partner_c = self.env['res.partner'].create({'name': 'Partner C'})
+        self.bill_1.copy({'line_ids': [Command.create({'product_id': self.product_a.id, 'account_id': self.expense_other_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id})], 'partner_id': self.partner_b.id})
+        self.bill_1.copy({'line_ids': [Command.create({'product_id': self.product_a.id, 'account_id': self.expense_direct_cost_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id})], 'partner_id': partner_c.id})
+        assignation_rules_domain = [
+            ('esg_emission_factor_id', 'in', (self.emission_factor_delivery_transportation + self.emission_factor_computers_production).ids)
+        ]
+        self.assertFalse(self.env['esg.assignation.line'].search(assignation_rules_domain), "No rule should exist for the emission factors selected for the test.")
+        self.env['account.move.line'].create([
+            {'move_id': self.bill_1.id, 'product_id': self.product_a.id, 'account_id': self.expense_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+            {'move_id': self.bill_1.id, 'product_id': self.product_a.id, 'account_id': self.expense_direct_cost_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+        ])
+        assignation_rules = self.env['esg.assignation.line'].search(assignation_rules_domain)
+        self.assertEqual(len(assignation_rules), 1, "1 rule should have been created")
+        rule = assignation_rules
+        self.assertEqual(rule.esg_emission_factor_id, self.emission_factor_delivery_transportation)
+        self.assertFalse(rule.partner_id)
+        self.assertEqual(rule.product_id, self.product_a)
+        self.assertFalse(rule.account_id)
+
+    def test_auto_generate_assignation_rules_when_account_in_common(self):
+        partner_c = self.env['res.partner'].create({'name': 'Partner C'})
+        self.bill_1.copy({'line_ids': [Command.create({'product_id': self.product_b.id, 'account_id': self.expense_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id})], 'partner_id': self.partner_b.id})
+        self.bill_1.copy({'line_ids': [Command.create({'product_id': self.product_a.id, 'account_id': self.expense_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id})], 'partner_id': partner_c.id})
+        assignation_rules_domain = [
+            ('esg_emission_factor_id', 'in', (self.emission_factor_delivery_transportation + self.emission_factor_computers_production).ids)
+        ]
+        self.assertFalse(self.env['esg.assignation.line'].search(assignation_rules_domain), "No rule should exist for the emission factors selected for the test.")
+        self.env['account.move.line'].create([
+            {'move_id': self.bill_1.id, 'product_id': self.product_a.id, 'account_id': self.expense_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+            {'move_id': self.bill_1.id, 'product_id': self.product_b.id, 'account_id': self.expense_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+        ])
+        assignation_rules = self.env['esg.assignation.line'].search(assignation_rules_domain)
+        self.assertEqual(len(assignation_rules), 1, "1 rule should have been created")
+        rule = assignation_rules
+        self.assertEqual(rule.esg_emission_factor_id, self.emission_factor_delivery_transportation)
+        self.assertFalse(rule.partner_id)
+        self.assertFalse(rule.product_id)
+        self.assertEqual(rule.account_id, self.expense_account)

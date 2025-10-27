@@ -1,5 +1,3 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 {
     'name': 'BBAN Plusgiro Bankgiro',
     'version': '1.0',
@@ -13,13 +11,13 @@
         This module can be installed without installing the Swedish localization enabling
         the use of those accounts for non swedish companies.
     """,
-    'depends': ['account_iso20022'],
+    'depends': ['account_iso20022', 'l10n_se'],
     'data': [
         'data/se.bban.clear.range.csv',
         'security/ir.model.access.csv',
         'views/se_bban_clear_range.xml',
     ],
-    'countries': ['SE'],
+    'auto_install': ['l10n_se'],
     'installable': True,
     'license': 'OEEL-1',
 }

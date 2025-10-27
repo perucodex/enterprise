@@ -151,12 +151,18 @@ class IrActionsServer(models.Model):
             "type": "object",
         }
 
+        record_context = {
+                'active_model': record._name,
+                'active_id': record.id,
+                'active_ids': record.ids
+        } if record else {}
+
         def _exec_tool(ir_action_tool, arguments):
             # Execute the tool, and register the call in `tool_calls_history`
             start_time = time.perf_counter()
             error = None
             try:
-                result = ir_action_tool._ai_tool_run(record, arguments)
+                result = ir_action_tool.with_context(**record_context)._ai_tool_run(record, arguments)
             except psycopg2.errors.SerializationFailure:
                 raise
             except Exception as e:  # noqa: BLE001

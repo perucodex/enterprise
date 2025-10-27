@@ -1121,7 +1121,7 @@ class AccountEdiXmlUbl_Dian(models.AbstractModel):
 
         # 3. Format the XML
         xml = etree.tostring(xml_content, xml_declaration=True, encoding='UTF-8')
-        return self._dian_sign_xml(xml, invoice)
+        return self.with_context(l10n_co_next_commercial_state=next_commercial_state)._dian_sign_xml(xml, invoice)
 
     def _get_co_invoice_event_update_status_node(self, vals):
         self._add_co_invoice_event_update_status_config_vals(vals)
@@ -1150,6 +1150,11 @@ class AccountEdiXmlUbl_Dian(models.AbstractModel):
     def _add_co_invoice_event_update_status_header_nodes(self, node, vals):
         invoice = vals['invoice']
         commercial_state_values = invoice._fields['l10n_co_dian_commercial_state'].get_values(self.env)
+        if invoice.is_purchase_document():
+            id_prefix = invoice.ref
+        else:
+            id_prefix = invoice.name
+
         node.update({
             'cbc:UBLVersionID': {'_text': 'UBL 2.1'},
             'cbc:CustomizationID': {'_text': '1'},
@@ -1157,7 +1162,7 @@ class AccountEdiXmlUbl_Dian(models.AbstractModel):
             'cbc:ProfileExecutionID': {'_text': '2' if vals['is_test_env'] else '1'},
             'cbc:ID': {
                 # the move id suffixed by a number that increases with every call
-                '_text': f'{invoice.ref}{commercial_state_values.index(vals["l10n_co_dian_commercial_state_next"])}'
+                '_text': f'{id_prefix}{commercial_state_values.index(vals["l10n_co_dian_commercial_state_next"])}',
             },
             'cbc:UUID': {
                 'schemeID': '2' if vals['is_test_env'] else '1',
@@ -1189,10 +1194,12 @@ la aceptación o rechazo de la referida factura, ni reclamó en contra de su con
         receiver_partner = vals['receiver_partner']
         node['cac:ReceiverParty'] = {
             'cac:PartyTaxScheme': self._get_co_invoice_event_update_status_party_tax_scheme_node({**vals, 'partner': receiver_partner, 'role': 'receiver'}),
-            'cac:Contact': {
-                'cbc:ElectronicMail': {'_text': receiver_partner.email},
-            },
         }
+
+        if vals['l10n_co_dian_commercial_state_next'] != 'accepted_by_issuer':
+            node['cac:ReceiverParty']['cac:Contact'] = {
+                'cbc:ElectronicMail': {'_text': receiver_partner.email},
+            }
 
     def _get_co_invoice_event_update_status_party_tax_scheme_node(self, vals):
         partner = vals['partner']
@@ -1206,10 +1213,15 @@ la aceptación o rechazo de la referida factura, ni reclamó en contra de su con
 
         tax_type = vals['tax_types'][0] if vals['tax_types'] else None
 
+        if vals['role'] == 'sender' and vals['l10n_co_dian_commercial_state_next'] == 'accepted_by_issuer':
+            partner_vat = '800197268'  # VAT number of DIAN
+        else:
+            partner_vat = partner._get_vat_without_verification_code()
+
         return {
             'cbc:RegistrationName': {'_text': registration_name},
             'cbc:CompanyID': {
-                '_text': partner._get_vat_without_verification_code(),
+                '_text': partner_vat,
                 'schemeName': partner._l10n_co_edi_get_carvajal_code_for_identification_type(),
                 'schemeAgencyName': "CO, DIAN (Dirección de Impuestos y Aduanas Nacionales)",
                 'schemeAgencyID': "195",
@@ -1414,7 +1426,7 @@ la aceptación o rechazo de la referida factura, ni reclamó en contra de su con
         document_number = root.findtext('./cbc:ID', namespaces=namespaces)
 
         if ((invoice.move_type in ('in_invoice', 'in_refund') and not invoice.l10n_co_edi_is_support_document)
-                or (invoice.move_type == 'out_invoice' and self.env.context.get('l10n_co_dian_commercial_state_next') == 'accept_by_issuer')):
+                or (invoice.move_type == 'out_invoice' and self.env.context.get('l10n_co_next_commercial_state') == 'accepted_by_issuer')):
             identifier = root.findtext('.//cac:DocumentResponse/cac:DocumentReference/cbc:UUID', namespaces=namespaces)
         else:
             identifier = root.findtext('./cbc:UUID', namespaces=namespaces)
@@ -1456,4 +1468,13 @@ la aceptación o rechazo de la referida factura, ni reclamó en contra de su con
         cufe = self._find_value("./cbc:UUID[@schemeName='CUFE-SHA384']", tree)
         if cufe:
             invoice.l10n_co_edi_cufe_cude_ref = cufe
+        if invoice.is_purchase_document():
+            self.env['l10n_co_dian.document']._create_document(
+                etree.tostring(tree, encoding='UTF-8'),
+                invoice,
+                'invoice_accepted',
+                attachment_name=f'dian_{invoice.move_type}_{invoice.ref}.xml',
+                commercial_state='pending',
+                message_json={'status': ''},
+            )
         return logs

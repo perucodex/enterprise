@@ -51,10 +51,10 @@ patch(PosStore.prototype, {
             receipt_id: order.sequence_number.toString(),
             pos_id: order.pos.config.id.toString(),
             organisation_number: this.company.company_registry,
-            receipt_total: order.getTotalWithTax().toFixed(2).toString().replace(".", ","),
+            receipt_total: order.displayPrice.toFixed(2).toString().replace(".", ","),
             negative_total:
-                order.getTotalWithTax() < 0
-                    ? Math.abs(order.getTotalWithTax()).toFixed(2).toString().replace(".", ",")
+                order.totalDue < 0
+                    ? Math.abs(order.totalDue).toFixed(2).toString().replace(".", ",")
                     : "0,00",
             receipt_type: order.receipt_type,
             vat1: order.blackbox_tax_category_a

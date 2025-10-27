@@ -1814,3 +1814,75 @@ class TestAccountReportsFilters(TestAccountReportsCommon, odoo.tests.HttpCase):
                 'currency_table_period_key': '2022-10-01_2022-12-31',
             },
         )
+
+    ####################################################
+    # CONSOLIDATION
+    ####################################################
+
+    def test_filter_consolidation(self):
+        company1 = self.company_data['company']
+        company2 = self.company_data_2['company']
+        self.env['res.currency.rate'].search([]).unlink()
+        self.company_data_2['default_account_receivable'].with_company(company1).code = '121000'
+        self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_date': '2024-06-06',
+            'invoice_line_ids': [Command.create({
+                'price_unit': 50,
+            })],
+            'company_id': company1.id,
+        }).action_post()
+        self.env['account.move'].with_company(company2).create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_date': '2024-06-06',
+            'invoice_line_ids': [Command.create({
+                'price_unit': 50,
+            })],
+            'company_id': company2.id,
+        }).action_post()
+
+        report = self.env['account.report'].create({
+            'name': "Simple Report",
+            'filter_multi_company': 'selector',
+            'filter_account_type': 'both',
+            'column_ids': [Command.create({
+                'name': 'Balance',
+                'expression_label': 'balance',
+            })],
+            'line_ids': [Command.create({
+                'name': "The line",
+                'groupby': 'account_id',
+                'expression_ids': [Command.create({
+                    'label': 'balance',
+                    'engine': 'domain',
+                    'formula': [],
+                    'subformula': 'sum',
+                })],
+            })],
+        })
+        options = self._generate_options(report, '2024-01-01', '2024-12-31')
+        self.assertLinesValues(
+            report._get_lines(options),
+            [0, 1],
+            [
+                ('The line', 100),
+                ('121000 Account Receivable', 50),
+                ('121000 Account Receivable', 50),
+                ('Total The line', 100)
+            ],
+            options,
+        )
+
+        options['consolidation'] = True
+        self.assertLinesValues(
+            report._get_lines(options),
+            [0, 1],
+            [
+                ('The line', 100),
+                ('121000 Account Receivable', 100),
+                ('Total The line', 100)
+            ],
+            options,
+        )

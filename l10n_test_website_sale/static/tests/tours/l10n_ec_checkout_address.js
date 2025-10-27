@@ -45,6 +45,7 @@ registry.category("web_tour.tours").add("tour_new_billing_ec", {
             run: "click",
             expectUnloadPage: true,
         },
+        tourUtils.waitForInteractionToLoad(),
         {
             content: "Billing address is not same as delivery address",
             trigger: "#use_delivery_as_billing",

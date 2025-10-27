@@ -33,6 +33,11 @@ super_status = {
 
 class TestL10nAUPayrollAPICommon(TransactionCase):
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env.user.group_ids |= cls.env.ref('hr_payroll.group_hr_payroll_manager')
+
     def _register_company(self):
         self.env.company.l10n_au_payroll_mode = "test"
 

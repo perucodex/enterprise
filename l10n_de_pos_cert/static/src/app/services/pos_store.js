@@ -130,10 +130,10 @@ patch(PosStore.prototype, {
             "VAT 5,5%": "SPECIAL_RATE_2",
         };
 
-        const orderSign = order.taxTotals.order_sign;
-        const expectedBase = order.taxTotals.base_amount;
+        const orderSign = order.prices.taxDetails.order_sign;
+        const expectedBase = order.prices.taxDetails.base_amount;
         let baseAmountSum = 0;
-        const result = order.taxTotals.subtotals[0].tax_groups.map((group) => {
+        const result = order.prices.taxDetails.subtotals[0].tax_groups.map((group) => {
             const amount = parseFloat((group.tax_amount + group.base_amount) * orderSign);
             baseAmountSum += group.base_amount;
             return {

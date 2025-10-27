@@ -1106,6 +1106,8 @@ services reception has been received as well.
         ]).filtered(lambda m: m.l10n_latam_document_number.lstrip('0') == document_number.lstrip('0')):
             messages.append(_('E-invoice already exist: %s', document_number))
 
+        if document_type_code == '61':
+            vals['move_type'] = 'in_refund'
         vals['l10n_latam_document_type_id'] = document_type
         vals['l10n_latam_document_number'] = document_number
 

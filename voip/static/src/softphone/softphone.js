@@ -61,7 +61,11 @@ export class Softphone extends Component {
 
     /** @returns {boolean} */
     get shouldShowCallBanner() {
-        return this.userAgent.mainSession && this.userAgent.transferSession && this.pendingCall.state === "ongoing";
+        return (
+            this.userAgent.mainSession &&
+            this.userAgent.transferSession &&
+            this.pendingCall.state === "ongoing"
+        );
     }
 
     get tabs() {

@@ -158,6 +158,11 @@ class AccountExternalTaxMixin(models.AbstractModel):
                 if tax_id in manual_tax_amounts:
                     manual_tax_amounts[tax_id]['tax_amount_currency'] += manual_amounts['tax_amount_currency']
                 else:
+                    if (
+                        base_line['manual_total_excluded_currency'] is None
+                        and 'base_amount_currency' in manual_amounts
+                    ):
+                        base_line['manual_total_excluded_currency'] = manual_amounts['base_amount_currency']
                     manual_tax_amounts[tax_id] = manual_amounts
 
         return {base_line['record']: base_line for base_line, _amount in base_line_with_tax_values}

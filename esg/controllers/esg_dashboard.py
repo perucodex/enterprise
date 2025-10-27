@@ -21,7 +21,11 @@ class EsgDashboard(Controller):
             groupby=['scope'],
             aggregates=['esg_emissions_value_t:sum'],
         ))
-        scope_names = dict(request.env['esg.emission.source']._fields['scope']._description_selection(self.env))
+        scope_names = {
+            'direct': request.env._('Scope 1'),
+            'indirect': request.env._('Scope 2'),
+            'indirect_others': request.env._('Scope 3'),
+        }
 
         # If no data found from start of current year to now, build sample data
         if not data_per_scope:

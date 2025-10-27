@@ -35,10 +35,10 @@ export class Body extends Component {
     setup() {
         this.pos = usePos();
         this.order = this.props.order || this.pos.getOrder();
-        this.adjustment = this.order.getRoundingApplied() && {
+        this.adjustment = this.order.appliedRounding && {
             description: _t("Rounding"),
-            amount: this._itFormatCurrency(Math.abs(this.order.getRoundingApplied())),
-            adjustmentType: this.order.getRoundingApplied() > 0 ? 6 : 1,
+            amount: this._itFormatCurrency(Math.abs(this.order.appliedRounding)),
+            adjustmentType: this.order.appliedRounding > 0 ? 6 : 1,
         };
     }
 
@@ -60,25 +60,24 @@ export class Body extends Component {
         });
     }
     get isFullDiscounted() {
-        return (
-            this.order.lines.length > 0 && this.order.currency.isZero(this.order.getTotalWithTax())
-        );
+        return this.order.lines.length > 0 && this.order.currency.isZero(this.priceIncl);
     }
     get lines() {
         const calculateDiscountAmount = (line) => {
-            const { priceWithTaxBeforeDiscount, priceWithTax: priceWithTaxAfterDiscount } =
-                line.getAllPrices();
-            return priceWithTaxBeforeDiscount - priceWithTaxAfterDiscount;
+            const order = line.order_id;
+            return order.prices.baseLineByLineUuids[line.uuid].tax_details.discount_amount;
         };
 
         return this.order.lines.map((line, index) => {
+            const order = line.order_id;
+            const data = order.prices.baseLineByLineUuids[line.uuid];
             const productName = line.getFullProductName();
             const department = line.tax_ids.map((tax) => tax.tax_group_id.pos_receipt_label)[0];
             const isRefund = line.qty < 0;
             const isReward = line.is_reward_line;
             const unitPrice = isRefund
-                ? line.getAllPrices(1).priceWithTax
-                : line.getAllPrices(1).priceWithTaxBeforeDiscount;
+                ? data.tax_details.total_included
+                : data.tax_details.no_discount_total_included;
             const isGlobalDiscount = this.order.currency.isNegative(unitPrice);
             const unitPriceFormatted = this._itFormatCurrency(
                 isGlobalDiscount ? -unitPrice : unitPrice

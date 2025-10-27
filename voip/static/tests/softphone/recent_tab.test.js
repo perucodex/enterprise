@@ -10,7 +10,9 @@ setupVoipTests();
 test.skip("Scrolling to bottom loads more recent calls", async () => {
     const pyEnv = await startServer();
     let rpcCount = 0;
-    onRpc("voip.call", "get_recent_phone_calls", () => { ++rpcCount; });
+    onRpc("voip.call", "get_recent_phone_calls", () => {
+        ++rpcCount;
+    });
     await start();
     for (let i = 0; i < 30; ++i) {
         pyEnv["voip.call"].create({

@@ -73,6 +73,20 @@ class TestL10nClEdiCommon(AccountEdiTestCommon):
             'l10n_cl_activity_description': 'activity_test',
             'vat': '76086428-5',
         })
+        cls.partner_dte_2 = cls.env['res.partner'].create({
+            'name': 'CARLOS BOLOMEY SPA',
+            'is_company': 1,
+            'city': 'Santiago',
+            'country_id': cl_country,
+            'street': 'San Pablo N° 1923',
+            'phone': '+562 0000 0000',
+            'company_id': cls.company_data['company'].id,
+            'l10n_cl_dte_email': 'bolomey@test.com',
+            'l10n_latam_identification_type_id': cls.env.ref('l10n_cl.it_RUT').id,
+            'l10n_cl_sii_taxpayer_type': '1',
+            'l10n_cl_activity_description': 'activity_test',
+            'vat': '87590300-4',
+        })
 
         cls.partner_anonimo = cls.env['res.partner'].create({
             'name': 'Consumidor Final Anonimo',

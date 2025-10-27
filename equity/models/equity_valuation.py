@@ -62,10 +62,17 @@ class EquityValuation(models.Model):
         for valuation in self:
             valuation.valuation = valuation.share_price * valuation.shares
 
-    @api.depends('partner_id.display_name', 'date')
+    @api.depends('partner_id.display_name', 'equity_currency_id', 'valuation')
     def _compute_display_name(self):
         for valuation in self:
-            valuation.display_name = f'{valuation.partner_id.display_name} [{valuation.date}]'
+            if valuation.partner_id:
+                valuation.display_name = self.env._(
+                    "%(partner_name)s %(amount)s",
+                    partner_name=valuation.partner_id.display_name,
+                    amount=valuation.equity_currency_id.format(valuation.valuation),
+                )
+            else:
+                valuation.display_name = ""
 
     def _compute_attachment_number(self):
         valuation_attachment_counts = dict(self.env['ir.attachment']._read_group(

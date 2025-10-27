@@ -239,7 +239,7 @@ class StripeIssuingController(Controller):
             signature_data_dict[key] = value
 
         if 'v1' not in signature_data_dict or 't' not in signature_data_dict:
-            return StripeIssuingDatabaseError.DB_WRONG_SIGNATURE
+            return False
 
         signature = base64.b64decode(signature_data_dict['v1'] + '==')  # Ensure padding is correct for base64 decoding
         timestamp = signature_data_dict['t']

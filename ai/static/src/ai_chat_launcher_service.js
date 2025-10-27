@@ -1,11 +1,66 @@
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { formatDate, formatDateTime } from "@web/core/l10n/dates";
 import { browser } from "@web/core/browser/browser";
-
+import { rpc } from "@web/core/network/rpc";
 
 export const aiChatLauncherService = {
-    dependencies: ["mail.store", "orm"],
+    dependencies: ["mail.store", "orm", "action"],
     start(env, services) {
+        const actionService = services["action"];
+        const mailStore = services["mail.store"];
+
+        async function openFullComposer(msgType, resModel, resId, content) {
+            let allRecipients = [];
+            const thread = await mailStore.Thread.getOrFetch({ model: resModel, id: resId });
+            if (msgType === "message") {
+                allRecipients = [...thread.suggestedRecipients, ...thread.additionalRecipients];
+                // auto-create partner
+                const newPartners = allRecipients.filter((recipient) => !recipient.partner_id);
+                if (newPartners.length !== 0) {
+                    const recipientEmails = [];
+                    newPartners.forEach((recipient) => {
+                        recipientEmails.push(recipient.email);
+                    });
+                    const partners = await rpc("/mail/partner/from_email", {
+                        thread_model: thread.model,
+                        thread_id: thread.id,
+                        emails: recipientEmails,
+                    });
+                    for (const index in partners) {
+                        const partnerData = partners[index];
+                        const partner = mailStore["res.partner"].insert(partnerData);
+                        const email = recipientEmails[index];
+                        const recipient = allRecipients.find(
+                            (recipient) => recipient.email === email,
+                        );
+                        recipient.partner_id = partner.id;
+                    }
+                }
+            }
+            actionService.doAction(
+                {
+                    name: msgType === "message" ? _t("Send Message") : _t("Log Note"),
+                    res_model: "mail.compose.message",
+                    target: "new",
+                    type: "ir.actions.act_window",
+                    view_id: false,
+                    view_mode: "form",
+                    views: [[false, "form"]],
+                    context: {
+                        clicked_on_full_composer: true,
+                        default_body: content,
+                        default_model: resModel,
+                        default_partner_ids: allRecipients.map((recipient) => recipient.partner_id),
+                        default_res_ids: [resId],
+                        default_subtype_xmlid:
+                            msgType === "message" ? "mail.mt_comment" : "mail.mt_note",
+                    },
+                },
+                { onClose: () => thread?.fetchNewMessages() },
+            );
+        }
+
         return {
             async launchAIChat({
                 callerComponentName,
@@ -26,7 +81,7 @@ export const aiChatLauncherService = {
                 // make the insert button target the component that called the AI
                 services['mail.store'].aiInsertButtonTarget = aiChatSourceId;
                 
-                const { ai_channel_id, data, prompts } = await services.orm.call(
+                const { ai_channel_id, data, prompts, model_has_thread } = await services.orm.call(
                     'discuss.channel',
                     'create_ai_draft_channel',
                     [
@@ -45,6 +100,17 @@ export const aiChatLauncherService = {
                     id: Number(ai_channel_id),
                 });
                 browser.localStorage.setItem("ai.thread.prompt_buttons.".concat(thread.id), JSON.stringify(prompts));
+
+                // add sendMessage and logNote only if the model inherits from mail.thread
+                if (callerComponentName === "chatter_ai_button" && model_has_thread) {
+                    aiSpecialActions = {
+                        ...(aiSpecialActions || {}),
+                        sendMessage: (content) =>
+                            openFullComposer("message", recordModel, recordId, content),
+                        logNote: (content) =>
+                            openFullComposer("note", recordModel, recordId, content),
+                    };
+                }
                 thread.ai_prompt_buttons = prompts;
                 thread.aiSpecialActions = aiSpecialActions;
                 thread.aiChatSource = aiChatSourceId;

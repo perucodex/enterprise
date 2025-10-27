@@ -13,6 +13,8 @@ Accounting reports for Taiwan
     'data': [
         'data/profit_and_loss.xml',
         'data/balance_sheet.xml',
+        'data/profit_and_loss_legacy.xml',
+        'data/balance_sheet_legacy.xml',
     ],
     'auto_install': True,
     'installable': True,

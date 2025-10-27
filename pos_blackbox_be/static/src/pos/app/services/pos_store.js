@@ -283,7 +283,7 @@ patch(PosStore.prototype, {
                 order.blackbox_tax_category_d = 0;
                 order.setDataForPushOrderFromBlackbox(blackbox_response);
                 await this.createLog(order, {}, false, false, false, true);
-                await this.increaseCorrectionCounter(order.getTotalWithTax());
+                await this.increaseCorrectionCounter(order.priceIncl);
             } finally {
                 this.ui.unblock();
             }
@@ -309,7 +309,9 @@ patch(PosStore.prototype, {
         const bbFields = await this.getBlackboxFields(order, "PR");
         Object.assign(serializedOrder, bbFields);
         if (lines) {
-            serializedOrder.receipt_total = order.getTotalWithTaxOfLines(lines);
+            serializedOrder.receipt_total = order.getPriceWithOptions({
+                lines,
+            }).taxDetails.total_amount;
             serializedOrder.plu = order.getPlu(lines);
             serializedOrder.blackbox_tax_category_a = order.getTaxAmountByPercent(21, lines);
             serializedOrder.blackbox_tax_category_b = order.getTaxAmountByPercent(12, lines);
@@ -317,7 +319,7 @@ patch(PosStore.prototype, {
             serializedOrder.blackbox_tax_category_d = order.getTaxAmountByPercent(0, lines);
         } else {
             serializedOrder.plu = order.getPlu();
-            serializedOrder.receipt_total = order.getTotalWithTax();
+            serializedOrder.receipt_total = order.priceIncl;
         }
 
         if (serializedOrder.receipt_total > 0) {
@@ -394,8 +396,8 @@ patch(PosStore.prototype, {
         if (!lines) {
             lines = order.lines;
         }
-        const amount_total = Math.abs(order.getTotalWithTaxOfLines(lines));
-        const amount_paid = Math.abs(order.getTotalPaid());
+        const amount_total = Math.abs(order.getPriceWithOptions({ lines }).taxDetails.total_amount);
+        const amount_paid = Math.abs(order.amountPaid);
         const response = {
             state: order.state,
             create_date: order.date_order,
@@ -414,7 +416,7 @@ patch(PosStore.prototype, {
             blackbox_unique_fdm_production_number: order.blackbox_unique_fdm_production_number,
             certified_blackbox_identifier: this.config.certified_blackbox_identifier,
             blackbox_signature: order.blackbox_signature,
-            change: order.getChange(),
+            change: order.change,
         };
         if (Object.keys(blackboxResponse).length > 0) {
             response.blackbox_signature = blackboxResponse.signature;
@@ -433,15 +435,18 @@ patch(PosStore.prototype, {
         if (!lines) {
             lines = order.lines;
         }
-        return lines.map((line) => ({
-            product_name: line.product_id.display_name,
-            qty: receipt_type[1] == "R" ? -line.getQuantity() : line.getQuantity(),
-            price_subtotal_incl:
-                receipt_type == "R"
-                    ? -line.getAllPrices().priceWithTax
-                    : line.getAllPrices().priceWithTax,
-            discount: receipt_type == "R" ? -line.getDiscount() : line.getDiscount(),
-        }));
+        return lines.map((line) => {
+            const data = order.prices.baseLineByLineUuids;
+            return {
+                product_name: line.product_id.display_name,
+                qty: receipt_type[1] == "R" ? -line.getQuantity() : line.getQuantity(),
+                price_subtotal_incl:
+                    receipt_type == "R"
+                        ? -data[line.uuid].tax_details.total_included
+                        : data[line.uuid].tax_details.total_included,
+                discount: receipt_type == "R" ? -line.getDiscount() : line.getDiscount(),
+            };
+        });
     },
     async createLog(
         order,
@@ -514,7 +519,7 @@ patch(PosStore.prototype, {
             clock: order.uiState.clock,
             insz: insz,
             receipt_type: order.uiState.receipt_type,
-            receipt_total: order.getTotalWithTax(),
+            receipt_total: order.priceIncl,
             plu: order.getPlu(),
         });
         return this.pushToBlackbox(dataToSend);

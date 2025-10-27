@@ -97,11 +97,13 @@ class TestSEPACreditTransferUpdate(TestSEPACreditTransferUpdateCommon):
         postal_code = partner_address.findtext('ns:PstCd', namespaces=namespaces)
         city = partner_address.findtext('ns:TwnNm', namespaces=namespaces)
         adr_line = partner_address.findtext('ns:AdrLine', namespaces=namespaces)
+        end_to_end_id = sct_doc.find('.//ns:CdtTrfTxInf/ns:PmtId/ns:EndToEndId', namespaces=namespaces)
 
         self.assertEqual(street, self.partner_a.street)
         self.assertEqual(postal_code, self.partner_a.zip)
         self.assertEqual(city, self.partner_a.city)
         self.assertFalse(adr_line)
+        self.assertEqual(end_to_end_id.text, self.payment.end_to_end_uuid)
 
 
 @tagged('external_l10n', 'post_install', '-at_install', '-standard')

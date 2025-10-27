@@ -111,6 +111,7 @@ class L10n_Co_DianDocument(models.Model):
 
         root = etree.fromstring(xml)
         demo_mode = move.company_id.l10n_co_dian_demo_mode
+        attachment_name = kwargs.pop('attachment_name', None) or self.env['account.edi.xml.ubl_dian']._export_invoice_filename(move)
 
         if demo_mode:
             doc_datetime = datetime.now()
@@ -144,7 +145,7 @@ class L10n_Co_DianDocument(models.Model):
         # create attachment
         doc.attachment_id = self.env['ir.attachment'].create([{
             'raw': xml,
-            'name': self.env['account.edi.xml.ubl_dian']._export_invoice_filename(move),
+            'name': attachment_name,
             'res_id': doc.id if state != 'invoice_accepted' else move.id,
             'res_model': doc._name if state != 'invoice_accepted' else move._name,
         }])
@@ -296,14 +297,7 @@ class L10n_Co_DianDocument(models.Model):
         if self._document_already_processed(root):
             # DIAN rejected this call because it already accepted a call with the next commercial state
             # so we can safely force the state to accepted so the user can continue the commercial event flow
-            document_xml = etree.fromstring(b64decode(root.findtext('.//{*}XmlBase64Bytes')))
-
-            if commercial_state_code := document_xml.findtext('.//{*}DocumentResponse/{*}Response/{*}ResponseCode'):
-                commercial_states = self.env['account.move']._fields['l10n_co_dian_commercial_state']._description_selection(self.env)
-                document_vals.update({
-                    'commercial_state': next(key for key, label in commercial_states if label.split(' - ', 1)[0] == commercial_state_code),
-                    'state': 'invoice_accepted',
-                })
+            document_vals['state'] = 'invoice_accepted'
 
         return document_vals, response
 
@@ -456,8 +450,11 @@ class L10n_Co_DianDocument(models.Model):
         current_response_raw = b64decode(current_response_etree.findtext(".//{*}XmlBase64Bytes"))
         history = [current_response_raw]
 
-        # exclude the last document because we already added its xml to the history
-        for document in reversed(self[:-1]):
+        # exclude the first and last documents:
+        # last: its xml has already been added to the history in the above section
+        # first: is a dummy document created by Odoo which represents the 'pending' state before
+        #        the commercial event flow has started, its xml should therefore not be added to the history
+        for document in self.sorted()[1:-1]:
             # Unzip attachment -> return the event xml from the AttachedDocument (in the last ParentDocumentLineReference)
             attached_document = etree.fromstring(xml_utils._unzip(document.attachment_id.raw))
             document_line_ref = attached_document.findall('./{*}ParentDocumentLineReference')[-1]

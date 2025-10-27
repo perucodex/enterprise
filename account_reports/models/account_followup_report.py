@@ -20,6 +20,9 @@ class AccountFollowupCustomHandler(models.AbstractModel):
         options['custom_display_config']['components']['AccountReportLine'] = 'PartnerLedgerFollowupLine'
         options['custom_display_config']['templates']['AccountReportHeader'] = 'account_reports.PartnerLedgerFollowupHeader'
 
+        if self.env.ref('account_reports.pdf_export_main_customer_report', raise_if_not_found=False):
+            options['custom_display_config'].setdefault('pdf_export', {})['pdf_export_main'] = 'account_reports.pdf_export_main_customer_report'
+
         options['hide_initial_balance'] = True
         if len(options['partner_ids']) == 1:
             options['ignore_totals_below_sections'] = True

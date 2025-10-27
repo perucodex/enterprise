@@ -2557,6 +2557,7 @@ class AccountReturnCheck(models.Model):
     attachment_ids = fields.Many2many(
         comodel_name='ir.attachment',
         string="Attachment",
+        bypass_search_access=True,
     )
 
     # Return related

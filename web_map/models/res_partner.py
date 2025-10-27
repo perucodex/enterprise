@@ -54,12 +54,14 @@ class ResPartner(models.Model):
         self.partner_latitude = False
         self.partner_longitude = False
 
-    @api.depends('street', 'zip', 'city', 'country_id')
+    @api.depends('street', 'street2', 'zip', 'city', 'country_id')
     def _compute_complete_address(self):
         for record in self:
             record.contact_address_complete = ''
             if record.street:
                 record.contact_address_complete += record.street + ', '
+            if record.street2:
+                record.contact_address_complete += record.street2 + ', '
             if record.zip:
                 record.contact_address_complete += record.zip + ' '
             if record.city:

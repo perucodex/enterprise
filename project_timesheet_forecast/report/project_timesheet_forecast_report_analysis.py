@@ -26,15 +26,21 @@ class ProjectTimesheetForecastReportAnalysis(models.Model):
     planned_costs = fields.Float('Planned Costs', readonly=True)
 
     def _number_of_days_without_weekend(self):
+        # this method should return working days based on resource calendar
+        # TODO: naming should be changed on master
         return """
             WITH no_weekend_days AS (
                 SELECT
                     F.id AS forecast_id,
-                    GREATEST(COUNT(*), 1) AS no_weekend_days_count
+                    GREATEST(COUNT(DISTINCT g::date), 1) AS no_weekend_days_count
                 FROM
-                    planning_slot F,
-                    generate_series(F.start_datetime, F.end_datetime, '1 day') AS g(day)
-                WHERE EXTRACT(ISODOW FROM g.day) < 6
+                    planning_slot F
+                    JOIN hr_employee E ON F.employee_id = E.id
+                    JOIN resource_resource R ON E.resource_id = R.id
+                    JOIN resource_calendar_attendance A ON A.calendar_id = R.calendar_id,
+                    generate_series(F.start_datetime::date, F.end_datetime::date, '1 day') g
+                WHERE
+                    EXTRACT(ISODOW FROM g) = (A.dayofweek::integer + 1)
                 GROUP BY F.id
             )
         """

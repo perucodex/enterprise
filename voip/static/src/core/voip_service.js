@@ -105,9 +105,7 @@ export class Voip {
 
     /** @returns {boolean} */
     get hasRtcSupport() {
-        return Boolean(
-            window.RTCPeerConnection && window.MediaStream && navigator.mediaDevices
-        );
+        return Boolean(window.RTCPeerConnection && window.MediaStream && navigator.mediaDevices);
     }
 
     /** @returns {boolean} */

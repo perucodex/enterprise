@@ -13,6 +13,7 @@ Accounting Reports
         'security/account_reports_security.xml',
         'security/ir.model.access.csv',
         'data/pdf_export_templates.xml',
+        'data/customer_reports_pdf_export_templates.xml',
         'data/balance_sheet.xml',
         'data/cash_flow_report.xml',
         'data/executive_summary.xml',

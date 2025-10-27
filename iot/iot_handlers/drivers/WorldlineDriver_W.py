@@ -156,12 +156,11 @@ class WorldlineDriver(CtypesTerminalDriver):
                 card,  # char* card
                 error_code,  # char* error
             )
-            _logger.debug('finished transaction #%d with result %d', transaction_id, result)
-
             self.next_transaction_min_dt = datetime.datetime.now() + datetime.timedelta(seconds=self.DELAY_TIME_BETWEEN_TRANSACTIONS)
 
             if result == 1:
                 # Transaction successful
+                _logger.info('succesfully finished transaction #%d', transaction_id)
                 self.send_status(
                     response='Approved',
                     ticket=customer_receipt.value.decode(),
@@ -174,13 +173,16 @@ class WorldlineDriver(CtypesTerminalDriver):
                 # Transaction failed
                 error_code = error_code.value.decode('utf-8')
                 if error_code not in IGNORE_ERRORS:
-                    error_msg = '%s (Error code: %s)' % (TERMINAL_ERRORS.get(error_code, 'Transaction was not processed correctly'), error_code)
+                    error_msg = f'transaction #{transaction_id} error: {error_code}: {TERMINAL_ERRORS.get(error_code, "Transaction Error")}'
+                    _logger.info(error_msg)
                     self.send_status(error=error_msg, request_data=transaction)
                 # Transaction was cancelled
                 else:
+                    _logger.info("transaction #%d cancelled by PoS user", transaction_id)
                     self.send_status(stage='Cancel', request_data=transaction)
             elif result == -1:
                 # Terminal disconnection, check status manually
+                _logger.warning("terminal disconnected during transaction #%d", transaction_id)
                 self.send_status(disconnected=True, request_data=transaction)
 
         except OSError:

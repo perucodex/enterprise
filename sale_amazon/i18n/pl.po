@@ -16,21 +16,22 @@
 # Piotr Szlązak <szlazakpiotr@gmail.com>, 2022
 # Maksym <ms@myodoo.pl>, 2022
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# "Marta (wacm)" <wacm@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-10-08 18:44+0000\n"
-"PO-Revision-Date: 2025-09-16 12:12+0000\n"
-"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"PO-Revision-Date: 2025-10-21 14:23+0000\n"
+"Last-Translator: \"Marta (wacm)\" <wacm@odoo.com>\n"
 "Language-Team: Polish <https://translate.odoo.com/projects/odoo-19/"
 "sale_amazon/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
-"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && ("
+"n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
 "n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 "X-Generator: Weblate 5.12.2\n"
 
@@ -131,6 +132,71 @@ msgid ""
 "            </div>\n"
 "        </body>"
 msgstr ""
+"<style>\n"
+"                .amz_table {\n"
+"                    width: 100%;\n"
+"                    max-width: 900px;\n"
+"                    border-collapse: collapse;\n"
+"                }\n"
+"\n"
+"                .amz_table th,\n"
+"                .amz_table td {\n"
+"                    border: 1px solid #888;\n"
+"                }\n"
+"\n"
+"                .amz_table th {\n"
+"                    white-space: nowrap;\n"
+"                }\n"
+"\n"
+"                .amz_table thead th {\n"
+"                    padding: 0.5em 0.5em;\n"
+"                    text-align: center;\n"
+"                    border-bottom: 1px solid #888;\n"
+"                }\n"
+"\n"
+"                .amz_table tbody th,\n"
+"                .amz_table tbody td {\n"
+"                    padding: 0.5em 0.5em 1em;\n"
+"                    vertical-align: top;\n"
+"                }\n"
+"            </style>\n"
+"            <body><div>\n"
+"                <p>Synchronizacja zamówień dostawy napotkała pewne błędy i "
+"nie została dokończona.</p>\n"
+"                <p>Prosimy skorygować problem przed kolejną ręczną "
+"synchronizacją zamówień dostawy, ponieważ nie zostanie podjęta żadna kolejna "
+"próba synchronizacji</p>\n"
+"                <p>Poniżej znajdują się błędy przesłane przez Amazon: </p>\n"
+"                <table class=\"amz_table\">\n"
+"                    <thead>\n"
+"                        <tr>\n"
+"                            <th>Referencja zamówienia</th>\n"
+"                            <th>Wiadomość</th>\n"
+"                        </tr>\n"
+"                    </thead>\n"
+"                    <tbody>\n"
+"                        <tr t-foreach=\"ctx.get('error_messages')\" t-as="
+"\"error\">\n"
+"                            <th><t t-out=\"error['order_ref']\"/></th>\n"
+"                            <td>\n"
+"                                <t t-if=\"error['message']\" t-out="
+"\"error['message']\"/>\n"
+"                                <t t-else=\"\">Podczas synchronizacji z "
+"Amazon wystąpił nieznany błąd.\n"
+"                                    Niestety, będziesz musiał ręcznie "
+"sprawdzić czy stan zamówienia jest poprawny.\n"
+"                                    Wszystkie informacje o tym znajdziesz\n"
+"                                    <a href=\"https://www.odoo.com/"
+"documentation/latest/applications/sales/sales/amazon_connector/manage.html#"
+"manage_deliveries_errors\">\n"
+"                                        w dokumentacji\n"
+"                                    </a>.</t>\n"
+"                            </td>\n"
+"                        </tr>\n"
+"                    </tbody>\n"
+"                </table>\n"
+"            </div>\n"
+"        </body>"
 
 #. module: sale_amazon
 #: model:mail.template,body_html:sale_amazon.inventory_sync_failure
@@ -216,7 +282,7 @@ msgstr "Nazwa konta"
 #. module: sale_amazon
 #: model:ir.ui.menu,name:sale_amazon.accounts_menu
 msgid "Accounts"
-msgstr ""
+msgstr "Konta"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__active
@@ -526,7 +592,7 @@ msgstr "Wystąpił błąd podczas łączenia konta z Amazon."
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_search
 msgid "Archived"
-msgstr ""
+msgstr "Zarchiwizowane"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
@@ -546,7 +612,7 @@ msgstr "Powrót do mojego konta"
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.quick_create_account_form
 msgid "Cancel"
-msgstr ""
+msgstr "Anuluj"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__company_id
@@ -563,13 +629,13 @@ msgstr "Ustawienia konfiguracji"
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 #: model_terms:ir.ui.view,arch_db:sale_amazon.quick_create_account_form
 msgid "Connect"
-msgstr ""
+msgstr "Połącz"
 
 #. module: sale_amazon
 #: model:ir.model.fields.selection,name:sale_amazon.selection__amazon_account__state__connected
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 msgid "Connected"
-msgstr ""
+msgstr "Połączono"
 
 #. module: sale_amazon
 #: model:ir.model,name:sale_amazon.model_res_partner
@@ -609,7 +675,7 @@ msgstr "Nie można przetworzyć dokumentu feed wysłanego przez Amazon."
 #. module: sale_amazon
 #: model:ir.model,website_form_label:sale_amazon.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Utwórz klienta"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__create_uid
@@ -646,13 +712,13 @@ msgstr "Odrzuć"
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 msgid "Disconnect"
-msgstr ""
+msgstr "Rozłącz"
 
 #. module: sale_amazon
 #: model:ir.model.fields.selection,name:sale_amazon.selection__amazon_account__state__disconnected
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 msgid "Disconnected"
-msgstr ""
+msgstr "Odłączony"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__display_name
@@ -692,7 +758,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/sale_amazon/utils.py:0
 msgid "Error code: %(error_code)s; description: %(error_message)s"
-msgstr ""
+msgstr "Kod błędu: %(error_code)s; opis: %(error_message)s"
 
 #. module: sale_amazon
 #: model:ir.model.fields.selection,name:sale_amazon.selection__amazon_marketplace__region__eu-west-1
@@ -755,7 +821,7 @@ msgstr ""
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_res_config_settings__has_amazon_account
 msgid "Has Amazon Account"
-msgstr ""
+msgstr "Ma konto Amazon"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__base_marketplace_id
@@ -805,6 +871,8 @@ msgid ""
 "If the sale is locked, you can not modify it anymore. However, you will "
 "still be able to invoice or deliver."
 msgstr ""
+"If the sale is locked, you can not modify it anymore. However, you will "
+"still be able to invoice or deliver."
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.picking_view_form
@@ -850,7 +918,7 @@ msgstr "Data ostatniej aktualizacji"
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.res_config_settings_view_form
 msgid "Link My Account"
-msgstr ""
+msgstr "Połącz moje konto"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
@@ -862,7 +930,7 @@ msgstr ""
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_order_view_form
 msgid "Lock"
-msgstr ""
+msgstr "Zablokuj"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_offer_view_search
@@ -889,7 +957,7 @@ msgstr "Nazwa"
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_tree
 msgid "New"
-msgstr ""
+msgstr "Nowe"
 
 #. module: sale_amazon
 #. odoo-python
@@ -1077,12 +1145,12 @@ msgstr "Klucz sprzedawcy"
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__state
 msgid "State"
-msgstr ""
+msgstr "Stan"
 
 #. module: sale_amazon
 #: model:ir.model,name:sale_amazon.model_stock_move
 msgid "Stock Move"
-msgstr ""
+msgstr "Przesunięcie"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_offer__sync_stock
@@ -1141,7 +1209,7 @@ msgstr "Synchronizacja z Amazon nie powiodła się"
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 msgid "Synchronize"
-msgstr ""
+msgstr "Synchronizuj"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.picking_view_form
@@ -1233,6 +1301,8 @@ msgid ""
 "The communication with the API failed.\n"
 "Error code: %(error_code)s; description: %(error_message)s"
 msgstr ""
+"Komunikacja z interfejsem API nie powiodła się.\n"
+"Kod błędu: %(error_code)s; opis: %(error_message)s"
 
 #. module: sale_amazon
 #: model:ir.model.fields,help:sale_amazon.field_amazon_account__base_marketplace_id
@@ -1485,13 +1555,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/sale_amazon/models/amazon_account.py:0
 msgid "[%(gift_wrap_code)s] Gift Wrapping Charges for %(product)s"
-msgstr ""
+msgstr "[%(gift_wrap_code)s] Koszt pakowania prezentów dla %(product)s"
 
 #. module: sale_amazon
 #. odoo-python
 #: code:addons/sale_amazon/models/amazon_account.py:0
 msgid "[%(shipping_code)s] Delivery Charges for %(product)s"
-msgstr ""
+msgstr "[%(shipping_code)s] Koszt dostawy dla %(product)s"
 
 #. module: sale_amazon
 #. odoo-python
@@ -1500,6 +1570,8 @@ msgid ""
 "[%(sku)s] %(item_title)s\n"
 "Condition: %(main_condition)s - %(sub_condition)s"
 msgstr ""
+"[%(sku)s]%(item_title)s\n"
+"Warunek: %(main_condition)s - %(sub_condition)s"
 
 #. module: sale_amazon
 #. odoo-python
@@ -1516,7 +1588,7 @@ msgstr "Na przykład Rynek Amerykański"
 #. odoo-python
 #: code:addons/sale_amazon/models/amazon_account.py:0
 msgid "id"
-msgstr ""
+msgstr "id"
 
 #~ msgid ""
 #~ "After validation of the credentials, the marketplaces\n"

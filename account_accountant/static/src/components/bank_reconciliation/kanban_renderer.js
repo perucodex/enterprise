@@ -89,6 +89,8 @@ export class BankRecKanbanRenderer extends KanbanRenderer {
             this.globalState.journalId,
         ]);
         this.globalState.totalJournalAmount = value.balance_amount;
+        this.globalState.totalIsInvalid = value.has_invalid_statements;
+        return value;
     }
 
     // -----------------------------------------------------------------------------

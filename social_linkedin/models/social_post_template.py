@@ -16,7 +16,7 @@ class SocialPostTemplate(models.Model):
     linkedin_image_ids = fields.Many2many(
         'ir.attachment', 'template_linkedin_image_ids_rel', string='LinkedIn Images',
         help='Will attach images to your posts.',
-        compute='_compute_images_by_media', store=True, readonly=False)
+        compute='_compute_images_by_media', store=True, readonly=False, bypass_search_access=True)
 
     display_linkedin_preview = fields.Boolean('Display LinkedIn Preview', compute='_compute_display_linkedin_preview')
     has_linkedin_account = fields.Boolean('Has LinkedIn Account', compute='_compute_has_linkedin_account')

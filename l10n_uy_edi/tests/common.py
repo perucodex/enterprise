@@ -74,6 +74,7 @@ class TestUyEdi(AccountTestInvoicingCommon):
         cls.tax_22 = cls.env.ref("account.%s_vat1" % cls.company_uy.id)
         cls.tax_10 = cls.env.ref("account.%s_vat2" % cls.company_uy.id)
         cls.tax_0 = cls.env.ref("account.%s_vat3" % cls.company_uy.id)
+        cls.reduced_tax = cls.env.ref("account.%s_vat11" % cls.company_uy.id)
 
         # Products
         cls.service_vat_22 = cls.env["product.product"].create({
@@ -91,6 +92,14 @@ class TestUyEdi(AccountTestInvoicingCommon):
             "type": "service",
             "default_code": "VAT 10",
             "taxes_id": [(6, 0, cls.tax_10.ids)],
+        })
+        cls.service_reduced_vat = cls.env["product.product"].create({
+            "name": "Virtual Home Staging (Reduced VAT)",
+            "list_price": 38.25,
+            "standard_price": 45.5,
+            "type": "service",
+            "default_code": "Reduced VAT",
+            "taxes_id": [(6, 0, cls.reduced_tax.ids)],
         })
         cls.product_vat_22 = cls.env["product.product"].create({
             "name": "Customizable Desk (VAT 10)",

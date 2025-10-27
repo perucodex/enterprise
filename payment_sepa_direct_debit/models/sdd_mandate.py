@@ -25,7 +25,8 @@ class SddMandate(models.Model):
     )
 
     def _compute_is_online_payment(self):
-        results = self.env['payment.transaction']._read_group(
+        # In sudo mode to read the custom_mode field of payment.provider.
+        results = self.env['payment.transaction'].sudo()._read_group(
             domain=[
                 ('mandate_id', 'in', self.ids),
                 ('provider_id.custom_mode', '=', 'sepa_direct_debit'),
@@ -36,7 +37,8 @@ class SddMandate(models.Model):
 
     @api.depends('payment_transaction_ids')
     def _compute_payment_transaction_count(self):
-        results = self.env['payment.transaction']._read_group(
+        # In sudo mode to read the custom_mode field of payment.provider.
+        results = self.env['payment.transaction'].sudo()._read_group(
             domain=[
                 ('mandate_id', 'in', self.ids),
                 ('provider_id.custom_mode', '=', 'sepa_direct_debit'),

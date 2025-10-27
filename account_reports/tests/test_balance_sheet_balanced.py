@@ -308,6 +308,10 @@ REPORT_CONFIG = {
         'asset_line_ref': 'l10n_tw_reports.account_financial_report_total_assets0_l10n_tw',
         'liability_line_ref': 'l10n_tw_reports.account_financial_report_libailities_and_equity',
     },
+    'l10n_tw_reports.l10n_tw_balance_sheet': {
+        'asset_line_ref': 'l10n_tw_reports.l10n_tw_balance_sheet_tw_a',
+        'liability_line_ref': 'l10n_tw_reports.l10n_tw_balance_sheet_tw_lbeq',
+    },
     'l10n_tz_reports.l10n_tz_balance_sheet': {
         'asset_line_ref': 'l10n_tz_reports.account_financial_report_tz_active',
         'liability_line_ref': 'l10n_tz_reports.account_financial_report_tz_passive',
@@ -330,7 +334,7 @@ REPORT_CONFIG = {
     },
     'l10n_cn_reports.l10n_cn_asbe_bs': {
         'asset_line_ref': 'l10n_cn_reports.l10n_cn_asbe_bs_cn_a',
-        'liability_line_ref': 'l10n_cn_reports.l10n_cn_asbe_bs_cn_l',
+        'liability_line_ref': 'l10n_cn_reports.l10n_cn_asbe_bs_cn_tle',
     },
     'l10n_cn_reports.l10n_cn_assbe_bs': {
         'asset_line_ref': 'l10n_cn_reports.l10n_cn_assbe_bs_cns_ta',

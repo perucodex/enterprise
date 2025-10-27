@@ -145,8 +145,8 @@ export class PaymentTyro extends PaymentInterface {
 
     validateRefundAmount() {
         const order = this.pos.getOrder();
-        const totalAmount = order.getTotalDue();
-        const amountDue = order.getDue();
+        const totalAmount = order.totalDue;
+        const amountDue = order.remainingDue;
         const line = order.getSelectedPaymentline();
         if (totalAmount < 0 && amountDue > line.amount) {
             this._showError("You cannot refund more than the original amount.");

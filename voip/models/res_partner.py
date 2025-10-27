@@ -105,14 +105,15 @@ class ResPartner(models.Model):
     @api.model
     def get_contacts(self, offset, limit, search_terms, t9_search=False):
         domain = Domain("phone", "!=", False)
-        if t9_search:
-            domain &= Domain("t9_name", "ilike", f"% {search_terms}%")
         if search_terms:
-            domain &= Domain.OR([
+            subdomain = Domain.OR([
                 [("phone", "like", search_terms)],
                 [("complete_name", "ilike", search_terms)],
                 [("email", "ilike", search_terms)],
             ])
+            if t9_search:
+                subdomain |= Domain("t9_name", "ilike", f"% {search_terms}%")
+            domain &= subdomain
         contacts = self.search(domain, offset=offset, limit=limit)
         return Store().add(contacts, self._voip_get_store_fields()).get_result()
 

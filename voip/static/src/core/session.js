@@ -176,6 +176,7 @@ export class Session {
      * @param {string} transferTarget
      */
     blindTransfer(transferTarget) {
+        this.voip.softphone.addressBook.searchInputValue = "";
         if (!this.sipSession) {
             this.userAgent.hangup({ session: this });
             return;

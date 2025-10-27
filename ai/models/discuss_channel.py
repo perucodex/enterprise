@@ -70,24 +70,40 @@ class DiscussChannel(models.Model):
         # create a new AI chat
         channel = ai_agent._create_ai_chat_channel(channel_name=channel_name)
         # Create the initial context for the AI - the default prompt from the composer
-        model_context = [
-            ai_composer.default_prompt,
-        ]
+        model_context = []
+        if composer_prompt := ai_composer.default_prompt:
+            model_context.append(composer_prompt)
 
+        model_has_thread = False
         if record_model:
             original_record = self.env[record_model].search([('id', '=', record_id)])
             # Add extra info that are relevant to the where we call the AI from (record info, chatter info, pre-prompts, etc.)
             model_context += original_record._ai_initialise_context(
                 caller_component, text_selection, front_end_info
             )
+            if isinstance(original_record, self.pool['mail.thread']):
+                model_has_thread = True
 
         # Finally pass the complete "save" the context to the channel
         channel.ai_env_context = model_context
 
         prompts = ai_composer.available_prompts
+        # Don't show prompts related to chatter if the model does not inherit from mail.thread
+        # (note: name is misleading, 'chatter_ai_button' means 'from the systray in a form view')
+        if caller_component == "chatter_ai_button" and not model_has_thread:
+            chatter_prompts = {
+                self.env.ref('ai.ai_prompt_summarize_chatter', raise_if_not_found=False),
+                self.env.ref('ai.ai_prompt_write_followup_chatter', raise_if_not_found=False),
+            }
+            prompts = [p for p in prompts if p not in chatter_prompts]
         random_prompts = random.sample(prompts, min(3, len(prompts)))
 
-        return {"ai_channel_id": channel.id, "data": Store().add(channel).get_result(), "prompts": [prompt.name for prompt in random_prompts]}
+        return {
+            "ai_channel_id": channel.id,
+            "data": Store().add(channel).get_result(),
+            "prompts": [prompt.name for prompt in random_prompts],
+            "model_has_thread": model_has_thread,
+        }
 
     @api.autovacuum
     def _remove_ai_chat_channels(self):

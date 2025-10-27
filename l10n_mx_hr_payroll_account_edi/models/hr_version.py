@@ -22,7 +22,7 @@ class HrVersion(models.Model):
             ('13', 'Severance or Separation'),
             ('99', 'Other Regime'),
         ],
-        required=True, default='02')
+        required=True, default='02', groups="hr_payroll.group_hr_payroll_user")
 
     l10n_mx_shift_type = fields.Selection(
         selection=[
@@ -36,7 +36,7 @@ class HrVersion(models.Model):
             ('08', 'Shift-Based'),
             ('99', 'Other Schedule'),
         ],
-        required=True, default='01')
+        required=True, default='01', groups="hr_payroll.group_hr_payroll_user")
 
     l10n_mx_payment_periodicity = fields.Selection(
         selection=[
@@ -52,7 +52,7 @@ class HrVersion(models.Model):
             ('10', '10 Days'),
             ('99', 'Other Frequency'),
         ],
-        compute='_compute_payment_periodicity')
+        compute='_compute_payment_periodicity', groups="hr_payroll.group_hr_payroll_user")
 
     @api.depends('schedule_pay')
     def _compute_payment_periodicity(self):

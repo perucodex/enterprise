@@ -5,7 +5,7 @@
             <div t-foreach="this.usersThumbnail" t-as="user" t-key="user_index" class="o_spreadsheet_user ms-1">
                 <img t-att-src="user.avatar" class="rounded justify-content-between"
                     t-att-style="'border-color: ' + user.color"
-                    t-att-data-tooltip="'Go to ' + user.name"
+                    t-att-data-tooltip="getDataTooltip(user.name)"
                     t-on-click="() => this.jumpToUser(user)"
                     t-on-mouseenter="() => this.showUser(user)"
                     t-on-mouseleave="() => this.hideUser(user)"/>
@@ -29,7 +29,7 @@
             <div t-foreach="this.props.users" t-as="user" t-key="user_index" class="pb-1">
                 <div class="o_spreadsheet_user d-flex justify-content-between align-items-center px-1 pt-1" style="cursor:pointer;"
                     t-on-click="() => this.props.onClick(user)"
-                    t-att-data-tooltip="'Go to '+user.name" data-tooltip-position="right"
+                    t-att-data-tooltip="getDataTooltip(user.name)" data-tooltip-position="right"
                 >
                     <img t-att-src="user.avatar" class="rounded justify-content-between"
                     t-att-style="'padding: 0.15rem;background-color: ' + user.color"/>

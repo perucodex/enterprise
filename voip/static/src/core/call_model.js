@@ -94,7 +94,9 @@ export class Call extends Record {
                 // example), the call may be stuck in the “calling” or “ongoing”
                 // state, meaning we can't rely on the state alone, hence the
                 // need to also check for the session.
-                return Boolean(this.store.env.services["voip.user_agent"].activeSession?.call.eq(this));
+                return Boolean(
+                    this.store.env.services["voip.user_agent"].activeSession?.call.eq(this)
+                );
             default:
                 return false;
         }

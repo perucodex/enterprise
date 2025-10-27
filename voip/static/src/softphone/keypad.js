@@ -196,7 +196,7 @@ export class Keypad extends Component {
     get inputFontSizeClass() {
         const length = this.props.state.input.value.length;
         if (!length) {
-            return "fs-2"
+            return "fs-2";
         }
         if (length < 12) {
             return "fs-1";

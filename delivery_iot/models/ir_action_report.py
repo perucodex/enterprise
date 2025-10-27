@@ -1,5 +1,8 @@
-import json
+import logging
 from odoo import models
+from odoo.fields import Domain
+
+_logger = logging.getLogger(__name__)
 
 
 class IrActionReport(models.Model):
@@ -13,27 +16,26 @@ class IrActionReport(models.Model):
         if self.report_name not in ['delivery_iot.report_shipping_labels', 'delivery_iot.report_shipping_docs']:
             return super().render_document(device_id_list, res_ids, data)
 
-        # set the default printer id in the system parameters for auto printing
-        icp_sudo = self.env['ir.config_parameter'].sudo()
-        res_user_printers = json.loads(icp_sudo.get_param('delivery_iot.res_user_printers', '{}'))
+        domain = [('res_model', '=', 'stock.picking'), ('res_id', 'in', res_ids)]
+        if self.report_name == 'delivery_iot.report_shipping_labels':
+            domain = Domain.AND([domain, [('name', 'ilike', 'Label%')]])
+        elif self.report_name == 'delivery_iot.report_shipping_docs':
+            domain = Domain.AND([domain, [('name', 'ilike', 'ShippingDoc%')]])
 
-        device_ids = self.env['iot.device'].browse(device_id_list)
-        for device in device_ids:
-            res_user_printers[str(self.env.user.id)] = device.identifier
-        icp_sudo.set_param('delivery_iot.res_user_printers', json.dumps(res_user_printers))
-
-        attachment = self.env['ir.attachment'].search([
-            ('res_model', '=', 'stock.picking'),
-            ('res_id', 'in', res_ids),
-            '|', ('name', 'ilike', '%.zplii'), ('name', 'ilike', '%.zpl'),
-        ], order='id desc', limit=1)
-        if not attachment:
+        attachments = self.env['ir.attachment'].search(domain, order='id desc')
+        if not attachments:
+            _logger.warning("No attachment found for report %s and res_ids %s", self.report_name, res_ids)
             return []
 
-        return [{
-            "iotBoxId": device.iot_id.id,
-            "deviceId": device.id,
-            "deviceIdentifier": device.identifier,
-            "deviceName": device.display_name,
-            "document": attachment.datas,
-        } for device in device_ids]  # As it is called via JS, we format keys to camelCase
+        device_ids = self.env['iot.device'].sudo().browse(device_id_list)
+        return [
+            {
+                "iotBoxId": device.iot_id.id,
+                "deviceId": device.id,
+                "deviceIdentifier": device.identifier,
+                "deviceName": device.display_name,
+                "document": attachment.datas,
+            }
+            for attachment in attachments
+            for device in device_ids
+        ]  # As it is called via JS, we format keys to camelCase

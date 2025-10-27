@@ -64,7 +64,7 @@ class ProjectTask(models.Model):
             Then we need to give the id of timesheets which is validated.
         """
         result = super().read(fields=fields, load=load)
-        if fields and 'timesheet_ids' in fields and self.env.user._is_portal():
+        if fields and 'timesheet_ids' in fields and (self.env.user._is_portal() or 'project_sharing_id' in self.env.context):
             # We need to check if configuration
             param_invoiced_timesheet = self.env['ir.config_parameter'].sudo().get_param('sale.invoiced_timesheet', DEFAULT_INVOICED_TIMESHEET)
             if param_invoiced_timesheet == 'approved':

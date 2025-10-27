@@ -50,6 +50,9 @@ class ResPartnerBank(models.Model):
         cleaned_acc_number = acc_number.replace(' ', '').replace(',', '').replace('-', '')
 
         if not cleaned_acc_number.isdigit():
+            cleaned_acc_number = cleaned_acc_number[4:]
+
+        if not cleaned_acc_number.isdigit():
             return False, False, False
 
         clearing_range = self.env['se.bban.clear.range'].search([

@@ -1,5 +1,6 @@
 import { registry } from "@web/core/registry";
 import { useRecordObserver } from "@web/model/relational_model/utils";
+import { formatFloat } from "@web/core/utils/numbers";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
@@ -52,7 +53,10 @@ export class Digipad extends Component {
         }
         const record = this.props.record.data;
         const currentQty = record[this.props.fieldToEdit];
-        return this.fulfillQuantity - currentQty;
+
+        const quantityToFulfill = this.fulfillQuantity - currentQty;
+        const params = { digits: [false, this.precision], thousandsSep: "", decimalPoint: "." };
+        return parseFloat(formatFloat(quantityToFulfill, params));
     }
 
     get buttonContainerClass() {

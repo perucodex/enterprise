@@ -44,8 +44,12 @@ export class AddressBook extends Component {
         contacts.sort((a, b) => {
             const initialA = getInitial(a);
             const initialB = getInitial(b);
-            if (initialA === "#" && initialB !== "#") return 1;
-            if (initialA !== "#" && initialB === "#") return -1;
+            if (initialA === "#" && initialB !== "#") {
+                return 1;
+            }
+            if (initialA !== "#" && initialB === "#") {
+                return -1;
+            }
             return compareFn(a.voipName, b.voipName);
         });
         return Map.groupBy(contacts, getInitial);

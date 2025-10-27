@@ -70,6 +70,10 @@ export class AccountReportFilters extends Component {
             'integer_rounding_enabled': {
                 'name': _t("Integer Rounding"),
             },
+            'consolidation': {
+                'name': _t("Consolidation"),
+                'show': this.controller.cachedFilterOptions.show_consolidation,
+            },
             'hide_0_lines': {
                 'name': _t("Hide lines at 0"),
                 'ui_filter': true,

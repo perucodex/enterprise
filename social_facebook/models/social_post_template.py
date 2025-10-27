@@ -16,7 +16,7 @@ class SocialPostTemplate(models.Model):
     facebook_image_ids = fields.Many2many(
         'ir.attachment', 'template_facebook_image_ids_rel', string='Facebook Images',
         help='Will attach images to your posts.', compute='_compute_images_by_media',
-        store=True, readonly=False)
+        store=True, readonly=False, bypass_search_access=True)
 
     facebook_preview = fields.Html('Facebook Preview', compute='_compute_facebook_preview')
     has_facebook_account = fields.Boolean('Has Facebook Account', compute='_compute_has_facebook_account')

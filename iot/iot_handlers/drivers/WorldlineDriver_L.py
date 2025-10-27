@@ -153,11 +153,10 @@ class WorldlineDriver(CtypesTerminalDriver):
             card,   # char* card
             error_code, # char* error
         )
-        _logger.debug('finished transaction #%d with result %d', transaction_id, result)
-
         self.next_transaction_min_dt = datetime.datetime.now() + datetime.timedelta(seconds=self.DELAY_TIME_BETWEEN_TRANSACTIONS)
 
         if result == 1:
+            _logger.info('succesfully finished transaction #%d', transaction_id)
             # Transaction successful
             self.send_status(
                 response='Approved',
@@ -171,14 +170,16 @@ class WorldlineDriver(CtypesTerminalDriver):
             error_code = error_code.value.decode('utf-8')
             # Transaction failed
             if error_code not in IGNORE_ERRORS:
-                error_msg = '%s (Error code: %s)' % (TERMINAL_ERRORS.get(error_code, 'Transaction was not processed correctly'), error_code)
-                logging.info(error_msg)
+                error_msg = f'transaction #{transaction_id} error: {error_code}: {TERMINAL_ERRORS.get(error_code, "Transaction Error")}'
+                _logger.info(error_msg)
                 self.send_status(error=error_msg, request_data=transaction)
             # Transaction was cancelled
             else:
+                _logger.info("transaction #%d cancelled by PoS user", transaction_id)
                 self.send_status(stage='Cancel', request_data=transaction)
         elif result == -1:
             # Terminal disconnection, check status manually
+            _logger.warning("terminal disconnected during transaction #%d", transaction_id)
             self.send_status(disconnected=True, request_data=transaction)
 
     def cancelTransaction(self, transaction):
@@ -187,12 +188,12 @@ class WorldlineDriver(CtypesTerminalDriver):
         self.send_status(stage='waitingCancel', request_data=transaction)
 
         error_code = create_ctypes_string_buffer()
-        _logger.info("cancel transaction request")
+        _logger.info("cancel transaction request for %s", transaction)
         result = easyCTEP.abortTransaction(ctypes.byref(self.dev), error_code) # std::shared_ptr<ect::CTEPTerminal> trm
         _logger.debug("end cancel transaction request")
 
         if not result:
             error_code = error_code.value.decode('utf-8')
-            error_msg = '%s (Error code: %s)' % (TERMINAL_ERRORS.get(error_code, 'Transaction could not be cancelled'), error_code)
+            error_msg = f'Cancellation failed: {error_code}: {TERMINAL_ERRORS.get(error_code, "cancellation error")}'
             _logger.info(error_msg)
             self.send_status(stage='Cancel', error=error_msg, request_data=transaction)

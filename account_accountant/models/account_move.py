@@ -265,7 +265,7 @@ class AccountMove(models.Model):
         if self.state != 'posted':
             return
 
-        deferred_type = "expense" if self.is_purchase_document() else "revenue"
+        deferred_type = "expense" if self.is_purchase_document(include_receipts=True) else "revenue"
         deferred_account = self.company_id.deferred_expense_account_id if deferred_type == "expense" else self.company_id.deferred_revenue_account_id
         deferred_journal = self.company_id.deferred_expense_journal_id if deferred_type == "expense" else self.company_id.deferred_revenue_journal_id
         if not deferred_journal:
@@ -499,7 +499,7 @@ class AccountMove(models.Model):
         super().js_assign_outstanding_line(line_id)
         line = self.env['account.move.line'].browse(line_id)
         if line.account_id.account_type == 'asset_cash' and line.statement_line_id:
-            return line.statement_line_id.set_line_bank_statement_line(self.line_ids.filtered(lambda line: line.account_id.account_type in ['asset_receivable', 'liability_payable']).ids)
+            return line.statement_line_id.with_context(skip_payment_tolerance=True).set_line_bank_statement_line(self.line_ids.filtered(lambda line: line.account_id.account_type in {'asset_receivable', 'liability_payable'}).ids)
 
     def js_remove_outstanding_partial(self, partial_id):
         # EXTENDS
@@ -660,11 +660,11 @@ class AccountMoveLine(models.Model):
     def _has_deferred_compatible_account(self):
         self.ensure_one()
         return (
-            self.move_id.is_purchase_document()
+            self.move_id.is_purchase_document(include_receipts=True)
             and
             self.account_id.internal_group == 'expense'
         ) or (
-            self.move_id.is_sale_document()
+            self.move_id.is_sale_document(include_receipts=True)
             and
             self.account_id.internal_group == 'income'
         ) or (

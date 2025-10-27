@@ -94,6 +94,9 @@ class TestCFDIPosOrder(TestMxEdiPosCommon, TestPointOfSaleHttpCommon):
                     'payments': [(self.bank_pm1, 9280.0)],
                 })
                 refund = self._create_order({
+                    'pos_order_ui_args': {
+                        'is_refund': True,
+                    },
                     'pos_order_lines_ui_args': [
                         {
                             'product': self.product,
@@ -350,6 +353,9 @@ class TestCFDIPosOrder(TestMxEdiPosCommon, TestPointOfSaleHttpCommon):
             with self.with_pos_session() as _session, self.with_mocked_pac_sign_success():
                 # Invoice the refund order, then sign it.
                 refund_order = self._create_order({
+                    'pos_order_ui_args': {
+                        'is_refund': True,
+                    },
                     'pos_order_lines_ui_args': [{
                         'product': self.product,
                         'quantity': -10,
@@ -559,6 +565,9 @@ class TestCFDIPosOrder(TestMxEdiPosCommon, TestPointOfSaleHttpCommon):
         with self.with_pos_session():
             # Invoice the refund order.
             refund = self._create_order({
+                'pos_order_ui_args': {
+                    'is_refund': True,
+                },
                 'pos_order_lines_ui_args': [{
                     'product': self.product,
                     'quantity': -10,

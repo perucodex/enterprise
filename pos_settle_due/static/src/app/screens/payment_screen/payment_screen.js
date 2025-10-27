@@ -65,7 +65,7 @@ patch(PaymentScreen.prototype, {
     },
     async validateOrder(isForceValidate) {
         const order = this.currentOrder;
-        const change = order.getChange();
+        const change = order.change;
         const settleLines = order.lines.filter(
             (line) => line.isSettleDueLine() || line.isSettleInvoiceLine()
         );
@@ -128,8 +128,12 @@ patch(PaymentScreen.prototype, {
                 confirmLabel: _t("Yes"),
             });
             if (confirmed) {
-                const paylaterPayment = order.addPaymentline(paylaterPaymentMethod);
-                paylaterPayment.setAmount(-amountToSettle);
+                const result = order.addPaymentline(paylaterPaymentMethod);
+                if (!result.status) {
+                    return false;
+                }
+
+                result.data.setAmount(-amountToSettle);
                 settleLines.forEach((line) => (line.qty = 0));
                 return super.validateOrder(...arguments);
             }
@@ -159,8 +163,12 @@ patch(PaymentScreen.prototype, {
                 taxes_id: [],
                 product_tmpl_id: this.pos.config.deposit_product_id,
             });
-            const paylaterPayment = order.addPaymentline(paylaterPaymentMethod);
-            paylaterPayment.setAmount(-change);
+            const result = order.addPaymentline(paylaterPaymentMethod);
+            if (!result.status) {
+                return false;
+            }
+
+            result.data.setAmount(-change);
             const depositLines = order.lines.filter((l) => l.isDepositLine());
             depositLines.forEach((line) => (line.qty = 0));
             return super.validateOrder(...arguments);

@@ -192,14 +192,14 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
             [
                 ('121000 Account Receivable',               0.0,        1000.0,           0.0,          1000.0),
                 ('211000 Account Payable',                100.0,           0.0,           0.0,           100.0),
-                ('211010 Account Payable',                 33.33,          0.0,           0.0,            33.33),
+                ('211010 Account Payable',                 50.0,           0.0,           0.0,            50.0),
                 ('400000 Product Sales',                    0.0,       20000.0,           0.0,         20000.0),
                 ('400010 Product Sales',                    0.0,           0.0,         200.0,          -200.0),
                 ('600000 Expenses',                         0.0,           0.0,       21000.0,        -21000.0),
                 ('600010 Expenses',                         0.0,         200.0,           0.0,           200.0),
                 ('999989 Undistributed Profits/Losses',   -50.0,           0.0,           0.0,           -50.0),
                 ('999999 Undistributed Profits/Losses',  -100.0,           0.0,           0.0,          -100.0),
-                ('Total',                                -16.67,       21200.0,       21200.0,           -16.67),
+                ('Total',                                   0.0,       21200.0,       21200.0,             0.0),
             ],
             options,
         )
@@ -338,14 +338,14 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
             [
                 ('121000 Account Receivable',              0.0,        0.0,         0.0,           0.0,              0.0,       1000.0,          0.0,            1000.0),
                 ('211000 Account Payable',                 0.0,      100.0,         0.0,         100.0,            100.0,          0.0,          0.0,             100.0),
-                ('211010 Account Payable',                 0.0,       33.33,        0.0,          33.33,            33.33,         0.0,          0.0,              33.33),
+                ('211010 Account Payable',                 0.0,       50.0,        0.0,           50.0,             50.0,          0.0,          0.0,              50.0),
                 ('400000 Product Sales',                   0.0,        0.0,       300.0,        -300.0,              0.0,      20000.0,          0.0,           20000.0),
                 ('400010 Product Sales',                   0.0,        0.0,        41.66,        -41.66,             0.0,          0.0,        166.62,           -166.62),
                 ('600000 Expenses',                        0.0,      200.0,         0.0,         200.0,              0.0,          0.0,      21000.0,          -21000.0),
                 ('600010 Expenses',                        0.0,        0.0,         0.0,           0.0,              0.0,        166.62,         0.0,             166.62),
                 ('999989 Undistributed Profits/Losses',    0.0,        0.0,         0.0,           0.0,            -41.66,         0.0,          0.0,             -41.66),
                 ('999999 Undistributed Profits/Losses',    0.0,        0.0,         0.0,           0.0,           -100.0,          0.0,          0.0,            -100.0),
-                ('Total',                                  0.0,      333.33,      341.66,         -8.32,            -8.32,     21166.62,     21166.62,             -8.32),
+                ('Total',                                  0.0,      350.0,      341.66,          8.34,             8.34,     21166.62,     21166.62,              8.34),
             ],
             options,
         )
@@ -361,14 +361,14 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
             [
                 ('121000 Account Receivable',                0.0,          1000.0,            0.0,          1000.0),
                 ('211000 Account Payable',                 100.0,             0.0,            0.0,           100.0),
-                ('211010 Account Payable',                  33.33,            0.0,            0.0,            33.33),
+                ('211010 Account Payable',                  50.0,             0.0,            0.0,            50.0),
                 ('400000 Product Sales',                     0.0,         20000.0,            0.0,         20000.0),
                 ('400010 Product Sales',                     0.0,             0.0,          200.0,          -200.0),
                 ('600000 Expenses',                          0.0,             0.0,        21000.0,        -21000.0),
                 ('600010 Expenses',                          0.0,           200.0,            0.0,           200.0),
                 ('999989 Undistributed Profits/Losses',    -50.0,             0.0,            0.0,           -50.0),
                 ('999999 Undistributed Profits/Losses',   -100.0,             0.0,            0.0,          -100.0),
-                ('Total',                                  -16.67,        21200.0,        21200.0,           -16.67),
+                ('Total',                                    0.0,         21200.0,        21200.0,             0.0),
             ],
             options,
         )
@@ -453,15 +453,15 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
                 ('6 Group_6',                           -21000.0,         200.0,             0.0,      -20800.0),
                 ('600000 Expenses',                     -21000.0,           0.0,             0.0,      -21000.0),
                 ('600010 Expenses',                          0.0,         200.0,             0.0,         200.0),
-                ('(No Group)',                           20983.33,          0.0,           200.0,       20783.33),
+                ('(No Group)',                           21000.0,           0.0,           200.0,       20800.0),
                 ('121000 Account Receivable',             1000.0,           0.0,             0.0,        1000.0),
                 ('211000 Account Payable',                 100.0,           0.0,             0.0,         100.0),
-                ('211010 Account Payable',                  33.33,          0.0,             0.0,          33.33),
+                ('211010 Account Payable',                  50.0,           0.0,             0.0,          50.0),
                 ('400000 Product Sales',                 20000.0,           0.0,             0.0,       20000.0),
                 ('400010 Product Sales',                     0.0,           0.0,           200.0,        -200.0),
                 ('999989 Undistributed Profits/Losses',    -50.0,           0.0,             0.0,         -50.0),
                 ('999999 Undistributed Profits/Losses',   -100.0,           0.0,             0.0,        -100.0),
-                ('Total',                                  -16.67,        200.0,           200.0,         -16.67),
+                ('Total',                                    0.0,         200.0,           200.0,           0.0),
             ],
             options,
         )
@@ -892,3 +892,96 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
             fields.Date.from_string('2025-08-31')
         )
         self.report.export_to_xlsx(options)
+
+    def test_trial_balance_export_pdf_filter(self):
+        """
+        Test if the filter is applied.
+        Test if it is also applied to the name of the group if hirarchy is enabled
+        """
+        self.env.lang = self.env['res.lang'].search([('code', '=', 'en_US')]).code
+        self.env['account.group'].create([
+            {'name': 'Group_10', 'code_prefix_start': '10', 'code_prefix_end': '10'},
+            {'name': 'Group_101', 'code_prefix_start': '101', 'code_prefix_end': '101'},
+            {'name': 'Group_1012', 'code_prefix_start': '1012', 'code_prefix_end': '1012'},
+            {'name': 'Group_102', 'code_prefix_start': '102', 'code_prefix_end': '102'},
+        ])
+
+        # Create the accounts.
+        account_a, account_a1, account_b2 = self.env['account.account'].create([
+            {'code': '100000', 'name': 'Account A', 'account_type': 'asset_current'},
+            {'code': '101200', 'name': 'Account A1', 'account_type': 'asset_current'},
+            {'code': '102200', 'name': 'Account B2', 'account_type': 'asset_current'},
+        ])
+
+        move = self.env['account.move'].create({
+            'move_type': 'entry',
+            'date': fields.Date.from_string('2017-06-01'),
+            'journal_id': self.company_data['default_journal_misc'].id,
+            'line_ids': [
+                Command.create({'debit': 100.0,     'credit': 0.0,      'name': 'account_a_1',     'account_id': account_a.id}),
+                Command.create({'debit': 0.0,       'credit': 100.0,    'name': 'account_a_2',     'account_id': account_a.id}),
+                Command.create({'debit': 200.0,     'credit': 0.0,      'name': 'account_a1_1',    'account_id': account_a1.id}),
+                Command.create({'debit': 0.0,       'credit': 200.0,    'name': 'account_a1_2',    'account_id': account_a1.id}),
+                Command.create({'debit': 333.0,     'credit': 0.0,      'name': 'account_b2_1',    'account_id': account_b2.id}),
+                Command.create({'debit': 0.0,       'credit': 333.0,    'name': 'account_b2_2',    'account_id': account_b2.id}),
+            ],
+        })
+        move.action_post()
+
+        # Test the filter on account_code
+        default_options = {
+            'hierarchy': False,
+            'unfold_all': True,
+            'export_mode': 'print',
+            'filter_search_bar': '101',
+        }
+        options = self._generate_options(self.report, '2017-06-01', '2017-06-01', default_options=default_options)
+        self.assertLinesValues(
+            self.report._get_lines(options),
+            [   0,                                     1,              2,               3,              4],
+            [
+                ['101200 Account A1',                  0.0,             200.0,          200.0,            0.0],
+                ['Total',                              0.0,             200.0,          200.0,            0.0],
+            ],
+            options,
+        )
+
+        # Test the filter on account_name
+        default_options = {
+            'hierarchy': False,
+            'unfold_all': True,
+            'export_mode': 'print',
+            'filter_search_bar': 'Account A',
+        }
+        options = self._generate_options(self.report, '2017-06-01', '2017-06-01', default_options=default_options)
+        self.assertLinesValues(
+            self.report._get_lines(options),
+            [   0,                                     1,              2,               3,              4],
+            [
+                ['100000 Account A',                  0.0,             100.0,          100.0,            0.0],
+                ['101200 Account A1',                  0.0,             200.0,          200.0,            0.0],
+                ['Total',                              0.0,             300.0,          300.0,            0.0],
+            ],
+            options,
+        )
+
+        # Test the filter on account_group and account_code
+        default_options = {
+            'hierarchy': True,
+            'unfold_all': True,
+            'export_mode': 'print',
+            'filter_search_bar': 'Group_101',
+        }
+        options = self._generate_options(self.report, '2017-06-01', '2017-06-01', default_options=default_options)
+        self.assertLinesValues(
+            self.report._get_lines(options),
+            [   0,                                     1,              2,               3,              4],
+            [
+                ['10 Group_10',                        0.0,             200.0,          200.0,            0.0],
+                ['101 Group_101',                      0.0,             200.0,          200.0,            0.0],
+                ['1012 Group_1012',                    0.0,             200.0,          200.0,            0.0],
+                ['101200 Account A1',                  0.0,             200.0,          200.0,            0.0],
+                ['Total',                              0.0,             200.0,          200.0,            0.0],
+            ],
+            options,
+        )

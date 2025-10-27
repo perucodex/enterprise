@@ -231,6 +231,38 @@ class AccountTrialBalanceReportHandler(models.AbstractModel):
                 ('date', '>=', fiscalyear_start),
             ]
 
+        if options.get('export_mode') == 'print' and options.get('filter_search_bar'):
+            if options.get('hierarchy'):
+                extra_domain += [
+                    '|',
+                    ('account_id', 'ilike', options['filter_search_bar']),
+                    ('account_id', 'in', SQL(
+                        """
+                        /*
+                        JOIN clause: Check if the account_group include the account_account
+                        A group from 10 to 10 include every account with code that begin with 10.
+                        If there is an account with a length of 6, it should be included if it's in the range from 100 000 to 109 999 included
+
+                        Where clause: Check if the account_group matches the filter
+                        */
+                        (SELECT distinct account_account.id
+                        FROM account_account
+                        LEFT JOIN account_group ON
+                            (
+                                LEFT(account_account.code_store->> '%(company_id)s', LENGTH(code_prefix_start)) BETWEEN
+                                    code_prefix_start
+                                AND code_prefix_end
+                            )
+                        WHERE ( account_group.name->> %(lang)s  ILIKE %(filter_search_bar)s
+                            OR  account_group.code_prefix_start ILIKE %(filter_search_bar)s)
+                        )""",
+                        lang=self.env.lang,
+                        company_id=self.env.company.id,
+                        filter_search_bar="%" + options['filter_search_bar'] + "%")),
+                ]
+            else:
+                extra_domain.append(('account_id', 'ilike', options['filter_search_bar']))
+
         next_groupbys = next_groupby.split(',') if next_groupby else []
         query = report._get_report_query(options, date_scope, domain=extra_domain)
 

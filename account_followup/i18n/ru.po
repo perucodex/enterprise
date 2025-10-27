@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 17.0+e\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-10-08 18:45+0000\n"
-"PO-Revision-Date: 2025-09-15 21:02+0000\n"
+"PO-Revision-Date: 2025-10-22 12:10+0000\n"
 "Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
 "Language-Team: Russian <https://translate.odoo.com/projects/odoo-19/"
 "account_followup/ru/>\n"
@@ -18,21 +18,21 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
-"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || ("
+"n%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Generator: Weblate 5.12.2\n"
 
 #. module: account_followup
 #. odoo-python
 #: code:addons/account_followup/models/account_followup_report.py:0
 msgid "%(company)s Payment Reminder - %(partner)s"
-msgstr ""
+msgstr "%(company)s Напоминание о платеже - %(partner)s"
 
 #. module: account_followup
 #. odoo-python
 #: code:addons/account_followup/models/account_followup.py:0
 msgid "%(delay)s days (copy of %(name)s)"
-msgstr ""
+msgstr "%(delay)s дней (копия %(name)s)"
 
 #. module: account_followup
 #: model:ir.actions.report,print_report_name:account_followup.action_report_followup
@@ -109,6 +109,43 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p>\n"
+"                        <t t-if="
+"\"object.id != object.commercial_partner_id.id\">Здравствуйте, <t t-out="
+"\"object.name or ''\"/> (<t t-out=\"object.commercial_partner_id.name or ''\""
+"/>)!</t>\n"
+"                        <t t-else=\"\">Здравствуйте, <t t-out=\"object.name "
+"or ''\"/>!</t>\n"
+"                        <br/>\n"
+"                        Несмотря на неоднократные напоминания, задолженность "
+"по вашему счету до сих пор не погашена.\n"
+"                        Если полная оплата не будет произведена в течение 8 "
+"дней, будет инициировано судебное взыскание долга без дополнительного "
+"уведомления.\n"
+"                        Надеемся, что до этого не дойдет. Ниже приведены "
+"реквизиты к оплате.\n"
+"                        При возникновении вопросов по данному уведомлению, "
+"пожалуйста, свяжитесь с нашим бухгалтерским отделом.\n"
+"                        <br/>\n"
+"                        С уважением,\n"
+"                        <br/>\n"
+"                        <t t-if="
+"\"not is_html_empty(object._get_followup_responsible().signature)\">\n"
+"                            <br/>\n"
+"                            <t t-out="
+"\"object._get_followup_responsible().signature\"/>\n"
+"                        </t>\n"
+"                        <t t-else=\"\">\n"
+"                            <br/>\n"
+"                            --\n"
+"                            <br/>\n"
+"                            <t t-out="
+"\"object._get_followup_responsible().name\"/>\n"
+"                        </t>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: account_followup
 #: model:mail.template,body_html:account_followup.demo_followup_email_template_2
@@ -154,6 +191,47 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p>\n"
+"                        <t t-if="
+"\"object.id != object.commercial_partner_id.id\">Здравствуйте, <t t-out="
+"\"object.name or ''\"/> (<t t-out=\"object.commercial_partner_id.name or ''\""
+"/>)!</t>\n"
+"                        <t t-else=\"\">Здравствуйте, <t t-out=\"object.name "
+"or ''\"/>!</t>\n"
+"                        <br/>\n"
+"                        С сожалением сообщаем, что, несмотря на наше "
+"напоминание, по вашему счету образовалась серьезная просроченная "
+"задолженность.\n"
+"                        <br/>\n"
+"                        Необходимо произвести оплату немедленно, иначе мы "
+"будем вынуждены приостановить работу с вами, что означает прекращение "
+"поставок (товаров/услуг). Просим принять меры и провести оплату в течение 8 "
+"дней.\n"
+"                        <br/>\n"
+"                        Если у вас возникли проблемы с оплатой счета, о "
+"которых мы не знаем, свяжитесь с нашим бухгалтерским отделом, чтобы "
+"оперативно решить вопрос.\n"
+"                        <br/>\n"
+"                        Ниже приведены реквизиты к оплате.\n"
+"                        <br/>\n"
+"                        С уважением,\n"
+"                        <t t-if="
+"\"not is_html_empty(object._get_followup_responsible().signature)\">\n"
+"                            <br/>\n"
+"                            <t t-out="
+"\"object._get_followup_responsible().signature\"/>\n"
+"                        </t>\n"
+"                        <t t-else=\"\">\n"
+"                            <br/>\n"
+"                            --\n"
+"                            <br/>\n"
+"                            <t t-out="
+"\"object._get_followup_responsible().name\"/>\n"
+"                        </t>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: account_followup
 #: model:mail.template,body_html:account_followup.email_template_followup_1
@@ -516,7 +594,7 @@ msgstr "Дополнительные получатели"
 #. odoo-python
 #: code:addons/account_followup/models/res_partner.py:0
 msgid "Follow-up %(partner)s - %(date)s.pdf"
-msgstr ""
+msgstr "Последующее действие %(partner)s - %(date)s.pdf"
 
 #. module: account_followup
 #: model:ir.model,name:account_followup.model_account_followup_followup_line
@@ -572,7 +650,7 @@ msgstr "Сформировано письмо для последующего д
 #. module: account_followup
 #: model:ir.model,name:account_followup.model_account_followup_missing_information_wizard
 msgid "Followup missing information wizard"
-msgstr "Инструмент для заполнения недостающих данных"
+msgstr "Мастер заполнения недостающих данных"
 
 #. module: account_followup
 #: model_terms:ir.actions.act_window,help:account_followup.action_account_followup_line_definition_form
@@ -597,7 +675,7 @@ msgstr "Четвертое напоминание"
 #: model:ir.model.fields,field_description:account_followup.field_res_partner__has_moves
 #: model:ir.model.fields,field_description:account_followup.field_res_users__has_moves
 msgid "Has Moves"
-msgstr ""
+msgstr "Есть проводки"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__id
@@ -628,7 +706,7 @@ msgstr "Нуждающиеся в действии"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.view_partner_property_form_followup
 msgid "Invoice Follow-ups"
-msgstr ""
+msgstr "Последующие действия по счетам"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.template_followup_report
@@ -730,6 +808,9 @@ msgid ""
 "                Sending a reminder will set this date depending on the "
 "levels configuration, and you can change it manually."
 msgstr ""
+"До этой даты не будет предпринято никаких последующих действий.\n"
+"                Отправка напоминания установит эту дату в соответствии с "
+"настройками уровня, но вы можете изменить ее вручную."
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__activity_note
@@ -793,7 +874,7 @@ msgstr "Печать письма-напоминания"
 #. module: account_followup
 #: model:ir.actions.server,name:account_followup.action_account_reports_customer_statements_do_followup
 msgid "Process Follow-ups"
-msgstr ""
+msgstr "Обработать последующие действия"
 
 #. module: account_followup
 #. odoo-python
@@ -820,12 +901,12 @@ msgstr "Модель рендеринга"
 #. module: account_followup
 #: model:ir.model,name:account_followup.model_ir_actions_report
 msgid "Report Action"
-msgstr ""
+msgstr "Отчет о действиях"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.customer_statements_search_view
 msgid "Requires Follow-up"
-msgstr ""
+msgstr "Требует последующего действия"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__activity_default_responsible_type
@@ -962,13 +1043,13 @@ msgstr "Всего"
 #: model:ir.model.fields,field_description:account_followup.field_res_partner__total_all_due
 #: model:ir.model.fields,field_description:account_followup.field_res_users__total_all_due
 msgid "Total All Due"
-msgstr ""
+msgstr "Общая сумма к оплате"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_res_partner__total_all_overdue
 #: model:ir.model.fields,field_description:account_followup.field_res_users__total_all_overdue
 msgid "Total All Overdue"
-msgstr ""
+msgstr "Общая сумма просроченной задолженности"
 
 #. module: account_followup
 #. odoo-python

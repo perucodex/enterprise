@@ -1,8 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-import json
-from random import sample
-
 from odoo import fields, models
+from odoo.addons.web.controllers.utils import clean_action
 
 
 class StockPickingType(models.Model):
@@ -25,48 +23,20 @@ class StockPickingType(models.Model):
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
-    allowed_printer_ids = fields.Many2many(
-        'iot.device', default=lambda self: self._get_allowed_printer_ids(), store=False
-    )
-
-    def _get_allowed_printer_ids(self):
-        report = self.env['ir.actions.report']
-        return (
-            report._get_report_from_name('delivery_iot.report_shipping_labels').device_ids.ids
-            + report._get_report_from_name('delivery_iot.report_shipping_docs').device_ids.ids
-        )
-
-    def message_post(self, **kwargs):
-        message = super().message_post(**kwargs)
-        for attachment in message.attachment_ids:
-            if (
-                (self.picking_type_id.auto_print_carrier_labels and 'Label' in attachment.name)
-                or (self.picking_type_id.auto_print_export_documents and 'ShippingDoc' in attachment.name)
-            ):
-                self.print_attachment(attachment)
-        return message
+    def _get_autoprint_report_actions(self):
+        report_actions = []
+        shipping_labels_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_carrier_labels)
+        if shipping_labels_to_print:
+            action = self.env.ref("delivery_iot.action_report_shipping_labels").report_action(shipping_labels_to_print.ids, config=False)
+            clean_action(action, self.env)
+            report_actions.append(action)
+        shipping_documents_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_export_documents)
+        if shipping_documents_to_print:
+            action = self.env.ref("delivery_iot.action_report_shipping_docs").report_action(shipping_documents_to_print.ids, config=False)
+            clean_action(action, self.env)
+            report_actions.append(action)
+        return report_actions + super()._get_autoprint_report_actions()
 
     def print_attachment(self, attachments):
-        res_user_printers = json.loads(
-            self.env['ir.config_parameter'].sudo().get_param('delivery_iot.res_user_printers', '{}')
-        )
-        printer_identifier = res_user_printers.get(str(self.env.user.id))
-
-        if printer_identifier:
-            iot_box_identifier = self.env['iot.device'].sudo().search(
-                [('identifier', '=', printer_identifier)], limit=1
-            ).iot_id.identifier
-        elif not self.allowed_printer_ids:
-            return
-        else:
-            printer_identifier = self.allowed_printer_ids[0].identifier
-            iot_box_identifier = self.allowed_printer_ids[0].iot_id.identifier
-
-        self.env['iot.channel'].send_message({
-            'iotDevice': {
-                'iotIdentifiers': [iot_box_identifier],
-                'identifiers': [{'identifier': printer_identifier}],
-            },
-            'print_id': 0,
-            'document': attachments.datas,
-        })
+        """Unused method, kept to avoid breaking the API."""
+        pass

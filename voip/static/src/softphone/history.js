@@ -205,7 +205,12 @@ export class History extends Component {
             name: _t("Recent Calls"),
             res_model: "voip.call",
             target: this.ui.isSmall ? "new" : "current",
-            views: [[false, "list"], [false, "graph"], [false, "pivot"], [false, "form"]],
+            views: [
+                [false, "list"],
+                [false, "graph"],
+                [false, "pivot"],
+                [false, "form"],
+            ],
             context: {
                 search_default_my_calls: 1,
             },

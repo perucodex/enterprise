@@ -64,15 +64,15 @@ class IrActionsReport(models.Model):
             'device_ids': selected_device_ids
         })
         return {
-                'name': _("Select Printers"),
-                'res_id': wizard.id,
-                'type': 'ir.actions.act_window',
-                'res_model': 'select.printers.wizard',
-                'target': 'new',
-                'views': [[False, 'form']],
-                'context': {
-                    'report_id': self.id,
-                },
+            'name': _("Select Printers for %s", self.name),
+            'res_id': wizard.id,
+            'type': 'ir.actions.act_window',
+            'res_model': 'select.printers.wizard',
+            'target': 'new',
+            'views': [[False, 'form']],
+            'context': {
+                'report_id': self.id,
+            },
         }
 
     def _render_qweb_pdf(self, report_ref, *args, **kwargs):

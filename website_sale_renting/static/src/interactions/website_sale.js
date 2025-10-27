@@ -37,7 +37,12 @@ patch(WebsiteSale.prototype, {
         const { start_date, end_date, values } = await this.waitFor(rpc(
             '/shop/cart/update_renting', this._getSerializedRentingDates()
         ));
+        // `updateCartNavBar` regenerates the cart lines so we need to stop and start interactions
+        // to make sure the regenerated reorder products and cart lines are properly handled.
+        const cart = this.el.querySelector('#shop_cart');
+        this.services['public.interactions'].stopInteractions(cart);
         wSaleUtils.updateCartNavBar(values);
+        this.services['public.interactions'].startInteractions(cart);
         const format = this._isDurationWithHours() ? formatDateTime : formatDate;
         document.querySelector("input[name=renting_start_date]").value = format(deserializeDateTime(start_date, { tz: this.websiteTz }), { tz: this.websiteTz });
         document.querySelector("input[name=renting_end_date]").value = format(deserializeDateTime(end_date, { tz: this.websiteTz }), { tz: this.websiteTz });

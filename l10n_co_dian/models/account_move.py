@@ -200,7 +200,20 @@ class AccountMove(models.Model):
         res = super()._post(soft=soft)
         for move in self.filtered('l10n_co_dian_is_enabled'):
             # naive local colombian datetime
-            move.l10n_co_dian_post_time = fields.Datetime.to_string(datetime.now(tz=timezone('America/Bogota')))
+            now = fields.Datetime.to_string(datetime.now(tz=timezone('America/Bogota')))
+            move.l10n_co_dian_post_time = now
+
+            if move.is_purchase_document() and not move.l10n_co_edi_is_support_document and not move.l10n_co_dian_document_ids:
+                self.env['l10n_co_dian.document']._create_document(
+                    '<Note>No xml</Note>',
+                    move,
+                    'invoice_accepted',
+                    attachment_name=f'dian_{move.move_type}_{move.name}.xml',
+                    commercial_state='pending',
+                    message_json={'status': ''},
+                    datetime=now,
+                    identifier=move.l10n_co_edi_cufe_cude_ref,
+                )
         return res
 
     @api.depends('l10n_co_dian_state')

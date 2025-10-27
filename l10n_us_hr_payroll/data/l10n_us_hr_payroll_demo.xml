@@ -72,7 +72,7 @@
         <field name="partner_id" ref="l10n_us_hr_payroll.res_partner_maggie"/>
         <!-- firstname.lastname@example.com -->
         <field name="login" model="res.partner" eval="obj(ref('l10n_us_hr_payroll.res_partner_maggie')).name.replace(' ', '.').lower() + '@example.com'"/>
-        <field name="signature" model="res.partner" eval="obj(ref('l10n_us_hr_payroll.res_partner_maggie')).name.split(' ')[0][0] + '. ' + obj(ref('l10n_us_hr_payroll.res_partner_maggie')).name.split(' ')[-1]"/>
+        <field name="signature" model="res.partner" eval="'&lt;div&gt;' + obj(ref('l10n_us_hr_payroll.res_partner_maggie')).name.split(' ')[0][0] + '. ' + obj(ref('l10n_us_hr_payroll.res_partner_maggie')).name.split(' ')[-1] + '&lt;/div&gt;'"/>
         <field name="company_ids" eval="[(4, ref('l10n_us.demo_company_us'))]"/>
         <field name="company_id" ref="l10n_us.demo_company_us"/>
         <field name="group_ids" eval="[(6,0,[ref('base.group_user')])]"/>

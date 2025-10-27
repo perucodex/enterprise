@@ -289,8 +289,12 @@ class ProductFetchImageWizard(models.TransientModel):
         :param Optional[datetime.datetime] at:
             When to execute the cron, at one moments in time instead of as soon as possible.
         """
-        self.env.ref('product_barcodelookup.ir_cron_fetch_image')._trigger(at)
-        # If two `ir_cron_fetch_image` are triggered automatically, and the first one is not
-        # committed, the constrains will return a ValidationError and roll back to the last commit,
-        # leaving no `ir_cron_fetch_image` in the schedule.
-        self.env.cr.commit()
+        cron_fetch_image = self.env.ref('product_barcodelookup.ir_cron_fetch_image')
+        if at:
+            # Remove all other cron trigger because we don't want to trigger the cron before 'at'
+            # in order to respect the time off when timeout or too_many_requests
+            self.env['ir.cron.trigger'].search([
+                ('call_at', '<', at),
+                ('cron_id', '=', cron_fetch_image.id),
+            ]).unlink()
+        cron_fetch_image._trigger(at)

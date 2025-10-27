@@ -260,7 +260,7 @@ export class UserAgent extends Reactive {
     }
 
     /**
-     * @param {import("@voip/core/call_model").Call} call 
+     * @param {import("@voip/core/call_model").Call} call
      * @returns {Session}
      */
     invite(call) {

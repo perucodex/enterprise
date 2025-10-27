@@ -550,7 +550,6 @@ class HrPayslip(models.Model):
         mapped_reports = self._get_pdf_reports()
         attachments_vals_list = []
         generic_name = _("Payslip")
-        template = self._get_email_template()
         for report, payslips in mapped_reports.items():
             for payslip in payslips:
                 pdf_content, dummy = self.env['ir.actions.report'].sudo().with_context(lang=payslip.employee_id.lang or self.env.lang)._render_qweb_pdf(report, payslip.id)
@@ -567,12 +566,12 @@ class HrPayslip(models.Model):
                 })
 
         self.env['ir.attachment'].sudo().create(attachments_vals_list)
-        if not template:
-            return
         # Send email to employees (after attachment is created to include it in the mail by other bridge module)
         for payslips in mapped_reports.values():
             for payslip in payslips:
-                template.send_mail(payslip.id, email_layout_xmlid='mail.mail_notification_light')
+                template = payslip._get_email_template()
+                if template:
+                    template.send_mail(payslip.id, email_layout_xmlid='mail.mail_notification_light')
 
     def _filter_out_of_versions_payslips(self):
         return self.filtered(lambda p: p.version_id and not p.version_id._is_overlapping_period(p.date_from, p.date_to) and not p.is_refund_payslip)
@@ -1381,9 +1380,15 @@ class HrPayslip(models.Model):
                 slip.issues = dict(enumerate(errors + warnings))
 
     def _get_error_message(self):
-        return ('\n').join([f' • {slip.name}: ' + issue['message']
+        if len(self) == 1:
+            return '\n'.join([
+                f' • {issue["message"]}'
+                for issue in self.issues.values() if issue['level'] == 'danger'
+            ])
+        return '\n'.join([
+            f' • {slip.name}: {issue["message"]}'
             for slip in self
-            for issue in (slip.issues or {}).values() if issue['level'] == 'danger'
+            for issue in slip.issues.values() if issue['level'] == 'danger'
         ])
 
     @api.depends('date_from', 'date_to', 'struct_id')

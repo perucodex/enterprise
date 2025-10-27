@@ -54,7 +54,7 @@ test("Can save a list in a new spreadsheet", async () => {
 });
 
 test("Can save a list in existing spreadsheet", async () => {
-    onRpc("/spreadsheet/data/*", () => expect.step("/spreadsheet/data/"), { pure: true });
+    onRpc("/spreadsheet/data/*", () => expect.step("/spreadsheet/data/"));
     await spawnListViewForSpreadsheet({
         mockRPC: async function (route, args) {
             if (args.model === "documents.document") {

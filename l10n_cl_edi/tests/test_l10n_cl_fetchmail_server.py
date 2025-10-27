@@ -421,6 +421,32 @@ class TestClFetchmailServer(TestL10nClEdiCommon):
         self.assertEqual(move.invoice_line_ids.name, 'Unknown Product')
         self.assertEqual(move.invoice_line_ids.price_unit, 32980.0)
 
+    def test_create_credit_note_61_from_attachment(self):
+        att_name = 'incoming_credit_note_61.xml'
+        from_address = 'incoming_dte@test.com'
+        with file_open(f'l10n_cl_edi/tests/fetchmail_dtes/{att_name}', 'rb', filter_ext=('.xml',)) as f:
+            content = f.read()
+            file_data = {'name': att_name, 'raw': content, 'xml_tree': etree.fromstring(content)}
+        moves = self.env['fetchmail.server']._process_incoming_supplier_document(
+            file_data, from_address, self.company_data['company'].id)
+
+        self.assertEqual(len(moves), 1)
+
+        move = moves[0]
+        self.assertEqual(move.name, 'N/C 1072252')
+        self.assertEqual(move.move_type, 'in_refund')
+        self.assertEqual(move.partner_id, self.partner_dte_2)
+        self.assertEqual(move.journal_id.type, 'purchase')
+        self.assertEqual(move.l10n_latam_document_number, '1072252')
+        self.assertEqual(move.l10n_cl_dte_acceptation_status, 'received')
+        self.assertEqual(move.invoice_source_email, from_address)
+        self.assertEqual(move.l10n_latam_document_type_id.code, '61')
+        self.assertEqual(move.company_id, self.company_data['company'])
+        self.assertEqual(len(move.invoice_line_ids), 1)
+        self.assertEqual(move.invoice_line_ids.product_id, self.env['product.product'])
+        self.assertEqual(move.invoice_line_ids.name, 'CORREA ALTERN P.47 HDI 163HP/EXPRT 2.0 HDI 6PK1245')
+        self.assertEqual(move.invoice_line_ids.price_unit, 8303.0)
+
     def test_process_incoming_customer_claim_move_not_found(self):
         att_name = 'incoming_acknowledge.xml'
         with file_open(f'l10n_cl_edi/tests/fetchmail_dtes/{att_name}', 'rb', filter_ext=('.xml',)) as f:

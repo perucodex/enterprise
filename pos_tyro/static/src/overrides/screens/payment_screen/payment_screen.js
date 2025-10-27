@@ -15,7 +15,7 @@ patch(PaymentScreen.prototype, {
             orderLinesToRefund.flatMap((line) => line.order_id?.payment_ids ?? []),
             (line) => line.id
         );
-        const amountDue = -order.getDue();
+        const amountDue = -order.remainingDue;
         const validLinesToRefund = paymentLinesToRefund.filter(
             (line) =>
                 this.payment_methods_from_config.some(

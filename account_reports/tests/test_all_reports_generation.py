@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import json
+
 from collections import defaultdict
 from unittest.mock import patch
 
@@ -120,7 +122,11 @@ class TestAllReportsGeneration(AccountTestInvoicingCommon):
                                 )
 
                                 if action_dict['type'] == 'ir_actions_account_report_download':
-                                    file_gen_res = report.dispatch_report_action(options, action_dict['data']['file_generator'], on_sections_source=True)
+                                    file_gen_res = report.dispatch_report_action(
+                                        json.loads(action_dict['data']['options']),
+                                        action_dict['data']['file_generator'],
+                                        on_sections_source=True,
+                                    )
                                     self.assertEqual(
                                         set(file_gen_res.keys()), {'file_name', 'file_content', 'file_type'},
                                         "File generator's result should always contain the same 3 keys."

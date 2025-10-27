@@ -9,7 +9,7 @@ class KpiProvider(models.AbstractModel):
     @api.model
     def get_documents_kpi_summary(self):
         inbox_folder = self.env.ref('documents.document_inbox_folder', raise_if_not_found=False)
-        if not inbox_folder:
+        if not inbox_folder or not inbox_folder.active:
             return []
 
         return [{

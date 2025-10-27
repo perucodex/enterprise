@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <record id="account_financial_report_l10n_tw_pl" model="account.report">
+<odoo auto_sequence="1">
+    <record id="l10n_tw_profit_and_loss" model="account.report">
         <field name="name">Profit and Loss</field>
         <field name="root_report_id" ref="account_reports.profit_and_loss"/>
         <field name="filter_analytic_groupby" eval="True"/>
@@ -8,196 +8,211 @@
         <field name="filter_journals" eval="True"/>
         <field name="country_id" ref="base.tw"/>
         <field name="filter_multi_company">selector</field>
+        <field name="filter_budgets" eval="True"/>
+        <field name="default_opening_date_filter">this_year</field>
         <field name="column_ids">
-            <record id="account_financial_report_l10n_tw_pl_column" model="account.report.column">
+            <record id="l10n_tw_profit_and_loss_balance" model="account.report.column">
                 <field name="name">Balance</field>
                 <field name="expression_label">balance</field>
             </record>
         </field>
         <field name="line_ids">
-            <record id="account_financial_report_l10n_tw_pl_op" model="account.report.line">
-                <field name="name">Operating profit</field>
+            <record id="l10n_tw_profit_and_loss_tw_gplo" model="account.report.line">
+                <field name="name">Gross profit (loss) from operations</field>
                 <field name="name@zh_TW">營業毛利</field>
-                <field name="code">OP</field>
-                <field name="foldable" eval="True"/>
-                <field name="hierarchy_level" eval="3"/>
+                <field name="code">TW_GPLO</field>
+                <field name="hierarchy_level">0</field>
+                <field name="foldable" eval="False"/>
                 <field name="expression_ids">
-                    <record id="account_financial_report_l10n_tw_pl_op_expression" model="account.report.expression">
+                    <record id="l10n_tw_profit_and_loss_tw_gplo_balance" model="account.report.expression">
                         <field name="label">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">OI.balance - OC.balance</field>
+                        <field name="formula">TW_OR.balance - TW_OC.balance</field>
                     </record>
                 </field>
                 <field name="children_ids">
-                    <record id="account_financial_report_l10n_tw_pl_oi" model="account.report.line">
-                        <field name="name">Operating income</field>
+                    <record id="l10n_tw_profit_and_loss_tw_or" model="account.report.line">
+                        <field name="name">Total operating revenue</field>
                         <field name="name@zh_TW">營業收入</field>
-                        <field name="code">OI</field>
+                        <field name="code">TW_OR</field>
+                        <field name="hierarchy_level">1</field>
                         <field name="groupby">account_id</field>
                         <field name="foldable" eval="True"/>
                         <field name="expression_ids">
-                            <record id="account_financial_report_l10n_tw_pl_oi_expression" model="account.report.expression">
+                            <record id="l10n_tw_profit_and_loss_tw_or_balance" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">account_codes</field>
-                                <field name="formula">-411 - 412 - 413 - 414 - 42</field>
+                                <field name="formula">-41 -42 -43 -47 -48</field>
                             </record>
                         </field>
                     </record>
-                    <record id="account_financial_report_l10n_tw_pl_oc" model="account.report.line">
-                        <field name="name">Operating cost</field>
+                    <record id="l10n_tw_profit_and_loss_tw_oc" model="account.report.line">
+                        <field name="name">Total operating costs</field>
                         <field name="name@zh_TW">營業成本</field>
-                        <field name="code">OC</field>
+                        <field name="code">TW_OC</field>
+                        <field name="hierarchy_level">1</field>
                         <field name="groupby">account_id</field>
                         <field name="foldable" eval="True"/>
                         <field name="expression_ids">
-                            <record id="account_financial_report_l10n_tw_pl_oc_expression" model="account.report.expression">
+                            <record id="l10n_tw_profit_and_loss_tw_oc_balance" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">account_codes</field>
-                                <field name="formula">5</field>
+                                <field name="formula">51 + 55 + 56</field>
                             </record>
                         </field>
                     </record>
                 </field>
             </record>
-            <record id="account_financial_report_l10n_tw_pl_oe" model="account.report.line">
+            <record id="l10n_tw_profit_and_loss_tw_oe" model="account.report.line">
                 <field name="name">Operating expenses</field>
                 <field name="name@zh_TW">營業費用</field>
-                <field name="code">OE</field>
+                <field name="code">TW_OE</field>
+                <field name="hierarchy_level">0</field>
                 <field name="groupby">account_id</field>
                 <field name="foldable" eval="True"/>
-                <field name="hierarchy_level" eval="3"/>
                 <field name="expression_ids">
-                    <record id="account_financial_report_l10n_tw_pl_oe_expression" model="account.report.expression">
+                    <record id="l10n_tw_profit_and_loss_tw_oe_balance" model="account.report.expression">
                         <field name="label">balance</field>
                         <field name="engine">account_codes</field>
-                        <field name="formula">61</field>
+                        <field name="formula">65 + 66 + 67</field>
                     </record>
                 </field>
             </record>
-            <record id="account_financial_report_l10n_tw_pl_onp" model="account.report.line">
-                <field name="name">Operating net profit (net loss)</field>
-                <field name="name@zh_TW">營業淨利(淨損)</field>
-                <field name="code">ONP</field>
-                <field name="foldable" eval="True"/>
-                <field name="expression_ids">
-                    <record id="account_financial_report_l10n_tw_pl_onp_expression" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">OP.balance - OE.balance</field>
-                    </record>
-                </field>
-            </record>
-            <record id="account_financial_report_l10n_tw_pl_noid" model="account.report.line">
-                <field name="name">Non-operating income and depreciation</field>
-                <field name="name@zh_TW">營業外收益及費損</field>
-                <field name="code">NOID</field>
+            <record id="l10n_tw_profit_and_loss_tw_noi" model="account.report.line">
+                <field name="name">Net other income (expenses)</field>
+                <field name="name@zh_TW">其他收益及費損淨額</field>
+                <field name="code">TW_NOI</field>
+                <field name="hierarchy_level">0</field>
                 <field name="groupby">account_id</field>
                 <field name="foldable" eval="True"/>
-                <field name="hierarchy_level" eval="3"/>
                 <field name="expression_ids">
-                    <record id="account_financial_report_l10n_tw_pl_noid_expression" model="account.report.expression">
+                    <record id="l10n_tw_profit_and_loss_tw_noi_balance" model="account.report.expression">
                         <field name="label">balance</field>
                         <field name="engine">account_codes</field>
-                        <field name="formula">-71 - 72</field>
+                        <field name="formula">-7100</field>
                     </record>
                 </field>
             </record>
-            <record id="account_financial_report_l10n_tw_pl_npbt" model="account.report.line">
-                <field name="name">Net profit before tax (net loss)</field>
-                <field name="name@zh_TW">稅前淨利(淨損)</field>
-                <field name="code">NBPT</field>
-                <field name="foldable" eval="True"/>
+            <record id="l10n_tw_profit_and_loss_tw_noil" model="account.report.line">
+                <field name="name">Net operating income (loss)</field>
+                <field name="name@zh_TW">營業利益（損失）</field>
+                <field name="code">TW_NOIL</field>
+                <field name="hierarchy_level">0</field>
+                <field name="foldable" eval="False"/>
                 <field name="expression_ids">
-                    <record id="account_financial_report_l10n_tw_pl_npbt_expression" model="account.report.expression">
+                    <record id="l10n_tw_profit_and_loss_tw_noil_balance" model="account.report.expression">
                         <field name="label">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">ONP.balance + NOID.balance</field>
+                        <field name="formula">TW_GPLO.balance - TW_OE.balance + TW_NOI.balance</field>
                     </record>
                 </field>
             </record>
-            <record id="account_financial_report_l10n_tw_pl_ite" model="account.report.line">
-                <field name="name">Income tax expense (benefits)</field>
-                <field name="name@zh_TW">所得稅費用(利益)</field>
-                <field name="code">ITE</field>
+            <record id="l10n_tw_profit_and_loss_tw_noie" model="account.report.line">
+                <field name="name">Non-operating income and expenses</field>
+                <field name="name@zh_TW">營業外收入及支出</field>
+                <field name="code">TW_NOIE</field>
+                <field name="hierarchy_level">0</field>
+                <field name="foldable" eval="False"/>
+                <field name="expression_ids">
+                    <record id="l10n_tw_profit_and_loss_tw_noie_balance" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">TW_NONI.balance - TW_NONE.balance</field>
+                    </record>
+                </field>
+                <field name="children_ids">
+                    <record id="l10n_tw_profit_and_loss_tw_noni" model="account.report.line">
+                        <field name="name">Non-operating income</field>
+                        <field name="name@zh_TW">營業外收入</field>
+                        <field name="code">TW_NONI</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="groupby">account_id</field>
+                        <field name="foldable" eval="True"/>
+                        <field name="expression_ids">
+                            <record id="l10n_tw_profit_and_loss_tw_noni_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">account_codes</field>
+                                <field name="formula">-72 -71\(7100)</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="l10n_tw_profit_and_loss_tw_none" model="account.report.line">
+                        <field name="name">Non-operating expenses</field>
+                        <field name="name@zh_TW">營業外支出</field>
+                        <field name="code">TW_NONE</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="groupby">account_id</field>
+                        <field name="foldable" eval="True"/>
+                        <field name="expression_ids">
+                            <record id="l10n_tw_profit_and_loss_tw_none_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">account_codes</field>
+                                <field name="formula">+75</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="l10n_tw_profit_and_loss_tw_pnlcobt" model="account.report.line">
+                <field name="name">Profit (loss) from continuing operations before tax</field>
+                <field name="name@zh_TW">稅前淨利（淨損）</field>
+                <field name="code">TW_PNLCOBT</field>
+                <field name="hierarchy_level">0</field>
+                <field name="foldable" eval="False"/>
+                <field name="expression_ids">
+                    <record id="l10n_tw_profit_and_loss_tw_pnlcobt_balance" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">TW_NOIL.balance + TW_NOIE.balance</field>
+                    </record>
+                </field>
+                <field name="children_ids">
+                    <record id="l10n_tw_profit_and_loss_tw_ite" model="account.report.line">
+                        <field name="name">Income tax expense (benefits)</field>
+                        <field name="name@zh_TW">所得稅費用（利益）合計</field>
+                        <field name="code">TW_ITE</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="groupby">account_id</field>
+                        <field name="foldable" eval="True"/>
+                        <field name="expression_ids">
+                            <record id="l10n_tw_profit_and_loss_tw_ite_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">account_codes</field>
+                                <field name="formula">+81</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="l10n_tw_profit_and_loss_tw_pnlcoat" model="account.report.line">
+                <field name="name">Profit (loss) from continuing operations after tax</field>
+                <field name="name@zh_TW">繼續營業單位本期淨利（淨損）</field>
+                <field name="code">TW_PNLCOAT</field>
+                <field name="hierarchy_level">0</field>
+                <field name="foldable" eval="False"/>
+                <field name="expression_ids">
+                    <record id="l10n_tw_profit_and_loss_tw_pnlcoat_balance" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">TW_PNLCOBT.balance - TW_ITE.balance</field>
+                    </record>
+                </field>
+            </record>
+            <record id="l10n_tw_profit_and_loss_tw_oceil" model="account.report.line">
+                <field name="name">Other comprehensive income (losses) for the current period</field>
+                <field name="name@zh_TW">其他綜合損益（淨額）</field>
+                <field name="code">TW_OCEIL</field>
+                <field name="hierarchy_level">0</field>
                 <field name="groupby">account_id</field>
                 <field name="foldable" eval="True"/>
-                <field name="hierarchy_level" eval="3"/>
                 <field name="expression_ids">
-                    <record id="account_financial_report_l10n_tw_pl_ite_expression" model="account.report.expression">
+                    <record id="l10n_tw_profit_and_loss_tw_oceil_balance" model="account.report.expression">
                         <field name="label">balance</field>
                         <field name="engine">account_codes</field>
-                        <field name="formula">82</field>
-                    </record>
-                </field>
-            </record>
-            <record id="account_financial_report_l10n_tw_pl_npatcbu" model="account.report.line">
-                <field name="name">Net profit after tax (net loss) of continuing business units</field>
-                <field name="name@zh_TW">繼續營業單位稅後淨利(淨損)</field>
-                <field name="code">NPATCBU</field>
-                <field name="foldable" eval="True"/>
-                <field name="expression_ids">
-                    <record id="account_financial_report_l10n_tw_pl_npatcbu_expression" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">NBPT.balance - ITE.balance</field>
-                    </record>
-                </field>
-            </record>
-            <record id="account_financial_report_l10n_tw_pl_plcu" model="account.report.line">
-                <field name="name">Profit and loss of closed units (after tax)</field>
-                <field name="name@zh_TW">停業單位損益(稅後)</field>
-                <field name="code">PLCU</field>
-                <field name="groupby">account_id</field>
-                <field name="foldable" eval="True"/>
-                <field name="hierarchy_level" eval="3"/>
-                <field name="expression_ids">
-                    <record id="account_financial_report_l10n_tw_pl_plcu_expression" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">account_codes</field>
-                        <field name="formula">-84</field>
-                    </record>
-                </field>
-            </record>
-            <record id="ccount_financial_report_l10n_tw_pl_npatcp" model="account.report.line">
-                <field name="name">Net profit after tax (net loss) for the current period</field>
-                <field name="code">NPATCP</field>
-                <field name="foldable" eval="True"/>
-                <field name="expression_ids">
-                    <record id="ccount_financial_report_l10n_tw_pl_npatcp_expression" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">NPATCBU.balance + PLCU.balance</field>
-                    </record>
-                </field>
-            </record>
-            <record id="ccount_financial_report_l10n_tw_pl_ocglcp" model="account.report.line">
-                <field name="name">Other comprehensive gains and losses for the current period</field>
-                <field name="code">OCGLCP</field>
-                <field name="groupby">account_id</field>
-                <field name="foldable" eval="True"/>
-                <field name="hierarchy_level" eval="3"/>
-                <field name="expression_ids">
-                    <record id="ccount_financial_report_l10n_tw_pl_ocglcp_expression" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">account_codes</field>
-                        <field name="formula">-87</field>
-                    </record>
-                </field>
-            </record>
-            <record id="account_financial_report_l10n_tw_pl_tcplcp" model="account.report.line">
-                <field name="name">Total comprehensive profit and loss for the current period</field>
-                <field name="name@zh_TW">本期綜合損益總額(稅後淨額)</field>
-                <field name="code">TCPLCP</field>
-                <field name="foldable" eval="True"/>
-                <field name="expression_ids">
-                    <record id="account_financial_report_l10n_tw_pl_tcplcp_expression" model="account.report.expression">
-                        <field name="label">balance</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">NPATCP.balance + OCGLCP.balance</field>
+                        <field name="formula">-91 -92</field>
                     </record>
                 </field>
             </record>
         </field>
     </record>
-
 </odoo>

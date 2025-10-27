@@ -894,6 +894,10 @@ class HelpdeskTicket(models.Model):
     @api.model
     def message_new(self, msg_dict, custom_values=None):
         values = dict(custom_values or {}, partner_email=msg_dict.get('from'), partner_name=msg_dict.get('from'), partner_id=msg_dict.get('author_id'))
+        partner = self.env['res.partner'].browse(values.get('partner_id'))
+        team = self.env['helpdesk.team'].browse(values.get('team_id'))
+        if team and partner.company_id and partner.company_id != team.company_id:
+            values.pop('partner_id')
         ticket = super(HelpdeskTicket, self.with_context(mail_notify_author=True)).message_new(msg_dict, custom_values=values)
         partner_ids = ticket._partner_find_from_emails_single(tools.email_split((msg_dict.get('to') or '') + ',' + (msg_dict.get('cc') or ''))).ids
         customer_ids = ticket._partner_find_from_emails_single(tools.email_split(values['partner_email'])).ids

@@ -221,9 +221,7 @@ test("Search by phone number works", async () => {
 
 test("T9 search does not match when contact has falsy t9_name", async () => {
     const pyEnv = await startServer();
-    pyEnv["res.partner"].create([
-        { name: " ", phone: "+1234567890", t9_name: false },
-    ]);
+    pyEnv["res.partner"].create([{ name: " ", phone: "+1234567890", t9_name: false }]);
     await start();
     await click(".o_menu_systray [title='Show Softphone']");
     await click(".o-voip-Softphone nav button:contains(Keypad)");

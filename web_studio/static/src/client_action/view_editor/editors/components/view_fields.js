@@ -74,7 +74,7 @@ export class ExistingFields extends Component {
 
 const newFields = [
     { type: "char", string: _t("Text") },
-    { type: "text", string: _t("Multine Text") },
+    { type: "text", string: _t("Multiline Text") },
     { type: "integer", string: _t("Integer") },
     { type: "float", string: _t("Decimal") },
     { type: "html", string: _t("HTML") },

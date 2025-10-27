@@ -11,9 +11,12 @@ patch(PosOrder.prototype, {
         if (!lines) {
             lines = this.getOrderlines();
         }
-        const tax = this.getTaxDetailsOfLines(lines)
-            .filter((tax) => tax.tax_percentage === tax_percentage)
-            .reduce((acc, tax) => acc + tax.amount, 0);
+        const taxDetails = lines.map((l) => l.prices);
+        const matches = taxDetails
+            .flatMap((td) => td.taxes_data)
+            .filter((t) => t.tax.amount_type === "percent" && t.tax.amount === tax_percentage);
+        const tax = matches.reduce((acc, match) => acc + match.tax_amount, 0);
+
         return tax ? tax : false;
     },
     waitForPushOrder() {
@@ -30,7 +33,7 @@ patch(PosOrder.prototype, {
         return sha1.slice(sha1.length - 8);
     },
     updateReceiptType() {
-        const order_total_with_tax = this.getTotalWithTax();
+        const order_total_with_tax = this.priceIncl;
         const sale = this.state == "paid" ? "NS" : "PS";
         const refund = this.state == "paid" ? "NR" : "PR";
         if (order_total_with_tax > 0) {

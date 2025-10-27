@@ -38,6 +38,9 @@
             ('include', 'web.assets_frontend'),
             ('before', 'website_knowledge/static/src/scss/primary_variables.scss', 'website_knowledge/static/src/scss/website_knowledge.scss'),
         ],
+        'website_knowledge.assets_knowledge_print': [
+            'website_knowledge/static/src/frontend/knowledge_public_view/knowledge_public_view_print.scss',
+        ],
         'web.assets_unit_tests': [
             'website_knowledge/static/tests/**/*',
             ('remove', 'website_knowledge/static/tests/tours/**/*'),

@@ -571,7 +571,7 @@ test("Can save a pivot in existing spreadsheet", async () => {
         expect.step("write");
         return { id: 1, type: "ir.actions.act_window_close" };
     });
-    onRpc("/spreadsheet/data/*", () => expect.step("/spreadsheet/data/"), { pure: true });
+    onRpc("/spreadsheet/data/*", () => expect.step("/spreadsheet/data/"));
     await makeDocumentsSpreadsheetMockEnv({
         serverData,
         mockRPC: function (route, args) {

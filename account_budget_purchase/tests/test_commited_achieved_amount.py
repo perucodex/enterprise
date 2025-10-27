@@ -613,3 +613,55 @@ class TestCommittedAchievedAmount(TestAccountBudgetPurchaseCommon):
         # The discount line should impact both amounts of the budget line
         plan_a_line = self.budget_analytic_expense.budget_line_ids[0]
         self.assertBudgetLine(plan_a_line, committed=90, achieved=90)
+
+    def test_account_budget_overlapping_accounts(self):
+        """
+        Ensure that committed and achieved amounts in budget report are not collected
+        twice when the analytic distribution contains both accounts defined in separate
+        budget lines
+        """
+
+        # Create a budget with 2 lines having different plan and analytic account
+        budget = self.env['budget.analytic'].create({
+            'name': 'Test Budget',
+            'date_from': '2025-01-01',
+            'date_to': '2025-12-31',
+            'budget_line_ids': [
+                Command.create({
+                    'budget_amount': 500,
+                    self.project_column_name: self.analytic_account_partner_a.id,
+                }),
+                Command.create({
+                    'budget_amount': 600,
+                    self.department_column_name: self.analytic_account_administratif.id,
+                }),
+            ]
+        })
+        budget.action_budget_confirm()
+        line = budget.budget_line_ids[0]
+
+        # Create a bill having both analytic accounts assigned to the same line
+        bill = self.env['account.move'].create({
+            'move_type': 'in_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_date': '2025-01-10',
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'analytic_distribution': {
+                        f'{self.analytic_account_partner_a.id}, {self.analytic_account_administratif.id}': 100,
+                    },
+                    'quantity': 1,
+                    'price_unit': 100,
+                    'account_id': self.company_data['default_account_expense'].id,
+                }),
+            ]
+        })
+        bill.action_post()
+
+        self.assertBudgetLine(line, committed=100.0, achieved=100.0)
+
+        # Ensure amount in budget line report is equal to line amount
+        action = line.action_open_budget_entries()
+        report_lines = self.env['budget.report'].search(action['domain'])
+        self.assertEqual(sum(line.committed for line in report_lines), 100.0)

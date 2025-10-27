@@ -330,8 +330,16 @@ class HrContractSalaryOffer(models.Model):
 
     def action_view_signature_request(self):
         self.ensure_one()
-        pending_sign_request = self.sign_request_ids.filtered(lambda r: r.state != 'signed')
-        return pending_sign_request.go_to_document()
+        pending_sign_requests = self.sign_request_ids.filtered(lambda r: r.state != 'signed')
+        if len(pending_sign_requests) == 1:
+            return pending_sign_requests.go_to_document()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Signature Requests',
+            'view_mode': 'kanban,list',
+            'res_model': 'sign.request',
+            'domain': [('id', 'in', pending_sign_requests.ids)]
+        }
 
     def action_edit_offer_signatories(self):
         self.ensure_one()

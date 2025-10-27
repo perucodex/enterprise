@@ -431,6 +431,7 @@ class AccountJournal(models.Model):
             o_idx = p_idx; p_idx +=  1; note.append(_('Detail') + ': ' + _('transaction type') + ': ' + transaction_type[communication[o_idx:p_idx]])
             o_idx = p_idx; p_idx += 26; note.append(_('Detail') + ': ' + _('identification of terminal') + ': ' + parse_terminal(communication[o_idx:p_idx]))
             o_idx = p_idx; p_idx += 16; note.append(_('Detail') + ': ' + _('reference of transaction') + ': ' + rmspaces(communication[o_idx:p_idx]))
+            structured_com += _(' - ref: %s', rmspaces(communication[o_idx:p_idx]))
         elif co_type == '115':  # Terminal cash deposit
             structured_com = _('Terminal cash deposit')
             o_idx = p_idx; p_idx += 16; note.append(_('Detail') + ': ' + _('PAN or card number') + ': ' + rmspaces(communication[o_idx:p_idx]))
@@ -511,7 +512,9 @@ class AccountJournal(models.Model):
             o_idx = p_idx; p_idx +=  1; note.append(_('Detail') + ': ' + _('Paid or reason for refused payment') + ': ' + payment_reason[communication[o_idx:p_idx]])
             o_idx = p_idx; p_idx += 35; note.append(_('Detail') + ': ' + _('Creditor’s identification code') + ': ' + rmspaces(communication[o_idx:p_idx]))
             o_idx = p_idx; p_idx += 35; note.append(_('Detail') + ': ' + _('Mandate reference') + ': ' + rmspaces(communication[o_idx:p_idx]))
+            structured_com += _(' - mandate: %s', rmspaces(communication[o_idx:p_idx]))
             o_idx = p_idx; p_idx += 62; note.append(_('Detail') + ': ' + _('Communicaton') + ': ' + rmspaces(communication[o_idx:p_idx]))
+            structured_com += _(' - %s', rmspaces(communication[o_idx:p_idx]))
             o_idx = p_idx; p_idx +=  1; note.append(_('Detail') + ': ' + _('Type of R transaction') + ': ' + sepa_type[communication[o_idx:p_idx]])
             o_idx = p_idx; p_idx +=  4; note.append(_('Detail') + ': ' + _('Reason') + ': ' + rmspaces(communication[o_idx:p_idx]))
         else:

@@ -6,7 +6,7 @@ import { isContentEditable } from "@html_editor/utils/dom_info";
 import { unwrapContents } from "@html_editor/utils/dom";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { user } from "@web/core/user";
-import { MAIL_PLUGINS, MAIL_SMALL_UI_PLUGINS } from "@mail/core/common/plugin/plugin_sets";
+import { MAIL_CORE_PLUGINS } from "@mail/core/common/plugin/plugin_sets";
 
 export class ChatGPTPlugin extends Plugin {
     static id = "chatgpt";
@@ -183,5 +183,4 @@ export class ChatGPTPlugin extends Plugin {
 }
 
 MAIN_PLUGINS.push(ChatGPTPlugin);
-MAIL_PLUGINS.push(ChatGPTPlugin);
-MAIL_SMALL_UI_PLUGINS.push(ChatGPTPlugin);
+MAIL_CORE_PLUGINS.push(ChatGPTPlugin);

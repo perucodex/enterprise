@@ -18,7 +18,7 @@ patch(PartnerLine.prototype, {
     async settleCustomerDue() {
         this.props.close();
         const partnerId = this.props.partner.id;
-        const commercialPartnerId = this.props.partner.commercial_partner_id.id;
+        const commercialPartnerId = this.props.partner.raw.commercial_partner_id;
         this.dialog.add(CustomSelectCreateDialog, {
             resModel: "pos.order",
             noCreate: true,
@@ -62,7 +62,7 @@ patch(PartnerLine.prototype, {
     async settleCustomerInvoices() {
         this.props.close();
         const partnerId = this.props.partner.id;
-        const commercialPartnerId = this.props.partner.commercial_partner_id.id;
+        const commercialPartnerId = this.props.partner.raw.commercial_partner_id;
         this.dialog.add(CustomSelectCreateDialog, {
             resModel: "account.move",
             noCreate: true,

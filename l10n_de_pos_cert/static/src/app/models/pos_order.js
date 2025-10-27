@@ -129,11 +129,10 @@ patch(PosOrder.prototype, {
                 });
             }
         });
-        const change = this.getChange();
-        if (roundCurrency(change, this.currency)) {
+        if (this.change) {
             amountPerPaymentTypeArray.push({
                 payment_type: "CASH",
-                amount: roundCurrency(-change, this.currency).toFixed(2),
+                amount: roundCurrency(-this.change, this.currency).toFixed(2),
             });
         }
 

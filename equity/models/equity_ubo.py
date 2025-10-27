@@ -72,7 +72,14 @@ class EquityUbo(models.Model):
     @api.depends('partner_id.name', 'holder_id.name')
     def _compute_display_name(self):
         for ubo in self:
-            ubo.display_name = f'{ubo.partner_id.name} ({ubo.holder_id.name})'
+            if ubo.partner_id and ubo.holder_id:
+                ubo.display_name = self.env._(
+                    "%(partner_name)s (%(holder_name)s)",
+                    partner_name=ubo.partner_id.name,
+                    holder_name=ubo.holder_id.name,
+                )
+            else:
+                ubo.display_name = ""
 
     @api.depends('control_method')
     def _compute_has_percentages(self):

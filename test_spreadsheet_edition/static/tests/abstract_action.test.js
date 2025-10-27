@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { animationFrame, rightClick, waitFor, runAllTimers } from "@odoo/hoot-dom";
+import { animationFrame, rightClick, runAllTimers, waitFor } from "@odoo/hoot-dom";
 import { EventBus } from "@odoo/owl";
 
 import { helpers, registries } from "@odoo/o-spreadsheet";
@@ -31,17 +31,11 @@ const { toZone } = helpers;
 defineTestSpreadsheetEditionModels();
 
 test("custom colors in color picker", async function () {
-    onRpc(
-        "/spreadsheet/data/*",
-        () => {
-            return {
-                data: {},
-                name: "test",
-                company_colors: ["#875A7B", "not a valid color"],
-            };
-        },
-        { pure: true }
-    );
+    onRpc("/spreadsheet/data/*", () => ({
+        data: {},
+        name: "test",
+        company_colors: ["#875A7B", "not a valid color"],
+    }));
     const { model } = await createSpreadsheetTestAction("spreadsheet_test_action");
     expect(model.getters.getCustomColors()).toEqual(["#875A7B"]);
 });
@@ -59,7 +53,7 @@ test("preserve global filters when navigating through breadcrumb", async functio
     });
     await setGlobalFilterValue(model, {
         id: "42",
-        value: { operator: "in", ids: [37]},
+        value: { operator: "in", ids: [37] },
     });
     await doMenuAction(cellMenuRegistry, ["pivot_see_records"], env);
     expect(".o_list_renderer").toHaveCount(1);
@@ -158,7 +152,7 @@ test("The geoJson service is given to the model for geo charts", async function 
         type: "FeatureCollection",
         features: [{ type: "Feature", id: "BE", properties: { name: "Belgium" }, geometry: {} }],
     };
-    onRpc("/spreadsheet/static/topojson/world.topo.json", () => mockGeoJson, { pure: true });
+    onRpc("/spreadsheet/static/topojson/world.topo.json", () => mockGeoJson);
     const { model } = await createSpreadsheetTestAction("spreadsheet_test_action", {});
 
     expect(model.getters.getGeoChartAvailableRegions().map((r) => r.label)).toEqual([

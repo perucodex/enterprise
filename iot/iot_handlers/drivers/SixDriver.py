@@ -68,7 +68,7 @@ class SixDriver(CtypesTerminalDriver):
 
         # Transaction
         try:
-            _logger.info('Start transaction #%d amount: %f', transaction_id, transaction['amount'])
+            _logger.info('Start transaction #%s', transaction)
             result = TIMAPI.six_perform_transaction(
                 ctypes.cast(self.dev, ctypes.c_void_p),  # t_terminal_manager *terminal_manager
                 transaction['posId'].encode(),  # char *pos_id
@@ -87,9 +87,9 @@ class SixDriver(CtypesTerminalDriver):
                 error,  # char *error
                 ctypes_int_buffer_size  # int error_size
             )
-            _logger.debug('Finished transaction #%d with result %d', transaction_id, result)
             # Transaction successful
             if result == 1:
+                _logger.info('Successfully finished transaction #%s', transaction)
                 self.send_status(
                     response='Approved',
                     ticket=customer_receipt.value.decode(),
@@ -103,13 +103,16 @@ class SixDriver(CtypesTerminalDriver):
                 # If cancelled by Odoo Pos
                 if error_code.value == CANCELLED_BY_POS:
                     sleep(3)  # Wait a couple of seconds between cancel requests as per documentation
+                    _logger.info("Transaction #%s cancelled by PoS user", transaction)
                     self.send_status(stage='Cancel', request_data=transaction)
                 # If an error was encountered
                 else:
                     error_message = f"{error_code.value}: {error.value.decode()}"
+                    _logger.info("Transaction #%s failed with error: %s", transaction, error_message)
                     self.send_status(error=error_message, request_data=transaction)
             # Terminal disconnected
             elif result == -1:
+                _logger.warning("Terminal disconnected during transaction #%s", transaction)
                 self.send_status(disconnected=True)
         except OSError:
             _logger.exception("Failed to perform Six transaction. Check for potential segmentation faults")
@@ -127,7 +130,9 @@ class SixDriver(CtypesTerminalDriver):
             # able to unblock it pressing cancel
             return self.send_status(stage="Cancel", request_data=transaction)
         try:
+            _logger.info("cancel transaction request for %s", transaction)
             if not TIMAPI.six_cancel_transaction(ctypes.cast(self.dev, ctypes.c_void_p)):
+                _logger.info("Transaction #%s could not be cancelled", transaction)
                 self.send_status(stage='Cancel', error='Transaction could not be cancelled', request_data=transaction)
         except OSError:
             _logger.exception("Failed to cancel Six transaction. Check for potential segmentation faults.")

@@ -152,6 +152,7 @@ class TestPeEdiPoS(TestPeEdiCommon, TestPointOfSaleHttpCommon):
             "amount_tax": -180.0,
             "amount_paid": -1180.0,
             "amount_return": 0.0,
+            'is_refund': True,
         })
         refund_order.refunded_order_id = original_order
         try:

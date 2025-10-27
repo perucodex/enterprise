@@ -6,6 +6,7 @@ import logging
 
 from odoo import api, fields, models
 from odoo.addons.l10n_mx_edi.models.l10n_mx_edi_document import CFDI_DATE_FORMAT
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -104,6 +105,163 @@ class HrPayslip(models.Model):
                         ('company_id', '=', payslip.company_id.id)
                     ], limit=1)
 
+    @api.model
+    def _issues_dependencies(self):
+        return super()._issues_dependencies() + [
+            'version_id.private_zip', 'employee_id.l10n_mx_rfc', 'company_id.l10n_mx_curp', 'company_id.l10n_mx_imss_id',
+            'company_id.vat', 'move_id.state', 'version_id.contract_type_id.code', 'employee_id.registration_number',
+            'employee_id.work_contact_id.state_id', 'company_id.partner_id.is_company', 'employee_id.ssnid',
+            'employee_id.l10n_mx_curp', 'employee_id.bank_account_ids',
+        ]
+
+    def _get_errors_by_slip(self):
+        errors_by_slip = super()._get_errors_by_slip()
+        ready_for_cfdi = self.filtered(lambda s: s.country_code == 'MX' and s.state == 'paid' and s.move_id.state == 'posted')
+        for slip in ready_for_cfdi:
+            # -- Version Fields --
+            if not slip.version_id.private_zip:
+                errors_by_slip[slip].append({
+                    'message': self.env._('Private ZIP required on the employee'),
+                    'action_text': self.env._("Employee"),
+                    'action': slip.employee_id._get_records_action(
+                        name=self.env._("Employee"),
+                        target='new',
+                        context={**self.env.context, 'version_id': slip.version_id.id}
+                    ),
+                    'level': 'danger',
+                })
+            if not slip.version_id.contract_type_id:
+                errors_by_slip[slip].append({
+                    'message': self.env._('Contract Type required on the employee'),
+                    'action_text': self.env._("Employee"),
+                    'action': slip.employee_id._get_records_action(
+                        name=self.env._("Employee"),
+                        target='new',
+                        context={**self.env.context, 'version_id': slip.version_id.id}
+                    ),
+                    'level': 'danger',
+                })
+            elif slip.version_id.contract_type_id.code not in ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '99']:
+                errors_by_slip[slip].append({
+                    'message': self.env._('Invalid Contract Type code on the employee'),
+                    'action_text': self.env._("Employee"),
+                    'action': slip.employee_id._get_records_action(
+                        name=self.env._("Employee"),
+                        target='new',
+                        context={**self.env.context, 'version_id': slip.version_id.id}
+                    ),
+                    'level': 'danger',
+                })
+
+            # -- Employee Fields --
+            if not slip.employee_id.registration_number:
+                errors_by_slip[slip].append({
+                    'message': self.env._('Employee Reference required on the employee'),
+                    'action_text': self.env._("Employee"),
+                    'action': slip.employee_id._get_records_action(
+                        name=self.env._("Employee"),
+                        target='new',
+                        context={**self.env.context, 'version_id': slip.version_id.id}
+                    ),
+                    'level': 'danger',
+                })
+            if not slip.employee_id.l10n_mx_rfc:
+                errors_by_slip[slip].append({
+                    'message': self.env._('RFC required on the employee'),
+                    'action_text': self.env._("Employee"),
+                    'action': slip.employee_id._get_records_action(
+                        name=self.env._("Employee"),
+                        target='new',
+                        context={**self.env.context, 'version_id': slip.version_id.id}
+                    ),
+                    'level': 'danger',
+                })
+            if not slip.employee_id.l10n_mx_curp:
+                errors_by_slip[slip].append({
+                    'message': self.env._('CURP required on the employee'),
+                    'action_text': self.env._("Employee"),
+                    'action': slip.employee_id._get_records_action(
+                        name=self.env._("Employee"),
+                        target='new',
+                        context={**self.env.context, 'version_id': slip.version_id.id}
+                    ),
+                    'level': 'danger',
+                })
+            if not slip.employee_id.work_contact_id:
+                errors_by_slip[slip].append({
+                    'message': self.env._('Work Contact required on the employee'),
+                    'action_text': self.env._("Employee"),
+                    'action': slip.employee_id._get_records_action(
+                        name=self.env._("Employee"),
+                        target='new',
+                        context={**self.env.context, 'version_id': slip.version_id.id}
+                    ),
+                    'level': 'danger',
+                })
+            elif not slip.employee_id.work_contact_id.state_id:
+                errors_by_slip[slip].append({
+                    'message': self.env._('State required on the work contact'),
+                    'action_text': self.env._("Work Contact"),
+                    'action': slip.employee_id.work_contact_id._get_records_action(
+                        name=self.env._("Work Contact"),
+                        target='new',
+                    ),
+                    'level': 'danger',
+                })
+            if not slip.employee_id.bank_account_ids:
+                errors_by_slip[slip].append({
+                    'message': self.env._('Bank Account required on the employee'),
+                    'action_text': self.env._("Employee"),
+                    'action': slip.employee_id._get_records_action(
+                        name=self.env._("Employee"),
+                        target='new',
+                        context={**self.env.context, 'version_id': slip.version_id.id}
+                    ),
+                    'level': 'danger',
+                })
+        return errors_by_slip
+
+    def _get_warnings_by_slip(self):
+        warnings_by_slip = super()._get_warnings_by_slip()
+        ready_for_cfdi = self.filtered(lambda s: s.country_code == 'MX' and s.state == 'paid' and s.move_id.state == 'posted')
+        for slip in ready_for_cfdi:
+            # -- Company Fields --
+            if not slip.company_id.l10n_mx_curp and not slip.company_id.partner_id.is_company:
+                warnings_by_slip[slip].append({
+                    'message': self.env._('CURP missing on the company'),
+                    'action_text': self.env._("Settings"),
+                    'action': self.env['ir.actions.actions']._for_xml_id('hr_payroll.action_hr_payroll_configuration'),
+                    'level': 'warning',
+                })
+            if not slip.company_id.l10n_mx_imss_id:
+                warnings_by_slip[slip].append({
+                    'message': self.env._('IMSS ID missing on the company'),
+                    'action_text': self.env._("Settings"),
+                    'action': self.env['ir.actions.actions']._for_xml_id('hr_payroll.action_hr_payroll_configuration'),
+                    'level': 'warning',
+                })
+            if not slip.company_id.vat:
+                warnings_by_slip[slip].append({
+                    'message': self.env._('VAT missing on the company'),
+                    'action_text': self.env._("Settings"),
+                    'action': self.env['ir.actions.actions']._for_xml_id('account.action_account_config'),
+                    'level': 'warning',
+                })
+
+            # -- Employee Fields --
+            if not slip.employee_id.ssnid:
+                warnings_by_slip[slip].append({
+                    'message': self.env._('SSN ID missing on the employee'),
+                    'action_text': self.env._("Employee"),
+                    'action': slip.employee_id._get_records_action(
+                        name=self.env._("Employee"),
+                        target='new',
+                        context={**self.env.context, 'version_id': slip.version_id.id}
+                    ),
+                    'level': 'warning',
+                })
+        return warnings_by_slip
+
     # -------------------------------------------------------------------------
     # CFDI Generation: Payslips
     # -------------------------------------------------------------------------
@@ -141,7 +299,7 @@ class HrPayslip(models.Model):
         }
 
         cfdi_values['nomina_emisor'] = {
-            'curp': self.company_id.l10n_mx_curp if self.company_id.partner_id.is_company else False,
+            'curp': self.company_id.l10n_mx_curp if not self.company_id.partner_id.is_company else False,
             'registro_patronal': self.company_id.l10n_mx_imss_id,
             'rfc_patron_origen': self.company_id.vat,
         }
@@ -154,16 +312,16 @@ class HrPayslip(models.Model):
         cfdi_values['nomina_receptor'] = {
             'curp': self.employee_id.l10n_mx_curp,
             'num_seguridad_social': self.employee_id.ssnid,
-            'fecha_inicio_rel_laboral': self.employee_id.contract_date_start.isoformat(),
-            'antigüedad': f'P{(self.date_to - self.employee_id.contract_date_start).days // 7}W',
-            'tipo_contrato': self.employee_id.contract_type_id.code,
-            'tipo_regimen': self.employee_id.l10n_mx_regime_type,
-            'tipo_jornada': self.employee_id.l10n_mx_shift_type,
+            'fecha_inicio_rel_laboral': self.version_id.contract_date_start.isoformat(),
+            'antigüedad': f'P{(self.date_to - self.version_id.contract_date_start).days // 7}W',
+            'tipo_contrato': self.version_id.contract_type_id.code,
+            'tipo_regimen': self.version_id.l10n_mx_regime_type,
+            'tipo_jornada': self.version_id.l10n_mx_shift_type,
             'num_empleado': self.employee_id.registration_number,
             'riesgo_puesto': self.company_id.l10n_mx_risk_type,
-            'periodicidad_pago': self.employee_id.l10n_mx_payment_periodicity,
-            'puesto': self.employee_id.job_title,
-            'departamento': self.employee_id.department_id.name if self.employee_id.department_id else False,
+            'periodicidad_pago': self.version_id.l10n_mx_payment_periodicity,
+            'puesto': self.version_id.job_title,
+            'departamento': self.version_id.department_id.name if self.version_id.department_id else False,
             'salario_base_cot_apor': integrated_daily_wage,
             'salario_diario_integrado': self.l10n_mx_daily_salary,
             'clave_ent_fed': self.employee_id.work_contact_id.state_id.code,
@@ -283,6 +441,8 @@ class HrPayslip(models.Model):
     # -------------------------------------------------------------------------
 
     def action_generate_cfdi(self):
+        if self.filtered('error_count'):
+            raise ValidationError(self._get_error_message())
         self._l10n_mx_edi_cfdi_try_send()
 
     def _l10n_mx_edi_get_cfdi_filename(self):

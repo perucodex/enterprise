@@ -39,7 +39,13 @@ class HrEmployeePublic(models.Model):
     def action_open_last_appraisal(self):
         self.ensure_one()
         if self.is_user:
-            return self.user_id.action_open_last_appraisal()
+            return {
+                'view_mode': 'form',
+                'res_model': 'hr.appraisal',
+                'type': 'ir.actions.act_window',
+                'target': 'current',
+                'res_id': self.last_appraisal_id.id,
+            }
 
     def action_send_appraisal_request(self):
         return {

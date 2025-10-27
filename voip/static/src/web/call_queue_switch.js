@@ -71,7 +71,7 @@ export class CallQueueSwitch extends Component {
         if (this._hasPendingRequest) {
             return;
         }
-        await this._makeRequest(async () => 
+        await this._makeRequest(async () =>
             this.orm.call(this.props.record.resModel, "delete_call_activity", [
                 [this.props.record.resId],
             ])

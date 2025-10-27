@@ -112,7 +112,7 @@ class BudgetLine(models.Model):
     def action_open_budget_entries(self):
         project_plan, other_plans = self.env['account.analytic.plan']._get_all_plans()
         all_plan = project_plan + other_plans
-        domain = [('budget_analytic_id', '=', self.budget_analytic_id.id)]
+        domain = [('budget_analytic_id', '=', self.budget_analytic_id.id), ('budget_line_id', '=', self.id)]
         for plan in all_plan:
             fname = plan._column_name()
             if self[fname]:

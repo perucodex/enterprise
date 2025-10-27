@@ -25,7 +25,13 @@ export class ActionableWarningsField extends Component {
     }
 
     async handleOnClick(errorData){
-        return this.actionService.doAction(errorData.action);
+        return this.actionService.doAction(errorData.action, {
+            onClose: (onCloseInfo) =>  {
+                if (!onCloseInfo?.noReload) {
+                    this.env.model.load();
+                }
+            }
+        });
     }
 
     get sortedActionableWarnings() {

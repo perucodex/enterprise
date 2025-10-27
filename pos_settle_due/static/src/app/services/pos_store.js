@@ -143,9 +143,13 @@ patch(PosStore.prototype, {
                 } else {
                     newOrder = this.addNewOrder();
                 }
-                const payment = newOrder.addPaymentline(selectedPaymentMethod);
+                const result = newOrder.addPaymentline(selectedPaymentMethod);
+                if (!result.status) {
+                    return false;
+                }
+
                 newOrder.is_settling_account = true;
-                payment.setAmount(amount);
+                result.data.setAmount(amount);
                 newOrder.setPartner(partner);
                 newOrder.is_settling_account = true;
                 this.navigate("PaymentScreen", {

@@ -6,7 +6,9 @@ patch(PosOrder.prototype, {
         return !!this.config.iface_sweden_fiscal_data_module;
     },
     getSpecificTax(amount) {
-        const tax = this.getTaxDetails().find((tax) => tax.tax.amount === amount);
+        const tax = this.prices.taxDetails.tax_details.taxes_data.find(
+            (tax) => tax.tax.amount === amount
+        );
 
         if (tax) {
             return tax.amount;

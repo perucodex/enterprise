@@ -9,12 +9,7 @@ import { animationFrame } from "@odoo/hoot-mock";
 import { registries } from "@odoo/o-spreadsheet";
 import { addGlobalFilter, createBasicChart } from "@spreadsheet/../tests/helpers/commands";
 import * as dsHelpers from "@web/../tests/core/tree_editor/condition_tree_editor_test_helpers";
-import {
-    contains,
-    makeServerError,
-    onRpc,
-    fields,
-} from "@web/../tests/web_test_helpers";
+import { contains, makeServerError, onRpc, fields } from "@web/../tests/web_test_helpers";
 import { Partner } from "@spreadsheet/../tests/helpers/data";
 
 defineDocumentSpreadsheetModels();
@@ -387,8 +382,8 @@ test("geo chart", async () => {
         type: "FeatureCollection",
         features: [{ type: "Feature", id: "BE", properties: { name: "Belgium" }, geometry: {} }],
     };
-    onRpc("/spreadsheet/static/topojson/world.topo.json", () => mockGeoJson, { pure: true });
-    onRpc("/spreadsheet/static/topojson/europe.topo.json", () => mockGeoJson, { pure: true });
+    onRpc("/spreadsheet/static/topojson/world.topo.json", () => mockGeoJson);
+    onRpc("/spreadsheet/static/topojson/europe.topo.json", () => mockGeoJson);
 
     const { model, env } = await createSpreadsheetFromGraphView({
         additionalContext: {

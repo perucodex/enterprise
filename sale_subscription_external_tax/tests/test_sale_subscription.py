@@ -113,3 +113,21 @@ class TestSaleSubscriptionExternal(TestSubscriptionCommon, TestSaleSubscriptionE
                 fields.Date.from_string(today),
                 'The current date should be sent for subscriptions.'
             )
+
+    def test_05_recurring_total_match(self):
+        sub = self.subscription
+        sub.is_tax_computed_externally = True
+
+        sub.order_line = sub.order_line.filtered(lambda x: x.recurring_invoice)
+
+        def new_set_external_taxes(self, mapped_taxes):
+            """Simulate what happens for an exempt sale order: amounts that don't match the set tax."""
+            for line in sub.order_line:
+                line.price_subtotal = line.price_unit * line.product_uom_qty * 0.5
+                line.price_tax = line.price_unit * line.product_uom_qty * 0.5
+                line.price_total = line.price_subtotal + line.price_tax
+
+        with self.patch_set_external_taxes(new_set_external_taxes):
+            sub.button_external_tax_calculation()
+
+        self.assertEqual(sub.recurring_total, sub.amount_untaxed)

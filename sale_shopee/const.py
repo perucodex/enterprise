@@ -84,6 +84,7 @@ DELIVERY_STATUS_MAPPING = {
     'PROCESSED': 'confirmed',
     'SHIPPED': 'done',
     'COMPLETED': 'done',
+    'TO_CONFIRM_RECEIVE': 'done',
     'CANCELLED': 'cancelled',
     'RETRY_SHIP': 'error',
 }

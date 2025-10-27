@@ -44,7 +44,7 @@ class SaleCommissionReport(models.Model):
 
     @api.model
     def formatted_read_group(self, domain, groupby=(), aggregates=(), having=(), offset=0, limit=None, order=None) -> list[dict]:
-        return super().formatted_read_group(domain, groupby, aggregates, having, limit, offset, order)
+        return super().formatted_read_group(domain, groupby, aggregates, having, offset, limit, order)
     formatted_read_group._readonly = False
 
     @api.model

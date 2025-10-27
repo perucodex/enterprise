@@ -479,3 +479,20 @@ class TestManual(common.TestUyEdi):
                 'invoice_partner_display_name': 'BANCO ITAU URUGUAY S.A.',
             },
         ])
+
+    def test_210_e_invoice_xml_with_reduced_vat_tax(self):
+        """ Create e-Invoice, and check that the pre-generated xml is the same as the one expected """
+        invoice = self._create_move(
+            partner_id=self.partner_local.id,
+            l10n_latam_document_type_id=self.env.ref("l10n_uy.dc_e_inv").id
+        )
+        invoice.invoice_line_ids = [Command.set(invoice.invoice_line_ids.ids)] + [
+            Command.create({
+                'product_id': self.service_reduced_vat.id,
+                'quantity': 1,
+                'price_unit': 20,
+            })
+        ]
+        invoice.action_post()
+        self._send_and_print(invoice)
+        self._check_cfe(invoice, "e-FC", "200_e_invoice_with_reduced_vat_tax")

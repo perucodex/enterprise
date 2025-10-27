@@ -289,7 +289,7 @@ class TestAiServerActions(TransactionCase):
 
     def _ai_tool_call(self, name, call_id, arguments):
         # Simulate the response of `_request_llm` when the LLM ask to execute a tool
-        return [], [(name, call_id, arguments)], [{"call_id": call_id, "name": name, "arguments": json.dumps(arguments)}]
+        return ["Done"], [(name, call_id, arguments)], [{"call_id": call_id, "name": name, "arguments": json.dumps(arguments)}]
 
     def _create_mock_request(self, responses):
         call_count = 0
@@ -301,3 +301,58 @@ class TestAiServerActions(TransactionCase):
             return result
 
         return mock_request
+
+    def test_ai_create_activity(self):
+        # check that activities can be created from an AI action
+        create_activity_action = self.env['ir.actions.server'].create({
+            'model_id': self.env['ir.model']._get_id('res.partner'),
+            'state': 'next_activity',
+            'name': 'create activity',
+            'use_in_ai': True,
+            'activity_type_id': self.env.ref('mail.mail_activity_data_todo').id,
+            'activity_note': 'created by AI',
+        })
+        ai_action = self.env['ir.actions.server'].create({
+            'model_id': self.env['ir.model']._get_id('res.partner'),
+            'state': 'ai',
+            'name': 'call create activity',
+            'ai_action_prompt': 'create an activity',
+            'ai_tool_ids': create_activity_action.ids,
+        })
+
+        def _mocked_request_llm(*args, **kwargs):
+            return self._ai_tool_call(f"action_{create_activity_action.id}", "call_111111", {})
+
+        with patch.object(LLMApiService, "_request_llm", _mocked_request_llm):
+            ai_action._ai_action_run(self.env.user.partner_id)
+        self.assertIn('created by AI', self.env.user.partner_id.activity_ids[0].note)
+
+    def test_ai_send_mail(self):
+        partner_model_id = self.env['ir.model']._get_id('res.partner')
+        send_mail_action = self.env['ir.actions.server'].create({
+            'model_id': partner_model_id,
+            'state': 'mail_post',
+            'name': 'send mail',
+            'use_in_ai': True,
+            'template_id':  self.env['mail.template'].create({
+                'name': 'Test template',
+                'model_id': partner_model_id,
+                'subject': 'mail sent by AI',
+            }).id
+        })
+        ai_action = self.env['ir.actions.server'].create({
+            'model_id': partner_model_id,
+            'state': 'ai',
+            'name': 'send mail',
+            'ai_action_prompt': 'send an email',
+            'ai_tool_ids': send_mail_action.ids,
+        })
+
+        def _mocked_request_llm(*args, **kwargs):
+            return self._ai_tool_call(f"action_{send_mail_action.id}", "call_111111", {})
+
+        with patch.object(LLMApiService, "_request_llm", _mocked_request_llm):
+            ai_action._ai_action_run(self.env.user.partner_id)
+
+        # check that the mail has been created
+        self.assertTrue(any(msg.subject == 'mail sent by AI' for msg in self.env.user.partner_id.message_ids))

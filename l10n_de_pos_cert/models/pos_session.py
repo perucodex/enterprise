@@ -184,8 +184,8 @@ class PosSession(models.Model):
                     "timestamp_start": int(o.l10n_de_fiskaly_time_start.timestamp()),
                     "timestamp_end": int(o.l10n_de_fiskaly_time_end.timestamp()),
                     "user": {
-                        "user_export_id": f"{o.user_id.id}",
-                        "name": f"{o.user_id.name[:50]}",
+                        "user_export_id": f"{(o.user_id or o.create_uid).id}",
+                        "name": f"{(o.user_id or o.create_uid).name[:50]}",
                     },
                     "buyer": buyer,
                 },

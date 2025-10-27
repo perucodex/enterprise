@@ -35,6 +35,10 @@ test("Payroll rule preview", async () => {
     });
 
     const styledTextEl = document.querySelector('div[name="name"] span');
-    expect(styledTextEl).toHaveStyle("font-style: italic");
-    expect(styledTextEl).toHaveStyle("text-decoration: underline solid rgb(255, 87, 51)");
+    expect(styledTextEl).toHaveStyle({
+        fontStyle: "italic",
+        color: "rgb(255, 87, 51)",
+        textDecorationLine: "underline",
+        textDecorationColor: "rgb(255, 87, 51)",
+    });
 });

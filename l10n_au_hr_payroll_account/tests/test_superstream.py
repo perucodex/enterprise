@@ -18,7 +18,7 @@ class TestPayrollSuperStream(AccountTestInvoicingCommon):
     @AccountTestInvoicingCommon.setup_country('au')
     def setUpClass(cls):
         super().setUpClass()
-        cls.env.user.group_ids |= cls.env.ref("hr_payroll.group_hr_payroll_user")
+        cls.env.user.group_ids |= cls.env.ref('hr_payroll.group_hr_payroll_manager')
         cls.startClassPatcher(freeze_time(date(2023, 9, 1)))
         cls.account_21400 = cls.env['account.account'].search([
             ('company_ids', '=', cls.company_data['company'].id),

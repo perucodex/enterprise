@@ -2,6 +2,7 @@ import { _t } from "@web/core/l10n/translation";
 import { x2ManyCommands } from "@web/core/orm_service";
 import { patch } from "@web/core/utils/patch";
 import { Record } from "@web/model/relational_model/record";
+import { markup } from "@odoo/owl";
 
 const notificationTitles = [
     _t("I couldn't quite make sense of that"),
@@ -84,6 +85,9 @@ patch(Record.prototype, {
                 return false;
             }
             throw e;
+        }
+        if (property.type === "html") {
+            return markup(value);
         }
         return value;
     },

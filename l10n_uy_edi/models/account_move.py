@@ -325,10 +325,12 @@ class AccountMove(models.Model):
 
         neto = {10.0: 0.0, 22.0: 0.0, 0.0: 0.0}
         base = neto.copy()
-        for grouping_key, tax_dict in tax_details['tax_details'].items():
-            neto[grouping_key['_tax_amount']] = tax_dict['base_amount_currency']
-            base[grouping_key['_tax_amount']] = tax_dict['tax_amount_currency']
+        neto_keys = neto.keys()
 
+        for grouping_key, tax_dict in tax_details['tax_details'].items():
+            key = grouping_key['_tax_amount'] if grouping_key['_tax_amount'] in neto_keys else 'reduced_tax'
+            neto[key] = neto.get(key, 0) + tax_dict['base_amount_currency']
+            base[key] = base.get(key, 0) + tax_dict['tax_amount_currency']
         nf_amount = sum(
             self.invoice_line_ids.filtered(lambda x: x.move_id._is_downpayment() or x.quantity < 0).mapped('price_subtotal')
         )
@@ -340,9 +342,11 @@ class AccountMove(models.Model):
             "MntNetoIvaTasaMin": neto[10.0] if not expo_doc else None,  # A116
             "IVATasaMin": 10 if not expo_doc and neto[10.0] or self._is_downpayment() else None,  # A119
             "MntNetoIVATasaBasica": neto[22.0] if not expo_doc else None,  # A117
+            "MntNetoIVAOtra": neto.get('reduced_tax'),  # A118
             "IVATasaBasica": 22 if not expo_doc and neto[22.0] or self._is_downpayment() else None,  # A120
             "MntIVATasaMin": base[10.0] if not expo_doc else None,  # A121
             "MntIVATasaBasica": base[22.0] if not expo_doc else None,  # A122
+            "MntIVAOtra": base.get('reduced_tax'),  # A123
             "MntTotal": self.amount_total - nf_amount if nf_amount else self.amount_total,  # A124
             "CantLinDet": len(self.invoice_line_ids.filtered(lambda x: x.display_type == "product" and x.price_unit >= 0 or x.move_id._is_downpayment())),  # A126
             "MontoNF": nf_amount or None,
@@ -402,7 +406,7 @@ class AccountMove(models.Model):
                 22.0: 3,  # 3: Gravado a Tasa Básica
             }
             # IMPORTANT: By the moment, this is working for one VAT tax per move lines
-            invoice_ind = ind_code.get(line.tax_ids.amount)
+            invoice_ind = ind_code.get(line.tax_ids.amount, 4)  # 4: Otra Tasa IVA
 
         tax_included = set(line.tax_ids.mapped("price_include"))
 

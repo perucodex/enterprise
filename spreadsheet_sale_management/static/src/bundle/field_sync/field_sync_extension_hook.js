@@ -1,5 +1,5 @@
 import { registries, coreTypes, stores } from "@odoo/o-spreadsheet";
-import { onMounted, onWillUnmount } from "@odoo/owl";
+import { onMounted } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
 import { sum } from "@spreadsheet/helpers/helpers";
@@ -28,12 +28,11 @@ coreTypes.add("ADD_FIELD_SYNC").add("DELETE_FIELD_SYNCS");
  * Adds the spreadsheet field sync plugins and menus
  * and removes them when the action is left
  */
-export function useSpreadsheetFieldSyncExtension() {
+export function useSpreadsheetFieldSyncStore() {
     const stores = useStoreProvider();
     onMounted(() => {
         stores.instantiate(FieldSyncHighlightStore);
     });
-    addSpreadsheetFieldSyncExtensionWithCleanUp(onWillUnmount);
 }
 
 export function addSpreadsheetFieldSyncExtensionWithCleanUp(cleanUpHook = () => {}) {

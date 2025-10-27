@@ -131,17 +131,13 @@ test("publish dashboard from control panel", async function () {
 });
 
 test("unpublish dashboard from control panel", async function () {
-    onRpc(
-        "/spreadsheet/data/spreadsheet.dashboard/*",
-        () => ({
-            data: {},
-            revisions: [],
-            name: "Dashboard",
-            isReadonly: false,
-            is_published: true,
-        }),
-        { pure: true }
-    );
+    onRpc("/spreadsheet/data/spreadsheet.dashboard/*", () => ({
+        data: {},
+        revisions: [],
+        name: "Dashboard",
+        isReadonly: false,
+        is_published: true,
+    }));
     onRpc("spreadsheet.dashboard", "write", ({ args }) => {
         expect.step("dashboard_unpublished");
         expect(args[1]).toEqual({ is_published: false });

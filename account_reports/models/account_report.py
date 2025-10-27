@@ -21,6 +21,7 @@ from PIL import ImageFont
 
 from odoo import api, fields, models, _
 from odoo.addons.web.controllers.utils import clean_action
+from odoo.addons.account.models.account_report import ACCOUNT_CODES_ENGINE_SPLIT_REGEX, ACCOUNT_CODES_ENGINE_TERM_REGEX
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
 from odoo.fields import Command, Domain
 from odoo.service.model import get_public_method
@@ -31,15 +32,6 @@ from odoo.tools.misc import file_path, format_date, formatLang
 from odoo.tools.safe_eval import expr_eval, safe_eval
 
 _logger = logging.getLogger(__name__)
-
-ACCOUNT_CODES_ENGINE_SPLIT_REGEX = re.compile(r"(?=[+-])")
-
-ACCOUNT_CODES_ENGINE_TERM_REGEX = re.compile(
-    r"^(?P<sign>[+-]?)"\
-    r"(?P<prefix>([A-Za-z\d.]*|tag\([\w.]+\))((?=\\)|(?<=[^CD])))"\
-    r"(\\\((?P<excluded_prefixes>([A-Za-z\d.]+,)*[A-Za-z\d.]*)\))?"\
-    r"(?P<balance_character>[DC]?)$"
-)
 
 ACCOUNT_CODES_ENGINE_TAG_ID_PREFIX_REGEX = re.compile(r"tag\(((?P<id>\d+)|(?P<ref>\w+\.\w+))\)")
 
@@ -1431,7 +1423,7 @@ class AccountReport(models.Model):
                             account_currency_table.rate_type = CASE
                                 WHEN aml_ct_account.account_type LIKE %(equity_prefix)s THEN 'historical'
                                 WHEN aml_ct_account.account_type LIKE ANY (ARRAY[%(income_prefix)s, %(expense_prefix)s, 'equity_unaffected']) THEN 'average'
-                                ELSE 'closing'
+                                ELSE 'current'
                             END
                         )
                         AND (account_currency_table.date_from IS NULL OR account_currency_table.date_from <= %(aml_table)s.date)
@@ -1964,6 +1956,18 @@ class AccountReport(models.Model):
             return options
 
     ####################################################
+    # OPTIONS: CONSOLIDATION
+    ####################################################
+    def _init_options_consolidation(self, options, previous_options):
+        options['show_consolidation'] = len(self.get_report_company_ids(options)) > 1 and any(
+            groupby.strip() == 'account_id'
+            for groupby_str in self.line_ids.mapped('user_groupby')
+            for groupby in (groupby_str or '').split(',')
+        )
+
+        options['consolidation'] = options['show_consolidation'] and previous_options.get('consolidation', False)
+
+    ####################################################
     # OPTIONS: BUDGETS
     ####################################################
     def _init_options_budgets(self, options, previous_options):
@@ -2137,6 +2141,7 @@ class AccountReport(models.Model):
             self._init_options_comparison: 50,
             self._init_options_export_mode: 60,
             self._init_options_integer_rounding: 70,
+            self._init_options_consolidation: 75,
             self._init_options_journals: 80,
             self._init_options_journals_names: 90,
             self._init_options_audit: 100,
@@ -7499,8 +7504,16 @@ class AccountReportLine(models.Model):
 
     def _get_groupby(self, options):
         self.ensure_one()
+
         if options['export_mode'] == 'file':
             return self.groupby
+
+        groupby_lst = [groupby.strip() for groupby in (self.user_groupby or '').split(',')]
+        if options['consolidation'] and 'account_id' in groupby_lst:
+            index_account_id = groupby_lst.index('account_id')
+            groupby_lst.insert(index_account_id, 'account_code')
+            return ','.join(groupby_lst)
+
         return self.user_groupby
 
     def action_reset_custom_groupby(self):

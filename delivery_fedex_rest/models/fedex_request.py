@@ -71,6 +71,16 @@ FEDEX_MX_STATE_MATCH = {
     'ZAC': 'ZA'
 }
 
+FEDEX_AE_STATE_MATCH = {
+    'AZ': 'AB',
+    'AJ': 'AJ',
+    'DU': 'DU',
+    'FU': 'FU',
+    'RK': 'RA',
+    'SH': 'SH',
+    'UQ': 'UM',
+}
+
 FEDEX_STOCK_TYPE_MATCH = {
     'PAPER_4X6.75': 'PAPER_4X675',
     'PAPER_7X4.75': 'PAPER_7X475',
@@ -213,9 +223,12 @@ class FedexRequest:
         # need to adhere to two character length state code
             if partner.country_id.code == 'MX':
                 state_code = FEDEX_MX_STATE_MATCH[state_code]
+            if partner.country_id.code == 'AE':
+                state_code = FEDEX_AE_STATE_MATCH.get(state_code, state_code)
             if partner.country_id.code == 'IN' and partner.state_id.code == 'UK':
                 state_code = 'UT'
-            res['stateOrProvinceCode'] = state_code
+            if len(state_code) <= 2:
+                res['stateOrProvinceCode'] = state_code
         if check_residential:
             setting = self.check_residential
             if setting == 'always' or (setting == 'check' and self._check_residential_address({**res, 'streetLines': [partner.street, partner.street2]})):

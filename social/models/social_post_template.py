@@ -40,7 +40,7 @@ class SocialPostTemplate(models.Model):
     # Content
     message = fields.Text("Message")
     image_ids = fields.Many2many(
-        'ir.attachment', string='Attach Images',
+        'ir.attachment', string='Attach Images', bypass_search_access=True,
         help="Will attach images to your posts (if the social media supports it).")
     display_message = fields.Char(string='Display Message', compute='_compute_display_message', search='_search_display_message')
     # JSON array capturing the URLs of the images to make it easy to display them in the kanban view

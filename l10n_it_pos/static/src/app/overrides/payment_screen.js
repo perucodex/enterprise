@@ -9,7 +9,7 @@ patch(PaymentScreen.prototype, {
         onMounted(() => {
             if (isFiscalPrinterActive(this.pos.config)) {
                 const order = this.pos.getOrder();
-                const totalToPay = this.env.utils.formatCurrency(order.getTotalDue(), false);
+                const totalToPay = this.env.utils.formatCurrency(order.totalDue, false);
                 this.pos.fiscalPrinter.displayText(`To Pay: ${totalToPay}`);
             }
         });

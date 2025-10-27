@@ -7,14 +7,18 @@
             <field name="priority">10</field>
             <field name="arch" type="xml">
                 <form string="Bank Statement">
-                    <div class="alert alert-warning text-center" role="alert" invisible="is_valid and is_complete">
-                        <field name="problem_description"/>
+                    <div class="alert alert-warning text-center" role="alert" invisible="is_valid and is_complete and (not context.get('at_creation') or not journal_has_invalid_statements)">
+                        <div invisible="is_valid">The starting balance doesn't match the ending balance of the previous statement, or an earlier statement is missing.</div>
+                        <div invisible="is_complete">The running balance (<field name="balance_end"/>) doesn't match the specified ending balance.</div>
+                        <div invisible="not context.get('at_creation') or not journal_has_invalid_statements">
+                            There are one or more <a type="object" name="action_open_journal_invalid_statements" string="invalid statement(s)"/>
+                        </div>
                     </div>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button name="action_open_bank_reconcile_widget" type="object"
-                                class="oe_stat_button" invisible="not line_ids">
-                                <field name="line_ids" string="Reconcile" widget="statinfo" />
+                                    class="oe_stat_button" invisible="not line_ids">
+                                <field name="line_ids" string="Transactions" widget="statinfo"/>
                             </button>
                         </div>
                         <group>
@@ -60,7 +64,7 @@
             <field name="view_mode">form</field>
             <field name="view_id" ref="view_bank_statement_form_bank_rec_widget"/>
             <field name="target">new</field>
-            <field name="context">{'dialog_size': 'medium', 'show_running_balance_latest': True}</field>
+            <field name="context">{'dialog_size': 'medium', 'show_running_balance_latest': True, 'at_creation': True}</field>
         </record>
 
         <!-- Search view of the reconcile button -->
@@ -130,7 +134,7 @@
                     <separator/>
                     <filter name="no_statement" string="No statement" domain="[('statement_id', '=', False)]"/>
                     <filter name="invalid_statement" string="Invalid statements"
-                            domain="['|',('statement_complete', '=', False), ('statement_valid', '=', False)]"/>
+                            domain="[('statement_id', '!=', False), '|',('statement_complete', '=', False), ('statement_valid', '=', False)]"/>
                     <separator/>
                     <filter name="matched" string="Matched" domain="[('is_reconciled', '=', True)]"/>
                     <filter name="not_matched" string="Not Matched"

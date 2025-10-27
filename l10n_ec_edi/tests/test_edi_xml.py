@@ -815,8 +815,8 @@ class TestEcEdiXmls(TestEcEdiCommon):
         self.assertEqual(move.l10n_latam_document_type_id_code, '01')
         self.assertEqual(move.l10n_ec_authorization_number, '2025031801179001234500110010010000000011234567890')
         self.assertEqual(move.move_type, 'in_invoice')
-        self.assertEqual(move.amount_total, 2240)
-        self.assertEqual(move.amount_tax, 240)
+        self.assertEqual(move.amount_total, 2128.0)
+        self.assertEqual(move.amount_tax, 228.0)
         self.assertEqual(len(move.invoice_line_ids), 2)
         self.assertEqual(move.partner_id.name, 'EMPRESA PRUEBA S.A.')
 
@@ -843,8 +843,8 @@ class TestEcEdiXmls(TestEcEdiCommon):
         self.assertEqual(move.l10n_latam_document_type_id_code, '01')
         self.assertEqual(move.l10n_ec_authorization_number, '2025031801179001234500110010010000000011234567890')
         self.assertEqual(move.move_type, 'in_invoice')
-        self.assertEqual(move.amount_total, 2240)
-        self.assertEqual(move.amount_tax, 240)
+        self.assertEqual(move.amount_total, 2128.0)
+        self.assertEqual(move.amount_tax, 228.0)
         self.assertEqual(len(move.invoice_line_ids), 2)
         self.assertEqual(move.partner_id.name, 'EMPRESA PRUEBA S.A.')
 

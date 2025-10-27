@@ -60,7 +60,7 @@ export class SignablePDFIframe extends PDFIframe {
 
     /**
      * Modify the selected sign item of the corresponding radio set.
-     * @param {SignItem} signItem 
+     * @param {SignItem} signItem
      */
     handleRadioItemSelected(signItem) {
         const radio_set_id = signItem.data.radio_set_id;
@@ -486,6 +486,12 @@ export class SignablePDFIframe extends PDFIframe {
     }
 
     getSignatureValueFromElement(item) {
+        let textArea = item.el.textContent;
+        if (!item.data.constant) {
+            // remove line breaks, it may update the item value, we can't use it on constant items
+            // Moreover, item.el.value is empty for constant items.
+            textArea = this.textareaApplyLineBreak(item.el);
+        }
         const types = {
             text: () => {
                 const textValue =
@@ -498,7 +504,7 @@ export class SignablePDFIframe extends PDFIframe {
             },
             initial: () => item.el.dataset.signature,
             signature: () => item.el.dataset.signature,
-            textarea: () => this.textareaApplyLineBreak(item.el),
+            textarea: () => textArea,
             selection: () => (item.el.value && item.el.value.trim() ? item.el.value : false),
             checkbox: () => {
                 if (item.el.checked) {
@@ -528,7 +534,9 @@ export class SignablePDFIframe extends PDFIframe {
 
         const strRawValue = element.value;
         element.value = "";
-
+        if (!strRawValue) {
+           return element.value;
+        }
         const nEmptyWidth = element.scrollWidth;
         let nLastWrappingIndex = -1;
 

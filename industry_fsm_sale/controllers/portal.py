@@ -19,13 +19,14 @@ class CustomerPortal(SaleCustomerPortal, AccountCustomerPortal):
         if not request.env['sale.order'].has_access('read'):
             return values
         quotations = request.env['sale.order'].search([('task_id', '=', task.id)])
-        if quotations and task.project_id.with_user(uid)._check_project_sharing_access():
+        if quotations:
+            project = kwargs.get('project')
             if len(quotations) == 1:
                 values['task_link_section'].append({
                     'access_url': quotations.get_portal_url(),
                     'title': _('Quotation'),
                 })
-            else:
+            elif project and project.with_user(uid)._check_project_sharing_access():
                 values['task_link_section'].append({
                     'access_url': f'/my/projects/{task.project_id.id}/task/{task.id}/quotes',
                     'title': _('Quotations'),

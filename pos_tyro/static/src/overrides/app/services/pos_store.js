@@ -20,7 +20,7 @@ patch(PosStore.prototype, {
     },
 
     async onDeleteOrder(order) {
-        if (order.getTotalPaid() > 0) {
+        if (order.amountPaid > 0) {
             this.dialog.add(AlertDialog, {
                 title: _t("Cannot cancel order"),
                 body: _t(

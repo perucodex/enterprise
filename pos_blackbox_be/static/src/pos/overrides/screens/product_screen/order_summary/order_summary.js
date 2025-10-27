@@ -30,10 +30,10 @@ patch(OrderSummary.prototype, {
         const selectedLine = order.getSelectedOrderline();
         // if newQuantity is the same sign as old quantity, then the product of the two will be
         // a positive number and thus will not change the sign of the selectedLine.get_display_price()
-        const newPriceSign = Math.sign(selectedLine.allUnitPrices.priceWithTax * newQuantity);
+        const newPriceSign = Math.sign(selectedLine.currencyDisplayPriceUnit * newQuantity);
         if (
             order.lines.some(
-                (l) => l.uuid != selectedLine.uuid && l.getDisplayPrice() * newPriceSign < 0
+                (l) => l.uuid != selectedLine.uuid && l.prices.total_included * newPriceSign < 0
             )
         ) {
             this.dialog.add(AlertDialog, {
@@ -64,9 +64,9 @@ patch(OrderSummary.prototype, {
         await this.pos.pushCorrection(this.currentOrder, [
             this.currentOrder.getSelectedOrderline(),
         ]);
-        const oldTotal = this.currentOrder.getTotalWithTax();
+        const oldTotal = this.currentOrder.priceIncl;
         const decreasedQuantity = await super.handleDecreaseLine(newQuantity);
-        await this.pos.increaseCorrectionCounter(oldTotal - this.currentOrder.getTotalWithTax());
+        await this.pos.increaseCorrectionCounter(oldTotal - this.currentOrder.priceIncl);
         await this.pos.pushProFormaOrderLog(this.currentOrder);
         return decreasedQuantity;
     },
@@ -80,7 +80,7 @@ patch(OrderSummary.prototype, {
         if (!this.pos.useBlackBoxBe()) {
             return await super.setLinePrice(line, price);
         }
-        const oldPrice = line.getUnitDisplayPriceBeforeDiscount();
+        const oldPrice = line.unitPrices.no_discount_total_included;
         if (price > oldPrice) {
             return;
         }

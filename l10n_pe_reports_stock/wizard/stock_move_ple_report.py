@@ -132,7 +132,7 @@ class L10n_PeStockPleWizard(models.TransientModel):
                 data.append(values)
                 continue
             values.update({
-                'valuation': _get_stock_valuation(product_tmpl.category_id.id),
+                'valuation': _get_stock_valuation(product_tmpl.categ_id.id),
                 'qty_in': move._get_valued_qty() if move.is_in else '0.00',
                 'cost_in': move._get_price_unit() if move.is_in else '0.00',
                 'value_in': move.value if move.is_in else '0.00',
@@ -192,7 +192,7 @@ class L10n_PeStockPleWizard(models.TransientModel):
             return values
         unit_cost = move._get_price_unit() or '0.00'
         values.update({
-            'valuation': _get_stock_valuation(move.product_id.category_id.id),
+            'valuation': _get_stock_valuation(move.product_id.categ_id.id),
             'qty_in': quantity if quantity > 0 else '0.00',
             'cost_in': unit_cost,
             'value_in': (quantity * float(unit_cost)) or '0.00',
@@ -207,8 +207,8 @@ class L10n_PeStockPleWizard(models.TransientModel):
         return values
 
     def _append_historic_valuation_lines(self, products, period, count, report):
-        def _get_stock_valuation(category_id):
-            cost_method = self.env['product.category'].browse(category_id).property_cost_method
+        def _get_stock_valuation(categ_id):
+            cost_method = self.env['product.category'].browse(categ_id).property_cost_method
             return {'average': '1', 'fifo': '2', 'standard': '3'}.get(cost_method, '')
 
         domain = Domain([
@@ -273,7 +273,7 @@ class L10n_PeStockPleWizard(models.TransientModel):
                 continue
             unit_cost = product.standard_price if product.standard_price > 0 else '0.00'
             values.update({
-                'valuation': _get_stock_valuation(product.category_id.id),
+                'valuation': _get_stock_valuation(product.categ_id.id),
                 'qty_in': quantity if quantity > 0 else '0.00',
                 'cost_in': unit_cost,
                 'value_in': (quantity * float(unit_cost)) or '0.00',

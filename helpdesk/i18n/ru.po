@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 17.0+e\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2025-09-15 21:09+0000\n"
+"PO-Revision-Date: 2025-10-22 12:11+0000\n"
 "Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
 "Language-Team: Russian <https://translate.odoo.com/projects/odoo-19/helpdesk/"
 "ru/>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
-"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || ("
+"n%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Generator: Weblate 5.12.2\n"
 
 #. module: helpdesk
@@ -51,7 +51,7 @@ msgstr "# Срочный билет"
 #. odoo-python
 #: code:addons/helpdesk/models/res_partner.py:0
 msgid "%(partner_name)s's Tickets"
-msgstr ""
+msgstr "Тикеты партнера %(partner_name)s"
 
 #. module: helpdesk
 #. odoo-python
@@ -132,6 +132,26 @@ msgid ""
 "    </div>\n"
 "        "
 msgstr ""
+"<div>\n"
+"        Здравствуйте, <t t-out="
+"\"object.sudo().partner_id.name or 'Madam/Sir'\"> уважаемый клиент</t>!<br/><"
+"br/>\n"
+"        Сообщаем, что мы закрыли ваш тикет (<t t-out=\"object.id or ''\""
+">15</t>). \n"
+"        Мы надеемся, что предоставленные услуги соответствовали вашим "
+"ожиданиям и ваш вопрос был решен.<br/><br/>\n"
+"        Если у вас остались дополнительные вопросы или комментарии, "
+"пожалуйста, просто ответьте на это письмо, чтобы снова открыть ваш тикет. \n"
+"        Наша команда всегда готова помочь и с радостью окажет поддержку по "
+"любым вашим дальнейшим обращениям.<br/><br/>\n"
+"        Благодарим вас за выбор наших услуг и за сотрудничество в ходе "
+"обработки вашего тикета. Мы высоко ценим ваш бизнес и признательны за "
+"возможность работать с вами.<br/><br/>\n"
+"        С уважением,<br/><br/>\n"
+"        команда <t t-out=\"object.team_id.name or 'Helpdesk'\">службы "
+"поддержки</t>.\n"
+"    </div>\n"
+"        "
 
 #. module: helpdesk
 #: model:mail.template,body_html:helpdesk.rating_ticket_request_email_template
@@ -351,6 +371,10 @@ msgid ""
 "will automatically be sent by email to the customer when their ticket "
 "reaches the corresponding stage with the email template set.</span>"
 msgstr ""
+"<i class=\"fa fa-lightbulb-o\"/>\n"
+"                                    <span class=\"ms-2\">Запрос на оценку "
+"отправляется клиенту автоматически, как только его тикет переходит на этап, "
+"для которого настроена отправка письма.</span>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -363,6 +387,13 @@ msgid ""
 "tickets<br/>\n"
 "                                </span>"
 msgstr ""
+"<i class=\"fa fa-lightbulb-o\"/>\n"
+"                                <span class=\"ms-2\">\n"
+"                                    Введите <b>/тикет</b> для создания "
+"тикета<br/>\n"
+"                                    Введите <b>/искать_тикет</b> для поиска "
+"тикетов <br/>\n"
+"                                </span>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -377,7 +408,7 @@ msgstr "<i class=\"fa fa-warning\"/>&amp;nbsp;"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "<i class=\"oi oi-arrow-right\"/> Set an Alias Domain"
-msgstr ""
+msgstr "<i class=\"oi oi-arrow-right\"/> Установить псевдоним домена"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
@@ -397,7 +428,7 @@ msgstr "<small>#</small>"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "<small>Stage:</small>"
-msgstr ""
+msgstr "<small>Этап:</small>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_form
@@ -454,22 +485,22 @@ msgstr "<span class=\"o_stat_text\">Рейтинг</span>"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 msgid "<span class=\"text-muted text-nowrap\">Failed</span>"
-msgstr ""
+msgstr "<span class=\"text-muted text-nowrap\">Не выполнено</span>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 msgid "<span class=\"text-muted text-nowrap\">Open</span>"
-msgstr ""
+msgstr "<span class=\"text-muted text-nowrap\">Открыто</span>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 msgid "<span class=\"text-muted text-nowrap\">Unassigned</span>"
-msgstr ""
+msgstr "<span class=\"text-muted text-nowrap\">Не назначено</span>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 msgid "<span class=\"text-muted text-nowrap\">Urgent</span>"
-msgstr ""
+msgstr "<span class=\"text-muted text-nowrap\">Срочно</span>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -523,7 +554,7 @@ msgstr "<strong class=\"col-lg-3\">Сообщается о</strong>"
 #: model_terms:web_tour.tour,rainbow_man_message:helpdesk.helpdesk_tour
 msgid ""
 "<strong><b>Good job!</b> You walked through all steps of this tour.</strong>"
-msgstr ""
+msgstr "<strong><b>Отличная работа!</b> Вы прошли все шаги этого тура.</strong>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -593,7 +624,7 @@ msgstr "Активность"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Оформление исключения активности"
+msgstr "Оформление задачи-исключения"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__activity_state
@@ -633,7 +664,7 @@ msgstr ""
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_form
 msgid "Add details about this ticket..."
-msgstr ""
+msgstr "Добавить подробности об этом тикете..."
 
 #. module: helpdesk
 #. odoo-javascript
@@ -728,6 +759,8 @@ msgid ""
 "Allow customers to help each other on a forum. Share answers from your "
 "tickets directly."
 msgstr ""
+"Разрешите клиентам помогать друг другу на форуме. Делитесь ответами из ваших "
+"тикетов напрямую."
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -872,7 +905,7 @@ msgstr "Средний рейтинг (%)"
 #. odoo-javascript
 #: code:addons/helpdesk/static/src/components/helpdesk_team_dashboard/helpdesk_team_dashboard.xml:0
 msgid "Average Rating for the Past 7 Days"
-msgstr ""
+msgstr "Средняя оценка за последние 7 дней"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
@@ -896,7 +929,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/helpdesk/static/src/components/helpdesk_team_target/helpdesk_team_target.js:0
 msgid "Average rating daily target"
-msgstr ""
+msgstr "Дневная цель по средней оценке"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
@@ -946,12 +979,12 @@ msgstr "Кампания"
 #. module: helpdesk
 #: model:helpdesk.stage,name:helpdesk.stage_cancelled
 msgid "Cancelled"
-msgstr ""
+msgstr "Отменен"
 
 #. module: helpdesk
 #: model:ir.ui.menu,name:helpdesk.helpdesk_team_canned_response_menu
 msgid "Canned Responses"
-msgstr ""
+msgstr "Подготовленные ответы"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -971,7 +1004,7 @@ msgstr "Каналы"
 #. odoo-javascript
 #: code:addons/helpdesk/static/src/components/helpdesk_team_target/helpdesk_team_target.js:0
 msgid "Click to Set Your Daily Rating Target"
-msgstr ""
+msgstr "Нажмите, чтобы установить дневную цель по оценкам"
 
 #. module: helpdesk
 #. odoo-javascript
@@ -1015,7 +1048,7 @@ msgstr "Закрыто"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search_base
 msgid "Closed On"
-msgstr ""
+msgstr "Закрыто"
 
 #. module: helpdesk
 #. odoo-javascript
@@ -1471,7 +1504,7 @@ msgstr "Электронная почта cc"
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_domain
 msgid "Email domain e.g. 'example.com' in 'odoo@example.com'"
-msgstr ""
+msgstr "Домен электронной почты, например, 'example.com' в 'odoo@example.com'"
 
 #. module: helpdesk
 #: model_terms:digest.tip,tip_description:helpdesk.digest_tip_helpdesk_0
@@ -1602,6 +1635,8 @@ msgid ""
 "Get in touch with your website visitors, and engage them with scripted "
 "chatbot conversations. Create and search tickets from your conversations."
 msgstr ""
+"Общайтесь с посетителями вашего сайта и вовлекайте их в диалог с помощью чат-"
+"бота. Создавайте и ищите тикеты, не выходя из диалогов."
 
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_analysis_action
@@ -1897,7 +1932,7 @@ msgstr "Иконка"
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr "Значок, обозначающий исключение Дела."
+msgstr "Иконка, указывающая на задачу-исключение."
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__message_needaction
@@ -1945,7 +1980,7 @@ msgstr "Этапы"
 #. module: helpdesk
 #: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_ticket__kanban_state__normal
 msgid "In progress"
-msgstr ""
+msgstr "В процессе"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__auto_close_day
@@ -2031,12 +2066,12 @@ msgstr "Последние 30 дней"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search_base
 msgid "Last 365 Days"
-msgstr ""
+msgstr "Последние 365 дней"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search_base
 msgid "Last 7 Days"
-msgstr ""
+msgstr "Последние 7 дней"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.team_rating_data
@@ -2332,7 +2367,7 @@ msgstr "Следующий Тип Мероприятия"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.portal_helpdesk_ticket
 msgid "No Customer"
-msgstr ""
+msgstr "Нет клиента"
 
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_sla_action
@@ -2493,7 +2528,7 @@ msgstr "Время работы (часы)"
 #. odoo-javascript
 #: code:addons/helpdesk/static/src/js/tours/helpdesk.js:0
 msgid "Open the ticket."
-msgstr ""
+msgstr "Открыть тикет."
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_force_thread_id
@@ -2658,7 +2693,7 @@ msgstr "Пожалуйста, введите положительное знач
 #. odoo-javascript
 #: code:addons/helpdesk/static/src/components/helpdesk_team_target/helpdesk_team_target.js:0
 msgid "Please enter a value less than or equal to 5."
-msgstr ""
+msgstr "Введите значение, меньшее или равное 5."
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_contact
@@ -2725,7 +2760,7 @@ msgstr "Рейтинг"
 #: model_terms:ir.ui.view,arch_db:helpdesk.rating_rating_pivot_inherit_helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.rating_rating_view_graph_inherit_helpdesk
 msgid "Rating (1-5)"
-msgstr ""
+msgstr "Рейтинг (1-5)"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__rating_avg_text
@@ -3032,7 +3067,7 @@ msgstr "Пример"
 #. odoo-javascript
 #: code:addons/helpdesk/static/src/js/tours/helpdesk.js:0
 msgid "Save this ticket and the modifications you've made to it."
-msgstr ""
+msgstr "Сохранить заявку и изменения, сделанные в ней Вами."
 
 #. module: helpdesk
 #. odoo-javascript
@@ -3055,13 +3090,13 @@ msgstr "Поиск по назначению"
 #. odoo-python
 #: code:addons/helpdesk/controllers/portal.py:0
 msgid "Search in Customer"
-msgstr ""
+msgstr "Поиск в клиентах"
 
 #. module: helpdesk
 #. odoo-python
 #: code:addons/helpdesk/controllers/portal.py:0
 msgid "Search in Helpdesk Team"
-msgstr ""
+msgstr "Поиск в команде службы поддержки"
 
 #. module: helpdesk
 #. odoo-python
@@ -3073,7 +3108,7 @@ msgstr "Поиск внутри стадии"
 #. odoo-python
 #: code:addons/helpdesk/controllers/portal.py:0
 msgid "Search%(left)s Tickets%(right)s"
-msgstr ""
+msgstr "Поиск%(left)s тикетов%(right)s"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__access_token
@@ -3338,7 +3373,7 @@ msgstr "Члены команды"
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_stage_team_action
 msgid "Team Stages"
-msgstr ""
+msgstr "Стадии команды"
 
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.email_template_action_helpdesk
@@ -3350,6 +3385,8 @@ msgstr "Шаблоны"
 #: code:addons/helpdesk/models/helpdesk_ticket.py:0
 msgid "The customer cannot belong to a different company than the ticket."
 msgstr ""
+"Клиент не может принадлежать к другой компании, отличной от компании в "
+"тикете."
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_model_id
@@ -3679,7 +3716,7 @@ msgstr "Сегодняшние Дела"
 #. odoo-javascript
 #: code:addons/helpdesk/static/src/components/helpdesk_team_dashboard/helpdesk_team_dashboard.xml:0
 msgid "Today's Average Rating"
-msgstr ""
+msgstr "Средняя оценка за сегодня"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__total_response_hours
@@ -3720,7 +3757,7 @@ msgstr "Две звезды, максимум три"
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr "Тип Дела для исключения в записи."
+msgstr "Тип задачи-исключения в записи."
 
 #. module: helpdesk
 #. odoo-python
@@ -3978,6 +4015,8 @@ msgid ""
 "You cannot update the company of this partner because it would lead to "
 "inconsistency with some of its tickets."
 msgstr ""
+"Вы не можете обновить компанию этого партнера, так как это приведет к "
+"несоответствию с некоторыми из его тикетов."
 
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_sla
@@ -3993,12 +4032,12 @@ msgstr "Вас пригласили отслеживать %s"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.ticket_invitation_follower
 msgid "You have been invited to follow Ticket Document :"
-msgstr ""
+msgstr "Вы добавлены в список наблюдателей за документом по тикету:"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "alias"
-msgstr ""
+msgstr "псевдоним"
 
 #. module: helpdesk
 #. odoo-python
@@ -4019,7 +4058,7 @@ msgstr "напр., Обслуживание клиентов"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "e.g. My Company"
-msgstr ""
+msgstr "например, \"Моя компания\""
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_form
@@ -4030,7 +4069,7 @@ msgstr "например, товар прибыл поврежденным"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "e.g. mycompany.com"
-msgstr ""
+msgstr "например, mycompany.com"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_website_helpdesk_slides
@@ -4082,7 +4121,7 @@ msgstr ""
 #. module: helpdesk
 #: model:mail.template,subject:helpdesk.new_ticket_request_email_template
 msgid "{{ object.name }}"
-msgstr ""
+msgstr "{{ object.name }}"
 
 #. module: helpdesk
 #. odoo-python

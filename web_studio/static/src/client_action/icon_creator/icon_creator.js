@@ -7,6 +7,7 @@ import { useService } from "@web/core/utils/hooks";
 import { FontAwesomeIconSelector } from "@web_studio/client_action/components/font_awesome_icon_selector/font_awesome_icon_selector";
 
 import { Component } from "@odoo/owl";
+import { resizeBlobImg } from "@web/core/utils/files";
 
 export const DEFAULT_ICON = {
     backgroundColor: BG_COLORS[0],
@@ -60,10 +61,18 @@ export class IconCreator extends Component {
     setup() {
         this.orm = useService("orm");
 
+        const onWillUploadFiles = async (fileList) =>
+            Promise.all(
+                fileList.map(async (file) => {
+                    const blob = await resizeBlobImg(file, { height: 64, width: 64 });
+                    return new File([blob], file.name);
+                })
+            );
         this.fileInputProps = {
             acceptedFileExtensions: "image/png",
             resModel: "res.users",
             resId: user.userId,
+            onWillUploadFiles,
         };
     }
 

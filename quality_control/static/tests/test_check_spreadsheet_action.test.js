@@ -43,13 +43,9 @@ describe("quality check spreadsheet action", () => {
     test("pass wizard with a truthy cell, do next action", async () => {
         const qualityCheckWizardId = 1;
         const nextCheckSpreadsheetId = 1111;
-        onRpc(
-            `/spreadsheet/data/quality.check.spreadsheet/${nextCheckSpreadsheetId}`,
-            () => {
-                expect.step("join next check");
-            },
-            { pure: true }
-        );
+        onRpc(`/spreadsheet/data/quality.check.spreadsheet/${nextCheckSpreadsheetId}`, () => {
+            expect.step("join next check");
+        });
         onRpc("quality.check.wizard", "do_pass", (params) => {
             expect(params.args).toEqual([qualityCheckWizardId]);
             expect.step(params.method);
@@ -132,18 +128,14 @@ describe("quality check spreadsheet action", () => {
 
     test("invalid check cell is equivalent to no condition", async () => {
         const checkId = 1;
-        onRpc(
-            "/spreadsheet/data/quality.check.spreadsheet/*",
-            () => ({
-                data: {},
-                name: "spreadsheet name",
-                revisions: [],
-                isReadonly: false,
-                quality_check_display_name: "The check name",
-                quality_check_cell: "not a valid cell reference",
-            }),
-            { pure: true }
-        );
+        onRpc("/spreadsheet/data/quality.check.spreadsheet/*", () => ({
+            data: {},
+            name: "spreadsheet name",
+            revisions: [],
+            isReadonly: false,
+            quality_check_display_name: "The check name",
+            quality_check_cell: "not a valid cell reference",
+        }));
         onRpc("quality.check", "do_pass", ({ method }) => {
             expect.step(method);
             return true;
@@ -156,18 +148,14 @@ describe("quality check spreadsheet action", () => {
 
     test("no check cell is equivalent to no condition", async () => {
         const checkId = 1;
-        onRpc(
-            "/spreadsheet/data/quality.check.spreadsheet/*",
-            () => ({
-                data: {},
-                name: "spreadsheet name",
-                revisions: [],
-                isReadonly: false,
-                quality_check_display_name: "The check name",
-                quality_check_cell: false, // False = no value in the py orm
-            }),
-            { pure: true }
-        );
+        onRpc("/spreadsheet/data/quality.check.spreadsheet/*", () => ({
+            data: {},
+            name: "spreadsheet name",
+            revisions: [],
+            isReadonly: false,
+            quality_check_display_name: "The check name",
+            quality_check_cell: false, // False = no value in the py orm
+        }));
         onRpc("quality.check", "do_pass", ({ method }) => {
             expect.step(method);
             return true;

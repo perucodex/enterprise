@@ -16,7 +16,7 @@ class SocialPostTemplate(models.Model):
     twitter_image_ids = fields.Many2many(
         'ir.attachment', 'template_twitter_image_ids_rel', string='X Images',
         help='Will attach images to your posts.',
-        compute='_compute_images_by_media', store=True, readonly=False)
+        compute='_compute_images_by_media', store=True, readonly=False, bypass_search_access=True)
 
     twitter_preview = fields.Html('X Preview', compute='_compute_twitter_preview')
     has_twitter_account = fields.Boolean('Has X Account', compute='_compute_has_twitter_account')

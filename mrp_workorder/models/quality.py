@@ -314,7 +314,7 @@ class QualityCheck(models.Model):
             xml_id = 'stock.label_lot_template'
         else:
             xml_id = 'stock.action_report_lot_label'
-        res = self.env.ref(xml_id).report_action([self.workorder_id.finished_lot_ids.ids] * qty)
+        res = self.env.ref(xml_id).report_action(self.workorder_id.finished_lot_ids.ids * qty)
         res['id'] = self.env.ref(xml_id).id
         return res
 

@@ -121,7 +121,11 @@
                 <attribute name="column_invisible">context.get('planning_slots_to_schedule', False)</attribute>
                 <attribute name="readonly">sale_line_plannable and not start_datetime and not end_datetime</attribute>
                 <attribute name="required">not sale_line_plannable and start_datetime and end_datetime</attribute>
-                </field>
+            </field>
+            <field name="start_datetime" position="after">
+                <field name="allocated_hours" widget="float_time" sum="Allocated Hours" readonly="1"
+                decoration-danger="allocated_percentage &gt; 100" column_invisible="not context.get('planning_slots_to_schedule', False)"/>
+            </field>
             <field name="resource_id" position="attributes">
                 <attribute name="column_invisible">context.get('planning_slots_to_schedule', False)</attribute>
             </field>

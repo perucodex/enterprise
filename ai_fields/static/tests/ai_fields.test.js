@@ -1,5 +1,4 @@
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
-import { Record } from "@web/model/relational_model/record";
 import {
     asyncStep,
     Command,
@@ -11,10 +10,9 @@ import {
     patchWithCleanup,
     waitForSteps,
 } from "@web/../tests/web_test_helpers";
+import { Record } from "@web/model/relational_model/record";
 
-import { beforeEach, expect, test } from "@odoo/hoot";
-import { click } from "@odoo/hoot-dom";
-import { animationFrame } from "@odoo/hoot-mock";
+import { animationFrame, beforeEach, click, expect, test } from "@odoo/hoot";
 
 let unresolveRequest = false;
 
@@ -76,7 +74,7 @@ class AiModel extends models.Model {
             throw new Error("Unknown field " + fieldName);
         }
         if (unresolveRequest) {
-            return makeServerError({
+            throw makeServerError({
                 errorName: "odoo.addons.ai_fields.tools.UnresolvedQuery",
                 description: "The value could not be resolved",
             });
@@ -94,7 +92,7 @@ class AiModel extends models.Model {
             throw new Error("Unknown field " + fname);
         }
         if (unresolveRequest) {
-            return makeServerError({
+            throw makeServerError({
                 errorName: "odoo.addons.ai_fields.tools.UnresolvedQuery",
                 description: "The value could not be resolved",
             });
@@ -396,7 +394,9 @@ test("AI Fields - Unresolved Request", async () => {
     await click(".o_field_ai_char .btn[title='Refresh value']");
     await waitForSteps(["char computed"]);
     await animationFrame();
-    expect(".o_notification .o_notification_content").toHaveText(/The value could not be resolved$/);
+    expect(".o_notification .o_notification_content").toHaveText(
+        /The value could not be resolved$/
+    );
     expect(".o_field_ai_char input").toHaveValue("");
 });
 
@@ -434,6 +434,8 @@ test("AI Properties - Unresolved Request", async () => {
     await click(".o_field_properties .btn[title='Refresh value']");
     await waitForSteps(["properties.ai_char computed"]);
     await animationFrame();
-    expect(".o_notification .o_notification_content").toHaveText(/The value could not be resolved$/);
+    expect(".o_notification .o_notification_content").toHaveText(
+        /The value could not be resolved$/
+    );
     expect(".o_field_properties .o_property_field_value input").toHaveValue("");
 });

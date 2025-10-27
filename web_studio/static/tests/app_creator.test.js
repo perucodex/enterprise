@@ -1,6 +1,6 @@
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { describe, expect, globals, test } from "@odoo/hoot";
-import { edit, press, setInputFiles } from "@odoo/hoot-dom";
+import { edit, press, setInputFiles, waitFor } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import {
     contains,
@@ -38,14 +38,10 @@ test("app creator: standard flow with model creation", async () => {
 
     onRpc("ir.attachment", "read", () => [{ datas: sampleIconUrl }]);
 
-    onRpc(
-        "/web/binary/upload_attachment",
-        () => {
-            expect.step("upload_attachment");
-            return [{ id: 666 }];
-        },
-        { pure: true }
-    );
+    onRpc("/web/binary/upload_attachment", () => {
+        expect.step("upload_attachment");
+        return [{ id: 666 }];
+    });
 
     mockService("ui", {
         block: () => expect.step("UI blocked"),
@@ -84,11 +80,12 @@ test("app creator: standard flow with model creation", async () => {
 
     const res = await globals.fetch.call(window, "data:image/png;base64," + sampleIconUrl);
     const blob = await res.blob();
-    const file = new File([blob], "default_icon_app.png");
+    const file = new File([blob], "default_icon_app.png", { type: "image/png" });
 
     await contains(".o_web_studio_upload a").click();
     await setInputFiles(file);
     await animationFrame();
+    await waitFor(".o_web_studio_uploaded_image");
 
     expect(".o_web_studio_uploaded_image").toHaveStyle({
         backgroundImage: `url("data:image/png;base64,${sampleIconUrl}")`,

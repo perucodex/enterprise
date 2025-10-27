@@ -34,8 +34,8 @@ function getGeoChartRuntimeData(runtime) {
 }
 
 beforeEach(async () => {
-    onRpc("/spreadsheet/static/topojson/world.topo.json", () => mockWorldTopoJson, { pure: true });
-    onRpc("/spreadsheet/static/topojson/usa.topo.json", () => mockUSStatesTopoJson, { pure: true });
+    onRpc("/spreadsheet/static/topojson/world.topo.json", () => mockWorldTopoJson);
+    onRpc("/spreadsheet/static/topojson/usa.topo.json", () => mockUSStatesTopoJson);
 });
 
 test("The geoJson service is given to the model for geo charts", async function () {

@@ -173,9 +173,7 @@ test("list view with custom domain and groupby", async function () {
 });
 
 test("insert list in existing spreadsheet", async function () {
-    onRpc("/spreadsheet/data/documents.document/2", () => expect.step("spreadsheet-joined"), {
-        pure: true,
-    });
+    onRpc("/spreadsheet/data/documents.document/2", () => expect.step("spreadsheet-joined"));
     await openView("list");
     await loadBundle("web.chartjs_lib");
     await toggleSearchBarMenu();

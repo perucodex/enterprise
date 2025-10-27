@@ -165,6 +165,8 @@ class Base(models.AbstractModel):
             field_type = self.fields_get(field)[field]['type']
             if field_type in ['many2many', 'one2many']:
                 old_vals_per_pill_id[self.id][field] = self[field].ids or False
+            elif field_type == 'many2one':
+                old_vals_per_pill_id[self.id][field] = self[field].id or False
             else:
                 old_vals_per_pill_id[self.id][field] = self[field]
 
@@ -470,9 +472,7 @@ class Base(models.AbstractModel):
             "warnings": [],
         }
 
-        old_vals_per_pill_id = {
-            self.id: {field: self[field] for field in vals}
-        }
+        old_vals_per_pill_id = self.web_gantt_init_old_vals_per_pill_id(vals)
 
         candidates = self.browse([id for id in candidates_ids if id != self.id])
         self.write(vals)

@@ -221,10 +221,10 @@ registry.category("web_tour.tours").add("test_receipt_screen_after_unsent_order_
             Dialog.confirm("Open Register"),
             FloorScreen.clickTable("5"),
             ProductScreen.clickDisplayedProduct("Coca-Cola"),
-            ProductScreen.clickPayButton(),
+            ProductScreen.clickPayButton(false),
+            ProductScreen.confirmOrderWarningDialog(),
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickValidate(),
-            ReceiptScreen.confirmOrderWarningDialog(),
             ReceiptScreen.isShown(),
         ].flat(),
 });
