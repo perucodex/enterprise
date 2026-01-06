@@ -165,9 +165,9 @@ class TestSubscriptionUpsell(TestSubscriptionCommon):
             self.subscription.invoice_ids.filtered(lambda am: am.state == 'draft')._post()
             inv = self.subscription.invoice_ids.sorted('date')[-1]
             invoice_periods = inv.invoice_line_ids.sorted('id').mapped('name')
-            first_period = invoice_periods[0].split('\n')[1]
+            first_period = invoice_periods[0].split('\n')[2]
             self.assertEqual(first_period, "1 Month 08/01/2021 to 08/31/2021")
-            second_period = invoice_periods[1].split('\n')[1]
+            second_period = invoice_periods[1].split('\n')[2]
             self.assertEqual(second_period, "1 Month 08/01/2021 to 08/31/2021")
 
         self.assertEqual(len(self.subscription.order_line), 4)

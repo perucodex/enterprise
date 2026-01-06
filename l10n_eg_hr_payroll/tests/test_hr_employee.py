@@ -3,6 +3,8 @@
 from datetime import date
 from odoo.tests import tagged, TransactionCase
 
+from freezegun import freeze_time
+
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
 class TestEgyptianHrEmployee(TransactionCase):
@@ -37,13 +39,13 @@ class TestEgyptianHrEmployee(TransactionCase):
             'resource_calendar_id': cls.calendar.id,
         })
 
-    def test_get_annual_remaining_leaves_no_allocation(self):
+    @freeze_time("2025-12-31")
+    def test_get_annual_remaining_leaves(self):
         result = self.employee._l10n_eg_get_annual_remaining_leaves()
         self.assertIsInstance(result, dict)
         self.assertIn(self.employee.id, result)
-        self.assertEqual(result[self.employee.id], 0)
+        self.assertEqual(result[self.employee.id], 0, "The employee has no allocation yet so the result should be 0")
 
-    def test_get_annual_remaining_leaves_with_allocation(self):
         allocation = self.env['hr.leave.allocation'].create({
             'name': 'Annual Leave Allocation 2025',
             'holiday_status_id': self.leave_type.id,
@@ -54,20 +56,8 @@ class TestEgyptianHrEmployee(TransactionCase):
         })
         allocation._action_validate()
         result = self.employee._l10n_eg_get_annual_remaining_leaves()
-        self.assertIsInstance(result, dict)
-        self.assertIn(self.employee.id, result)
-        self.assertEqual(result[self.employee.id], 25)
+        self.assertEqual(result[self.employee.id], 25, "the employee has an allocation of 25 days so the result should be 25")
 
-    def test_get_annual_remaining_leaves_after_leave_taken(self):
-        allocation = self.env['hr.leave.allocation'].create({
-            'name': 'Annual Leave Allocation 2025',
-            'holiday_status_id': self.leave_type.id,
-            'number_of_days': 25,
-            'employee_id': self.employee.id,
-            'date_from': date(2025, 1, 1),
-            'date_to': date(2025, 12, 31),
-        })
-        allocation._action_validate()
         leave = self.env['hr.leave'].create({
             'name': 'Annual Leave Request',
             'holiday_status_id': self.leave_type.id,
@@ -79,6 +69,4 @@ class TestEgyptianHrEmployee(TransactionCase):
         })
         leave._action_validate()
         result = self.employee._l10n_eg_get_annual_remaining_leaves()
-        self.assertIsInstance(result, dict)
-        self.assertIn(self.employee.id, result)
-        self.assertEqual(result[self.employee.id], 19)
+        self.assertEqual(result[self.employee.id], 19, "the employee has an allocation and a leave so the result should be 25 - 6 = 19")

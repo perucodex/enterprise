@@ -9,13 +9,16 @@
 # Martin Trigaux, 2022
 # Cozmin Candea <office@terrabit.ro>, 2023
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Comaniciu Ioana <ioana@dakai.ro>, 2025.
+# Alin Ilie <alin.ilie@logit-solutions.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2025-09-16 21:17+0000\n"
-"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:41+0000\n"
+"PO-Revision-Date: 2025-12-10 10:27+0000\n"
+"Last-Translator: Alin Ilie <alin.ilie@logit-solutions.com>\n"
 "Language-Team: Romanian <https://translate.odoo.com/projects/odoo-19/"
 "timesheet_grid/ro/>\n"
 "Language: ro\n"
@@ -24,7 +27,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.project_task_view_kanban
@@ -168,6 +171,134 @@ msgid ""
 "</table>\n"
 "            "
 msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"padding: 16px; background-color: white; color: #454748; border-"
+"collapse:separate;\">\n"
+"<tbody>\n"
+"    <!-- HEADER -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\">\n"
+"                    <span style=\"font-size: 10px;\">Foile dvs. de pontaj</"
+"span><br/>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\" t-"
+"out=\"object.name or ''\">Abigail Peterson</span>\n"
+"                </td><td valign=\"middle\" align=\"right\" t-if=\"not "
+"object.company_id.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?"
+"company={{ object.company_id.id }}\" style=\"padding: 0px; margin: 0px; "
+"height: auto; width: 80px;\" t-att-alt=\"object.company_id.name\"/>\n"
+"                </td></tr>\n"
+"                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                  <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- CONTENT -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    <t t-set=\"timesheet_hours\" t-"
+"value=\"ctx.get('timesheet_hours', 0)\"/>\n"
+"                    <t t-set=\"working_hours\" t-"
+"value=\"ctx.get('working_hours', 0)\"/>\n"
+"                    <div>\n"
+"                        Bună <t t-out=\"object.name or ''\">Abigail "
+"Peterson</t>,<br/><br/>\n"
+"                        Acesta este un memento pentru a ponta orele dvs. "
+"pentru perioada următoare: <t t-out=\"ctx.get('date_start') or "
+"''\">05/05/2021</t> <i class=\"fa fa-long-arrow-right\"/> <t t-"
+"out=\"ctx.get('date_stop') or ''\">05/06/2021</t>.\n"
+"                        Deocamdată, dvs. <t t-if=\"timesheet_hours != 0\">v-"
+"ați </t> pontat <t t-out=\"'%d' %int(timesheet_hours)\">2</t><t t-"
+"if=\"timesheet_hours % 1 != 0\" t-out=\"':%02d' % (round(timesheet_hours % 1 "
+"* 60))\">:30</t> ore din<t t-out=\"'%d' %int(working_hours)\">8</t><t t-"
+"if=\"working_hours % 1 != 0\" t-out=\"':%02d' % (round(working_hours % 1 * "
+"60))\">:30</t> solicitate.<br/>\n"
+"                        <div t-if=\"ctx.get('action_url')\" style=\"margin: "
+"16px 0px 16px 0px;\">\n"
+"                            <a t-att-href=\"ctx.get('action_url')\" t-attf-"
+"style=\"background-color: {{object.company_id.email_secondary_color or "
+"'#875A7B'}};; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size: 13px;\">Completează foile de pontaj</a>\n"
+"                        </div>\n"
+"                        <br/>Mulțumesc,<br/>\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-"
+"quote=\"1\">Mitchell Admin</t></div>\n"
+"                        </t>\n"
+"                    </div>\n"
+"                </td></tr>\n"
+"                <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- FOOTER -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\" align=\"left\">\n"
+"                    <t t-out=\"object.company_id.name or ''\">YourCompany</"
+"t>\n"
+"                </td></tr>\n"
+"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: "
+"0.7;\">\n"
+"                    <t t-out=\"object.company_id.phone or ''\">+1 "
+"650-123-4567</t>\n"
+"                    <t t-if=\"object.company_id.email\">\n"
+"                        | <a t-attf-href=\"'mailto:%s' % "
+"{{ object.company_id.email }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.company_id.email or ''\">info@yourcompany.com</a>\n"
+"                    </t>\n"
+"                    <t t-if=\"object.company_id.website\">\n"
+"                        | <a t-attf-href=\"'%s' % "
+"{{ object.company_id.website }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.company_id.website or ''\">http://www.example.com</"
+"a>\n"
+"                    </t>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"</tbody>\n"
+"</table>\n"
+"</td></tr>\n"
+"<!-- POWERED BY -->\n"
+"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; "
+"padding: 8px; border-collapse:separate;\">\n"
+"      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"        Powered by <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}};\">Odoo</a>\n"
+"      </td></tr>\n"
+"    </table>\n"
+"</td></tr>\n"
+"</table>\n"
+"            "
 
 #. module: timesheet_grid
 #: model:mail.template,body_html:timesheet_grid.mail_template_timesheet_reminder
@@ -291,12 +422,130 @@ msgid ""
 "</table>\n"
 "            "
 msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"padding: 16px; background-color: white; color: #454748; border-"
+"collapse:separate;\">\n"
+"<tbody>\n"
+"    <!-- HEADER -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\">\n"
+"                    <span style=\"font-size: 10px;\">Foile dvs. de pontaj</"
+"span><br/>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\" t-"
+"out=\"object.name or ''\">Abigail Peterson</span>\n"
+"                </td><td valign=\"middle\" align=\"right\" t-if=\"not "
+"object.company_id.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?"
+"company={{ object.company_id.id }}\" style=\"padding: 0px; margin: 0px; "
+"height: auto; width: 80px;\" t-att-alt=\"object.company_id.name\"/>\n"
+"                </td></tr>\n"
+"                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- CONTENT -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    <div>\n"
+"                        Bună <t t-out=\"object.name or ''\">Abigail "
+"Peterson</t>,<br/><br/>\n"
+"                        Aceasta este un memento pentru a aproba foile de "
+"pontaj ale echipei dumneavoastră pentru perioada următoare: <t t-"
+"out=\"ctx.get('date_start') or ''\">05/05/2021</t> - <t t-"
+"out=\"ctx.get('date_stop') or ''\">06/05/2021</t>.<br/>\n"
+"                        <div t-if=\"ctx.get('action_url')\" style=\"margin: "
+"16px 0px 16px 0px;\">\n"
+"                            <a t-att-href=\"ctx.get('action_url')\" t-attf-"
+"style=\"background-color: {{object.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size: 13px;\">Validează fișele de pontaj</a>\n"
+"                        </div>\n"
+"                        <br/>Mulțumesc,<br/>\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-"
+"quote=\"1\">Mitchell Admin</t></div>\n"
+"                        </t>\n"
+"                    </div>\n"
+"                </td></tr>\n"
+"                <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- FOOTER -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\" align=\"left\">\n"
+"                    <t t-out=\"object.company_id.name or ''\">Compania ta</"
+"t>\n"
+"                </td></tr>\n"
+"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: "
+"0.7;\">\n"
+"                    <t t-out=\"object.company_id.phone or ''\">+1 "
+"650-123-4567</t>\n"
+"                    <t t-if=\"object.company_id.email\">\n"
+"                        | <a t-attf-href=\"'mailto:%s' % "
+"{{ object.company_id.email }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.company_id.email or ''\">info@yourcompany.com</a>\n"
+"                    </t>\n"
+"                    <t t-if=\"object.company_id.website\">\n"
+"                        | <a t-attf-href=\"'%s' % "
+"{{ object.company_id.website }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.company_id.website or ''\">http://www.example.com</"
+"a>\n"
+"                    </t>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"</tbody>\n"
+"</table>\n"
+"</td></tr>\n"
+"<!-- POWERED BY -->\n"
+"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; "
+"padding: 8px; border-collapse:separate;\">\n"
+"      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"        Powered by <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}};\">Odoo</a>\n"
+"      </td></tr>\n"
+"    </table>\n"
+"</td></tr>\n"
+"</table>\n"
+"            "
 
 #. module: timesheet_grid
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/components/timesheet_timer_header/timesheet_timer_header.xml:0
 msgid "A timer is running in another company."
-msgstr ""
+msgstr "Un cronometru funcționează într-o altă companie."
 
 #. module: timesheet_grid
 #: model:ir.ui.menu,name:timesheet_grid.menu_timesheet_grid_validate_all_timesheets
@@ -319,17 +568,17 @@ msgstr ""
 #. module: timesheet_grid
 #: model:ir.model,name:timesheet_grid.model_account_analytic_line
 msgid "Analytic Line"
-msgstr ""
+msgstr "Linie analitica"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_config_settings__reminder_allow
 msgid "Approver Reminder"
-msgstr ""
+msgstr "Reminder aprobator"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_config_settings__reminder_interval
 msgid "Approver Reminder Frequency"
-msgstr ""
+msgstr "Frecvența mementourilor pentru aprobatori"
 
 #. module: timesheet_grid
 #: model_terms:ir.actions.act_window,help:timesheet_grid.timesheet_grid_to_validate_action
@@ -346,6 +595,8 @@ msgstr ""
 #: code:addons/timesheet_grid/static/src/js/tours/timesheet_grid.js:0
 msgid "Click on the cell to set the number of hours you spent on this project."
 msgstr ""
+"Faceți clic pe celulă pentru a seta numărul de ore pe care le-ați dedicat "
+"acestui proiect."
 
 #. module: timesheet_grid
 #: model:ir.model,name:timesheet_grid.model_res_company
@@ -363,6 +614,8 @@ msgid ""
 "Configure reminders in timesheet settings to remind approvers to validate "
 "timesheets"
 msgstr ""
+"Configurați mementourile în setările foii de pontaj pentru a reaminti "
+"aprobatorilor să valideze foile de pontaj."
 
 #. module: timesheet_grid
 #. odoo-python
@@ -373,7 +626,7 @@ msgstr "Confirmați timpul consumat"
 #. module: timesheet_grid
 #: model:ir.model,name:timesheet_grid.model_hr_timesheet_stop_timer_confirmation_wizard
 msgid "Confirm timesheet creation when stop timer"
-msgstr ""
+msgstr "Confirmați crearea foii de pontaj când opriți cronometrul"
 
 #. module: timesheet_grid
 #: model_terms:web_tour.tour,rainbow_man_message:timesheet_grid.timesheet_tour
@@ -383,7 +636,7 @@ msgstr "Felicitări, acum sunteți un maestru al fișelor de pontaj."
 #. module: timesheet_grid
 #: model:ir.model,website_form_label:timesheet_grid.model_project_task
 msgid "Create a Task"
-msgstr ""
+msgstr "Creează o sarcină"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_hr_timesheet_merge_wizard__create_uid
@@ -401,7 +654,7 @@ msgstr "Creat în"
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/views/timer_timesheet_grid/timer_timesheet_grid_renderer.xml:0
 msgid "Daily overtime"
-msgstr ""
+msgstr "Ore suplimentare zilnice"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_hr_timesheet_merge_wizard__date
@@ -418,7 +671,7 @@ msgstr "Zi"
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_config_settings__reminder_delay
 msgid "Days to Remind Approver"
-msgstr ""
+msgstr "Zile până la reamintirea aprobatorului"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_config_settings__reminder_user_delay
@@ -464,6 +717,8 @@ msgid ""
 "Difference between the allocated %(uom)s (%(allocated_hours)s) and the %"
 "(uom)s spent (%(worked_hours)s) on the project"
 msgstr ""
+"Diferența dintre %(uom)s alocate (%(allocated_hours)s) și %(uom)s consumate "
+"(%(worked_hours)s) pentru proiect"
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -472,6 +727,8 @@ msgid ""
 "Difference between the allocated %(uom)s (%(allocated_hours)s) and the %"
 "(uom)s spent (%(worked_hours)s) on the task"
 msgstr ""
+"Diferența dintre %(uom)s alocate (%(allocated_hours)s) și %(uom)s consumate "
+"(%(worked_hours)s) pentru sarcină"
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -480,12 +737,14 @@ msgid ""
 "Difference between the number of hours recorded and the number of hours the "
 "employee was supposed to work according to his contract"
 msgstr ""
+"Diferența dintre numărul de ore înregistrate și numărul de ore pe care "
+"angajatul trebuia să le lucreze conform contractului său"
 
 #. module: timesheet_grid
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/components/timesheet_overtime_indication/timesheet_overtime_indication.js:0
 msgid "Difference between the time allocated and the time recorded"
-msgstr ""
+msgstr "Diferența dintre timpul alocat și timpul înregistrat"
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -573,11 +832,13 @@ msgid ""
 "Keep track of your working hours by project every day and bill your "
 "customers for that time."
 msgstr ""
+"Înregistrați orele de lucru pe proiect în fiecare zi și facturați clienților "
+"pentru acea perioadă de timp."
 
 #. module: timesheet_grid
 #: model:ir.ui.menu,name:timesheet_grid.menu_timesheet_grid_validate_previous_week
 msgid "Last Period"
-msgstr ""
+msgstr "Ultima perioadă"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_hr_timesheet_merge_wizard__write_uid
@@ -620,12 +881,12 @@ msgstr "Lansați <b>temporizatorul</b> to start a new activity."
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/views/timesheet_calendar_my_timesheets/timesheet_calendar_my_timesheets_side_panel.xml:0
 msgid "Legend"
-msgstr ""
+msgstr "Legendă"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.hr_timesheet_stop_timer_confirmation_wizard_view_form
 msgid "Log Time"
-msgstr ""
+msgstr "Înregistrează timp"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.timesheet_merge_wizard_view_form
@@ -670,6 +931,10 @@ msgid ""
 "timesheet drafts in the original project. Although they won't be visible "
 "here, you can still edit them using the Timesheets app."
 msgstr ""
+"Mutarea acestei sarcini într-un proiect fără suport pentru foaia de pontaj "
+"va păstra schițele foii de pontaj în proiectul original. Deși nu vor fi "
+"vizibile aici, le puteți edita în continuare folosind aplicația Foaie de "
+"pontaj."
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.timesheet_view_search
@@ -694,13 +959,13 @@ msgstr "Echipa mea"
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_hr_timesheet_stop_timer_confirmation_wizard__timesheet_name
 msgid "Name"
-msgstr ""
+msgstr "Nume"
 
 #. module: timesheet_grid
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/views/timesheet_grid/timesheet_grid_renderer.js:0
 msgid "No timesheets found. Let's create one!"
-msgstr ""
+msgstr "Nu există pontaje. Să creăm unul!"
 
 #. module: timesheet_grid
 #: model_terms:ir.actions.act_window,help:timesheet_grid.timesheet_grid_to_validate_action
@@ -743,14 +1008,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/timesheet_grid/models/account_analytic_line.py:0
 msgid "Open Form"
-msgstr ""
+msgstr "Deschide formularul"
 
 #. module: timesheet_grid
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/components/grid_timesheet_timer_header/grid_timesheet_timer_header.xml:0
 #: code:addons/timesheet_grid/static/src/components/timesheet_timer_header/timesheet_timer_header.xml:0
 msgid "Press"
-msgstr ""
+msgstr "Apăsați"
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -793,7 +1058,7 @@ msgstr "Resetare la ciornă"
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.hr_timesheet_stop_timer_confirmation_wizard_view_form
 msgid "Resume Timer"
-msgstr ""
+msgstr "Repornește cronometrul"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_config_settings__timesheet_rounding
@@ -848,7 +1113,7 @@ msgstr ""
 #: code:addons/timesheet_grid/static/src/components/grid_timesheet_timer_header/grid_timesheet_timer_header.xml:0
 #: code:addons/timesheet_grid/static/src/components/timesheet_timer_header/timesheet_timer_header.xml:0
 msgid "Shift"
-msgstr ""
+msgstr "Schimb / Tură"
 
 #. module: timesheet_grid
 #. odoo-python
@@ -953,13 +1218,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/timesheet_grid/models/project_project.py:0
 msgid "This Progress Bar is not implemented."
-msgstr ""
+msgstr "Acest Progress Bar nu este implementat."
 
 #. module: timesheet_grid
 #. odoo-python
 #: code:addons/timesheet_grid/models/project_task.py:0
 msgid "This project isn't expected to have task during this period."
 msgstr ""
+"Nu se preconizează ca acest proiect să aibă sarcini în această perioadă."
 
 #. module: timesheet_grid
 #. odoo-python
@@ -968,11 +1234,13 @@ msgid ""
 "This user isn't expected to have any projects assigned during this period "
 "because they don't have any running contract."
 msgstr ""
+"Nu se preconizează ca acest utilizator să aibă proiecte alocate în această "
+"perioadă, deoarece nu are niciun contract în derulare."
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.res_config_settings_view_form
 msgid "Time Rounding"
-msgstr ""
+msgstr "Rotunjirea timpului"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_hr_timesheet_stop_timer_confirmation_wizard__time_spent
@@ -1005,12 +1273,12 @@ msgstr "Grid mixin pentru fișa de pontaj"
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_project_task__timesheet_unit_amount
 msgid "Timesheet Unit Amount"
-msgstr ""
+msgstr "Suma unitară a foii de pontaj"
 
 #. module: timesheet_grid
 #: model:ir.actions.server,name:timesheet_grid.timesheet_reminder_ir_actions_server
 msgid "Timesheet: Approvers Email Reminder"
-msgstr ""
+msgstr "Foaie de pontaj: Memento prin e-mail pentru aprobatori"
 
 #. module: timesheet_grid
 #: model:ir.actions.server,name:timesheet_grid.timesheet_reminder_user_ir_actions_server
@@ -1036,6 +1304,8 @@ msgid ""
 "Timesheets before the %(date)s (included) have been validated, and can no "
 "longer be deleted."
 msgstr ""
+"Fișele de pontaj anterioare datei %(date)s (inclusiv) au fost validate și nu "
+"mai pot fi șterse."
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1044,6 +1314,8 @@ msgid ""
 "Timesheets before the %(date)s (included) have been validated, and can no "
 "longer be modified."
 msgstr ""
+"Fișele de pontaj anterioare datei %(date)s (inclusiv) au fost validate și nu "
+"mai pot fi modificate."
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.res_config_settings_view_form
@@ -1071,12 +1343,12 @@ msgstr "Fișe de pontaj de validat"
 #. module: timesheet_grid
 #: model:mail.template,name:timesheet_grid.mail_template_timesheet_reminder
 msgid "Timesheets: Approver Reminder"
-msgstr ""
+msgstr "Fișe de pontaj: Memento pentru aprobator"
 
 #. module: timesheet_grid
 #: model:mail.template,name:timesheet_grid.mail_template_timesheet_reminder_user
 msgid "Timesheets: Employee Reminder"
-msgstr ""
+msgstr "Fișe de pontaj: Memento pentru angajați"
 
 #. module: timesheet_grid
 #: model:ir.ui.menu,name:timesheet_grid.menu_timesheet_grid_validate
@@ -1164,7 +1436,7 @@ msgstr "Linie validată"
 #. odoo-python
 #: code:addons/timesheet_grid/models/project_task.py:0
 msgid "Warning"
-msgstr ""
+msgstr "Atenție"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.timesheet_view_grid
@@ -1177,7 +1449,7 @@ msgstr "Săptămână"
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/views/timer_timesheet_grid/timer_timesheet_grid_renderer.xml:0
 msgid "Weekly overtime"
-msgstr ""
+msgstr "Ore suplimentare săptămânale"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,help:timesheet_grid.field_account_analytic_line__user_can_validate
@@ -1190,7 +1462,7 @@ msgstr ""
 #: code:addons/timesheet_grid/models/hr_employee.py:0
 #: code:addons/timesheet_grid/models/res_users.py:0
 msgid "You are not allowed to see timesheets."
-msgstr ""
+msgstr "Nu aveți permisiunea de a vizualiza fișele de pontaj."
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1216,7 +1488,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/timesheet_grid/models/account_analytic_line.py:0
 msgid "You can't encode numbers with more than six digits."
-msgstr ""
+msgstr "Nu puteți codifica numere cu mai mult de șase cifre."
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1231,6 +1503,8 @@ msgid ""
 "You cannot adjust the time of the timesheet for a project with timesheets "
 "disabled."
 msgstr ""
+"Nu puteți ajusta timpul fișei de pontaj pentru un proiect cu fișe de pontaj "
+"dezactivate."
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1239,6 +1513,8 @@ msgid ""
 "You cannot delete a validated entry. Please contact your manager or your "
 "timesheet approver."
 msgstr ""
+"Nu puteți șterge o înregistrare validată. Vă rugăm să contactați managerul "
+"sau persoana responsabilă cu aprobarea foilor de pontaj."
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1264,6 +1540,9 @@ msgid ""
 "employees who are not part of your team or are not in a state that can be "
 "validated. This may be due to the fact that they are dated in the future."
 msgstr ""
+"Nu puteți valida fișele de pontaj selectate deoarece aparțin fie angajaților "
+"care nu fac parte din echipa dvs., fie nu se află într-o stare care poate fi "
+"validată. Acest lucru se poate datora faptului că sunt datate în viitor."
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1272,6 +1551,9 @@ msgid ""
 "Your timesheet entry is missing a project. Please either group the Grid view "
 "by project or enter your timesheets by adding a line via the Form view."
 msgstr ""
+"Înregistrarea din foaia de pontaj nu conține un proiect. Vă rugăm să grupați "
+"vizualizarea Grid după proiect sau să introduceți foile de pontaj adăugând o "
+"linie prin vizualizarea Form."
 
 #. module: timesheet_grid
 #: model:ir.model.fields.selection,name:timesheet_grid.selection__res_company__timesheet_mail_employee_interval__months
@@ -1289,7 +1571,7 @@ msgstr "după sfârșitul săptămânii"
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/components/timesheet_timer_header/timesheet_timer_header.xml:0
 msgid "and click on"
-msgstr ""
+msgstr "și faceți clic pe"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.res_config_settings_view_form
@@ -1307,13 +1589,13 @@ msgstr "min"
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/components/grid_timesheet_timer_header/grid_timesheet_timer_header.xml:0
 msgid "or"
-msgstr ""
+msgstr "sau"
 
 #. module: timesheet_grid
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/components/timesheet_timer_header/timesheet_timer_header.xml:0
 msgid "or click on"
-msgstr ""
+msgstr "sau faceți clic pe"
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -1327,7 +1609,7 @@ msgstr "de adăugat"
 #: code:addons/timesheet_grid/static/src/components/grid_timesheet_timer_header/grid_timesheet_timer_header.xml:0
 #: code:addons/timesheet_grid/static/src/components/timesheet_timer_header/timesheet_timer_header.xml:0
 msgid "to launch the timer"
-msgstr ""
+msgstr "pentru a porni cronometrul"
 
 #~ msgid "%s Spent"
 #~ msgstr "%s Consumat"

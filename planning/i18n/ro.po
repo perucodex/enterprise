@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* planning
+# * planning
 #
 # Translators:
 # Martin Trigaux, 2022
@@ -9,27 +9,31 @@
 # Cozmin Candea <office@terrabit.ro>, 2023
 # Claudia Baisan, 2023
 # Dorin Hongu <dhongu@gmail.com>, 2023
-#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Odoo Translation Bot <c3p@odoo.com>, 2025.
+# Comaniciu Ioana <ioana@dakai.ro>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2022-09-22 05:47+0000\n"
-"Last-Translator: Dorin Hongu <dhongu@gmail.com>, 2023\n"
-"Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-12-06 09:55+0000\n"
+"Last-Translator: Comaniciu Ioana <ioana@dakai.ro>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-19/"
+"planning/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?"
-"2:1));\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
+"20)) ? 1 : 2;\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/resource_resource.py:0
 msgid "%(resource_name)s (%(role)s)"
-msgstr ""
+msgstr "%(resource_name)s (%(role)s)"
 
 #. module: planning
 #. odoo-python
@@ -40,7 +44,7 @@ msgstr "%s (copie)"
 #. module: planning
 #: model:ir.actions.report,print_report_name:planning.report_planning_slot
 msgid "'Planning'"
-msgstr ""
+msgstr "'Planificare'"
 
 #. module: planning
 #. odoo-python
@@ -51,31 +55,31 @@ msgstr "(%s zile)"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.open_slots_list_template
 msgid ".&amp;nbsp;"
-msgstr ""
+msgstr ".&amp;nbsp;"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "1 Onsite Interview"
-msgstr ""
+msgstr "1 Interviu la sediu"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "1 Phone Call"
-msgstr ""
+msgstr "1 Apel telefonic"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "2 open days"
-msgstr ""
+msgstr "2 zile deschise"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "4 Days after Interview"
-msgstr ""
+msgstr "4 zile după interviu"
 
 #. module: planning
 #: model_terms:digest.tip,tip_description:planning.digest_tip_planning_0
@@ -86,7 +90,7 @@ msgstr ""
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_ics_description
 msgid "<b>Allocated Time:</b>"
-msgstr ""
+msgstr "<b>Timp alocat:</b>"
 
 #. module: planning
 #. odoo-javascript
@@ -103,18 +107,18 @@ msgstr ""
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_ics_description
 msgid "<b>Note:</b>"
-msgstr ""
+msgstr "<b>Notă:</b>"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/tours/planning.js:0
 msgid "<b>Publish & send</b> your employee's planning."
-msgstr ""
+msgstr "<b>Publică și trimite</b> planul angajatului."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_ics_description
 msgid "<b>Role:</b>"
-msgstr ""
+msgstr "<b>Rol:</b>"
 
 #. module: planning
 #: model:mail.template,body_html:planning.email_template_shift_switch_email
@@ -189,6 +193,75 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div>\n"
+"                    <p t-if=\"ctx.get('old_assignee_name')\">Dragă <t t-"
+"out=\"ctx['old_assignee_name']\">Anita Oliver</t>,</p>\n"
+"                    <p t-else=\"\">Bună,</p>\n"
+"                    <br/>\n"
+"                    <p>\n"
+"                        Următorul schimb pentru care ați solicitat "
+"schimbarea a fost realocat\n"
+"                        <t t-if=\"ctx.get('new_assignee_name')\"> către <t t-"
+"out=\"ctx['new_assignee_name']\">Marc Demo</t></t>.\n"
+"                    </p>\n"
+"                    <table style=\"margin-left: 30px;\">\n"
+"                        <tr t-if=\"(ctx.get('start_datetime') and "
+"ctx.get('end_datetime'))                                   or "
+"ctx.get('allocated_hours')                                   or "
+"ctx.get('allocated_percentage')\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Dată</th>\n"
+"                            <td style=\"padding: 5px;\">\n"
+"                                <span t-if=\"ctx.get('start_datetime') and "
+"ctx.get('end_datetime')\" t-out=\"'%s ⟶ %s' % "
+"(                                     ctx['start_datetime'],                                     "
+"ctx['end_datetime'],                                 )\">\n"
+"                                    31/05/2021, 8:00 AM ⟶ 31/05/2021, 4:00 "
+"PM\n"
+"                                </span>\n"
+"                                <span t-if=\"ctx.get('allocated_hours')\" "
+"style=\"opacity: 0.5;\">\n"
+"                                    (<t t-out=\"ctx['allocated_hours']"
+"\">4:00</t>h)\n"
+"                                </span>\n"
+"                                <span t-if=\"ctx.get('allocated_percentage') "
+"and ctx['allocated_percentage'] != '100'\" style=\"opacity: 0.5;\">\n"
+"                                    (<t t-out=\"ctx['allocated_percentage']"
+"\">50</t>%)\n"
+"                                </span>\n"
+"                            </td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"object.role_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Rol</th>\n"
+"                            <td style=\"padding: 5px;\" t-"
+"out=\"object.role_id.name or ''\">Barman</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'project_id') and "
+"object.project_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Proiect</th>\n"
+"                            <td style=\"padding: 5px;\" t-"
+"out=\"object.sudo().project_id.name or ''\">Întâlnire</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'sale_line_id') and "
+"object.sale_line_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Articol comandă vânzare</th>\n"
+"                            <td style=\"padding: 5px;\" t-"
+"out=\"object.sudo().sale_line_id.name or ''\">Cafea</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'name') and "
+"object.name\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Notă</th>\n"
+"                            <td style=\"padding: 5px;\" t-out=\"object.name "
+"or ''\">/</td>\n"
+"                        </tr>\n"
+"                    </table>\n"
+"                    <br/>\n"
+"                </div>\n"
+"            "
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_notification
@@ -197,6 +270,9 @@ msgid ""
 "                        You have successfully requested to switch your "
 "shift. You will be notified when another employee takes over your shift."
 msgstr ""
+"<i class=\"fa fa-check-circle\"/>\n"
+"                        Ați solicitat cu succes schimbarea schimbului. Veți "
+"fi notificat când un alt angajat va prelua schimbul dvs."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_notification
@@ -204,12 +280,15 @@ msgid ""
 "<i class=\"fa fa-check-circle\"/> Request to switch shift cancelled "
 "successfully."
 msgstr ""
+"<i class=\"fa fa-check-circle\"/> Cererea de schimbare a schimbului a fost "
+"anulată cu succes."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_notification
 msgid ""
 "<i class=\"fa fa-check-circle\"/> This shift is no longer assigned to you."
 msgstr ""
+"<i class=\"fa fa-check-circle\"/> Această tură nu vă mai este atribuită."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_notification
@@ -217,6 +296,8 @@ msgid ""
 "<i class=\"fa fa-check-circle\"/> You were successfully assigned this open "
 "shift."
 msgstr ""
+"<i class=\"fa fa-check-circle\"/> Ați fost atribuit cu succes acestei ture "
+"deschise."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_slot_template_view_kanban
@@ -232,6 +313,8 @@ msgid ""
 "<i class=\"fa fa-envelope-o\" title=\"Mail\" role=\"img\" style=\"padding-"
 "right: 2px\"/>"
 msgstr ""
+"<i class=\"fa fa-envelope-o\" title=\"Mail\" role=\"img\" style=\"padding-"
+"right: 2px\"/>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_notification
@@ -239,6 +322,8 @@ msgid ""
 "<i class=\"fa fa-exclamation-circle\"/> This shift is already assigned to "
 "another employee."
 msgstr ""
+"<i class=\"fa fa-exclamation-circle\"/> Această tură este deja atribuită "
+"altui angajat."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_notification
@@ -246,6 +331,8 @@ msgid ""
 "<i class=\"fa fa-exclamation-circle\"/> You can no longer unassign yourself "
 "from this shift."
 msgstr ""
+"<i class=\"fa fa-exclamation-circle\"/> Nu vă mai puteți dezatribui de la "
+"această tură."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_slot_template_view_form
@@ -253,6 +340,8 @@ msgid ""
 "<i class=\"fa fa-long-arrow-right my-1 mx-1\" aria-label=\"Arrow icon\" "
 "title=\"Arrow\"/>"
 msgstr ""
+"<i class=\"fa fa-long-arrow-right my-1 mx-1\" aria-label=\"Pictograma "
+"săgeată\" title=\"Săgeată\"/>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.open_slots_list_template
@@ -260,6 +349,8 @@ msgid ""
 "<i class=\"fa fa-long-arrow-right\" aria-label=\"Arrow icon\" "
 "title=\"Arrow\"/>"
 msgstr ""
+"<i class=\"fa fa-long-arrow-right\" aria-label=\"Pictogramă săgeată\" "
+"title=\"Săgeată\"/>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_assignee_contact_popover
@@ -267,6 +358,8 @@ msgid ""
 "<i class=\"fa fa-phone\" title=\"Phone\" role=\"img\" style=\"padding-right: "
 "2px\"/>"
 msgstr ""
+"<i class=\"fa fa-phone\" title=\"Telefon\" role=\"img\" style=\"padding-"
+"right: 2px\"/>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_kanban
@@ -283,30 +376,35 @@ msgid ""
 "aria-label=\"Arrow icon\" title=\"Arrow\"/>\n"
 "                                    <span class=\"o_end_date\"/>"
 msgstr ""
+"<span class=\"o_start_date\"/>\n"
+"                                    <i class=\"mx-1 fa fa-long-arrow-right\" "
+"aria-label=\"Pictogramă săgeată\" title=\"Săgeată\"/>\n"
+"                                    <span class=\"o_end_date\"/>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_public_view_form
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_view_form_inherit
 msgid "<span class=\"o_stat_text\">Planning</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">Planificare</span>"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "<span class=\"text-muted small\">Days to get an Offer</span>"
 msgstr ""
+"<span class=\"text-muted small\">Zile până la obținerea unei oferte</span>"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "<span class=\"text-muted small\">Process</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">Proces</span>"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "<span class=\"text-muted small\">Time to Answer</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">Timp de răspuns</span>"
 
 #. module: planning
 #: model_terms:web_tour.tour,rainbow_man_message:planning.planning_tour
@@ -314,11 +412,13 @@ msgid ""
 "<span><b>Congratulations!</b> You are now a master of planning.\n"
 "        </span>"
 msgstr ""
+"<span><b>Felicitări!</b> Acum ești un maestru al planificării.\n"
+"        </span>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
 msgid "<span>Allow employees to:</span>"
-msgstr ""
+msgstr "<span>Permiteți angajaților să:</span>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
@@ -326,7 +426,7 @@ msgstr ""
 msgid ""
 "<span>The employee assigned would like to switch shifts with someone else.</"
 "span>"
-msgstr ""
+msgstr "<span>Angajatul atribuit dorește să schimbe tura cu altcineva.</span>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
@@ -448,6 +548,118 @@ msgid ""
 "                </div>\n"
 "            </body>"
 msgstr ""
+"<style>\n"
+"                    .planning_mail_template_button {\n"
+"                        padding: 5px 10px;\n"
+"                        text-decoration: none;\n"
+"                        border: 1px;\n"
+"                        border-radius: 3px;\n"
+"                        text-align: center;\n"
+"                        color: #374151;\n"
+"                        background-color: #E7E9ED;\n"
+"                        border: solid #E7E9ED;\n"
+"                        flex: 1 1 40%;\n"
+"                    }\n"
+"                    .top_button {\n"
+"                        color: #FFFFFF;\n"
+"                        background-color: #714B67;\n"
+"                        border: solid #714B67;\n"
+"                        flex: 1 1 60%;\n"
+"                    }\n"
+"                    .button_box {\n"
+"                        display: flex;\n"
+"                        flex-wrap: wrap;\n"
+"                        gap: 10px;\n"
+"                        margin: 20px 15px 0px 15px;\n"
+"                    }\n"
+"                </style>\n"
+"                <body><div>\n"
+"                    <p t-if=\"ctx.get('employee_name')\">Dragă <t t-"
+"out=\"ctx['employee_name']\">Anita Oliver</t>,</p>\n"
+"                    <p t-else=\"\">Bună,</p>\n"
+"                    <br/>\n"
+"                    <p t-if=\"ctx.get('open_shift_available')\">Avem o nouă "
+"tură disponibilă:</p>\n"
+"                    <p t-else=\"\">V-a fost atribuită următoarea tură:</p>\n"
+"                    <table style=\"margin-left: 30px;\">\n"
+"                        <tr t-if=\"(ctx.get('start_datetime') and "
+"ctx.get('end_datetime'))                                   or "
+"ctx.get('allocated_hours')                                   or "
+"ctx.get('allocated_percentage')\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Dată</th>\n"
+"                            <td style=\"padding: 5px;\">\n"
+"                                <span t-if=\"ctx.get('start_datetime') and "
+"ctx.get('end_datetime')\" t-out=\"'%s ⟶ %s' % "
+"(                                     ctx['start_datetime'],                                     "
+"ctx['end_datetime'],                                 )\">\n"
+"                                    31/05/2021, 8:00 AM ⟶ 31/05/2021, 4:00 "
+"PM\n"
+"                                </span>\n"
+"                                <span t-if=\"ctx.get('allocated_hours')\" "
+"style=\"opacity: 0.5;\">\n"
+"                                    (<t t-out=\"ctx['allocated_hours']"
+"\">4:00</t>h)\n"
+"                                </span>\n"
+"                                <span t-if=\"ctx.get('allocated_percentage') "
+"and ctx['allocated_percentage'] != '100'\" style=\"opacity: 0.5;\">\n"
+"                                    (<t t-out=\"ctx['allocated_percentage']"
+"\">50</t>%)\n"
+"                                </span>\n"
+"                            </td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"object.role_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Rol</th>\n"
+"                            <td style=\"padding: 5px;\" t-"
+"out=\"object.role_id.name or ''\">Barman</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'project_id') and "
+"object.project_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Proiect</th>\n"
+"                            <td style=\"padding: 5px;\" t-"
+"out=\"object.sudo().project_id.name or ''\">Întâlnire</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'sale_line_id') and "
+"object.sale_line_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Articol comandă vânzare</th>\n"
+"                            <td style=\"padding: 5px;\" t-"
+"out=\"object.sudo().sale_line_id.name or ''\">Cafea</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'name') and "
+"object.name\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Notă</th>\n"
+"                            <td style=\"padding: 5px;\" t-out=\"object.name "
+"or ''\">/</td>\n"
+"                        </tr>\n"
+"                    </table>\n"
+"                    <div class=\"button_box\">\n"
+"                        <a t-if=\"ctx.get('available_link')\" t-att-"
+"href=\"ctx['available_link']\" target=\"_blank\" "
+"class=\"planning_mail_template_button top_button\">Atribuie-mi această tură</"
+"a>\n"
+"                        <a t-if=\"ctx.get('unavailable_link')\" t-att-"
+"href=\"ctx['unavailable_link']\" target=\"_blank\" "
+"class=\"planning_mail_template_button top_button\">Sunt indisponibil</a>\n"
+"                        <a t-if=\"ctx.get('google_url')\" t-att-"
+"href=\"ctx['google_url']\" target=\"_blank\" "
+"class=\"planning_mail_template_button\">Adaugă în Google Calendar</a>\n"
+"                        <a t-if=\"ctx.get('iCal_url')\" t-att-"
+"href=\"ctx['iCal_url']\" target=\"_blank\" "
+"class=\"planning_mail_template_button\">Adaugă în iCal/Outlook</a>\n"
+"                    </div>\n"
+"                    <br/>\n"
+"                    <p t-if=\"ctx.get('open_shift_available')\">Dacă vă "
+"intereseză și aveți disponibilitate, vă rugăm să vă atribuiți această tură "
+"deschisă.</p>\n"
+"                    <p t-else=\"\">Dacă această tură nu vi se potrivește, vă "
+"încurajăm să luați legătura cu colegii și să solicitați schimbul turelor. Ei "
+"ar putea fi interesați de un schimb cu dumneavoastră.</p>\n"
+"                </div>\n"
+"            </body>"
 
 #. module: planning
 #: model:mail.template,body_html:planning.email_template_planning_planning
@@ -516,6 +728,69 @@ msgid ""
 "                </div>\n"
 "            </body>"
 msgstr ""
+"<style>\n"
+"                .planning_mail_template_button {\n"
+"                    padding: 5px 10px;\n"
+"                    text-decoration: none;\n"
+"                    border: 1px;\n"
+"                    border-radius: 3px;\n"
+"                    display: inline-block; \n"
+"                    width: 190px;\n"
+"                    text-align: center;\n"
+"                }\n"
+"                </style>\n"
+"                <body><div>\n"
+"                    <p t-if=\"ctx.get('employee')\">Dragă <t t-"
+"out=\"ctx['employee'].name or ''\">Anita Oliver</t>,</p>\n"
+"                    <p t-else=\"\">Bună,</p>\n"
+"                    <br/>\n"
+"                    <p t-if=\"ctx.get('start_datetime') and "
+"ctx.get('end_datetime')\">\n"
+"                        Programul dvs. de muncă pentru perioada <t t-"
+"out=\"format_date(ctx['start_datetime'])\">05-05-2021</t>\n"
+"                        - <t t-out=\"format_date(ctx['end_datetime'])"
+"\">05-11-2021</t> a fost publicat.\n"
+"                    </p>\n"
+"                    <div style=\"display: flex; margin: 15px;\">\n"
+"                        <div t-if=\"ctx.get('planning_url')\" style=\"margin-"
+"right: 15px;\">\n"
+"                            <a t-att-href=\"ctx['planning_url']\" "
+"target=\"_blank\" class=\"planning_mail_template_button\" t-attf-"
+"style=\"color: {{object.company_id.email_primary_color or '#FFFFFF'}}; "
+"background-color: {{object.company_id.email_secondary_color or '#875A7B'}};"
+"\">Vezi programul</a>\n"
+"                        </div>\n"
+"                        <div t-if=\"ctx.get('planning_url_ics')\">\n"
+"                            <a t-att-href=\"ctx['planning_url_ics']\" "
+"target=\"_blank\" class=\"planning_mail_template_button\" style=\"color: "
+"#374151; background-color: #E7E9ED; border: solid #E7E9ED;\">Adaugă în "
+"calendar</a>\n"
+"                        </div>\n"
+"                    </div>\n"
+"                    <br/>\n"
+"                    <p t-if=\"ctx.get('slot_unassigned') or "
+"(object.allow_self_unassign and object.self_unassign_days_before)\">\n"
+"                        <t t-if=\"ctx.get('slot_unassigned')\">\n"
+"                            De asemenea, dorim să vă reamintim că există "
+"câteva ture disponibile și, dacă vă interesează și aveți disponibilitate, vă "
+"rugăm să vă alocați aceste ture.\n"
+"                        </t>\n"
+"                        <t t-if=\"object.allow_self_unassign and "
+"object.self_unassign_days_before\">\n"
+"                            Dacă nu puteți lucra într-o tură care v-a fost "
+"alocată, vă rugăm să vă retrageți cu cel puțin  <t t-"
+"out=\"object.self_unassign_days_before or ''\">5</t>zile înainte de "
+"începerea turei.\n"
+"                        </t>\n"
+"                    </p>\n"
+"                    <p t-if=\"ctx.get('message')\" t-out=\"ctx['message']\"/"
+">\n"
+"                    <p t-if=\"object.allow_self_unassign\">În cazul în care "
+"programul dvs. actual nu se potrivește, vă încurajăm să luați legătura cu "
+"colegii dvs. și să le cereți să schimbați turele. Este posibil ca ei să fie "
+"interesați să schimbe turele cu dumneavostră.</p>\n"
+"                </div>\n"
+"            </body>"
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_recurrency_check_until_limit
@@ -535,7 +810,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
 msgid "Actions"
-msgstr ""
+msgstr "Acțiuni"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_role__active
@@ -547,7 +822,7 @@ msgstr "Activ"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.js:0
 msgid "Add Shift"
-msgstr ""
+msgstr "Adaugă schimb"
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_planning_send__note
@@ -557,12 +832,12 @@ msgstr "Mesaj suplimentar afișat în e-mailul trimis angajaților"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_send_view_form
 msgid "Additional message included in the email sent to your employees"
-msgstr ""
+msgstr "Mesaj suplimentar inclus în e-mailul trimis angajaților"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
 msgid "Additional note sent to the employee"
-msgstr ""
+msgstr "Notă suplimentară trimisă angajatului"
 
 #. module: planning
 #: model:res.groups,name:planning.group_planning_manager
@@ -576,13 +851,15 @@ msgid ""
 "All open shifts have already been assigned, or there are no resources "
 "available to take them at this time."
 msgstr ""
+"Toate turele deschise au fost deja atribuite sau nu există resurse "
+"disponibile pentru a le prelua în acest moment."
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_ask_recurrence_update/planning_ask_recurrence_update_dialog.js:0
 #: model:ir.model.fields.selection,name:planning.selection__planning_slot__recurrence_update__all
 msgid "All shifts"
-msgstr ""
+msgstr "Toate schimburile"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
@@ -594,7 +871,7 @@ msgstr ""
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
 msgid "Allocated Percentage"
-msgstr ""
+msgstr "Procent alocat"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__allocated_hours
@@ -605,7 +882,7 @@ msgstr "Timp Alocat"
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__allocated_percentage
 msgid "Allocated Time %"
-msgstr ""
+msgstr "Timp alocat %"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__allocated_percentage
@@ -615,12 +892,12 @@ msgstr "Timp Alocat (%)"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_ics_description
 msgid "Allocated Time:"
-msgstr ""
+msgstr "Timp alocat:"
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_slot_check_allocated_hours_positive
 msgid "Allocated hours and allocated time percentage cannot be negative."
-msgstr ""
+msgstr "Orele alocate și procentul de timp alocat nu pot fi negative."
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__allocation_type
@@ -633,6 +910,8 @@ msgid ""
 "Analyze the allocation of your resources across roles, projects, and sales "
 "orders, and estimate future needs."
 msgstr ""
+"Analizați alocarea resurselor pe roluri, proiecte și comenzi de vânzare și "
+"estimați nevoile viitoare."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_role_view_form
@@ -650,6 +929,8 @@ msgid ""
 "Archiving this resource will transform all of its future shifts into open "
 "shifts. Are you sure you want to continue?"
 msgstr ""
+"Arhivarea acestei resurse va transforma toate schimburile viitoare în ture "
+"deschise. Ești sigur că vrei să continui?"
 
 #. module: planning
 #. odoo-javascript
@@ -662,25 +943,25 @@ msgstr "Esti sigur ca vrei sa stergi aceasta schimbare?"
 #. odoo-javascript
 #: code:addons/planning/static/src/components/conflicting_slot_ids_field/conflicting_slot_ids_field.xml:0
 msgid "Arrow"
-msgstr ""
+msgstr "Săgeată"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/components/conflicting_slot_ids_field/conflicting_slot_ids_field.xml:0
 msgid "Arrow icon"
-msgstr ""
+msgstr "Pictogramă săgeată"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
 msgid "Ask To Switch"
-msgstr ""
+msgstr "Solicită schimb"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
 msgid "Ask to Switch"
-msgstr ""
+msgstr "Solicită schimb"
 
 #. module: planning
 #. odoo-javascript
@@ -690,11 +971,14 @@ msgid ""
 "open shifts for the roles you will be needing to complete a mission. Then, "
 "assign those open shifts to the resources that are available.</i>"
 msgstr ""
+"Atribuiți o <b>resursă</b> sau lăsați-o deschisă pentru moment. <i>Sfat: "
+"Creați ture deschise pentru rolurile de care aveți nevoie pentru a finaliza "
+"o misiune. Apoi, atribuiți aceste ture deschise resurselor disponibile.</i>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.unwanted_slots_list_template
 msgid "Assignee"
-msgstr ""
+msgstr "Alocat"
 
 #. module: planning
 #. odoo-javascript
@@ -703,20 +987,20 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
 msgid "Auto Plan"
-msgstr ""
+msgstr "Planificare automată"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_calendar_controller.xml:0
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
 msgid "Automatically plan open shifts and sales orders"
-msgstr ""
+msgstr "Planificați automat turele deschise și comenzile de vânzare"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_filter_section/planning_calendar_filter_section.xml:0
 msgid "Avatar"
-msgstr ""
+msgstr "Imagine profil"
 
 #. module: planning
 #: model:ir.ui.menu,name:planning.planning_menu_schedule_by_resource
@@ -731,7 +1015,7 @@ msgstr "Prin Rol"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.unwanted_slots_list_template
 msgid "CANCEL SWITCH"
-msgstr ""
+msgstr "ANULEAZĂ SCHIMBUL"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
@@ -739,7 +1023,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
 msgid "Cancel Switch"
-msgstr ""
+msgstr "Anulează schimbul"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_view_form_simplified
@@ -777,6 +1061,8 @@ msgid ""
 "Company linked to the material resource. Leave empty for the resource to be "
 "available in every company."
 msgstr ""
+"Compania asociată resursei materiale. Lăsați necompletat pentru ca resursa "
+"să fie disponibilă în orice companie."
 
 #. module: planning
 #: model:ir.model,name:planning.model_res_config_settings
@@ -792,7 +1078,7 @@ msgstr "Configurare"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_ask_recurrence_update/planning_ask_recurrence_update_dialog.xml:0
 msgid "Confirm"
-msgstr ""
+msgstr "Confirmă"
 
 #. module: planning
 #. odoo-javascript
@@ -810,7 +1096,7 @@ msgstr "Copiați săptămâna anterioară"
 #. module: planning
 #: model:planning.role,name:planning.planning_role_crane
 msgid "Crane"
-msgstr ""
+msgstr "Macara"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_open_shifts
@@ -891,12 +1177,12 @@ msgstr "Termen limită în zile pentru dezalocarea schimbării"
 #: model:ir.model.fields,field_description:planning.field_hr_employee__default_planning_role_id
 #: model:ir.model.fields,field_description:planning.field_resource_resource__default_role_id
 msgid "Default Role"
-msgstr ""
+msgstr "Rol implicit"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.resource_resource_search_view_inherit
 msgid "Default Roles"
-msgstr ""
+msgstr "Roluri implicite"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.employee_no_email_list_wizard
@@ -904,6 +1190,8 @@ msgid ""
 "Define a work email address for the following employees so they will receive "
 "the planning."
 msgstr ""
+"Definiți o adresă de e-mail de serviciu pentru următorii angajați pentru a "
+"primi planificarea."
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_planning_slot__role_id
@@ -927,7 +1215,7 @@ msgstr "Șterge"
 #. odoo-javascript
 #: code:addons/planning/static/src/components/address_recurrency_confirmation_dialog/address_recurrency_confirmation_dialog.js:0
 msgid "Delete Recurring Shift"
-msgstr ""
+msgstr "Șterge tură recurentă"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__department_id
@@ -976,7 +1264,7 @@ msgstr "Nume afișat"
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_resources
 msgid "Distribute your material resources across projects and sales orders."
-msgstr ""
+msgstr "Distribuiți resursele materiale pe proiecte și comenzi de vânzare."
 
 #. module: planning
 #. odoo-javascript
@@ -993,6 +1281,9 @@ msgid ""
 "Drag a shift to another day to reschedule it, or to another row to reassign "
 "the shift. Press CTRL (or Cmd on Mac) while dragging a shift to duplicate it."
 msgstr ""
+"Trageți o tură pe altă zi pentru a o reprograma sau pe alt rând pentru a o "
+"realoca. Apăsați CTRL (sau Cmd pe Mac) în timp ce trageți o tură pentru a o "
+"duplica."
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__duration
@@ -1002,7 +1293,7 @@ msgstr "Durată"
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot_template__duration_days
 msgid "Duration Days"
-msgstr ""
+msgstr "Zile durată"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_role_view_kanban
@@ -1014,7 +1305,7 @@ msgstr "Editare"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_ask_recurrence_update/planning_ask_recurrence_update_dialog.xml:0
 msgid "Edit Recurrent Shift"
-msgstr ""
+msgstr "Editează tura recurentă"
 
 #. module: planning
 #: model:mail.template,description:planning.email_template_shift_switch_email
@@ -1023,16 +1314,19 @@ msgid ""
 "of another employee, notifying the person who requested to switch that the "
 "shift has been taken"
 msgstr ""
+"Email trimis automat când un angajat își atribuie singur tura nedorită a "
+"altui angajat, notificând persoana care a solicitat schimbul că tura a fost "
+"preluată"
 
 #. module: planning
 #: model:mail.template,description:planning.email_template_slot_single
 msgid "Email sent automatically when publishing a shift"
-msgstr ""
+msgstr "Email trimis automat la publicarea unei ture"
 
 #. module: planning
 #: model:mail.template,description:planning.email_template_planning_planning
 msgid "Email sent automatically when publishing the schedule of your employees"
-msgstr ""
+msgstr "Email trimis automat la publicarea programului angajaților"
 
 #. module: planning
 #: model:ir.model,name:planning.model_hr_employee
@@ -1052,7 +1346,7 @@ msgstr "Nume angajat"
 #: model:ir.model.fields,field_description:planning.field_res_config_settings__planning_employee_unavailabilities
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
 msgid "Employee Unavailabilities"
-msgstr ""
+msgstr "Indisponibilități angajat"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_send__employee_ids
@@ -1065,7 +1359,7 @@ msgstr "Angajați"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.employee_no_email_list_wizard
 msgid "Employees with no Work Email"
-msgstr ""
+msgstr "Angajați fără email de serviciu"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__end_datetime
@@ -1077,7 +1371,7 @@ msgstr "Dată sfârșit"
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot_template__end_time
 msgid "End Hour"
-msgstr ""
+msgstr "Oră sfârșit"
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_hr_employee_employee_token_unique
@@ -1088,7 +1382,7 @@ msgstr "Eroare: fiecare token de angajat trebuie să fie unic"
 #. odoo-python
 #: code:addons/planning/models/planning_recurrency.py:0
 msgid "Every %(repeat_interval)s week(s) until %(repeat_until)s"
-msgstr ""
+msgstr "În fiecare %(repeat_interval)s săptămână (i) până %(repeat_until)s"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_send__note
@@ -1107,22 +1401,24 @@ msgid ""
 "Find here your planning. Assign yourself open shifts that match your roles, "
 "or indicate your unavailability."
 msgstr ""
+"Găsește aici planificarea ta. Atribuie-ți ture deschise care corespund "
+"rolurilor tale sau indică indisponibilitatea."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "First you have to specify the date of the invitation."
-msgstr ""
+msgstr "Mai întâi trebuie specificată data invitației."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.view_employee_filter_inherit_hr
 msgid "Fixed Hours"
-msgstr ""
+msgstr "Ore fixe"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.view_employee_filter_inherit_hr
 msgid "Flexible Hours"
-msgstr ""
+msgstr "Ore flexibile"
 
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__planning_slot__allocation_type__forecast
@@ -1144,12 +1440,12 @@ msgstr "Pentru totdeauna, în fiecare%s săptămână(i)"
 #. module: planning
 #: model:planning.role,name:planning.planning_furniture_assembler
 msgid "Furniture Assembler"
-msgstr ""
+msgstr "Montator mobilă"
 
 #. module: planning
 #: model:planning.role,name:planning.planning_furniture_tool
 msgid "Furniture Tools"
-msgstr ""
+msgstr "Unelte pentru mobilă"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
@@ -1165,12 +1461,12 @@ msgstr "Dați adâncime la"
 #: model:ir.model.fields,field_description:planning.field_hr_employee__has_slots
 #: model:ir.model.fields,field_description:planning.field_hr_employee_public__has_slots
 msgid "Has Slots"
-msgstr ""
+msgstr "Are sloturi"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__request_to_switch
 msgid "Has there been a request to switch on this shift slot?"
-msgstr ""
+msgstr "A existat o solicitare de schimb pentru acest slot de tură?"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot_template__name
@@ -1265,7 +1561,7 @@ msgstr ""
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_view_form_simplified
 msgid "Job Position"
-msgstr ""
+msgstr "Funcție"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__job_title
@@ -1315,6 +1611,8 @@ msgid ""
 "Let employees switch shifts with colleagues or unassign themselves when "
 "unavailable"
 msgstr ""
+"Permiteți angajaților să schimbe turele cu colegii sau să se dezatribuie "
+"când sunt indisponibili"
 
 #. module: planning
 #. odoo-javascript
@@ -1324,6 +1622,9 @@ msgid ""
 "schedule</b> and easily plan your shifts with just one click by <em>copying "
 "the previous week's schedule</em>."
 msgstr ""
+"Hai să explorăm vizualizarea Gantt pentru funcționalități interesante. "
+"Pregătește-te să <b>partajezi programul</b> și să planifici ușor turele cu "
+"un singur click prin <em>copierea programului săptămânii trecute</em>."
 
 #. module: planning
 #. odoo-javascript
@@ -1332,12 +1633,15 @@ msgid ""
 "Let's create your first <b>shift</b>. <i>Tip: use the (+) shortcut available "
 "on each cell of the Gantt view to save time.</i>"
 msgstr ""
+"Hai să creăm primul tău <b>schimb</b>. <i>Sfat: folosește scurtătura (+) "
+"disponibilă pe fiecare celulă din vizualizarea Gantt pentru a economisi timp."
+"</i>"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/tours/planning.js:0
 msgid "Let's schedule a <b>shift</b> for this time range."
-msgstr ""
+msgstr "Hai să programăm un <b>schimb</b> pentru acest interval de timp."
 
 #. module: planning
 #. odoo-javascript
@@ -1349,18 +1653,18 @@ msgstr "Să începem să gestionăm programul angajaților!"
 #. odoo-javascript
 #: code:addons/planning/static/src/js/planning_calendar_front.js:0
 msgid "List"
-msgstr ""
+msgstr "Listă"
 
 #. module: planning
 #: model:hr.job,name:planning.job_maintenance_technician
 #: model:planning.role,name:planning.planning_maintenance_technician
 msgid "Maintenance Technician"
-msgstr ""
+msgstr "Tehnician mentenanță"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_shift_template
 msgid "Make encoding shifts easy with templates."
-msgstr ""
+msgstr "Ușurează introducerea schimburilor cu șabloane."
 
 #. module: planning
 #: model:planning.role,name:planning.planning_role_management
@@ -1403,7 +1707,7 @@ msgstr "Modificat de la ultima publicare"
 #. odoo-javascript
 #: code:addons/planning/static/src/js/planning_calendar_front.js:0
 msgid "Month"
-msgstr ""
+msgstr "Luna"
 
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__planning_recurrency__repeat_unit__month
@@ -1429,7 +1733,7 @@ msgstr "Planificarea Mea"
 #: model_terms:ir.ui.view,arch_db:planning.planning_slot_template_view_search
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
 msgid "My Roles"
-msgstr ""
+msgstr "Rolurile mele"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
@@ -1452,7 +1756,7 @@ msgstr "Nume"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_calendar_controller.js:0
 msgid "New Event"
-msgstr ""
+msgstr "Eveniment nou"
 
 #. module: planning
 #. odoo-javascript
@@ -1460,13 +1764,13 @@ msgstr ""
 #: code:addons/planning/models/planning_slot.py:0
 #: code:addons/planning/static/src/views/planning_calendar/planning_calendar_controller.js:0
 msgid "New Shift"
-msgstr ""
+msgstr "Schimb nou"
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/controllers/main.py:0
 msgid "New_Shift"
-msgstr ""
+msgstr "Schimb_nou"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
@@ -1477,12 +1781,12 @@ msgstr "Săptămâna următoare"
 #. odoo-python
 #: code:addons/planning/wizard/planning_send.py:0
 msgid "No Email Address for Some Employees"
-msgstr ""
+msgstr "Nu există adresă de email pentru unii angajați"
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_planning_recurrency__repeat_number
 msgid "No Of Repetitions of the plannings"
-msgstr ""
+msgstr "Numărul de repetiții ale planificărilor"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_report_action_analysis
@@ -1492,7 +1796,7 @@ msgstr "Nu există date încă!"
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_resources
 msgid "No material resources found. Let's create one!"
-msgstr ""
+msgstr "Nu s-au găsit resurse materiale. Hai să creăm una!"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_roles
@@ -1529,7 +1833,7 @@ msgstr "Notă"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_ics_description
 msgid "Note:"
-msgstr ""
+msgstr "Notă:"
 
 #. module: planning
 #. odoo-javascript
@@ -1538,11 +1842,13 @@ msgid ""
 "Now that this week is ready, let's get started on <b>next week's schedule</"
 "b>."
 msgstr ""
+"Acum că această săptămână este gata, hai să începem <b>programarea "
+"săptămânii viitoare</b>."
 
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__planning_slot__repeat_type__x_times
 msgid "Number of Occurrences"
-msgstr ""
+msgstr "Număr de apariții"
 
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__planning_recurrency__repeat_type__x_times
@@ -1553,7 +1859,7 @@ msgstr "Numărul de repetări"
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
 msgid "Open Shift"
-msgstr ""
+msgstr "Tură deschisă"
 
 #. module: planning
 #. odoo-javascript
@@ -1577,19 +1883,19 @@ msgstr "Ture Deschise Valabile"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_hooks.js:0
 msgid "Open shifts assigned"
-msgstr ""
+msgstr "Ture deschise atribuite"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_hooks.js:0
 msgid "Open shifts unscheduled"
-msgstr ""
+msgstr "Ture deschise neprogramate"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_calendar_controller.js:0
 msgid "Open: %s"
-msgstr ""
+msgstr "Deschide: %s"
 
 #. module: planning
 #. odoo-python
@@ -1613,6 +1919,8 @@ msgid ""
 "Plan resource allocation across projects and estimate deadlines more "
 "accurately"
 msgstr ""
+"Planificați alocarea resurselor pe proiecte și estimați termenele limită mai "
+"precis"
 
 #. module: planning
 #. odoo-javascript
@@ -1621,6 +1929,8 @@ msgid ""
 "Plan your shifts in one click by <b>copying the schedule from the previous "
 "week</b>."
 msgstr ""
+"Planifică-ți turele dintr-un singur click prin <b>copierea programului din "
+"săptămâna anterioară</b>."
 
 #. module: planning
 #. odoo-javascript
@@ -1629,11 +1939,13 @@ msgid ""
 "Plan your shifts in one click by <b>copying the schedule from the previous "
 "week</b>. Open the menu to access this option."
 msgstr ""
+"Planifică-ți turele dintr-un singur click prin <b>copierea programului din "
+"săptămâna anterioară</b>. Deschide meniul pentru a accesa această opțiune."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
 msgid "Planned Date"
-msgstr ""
+msgstr "Dată planificată"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot_template__start_time
@@ -1700,12 +2012,12 @@ msgstr "Planificare Tură"
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__slot_id
 msgid "Planning Slot"
-msgstr ""
+msgstr "Planificare slot"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_role__slot_properties_definition
 msgid "Planning Slot Properties"
-msgstr ""
+msgstr "Proprietăți slot planificare"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
@@ -1715,17 +2027,17 @@ msgstr "Planificare:"
 #. module: planning
 #: model:mail.template,name:planning.email_template_planning_planning
 msgid "Planning: New Schedule"
-msgstr ""
+msgstr "Planificare: Program nou"
 
 #. module: planning
 #: model:mail.template,name:planning.email_template_slot_single
 msgid "Planning: New Shift"
-msgstr ""
+msgstr "Planificare: adaugă schimb"
 
 #. module: planning
 #: model:mail.template,name:planning.email_template_shift_switch_email
 msgid "Planning: Shift Re-assigned"
-msgstr ""
+msgstr "Planificare: Schimb realocat"
 
 #. module: planning
 #: model:ir.actions.server,name:planning.ir_cron_forecast_schedule_ir_actions_server
@@ -1755,18 +2067,20 @@ msgid ""
 "Please add a work email for the following employee so that they can receive "
 "their planning:"
 msgstr ""
+"Vă rugăm să adăugați un email de serviciu pentru următorul angajat pentru a "
+"putea primi planificarea:"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/components/conflicting_slot_ids_field/conflicting_slot_ids_field.xml:0
 msgid "Prepare for the ultimate multi-tasking challenge:"
-msgstr ""
+msgstr "Pregătește-te pentru provocarea supremă de multitasking:"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer_controls.xml:0
 msgid "Press Ctrl to duplicate the shift"
-msgstr ""
+msgstr "Apasă Ctrl pentru a duplica schimbul"
 
 #. module: planning
 #. odoo-javascript
@@ -1774,7 +2088,7 @@ msgstr ""
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
 #: model_terms:ir.ui.view,arch_db:planning.planning_preview_view_form
 msgid "Preview"
-msgstr ""
+msgstr "Previzualizare"
 
 #. module: planning
 #: model:ir.actions.act_window,name:planning.resource_preview_action
@@ -1786,7 +2100,7 @@ msgstr ""
 #: code:addons/planning/static/src/views/planning_calendar/planning_calendar_controller.xml:0
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
 msgid "Print"
-msgstr ""
+msgstr "Tipăriți"
 
 #. module: planning
 #. odoo-javascript
@@ -1798,23 +2112,23 @@ msgstr ""
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_res_config_settings__module_project_forecast
 msgid "Project Planning"
-msgstr ""
+msgstr "Planificare proiect"
 
 #. module: planning
 #: model:planning.role,name:planning.planning_role_projector
 msgid "Projector"
-msgstr ""
+msgstr "Proiector"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__slot_properties
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search
 msgid "Properties"
-msgstr ""
+msgstr "Proprietăți"
 
 #. module: planning
 #: model:ir.model,name:planning.model_hr_employee_public
 msgid "Public Employee"
-msgstr ""
+msgstr "Angajați Publici"
 
 #. module: planning
 #. odoo-javascript
@@ -1835,7 +2149,7 @@ msgstr "Publicare & Trimitere"
 #. module: planning
 #: model:ir.actions.act_window,name:planning.planning_send_action
 msgid "Publish & Send the Schedule by Email"
-msgstr ""
+msgstr "Publică & Trimite programul prin email"
 
 #. module: planning
 #. odoo-javascript
@@ -1850,7 +2164,7 @@ msgstr "Publicat"
 #: model:hr.job,name:planning.job_quality_control
 #: model:planning.role,name:planning.planning_quality_control
 msgid "Quality Control Inspector"
-msgstr ""
+msgstr "Inspector Control Calitate"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_res_company__planning_generation_interval
@@ -1861,7 +2175,7 @@ msgstr "Rata de generare a turelor"
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__recurrence_update
 msgid "Recurrence Update"
-msgstr ""
+msgstr "Actualizare recurență"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__recurrency_id
@@ -1871,13 +2185,13 @@ msgstr "Recurență"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
 msgid "Recurring Shifts"
-msgstr ""
+msgstr "Ture recurente"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_form/planning_form_view.js:0
 msgid "Recurring shifts created"
-msgstr ""
+msgstr "Ture recurente create"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_recurrency__slot_ids
@@ -1913,7 +2227,7 @@ msgstr "Tip Repetare"
 #: model:ir.model.fields,field_description:planning.field_planning_recurrency__repeat_unit
 #: model:ir.model.fields,field_description:planning.field_planning_slot__repeat_unit
 msgid "Repeat Unit"
-msgstr ""
+msgstr "Unitate de repetare"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_recurrency__repeat_until
@@ -1945,7 +2259,7 @@ msgstr ""
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
 msgid "Requests to Switch"
-msgstr ""
+msgstr "Solicitări de schimb"
 
 #. module: planning
 #: model:ir.actions.server,name:planning.model_planning_slot_action_reset_to_draft
@@ -1964,7 +2278,7 @@ msgstr "Resursă"
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__resource_color
 msgid "Resource color"
-msgstr ""
+msgstr "Culoare resursă"
 
 #. module: planning
 #: model:ir.model,name:planning.model_resource_resource
@@ -1992,6 +2306,10 @@ msgid ""
 "This role will also have precedence over the other roles of the employee "
 "when planning orders."
 msgstr ""
+"Rolul care va fi selectat implicit la crearea unei ture pentru acest "
+"angajat.\n"
+"Acest rol va avea prioritate față de celelalte roluri ale angajatului la "
+"planificarea comenzilor."
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_resource_resource__default_role_id
@@ -2001,11 +2319,15 @@ msgid ""
 "This role will also have precedence over the other roles of the resource "
 "when planning shifts."
 msgstr ""
+"Rolul care va fi selectat implicit la crearea unei ture pentru această "
+"resursă.\n"
+"Acest rol va avea prioritate față de celelalte roluri ale resursei la "
+"planificarea turelor."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_ics_description
 msgid "Role:"
-msgstr ""
+msgstr "Rol:"
 
 #. module: planning
 #. odoo-javascript
@@ -2031,6 +2353,14 @@ msgid ""
 "(with the default planning role having precedence over the other ones).\n"
 "Leave empty for the employee to be assigned shifts regardless of the role."
 msgstr ""
+"Roluri pe care angajatul le poate îndeplini. La crearea unei ture pentru "
+"acest angajat, vor fi afișate doar șabloanele de tură pentru aceste roluri.\n"
+"Similar, doar turele deschise disponibile pentru aceste roluri vor fi "
+"trimise angajatului la publicarea programului.\n"
+"În plus, angajatului i se vor atribui doar comenzi pentru aceste roluri "
+"(rolul implicit de planificare având prioritate față de celelalte).\n"
+"Lăsați necompletat pentru ca angajatul să poată fi atribuit la ture "
+"indiferent de rol."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
@@ -2040,12 +2370,12 @@ msgstr "Salvează"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.employee_no_email_list_wizard
 msgid "Save & Send Schedule"
-msgstr ""
+msgstr "Salvează & Trimite programul"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
 msgid "Save Template"
-msgstr ""
+msgstr "Salvare șablon"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__template_creation
@@ -2061,7 +2391,7 @@ msgstr "Salvați acest schimb odată ce este gata."
 #. module: planning
 #: model:planning.role,name:planning.planning_role_scanner
 msgid "Scanner"
-msgstr ""
+msgstr "Scaner"
 
 #. module: planning
 #: model:ir.model,name:planning.model_planning_planning
@@ -2084,7 +2414,7 @@ msgstr "Programare după rol"
 #. odoo-python
 #: code:addons/planning/wizard/planning_send.py:0
 msgid "Schedule sent to your employees"
-msgstr ""
+msgstr "Programul a fost trimis angajaților tăi"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_schedule_by_resource
@@ -2105,7 +2435,7 @@ msgstr "Security Token"
 #. odoo-javascript
 #: code:addons/planning/static/src/components/conflicting_slot_ids_field/conflicting_slot_ids_field.xml:0
 msgid "See conflicting shifts"
-msgstr ""
+msgstr "Vezi schimburile în conflict"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
@@ -2138,6 +2468,8 @@ msgid ""
 "Share the schedule with your team by publishing and sending it. Open the "
 "menu to access this option."
 msgstr ""
+"Partajează programul cu echipa ta publicându-l și trimițându-l. Deschide "
+"meniul pentru a accesa această opțiune."
 
 #. module: planning
 #. odoo-python
@@ -2207,18 +2539,18 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_form/planning_form_view.js:0
 msgid "Shift saved as template"
-msgstr ""
+msgstr "Schimb salvat ca șablon"
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "Shift sent"
-msgstr ""
+msgstr "Schimb trimis"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
 msgid "Shifts Planned"
-msgstr ""
+msgstr "Schimburi / Ture planificate"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
@@ -2235,7 +2567,7 @@ msgstr "Schimburi / Ture în Conflict"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
 msgid "Shifts of Your Department Member"
-msgstr ""
+msgstr "Schimburile membrilor departamentului tău"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
@@ -2246,12 +2578,12 @@ msgstr "Schimbul / Tura membrilor echipei tale"
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "Shifts reset to draft"
-msgstr ""
+msgstr "Schimburile au fost resetate la ciornă"
 
 #. module: planning
 #: model:planning.role,name:planning.planning_shipping_associate
 msgid "Shipping Associate"
-msgstr ""
+msgstr "Asociat transport"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_preview__slot_count
@@ -2266,12 +2598,12 @@ msgstr "S-au făcut unele modificări de la publicarea acestui schimb."
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_slot_template_view_form
 msgid "Span"
-msgstr ""
+msgstr "Durată"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_slot_template_view_form
 msgid "Start & End Hours"
-msgstr ""
+msgstr "Ore început & sfârșit"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__start_datetime
@@ -2291,12 +2623,12 @@ msgstr "Stare"
 #: model:ir.model.fields,field_description:planning.field_planning_planning__end_datetime
 #: model:ir.model.fields,field_description:planning.field_planning_send__end_datetime
 msgid "Stop Date"
-msgstr "Dată  de oprire"
+msgstr "Dată de oprire"
 
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__res_company__planning_employee_unavailabilities__switch
 msgid "Switch shifts with other employees"
-msgstr ""
+msgstr "Schimbă turele cu alți angajați"
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_res_company_planning_self_unassign_days_before_positive
@@ -2310,7 +2642,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "The company does not allow you to unassign yourself from shifts."
-msgstr ""
+msgstr "Compania nu vă permite să vă dezatribuiți de la ture."
 
 #. module: planning
 #. odoo-python
@@ -2321,7 +2653,7 @@ msgstr "Termenul limită pentru dezasignare a trecut."
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_slot_check_start_date_lower_end_date
 msgid "The end date of a shift should be after its start date."
-msgstr ""
+msgstr "Data de sfârșit a unei ture trebuie să fie după data de început."
 
 #. module: planning
 #. odoo-python
@@ -2332,13 +2664,13 @@ msgstr "Numărul de repetări nu poate fi negativ."
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_recurrency_check_repeat_interval_positive
 msgid "The recurrence should be greater than 0."
-msgstr ""
+msgstr "Recurența trebuie să fie mai mare decât 0."
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_form/planning_form_view.js:0
 msgid "The shift has successfully been created."
-msgstr ""
+msgstr "Schimbul a fost creat cu succes."
 
 #. module: planning
 #. odoo-javascript
@@ -2348,6 +2680,7 @@ msgstr ""
 msgid ""
 "The shifts have already been published, or there are no shifts to publish."
 msgstr ""
+"Schimburile au fost deja publicate sau nu există schimburi de publicat."
 
 #. module: planning
 #. odoo-python
@@ -2358,7 +2691,7 @@ msgstr "Schimbările au fost publicate și trimise cu succes."
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_slot_template_check_duration_days_positive
 msgid "The span must be at least 1 working day."
-msgstr ""
+msgstr "Durata trebuie să fie de cel puțin 1 zi lucrătoare."
 
 #. module: planning
 #. odoo-python
@@ -2366,16 +2699,18 @@ msgstr ""
 msgid ""
 "The start and end hours must be greater or equal to 0 and lower than 24."
 msgstr ""
+"Orele de început și de sfârșit trebuie să fie mai mari sau egale cu 0 și mai "
+"mici decât 24."
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_slot_template_check_start_time_lower_than_24
 msgid "The start hour cannot be greater than 24."
-msgstr ""
+msgstr "Ora de început nu poate fi mai mare de 24."
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_slot_template_check_start_time_positive
 msgid "The start hour cannot be negative."
-msgstr ""
+msgstr "Ora de început nu poate fi negativă."
 
 #. module: planning
 #. odoo-python
@@ -2383,18 +2718,20 @@ msgstr ""
 msgid ""
 "The start hour cannot be before the end hour for a one-day shift template."
 msgstr ""
+"Ora de început nu poate fi înaintea orei de sfârșit pentru un șablon de tură "
+"de o zi."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/wizard/planning_send.py:0
 msgid "The work email is missing for the following employees:"
-msgstr ""
+msgstr "Lipsește adresa de email de serviciu pentru următorii angajați:"
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "There are no resources available for this open shift."
-msgstr ""
+msgstr "Nu există resurse disponibile pentru această tură deschisă."
 
 #. module: planning
 #. odoo-javascript
@@ -2403,6 +2740,8 @@ msgid ""
 "There are no shifts planned for the previous week, or they have already been "
 "copied."
 msgstr ""
+"Nu există ture planificate pentru săptămâna anterioară sau acestea au fost "
+"deja copiate."
 
 #. module: planning
 #. odoo-python
@@ -2420,7 +2759,7 @@ msgstr "Nu există ture de resetat la proiect."
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "This Progress Bar is not implemented."
-msgstr ""
+msgstr "Acest Progress Bar nu este implementat."
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__was_copied
@@ -2437,7 +2776,7 @@ msgstr "Săpt. curentă"
 #: code:addons/planning/static/src/views/planning_calendar/planning_ask_recurrence_update/planning_ask_recurrence_update_dialog.js:0
 #: model:ir.model.fields.selection,name:planning.selection__planning_slot__recurrence_update__subsequent
 msgid "This and following shifts"
-msgstr ""
+msgstr "Această tură și următoarele"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_preview_view_form
@@ -2451,12 +2790,14 @@ msgid ""
 "This employee is not expected to work during this period, either because "
 "they do not have a current contract or because they are on leave."
 msgstr ""
+"Nu se așteaptă ca acest angajat să lucreze în această perioadă, fie pentru "
+"că nu are un contract activ, fie pentru că este în concediu."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "This method must take two slots in argument."
-msgstr ""
+msgstr "Această metodă trebuie să primească doi parametri de tip slot."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
@@ -2473,13 +2814,13 @@ msgstr ""
 #: code:addons/planning/static/src/views/planning_calendar/planning_ask_recurrence_update/planning_ask_recurrence_update_dialog.js:0
 #: model:ir.model.fields.selection,name:planning.selection__planning_slot__recurrence_update__this
 msgid "This shift"
-msgstr ""
+msgstr "Această tură"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/components/address_recurrency_confirmation_dialog/address_recurrency_confirmation_dialog.xml:0
 msgid "This shift is recurrent. Delete:"
-msgstr ""
+msgstr "Această tură este recurentă. Ștergeți:"
 
 #. module: planning
 #: model:digest.tip,name:planning.digest_tip_planning_0
@@ -2494,6 +2835,11 @@ msgid ""
 "passes by in order to always get shifts 6 months ahead. This value can be "
 "modified from the settings of Planning, in debug mode."
 msgstr ""
+"Pentru a evita încărcarea bazei de date și problemele de performanță, turele "
+"sunt create doar pentru următoarele 6 luni. Ulterior, ele sunt generate "
+"treptat, astfel încât să existe mereu ture pe 6 luni înainte. Această "
+"valoare poate fi modificată din setările modulului Planificare, în modul de "
+"depanare."
 
 #. module: planning
 #. odoo-javascript
@@ -2520,7 +2866,7 @@ msgstr ""
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__res_company__planning_employee_unavailabilities__unassign
 msgid "Unassign themselves from shifts"
-msgstr ""
+msgstr "Să se dezatribuie de la ture"
 
 #. module: planning
 #. odoo-python
@@ -2537,7 +2883,7 @@ msgstr "Până la"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.unwanted_slots_list_template
 msgid "Unwanted Shifts Available"
-msgstr ""
+msgstr "Ture nedorite disponibile"
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_planning_recurrency__repeat_until
@@ -2561,7 +2907,7 @@ msgstr "Vizualizare Planificare"
 #. odoo-javascript
 #: code:addons/planning/static/src/js/planning_calendar_front.js:0
 msgid "Week"
-msgstr ""
+msgstr "Săptămână"
 
 #. module: planning
 #. odoo-python
@@ -2589,7 +2935,7 @@ msgstr "Loc muncă"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_slot_template_view_form
 msgid "Working Days"
-msgstr ""
+msgstr "Zile lucrătoare"
 
 #. module: planning
 #. odoo-javascript
@@ -2600,6 +2946,10 @@ msgid ""
 "needing to complete a mission. Then, assign those open shifts to the "
 "resources that are available.</i>"
 msgstr ""
+"Scrieți <b>rolul</b> pe care îl va îndeplini angajatul (<i>ex: Bucătar, "
+"Barman, Chelner etc.</i>). <i>Sfat: Creați ture deschise pentru rolurile de "
+"care aveți nevoie pentru a finaliza o misiune. Apoi, atribuiți aceste ture "
+"deschise resurselor disponibile.</i>"
 
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__planning_recurrency__repeat_unit__year
@@ -2611,7 +2961,7 @@ msgstr "Ani"
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "You are not allowed to reset shifts to draft."
-msgstr ""
+msgstr "Nu aveți permisiunea să resetați turele la ciornă."
 
 #. module: planning
 #. odoo-python
@@ -2628,44 +2978,50 @@ msgstr "Nu poți dezasigna alt angajat decât pe tine."
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
-msgid "You cannot assign yourself to a shift in the past."
+msgid "You cannot assign yourself to a shift belonging to another company."
 msgstr ""
+
+#. module: planning
+#. odoo-python
+#: code:addons/planning/models/planning_slot.py:0
+msgid "You cannot assign yourself to a shift in the past."
+msgstr "Nu vă puteți atribui unei ture din trecut."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "You cannot cancel a request to switch made by another user."
-msgstr ""
+msgstr "Nu puteți anula o solicitare de schimb făcută de alt utilizator."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "You cannot cancel a request to switch that is in the past."
-msgstr ""
+msgstr "Nu puteți anula o solicitare de schimb care este în trecut."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "You cannot request to switch a shift that is assigned to another user."
-msgstr ""
+msgstr "Nu puteți solicita schimbul unei ture atribuite altui utilizator."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "You cannot switch a shift that is in the past."
-msgstr ""
+msgstr "Nu puteți schimba o tură care este în trecut."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "You cannot unassign yourself from a shift in the past."
-msgstr ""
+msgstr "Nu vă puteți dezatribuie de la o tură din trecut."
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/planning_calendar_front.js:0
 msgid "You don't have any shifts planned yet."
-msgstr ""
+msgstr "Nu aveți încă nicio tură planificată."
 
 #. module: planning
 #. odoo-javascript
@@ -2674,24 +3030,26 @@ msgid ""
 "You don't have any shifts planned yet. You can assign yourself some of the "
 "available open shifts."
 msgstr ""
+"Nu aveți încă nicio tură planificată. Vă puteți atribui una dintre turele "
+"deschise disponibile."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "You don't have the right to assign yourself to shifts."
-msgstr ""
+msgstr "Nu aveți dreptul să vă atribuiți la ture."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "You don't have the right to cancel a request to switch."
-msgstr ""
+msgstr "Nu aveți dreptul să anulați o solicitare de schimb."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "You don't have the right to switch shifts."
-msgstr ""
+msgstr "Nu aveți dreptul să schimbați turele."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.slot_unassign
@@ -2718,17 +3076,19 @@ msgid ""
 "Your shift on {{ ctx.get('start_datetime') }} was re-assigned to "
 "{{ ctx.get('new_assignee_name', 'Marc Demo') }}"
 msgstr ""
+"Tura ta din {{ ctx.get('start_datetime') }} a fost realocată către "
+"{{ ctx.get('new_assignee_name', 'Marc Demo') }}"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/components/address_recurrency_confirmation_dialog/address_recurrency_confirmation_dialog.xml:0
 msgid "all shifts"
-msgstr ""
+msgstr "toate turele"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
 msgid "close"
-msgstr ""
+msgstr "inchideți"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
@@ -2740,18 +3100,18 @@ msgstr "zile înainte de începerea schimbului"
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
 msgid "e.g. Bartender"
-msgstr ""
+msgstr "ex. Barman"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_role_view_tree
 msgid "e.g. Cleaner"
-msgstr ""
+msgstr "ex. Curățenie"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.resource_resource_form_view_inherit
 #: model_terms:ir.ui.view,arch_db:planning.resource_resource_tree_view_inherit
 msgid "e.g. Crane"
-msgstr ""
+msgstr "ex. Macara"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_view_form_simplified
@@ -2779,13 +3139,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/planning/static/src/components/address_recurrency_confirmation_dialog/address_recurrency_confirmation_dialog.xml:0
 msgid "this and following shifts"
-msgstr ""
+msgstr "aceasta și următoarele ture"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/components/address_recurrency_confirmation_dialog/address_recurrency_confirmation_dialog.xml:0
 msgid "this shift"
-msgstr ""
+msgstr "această tură"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template

@@ -30,6 +30,7 @@ class L10n_FrReportHandler(models.AbstractModel):
             raise UserError(_("You need to complete the tax closing process for this period before submitting the report to the French administration."))
 
         l10n_fr_vat_report = self.env['l10n_fr_reports.send.vat.report'].create({
+            'return_id': account_return.id,
             'report_id': report.id,
             'date_from': date_from,
             'date_to': date_to,

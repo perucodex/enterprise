@@ -6,13 +6,15 @@
 # Martin Trigaux, 2022
 # Malaz Abuidris <msea@odoo.com>, 2023
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# "Malaz Siddig Elsayed Abuidris (msea)" <msea@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:46+0000\n"
-"PO-Revision-Date: 2025-09-16 13:38+0000\n"
-"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:45+0000\n"
+"PO-Revision-Date: 2026-01-02 16:47+0000\n"
+"Last-Translator: \"Malaz Siddig Elsayed Abuidris (msea)\" <msea@odoo.com>\n"
 "Language-Team: Arabic <https://translate.odoo.com/projects/odoo-19/"
 "hr_contract_salary/ar/>\n"
 "Language: ar\n"
@@ -21,7 +23,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_salary_personal_info__impacts_net_salary
@@ -86,6 +88,28 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <h2>تهانينا!</h2>\n"
+"                يمكنك تهيئة باقة الرواتب الخاصة بك من خلال الرابط التالي.<br/"
+">\n"
+"                <t t-if=\"ctx.get('validity_end')\">\n"
+"                    ستنتهي صلاحية الرابط في <t t-"
+"out=\"ctx.get('validity_end')\"/>.\n"
+"                </t>\n"
+"                <div style=\"padding: 16px 0px 16px 0px;\">\n"
+"                    <a t-att-href=\"'/salary_package/simulation/offer/%s%s' "
+"% "
+"(                             ctx.get('offer_id'),                             "
+"('?token=' + ctx.get('access_token')) if ctx.get('access_token') else "
+"''                         )\" target=\"_blank\" t-attf-style=\"background-"
+"color: {{object.company_id.email_secondary_color or '#875A7B'}}; text-"
+"decoration: none; color: {{object.company_id.email_primary_color or "
+"'#FFFFFF'}}; padding: 8px 16px 8px 16px; border-radius: 5px;\">\n"
+"                        تهيئة باقة الرواتب\n"
+"                    </a>\n"
+"                </div>\n"
+"            </div>\n"
+"        "
 
 #. module: hr_contract_salary
 #: model:mail.template,body_html:hr_contract_salary.mail_template_send_offer_applicant
@@ -110,6 +134,25 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <h2>تهانينا!</h2>\n"
+"                يمكنك تهيئة باقة الرواتب الخاصة بك عن طريق الضغط على الرابط "
+"أدناه.<br/>\n"
+"                <t t-if=\"ctx.get('validity_end')\">\n"
+"                    سوف تنتهي صلاحية الرابط بتاريخ <t t-"
+"out=\"ctx.get('validity_end')\"/>.\n"
+"                </t>\n"
+"                <div style=\"padding: 16px 0px 16px 0px;\">\n"
+"                    <a t-attf-href=\"/salary_package/simulation/offer/"
+"{{ctx.get('offer_id')}}?token={{ctx.get('access_token')}}\" "
+"target=\"_blank\" t-attf-style=\"background-color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}}; text-decoration: "
+"none; color: {{object.company_id.email_primary_color or '#FFFFFF'}}; "
+"padding: 8px 16px 8px 16px; border-radius: 5px;\">قم بتهيئة باقة الرواتب "
+"الخاصة لك</a>\n"
+"                </div>\n"
+"            </div>\n"
+"        "
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.salary_package_sidebar
@@ -132,6 +175,8 @@ msgid ""
 "<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
 "title=\"Arrow\"/>"
 msgstr ""
+"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
+"title=\"سهم \"/>"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_view_employee_form
@@ -327,7 +372,7 @@ msgstr "إضافة قسم"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info.type,name:hr_contract_salary.hr_contract_salary_personal_info_type_address
 msgid "Address"
-msgstr ""
+msgstr "العنوان"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_salary_benefit__benefit_type_id
@@ -584,7 +629,7 @@ msgstr "تأكيد"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info.type,name:hr_contract_salary.hr_contract_salary_personal_info_type_contact
 msgid "Contact Information"
-msgstr ""
+msgstr "معلومات التواصل"
 
 #. module: hr_contract_salary
 #: model:ir.model,name:hr_contract_salary.model_hr_contract_salary_benefit_type
@@ -604,7 +649,7 @@ msgstr ""
 #. module: hr_contract_salary
 #: model:ir.actions.act_window,name:hr_contract_salary.action_view_contract_statbutton
 msgid "Contract Details"
-msgstr ""
+msgstr "تفاصيل العقد"
 
 #. module: hr_contract_salary
 #: model:ir.actions.act_window,name:hr_contract_salary.action_view_partially_signed_contract_statbutton
@@ -614,7 +659,7 @@ msgstr ""
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_offer__contract_end_date
 msgid "Contract End Date"
-msgstr ""
+msgstr "تاريخ انتهاء العقد"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -734,8 +779,8 @@ msgstr "بلد الميلاد"
 
 #. module: hr_contract_salary
 #: model_terms:ir.actions.act_window,help:hr_contract_salary.hr_contract_salary_offer_action
-msgid "Create a Offer"
-msgstr "إنشاء عرض عمل"
+msgid "Create an Offer"
+msgstr ""
 
 #. module: hr_contract_salary
 #: model_terms:ir.actions.act_window,help:hr_contract_salary.hr_contract_salary_offer_recruitment_action
@@ -926,6 +971,7 @@ msgstr "إهمال"
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_version__display_name
 #: model:ir.model.fields,field_description:hr_contract_salary.field_refuse_offer_wizard__display_name
 #: model:ir.model.fields,field_description:hr_contract_salary.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:hr_contract_salary.field_sign_item__display_name
 #: model:ir.model.fields,field_description:hr_contract_salary.field_sign_request__display_name
 msgid "Display Name"
 msgstr "اسم العرض"
@@ -970,7 +1016,7 @@ msgstr "لا يؤثر على صافي الراتب"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_view_employee_form_readonly
 msgid "Draft"
-msgstr ""
+msgstr "مسودة"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_benefit__display_type__dropdown
@@ -1072,7 +1118,7 @@ msgstr "ميزانية الموظِّف"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume,name:hr_contract_salary.hr_contract_salary_resume_final_yearly_costs
 msgid "Employer Cost"
-msgstr ""
+msgstr "تكلفة صاحب العمل"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_view_employee_form
@@ -1122,7 +1168,7 @@ msgstr "أنثى"
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_benefit__field
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_benefit__source__field
 msgid "Field"
-msgstr ""
+msgstr "حقل"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_personal_info__field
@@ -1133,6 +1179,11 @@ msgstr "اسم الحقل"
 #: model:hr.contract.salary.personal.info,name:hr_contract_salary.hr_contract_salary_personal_info_study_field
 msgid "Field of Study"
 msgstr "مجال الدراسة"
+
+#. module: hr_contract_salary
+#: model:ir.model,name:hr_contract_salary.model_sign_item
+msgid "Fields to be sign on Document"
+msgstr "الحقول المطلوب توقيعها في المستند"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_resume__fixed_value
@@ -1192,7 +1243,7 @@ msgstr "إنشاء عرض"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume,name:hr_contract_salary.hr_contract_salary_resume_gross
 msgid "Gross"
-msgstr ""
+msgstr "الإجمالي"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_signatory__signatory__hr
@@ -1271,6 +1322,7 @@ msgstr "إخفاء معلومات الفروع الشخصية عند التحد�
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_version__id
 #: model:ir.model.fields,field_description:hr_contract_salary.field_refuse_offer_wizard__id
 #: model:ir.model.fields,field_description:hr_contract_salary.field_res_config_settings__id
+#: model:ir.model.fields,field_description:hr_contract_salary.field_sign_item__id
 #: model:ir.model.fields,field_description:hr_contract_salary.field_sign_request__id
 msgid "ID"
 msgstr "المُعرف"
@@ -1573,7 +1625,7 @@ msgstr "إجمالي الراتب الشهري"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume.category,name:hr_contract_salary.hr_contract_salary_resume_category_monthly_salary
 msgid "Monthly Salary"
-msgstr ""
+msgstr "الراتب الشهري"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_resume__value_type__monthly_total
@@ -1678,7 +1730,7 @@ msgstr "لا توجد بيانات لعرضها"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "No limit"
-msgstr ""
+msgstr "بلا حد"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -1819,6 +1871,8 @@ msgid ""
 "                It allows to reflect on the proposition and discuss it."
 "<br><br>"
 msgstr ""
+"يتم إرسال العروض إلى الموظف مع مجموعة محددة مسبقًا من البيانات.\n"
+"              يتيح ذلك الفرصة للتفكير في العرض ومناقشته.<br><br>"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -1947,6 +2001,13 @@ msgid ""
 "Monthly Total: The information will be a total of all the information in the "
 "category Monthly Benefits"
 msgstr ""
+"قم بتحديد الطريقة التي يتم بها حساب قيمة المعلومات:\n"
+"قيمة ثابتة: قم بتعيين قيمة ثابتة لجميع الروابط\n"
+"قيمة سجل الموظف: احصل على القيمة من حقل موجود في سجل الموظف\n"
+"قيمة كشف الراتب: احصل على القيمة من حقل موجود في سجل كشف الراتب\n"
+"قيمة مجموع المزايا: يمكنك اختيار جميع المزايا وحساب مجموعها\n"
+"الإجمالي الشهري: ستكون المعلومات عبارة عن إجمالي جميع المعلومات الموجودة في "
+"فئة المزايا الشهرية"
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info,name:hr_contract_salary.hr_contract_salary_personal_info_place_of_birth
@@ -2689,7 +2750,7 @@ msgstr "الرمز"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume.category,name:hr_contract_salary.hr_contract_salary_resume_category_total
 msgid "Total"
-msgstr ""
+msgstr "الإجمالي"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_salary_offer__activity_exception_decoration
@@ -2751,7 +2812,7 @@ msgstr "الأجر"
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_employee__wage_on_signature
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_version__wage_on_signature
 msgid "Wage on Signature"
-msgstr ""
+msgstr "الأجر عند التوقيع"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_employee__wage_with_holidays
@@ -2898,7 +2959,7 @@ msgstr "هنا"
 #. odoo-python
 #: code:addons/hr_contract_salary/models/hr_contract_salary_offer.py:0
 msgid "id"
-msgstr ""
+msgstr "المعرف"
 
 #. module: hr_contract_salary
 #: model:mail.template,subject:hr_contract_salary.mail_template_send_offer_applicant
@@ -2915,6 +2976,9 @@ msgid ""
 "{{ object.company_id.name }}: Job Offer - "
 "{{ object.employee_version_id.name }}"
 msgstr ""
+
+#~ msgid "Create a Offer"
+#~ msgstr "إنشاء عرض عمل"
 
 #~ msgid ""
 #~ "<div style=\"margin: 0px; padding: 0px;\">\n"

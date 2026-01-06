@@ -64,6 +64,12 @@ export class DocumentsKanbanRecord extends KanbanRecord {
         if (this.props.record.data.type == "folder") {
             result += " o_folder_record";
         }
+        if (
+            this.env.isSmall &&
+            this.props.groupByField?.name == "last_access_date_group"
+        ) {
+            result += " flex-grow-1";
+        }
         return result;
     }
 

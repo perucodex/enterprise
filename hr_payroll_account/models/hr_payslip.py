@@ -37,7 +37,7 @@ class HrPayslip(models.Model):
 
     def action_payslip_cancel(self):
         moves = self.mapped('move_id')
-        moves._unlink_or_reverse()
+        moves.sudo()._unlink_or_reverse()
         return super().action_payslip_cancel()
 
     def action_payslip_done(self):
@@ -61,17 +61,8 @@ class HrPayslip(models.Model):
                 all_payslips |= run.slip_ids
 
         # A payslip need to have a validated state and not an accounting move.
-        payslips_to_post = all_payslips.filtered(lambda slip: slip.state == 'validated' and not slip.move_id)
+        payslips_to_post = all_payslips.filtered(lambda slip: slip.state == 'validated' and not slip.move_id and slip.struct_id.journal_id)
 
-        # Check that a journal exists on all the structures
-        contracts_no_structure_type = payslips_to_post.version_id.filtered(lambda c: not c.structure_type_id)
-        if contracts_no_structure_type:
-            raise ValidationError(self.env._('Some contracts for these payslips have no structure type, employees: %s',
-                                    ', '.join(contracts_no_structure_type.employee_id.mapped('name'))))
-        structures_no_journal = payslips_to_post.struct_id.filtered(lambda s: not s.journal_id)
-        if structures_no_journal:
-            raise ValidationError(self.env._('Some payroll structures have no account journal defined on it: %s',
-                                             ', '.join(structures_no_journal.mapped('name'))))
 
         # Map all payslips by structure journal and pay slips month.
         # Case 1: Batch all the payslips together -> {'journal_id': {'month': slips}}

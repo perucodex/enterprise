@@ -391,12 +391,12 @@ class L10n_EsTaxReportHandler(models.AbstractModel):
 
     def _extract_spanish_tin(self, partner, except_if_foreign=False):
         formatted_tin = self._extract_tin(partner, error_if_no_tin=True)
-        if formatted_tin[:2] != 'ES':
-            if except_if_foreign:
-                raise UserError(_("Reading a non-Spanish TIN as a Spanish TIN."))
-            else:
-                return ''
-        return formatted_tin[2:]
+        is_spanish = formatted_tin[:2] == 'ES' or not partner.country_id or partner.country_code == 'ES'
+        if is_spanish:
+            return formatted_tin.removeprefix('ES')
+        elif except_if_foreign:
+            raise UserError(_("Reading a non-Spanish TIN as a Spanish TIN."))
+        return ''
 
     def _generate_111_115_common_header(self, options, period, year, modelo_number):
         rslt = b''

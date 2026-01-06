@@ -412,6 +412,7 @@ class ResCompany(models.Model):
             'saveItemComposition': 'success',
             'saveStockMaster': 'success',
             'saveTrnsSalesOsdc': 'save_sale_success',
+            'selectInvoiceDetails': 'get_invoice_details_success',
             'selectBhfList': 'get_branches',
             'selectCodeList': 'get_codes',
             'selectCustomer': 'get_customer',

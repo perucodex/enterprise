@@ -1,6 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
 
+from freezegun import freeze_time
+
 from odoo.exceptions import RedirectWarning
 from odoo.tests import tagged
 from odoo.tools import file_open
@@ -48,3 +50,26 @@ class TestSimpleReports(TestARReportsCommon):
             "Warning, activities are not set as a fallback on the company. As such the Sales VAT Simple files may be incorrect. Please set a fallback activity on the company or ignore this warning to generate the file anyway.",
         ):
             self.env['l10n_ar.tax.report.handler'].vat_simple_export_files_to_zip(self.options)
+
+    @freeze_time('2024-01-01')
+    def test_04_mixed_sale_taxes(self):
+        """ VAT Simple tax reports should only include tax values that are of type IVA. Any other
+            taxes should be skipped over. (We use a different date to just check this record versus
+            all the rest)"""
+        self.options['ar_vat_book_tax_types_available']['sale']['selected'] = True
+        self.options['date']['date_from'] = '2024-01-01'
+        self.options['date']['date_to'] = '2024-01-31'
+
+        self.tax_perc_iibb.active = True
+        self.tax_perc_iibb.amount = 3
+        invoice = self._create_invoice_from_dict({
+            "move_type": 'out_invoice',
+            "partner_id": self.res_partner_servicios_globales,
+            "date": '2024-01-01',
+            "invoice_date": '2024-01-01',
+            "invoice_line_ids": [
+                {'product_id': self.product_iva_105_perc, 'price_unit': 10000.0, 'quantity': 1},
+            ],
+        })
+        invoice.action_post()
+        self._test_csv_file('SaleInvoiceMixed.csv', 'sale_invoice')

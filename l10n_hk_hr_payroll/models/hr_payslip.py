@@ -118,7 +118,8 @@ class HrPayslip(models.Model):
             adw = 0
             average_daily_wage = sum(slip.input_line_ids.filtered(lambda line: line.code == 'AVERAGE_DAILY_WAGE').mapped('amount'))
             if average_daily_wage:
-                adw = average_daily_wage
+                slip.l10n_hk_average_daily_wage = average_daily_wage
+                continue
 
             last_year_payslips = slip._get_previous_year_payslips(order='date_from')
             if last_year_payslips:
@@ -310,12 +311,15 @@ class HrPayslip(models.Model):
         The way it is done is by finding the last monthly payslip before that date, and getting the value from it.
         """
         employee_salary_struct = self.env.ref('l10n_hk_hr_payroll.hr_payroll_structure_cap57_employee_salary')
-        latest_payslip = next(iter(self.employee_id.slip_ids.filtered(
+        relevant_payslips = self.employee_id.slip_ids.filtered(
             lambda s: s.struct_id == employee_salary_struct and s.date_to < request_date
-        ).sorted()))
-        if not latest_payslip:
-            return 0.0
-        return latest_payslip._get_line_values(['713_GROSS'])['713_GROSS'][latest_payslip.id]['total']
+        )
+        if relevant_payslips:
+            latest_payslip = next(iter(relevant_payslips.sorted()))
+            if not latest_payslip:
+                return 0.0
+            return latest_payslip._get_line_values(['713_GROSS'])['713_GROSS'][latest_payslip.id]['total']
+        return 0.0
 
     def _get_years_of_services_per_period(self):
         """
@@ -332,11 +336,11 @@ class HrPayslip(models.Model):
         contract_end_date = contracts[0].date_end or self.date_to
         # Starts by calculating the pre-transition years of service.
         pre_transition_end_date = transition_date - relativedelta(days=1)  # April 30, 2025
-        pre_transition_years = self.employee_id._get_years_of_service(self.employee_id.contract_date_start, pre_transition_end_date)
+        pre_transition_years = self.employee_id._get_years_of_service(self.employee_id._get_first_version_date(), pre_transition_end_date)
 
         # Continues by calculating the post-transition years of service.
         post_transition_start_date = transition_date
-        post_transition_years = self.employee_id._get_years_of_service(max(self.employee_id.contract_date_start, post_transition_start_date), contract_end_date)
+        post_transition_years = self.employee_id._get_years_of_service(max(self.employee_id._get_first_version_date(), post_transition_start_date), contract_end_date)
 
         return pre_transition_years, post_transition_years
 

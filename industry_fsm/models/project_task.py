@@ -373,6 +373,10 @@ class ProjectTask(models.Model):
                 'default_user_ids': default_user_ids,
                 'allow_timesheets': allow_timesheets,
             },
+            'domain': Domain.AND([
+                literal_eval(action.get('domain', [])),
+                [('has_template_ancestor', '=', False)]
+            ]),
         }
 
     # ---------------------------------------------------------

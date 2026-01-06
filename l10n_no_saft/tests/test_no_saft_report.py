@@ -40,6 +40,10 @@ class TestNoSaftReportCommon(TestAccountReportsCommon):
         cls.product_a.default_code = 'PA'
         cls.product_b.default_code = 'PB'
 
+        ChartTemplate = cls.env['account.chart.template']
+        provision_acc = ChartTemplate.ref("chart2045")
+        allocation_acc = ChartTemplate.ref("chart8900")
+
         # Create invoices
 
         cls.invoices = cls.env['account.move'].create([
@@ -78,6 +82,23 @@ class TestNoSaftReportCommon(TestAccountReportsCommon):
                     'price_unit': 800.0,
                     'tax_ids': [(6, 0, cls.company_data['default_tax_purchase'].ids)],
                 })],
+            },
+            {
+                # allocation of undistributed profits/losses
+                'move_type': 'entry',
+                'date': '2018-12-31',
+                'line_ids': [
+                    Command.create({
+                        'debit': 8000.0,
+                        'credit': 0.0,
+                        'account_id': provision_acc.id,
+                    }),
+                    Command.create({
+                        'debit': 0.0,
+                        'credit': 8000.0,
+                        'account_id': allocation_acc.id,
+                    }),
+                ],
             },
             {
                 # this entry is added to ensure that the XML will have CreditAmount tag
@@ -149,9 +170,9 @@ class TestNoSaftReport(TestNoSaftReportCommon):
                             </Account>
                             <Account>
                                 <AccountID>___ignore___</AccountID>
-                                <AccountDescription>Retained result</AccountDescription>
+                                <AccountDescription>Reserve for non-realised gains</AccountDescription>
                                 <GroupingCategory>RF-1167</GroupingCategory>
-                                <GroupingCode>2099</GroupingCode>
+                                <GroupingCode>2045</GroupingCode>
                                 <AccountType>GL</AccountType>
                                 <OpeningDebitBalance>8000.00</OpeningDebitBalance>
                                 <ClosingDebitBalance>8000.00</ClosingDebitBalance>

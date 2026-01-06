@@ -71,7 +71,7 @@ class AccountJournal(models.Model):
             # account.move.ref is SocialNumber+SequenceNumber+AccountPeriodYYYY/AccountPeriodmm : check that this move has not already been imported
             account_period = parsed_attachment.find('.//AccountPeriod').text
             ref = "%s-%s-%s/%s" % (parsed_attachment.find('.//Source').text, parsed_attachment.find('.//SeqNumber').text, account_period[:4], account_period[4:])
-            existing_move = self.env['account.move'].search([('ref', '=', ref)])
+            existing_move = self.env['account.move'].search([('ref', '=', ref), ('company_id', '=', self.company_id.id)])
             if existing_move:
                 if self.env.context.get('raise_no_imported_file', True):
                     raise UserError(

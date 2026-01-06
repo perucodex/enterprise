@@ -22,5 +22,5 @@ registerThreadAction("view-contact", {
     },
     icon: "fa fa-fw fa-address-book",
     name: _t("View Contact"),
-    sequenceGroup: ({ owner }) => (owner.env.inDiscussApp ? 50 : 1),
+    sequenceGroup: 1,
 });

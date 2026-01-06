@@ -27,7 +27,7 @@ patch(BankRecLineToReconcile.prototype, {
             ),
         ];
         if (batchPaymentIds.length) {
-            await this.bankReconciliation.updateAvailableBatchPayments(
+            await this.bankReconciliation.updateHasAvailableBatchPayments(
                 this.statementLineData.journal_id.id
             );
             this.props.statementLine.load();

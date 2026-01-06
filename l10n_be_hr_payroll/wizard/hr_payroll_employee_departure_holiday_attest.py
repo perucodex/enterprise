@@ -1,7 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from dateutil.relativedelta import relativedelta
-from itertools import product
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
@@ -109,44 +108,38 @@ class HrPayslipEmployeeDepatureHolidayAttests(models.TransientModel):
                 continue
 
             current_year = wizard.employee_id.end_notice_period.replace(month=1, day=1)
-            previous_year = current_year - relativedelta(years=1)
 
-            legal_leave_type = \
-                wizard.employee_id.company_id.l10n_be_legal_time_off_type.id or \
-                self.env['hr.leave.type'].search(
-                    [('work_entry_type_id', '=', self.env.ref('hr_work_entry.work_entry_type_legal_leave').id)],
-                    limit=1
-                ).id
-            target_leave_types = [
-                self.env.ref('hr_holidays.l10n_be_leave_type_european').id,
-            ]
-            if legal_leave_type:
-                target_leave_types.append(legal_leave_type)
+            target_leave_types = self.env['hr.leave.type'].search([
+                ('work_entry_type_id', 'in', (
+                    self.env.ref('hr_work_entry.work_entry_type_legal_leave').id,
+                    self.env.ref('hr_work_entry.l10n_be_work_entry_type_european').id,
+                ))
+            ]).ids
 
             time_off_ids = self.env['hr.leave'].search([
                 ('employee_id', '=', wizard.employee_id.id),
-                ('date_from', '>=', previous_year),
+                ('date_from', '>=', current_year),
                 ('state', '=', 'validate'),
                 ('holiday_status_id', 'in', target_leave_types)])
 
             time_off_allocation_ids = self.env['hr.leave.allocation'].search([
                 ('employee_id', '=', wizard.employee_id.id),
-                ('date_from', '>=', previous_year),
+                ('date_from', '>=', current_year),
                 ('state', '=', 'validate'),
                 ('holiday_status_id', 'in', target_leave_types)])
 
             values = []
-            for year, time_off_type_id in product([previous_year.year, current_year.year], target_leave_types):
+            for time_off_type_id in target_leave_types:
                 time_offs = time_off_ids.filtered(
-                    lambda t: t.holiday_status_id.id == time_off_type_id and t.date_from.year == year
+                    lambda t: t.holiday_status_id.id == time_off_type_id
                 )
                 time_off_allocations = time_off_allocation_ids.filtered(
-                    lambda t: t.holiday_status_id.id == time_off_type_id and t.date_from.year == year
+                    lambda t: t.holiday_status_id.id == time_off_type_id
                 )
                 if time_offs or time_off_allocations:
                     values.append(
                         (0, 0, {
-                            'year': year,
+                            'year': current_year.year,
                             'leave_type_id': self.env['hr.leave.type'].browse(time_off_type_id).id,
                             'leave_allocation_count': sum(time_off_allocations.mapped('number_of_days')),
                             'leave_count': sum(time_offs.mapped('number_of_days')),
@@ -370,12 +363,14 @@ class HrPayslipEmployeeDepatureHolidayAttests(models.TransientModel):
             ('date_to', '>=', previous_year),
             ('date_from', '<', current_year),
             ('state', 'in', ['validated', 'paid'])])
-        legal_time_off_type = self.employee_id.company_id.l10n_be_legal_time_off_type.id
+        legal_time_off_types = self.env['hr.leave.type'].search([
+            ('work_entry_type_id', '=', self.env.ref('hr_work_entry.work_entry_type_legal_leave').id)
+        ]).ids
         legal_time_off_lines_allocation = self.time_off_line_ids.filtered(
-            lambda t: t.year == previous_year.year and t.leave_type_id.id == legal_time_off_type
+            lambda t: t.year == current_year.year and t.leave_type_id.id in legal_time_off_types
         )
         legal_time_off_lines_leave = self.time_off_line_ids.filtered(
-            lambda t: t.year == current_year.year and t.leave_type_id.id == legal_time_off_type
+            lambda t: t.year == current_year.year and t.leave_type_id.id in legal_time_off_types
         )
         time_off_allocated = legal_time_off_lines_allocation.leave_allocation_count
         time_off_taken = legal_time_off_lines_leave.leave_count

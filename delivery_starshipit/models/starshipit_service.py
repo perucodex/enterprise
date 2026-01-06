@@ -249,4 +249,4 @@ class Starshipit:
         uuid in order to get a unique but easily recomputable reference and add it to the picking number.
         """
         database_uuid = picking.env['ir.config_parameter'].sudo().get_param('database.uuid')
-        return f"{picking.name}#{picking.company_id.id}-{database_uuid[:5]}"
+        return f"{picking.name}#{picking.company_id.id} ({picking.sale_id.name})-{database_uuid[:5]}"

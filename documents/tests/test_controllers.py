@@ -387,7 +387,7 @@ class TestDocumentsControllers(HttpCaseWithUserDemo, MockEmail):
         self.public_file.action_create_shortcut(str(self.internal_folder.id))
         self.public_folder.action_create_shortcut(str(self.internal_folder.id))
         self.env['documents.document'].create([{
-            'name': 'test.tar.gz',
+            'name': 'te/st.tar.gz',  # the `/` in the name should be replaced with `_`
             'folder_id': self.internal_folder.id,
             'access_internal': 'view',
             'datas': 'test',
@@ -404,6 +404,15 @@ class TestDocumentsControllers(HttpCaseWithUserDemo, MockEmail):
             'access_internal': 'view',
             'type': 'folder',
         } for _ in range(2)])
+
+        # add nested folders with `/` in their names
+        parent_id = self.public_folder.id
+        for i in range(4):
+            parent_id = self.env["documents.document"].create({
+                'name': f'folder/test/{i}',
+                'folder_id': parent_id,
+                'type': 'folder',
+            }).id
 
         self.authenticate('demo', 'demo')
         res = self.url_open(f'/documents/content/{self.internal_folder.access_token}')
@@ -423,11 +432,16 @@ class TestDocumentsControllers(HttpCaseWithUserDemo, MockEmail):
             'public folder-3/',
             'public folder-4/',
             'public folder-5/',
-            'test.tar.gz',
-            'test-2.tar.gz',
-            'test-3.tar.gz',
+            'te_st.tar.gz',
+            'te_st-2.tar.gz',
+            'te_st-3.tar.gz',
             '.hidden/',
             '.hidden-2/',
+            # the path should be correct, even if the folders have `/` in their names
+            'public folder/folder_test_0/',
+            'public folder/folder_test_0/folder_test_1/',
+            'public folder/folder_test_0/folder_test_1/folder_test_2/',
+            'public folder/folder_test_0/folder_test_1/folder_test_2/folder_test_3/',
         }
         with zipfile.ZipFile(BytesIO(res.content)) as reszip:
             self.assertEqual(set(reszip.namelist()), expected)

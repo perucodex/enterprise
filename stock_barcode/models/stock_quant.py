@@ -31,7 +31,6 @@ class StockQuant(models.Model):
                 val[2]['lot_id'] = self.env['stock.lot'].create({
                     'name': val[2].pop('lot_name'),
                     'product_id': val[2].get('product_id', quant_db and quant_db.product_id.id or False),
-                    'company_id': self.env['stock.location'].browse(val[2].get('location_id') or quant_db.location_id.id).company_id.id
                 }).id
 
         quant_ids = []
@@ -74,11 +73,23 @@ class StockQuant(models.Model):
         package_types = self.env['stock.package.type']
         valid_quants = self
         if not self:  # `self` is an empty recordset when we open the inventory adjustment.
+            warehouse_location = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1).lot_stock_id
+            quant_locations = self.env['stock.location']
             if self.env.user.has_group('stock.group_stock_multi_locations'):
-                locations = self.env['stock.location'].search([('usage', 'in', ['internal', 'transit']), ('company_id', '=', company_id)], order='id')
+                quant_locations = self.env['stock.location'].search([
+                    ('usage', 'in', ['internal', 'transit']),
+                    ('company_id', '=', company_id),
+                ], order='id')
             else:
-                locations = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1).lot_stock_id
-            valid_quants = self.env['stock.quant'].search(['|', ('user_id', '=?', self.env.user.id), ('user_id', '=', False), ('location_id', 'in', locations.ids), ('inventory_date', '<=', fields.Date.today())])
+                quant_locations = warehouse_location
+            valid_quants = self.env['stock.quant'].search([
+                '|',
+                    ('user_id', '=?', self.env.user.id),
+                    ('user_id', '=', False),
+                ('location_id', 'in', quant_locations.ids),
+                ('inventory_date', '<=', fields.Date.today()),
+            ])
+            locations = warehouse_location.child_internal_location_ids | valid_quants.location_id
             if self.env.user.has_group('stock.group_tracking_lot'):
                 package_types = package_types.search([])
 

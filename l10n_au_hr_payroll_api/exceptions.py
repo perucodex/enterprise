@@ -6,4 +6,4 @@ from odoo.exceptions import UserError
 
 def _l10n_au_raise_user_error(message: str):
     """Create a UserError for Australian Payroll with a specific message."""
-    return UserError(_("Australian Payroll Error: %s", message))
+    raise UserError(_("Australian Payroll Error: %s", message))

@@ -426,6 +426,7 @@ class SIE4ImportWizard(models.TransientModel):
             off_balance_account = self.env['account.account'].with_company(self.company_id).search_fetch(
                 domain=[('account_type', '=', 'equity_unaffected')],
                 field_names=['id'],
+                limit=1,
             )
             line_ids.append(Command.create({
                 'date': prev_date_to,

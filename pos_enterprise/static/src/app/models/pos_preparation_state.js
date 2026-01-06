@@ -13,10 +13,7 @@ export class PosPreparationState extends Base {
         const orderPresetTime = this.prep_line_id.prep_order_id.pos_order_id.preset_time;
         if (orderPresetTime) {
             const preset = this.prep_line_id.prep_order_id.pos_order_id.preset_id;
-            if (
-                orderPresetTime.hasSame(DateTime.now().startOf("day"), "day") &&
-                preset.nextSlot.datetime.ts < orderPresetTime.ts
-            ) {
+            if (preset.nextSlot?.datetime.ts < orderPresetTime.ts) {
                 this.timeToShow =
                     orderPresetTime.minus({ minutes: preset.interval_time }) - DateTime.now();
                 setTimeout(() => {
@@ -40,6 +37,10 @@ export class PosPreparationState extends Base {
 
     computeDuration() {
         return computeDurationSinceDate(this.write_date);
+    }
+
+    isStageDone(stage_id, todo = false) {
+        return this.stage_id.id === stage_id && this.todo === todo;
     }
 }
 

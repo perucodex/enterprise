@@ -29,7 +29,8 @@ class StockMoveLine(models.Model):
     @api.depends('result_package_id')
     def _compute_outermost_result_package_id(self):
         for line in self:
-            line.outermost_result_package_id = line.result_package_id.outermost_package_id
+            outermost_package = line.result_package_id.outermost_package_id
+            line.outermost_result_package_id = outermost_package if outermost_package != line.result_package_id else False
 
     @api.depends('tracking', 'picking_type_use_existing_lots', 'picking_type_use_create_lots', 'lot_name')
     def _compute_hide_lot_name(self):

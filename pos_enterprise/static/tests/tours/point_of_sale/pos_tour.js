@@ -111,3 +111,33 @@ registry.category("web_tour.tours").add("test_sending_order_in_preparation_shoul
             ReceiptScreen.clickNextOrder(),
         ].flat(),
 });
+
+registry.category("web_tour.tours").add("PosOrderCreationTourPdis", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            // Make simple order "Eat in"
+            ProductScreen.clickDisplayedProduct("Desk Pad", true, "1.0"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.clickNextOrder(),
+            // Make Takeaway order for tomorrow
+            ProductScreen.clickDisplayedProduct("Letter Tray", true, "1.0"),
+            ProductScreen.selectPreset("Eat in", "Takeaway"),
+            Chrome.selectSlotDays("6"),
+            Chrome.selectPresetTimingSlotIndex("1"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.clickNextOrder(),
+            // Make a Delivery order
+            ProductScreen.clickDisplayedProduct("Whiteboard Pen", true, "1.0"),
+            ProductScreen.selectPreset("Eat in", "Delivery"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.clickNextOrder(),
+        ].flat(),
+});

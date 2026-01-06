@@ -103,11 +103,16 @@ export class UserAgent extends Reactive {
         };
     }
 
-    async shouldPlayIncomingCallRingtone() {
+    get isInDoNotDisturbMode() {
         const dndUntil = this.voip.store.settings.do_not_disturb_until_dt;
-        const doNotDisturb = Boolean(dndUntil) && dndUntil > luxon.DateTime.now();
+        return Boolean(dndUntil) && dndUntil > luxon.DateTime.now();
+    }
+
+    async shouldPlayIncomingCallRingtone() {
         return (
-            this.hasCallInvitation && !doNotDisturb && (await this.multiTabService.isOnMainTab())
+            this.hasCallInvitation &&
+            !this.isInDoNotDisturbMode &&
+            (await this.multiTabService.isOnMainTab())
         );
     }
 
@@ -148,6 +153,9 @@ export class UserAgent extends Reactive {
     }
 
     async attemptReconnection(attemptCount = 0) {
+        if (this.voip.isUnloading) {
+            return;
+        }
         if (attemptCount > 5) {
             this.voip.triggerError(
                 _t("The WebSocket connection was lost and couldn't be reestablished.")
@@ -459,7 +467,9 @@ export class UserAgent extends Reactive {
             onCancel: (message) => session._onIncomingInviteCanceled(message),
         };
         this.activeSession = this.mainSession = session;
-        this.softphone.show();
+        if (!this.isInDoNotDisturbMode) {
+            this.softphone.show();
+        }
         if (await this.shouldPlayIncomingCallRingtone()) {
             this.ringtoneService.incoming.play();
         }

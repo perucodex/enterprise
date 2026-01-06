@@ -23,6 +23,7 @@ export class BankStatementImportAction extends ImportAction {
         onWillStart(async () => {
             if (this.props.action.params.context) {
                 this.model.id = this.props.action.params.context.wizard_id;
+                await this.model.init();
                 await super.handleFilesUpload([{ name: this.state.filename }])
             }
         });

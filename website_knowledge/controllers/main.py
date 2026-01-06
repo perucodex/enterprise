@@ -21,7 +21,7 @@ class KnowledgeWebsiteController(KnowledgeController):
         return super().access_knowledge_home()
 
     # Override routes to display articles to public users
-    @http.route('/knowledge/article/<int:article_id>', type='http', auth='public', website=True, sitemap=False)
+    @http.route('/knowledge/article/<int:article_id>', type='http', auth='public', website=True, sitemap=False, multilang=False)
     def redirect_to_article(self, **kwargs):
         if request.env.user._is_public():
             article = request.env['knowledge.article'].sudo().browse(kwargs['article_id'])

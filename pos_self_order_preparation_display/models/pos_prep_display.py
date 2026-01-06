@@ -4,14 +4,10 @@ from odoo import models, api
 class PosPrepDisplay(models.Model):
     _inherit = "pos.prep.display"
 
-    def _load_preparation_data_models(self):
-        res = super()._load_preparation_data_models()
-        return res + ['pos.config']
-
     def _get_preparation_display_order_additional_info(self, prep_states, prep_lines, prep_orders):
         self.ensure_one()
         res = super()._get_preparation_display_order_additional_info(prep_states, prep_lines, prep_orders)
-        res['pos.config'] = self._get_pos_config_ids().read(['id', 'name', 'has_paper'], load=False)
+        res['pos.config'] = self._get_pos_config_ids().read(['id', 'name', 'has_paper', 'use_presets'], load=False)
         return res
 
     def _paper_status_change(self, pos_config):

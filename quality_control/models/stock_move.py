@@ -47,6 +47,9 @@ class StockMove(models.Model):
         check_vals_list = []
         for picking, moves in pick_moves.items():
             quality_points_domain = self.env['quality.point']._get_domain(moves.product_id, picking.picking_type_id, measure_on='operation')
+            existing_point_ids = picking.check_ids.filtered(lambda c: c.measure_on == 'operation').point_id.ids
+            if existing_point_ids:
+                quality_points_domain += [('id', 'not in', existing_point_ids)]
             quality_points = self.env['quality.point'].sudo().search(quality_points_domain)
             for point in quality_points:
                 if point.check_execute_now():

@@ -40,26 +40,36 @@ class AppointmentHrTest(AppointmentHrCommon):
 
     @users('apt_manager')
     def test_generate_slots_recurring(self):
-        """ Generates recurring slots, check begin and end slot boundaries. """
+        """Generates recurring slots depending on whether the staff member has flexible hours or not and
+         checks begin and end slot boundaries."""
         apt_type = self.apt_type_bxls_2days.with_user(self.env.user)
 
+        exp_months = [{
+            'name_formated': 'February 2022',
+            'month_date': datetime(2022, 2, 1),
+            'weeks_count': 5,  # 31/01 -> 28/02 (06/03)
+        }]
+        slots_data = {
+            'enddate': self.global_slots_enddate,
+            'startdate': self.reference_now_monthweekstart,
+            'slots_startdate': self.reference_monday.date(),  # First Monday after reference_now.
+            'slots_weekdays_nowork': range(2, 7),  # Working hours only on Monday/Tuesday (0, 1).
+        }
+
+        # Check that only slots during working hours are available for users without flexible hours.
+        self.assertFalse(self.staff_employee_bxls.resource_calendar_id.flexible_hours)
         with freeze_time(self.reference_now):
             slots = apt_type._get_appointment_slots('Europe/Brussels')
+        # Based on appointment type start hours of slots but 12 is pause midi.
+        slots_data.update({'slots_start_hours': [8, 9, 10, 11, 13]})
+        self.assertSlots(slots, exp_months, slots_data)
 
-        self.assertSlots(
-            slots,
-            [{'name_formated': 'February 2022',
-              'month_date': datetime(2022, 2, 1),
-              'weeks_count': 5,  # 31/01 -> 28/02 (06/03)
-             }
-            ],
-            {'enddate': self.global_slots_enddate,
-             'startdate': self.reference_now_monthweekstart,
-             'slots_start_hours': [8, 9, 10, 11, 13],  # based on appointment type start hours of slots but 12 is pause midi
-             'slots_startdate': self.reference_monday.date(),  # first Monday after reference_now
-             'slots_weekdays_nowork': range(2, 7)  # working hours only on Monday/Tuesday (0, 1)
-            }
-        )
+        # Check that even slots outside working hours are available for users with flexible hours.
+        self.staff_employee_bxls.resource_calendar_id.write({'flexible_hours': True})
+        with freeze_time(self.reference_now):
+            slots = apt_type._get_appointment_slots('Europe/Brussels')
+        slots_data.update({'slots_start_hours': [8, 9, 10, 11, 12, 13]})
+        self.assertSlots(slots, exp_months, slots_data)
 
     @users('apt_manager')
     def test_generate_slots_recurring_midnight(self):

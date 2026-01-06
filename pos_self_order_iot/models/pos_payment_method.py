@@ -14,5 +14,8 @@ class PosPaymentMethod(models.Model):
     def _load_pos_self_data_domain(self, data, config):
         domain = super()._load_pos_self_data_domain(data, config)
         if config.self_ordering_mode == 'kiosk':
-            domain = Domain.OR([[('iot_device_id', '!=', False)], domain])
+            domain = Domain.OR([
+                [('iot_device_id', '!=', False), ('id', 'in', config.payment_method_ids.ids)],
+                domain
+            ])
         return domain

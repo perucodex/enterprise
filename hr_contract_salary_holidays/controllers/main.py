@@ -21,8 +21,9 @@ class SignContract(Sign):
                     'employee_id': version.employee_id.id,
                     'number_of_days': version.holidays,
                     'holiday_status_id': time_off_type.id,
-                    'state': 'validate',
+                    'state': 'confirm',
                     'notes': _('Allocation automatically created from Contract Signature.'),
                 })
                 version.leave_allocation_id = records[0]
+                version.leave_allocation_id.action_approve()
         return result

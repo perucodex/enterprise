@@ -8,10 +8,14 @@
         <field name="arch" type="xml">
             <field name="product_tooltip" position="after">
                 <label for="product_tooltip" string=""
-                    invisible="not recurring_invoice or type != 'consu'"/>
-                <div class="fst-italic text-muted"
-                    invisible="not recurring_invoice or type != 'consu'">
-                    Recurring order with this product will be invoiced at the end of the period.
+                    invisible="not recurring_invoice or type == 'combo'"/>
+                <div class="fst-italic text-muted" invisible="not recurring_invoice or type == 'combo'">
+                    <div invisible="invoice_policy != 'delivery'">
+                        Recurring order with this product will be invoiced at the end of the period.
+                    </div>
+                    <div invisible="invoice_policy != 'order'">
+                        Recurring order with this product will be invoiced at the beginning of the period.
+                    </div>
                 </div>
             </field>
         </field>

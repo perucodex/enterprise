@@ -11,24 +11,29 @@
                 autofocus="true"
             />
         </Section>
-        <Section title.translate="Default value" class="'o-default-value-section'">
-            <DefaultDateValue value="store.filter.defaultValue"
-                              update.bind="updateDefaultValue"/>
-        </Section>
-        <t t-if="store.shouldDisplayFieldMatching">
-            <SidePanelCollapsible isInitiallyCollapsed="!store.isNew" title.translate="Field matching">
-                <t t-set-slot="content">
-                    <Section class="'pt-0'">
-                        <FilterEditorFieldMatching
-                            fieldMatchings="store.fieldsMatching"
-                            selectField.bind="onSelectedField"
-                            filterModelFieldSelectorField="store.filterModelFieldSelectorField"
-                            onOffsetSelected.bind="onOffsetSelected"
-                        />
-                    </Section>
-                </t>
-            </SidePanelCollapsible>
+        <t t-if="store.isValid">
+            <Section title.translate="Default value" class="'o-default-value-section'">
+                <DefaultDateValue value="store.filter.defaultValue"
+                                update.bind="updateDefaultValue"/>
+            </Section>
+            <t t-if="store.shouldDisplayFieldMatching">
+                <SidePanelCollapsible isInitiallyCollapsed="!store.isNew" title.translate="Field matching">
+                    <t t-set-slot="content">
+                        <Section class="'pt-0'">
+                            <FilterEditorFieldMatching
+                                fieldMatchings="store.fieldsMatching"
+                                selectField.bind="onSelectedField"
+                                filterModelFieldSelectorField="store.filterModelFieldSelectorField"
+                                onOffsetSelected.bind="onOffsetSelected"
+                            />
+                        </Section>
+                    </t>
+                </SidePanelCollapsible>
+            </t>
         </t>
+        <Section t-else="1">
+            <ValidationMessages messages="[invalidModel]" msgType="'error'"/>
+        </Section>
         <GlobalFilterFooter t-props="footerProps"/>
     </div>
 </templates>

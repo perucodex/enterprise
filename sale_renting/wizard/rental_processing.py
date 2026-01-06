@@ -93,7 +93,8 @@ class RentalOrderWizardLine(models.TransientModel):
     @api.constrains('qty_returned', 'qty_delivered')
     def _only_pickedup_can_be_returned(self):
         for wizard_line in self:
-            if wizard_line.status == 'return' and wizard_line.qty_returned > wizard_line.qty_delivered:
+            total_qty_returned = wizard_line.qty_returned + wizard_line.order_line_id.qty_returned
+            if wizard_line.status == 'return' and total_qty_returned > wizard_line.qty_delivered:
                 raise ValidationError(_("You can't return more than what's been picked-up."))
 
     def _apply(self):

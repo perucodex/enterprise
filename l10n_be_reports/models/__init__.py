@@ -15,3 +15,4 @@ from . import account_325_form
 from . import account_281_50_form
 from . import mail_activity_type
 from . import annual_statement_custom_handler
+from . import qr_code_payment_wizard

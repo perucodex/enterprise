@@ -5,8 +5,9 @@ import { onWillStart, Component } from "@odoo/owl";
 import { FilterEditorStore } from "../../filter_editor_store";
 import { FilterEditorFieldMatching } from "./filter_editor_field_matching";
 import { GlobalFilterFooter } from "../global_filter_footer/global_filter_footer";
+import { _t } from "@web/core/l10n/translation";
 
-const { Checkbox, Section, SidePanelCollapsible, TextInput } = components;
+const { Checkbox, Section, SidePanelCollapsible, TextInput, ValidationMessages } = components;
 const { useLocalStore } = stores;
 
 /**
@@ -32,6 +33,7 @@ export class AbstractFilterEditorSidePanel extends Component {
         TextInput,
         FilterEditorFieldMatching,
         GlobalFilterFooter,
+        ValidationMessages,
     };
     static props = {
         id: { type: String, optional: true },
@@ -66,10 +68,12 @@ export class AbstractFilterEditorSidePanel extends Component {
 
     get footerProps() {
         return {
-            onClickSave: () => {
-                const sourcePanel = `${this.constructor.name}_${this.props.id}`;
-                this.store.saveGlobalFilter(sourcePanel);
-            },
+            onClickSave: !this.store.isValid
+                ? undefined
+                : () => {
+                      const sourcePanel = `${this.constructor.name}_${this.props.id}`;
+                      this.store.saveGlobalFilter(sourcePanel);
+                  },
             onClickDelete: !this.props.id
                 ? undefined
                 : () => {
@@ -88,5 +92,11 @@ export class AbstractFilterEditorSidePanel extends Component {
                 );
             },
         };
+    }
+
+    get invalidModel() {
+        return _t(
+            "At least one data source has an invalid model. Please delete it before editing this global filter."
+        );
     }
 }

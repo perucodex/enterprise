@@ -81,3 +81,58 @@ class TestAccountMissingTransactionsWizard(AccountOnlineSynchronizationCommon):
 
         transaction = self.env['account.bank.statement.line'].search([('payment_ref', '=', 'ABCD01')], limit=1)
         self.assertEqual(transaction.transaction_details, expected_transaction_details)
+
+    @patch('odoo.addons.account_online_synchronization.models.account_online.AccountOnlineLink._fetch_odoo_fin')
+    def test_fetch_missing_transaction_with_end_to_end_uuid(self, patched_fetch_odoofin):
+        """Tests that the wizard works when the end-to-end uuid is sent from OdooFin."""
+        self.account_online_link.state = 'connected'
+        patched_fetch_odoofin.side_effect = [
+            {
+                'transactions': [self._create_one_online_transaction(
+                    transaction_identifier='ABCD01',
+                    date='2023-07-06',
+                    end_to_end_uuid='123',
+                )],
+            },
+            {
+                'transactions': [self._create_one_online_transaction(
+                    transaction_identifier='ABCD02_pending',
+                    date='2023-07-25',
+                    end_to_end_uuid='123',
+                )],
+            },
+        ]
+
+        wizard = self.env['account.missing.transaction.wizard'].new({
+            'date': '2023-07-01',
+            'journal_id': self.euro_bank_journal.id,
+        })
+
+        action = wizard.action_fetch_missing_transaction()
+        transient_transactions = self.env['account.bank.statement.line.transient'].search(domain=action['domain'])
+        self.assertEqual(2, len(transient_transactions))
+
+    @patch('odoo.addons.account_online_synchronization.models.account_online.AccountOnlineLink._fetch_odoo_fin')
+    def test_fetch_pending_transaction_with_end_to_end_uuid(self, patched_fetch_odoofin):
+        """Tests that the pending transactions works when the end-to-end uuid is sent from OdooFin."""
+        self.account_online_link.state = 'connected'
+        patched_fetch_odoofin.side_effect = [
+            {
+                'transactions': [self._create_one_online_transaction(
+                    transaction_identifier='ABCD01',
+                    date='2023-07-06',
+                    end_to_end_uuid='123',
+                )],
+            },
+            {
+                'transactions': [self._create_one_online_transaction(
+                    transaction_identifier='ABCD02_pending',
+                    date='2023-07-25',
+                    end_to_end_uuid='123',
+                )],
+            },
+        ]
+
+        action = self.euro_bank_journal.action_open_pending_bank_statement_lines()
+        transient_transactions = self.env['account.bank.statement.line.transient'].search(domain=action['domain'])
+        self.assertEqual(1, len(transient_transactions))

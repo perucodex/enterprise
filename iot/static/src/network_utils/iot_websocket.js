@@ -32,7 +32,13 @@ export class IotWebsocket {
         messageId ??= uuid();
 
         await this.orm.call("iot.channel", "send_message", [
-            { iot_identifiers: [iotBoxIdentifier], session_id: messageId, ...message }, messageType
+            {
+                iot_identifiers: [iotBoxIdentifier],
+                iot_identifier: iotBoxIdentifier, // compatibility with v19.1+ IoT Boxes
+                session_id: messageId,
+                ...message
+            },
+            messageType
         ]);
 
         return messageId;

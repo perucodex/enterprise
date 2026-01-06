@@ -176,7 +176,7 @@ class AccountReturnCreationWizard(models.TransientModel):
             forced_date_from=fields.Date.to_string(self.date_from),
             forced_date_to=fields.Date.to_string(self.date_to),
             manually_created=True
-        )._try_create_returns_for_fiscal_year(company, tax_unit, allow_duplicates=self.category == 'audit')
+        )._try_create_returns_for_fiscal_year(company, tax_unit, allow_duplicates=self.category == 'audit', bypass_period_check=True)
         returns_created.skipped_check_cycles = ','.join(
             v for k, v in {
                 'regulatory_compliance': 'regulatory_compliance',

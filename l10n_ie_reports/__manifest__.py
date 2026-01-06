@@ -12,7 +12,9 @@
     "data": [
         "data/account_return_data.xml",
         "data/profit_and_loss-ie.xml",
+        "data/profit_and_loss_tags-ie.xml",
         "data/balance_sheet-ie.xml",
+        "data/balance_sheet_tags-ie.xml",
         "data/ec_sales_list_report-ie.xml",
         "data/tax_report-ie.xml",
         "data/vat3_template.xml",

@@ -8,7 +8,7 @@
                     <img t-attf-class="o_avatar rounded object-fit-contain {{ props.avatarUrl != '/base/static/img/avatar_grey.png' and 'o-voip-avatar-bg' }}" t-att-src="props.avatarUrl" alt="Profile picture" aria-hidden="true"/>
                     <div class="overflow-hidden">
                         <p class="m-0 fw-bold text-truncate">
-                            <img t-if="props.title === props.phoneNumber and props.countryCode" class="o-voip-countryFlag me-1 align-middle" t-attf-src="/base/static/img/country_flags/{{ props.countryCode }}.png" t-att-alt="flagAlt"/>
+                            <img t-if="props.title === props.phoneNumber and props.record.phone_country_id?.image_url" class="o-voip-countryFlag me-1 align-middle" t-att-src="props.record.phone_country_id.image_url" t-att-alt="flagAlt"/>
                             <span class="align-middle" t-out="props.title"/>
                         </p>
                         <p t-if="props.subtitle" class="m-0 opacity-75 text-truncate" t-att-class="props.subtitleClass">

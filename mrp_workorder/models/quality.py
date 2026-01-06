@@ -210,7 +210,7 @@ class QualityCheck(models.Model):
     is_user_working = fields.Boolean(related="workorder_id.is_user_working")
     consumption = fields.Selection(related="workorder_id.consumption")
     working_state = fields.Selection(related="workorder_id.working_state")
-    is_deleted = fields.Boolean('Deleted in production')
+    is_deleted = fields.Boolean('Deleted in production')  # TODO DELETE in MASTER
 
     # Computed fields
     title = fields.Char('Title', compute='_compute_title')

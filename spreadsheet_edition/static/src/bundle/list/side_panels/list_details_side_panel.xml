@@ -5,19 +5,19 @@
         class="o-listing-details-side-panel"
         t-att="env.model.getters.isReadonly() ? ['inert', 1] : []"
         t-att-class="{ 'pe-none opacity-50': env.model.getters.isReadonly() }">
-        <Section class="'o-section'">
-            <t t-set-slot="title">
-                <div class="d-flex flex-row justify-content-between align-items-center">
-                    List Name
-                    <CogWheelMenu items="cogWheelMenuItems"/>
-                </div>
-            </t>
-            <TextInput
-                value="env.model.getters.getListName(props.listId)"
-                onChange.bind="onNameChanged"
-            />
-        </Section>
         <t t-if="isModelValid">
+            <Section class="'o-section'">
+                <t t-set-slot="title">
+                    <div class="d-flex flex-row justify-content-between align-items-center">
+                        List Name
+                        <CogWheelMenu items="cogWheelMenuItems"/>
+                    </div>
+                </t>
+                <TextInput
+                    value="env.model.getters.getListName(props.listId)"
+                    onChange.bind="onNameChanged"
+                />
+            </Section>
             <t t-set="def" t-value="listDefinition"/>
             <div class="o-section">
                 <div class="o-section-title">Model</div>
@@ -54,8 +54,9 @@
                 <ValidationMessages messages="[unusedListWarning]" msgType="'warning'"/>
             </div>
         </t>
-        <t t-else="1">
+        <Section t-else="1">
             <ValidationMessages messages="[invalidListModel]" msgType="'error'"/>
-        </t>
+            <button class="mx o-button o-button-primary mt-2 m-1" t-on-click="delete">Delete List</button>
+        </Section>
     </div>
 </templates>

@@ -8,8 +8,12 @@
                         Voucher Number: <t t-esc="order.voucher_number"/>
                     </div>
                 </div>
+                <div t-if="!order.finalized">
+                    Suggested Tip: <t t-esc="formatCurrency(order.priceExcl * 0.10)"/>
+                    <!-- as per the chilean law we have to show 10% of subtotal(without tax) as suggested tip -->
+                </div>
                 <br/>
-                <div t-if= "order.company.l10n_cl_dte_resolution_date" class="d-flex flex-column align-items-center pos-receipt-order-data">
+                <div t-if= "order.finalized and order.company.l10n_cl_dte_resolution_date" class="d-flex flex-column align-items-center pos-receipt-order-data">
                     <img class="img-fluid w-100" t-attf-src="data:image/*;base64,{{order.account_move?.l10n_cl_sii_barcode_image}}"/>
                     <span>Timbre Electrónico SII</span>
                     <span>Resolución Nº: <t t-out="order.company.l10n_cl_dte_resolution_number"/></span>

@@ -149,7 +149,10 @@ export class VoiceTranscription extends Component {
                     transcriptPrompt?.innerText.trim()
                 );
                 this.embeddedState.status = "recording";
-                this.props.onTranscriptionStarted(this.embeddedState.id);
+                this.props.onTranscriptionStarted(
+                    this.embeddedState.id,
+                    this.state.currentLanguage.replace("_", "-")
+                );
                 this.props.onTranscriptionUpdated(
                     "listening",
                     this.embeddedState.id,
@@ -209,12 +212,13 @@ export class VoiceTranscription extends Component {
             return null;
         }
 
+        const summaryLanguage = `You MUST provide the summary in the following language: ${this.state.currentLanguage}`;
         const summary = await this.orm.call(
             "ai.agent",
             "get_direct_response",
             [this.composerPrompts.ai_agent],
             {
-                prompt: `${this.composerPrompts.default_prompt}\n${prompt}\n${textToSummarize}`,
+                prompt: `${this.composerPrompts.default_prompt}\n${prompt}\n${summaryLanguage}\n${textToSummarize}`,
                 enable_html_response: true,
             }
         );

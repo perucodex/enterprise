@@ -145,6 +145,8 @@ onRpc("get_sidebar_articles", () => ({ articles: [], favorite_ids: [] }));
 // Prevent instantiation of the color picker
 onRpc("render_public_asset", () => false);
 
+onRpc("has_access", () => true);
+
 defineActions([
     {
         id: 1,

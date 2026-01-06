@@ -12,4 +12,9 @@
     'auto_install': True,
     'author': 'Odoo S.A.',
     'license': 'OEEL-1',
+    'assets': {
+        'web.assets_backend': [
+            'quality_mrp_workorder_iot/static/src/**/*',
+        ],
+    }
 }

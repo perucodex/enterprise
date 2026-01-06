@@ -122,7 +122,7 @@ class L10n_ArTaxReportHandler(models.AbstractModel):
         line_ids = self.env['account.move.line'].browse(aml_ids)
 
         currency_id = line_ids[:1].move_id.currency_id
-        tax_data = line_ids.tax_ids.compute_all(total, currency=currency_id)
+        tax_data = line_ids.tax_ids.filtered('tax_group_id.l10n_ar_vat_afip_code').compute_all(total, currency=currency_id)
         return currency_id.round(tax_data['total_included'] - tax_data['total_excluded'])
 
     def _vat_simple_build_purchase_query(self, file_type, move_ids):
@@ -134,7 +134,7 @@ class L10n_ArTaxReportHandler(models.AbstractModel):
         query = SQL(
             """
                 WITH move_lines_with_concept AS (
-                    SELECT
+                    SELECT DISTINCT ON (aml.id)
                         aml.*,
                         CASE
                             WHEN tag_rel.account_account_tag_id = %(lease_tag_id)s THEN 2
@@ -157,6 +157,14 @@ class L10n_ArTaxReportHandler(models.AbstractModel):
                         aml.move_id IN %(move_ids)s AND
                         btg.l10n_ar_vat_afip_code IN ('3', '4', '5', '6', '8', '9') AND
                         aml.partner_id IS NOT NULL
+                    ORDER BY
+                        aml.id,
+                        -- Prioritize lease tag over fixed asset tag for concept determination on the distinct selection
+                        (CASE
+                            WHEN tag_rel.account_account_tag_id = %(lease_tag_id)s THEN 1
+                            WHEN tag_rel.account_account_tag_id = %(fixed_tag_id)s THEN 2
+                            ELSE 3
+                        END)
                 )
                 SELECT
                     concept,
@@ -203,15 +211,17 @@ class L10n_ArTaxReportHandler(models.AbstractModel):
                 """
                 (CASE
                     WHEN btg.l10n_ar_vat_afip_code IN ('0', '1', '2') THEN 3
-                    WHEN aaat.account_account_tag_id IN %(tag_id)s THEN 2
+                    WHEN aaat.account_account_tag_id = %(tag_id)s THEN 2
                     ELSE 1
                 END)
                 """,
-                tag_id=tuple(tag_id.ids),
+                tag_id=tag_id.id,
             )
             columns_map["Debito Fiscal Facturado"] = 'vat_amount'
             columns_map["Debito Fiscal O.D.P."] = 'vat_amount'
             exempt_operation_type = 3
+            # Since we are SELECT DISTINCT ON, we need a stable ORDER BY. Prioritize fixed asset tag for the op type.
+            cte_order_query = SQL("ORDER BY aml.id, (CASE when aaat.account_account_tag_id = %(tag_id)s THEN 1 ELSE 2 END)", tag_id=tag_id.id)
         else:
             operation_type_query = SQL(
                 """
@@ -224,18 +234,20 @@ class L10n_ArTaxReportHandler(models.AbstractModel):
                 )
             columns_map["Debito Fiscal a Restituir"] = 'vat_amount'
             exempt_operation_type = 2
-        columns_map["Monto Neto Exento o No Gravado"] = 'balance'
+            cte_order_query = SQL("ORDER BY aml.id")
+        columns_map["Monto Neto Exento o No Gravado"] = 'exempt_balance'
 
         query = SQL(
             """
                 WITH move_lines_with_operation_type AS (
-                    SELECT
-                        aml.*,
+                    SELECT DISTINCT ON (aml.id)
+                        aml.balance,
+                        aml.id,
+                        aml.move_id,
                         COALESCE(amlact.code, cmpact.code, '0') AS activity,
                         %(operation_query)s AS operation_type,
                         rprt.code as partner_responsibility_code,
-                        btg.l10n_ar_vat_afip_code,
-                        aaat.account_account_tag_id  -- Keep this for operation_query that might need it
+                        btg.l10n_ar_vat_afip_code
                     FROM account_move_line aml
                     LEFT JOIN account_account acc ON aml.account_id = acc.id
                     LEFT JOIN l10n_ar_arca_activity amlact ON acc.l10n_ar_arca_activity_id = amlact.id
@@ -249,6 +261,7 @@ class L10n_ArTaxReportHandler(models.AbstractModel):
                     LEFT JOIN account_tax_group btg ON bt.tax_group_id = btg.id
                     WHERE
                         btg.l10n_ar_vat_afip_code IS NOT NULL AND aml.move_id IN %(move_ids)s
+                    %(cte_order_query)s
                 )
                 SELECT
                     activity,
@@ -265,6 +278,10 @@ class L10n_ArTaxReportHandler(models.AbstractModel):
                         WHEN operation_type = %(exempt_op_type)s THEN ''
                         ELSE l10n_ar_vat_afip_code
                     END AS rate_code,
+                    CASE
+                        WHEN operation_type != %(exempt_op_type)s THEN ''
+                        ELSE REPLACE(ABS(SUM(balance))::TEXT, '.', ',')
+                    END AS exempt_balance,
                     SUM(balance) AS balance,
                     ARRAY_AGG(DISTINCT id) as aml_ids,
                     ARRAY_AGG(DISTINCT move_id) as move_ids
@@ -273,6 +290,7 @@ class L10n_ArTaxReportHandler(models.AbstractModel):
                 ORDER BY activity, operation_type, responsibility_type_code, rate_code;
             """,
                 operation_query=operation_type_query,
+                cte_order_query=cte_order_query,
                 exempt_op_type=exempt_operation_type,
                 move_ids=move_ids,
             )

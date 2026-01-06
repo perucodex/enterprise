@@ -60,7 +60,7 @@ export class Body extends Component {
         });
     }
     get isFullDiscounted() {
-        return this.order.lines.length > 0 && this.order.currency.isZero(this.priceIncl);
+        return this.order.lines.length > 0 && this.order.currency.isZero(this.order.priceIncl);
     }
     get lines() {
         const calculateDiscountAmount = (line) => {
@@ -75,9 +75,11 @@ export class Body extends Component {
             const department = line.tax_ids.map((tax) => tax.tax_group_id.pos_receipt_label)[0];
             const isRefund = line.qty < 0;
             const isReward = line.is_reward_line;
-            const unitPrice = isRefund
+            const quantity = Math.abs(line.qty);
+            const totalPrice = isRefund
                 ? data.tax_details.total_included
                 : data.tax_details.no_discount_total_included;
+            const unitPrice = quantity > 0 ? totalPrice / quantity : totalPrice;
             const isGlobalDiscount = this.order.currency.isNegative(unitPrice);
             const unitPriceFormatted = this._itFormatCurrency(
                 isGlobalDiscount ? -unitPrice : unitPrice
@@ -89,7 +91,7 @@ export class Body extends Component {
                 isGlobalDiscount,
                 description: isRefund ? _t("%s (refund)", productName) : productName,
                 customer_note: line.getCustomerNote(),
-                quantity: this._itFormatQty(Math.abs(line.qty)),
+                quantity: this._itFormatQty(quantity),
                 // DISCOUNT: Use price before discount because the discounted amount is specified in the printRecItemAdjustment.
                 // REFUND: Use the price with tax because there is no adjustment for printRecRefund.
                 unitPrice: unitPriceFormatted,
@@ -117,6 +119,7 @@ export class Body extends Component {
                 payment: this._itFormatCurrency(payment.amount),
                 paymentType: payment.payment_method_id.it_payment_code,
                 index: payment.payment_method_id.it_payment_index,
+                id: payment.id,
             }));
     }
 }

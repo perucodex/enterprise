@@ -202,6 +202,11 @@ class AccountExternalTaxMixin(models.AbstractModel):
 
             for record in records:
                 service_params = record._get_avatax_service_params()
+
+                # Avatax errors when sending records without lines
+                if not service_params['line_data']:
+                    continue
+
                 document_data = record._prepare_avatax_document_service_call(service_params)
                 base_lines = [data['base_line'] for data in service_params['line_data']]
 

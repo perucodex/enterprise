@@ -89,24 +89,31 @@ class ResCompany(models.Model):
             company.timesheet_mail_nextdate = fields.Datetime.to_string(nextdate)
 
     @api.model
+    def _get_timesheet_reminder_domain(self):
+        return [
+            ('date', '>=', fields.Date.to_string(date.today() - relativedelta(months=3))),
+            ('date', '<=', fields.Date.today()),
+            ('project_id', '!=', False),
+        ]
+
+    @api.model
     def _cron_timesheet_reminder_employee(self):
         """ Send an email reminder to the user having at least one timesheet since the last 3 month. From those ones, we exclude
             ones having complete their timesheet (meaning timesheeted the same hours amount than their working calendar).
         """
         today_max = fields.Datetime.to_string(datetime.combine(date.today(), time.max))
         companies = self.search([('timesheet_mail_employee_allow', '=', True), ('timesheet_mail_employee_nextdate', '<', today_max)])
+        timesheet_domain = self._get_timesheet_reminder_domain()
         for company in companies:
             if company.timesheet_mail_employee_nextdate < fields.Datetime.today():
                 _logger.warning('The cron "Timesheet: Employees Email Reminder" should have run on %s' % company.timesheet_mail_employee_nextdate)
 
             # get the employee that have at least a timesheet for the last 3 months
             # and that are still active; don't spam retired users
-            users = self.env['account.analytic.line'].search([
-                ('date', '>=', fields.Date.to_string(date.today() - relativedelta(months=3))),
-                ('date', '<=', fields.Date.today()),
-                ('project_id', '!=', False),
-                ('company_id', '=', company.id),
-            ]).mapped('user_id').filtered('active')
+            users = self.env['account.analytic.line'].search(fields.Domain.AND([
+                [('company_id', '=', company.id)],
+                timesheet_domain,
+            ])).mapped('user_id').filtered('active')
 
             # calculate the period
             if company.timesheet_mail_employee_interval == 'months':

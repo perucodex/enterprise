@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:44+0000\n"
-"PO-Revision-Date: 2025-10-22 12:12+0000\n"
+"POT-Creation-Date: 2025-12-30 18:43+0000\n"
+"PO-Revision-Date: 2025-12-15 07:52+0000\n"
 "Last-Translator: \"Larissa Manderfeld (lman)\" <lman@odoo.com>\n"
 "Language-Team: German <https://translate.odoo.com/projects/odoo-19/"
 "hr_expense_stripe/de/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -26,17 +26,15 @@ msgid "(Fetching...)"
 msgstr "(Abrufen ...)"
 
 #. module: hr_expense_stripe
-#: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_kanban
+#: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
 msgid ""
-"<span class=\"card_cvc w-50 text-end stripe_card_text_sm\" invisible=\"state "
-"in ('draft', 'pending')\">\n"
-"                                                        ****\n"
-"                                                    </span>"
+"<i class=\"fa fa-warning ms-1 text-warning\"/>\n"
+"                                <span class=\"text-warning\"> Stripe issuing "
+"is not yet supported for your localization.</span>"
 msgstr ""
-"<span class=\"card_cvc w-50 text-end stripe_card_text_sm\" invisible=\"state "
-"in ('draft', 'pending')\">\n"
-"                                                        ****\n"
-"                                                    </span>"
+"<i class=\"fa fa-warning ms-1 text-warning\"/>\n"
+"                                <span class=\"text-warning\"> Stripe Issuing "
+"wird noch nicht füre Ihre Lokalisierung unterstützt.</span>"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.account_journal_form_inherit_expense_stripe
@@ -92,6 +90,225 @@ msgid ""
 msgstr ""
 "<strong>Laden Sie Ihr Stripe-Issuing-Konto auf, um sicherzustellen, dass Ihr "
 "Guthaben für anstehende Ausgaben ausreicht.</strong>"
+
+#. module: hr_expense_stripe
+#: model:mail.template,body_html:hr_expense_stripe.email_template_hr_expense_stripe_card_assigned
+msgid ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"padding: 16px; background-color: white; color: "
+"#454748; border-collapse:separate;\">\n"
+"            <tbody>\n"
+"            <!-- HEADER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\">\n"
+"                    <t t-set=\"company\" t-value=\"object.company_id\"/>\n"
+"                    <span style=\"font-size: 10px;\">Card Shipment "
+"Notification</span><br/>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\">Your "
+"Card Has Been Assigned</span>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"right\" t-if=\"not "
+"company.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?company={{ company.id }}\" "
+"style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-"
+"alt=\"company.name\"/>\n"
+"                    </td></tr>\n"
+"                    <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- CONTENT -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    Hi <t t-out=\"ctx.get('recipient_name', "
+"object.user_id.name)\">[Recipient Name]</t>,<br/><br/>\n"
+"                    We have assigned a company expense card to you.\n"
+"                    You can view and manage it anytime by going to My "
+"Profile and selecting the Cards section.<br/><br/>\n"
+"                    If you have any questions, feel free to reach out.<br/"
+"><br/>\n"
+"                    Best regards,<br/>\n"
+"                    <t t-out=\"object.ordered_by.name or ''\">[Expense "
+"Administrator]</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- FOOTER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\" align=\"left\">\n"
+"                        <t t-out=\"company.name or ''\">YourCompany</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"left\" "
+"style=\"opacity: 0.7;\">\n"
+"                    <t t-if=\"company.phone\">\n"
+"                        <t t-out=\"company.phone or ''\">+1 650-123-4567</t> "
+"|\n"
+"                    </t>\n"
+"                    <t t-if=\"company.email\">\n"
+"                        <a t-attf-href=\"'mailto:%s' % {{ company.email }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.email or "
+"''\">info@yourcompany.com</a> |\n"
+"                    </t>\n"
+"                    <t t-if=\"company.website\">\n"
+"                        <a t-attf-href=\"'%s' % {{ company.website }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.website or "
+"''\">http://www.example.com</a>\n"
+"                    </t>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            </tbody>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            <!-- POWERED BY -->\n"
+"            <tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: "
+"#454748; padding: 8px; border-collapse:separate;\">\n"
+"            <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"                Powered by <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{company.email_secondary_color or '#875A7B'}};\">Odoo</a>\n"
+"            </td></tr>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            </table>\n"
+"        "
+msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"padding: 16px; background-color: white; color: "
+"#454748; border-collapse:separate;\">\n"
+"            <tbody>\n"
+"            <!-- HEADER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\">\n"
+"                    <t t-set=\"company\" t-value=\"object.company_id\"/>\n"
+"                    <span style=\"font-size: 10px;\">Benachrichtigung über "
+"den Versand der Karte</span><br/>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\">Ihre "
+"Karte wurde zugewiesen</span>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"right\" t-if=\"not "
+"company.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?company={{ company.id }}\" "
+"style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-"
+"alt=\"company.name\"/>\n"
+"                    </td></tr>\n"
+"                    <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- CONTENT -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    Hallo <t t-out=\"ctx.get('recipient_name', "
+"object.user_id.name)\">[Name des Empfängers]</t>,<br/><br/>\n"
+"                    Ihnen wurde eine Spesenkarte zugewiesen.\n"
+"                    Sie können diese jederzeit einsehen und verwalten, indem "
+"Sie zu „Mein Profil“ gehen und den Abschnitt „Karten“ auswählen.<br/><br/>\n"
+"                    Sollten Sie Fragen haben oder Unterstützung benötigen, "
+"steht Ihnen unser Team gerne zur Verfügung.<br/><br/>\n"
+"                    Mit freundlichen Grüßen<br/>\n"
+"                    <t t-out=\"object.ordered_by.name or "
+"''\">[Spesenadministrator]</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- FOOTER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\" align=\"left\">\n"
+"                        <t t-out=\"company.name or ''\">IhrUnternehmen</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"left\" "
+"style=\"opacity: 0.7;\">\n"
+"                    <t t-if=\"company.phone\">\n"
+"                        <t t-out=\"company.phone or ''\">+1 650-123-4567</t> "
+"|\n"
+"                    </t>\n"
+"                    <t t-if=\"company.email\">\n"
+"                        <a t-attf-href=\"'mailto:%s' % {{ company.email }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.email or "
+"''\">info@ihrunternehmen.com</a> |\n"
+"                    </t>\n"
+"                    <t t-if=\"company.website\">\n"
+"                        <a t-attf-href=\"'%s' % {{ company.website }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.website or "
+"''\">http://www.beispiel.com</a>\n"
+"                    </t>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            </tbody>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            <!-- POWERED BY -->\n"
+"            <tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: "
+"#454748; padding: 8px; border-collapse:separate;\">\n"
+"            <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"                Unterstützt durch <a target=\"_blank\" href=\"https://"
+"www.odoo.com?utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{company.email_secondary_color or '#875A7B'}};\">Odoo</a>\n"
+"            </td></tr>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            </table>\n"
+"        "
 
 #. module: hr_expense_stripe
 #: model:mail.template,body_html:hr_expense_stripe.email_template_hr_expense_stripe_card_canceled
@@ -2201,7 +2418,8 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.government_licensed_online_casinos_online_gambling_us_region_only
 msgid "Government Licensed Online Casinos Online Gambling US Region Only"
-msgstr "Staatlich lizenzierte Online-Casinos, Online-Glücksspiel nur in den USA"
+msgstr ""
+"Staatlich lizenzierte Online-Casinos, Online-Glücksspiel nur in den USA"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.government_owned_lotteries_non_us_region
@@ -2227,6 +2445,11 @@ msgstr "Staatliche Dienstleistungen"
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.grocery_stores_supermarkets
 msgid "Grocery Stores Supermarkets"
 msgstr "Lebensmittelgeschäfte und Supermärkte"
+
+#. module: hr_expense_stripe
+#: model:mail.template,name:hr_expense_stripe.email_template_hr_expense_stripe_card_assigned
+msgid "HR Expense Stripe Card Assigned"
+msgstr "Personalwesen: Stripe-Spesenkarte zugewiesen"
 
 #. module: hr_expense_stripe
 #: model:mail.template,name:hr_expense_stripe.email_template_hr_expense_stripe_card_ordered
@@ -2261,7 +2484,6 @@ msgstr "Hat Mitarbeiter"
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__has_message
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__has_message
-#, fuzzy
 msgid "Has Message"
 msgstr "Hat Nachricht"
 
@@ -2362,7 +2584,8 @@ msgstr "Falls markiert, weisen einige Nachrichten einen Zustellungsfehler auf."
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_topup_wizard_form
 msgid "If the balance is too low, card payments will be declined"
-msgstr "Sollte der Kontostand zu niedrig sein, werden Kartenzahlungen abgelehnt"
+msgstr ""
+"Sollte der Kontostand zu niedrig sein, werden Kartenzahlungen abgelehnt"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -2433,9 +2656,11 @@ msgstr "Ungültiger Mitarbeiter"
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/models/hr_expense_stripe_card.py:0
-msgid "Invalid email type, must be 'canceled', 'ordered' or 'shipped'."
+msgid ""
+"Invalid email type, must be 'canceled', 'ordered', 'assigned' or 'shipped'."
 msgstr ""
-"Ungültiger E-Mail-Typ, muss „storniert“, „bestellt“ oder „versendet“ lauten."
+"Ungültiger E-Mail-Typ, muss „storniert“, „bestellt“, „zugewiesen“ oder "
+"„versandt“ sein."
 
 #. module: hr_expense_stripe
 #. odoo-python
@@ -2565,7 +2790,6 @@ msgstr "Haftungsbeschränkung"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__is_live_mode
-#, fuzzy
 msgid "Live Mode"
 msgstr "Live-Modus"
 
@@ -2683,7 +2907,8 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_search
 msgid "Merchant codes that will be accepted when used by a vendor"
-msgstr "Händlercodes, die bei Verwendung durch einen Anbieter akzeptiert werden"
+msgstr ""
+"Händlercodes, die bei Verwendung durch einen Anbieter akzeptiert werden"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_has_error
@@ -2997,7 +3222,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense_stripe/utils.py:0
 msgid "Only licenses databases can use Odoo Stripe Issuing services."
-msgstr "Nur Lizenzen-Datenbanken können die Odoo-Stripe-Issuing-Dienste nutzen."
+msgstr ""
+"Nur Lizenzen-Datenbanken können die Odoo-Stripe-Issuing-Dienste nutzen."
 
 #. module: hr_expense_stripe
 #: model:ir.model.constraint,message:hr_expense_stripe.constraint_account_bank_statement_line_check_unique_stripe_id
@@ -3102,11 +3328,11 @@ msgstr "Pausiert"
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/pause_card_warning_action.xml:0
 msgid ""
-"Pausing your card will make it unactive. Only Expense Administrators can "
+"Pausing your card will disable it. Only Expense Administrators can "
 "reactivate it."
 msgstr ""
-"Durch das Pausieren Ihrer Karte wird diese deaktiviert. Nur Spesenverwalter "
-"können sie wieder aktivieren."
+"Wenn Sie Ihre Karte pausieren, wird sie deaktiviert. Nur "
+"Spesenadministratoren können sie wieder aktivieren."
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.pawn_shops
@@ -3340,6 +3566,11 @@ msgid "Resend"
 msgstr "Erneut senden"
 
 #. module: hr_expense_stripe
+#: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_view_form_inherits_stripe
+msgid "Reserved"
+msgstr "Reserviert"
+
+#. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__res_company__stripe_account_issuing_status__restricted
 msgid "Restricted"
 msgstr "Eingeschränkt"
@@ -3397,6 +3628,11 @@ msgstr "Wertpapiermakler und -händler"
 #: model:mail.template,description:hr_expense_stripe.email_template_hr_expense_stripe_card_shipped
 msgid "Sent to the person that will handle the reception of the card"
 msgstr "An die Person gesendet, die für den Empfang der Karte zuständig ist"
+
+#. module: hr_expense_stripe
+#: model:mail.template,description:hr_expense_stripe.email_template_hr_expense_stripe_card_assigned
+msgid "Sent to the person that will use the card"
+msgstr "An die Person gesendet, die die Karte verwenden wird"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.service_stations
@@ -3539,7 +3775,8 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_company__stripe_account_issuing_tos_accepted
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_config_settings__stripe_account_issuing_tos_accepted
 msgid "Stripe Account Issuing Tos Accepted"
-msgstr "Allgemeine Geschäftsbedingungen für das Stripe-Issuing-Konto akzeptiert"
+msgstr ""
+"Allgemeine Geschäftsbedingungen für das Stripe-Issuing-Konto akzeptiert"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense__stripe_authorization_id
@@ -3723,6 +3960,12 @@ msgid ""
 msgstr ""
 "Mit diesem Journal verknüpfte Stripe-Karten. Diese können zur Begleichung "
 "von Ausgaben oder zum Aufladen des Stripe-Issuing-Guthabens verwendet werden."
+
+#. module: hr_expense_stripe
+#. odoo-python
+#: code:addons/hr_expense_stripe/models/account_journal.py:0
+msgid "Stripe issuing is not supported for your localization"
+msgstr "Stripe Issuing wird für Ihre Lokalisierung nicht unterstützt"
 
 #. module: hr_expense_stripe
 #. odoo-python
@@ -4016,7 +4259,8 @@ msgstr "Die Lieferadresse muss sich innerhalb der Europäischen Union befinden."
 #. odoo-python
 #: code:addons/hr_expense_stripe/models/hr_expense_stripe_card.py:0
 msgid "The delivery address must be set before activating the card."
-msgstr "Die Lieferadresse muss vor der Aktivierung der Karte festgelegt werden."
+msgstr ""
+"Die Lieferadresse muss vor der Aktivierung der Karte festgelegt werden."
 
 #. module: hr_expense_stripe
 #. odoo-python
@@ -4364,6 +4608,12 @@ msgid "Unknown Error Code"
 msgstr "Unbekannter Fehlercode"
 
 #. module: hr_expense_stripe
+#. odoo-javascript
+#: code:addons/hr_expense_stripe/static/src/fields/monetary_blank_if_zero.xml:0
+msgid "Unlimited"
+msgstr "Unbegrenzt"
+
+#. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Update info"
 msgstr "Info aktualisieren"
@@ -4689,7 +4939,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense_stripe/models/hr_expense.py:0
 msgid "You cannot edit the security fields of an expense manually"
-msgstr "Sie können die Sicherheitsfelder einer Ausgabe nicht manuell bearbeiten"
+msgstr ""
+"Sie können die Sicherheitsfelder einer Ausgabe nicht manuell bearbeiten"
 
 #. module: hr_expense_stripe
 #: model:ir.model.constraint,message:hr_expense_stripe.constraint_res_company_constraint_journal_stripe_activated
@@ -4708,6 +4959,26 @@ msgid ""
 msgstr ""
 "Es ist nicht möglich, Kosten für ein Produkt festzulegen, das als "
 "Spesenkartenkategorie verwendet wird. Duplizieren Sie es stattdessen."
+
+#. module: hr_expense_stripe
+#. odoo-python
+#: code:addons/hr_expense_stripe/models/hr_expense.py:0
+msgid ""
+"You cannot split an expense that is reserved. Please wait for the "
+"transaction to be captured."
+msgstr ""
+"Sie können eine reservierte Ausgabe nicht aufteilen. Warten Sie, bis die "
+"Transaktion erfasst wurde."
+
+#. module: hr_expense_stripe
+#. odoo-python
+#: code:addons/hr_expense_stripe/models/hr_expense.py:0
+msgid ""
+"You cannot submit an expense that is reserved. Please wait for the "
+"transaction to be captured."
+msgstr ""
+"Sie können keine reservierte Ausgabe einreichen. Warten Sie, bis die "
+"Transaktion erfasst wurde."
 
 #. module: hr_expense_stripe
 #. odoo-python
@@ -4785,6 +5056,11 @@ msgid "Your Expense Card Has Been Shipped"
 msgstr "Ihre Spesen-Karte wurde versendet"
 
 #. module: hr_expense_stripe
+#: model:mail.template,subject:hr_expense_stripe.email_template_hr_expense_stripe_card_assigned
+msgid "Your Expense Card has been Assigned"
+msgstr "Ihre Spesenkarte wurde zugewiesen"
+
+#. module: hr_expense_stripe
 #: model:mail.template,subject:hr_expense_stripe.email_template_hr_expense_stripe_card_ordered
 msgid "Your Expense Card has been Ordered"
 msgstr "Ihre Spesen-Karte wurde bestellt"
@@ -4832,3 +5108,26 @@ msgstr "ID"
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
 msgid "terms and conditions"
 msgstr "Allgemeinen Geschäftsbedingungen"
+
+#~ msgid ""
+#~ "<span class=\"card_cvc w-50 text-end stripe_card_text_sm\" "
+#~ "invisible=\"state in ('draft', 'pending')\">\n"
+#~ "                                                        ****\n"
+#~ "                                                    </span>"
+#~ msgstr ""
+#~ "<span class=\"card_cvc w-50 text-end stripe_card_text_sm\" "
+#~ "invisible=\"state in ('draft', 'pending')\">\n"
+#~ "                                                        ****\n"
+#~ "                                                    </span>"
+
+#~ msgid "Invalid email type, must be 'canceled', 'ordered' or 'shipped'."
+#~ msgstr ""
+#~ "Ungültiger E-Mail-Typ, muss „storniert“, „bestellt“ oder „versendet“ "
+#~ "lauten."
+
+#~ msgid ""
+#~ "Pausing your card will make it unactive. Only Expense Administrators can "
+#~ "reactivate it."
+#~ msgstr ""
+#~ "Durch das Pausieren Ihrer Karte wird diese deaktiviert. Nur "
+#~ "Spesenverwalter können sie wieder aktivieren."

@@ -1428,3 +1428,90 @@ class TestPlanning(TestCommonPlanning, MockEmail):
         self.assertFalse(
             wizard_ctx.slot_ids,
         )
+
+    @freeze_time("2019-5-28 08:00:00")
+    def test_user_assign_shift_multicompany(self):
+        company = self.env['res.company'].create({"name": "Test company"})
+        self.env.user.company_ids += company
+        test_slot = self.env['planning.slot'].create({
+            'start_datetime': datetime(2019, 5, 28, 8, 0, 0),
+            'end_datetime': datetime(2019, 5, 28, 17, 0, 0),
+            'state': 'published',
+            'company_id': company.id,
+        })
+        with self.assertRaises(UserError):
+            test_slot.with_company(company).action_self_assign()
+        employee = self.env['hr.employee'].create({
+            'name': 'odoobot',
+            'work_email': 'odoobot@example.com',
+            'tz': 'UTC',
+            'employee_type': 'freelance',
+            'create_date': '2015-01-01 00:00:00',
+            'user_id': self.env.user.id,
+            'company_id': company.id,
+        })
+        test_slot.with_company(company).action_self_assign()
+        self.assertEqual(test_slot.employee_id, employee)
+
+    def test_avatar_card_archived_employee_info(self):
+        employee = self.env["hr.employee"].create({
+            "active": False,
+            "name": "Test Emp",
+        })
+        data = employee.resource_id.get_avatar_card_data(["name"])[0]
+        self.assertEqual(data.get("name"), "Test Emp")
+
+    def test_multi_shift_creation_excludes_non_working_days(self):
+        """Ensure multi-shift creation automatically skips weekends (non-working days)."""
+        self.employee_bert.resource_calendar_id = self.calendar_40h_flex
+        slots = self.env['planning.slot'].with_context(multi_create=True).create([
+            {
+                'start_datetime': datetime(2025, 10, day, 9, 0, 0),
+                'end_datetime': datetime(2025, 10, day, 17, 0, 0),
+                'resource_id': resource.id,
+                'template_id': self.template.id,
+            } for day in range(5, 12) for resource in [self.resource_janice, self.resource_bert, self.resource_joseph]
+        ])
+
+        slots_janice = slots.filtered(lambda slot: slot.resource_id == self.resource_janice)
+        slots_bert = slots.filtered(lambda slot: slot.resource_id == self.resource_bert)
+
+        self.assertEqual(len(slots_janice), 5, "Standard schedule: shifts should be created only on working days.")
+        self.assertEqual([slot.start_datetime.day for slot in slots_janice], [6, 7, 8, 9, 10], "Excluded 5 and 11 (Sat/Sun)")
+        self.assertEqual(len(slots_bert), 5, "Flexible schedule: shifts should be created only on working days.")
+        self.assertEqual([slot.start_datetime.day for slot in slots_bert], [5, 6, 7, 8, 9], "10 and 11 are non-working days.")
+
+    def test_planning_send_action_check_emails(self):
+        start_datetime = datetime(2024, 7, 1, 8, 0)
+        end_datetime = datetime(2024, 7, 1, 17, 0)
+        beth_shift, joseph_shift = self.env['planning.slot'].create([
+            {'start_datetime': start_datetime, 'end_datetime': end_datetime, 'resource_id': self.resource_bert.id},
+            {'start_datetime': start_datetime, 'end_datetime': end_datetime, 'resource_id': self.resource_joseph.id},
+        ])
+        self.assertEqual(beth_shift.state, 'draft', 'The shift should be in draft state by default')
+        self.assertEqual(joseph_shift.state, 'draft', 'The shift should be in draft state by default')
+
+        self.employee_bert.work_email = ''
+
+        planning_send_wizard = self.env['planning.send'].create({
+            'start_datetime': start_datetime,
+            'end_datetime': end_datetime,
+            'slot_ids': (beth_shift + joseph_shift).ids,
+        })
+        self.assertTrue(self.env['hr.employee'].has_access('write'))
+        action = planning_send_wizard.action_check_emails()
+        self.assertEqual(action['name'], 'No Email Address for Some Employees')
+        self.assertEqual(action['type'], 'ir.actions.act_window', 'The action should open a form view to complete missing work email')
+
+        # since the user has no access in edit to `hr.employee`, we will not send the planning to the employee without email set.
+        self.assertFalse(self.env['hr.employee'].with_user(self.planning_manager_user).has_access('write'))
+        action = planning_send_wizard.with_user(self.planning_manager_user).action_check_emails()
+        self.assertEqual(action['type'], 'ir.actions.client', 'The action should return a notification')
+        self.assertEqual(action['tag'], 'display_notification', 'The action should return a notification')
+        self.assertDictEqual(action['params'], {
+            'type': 'info',
+            'message': "Shifts published — employees without a work email were skipped",
+            'next': {'type': 'ir.actions.act_window_close'},
+        })
+        self.assertEqual(beth_shift.state, 'draft', 'The shift should not be in published state after sending the planning since the employee set has no work_email and so no way to receive the planning')
+        self.assertEqual(joseph_shift.state, 'published', 'The shift should be in published state after sending the planning')

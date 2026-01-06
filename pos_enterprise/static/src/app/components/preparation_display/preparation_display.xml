@@ -20,7 +20,7 @@
                         t-on-click="() => { this.toggleCategoryFilter(); this.showSidebar = !this.showSidebar }">
                         <div class="position-relative px-1">
                             <i class="d-block oi fa-fw" t-att-class="showSidebar ? ' oi-panel-right fa-rotate-180' : 'oi-close oi-larger'" role="img"/>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-info fs-6 fw-bolder" t-if="this.filterSelected and this.showSidebar" t-esc="this.filterSelected" />
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-info fs-7 fw-bolder py-1 px-2" t-if="this.filterSelected and this.showSidebar" t-esc="this.filterSelected" />
                         </div>
                     </button>
                 </div>
@@ -95,30 +95,50 @@
             </div>
             <div class="o_pdis_content d-flex w-100">
                 <div class="o_pdis_sidebar d-flex flex-column text-800" t-att-class="{'hide-category d-none': !this.prepDisplay.showCategoryFilter}">
-                    <div t-if="this.filterSelected or this.prepDisplay.selectedTime != 'all'" class="btn btn-info btn-lg mt-2 mb-0 ms-3 me-2" t-on-click="() => this.resetFilter()">
+                    <div t-if="this.filterSelected" class="btn btn-info btn-lg mt-2 mb-0 ms-3 me-2" t-on-click="() => this.resetFilter()">
                         Clear All Filters
                     </div>
                     <div class="o_pdis_categories mh-100 overflow-auto px-3 mb-auto">
-                        <t t-foreach="this.prepDisplay.categories" t-as="category" t-key="category.id">
-                            <Category category="category_value" />
-                        </t>
                         <div class="o_pdis_time">
+                            <t t-set="orderDays" t-value="this.prepDisplay.orderDays"/>
                             <section class="o_pdis_name_quantity d-flex justify-content-between mt-3 pt-2 pb-1 fs-4 fw-bold">
                                 <span class="name category-name">Time</span>
+                                <span class="count" t-esc="orderDays[0]"/>
                             </section>
                             <hr class="mt-1 mb-2 me-n2"/>
-                            <t t-set="time_filters" t-value="[['all', 'All'], ['today', 'Today'], ['tomorrow', 'Tomorrow'], ['next_days', 'Next days']]" />
+                            <t t-set="time_filters" t-value="[['now', 'Now'], ['today', 'Today'], ['tomorrow', 'Tomorrow'], ['next_days', 'Next days']]" />
                             <t t-foreach="time_filters" t-as="time_filter" t-key="time_filter[0]">
                                 <div class="d-flex justify-content-between m-0 py-2 border-bottom border-light cursor-pointer"
-                                    t-att-class="{ 'product-selected bg-info bg-opacity-25 px-2 me-n2': this.prepDisplay.selectedTime == time_filter[0]}"
+                                    t-att-class="{ 'product-selected bg-info bg-opacity-25 px-2 me-n2': this.prepDisplay.selectedTimeIds.has(time_filter[0])}"
                                     t-on-click="() => this.prepDisplay.toggleTime(time_filter[0])">
                                     <div class="pe-2 text-truncate">
                                         <span class="pe-2" t-esc="time_filter[1]"/>
                                     </div>
-                                    <span t-esc="this.prepDisplay.orderDays[time_filter[0]]"/>
+                                    <span t-esc="orderDays[time_filter[0]]"/>
                                 </div>
                             </t>
                         </div>
+                        <div class="o_pdis_preset" t-if="this.prepDisplay.displayPresetsFilter">
+                            <t t-set="orderCountPresets" t-value="this.prepDisplay.orderCountPresets"/>
+                            <section class="o_pdis_name_quantity d-flex justify-content-between mt-3 pt-2 pb-1 fs-4 fw-bold">
+                                <span class="name category-name">Preset</span>
+                                <span class="count" t-esc="orderCountPresets[0]"/>
+                            </section>
+                            <hr class="mt-1 mb-2 me-n2"/>
+                            <t t-foreach="this.presets" t-as="preset" t-key="preset.id">
+                                <div class="d-flex justify-content-between m-0 py-2 border-bottom border-light cursor-pointer"
+                                    t-att-class="{ 'product-selected bg-info bg-opacity-25 px-2 me-n2': this.prepDisplay.selectedPresetIds.has(preset.id)}"
+                                    t-on-click="() => this.prepDisplay.togglePreset(preset.id)">
+                                    <div class="pe-2 text-truncate">
+                                        <span class="pe-2" t-esc="preset.name"/>
+                                    </div>
+                                    <span t-esc="orderCountPresets[preset.id]"/>
+                                </div>
+                            </t>
+                        </div>
+                        <t t-foreach="this.prepDisplay.categories" t-as="category" t-key="category.id">
+                            <Category category="category_value" />
+                        </t>
                     </div>
                     <div class="w-100">
                         <div class="border-top w-100">

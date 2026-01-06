@@ -54,13 +54,13 @@ class PosConfig(models.Model):
                         'name': _("NS Order by blackbox"),
                         'padding': 4,
                         'code': f'pos_blackbox_be.NS_blackbox_{config.certified_blackbox_identifier}',
-                        'company_id': config.company_id.id,
+                        'company_id': False,
                     })
                     self.env['ir.sequence'].sudo().create({
                         'name': _("PS Order by blackbox"),
                         'padding': 4,
                         'code': f'pos_blackbox_be.PS_blackbox_{config.certified_blackbox_identifier}',
-                        'company_id': config.company_id.id,
+                        'company_id': False,
                     })
 
     def write(self, vals):

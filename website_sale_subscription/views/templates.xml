@@ -58,7 +58,7 @@
 
     <template id="sale_subscription_product_price" name="Subscription Product Price">
         <t t-if="combination_info.get('is_subscription') and combination_info['pricings']">
-            <div t-if="combination_info['subscription_pricing_select']" class="table-responsive border rounded-2">
+            <div t-if="combination_info['subscription_pricing_select']" class="table-responsive border rounded-2 plan_select">
                 <table class="table align-middle mb-0">
                     <tbody>
                         <t t-foreach="combination_info['pricings']" t-as="pricing">
@@ -197,7 +197,7 @@
 
     <template id="product_template_message" inherit_id="website_sale.product">
         <xpath expr="//form[@t-if='is_add_to_cart_possible']" position="after">
-            <p t-elif="product.recurring_invoice" class="alert alert-warning">
+            <p t-elif="product.recurring_invoice and product.subscription_rule_ids" class="alert alert-warning">
                 This subscription is not compatible with the one already in your cart.
                 Please order them separately or empty your cart.
             </p>

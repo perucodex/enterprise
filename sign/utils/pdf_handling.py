@@ -6,9 +6,34 @@ import logging
 from io import BytesIO
 from reportlab.pdfgen import canvas
 
-from odoo.tools.pdf import errors, PdfFileReader, PdfFileWriter, NameObject, DictionaryObject
+from odoo.exceptions import ValidationError
+from odoo.tools.pdf import DependencyError, DictionaryObject, errors, NameObject, PdfFileReader, PdfFileWriter, PdfReadError
+from odoo.tools.translate import LazyTranslate
 
+_lt = LazyTranslate(__name__)
 _logger = logging.getLogger(__name__)
+
+
+def get_valid_pdf_data(pdf_bytes, strict=True):
+    """
+    Validate and return a readable PDF file object from the given byte data.
+
+    :param pdf_bytes: Raw byte data of the PDF file to be validated.
+    :param strict: Enforce strict parsing of the PDF file.
+    :return: A valid and non-encrypted PdfFileReader instance.
+    :raises ValidationError: If cannot return non-encrypted PdfFileReader instance.
+    """
+    try:
+        pdf_reader = PdfFileReader(BytesIO(pdf_bytes), strict)
+        if not pdf_reader.isEncrypted:
+            return pdf_reader
+    except (DependencyError, UnicodeDecodeError, PdfReadError):
+        _logger.warning("Failed to read PDF data.")
+
+    raise ValidationError(_lt(
+        "It seems that we're not able to process one of the uploaded pdf. It is either"
+        " encrypted, or encoded in a format we do not support."
+    ))
 
 
 def flatten_pdf(base64_pdf):
@@ -22,7 +47,7 @@ def flatten_pdf(base64_pdf):
     """
     try:
         pdf_bytes = base64.b64decode(base64_pdf)
-        pdf_reader = PdfFileReader(BytesIO(pdf_bytes))
+        pdf_reader = get_valid_pdf_data(pdf_bytes)
         output_pdf = PdfFileWriter()
     except errors.PyPdfError as e:
         _logger.warning("Failed to parse PDF during flattening: %s", e)

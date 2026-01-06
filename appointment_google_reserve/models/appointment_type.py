@@ -225,11 +225,10 @@ class AppointmentType(models.Model):
         Google also wants to know how many spots would accommodate each capacity *regardless of bookings*.
         Meaning we send both the "theoretical" configuration where no-one has booked and the actual situation.
 
-        Note: We only send a maximum party-size of 12 regardless of the appointment configuration.
-        This matches the same (somewhat arbitrary) number used in the appointment website and
-        controllers when booking a slot.
-        It also has the big advantage of avoiding an explosion of the data size sent.
-        (Note: We should make this number more clear / configurable at some point).
+        Note: The maximum party-size defaults to 12 (somewhat arbitrary number previously used) and
+        is now configurable via the appointment.resource_max_capacity_allowed system parameter.
+        Keeping this value low has the big advantage of avoiding an explosion of the data size sent.
+        Also, the upper limit is fixed to 20 due to Google Reserve max party size.
 
         (Overly simplified used case for demonstration).
         Considering a restaurant that has 2 tables of 2 spots, this will result in:
@@ -286,7 +285,8 @@ class AppointmentType(models.Model):
         }
 
         availabilities = []
-        max_capacity = min(12, self.resource_total_capacity)  # see docstring
+        allowed_max_capacity = int(self.env['ir.config_parameter'].sudo().get_param('appointment.resource_max_capacity_allowed', default=12))
+        max_capacity = min(20, allowed_max_capacity, self.resource_total_capacity)  # see docstring
         for capacity in range(1, max_capacity + 1):
 
             # total numbers of resources that can accommodate this capacity, regardless of bookings

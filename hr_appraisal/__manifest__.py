@@ -2,7 +2,7 @@
 
 {
     'name': 'Appraisals',
-    'version': '1.1',
+    'version': '1.2',
     'category': 'Human Resources/Appraisals',
     'sequence': 180,
     'summary': 'Assess your employees',

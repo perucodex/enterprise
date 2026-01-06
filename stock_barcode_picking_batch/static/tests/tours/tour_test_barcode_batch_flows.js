@@ -841,7 +841,7 @@ registry.category("web_tour.tours").add("test_barcode_batch_scan_other_reserved_
                 const sublines = helper.getSublines();
                 const selectedSubline = helper.getSubline({ selected: true });
                 helper.assert(sublines[0], selectedSubline, "First lot should be selected");
-                helper.assertLinesTrackingNumbers(sublines, ["lot1", "lot2", "lot3"]);
+                helper.assertLinesTrackingNumbers(sublines, ["lot1", "lot2", "lot3", ""]);
             },
         },
         // Scan lot2 one time: second line (lot2 line) should be selected.
@@ -851,26 +851,46 @@ registry.category("web_tour.tours").add("test_barcode_batch_scan_other_reserved_
         { trigger: ".o_barcode_line", run: "scan lot2" },
         { trigger: ".o_barcode_line", run: "scan lot2" },
         {
-            trigger: ".o_sublines .o_barcode_line:nth-child(2).o_selected.o_faulty",
+            trigger: ".o_sublines .o_barcode_line:last-child.o_selected",
             run: () => {
                 const sublines = helper.getSublines();
                 const selectedSubline = helper.getSubline({ selected: true });
-                helper.assert(sublines[1], selectedSubline, "First lot should be selected");
                 helper.assertLineTrackingNumber(sublines[1], "lot2");
-                helper.assertLineQty(sublines[1], "4/3");
+                helper.assertLineQty(sublines[1], "3/3");
+                helper.assertLineTrackingNumber(sublines[3], "lot2");
+                helper.assertLineQty(sublines[3], "1/1");
+                helper.assert(sublines[3], selectedSubline, "Last lot should be selected");
             },
         },
         // Scan lot3: should select the 3th line.
         { trigger: ".o_barcode_line", run: "scan lot3" },
         // Scan lot1: should select the 1st line.
-        { trigger: ".o_sublines .o_barcode_line:last-child.o_selected", run: "scan lot1" },
+        { trigger: ".o_barcode_line .qty-done:contains(5)", run: "scan lot1" },
         // Scan again lot3: should re-select the 3th line.
         { trigger: ".o_sublines .o_barcode_line:first-child.o_selected", run: "scan lot3" },
         // Scan lot3 and lot1 once again to complete the delivery.
-        { trigger: ".o_sublines .o_barcode_line:last-child.o_selected", run: "scan lot3" },
+        { trigger: ".o_barcode_line .qty-done:contains(7)", run: "scan lot3" },
+        { trigger: ".o_sublines .o_barcode_line:contains(3).o_line_completed" },
+        { trigger: ".o_put_in_pack", run: "click" },
         {
-            trigger: ".o_sublines .o_barcode_line:last-child.o_selected.o_line_completed",
-            run: "scan lot1",
+            trigger: ".o_barcode_line .result-package", run: "scan lot1",
+        },
+        { trigger: ".o_barcode_line", run: "scan lot1" },
+        {
+            trigger: ".o_barcode_line .qty-done:contains(10)",
+            run: () => {
+                const sublines = helper.getSublines();
+                helper.assertLineTrackingNumber(sublines[0], "lot1");
+                helper.assertLineQty(sublines[0], "2/2");
+                helper.assertLineTrackingNumber(sublines[1], "lot1");
+                helper.assertLineQty(sublines[1], "1/1");
+                helper.assertLineTrackingNumber(sublines[2], "lot2");
+                helper.assertLineQty(sublines[2], "3/3");
+                helper.assertLineTrackingNumber(sublines[3], "lot3");
+                helper.assertLineQty(sublines[3], "3/3");
+                helper.assertLineTrackingNumber(sublines[4], "lot2");
+                helper.assertLineQty(sublines[4], "1/1");
+            },
         },
         { trigger: ".o_validate_page.btn-primary", run: "click" },
         { trigger: ".o_stock_barcode_main_menu" },
@@ -884,7 +904,15 @@ registry.category("web_tour.tours").add("test_batch_create", {
         { trigger: ".o_batch_picking a", run: "click" },
         { trigger: ".o_batch_picking a.active" },
         { trigger: ".o-kanban-button-new", run: "click" },
-
+        {
+            trigger: ".o_barcode_client_action",
+            run: "scan lovelybarcode",
+        },
+        {
+            trigger:
+                ".o_notification:has(.bg-danger):contains('This batch transfer is still in draft, scans are disabled until the batch is confirmed') .o_notification_close",
+            run: "click",
+        },
         // select 2 delivery orders
         {
             trigger: '.o_barcode_line_title:contains("picking_delivery_1")',
@@ -1477,5 +1505,158 @@ registry.category("web_tour.tours").add("test_scan_can_change_destination_locati
             trigger: ".o_validate_page.btn.btn-primary",
             run: "click",
         },
+    ],
+});
+
+registry.category("web_tour.tours").add("test_barcode_batch_partial_receipt_leave_reopen", {
+    steps: () => [
+        // Scan the product once for picking_receipt_1
+        {
+            trigger: '.o_barcode_line:contains(picking_receipt_1):contains(product1)',
+            run: 'click',
+        },
+        {
+            trigger: '.o_barcode_line:contains(product1)',
+            run: 'scan product1',
+        },
+        // Scan the product twice for picking_receipt_2
+        {
+            trigger: '.o_barcode_line:contains(picking_receipt_2):contains(product1)',
+            run: 'click',
+        },
+        {
+            trigger: '.o_barcode_line:contains(product1)',
+            run: 'scan product1',
+        },
+        {
+            trigger: '.o_barcode_line:contains(product1)',
+            run: 'scan product1',
+        },
+        // We need additional steps to make sure the python code is called
+        {
+            trigger: '.o_exit',
+            run: 'click',
+        },
+        {
+            trigger: '.o_button_operations',
+            run: 'click',
+        },
+    ]
+});
+
+registry.category("web_tour.tours").add("test_pack_batch_in_multiple_packages", {
+    steps: () => [
+        {
+            trigger: ".o_barcode_client_action",
+            run: () => {
+                helper.assertLinesCount(4);
+                helper.assertLineProduct(0, "product1");
+                helper.assertLineQty(0, "0/2");
+                helper.assertLineBelongTo(0, "Lovely receipt 1");
+                helper.assertLineProduct(1, "product1");
+                helper.assertLineQty(1, "0/3");
+                helper.assertLineBelongTo(1, "Lovely receipt 2");
+                helper.assertLineProduct(2, "product2");
+                helper.assertLineQty(2, "0/2");
+                helper.assertLineBelongTo(2, "Lovely receipt 1");
+                helper.assertLineProduct(3, "product2");
+                helper.assertLineQty(3, "0/3");
+                helper.assertLineBelongTo(3, "Lovely receipt 2");
+            }
+        },
+        {
+            trigger: ".o_barcode_line:has(.o_product_label:contains(product1)):has(.o_picking_label:contains('Lovely receipt 1'))",
+            run: "scan product1",
+        },
+        {
+            trigger: ".o_barcode_line:has(.o_product_label:contains(product1)):has(.o_picking_label:contains('Lovely receipt 1')):has(.qty-done:contains(1))",
+            run() {},
+        },
+        {
+            trigger: ".o_barcode_line:has(.o_product_label:contains(product1)):has(.o_picking_label:contains('Lovely receipt 2')) .o_add_remaining_quantity",
+            run: "click",
+        },
+        {
+            trigger: ".o_put_in_pack",
+            run: "click",
+        },
+        {
+            trigger: ".o_barcode_line .result-package",
+            run: () => {
+                helper.assertLinesCount(5);
+                const [line1, line2, line3, line4, line5] = helper.getLines();
+                const packageName = line5.querySelector('[name=package]').innerText
+                helper.assertLineProduct(0, "product1");
+                helper.assertLineQty(0, "0/1");
+                helper.assertLineBelongTo(0, "Lovely receipt 1");
+                helper.assert(line1.querySelector('[name=package]').innerText, `${packageName} ?`); // Display suggested package.
+                helper.assertLineProduct(1, "product2");
+                helper.assertLineQty(1, "0/2");
+                helper.assertLineBelongTo(1, "Lovely receipt 1");
+                helper.assert(line2.querySelector('[name=package]').innerText, `${packageName} ?`); // Display suggested package.
+                helper.assertLineProduct(2, "product2");
+                helper.assertLineQty(2, "0/3");
+                helper.assertLineBelongTo(2, "Lovely receipt 2");
+                helper.assert(line3.querySelector('[name=package]').innerText, `${packageName} ?`); // Display suggested package.
+                helper.assertLineProduct(3, "product1");
+                helper.assertLineQty(3, "1/1");
+                helper.assertLineBelongTo(3, "Lovely receipt 1");
+                helper.assert(line4.querySelector('[name=package]').innerText, packageName);
+                helper.assertLineProduct(4, "product1");
+                helper.assertLineQty(4, "3/3");
+                helper.assertLineBelongTo(4, "Lovely receipt 2");
+                helper.assert(line5.querySelector('[name=package]').innerText, packageName);
+            }
+        },
+        {
+            trigger: ".o_barcode_line:has(.o_product_label:contains(product1)):has(.o_picking_label:contains('Lovely receipt 1')) .o_add_remaining_quantity",
+            run: "click",
+        },
+        {
+            trigger: ".o_barcode_line:has(.o_product_label:contains(product2)):has(.o_picking_label:contains('Lovely receipt 1')) .o_add_remaining_quantity",
+            run: "click",
+        },
+        {
+            trigger: ".o_barcode_line:has(.o_product_label:contains(product2)):has(.o_picking_label:contains('Lovely receipt 2')) .o_add_remaining_quantity",
+            run: "click",
+        },
+        {
+            trigger: ".o_barcode_lines:not(:has(.o_barcode_line:contains(product1) .o_add_remaining_quantity))",
+            run() {},
+        },
+        {
+            trigger: ".o_put_in_pack",
+            run: "click",
+        },
+        {
+            trigger: ".o_barcode_lines:not(:contains(?))",
+            run: () => {
+                helper.assertLinesCount(5);
+                const [line1, line2, line3, line4, line5] = helper.getLines();
+                const package1 = line1.querySelector('[name=package]').innerText
+                const package2 = line3.querySelector('[name=package]').innerText
+                helper.assertLineProduct(0, "product1");
+                helper.assertLineQty(0, "1/1");
+                helper.assertLineBelongTo(0, "Lovely receipt 1");
+                helper.assert(line1.querySelector('[name=package]').innerText, package1);
+                helper.assertLineProduct(1, "product1");
+                helper.assertLineQty(1, "3/3");
+                helper.assertLineBelongTo(1, "Lovely receipt 2");
+                helper.assert(line2.querySelector('[name=package]').innerText, package1);
+                helper.assertLineProduct(2, "product1");
+                helper.assertLineQty(2, "1/1");
+                helper.assertLineBelongTo(2, "Lovely receipt 1");
+                helper.assert(line3.querySelector('[name=package]').innerText, package2);
+                helper.assertLineProduct(3, "product2");
+                helper.assertLineQty(3, "2/2");
+                helper.assertLineBelongTo(3, "Lovely receipt 1");
+                helper.assert(line4.querySelector('[name=package]').innerText, package2);
+                helper.assertLineProduct(4, "product2");
+                helper.assertLineQty(4, "3/3");
+                helper.assertLineBelongTo(4, "Lovely receipt 2");
+                helper.assert(line5.querySelector('[name=package]').innerText, package2);
+            }
+        },
+        ...stepUtils.validateBarcodeOperation(),
     ],
 });

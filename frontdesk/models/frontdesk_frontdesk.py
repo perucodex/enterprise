@@ -80,6 +80,14 @@ class FrontdeskFrontdesk(models.Model):
             )
             frontdesk.notify_warning = ', '.join(fallback_hosts.mapped('name'))
 
+    @api.onchange('company_id')
+    def _onchange_company_id(self):
+        """ Ensure that the public user has access to the selected company. """
+        if self.company_id and self.company_id != self.env.company:
+            public_user = self.env.ref('base.public_user')
+            if self.company_id not in public_user.company_ids:
+                public_user.company_ids = [(4, self.company_id.id)]
+
     def _compute_dashboard_data(self):
         """ This method computes the number of guests currently on site, the number of pending visitors, the number
         of drinks to serve, and the time of the latest check-in. """

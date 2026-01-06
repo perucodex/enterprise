@@ -84,7 +84,7 @@ class TestPayslipValidation(TestPayslipValidationCommon):
             'HOUALLOW': 1000.0,
             'OTALLOW': 500.0,
             'TRAALLOW': 200.0,
-            'EOSP': 799.17,
+            'EOSP': 570.83,
             'MEDICAL': 400.0,
             'IQAMA': 500.0,
             'WORKPER': 300.0,
@@ -119,7 +119,6 @@ class TestPayslipValidation(TestPayslipValidationCommon):
             'MEDICAL': 400.0,
             'IQAMA': 500.0,
             'WORKPER': 300.0,
-            'ANNUALP': 799.17,
             'GROSS': 54800.0,
             'NET': 53532.5,
         }
@@ -129,8 +128,8 @@ class TestPayslipValidation(TestPayslipValidationCommon):
         payslip = self._generate_payslip(date(2024, 1, 1), date(2024, 1, 31))
         work_entry = self.env['hr.work.entry'].create({
             'name': 'OT',
-            'employee_id': self.saudi_employee.id,
-            'version_id': self.saudi_employee.version_id.id,
+            'employee_id': payslip.employee_id.id,
+            'version_id': payslip.employee_id.version_id.id,
             'date': date(2024, 1, 1),
             'duration': 4,
             'work_entry_type_id': self.env.ref('hr_work_entry.work_entry_type_overtime').id,
@@ -144,7 +143,7 @@ class TestPayslipValidation(TestPayslipValidationCommon):
             'HOUALLOW': 400.0,
             'OTALLOW': 150.0,
             'TRAALLOW': 200.0,
-            'EOSP': 597.22,
+            'EOSP': 895.83,
             'ANNUALP': 597.22,
             'GROSS': 10750.0,
             'NET': 9736.0

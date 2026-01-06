@@ -208,7 +208,7 @@ class L10n_HkIrd(models.AbstractModel):
             'employee_address': '',
             'AreaCodeResAddr': AREA_CODE_MAP.get(employee.private_state_id.code, 'F'),
             'Capacity': employee.job_title,
-            'date_of_commencement': employee.contract_date_start,
+            'date_of_commencement': employee._get_first_version_date(),
         }
 
         if not data['HKID']:

@@ -40,7 +40,11 @@
             <div t-if="type == 'selection'" t-att-title="role" t-attf-class="{{classes}} o_sign_sign_item" t-att-style="style" t-att-value="value">
                 <div class="o_sign_select_options_display o_sign_select_options_display_edit">
                     <select name="selection" id="selection">
-                        <option class="o_select_empty"/>
+                        <option class="o_select_empty">
+                            <span class="o_placeholder ps-0">
+                                <t t-esc="placeholder"/>
+                            </span>
+                        </option>
                         <t t-foreach="options" t-key="option.value" t-as="option" t-index="index">
                             <option value="value" t-att-data-id="option.id">
                                 <t t-esc="option.value"/>

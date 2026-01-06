@@ -125,6 +125,8 @@ class TestUyEdi(AccountTestInvoicingCommon):
         })
 
         cls.utils_path = "odoo.addons.l10n_uy_edi.models.l10n_uy_edi_document.L10n_Uy_EdiDocument"
+        cls.mocked_responses_path = "l10n_uy_edi/tests/responses/"
+        cls.mocked_cfes_path = "l10n_uy_edi/tests/expected_cfes/"
 
     @classmethod
     def _create_move(cls, **kwargs):
@@ -170,7 +172,7 @@ class TestUyEdi(AccountTestInvoicingCommon):
         if response_file == "NO_RESPONSE" or not response_file:
             mock_response = None
         else:
-            xml_content = misc.file_open("l10n_uy_edi/tests/responses/" + response_file + ".xml", mode="rb").read()
+            xml_content = misc.file_open(self.mocked_responses_path + response_file + ".xml", mode="rb").read()
             mock_response = mock.Mock(spec=requests.Response)
             mock_response.status_code = 200
             mock_response.headers = ""
@@ -202,12 +204,12 @@ class TestUyEdi(AccountTestInvoicingCommon):
     def _mock_cron_l10n_uy_edi_get_vendor_bills(self, expected_folder, get_pdf=False):
         """ Call the cron to create vendor bills, will simulate that we have a notification, we read it and process
         the info and pdf of the vendor bill and then will stop the cron because there ar not more notificactions """
-        with patch(f"{self.utils_path}._ucfe_inbox") as mock_inbox, patch(f"{self.utils_path}._ucfe_query", \
-            return_value=self._mocked_response(expected_folder + "_pdf" if get_pdf else False)):
+        with patch(f"{self.utils_path}._ucfe_inbox") as mock_inbox, patch(f"{self.utils_path}._ucfe_query",
+            return_value=self._mocked_response(expected_folder + '_pdf' if get_pdf else False)):
             mock_inbox.side_effect = [
                 self._mocked_response(expected_folder + '/response_600'),  # Find if they are notifications available
                 self._mocked_response(expected_folder + '/response_610'),  # Read the notification
-                self._mocked_response(expected_folder + "/_status"),  # Update the status of the CFE
+                self._mocked_response(expected_folder + '/_status'),  # Update the status of the CFE
                 self._mocked_response(expected_folder + '/response_620'),  # Discard Notification
                 self._mocked_response(expected_folder + '/response_600_end'),  # No more notifications
             ]
@@ -222,7 +224,7 @@ class TestUyEdi(AccountTestInvoicingCommon):
     def _check_cfe(self, invoice, expected_prefix, expected_xml_file):
         self.assertEqual(invoice.name, "%s DE%07d" % (expected_prefix, invoice.id), "Not valid name")
         self.assertEqual(invoice.l10n_uy_edi_cfe_state, "accepted", "CFE not accepted in demo mode not possible (it is always accepted)")
-        expected_xml = self.get_xml_tree_from_string(misc.file_open("l10n_uy_edi/tests/expected_cfes/" + expected_xml_file + ".xml").read())
+        expected_xml = self.get_xml_tree_from_string(misc.file_open(self.mocked_cfes_path + expected_xml_file + ".xml").read())
         result_xml = self.get_xml_tree_from_attachment(invoice.l10n_uy_edi_document_id.attachment_id)
 
         # For Debit/Credit Notes we need to change the original expected document to add the proper tag.
@@ -237,7 +239,7 @@ class TestUyEdi(AccountTestInvoicingCommon):
         self.assertXmlTreeEqual(expected_xml, result_xml)
 
     def _mock_attachment_upload(self, journal, filename):
-        filename =  filename + ".xml"
+        filename = filename + ".xml"
         content = misc.file_open("l10n_uy_edi/tests/sobres_from_uruware/" + filename, mode="rb").read()
         attachment = self.env['ir.attachment'].create({
             'raw': content,
@@ -245,3 +247,19 @@ class TestUyEdi(AccountTestInvoicingCommon):
         })
         with patch(f"{self.utils_path}._create_pdf_vendor_bill", return_value=None):
             return self.env['account.move']._create_records_from_attachments(attachment)
+
+    def _configure_usd_company_currency(self):
+        USD = self.env.ref("base.USD")
+        UYU = self.env.ref("base.UYU")
+        self.company_uy.currency_id = USD
+        self.env["res.currency.rate"].search([('currency_id', '=', USD.id)]).unlink()
+        self.env["res.currency.rate"].search([('currency_id', '=', UYU.id)]).unlink()
+
+        rate_date = "2025-09-25"
+        self.env["res.currency.rate"].create([
+            {"name": rate_date, "company_id": self.company_uy.id, "currency_id": USD.id, "rate": 1.0},
+            {"name": rate_date, "company_id": self.company_uy.id, "currency_id": UYU.id, "rate": 1.0 / 0.02602066},
+        ])
+
+        self.assertEqual(self.company_uy.currency_id, USD)
+        self.assertEqual(self.company_uy.currency_id.rate, 1.0)

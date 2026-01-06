@@ -59,11 +59,12 @@ class PlanningSlot(models.Model):
             default_rental_return_date=self.end_datetime,
         )
         if products := self.role_id.product_ids.filtered('rent_ok'):
+            uom_hour = self.env.ref('uom.product_uom_hour')
             context['default_order_line'] = [
                 Command.create({
                     'product_id': products[0].product_variant_id.id,
                     'is_rental': True,
-                    'product_uom_qty': 1,
+                    'product_uom_qty': self.allocated_hours if products[:1].uom_id == uom_hour else 1,
                     'planning_slot_ids': self.ids,
                 }),
             ]
@@ -80,6 +81,7 @@ class PlanningSlot(models.Model):
         order = self.env['sale.order'].search([
             ('is_rental_order', '=', True),
             ('user_id', '=', self.env.uid),
+            ('state', '=', 'sale'),
         ], limit=1)
         if not order:
             raise ValidationError(self.env._('No Rental Order is found.'))
@@ -89,13 +91,25 @@ class PlanningSlot(models.Model):
                 self.sale_line_id = sol
                 break
         if not self.sale_line_id:
-            self.sale_line_id = self.env['sale.order.line'].with_context(planning_slot_generation=False).create({
-                'product_id': products[:1].product_variant_id.id,
-                'is_rental': True,
-                'product_uom_qty': 1,
-                'order_id': order.id,
-                'planning_slot_ids': self.ids,
-            })
+            uom_hour = self.env.ref('uom.product_uom_hour')
+            sale_line = order.order_line.filtered(
+                lambda l: l.is_rental and l.product_template_id in products
+            )[:1]
+            if sale_line:
+                self.sale_line_id = sale_line
+                sale_line.product_uom_qty = (
+                    sum(slot.allocated_hours for slot in sale_line.planning_slot_ids)
+                    if sale_line.product_uom_id == uom_hour else len(sale_line.planning_slot_ids)
+                )
+            else:
+                product = products[:1]
+                self.sale_line_id = self.env['sale.order.line'].with_context(planning_slot_generation=False).create({
+                    'product_id': product.product_variant_id.id,
+                    'is_rental': True,
+                    'product_uom_qty': self.allocated_hours if product.uom_id == uom_hour else 1,
+                    'order_id': order.id,
+                    'planning_slot_ids': self.ids,
+                })
         self.state = 'published'
         if not self.resource_id:
             self._set_slot_resource()

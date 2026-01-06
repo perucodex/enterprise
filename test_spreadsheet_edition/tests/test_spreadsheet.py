@@ -318,6 +318,19 @@ class SpreadsheetMixinTest(SpreadsheetTestCase):
         self.assertEqual(revisions[0]["timestamp"], datetime(2020, 2, 2, 0, 0, 0))
         self.assertEqual(revisions[0]["user"], (user.id, user.name))
 
+    def test_currency_passed_to_spreadsheet_history(self):
+        spreadsheet = self.env["spreadsheet.test"].create({})
+        company_eur = self.env["res.company"].create({"currency_id": self.env.ref("base.EUR").id, "name": "EUR"})
+        company_gbp = self.env["res.company"].create({"currency_id": self.env.ref("base.GBP").id, "name": "GBP"})
+
+        data = spreadsheet.with_company(company_eur).get_spreadsheet_history()
+        self.assertEqual(data["default_currency"]["code"], "EUR")
+        self.assertEqual(data["default_currency"]["symbol"], "€")
+
+        data = spreadsheet.with_company(company_gbp).get_spreadsheet_history()
+        self.assertEqual(data["default_currency"]["code"], "GBP")
+        self.assertEqual(data["default_currency"]["symbol"], "£")
+
     def test_get_spreadsheet_base_user_access_right_history(self):
         user = new_test_user(self.env, login="test", groups="base.group_user")
         spreadsheet = self.env["spreadsheet.test"].create({})

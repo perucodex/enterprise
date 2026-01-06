@@ -131,3 +131,52 @@ class TestHelpdeskMultyCompany(HelpdeskCommon):
             self.partner.write({'company_id': company_b.id})
 
         self.partner.write({'company_id': False})
+
+    def test_team_assignement_resource_multicompany(self):
+        '''
+            Test that the team computes assignement considering only resources of the team company.
+
+            Test Case:
+            ==========
+            - have a user with 1 resource in different company than the one set on the helpdesk team
+            - add the user as member of a helpdesk team of company A
+            - check that only the resources of company A are considered to compute working intervals
+        '''
+        Team = self.env['helpdesk.team'].with_context(tracking_disable=True)
+        company = self.env['res.company'].with_context(tracking_disable=True).create({
+            "name": "Test Company",
+        })
+        user_multi = new_test_user(
+            self.env,
+            'umc',
+            'helpdesk.group_helpdesk_user',
+            name='User Multi Company',
+            email='a@b.c',
+            context={'tracking_disable': True},
+        )
+        helpdesk_user = new_test_user(
+            self.env,
+            'helpdesk_user',
+            'helpdesk.group_helpdesk_user',
+            company_id=company.id,
+            name='Helpdesk User',
+            email='helpdesk_user@test.com',
+            context={'tracking_disable': True},
+        )
+        self.env['resource.resource'].create({
+            'name': 'Resource A',
+            'user_id': user_multi.id,
+        })
+        team_a = Team.create({
+            'name': 'Team A',
+            'company_id': company.id,
+            'auto_assignment': True,
+            'assign_method': 'randomly',
+            'member_ids': user_multi.ids,
+        })
+        ticket = self.env['helpdesk.ticket'].with_company(company).with_user(helpdesk_user).create({
+            'name': 'test ticket',
+            'team_id': team_a.id,
+        })
+        self.assertEqual(ticket.user_id, user_multi)
+        self.assertEqual(ticket.company_id, company)

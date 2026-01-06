@@ -750,6 +750,10 @@ class TestDocumentsAccess(TransactionCaseDocuments, MockEmail):
         # with SUDO, a normal user can move a pinned a folder
         self.folder_a.with_user(self.internal_user).sudo().owner_id = self.internal_user
 
+        # Internal user cannot copy a company root folder
+        with self.assertRaises(AccessError):
+            self.company_root_folder.with_user(self.internal_user).copy(default={'user_folder_id': "COMPANY"})
+
     @mute_logger('odoo.addons.base.models.ir_rule')
     def test_unlink_with_children(self):
         """Check that deletion handles children items and checks access rights
@@ -1677,3 +1681,81 @@ class TestDocumentsAccess(TransactionCaseDocuments, MockEmail):
         self.assertIn(
             (self.internal_user.partner_id, 'view'),
             self.document_txt.access_ids.mapped(lambda a: (a.partner_id, a.role)))
+
+    def test_permissions_internal_propagation_on_folder_moves(self):
+        not_secret_folder = self.env['documents.document'].create({
+            'name': 'Not Secret Folder',
+            'type': 'folder',
+            'access_internal': 'edit',
+            'children_ids': [
+                Command.create({
+                    'name': 'Secret Folder',
+                    'type': 'folder',
+                    'access_internal': 'none',
+                }),
+            ],
+            'owner_id': self.document_manager.id  # not odoobot
+        })
+        secret_folder = not_secret_folder.children_ids[0]
+        self.assertEqual(secret_folder.with_user(self.internal_user).user_permission, 'none')
+        none = self.env['documents.document'].with_user(self.internal_user).create({
+            'name': 'none',
+            'type': 'folder',
+            'access_internal': 'none',
+        })
+        editor = self.env['documents.document'].with_user(self.internal_user).create({
+            'name': 'editor',
+            'type': 'folder',
+            'access_internal': 'edit',
+        })
+
+        not_secret_folder.with_user(self.internal_user).action_move_folder(target=str(none.id))
+        none.with_user(self.internal_user).action_move_folder(target=str(editor.id))
+        with self.assertRaises(AccessError):
+            secret_folder.with_user(self.internal_user).check_access('read')
+        self.assertEqual(secret_folder.access_internal, 'none')
+
+    def test_permissions_member_and_owner_propagation_on_folder_moves(self):
+        member_folder = self.env['documents.document'].create({
+            'name': 'Member Folder',
+            'type': 'folder',
+            'access_internal': 'none',
+            'children_ids': [
+                Command.create({
+                    'name': 'Secret Folder',
+                    'type': 'folder',
+                    'access_internal': 'none',
+                    'access_ids': False,
+                }),
+            ],
+            'access_ids': [Command.create({'partner_id': self.internal_user.partner_id.id, 'role': 'edit'})],
+            'owner_id': self.document_manager.id  # not odoobot
+        })
+        secret_folder = member_folder.children_ids[0]
+        self.assertEqual(secret_folder.with_user(self.doc_user).user_permission, 'none')
+        none = self.env['documents.document'].with_user(self.internal_user).create({
+            'name': 'none',
+            'type': 'folder',
+            'access_internal': 'none',
+        })
+        doc_user_editor = self.env['documents.document'].with_user(self.internal_user).create({
+            'name': 'editor',
+            'type': 'folder',
+            'access_internal': 'none',
+            'access_ids': [Command.create({'partner_id': self.doc_user.partner_id.id, 'role': 'edit'})]
+        })
+
+        member_folder.with_user(self.internal_user).action_move_folder(target=str(none.id))
+        none.with_user(self.internal_user).action_move_folder(target=str(doc_user_editor.id))
+
+        none.with_user(self.doc_user).check_access('read')
+        member_folder.with_user(self.doc_user).check_access("read")
+        self.assertIn(self.doc_user.partner_id, member_folder.access_ids.partner_id)
+
+        with self.assertRaises(AccessError):
+            secret_folder.with_user(self.internal_user).check_access('read')
+        with self.assertRaises(AccessError):
+            secret_folder.with_user(self.doc_user).check_access('read')
+
+        self.assertNotIn(self.internal_user.partner_id, secret_folder.access_ids.partner_id)
+        self.assertNotIn(self.doc_user.partner_id, secret_folder.access_ids.partner_id)

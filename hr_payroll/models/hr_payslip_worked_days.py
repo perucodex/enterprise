@@ -63,21 +63,31 @@ class HrPayslipWorkedDays(models.Model):
 
     @api.depends('work_entry_type_id', 'number_of_days', 'number_of_hours', 'payslip_id')
     def _compute_name(self):
-        if self.payslip_id:
-            to_check_public_holiday = dict(
-                self.env['resource.calendar.leaves']._read_group(
-                    [
-                        ('resource_id', '=', False),
-                        ('work_entry_type_id', 'in', self.mapped('work_entry_type_id').ids),
-                        ('date_from', '<=', max(self.payslip_id.mapped('date_to'))),
-                        ('date_to', '>=', min(self.payslip_id.mapped('date_from'))),
-                    ],
-                    ['work_entry_type_id'],
-                    ['id:recordset']
-                )
+        if not self.payslip_id:
+            return
+
+        to_check_public_holiday = dict(
+            self.env['resource.calendar.leaves']._read_group(
+                [
+                    ('resource_id', '=', False),
+                    ('work_entry_type_id', 'in', self.mapped('work_entry_type_id').ids),
+                    ('date_from', '<=', max(self.payslip_id.mapped('date_to'))),
+                    ('date_to', '>=', min(self.payslip_id.mapped('date_from'))),
+                ],
+                ['work_entry_type_id'],
+                ['id:recordset']
             )
-        else:
-            to_check_public_holiday = {}
+        )
+        work_entries = {
+            (employee, date): we
+            for employee, date, we in self.env['hr.work.entry']._read_group(
+            domain=[
+                ('date', '<=', max(self.payslip_id.mapped('date_to'))),
+                ('date', '>=', min(self.payslip_id.mapped('date_from'))),
+                ('employee_id', 'in', self.payslip_id.employee_id.ids)
+            ],
+            groupby=['employee_id', 'date:day'],
+            aggregates=['id:recordset'])}
 
         for worked_days in self:
             public_holidays = to_check_public_holiday.get(worked_days.work_entry_type_id, '')
@@ -86,9 +96,18 @@ class HrPayslipWorkedDays(models.Model):
                 and p.date_from.date() <= worked_days.payslip_id.date_to
                 and p.date_to.date() >= worked_days.payslip_id.date_from
                 and p.company_id == worked_days.payslip_id.company_id)
+            actual_holidays = self.env['resource.calendar.leaves']
             if holidays:
-                name = (', '.join(holidays.mapped('name')))
+                for holiday in holidays:
+                    work_entry_list = work_entries.get(
+                        (worked_days.payslip_id.employee_id, holiday.date_from.date()),
+                        self.env['hr.work.entry']
+                    )
+                    if any(we.code == holiday.work_entry_type_id.code for we in work_entry_list):
+                        actual_holidays |= holiday
+            if actual_holidays:
+                name = (', '.join(actual_holidays.mapped('name')))
             else:
                 name = worked_days.work_entry_type_id.name or ''
-            half_day = bool(worked_days.payslip_id) and worked_days._is_half_day()
+            half_day = worked_days._is_half_day()
             worked_days.name = name + (_(' (Half-Day)') if half_day else '')

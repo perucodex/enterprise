@@ -2,7 +2,7 @@ import json
 from unittest.mock import patch
 
 from odoo.exceptions import AccessError
-from odoo.tests import Form
+from odoo.tests import Form, users
 from odoo.tools import mute_logger
 
 from odoo.addons.ai.utils.llm_api_service import LLMApiService
@@ -239,6 +239,63 @@ class TestAiDocuments(TestAiDocumentsCommon):
             })
 
         self.assertEqual(llm_calls, 3)
+        self.assertEqual(document.folder_id, self.target_folder)
+
+    @users('user_test')
+    def test_ai_documents_sort_manual_trigger(self):
+        """Test that users can trigger auto-sort on their documents."""
+        # disable the automation to be able to trigger it manually
+        self.env["base.automation"].sudo().search([("ai_autosort_folder_id", "=", self.folder.id)]).active = False
+        document = self.env['documents.document'].with_user(self.user_internal).sudo().create({
+            "folder_id": self.folder.sudo().id,
+            "name": "Document Name",
+            "type": "binary",
+            "datas": "VGVzdCBmaWxl",
+        }).sudo(False)
+        llm_calls = 0
+
+        # The user cannot access the target folder,
+        # but the name of the folder is still inserted in the prompt
+        self.env.invalidate_all()
+        with self.assertRaises(AccessError):
+            self.target_folder.with_user(self.user_internal).name
+        self.assertEqual(
+            self.target_folder.with_user(self.user_internal).sudo().user_permission,
+            'none',
+        )
+        self.assertEqual(
+            self.target_folder.with_user(self.user_internal).sudo().display_name,
+            'Restricted Folder',
+        )
+
+        def _mocked_request_llm(
+            service, llm_model, system_prompts, user_prompts, tools=None,
+            files=None, schema=None, temperature=0.2, inputs=(), web_grounding=False
+        ):
+            self.assertIn('Target Folder', ''.join(user_prompts))
+            self.assertNotIn('Restricted Folder', ''.join(user_prompts))
+
+            nonlocal llm_calls
+            llm_calls += 1
+            if llm_calls == 1:
+                self.assertFalse(inputs)
+                return self._ai_tool_call(
+                    f"action_{self.ir_action_tool.id}",
+                    "call_123456",
+                    {'new_name': 'new name'},
+                )
+            if llm_calls == 2:
+                self.assertEqual(len(inputs), 2)
+                self.assertEqual(inputs[0].get('name'), f"action_{self.ir_action_tool.id}")
+                return self._ai_tool_call(
+                    "ir_actions_server_move_in_folder",
+                    "call_789123",
+                    {'folder_id': self.target_folder.id},
+                )
+
+            return ["Done"], [], []
+        with patch.object(LLMApiService, "_request_llm", _mocked_request_llm):
+            document.action_ai_sort()
         self.assertEqual(document.folder_id, self.target_folder)
 
     def _ai_tool_call(self, name, call_id, arguments):

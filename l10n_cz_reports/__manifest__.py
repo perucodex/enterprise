@@ -19,6 +19,7 @@ This module includes accounting reports for Czech Republic, including:
         'data/account_return_data.xml',
         'data/profit_loss.xml',
         'data/balance_sheet.xml',
+        'data/account_report_ec_sales_list_report.xml',
         'data/tax_report.xml',
         'data/common_report_export.xml',
         'data/control_statement_report_export.xml',

@@ -40,10 +40,11 @@ export class SignRequest extends Component {
             createUid: context.create_uid || (action.params && action.params.create_uid),
             signRequestState: context.state || (action.params && action.params.state),
             requestItemStates: context.request_item_states,
-            needToSign: context.need_to_sign,
+            needToSign: context.need_to_sign || (action.params && action.params.need_to_sign),
             todayFormattedDate: context.today_formatted_date,
             dateFormat: context.date_format,
             sequencedSignatureMail: context.sequenced_signature_mail || (action.params && action.params.sequenced_signature_mail),
+            name: action.name || action.params && action.params.name,
         });
 
         if (this.signInfo) {
@@ -53,7 +54,10 @@ export class SignRequest extends Component {
                 create_uid: this.signInfo.get("createUid"),
                 state: this.signInfo.get("signRequestState"),
                 sequenced_signature_mail: this.signInfo.get("sequencedSignatureMail"),
+                need_to_sign: this.signInfo.get("needToSign"),
+                name: this.signInfo.get("name") || "",
             });
+            this.env.config.setDisplayName(this.signInfo.get("name") || "");
         }
 
         this.documentRoot = useRef("sign-document");

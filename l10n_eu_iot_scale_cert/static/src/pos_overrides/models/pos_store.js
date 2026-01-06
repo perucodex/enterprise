@@ -13,6 +13,10 @@ patch(PosStore.prototype, {
             this.config.iface_electronic_scale &&
             this.config._is_eu_country &&
             this.models["product.product"].some((product) => product.to_weight);
+
+        // TODO: The POS is only certified in 18.0, so we will disable the certification messages. Once a new version is certified, this line should be removed.
+        this.isScaleIconVisible = false;
+
         this.config.isCertified = this.isCertified;
         this.config.showCertificationWarning = this.isScaleIconVisible && !this.isCertified;
     },

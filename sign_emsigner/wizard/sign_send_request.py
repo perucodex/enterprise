@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models
+from odoo import api, models
 from odoo.exceptions import UserError
 
 
@@ -15,3 +15,12 @@ class EmsignerSignSendRequest(models.TransientModel):
             if has_emsigner_role:
                 raise UserError(self.env._("Emsigner role cannot be signed first. Please keep emsigner as last signer."))
         return super().sign_directly()
+
+    @api.depends("only_autofill_readonly", "signers_count", "is_user_signer")
+    def _compute_display_download_button(self):
+        # Hide download button as emsigner does not allow direct download without signing
+        for wiz in self:
+            if wiz.signer_ids[:1].role_id.auth_method == "emsigner":
+                wiz.display_download_button = False
+            else:
+                super()._compute_display_download_button()

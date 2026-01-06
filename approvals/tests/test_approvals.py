@@ -18,6 +18,7 @@ class TestRequest(common.TransactionCase):
             'date_end': fields.Datetime.now(),
             'location': 'testland'
         })
+        record.write({'approver_ids': [(5, 0, 0)]})
         first_approver = self.env['approval.approver'].create({
             'user_id': 1,
             'request_id': record.id,
@@ -86,6 +87,7 @@ class TestRequest(common.TransactionCase):
             'date_end': fields.Datetime.now(),
             'location': 'testland'
         })
+        record.write({'approver_ids': [(5, 0, 0)]})
         first_approver = self.env['approval.approver'].create({
             'user_id': 1,
             'request_id': record.id,
@@ -331,7 +333,7 @@ class TestRequest(common.TransactionCase):
         approver3.with_user(user3).unlink()
         self.assertEqual(approval.approver_ids.user_id.id, user2.id)
 
-    def test_user_access_to_admin_approval(self):
+    def test_consistency_between_request_and_approver(self):
         user = new_test_user(self.env, login='user1', groups='base.group_user')
         admin = new_test_user(self.env, login='admin1', groups='approvals.group_approval_manager')
         admin_env = self.env(user=admin)
@@ -367,3 +369,29 @@ class TestRequest(common.TransactionCase):
 
         with self.assertRaises(AccessError):
             user_approver.with_user(user).request_id = private_approval
+
+        # As admin, create an approver for your own approval with user
+        user_approver_for_admin = admin_env['approval.approver'].create({
+            'user_id': user.id,
+            'request_id': private_approval.id
+        })
+        user_approval = admin_env['approval.request'].create({
+            'name': 'Test request',
+            'request_owner_id': user.id,
+            'category_id': category1.id,
+            'date_start': fields.Datetime.now(),
+            'date_end': fields.Datetime.now(),
+            'location': 'testland'
+        })
+        # As user, try to move your own approver on your own request
+        with self.assertRaises(AccessError):
+            user_approver_for_admin.with_user(user).request_id = user_approval
+        # As user, move your own approver on the same request
+        user_approver_for_admin.with_user(user).request_id = private_approval.id
+
+        # Create an approver without request
+        user_approver = self.env['approval.approver'].create({
+            'user_id': user.id,
+        })
+        # Move it to a request
+        user_approver.request_id = approval.id

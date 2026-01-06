@@ -15,6 +15,8 @@ class AccountMoveReversal(models.TransientModel):
     def reverse_moves(self, is_modify=False):
         action = super().reverse_moves(is_modify=is_modify)
         if self.helpdesk_ticket_id:  # checking if the wizard was created from helpdesk
+            if self.sudo().product_id and self.new_move_ids.invoice_line_ids.product_id != self.sudo().product_id:
+                self.new_move_ids.invoice_line_ids = self.new_move_ids.invoice_line_ids.filtered(lambda line: line.product_id == self.sudo().product_id)
             for line in self.new_move_ids.invoice_line_ids:  # self.new_move_ids is the reverse of the moves passed to the wizard
                 # the line could be a down payment, which has display_type == 'product'; we have to check if there is a product
                 if not line.product_id or line.display_type != 'product' or line.product_id.type != 'consu' or line.product_id != self.product_id:

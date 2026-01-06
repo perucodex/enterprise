@@ -159,16 +159,23 @@ class L10n_BeTaxReportHandler(models.AbstractModel):
             'year': str(dt_to[:4]),
             'client_nihil': options.get('client_nihil', False) and 'YES' or 'NO',
             'ask_restitution': options.get('ask_restitution', False) and 'YES' or 'NO',
-            'comment': options.get('comment') or '/',
+            'comment': options.get('comment'),
             'prorata_deduction': deduction_text,
             'representative_node': _get_xml_export_representative_node(report),
+            'rectification_ref': options.get('rectification_ref'),
         }
 
         rslt = Markup(f"""<?xml version="1.0"?>
 <ns2:VATConsignment xmlns="http://www.minfin.fgov.be/InputCommon" xmlns:ns2="http://www.minfin.fgov.be/VATConsignment" VATDeclarationsNbr="1">
     %(representative_node)s
-    <ns2:VATDeclaration SequenceNumber="1" DeclarantReference="%(send_ref)s">
-        <ns2:Declarant>
+    <ns2:VATDeclaration SequenceNumber="1" DeclarantReference="%(send_ref)s">""") % file_data
+
+        if file_data.get('rectification_ref'):
+            rslt += Markup("""
+        <ns2:ReplacedVATDeclaration>%(rectification_ref)s</ns2:ReplacedVATDeclaration>
+            """) % file_data
+
+        rslt += Markup(f"""<ns2:Declarant>
             <VATNumber xmlns="http://www.minfin.fgov.be/InputCommon">%(only_vat)s</VATNumber>
             <Name>%(company_name)s</Name>
             <Street>%(address)s</Street>
@@ -188,12 +195,12 @@ class L10n_BeTaxReportHandler(models.AbstractModel):
         grids_list = []
         currency_id = self.env.company.currency_id
 
-        options = report.get_options({'no_format': True, 'date': {'date_from': date_from, 'date_to': date_to}, 'filter_unfold_all': True})
+        options = report.get_options({'no_format': True, 'date': {'date_from': date_from, 'date_to': date_to}, 'filter_unfold_all': True, 'export_mode': 'file'})
         lines = report._get_lines(options)
 
         # Create a mapping between report line ids and actual grid names
         non_compound_rep_lines = report.line_ids.expression_ids.filtered(
-                lambda x: x.formula not in {'48s44', '48s46L', '48s46T', '46L', '46T'})
+                lambda x: x.formula not in {'48s44', '48s46L', '48s46T', '-46L', '-46T'})
         lines_grids_map = {
             expr.report_line_id.id: expr.formula.split('.')[0].replace('c', '') for expr in non_compound_rep_lines
         }
@@ -246,10 +253,17 @@ class L10n_BeTaxReportHandler(models.AbstractModel):
         </ns2:Data>
         <ns2:ClientListingNihil>%(client_nihil)s</ns2:ClientListingNihil>
         <ns2:Ask Restitution="%(ask_restitution)s"/>
+        """) % file_data
+
+        if file_data['comment']:
+            rslt += Markup("""
         <ns2:Comment>%(comment)s</ns2:Comment>
+            """) % file_data
+
+        rslt += Markup("""
     </ns2:VATDeclaration>
 </ns2:VATConsignment>
-        """) % file_data
+        """)
 
         return {
             'file_name': report.get_default_report_filename(options, 'xml'),
@@ -284,3 +298,8 @@ class L10n_BeTaxReportHandler(models.AbstractModel):
         )):
             # remind user to submit EC Sales Report if any ec sales related taxes
             warnings['l10n_be_reports.tax_report_warning_ec_sales_reminder'] = {}
+
+        if _evaluate_check(lambda expr_totals: any(
+            self.env.company.currency_id.compare_amounts(expr_totals[expr]['value'], 0) < 0 for expr in expr_map.values()
+        )):
+            warnings['l10n_be_reports.tax_report_warning_negative_amounts'] = {'alert_type': 'danger'}

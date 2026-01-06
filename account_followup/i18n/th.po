@@ -8,13 +8,14 @@
 # Wichanon Jamwutthipreecha, 2022
 # Martin Trigaux, 2022
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:45+0000\n"
-"PO-Revision-Date: 2025-09-16 22:56+0000\n"
-"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:43+0000\n"
+"PO-Revision-Date: 2025-11-16 05:24+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Thai <https://translate.odoo.com/projects/odoo-19/"
 "account_followup/th/>\n"
 "Language: th\n"
@@ -28,13 +29,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_followup/models/account_followup_report.py:0
 msgid "%(company)s Payment Reminder - %(partner)s"
-msgstr ""
+msgstr "%(company)s แจ้งเตือนการชำระเงิน - %(partner)s"
 
 #. module: account_followup
 #. odoo-python
 #: code:addons/account_followup/models/account_followup.py:0
 msgid "%(delay)s days (copy of %(name)s)"
-msgstr ""
+msgstr "%(delay)sวัน (สำเนาของ %(name)s)"
 
 #. module: account_followup
 #: model:ir.actions.report,print_report_name:account_followup.action_report_followup
@@ -49,7 +50,7 @@ msgstr "15 วัน"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.followup_filter_info_template
 msgid "2023-09-06"
-msgstr ""
+msgstr "2023-09-06"
 
 #. module: account_followup
 #: model:account_followup.followup.line,name:account_followup.demo_followup_line2
@@ -111,6 +112,39 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p>\n"
+"                        <t t-if=\"object.id != "
+"object.commercial_partner_id.id\">เรียน <t t-out=\"object.name or ''\"/> (<t "
+"t-out=\"object.commercial_partner_id.name or ''\"/>)</t>\n"
+"                        เรียน <t t-out=\"object.name or ''\"/><t t-"
+"else=\"\">\n"
+"                        <br/>\n"
+"                        แม้ว่าจะมีการแจ้งเตือนหลายครั้ง แต่บัญชีของคุณก็ยังไม่ได้รับการแก้ไข\n"
+"                        เว้นแต่จะได้ชำระเงินเต็มจำนวนภายใน 8 วันข้างหน้า "
+"การดำเนินการทางกฎหมายเพื่อขอคืนหนี้จะดำเนินการโดยไม่มีการแจ้งให้ทราบล่วงหน้า\n"
+"                        ฉันเชื่อว่าการดำเนินการนี้จะพิสูจน์ได้ว่าไม่มีความจำเป็น "
+"และรายละเอียดของการชำระเงินที่ครบกำหนดแสดงไว้ด้านล่างนี้\n"
+"                        หากมีข้อสงสัยโปรดติดต่อฝ่ายบัญชีของเราทันที\n"
+"                        <br/>\n"
+"                        ขอแสดงความนับถือ\n"
+"                        <br/>\n"
+"                        <t t-if=\"not "
+"is_html_empty(object._get_followup_responsible().signature)\">\n"
+"                            <br/>\n"
+"                            <t t-"
+"out=\"object._get_followup_responsible().signature\"/>\n"
+"                        </t>\n"
+"                        <t t-else=\"\">\n"
+"                            <br/>\n"
+"                            --\n"
+"                            <br/>\n"
+"                            <t t-"
+"out=\"object._get_followup_responsible().name\"/>\n"
+"                        </t>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: account_followup
 #: model:mail.template,body_html:account_followup.demo_followup_email_template_2
@@ -156,6 +190,43 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p>\n"
+"                        <t t-if=\"object.id != "
+"object.commercial_partner_id.id\">เรียน <t t-out=\"object.name or ''\"/>(<t t-"
+"out=\"object.commercial_partner_id.name or ''\"/>)\n"
+"                        <t t-else=\"\">เรียน <t t-out=\"object.name or ''\"/"
+"></t>\n"
+"                        \n"
+"                        เราเสียใจที่ต้องรับรู้ว่าการส่งแจ้งเตือนนั้นไม่เป็นผล "
+"เนื่องจากบัญชีของคุณยังคงเกินกำหนดชำระ\n"
+"                        <br/>\n"
+"                        มีความจำเป็นอย่างยิ่งที่จะต้องชำระเงินทันที "
+"ไม่เช่นนั้นเราจะต้องพิจารณาระงับบัญชีของคุณ ซึ่งหมายความว่าเราจะไม่สามารถจัดหา (สินค้า/บริการ) "
+"ให้กับบริษัทของคุณได้ โปรดใช้มาตรการที่เหมาะสมเพื่อดำเนินการชำระเงินนี้ภายใน 8 วันข้างหน้า\n"
+"                        <br/>\n"
+"                        หากมีปัญหาในการชำระใบแจ้งหนี้ที่เราไม่ทราบ "
+"โปรดติดต่อฝ่ายบัญชีของเรา เพื่อให้เราสามารถแก้ไขปัญหาได้อย่างรวดเร็ว\n"
+"                        <br/>\n"
+"                        รายละเอียดการชำระเงินที่ครบกำหนดได้พิมพ์ไว้ด้านล่าง\n"
+"                        <br/>\n"
+"                        ขอแสดงความนับถือ\n"
+"                        <t t-if=\"not "
+"is_html_empty(object._get_followup_responsible().signature)\">\n"
+"                            <br/>\n"
+"                            <t t-"
+"out=\"object._get_followup_responsible().signature\"/>\n"
+"                        </t>\n"
+"                        <t t-else=\"\">\n"
+"                            <br/>\n"
+"                            --\n"
+"                            <br/>\n"
+"                            <t t-"
+"out=\"object._get_followup_responsible().name\"/>\n"
+"                        </t>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: account_followup
 #: model:mail.template,body_html:account_followup.email_template_followup_1
@@ -213,7 +284,7 @@ msgstr ""
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.res_partner_view_form
 msgid "<span class=\"o_stat_text\">Due</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">ครบกำหนด</span>"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.template_followup_report
@@ -222,6 +293,9 @@ msgid ""
 "                                Pending Invoices\n"
 "                            </strong>"
 msgstr ""
+"<strong>\n"
+"                                ใบแจ้งหนี้ที่รอดำเนินการ\n"
+"                            </strong>"
 
 #. module: account_followup
 #: model:ir.model.constraint,message:account_followup.constraint_account_followup_followup_line_uniq_name
@@ -274,12 +348,12 @@ msgstr "เพิ่มที่ติดต่อเพื่อแจ้งใ
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__additional_follower_ids
 msgid "Add followers"
-msgstr ""
+msgstr "เพิ่มผู้ติดตาม"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.followup_filter_info_template
 msgid "Address"
-msgstr ""
+msgstr "ที่อยู่"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__join_invoices
@@ -302,7 +376,7 @@ msgstr "โดยอัตโนมัติ"
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__body_has_template_value
 msgid "Body content is the same as the template"
-msgstr ""
+msgstr "เนื้อหาเนื้อความเหมือนกับเทมเพลต"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__can_edit_body
@@ -317,7 +391,7 @@ msgstr "ยกเลิก"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.missing_information_view_form
 msgid "Close"
-msgstr ""
+msgstr "ปิด"
 
 #. module: account_followup
 #. odoo-python
@@ -348,7 +422,7 @@ msgstr "เนื้อหา"
 #. module: account_followup
 #: model:ir.model,website_form_label:account_followup.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "สร้างลูกค้า"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__create_uid
@@ -436,7 +510,7 @@ msgstr "กำหนดระดับการติดตามผลและ
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.followup_filter_info_template
 msgid "Demo Ref"
-msgstr ""
+msgstr "อ้างอิงการสาธิต"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__name
@@ -497,7 +571,7 @@ msgstr "หัวเรื่องอีเมล"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.view_account_followup_followup_line_form
 msgid "Email Template"
-msgstr ""
+msgstr "เทมเพลตอีเมล"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__email_recipient_ids
@@ -553,7 +627,7 @@ msgstr "ขั้นตอนการติดตามผล"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.report_followup_print_all
 msgid "Follow-up details"
-msgstr ""
+msgstr "รายละเอียดการติดตามผล"
 
 #. module: account_followup
 #. odoo-python
@@ -564,7 +638,7 @@ msgstr "สร้างจดหมายการติดตามผลแล
 #. module: account_followup
 #: model:ir.model,name:account_followup.model_account_followup_missing_information_wizard
 msgid "Followup missing information wizard"
-msgstr ""
+msgstr "การติดตามโปรแกรมข้อมูลที่ไม่ครบถ้วน"
 
 #. module: account_followup
 #: model_terms:ir.actions.act_window,help:account_followup.action_account_followup_line_definition_form
@@ -607,6 +681,8 @@ msgid ""
 "notifications about any email reply made by the partner on the reminder "
 "email."
 msgstr ""
+"หากตั้งค่าไว้ "
+"ผู้ใช้เหล่านั้นจะถูกเพิ่มเป็นผู้ติดตามของพาร์ทเนอร์และรับการแจ้งเตือนเกี่ยวกับการตอบกลับอีเมลที่พาร์ทเนอร์ทำไว้ในอีเมลเตือนความจำ"
 
 #. module: account_followup
 #: model:ir.model.fields.selection,name:account_followup.selection__res_partner__followup_status__in_need_of_action
@@ -616,12 +692,12 @@ msgstr "จำเป็นต้องดำเนินการ"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.view_partner_property_form_followup
 msgid "Invoice Follow-ups"
-msgstr ""
+msgstr "การติดตามใบแจ้งหนี้"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.template_followup_report
 msgid "Invoices Analysis"
-msgstr ""
+msgstr "การวิเคราะห์ใบแจ้งหนี้"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__is_mail_template_editor
@@ -638,7 +714,7 @@ msgstr "รายการสมุดรายวัน"
 #: code:addons/account_followup/models/res_partner.py:0
 #: model_terms:ir.ui.view,arch_db:account_followup.view_partner_property_form_followup
 msgid "Journal Items"
-msgstr ""
+msgstr "รายการสมุดรายวัน"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.manual_reminder_view_form
@@ -686,12 +762,12 @@ msgstr "ด้วยตัวเอง"
 #: code:addons/account_followup/models/res_partner.py:0
 #: code:addons/account_followup/wizard/followup_missing_information.py:0
 msgid "Missing information"
-msgstr ""
+msgstr "ข้อมูลที่ไม่ครบถ้วน"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.line_template
 msgid "Name"
-msgstr ""
+msgstr "ชื่อ"
 
 #. module: account_followup
 #. odoo-python
@@ -718,6 +794,9 @@ msgid ""
 "                Sending a reminder will set this date depending on the "
 "levels configuration, and you can change it manually."
 msgstr ""
+"จะไม่มีการดำเนินการติดตามผลก่อนวันที่นี้\n"
+"                การส่งการแจ้งเตือนจะกำหนดวันที่นี้ขึ้นอยู่กับการกำหนดค่าระดับ "
+"และคุณสามารถเปลี่ยนได้ด้วยตนเอง"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__activity_note
@@ -751,9 +830,13 @@ msgid "Origin"
 msgstr "จุดเริ่ม"
 
 #. module: account_followup
+#: model_terms:ir.ui.view,arch_db:account_followup.customer_statements_search_view
+msgid "Overdue Customer Invoices"
+msgstr ""
+
+#. module: account_followup
 #. odoo-python
 #: code:addons/account_followup/models/res_partner.py:0
-#: model_terms:ir.ui.view,arch_db:account_followup.customer_statements_search_view
 msgid "Overdue Invoices"
 msgstr "ใบแจ้งหนี้ที่ค้างชำระ"
 
@@ -781,13 +864,13 @@ msgstr "พิมพ์จดหมายการติดตามผล"
 #. module: account_followup
 #: model:ir.actions.server,name:account_followup.action_account_reports_customer_statements_do_followup
 msgid "Process Follow-ups"
-msgstr ""
+msgstr "ขั้นตอนการติดตามผล"
 
 #. module: account_followup
 #. odoo-python
 #: code:addons/account_followup/models/account_followup_report.py:0
 msgid "Reference"
-msgstr ""
+msgstr "อ้างอิง"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.view_account_followup_followup_line_form
@@ -808,12 +891,12 @@ msgstr "โมเดลการแสดงผล"
 #. module: account_followup
 #: model:ir.model,name:account_followup.model_ir_actions_report
 msgid "Report Action"
-msgstr ""
+msgstr "การดําเนินการรายงาน"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.customer_statements_search_view
 msgid "Requires Follow-up"
-msgstr ""
+msgstr "จำเป็นต้องมีการติดตามผล"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__activity_default_responsible_type
@@ -908,12 +991,12 @@ msgstr "สรุป"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.table_header_template_followup_report
 msgid "Table Header"
-msgstr ""
+msgstr "ส่วนหัวของตาราง"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.line_template
 msgid "Table Value"
-msgstr ""
+msgstr "ค่าตาราง"
 
 #. module: account_followup
 #: model:ir.model.fields,help:account_followup.field_account_move_line__invoice_origin
@@ -998,7 +1081,7 @@ msgstr "AML ที่ไม่กระทบยอด"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.missing_information_view_form
 msgid "View partners"
-msgstr ""
+msgstr "ดูพาร์ทเนอร์"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.missing_information_view_form
@@ -1006,6 +1089,8 @@ msgid ""
 "We were not able to process some of the automated follow-up actions due to "
 "missing information on the partners."
 msgstr ""
+"เราไม่สามารถประมวลผลการดำเนินการติดตามผลแบบอัตโนมัติบางส่วนได้ "
+"เนื่องจากข้อมูลเกี่ยวกับพาร์ทเนอร์ที่ไม่ครบถ้วน"
 
 #. module: account_followup
 #: model:ir.model.fields.selection,name:account_followup.selection__res_partner__followup_status__with_overdue_invoices

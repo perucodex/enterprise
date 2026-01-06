@@ -9,12 +9,13 @@
 # Jolien De Paepe, 2023
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # "Manon Rondou (ronm)" <ronm@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:46+0000\n"
-"PO-Revision-Date: 2025-10-15 07:25+0000\n"
+"POT-Creation-Date: 2025-12-30 18:45+0000\n"
+"PO-Revision-Date: 2025-12-22 09:20+0000\n"
 "Last-Translator: \"Manon Rondou (ronm)\" <ronm@odoo.com>\n"
 "Language-Team: French <https://translate.odoo.com/projects/odoo-19/"
 "hr_contract_salary/fr/>\n"
@@ -24,7 +25,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
 "1000000 == 0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_salary_personal_info__impacts_net_salary
@@ -89,6 +90,28 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <h2>Félicitations !</h2>\n"
+"                Vous pouvez configurer votre package salarial en cliquant "
+"sur le lien ci-dessous.<br/>\n"
+"                <t t-if=\"ctx.get('validity_end')\">\n"
+"                    Le lien expire le <t t-out=\"ctx.get('validity_end')\"/"
+">.\n"
+"                </t>\n"
+"                <div style=\"padding: 16px 0px 16px 0px;\">\n"
+"                    <a t-att-href=\"'/salary_package/simulation/offer/%s%s' "
+"% "
+"(                             ctx.get('offer_id'),                             "
+"('?token=' + ctx.get('access_token')) if ctx.get('access_token') else "
+"''                         )\" target=\"_blank\" t-attf-style=\"background-"
+"color: {{object.company_id.email_secondary_color or '#875A7B'}}; text-"
+"decoration: none; color: {{object.company_id.email_primary_color or "
+"'#FFFFFF'}}; padding: 8px 16px 8px 16px; border-radius: 5px;\">\n"
+"                        Configurer votre package\n"
+"                    </a>\n"
+"                </div>\n"
+"            </div>\n"
+"        "
 
 #. module: hr_contract_salary
 #: model:mail.template,body_html:hr_contract_salary.mail_template_send_offer_applicant
@@ -113,6 +136,25 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <h2>Félicitations !</h2>\n"
+"                Vous pouvez configurer votre package salarial en cliquant "
+"sur le lien ci-dessous.<br/>\n"
+"                <t t-if=\"ctx.get('validity_end')\">\n"
+"                    Le lien expire le <t t-out=\"ctx.get('validity_end')\"/"
+">.\n"
+"                </t>\n"
+"                <div style=\"padding: 16px 0px 16px 0px;\">\n"
+"                    <a t-attf-href=\"/salary_package/simulation/offer/"
+"{{ctx.get('offer_id')}}?token={{ctx.get('access_token')}}\" "
+"target=\"_blank\" t-attf-style=\"background-color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}}; text-decoration: "
+"none; color: {{object.company_id.email_primary_color or '#FFFFFF'}}; "
+"padding: 8px 16px 8px 16px; border-radius: 5px;\">Configurer votre package</"
+"a>\n"
+"                </div>\n"
+"            </div>\n"
+"        "
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.salary_package_sidebar
@@ -135,6 +177,8 @@ msgid ""
 "<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
 "title=\"Arrow\"/>"
 msgstr ""
+"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Icône flèche\" "
+"title=\"Flèche\"/>"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_view_employee_form
@@ -144,7 +188,7 @@ msgstr "<span class=\"mb-3 text-muted\">/ mois</span>"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "<span class=\"o_stat_text\">Contract Details</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">Détails du contrat</span>"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_applicant_view_form
@@ -178,6 +222,8 @@ msgid ""
 "<span class=\"o_stat_value\">New</span>\n"
 "                        <span class=\"o_stat_text\">Offers</span>"
 msgstr ""
+"<span class=\"o_stat_value\">Nouvelles</span>\n"
+"                        <span class=\"o_stat_text\">Offres</span>"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.salary_package_thank_you
@@ -250,13 +296,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_contract_salary/controllers/main.py:0
 msgid "Access Denied: Invalid Token"
-msgstr ""
+msgstr "Accès refusé : jeton invalide"
 
 #. module: hr_contract_salary
 #. odoo-python
 #: code:addons/hr_contract_salary/controllers/main.py:0
 msgid "Access Denied: Missing Token"
-msgstr ""
+msgstr "Accès refusé : jeton manquant"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_offer__access_token
@@ -332,7 +378,7 @@ msgstr "Ajouter une section"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info.type,name:hr_contract_salary.hr_contract_salary_personal_info_type_address
 msgid "Address"
-msgstr ""
+msgstr "Adresse"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_salary_benefit__benefit_type_id
@@ -362,6 +408,8 @@ msgid ""
 "An %(offer)s for the applicant %(applicant_name)s has been created by %"
 "(user)s."
 msgstr ""
+"Une offre %(offer)s pour le candidat %(applicant_name)s a été créée par %"
+"(user)s."
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -375,7 +423,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_contract_salary/models/hr_contract_salary_offer.py:0
 msgid "An offer must be linked to either an applicant or an employee."
-msgstr ""
+msgstr "Une offre doit être liée à un candidat ou à un employé."
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -477,7 +525,7 @@ msgstr "Champ avantage"
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_benefit__source
 msgid "Benefit Source"
-msgstr ""
+msgstr "Source de l’avantage"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_benefit__benefit_type_id
@@ -498,6 +546,8 @@ msgid ""
 "Benefits that are not linked to a field or salary rule should always be "
 "displayed."
 msgstr ""
+"Les avantages non liés à un champ ou à une règle salariale doivent toujours "
+"être affichés."
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info,name:hr_contract_salary.hr_contract_salary_personal_info_birthdate
@@ -589,7 +639,7 @@ msgstr "Confirmer"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info.type,name:hr_contract_salary.hr_contract_salary_personal_info_type_contact
 msgid "Contact Information"
-msgstr ""
+msgstr "Informations de contact"
 
 #. module: hr_contract_salary
 #: model:ir.model,name:hr_contract_salary.model_hr_contract_salary_benefit_type
@@ -604,22 +654,22 @@ msgstr "Valeur de l'avantage du contrat"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "Contract Date"
-msgstr ""
+msgstr "Date du contrat"
 
 #. module: hr_contract_salary
 #: model:ir.actions.act_window,name:hr_contract_salary.action_view_contract_statbutton
 msgid "Contract Details"
-msgstr ""
+msgstr "Détails du contrat"
 
 #. module: hr_contract_salary
 #: model:ir.actions.act_window,name:hr_contract_salary.action_view_partially_signed_contract_statbutton
 msgid "Contract Details (Read Only) "
-msgstr ""
+msgstr "Détails du contrat (lecture seule) "
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_offer__contract_end_date
 msgid "Contract End Date"
-msgstr ""
+msgstr "Date de fin du contrat"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -705,7 +755,7 @@ msgstr "Révisions des contrats"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "Copy link"
-msgstr ""
+msgstr "Copier le lien"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_benefit__cost_res_field_id
@@ -740,7 +790,7 @@ msgstr "Pays de naissance"
 
 #. module: hr_contract_salary
 #: model_terms:ir.actions.act_window,help:hr_contract_salary.hr_contract_salary_offer_action
-msgid "Create a Offer"
+msgid "Create an Offer"
 msgstr "Créer une offre"
 
 #. module: hr_contract_salary
@@ -941,6 +991,7 @@ msgstr "Ignorer"
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_version__display_name
 #: model:ir.model.fields,field_description:hr_contract_salary.field_refuse_offer_wizard__display_name
 #: model:ir.model.fields,field_description:hr_contract_salary.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:hr_contract_salary.field_sign_item__display_name
 #: model:ir.model.fields,field_description:hr_contract_salary.field_sign_request__display_name
 msgid "Display Name"
 msgstr "Nom d'affichage"
@@ -986,7 +1037,7 @@ msgstr "N'impacte pas le salaire net"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_view_employee_form_readonly
 msgid "Draft"
-msgstr ""
+msgstr "Brouillon"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_benefit__display_type__dropdown
@@ -1002,12 +1053,12 @@ msgstr "Groupe déroulant"
 #. odoo-python
 #: code:addons/hr_contract_salary/models/hr_contract_salary_offer.py:0
 msgid "Edit PDF Template Signatories"
-msgstr ""
+msgstr "Modifier les signataires du modèle PDF"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "Edit Signatories"
-msgstr ""
+msgstr "Modifier les signataires"
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info,name:hr_contract_salary.hr_contract_salary_personal_info_email
@@ -1053,12 +1104,12 @@ msgstr "Photo d'employé"
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_benefit__res_field_id
 msgid "Employee Record Related Field"
-msgstr ""
+msgstr "Champ lié à la fiche de l’employé"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_resume__value_type__version
 msgid "Employee Record Value"
-msgstr ""
+msgstr "Valeur fiche de l’employé"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_offer__employee_version_id
@@ -1088,7 +1139,7 @@ msgstr "Budget de l'employé"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume,name:hr_contract_salary.hr_contract_salary_resume_final_yearly_costs
 msgid "Employer Cost"
-msgstr ""
+msgstr "Coût employeur"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_view_employee_form
@@ -1138,7 +1189,7 @@ msgstr "Féminin"
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_benefit__field
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_benefit__source__field
 msgid "Field"
-msgstr ""
+msgstr "Champ"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_personal_info__field
@@ -1149,6 +1200,11 @@ msgstr "Nom de champ"
 #: model:hr.contract.salary.personal.info,name:hr_contract_salary.hr_contract_salary_personal_info_study_field
 msgid "Field of Study"
 msgstr "Champ d’étude"
+
+#. module: hr_contract_salary
+#: model:ir.model,name:hr_contract_salary.model_sign_item
+msgid "Fields to be sign on Document"
+msgstr "Champs à signer sur le document"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_resume__fixed_value
@@ -1208,7 +1264,7 @@ msgstr "Générer l'offre"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume,name:hr_contract_salary.hr_contract_salary_resume_gross
 msgid "Gross"
-msgstr ""
+msgstr "Brut"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_signatory__signatory__hr
@@ -1287,6 +1343,7 @@ msgstr "Masquer les infos personnelles des enfants si coché."
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_version__id
 #: model:ir.model.fields,field_description:hr_contract_salary.field_refuse_offer_wizard__id
 #: model:ir.model.fields,field_description:hr_contract_salary.field_res_config_settings__id
+#: model:ir.model.fields,field_description:hr_contract_salary.field_sign_item__id
 #: model:ir.model.fields,field_description:hr_contract_salary.field_sign_request__id
 msgid "ID"
 msgstr "ID"
@@ -1378,7 +1435,7 @@ msgstr ""
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info.type,name:hr_contract_salary.hr_contract_salary_personal_info_type_emergency
 msgid "In case of emergency"
-msgstr ""
+msgstr "En cas d’urgence"
 
 #. module: hr_contract_salary
 #. odoo-javascript
@@ -1559,22 +1616,22 @@ msgstr "Mensuel"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.benefit.type,name:hr_contract_salary.l10n_be_monthly_cash
 msgid "Monthly Benefit in Cash"
-msgstr ""
+msgstr "Avantage mensuel en espèces"
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.benefit.type,name:hr_contract_salary.l10n_be_monthly_benefit
 msgid "Monthly Benefit in Kind"
-msgstr ""
+msgstr "Avantage mensuel en nature"
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.benefit.type,name:hr_contract_salary.l10n_be_monthly_net
 msgid "Monthly Benefit in Net"
-msgstr ""
+msgstr "Avantage mensuel net"
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume.category,name:hr_contract_salary.hr_contract_salary_resume_category_monthly_benefits
 msgid "Monthly Benefits"
-msgstr ""
+msgstr "Avantages mensuels"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_employee__monthly_yearly_costs
@@ -1585,7 +1642,7 @@ msgstr "Coût mensuel"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume,name:hr_contract_salary.hr_contract_salary_resume_monthly_total
 msgid "Monthly Equivalent"
-msgstr ""
+msgstr "Équivalent mensuel"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -1596,7 +1653,7 @@ msgstr "Salaire brut mensuel"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume.category,name:hr_contract_salary.hr_contract_salary_resume_category_monthly_salary
 msgid "Monthly Salary"
-msgstr ""
+msgstr "Salaire mensuel"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_resume__value_type__monthly_total
@@ -1702,7 +1759,7 @@ msgstr "Aucune donnée à afficher"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "No limit"
-msgstr ""
+msgstr "Aucune limite"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -1729,7 +1786,7 @@ msgstr "Aucun modèle n’est encore configuré. Voulez-vous en configurer un ?"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.benefit.type,name:hr_contract_salary.l10n_be_non_financial_benefits
 msgid "Non Financial Benefits"
-msgstr ""
+msgstr "Avantages non financiers"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_benefit_value__selector_highlight__none
@@ -1827,7 +1884,7 @@ msgstr "Offre pour %(recipient)s"
 #. odoo-python
 #: code:addons/hr_contract_salary/models/hr_applicant.py:0
 msgid "Offer link can not be sent without an applicant name."
-msgstr ""
+msgstr "Le lien vers l’offre ne peut pas être envoyé sans le nom du candidat."
 
 #. module: hr_contract_salary
 #: model:ir.actions.act_window,name:hr_contract_salary.hr_contract_salary_offer_action
@@ -1845,6 +1902,10 @@ msgid ""
 "                It allows to reflect on the proposition and discuss it."
 "<br><br>"
 msgstr ""
+"Les offres sont envoyées à l’employé avec une sélection de données "
+"prédéfinie.\n"
+"                Cela permet de réfléchir à la proposition et d’en discuter."
+"<br><br>"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -1879,7 +1940,7 @@ msgstr "Autre"
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_offer__sign_template_id
 msgid "PDF Sign Template"
-msgstr ""
+msgstr "Modèle de signature PDF"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
@@ -1973,6 +2034,16 @@ msgid ""
 "Monthly Total: The information will be a total of all the information in the "
 "category Monthly Benefits"
 msgstr ""
+"Choisissez la méthode de calcul de la valeur des informations :\n"
+"Valeur fixe : définit une valeur déterminée, identique pour tous les liens.\n"
+"Valeur issue de la fiche de l’employé : récupère la valeur depuis un champ "
+"de la fiche de l’employé.\n"
+"Valeur issue de la fiche de paie : récupère la valeur depuis un champ de la "
+"fiche de paie.\n"
+"Somme des avantages : vous pouvez sélectionner plusieurs avantages et en "
+"calculer la somme.\n"
+"Total mensuel : les informations correspondront au total de la catégorie "
+"Avantages mensuels"
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info,name:hr_contract_salary.hr_contract_salary_personal_info_place_of_birth
@@ -1990,6 +2061,8 @@ msgid ""
 "Please define a signature template on the contract before generating the "
 "offer."
 msgstr ""
+"Veuillez définir un modèle de signature sur le contrat avant de générer "
+"l’offre."
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info,name:hr_contract_salary.hr_contract_salary_personal_info_private_license_plate
@@ -2296,7 +2369,7 @@ msgstr ""
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "Select a contract template to load its predefined values"
-msgstr ""
+msgstr "Sélectionnez un modèle de contrat pour charger ses valeurs prédéfinies"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
@@ -2335,7 +2408,7 @@ msgstr ""
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "Select the PDF that the employee will sign"
-msgstr ""
+msgstr "Sélectionnez le PDF que l’employé signera"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_salary_benefit__cost_res_field_id
@@ -2480,7 +2553,7 @@ msgstr "Demande de signature - %s"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info.type,name:hr_contract_salary.hr_contract_salary_personal_info_type_family
 msgid "Situation"
-msgstr ""
+msgstr "Situation"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_benefit__display_type__slider
@@ -2596,7 +2669,7 @@ msgstr "Il s’agit du contrat à partir duquel le contrat actuel a été dupliq
 #. odoo-python
 #: code:addons/hr_contract_salary/models/hr_job.py:0
 msgid "The contract template's company must match the job's company."
-msgstr ""
+msgstr "La société du modèle de contrat doit correspondre à celle du poste."
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_benefit_view_form
@@ -2610,6 +2683,8 @@ msgid ""
 "The display type of a benefit linked to a salary rule must be one of the "
 "following: %s"
 msgstr ""
+"Le type d’affichage d’un avantage lié à une règle salariale doit être l’un "
+"des suivants : %s"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_salary_benefit__fold_res_field_id
@@ -2686,7 +2761,7 @@ msgstr ""
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_view_employee_form_readonly
 msgid "This is a partially-signed contract."
-msgstr ""
+msgstr "Ce contrat est partiellement signé."
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -2732,7 +2807,7 @@ msgstr "Jeton"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume.category,name:hr_contract_salary.hr_contract_salary_resume_category_total
 msgid "Total"
-msgstr ""
+msgstr "Total"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_salary_offer__activity_exception_decoration
@@ -2843,12 +2918,12 @@ msgstr "Annuel"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume.category,name:hr_contract_salary.hr_contract_salary_resume_category_yearly_benefits
 msgid "Yearly Benefits"
-msgstr ""
+msgstr "Avantages annuels"
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.benefit.type,name:hr_contract_salary.l10n_be_yearly_cash
 msgid "Yearly Benefits in Cash"
-msgstr ""
+msgstr "Avantages annuels en espèces"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_employee__final_yearly_costs
@@ -2911,17 +2986,17 @@ msgstr "par ex. date de naissance"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "e.g. Developer, Sales, Consultant"
-msgstr ""
+msgstr "ex. : Développeur, Commercial, Consultant"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "e.g. Human Resources, Research & Development, Marketing"
-msgstr ""
+msgstr "ex. : Ressources humaines, Recherche & Développement, Marketing"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "e.g. Lead Dev, Junior Consultant"
-msgstr ""
+msgstr "ex. : Lead Dev, Consultant junior"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_benefit_view_form
@@ -2931,7 +3006,7 @@ msgstr "par ex. chèques-repas"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "e.g. Offer 70k Employer Cost"
-msgstr ""
+msgstr "ex. : Offre coût employeur 70 k"
 
 #. module: hr_contract_salary
 #: model_terms:ir.actions.act_window,help:hr_contract_salary.hr_contract_salary_offer_recruitment_action
@@ -2942,7 +3017,7 @@ msgstr "ici"
 #. odoo-python
 #: code:addons/hr_contract_salary/models/hr_contract_salary_offer.py:0
 msgid "id"
-msgstr ""
+msgstr "id"
 
 #. module: hr_contract_salary
 #: model:mail.template,subject:hr_contract_salary.mail_template_send_offer_applicant
@@ -2961,6 +3036,9 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }}: Offre d'emploi - "
 "{{ object.employee_version_id.name }}"
+
+#~ msgid "Create a Offer"
+#~ msgstr "Créer une offre"
 
 #~ msgid ""
 #~ "<div style=\"margin: 0px; padding: 0px;\">\n"

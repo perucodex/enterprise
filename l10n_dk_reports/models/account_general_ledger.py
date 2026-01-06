@@ -7,6 +7,7 @@ from odoo.exceptions import UserError
 from odoo.tools import street_split
 
 from odoo import api, models, _
+from odoo.addons.account_reports.models.account_report import AccountReportFileDownloadException
 
 
 class AccountGeneralLedgerReportHandler(models.AbstractModel):
@@ -108,12 +109,23 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
         # fold all report lines to make sure we only get the account details
 
         new_options = report.get_options(previous_options={**options, 'unfolded_lines': [], 'unfold_all': False})
+        errors = {}
 
         balance_index = [c['expression_label'] for c in options['columns']].index('balance')
         lines = report._get_lines(new_options)
         for line in filter(lambda line: self.env['account.report']._get_markup(line['id']) != 'total', lines):
-            account_number, account_name = line['name'].split(maxsplit=1)
             account_balance = int(line['columns'][balance_index]['no_format'])  # balance value must be a whole number
+            if report._get_markup(line['id']) == 'undistributed_profits_losses':
+                if account_balance != 0:
+                    errors = {
+                        'undistributed_earnings': {
+                            'message': _('Undistributed profits or losses may cause export rejection.'),
+                            'level': 'info',
+                        }
+                    }
+                continue
+            account_number, account_name = line['name'].split(maxsplit=1)
+
             csv_lines.append((account_number, account_name, account_balance))
 
         with io.StringIO() as buf:
@@ -121,8 +133,13 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
             writer.writerows(csv_lines)
             content = buf.getvalue().encode()
 
-        return {
+        file_data = {
             'file_name': report.get_default_report_filename(options, 'csv'),
             'file_content': content,
             'file_type': 'csv',
         }
+
+        if errors:
+            raise AccountReportFileDownloadException(errors, file_data)
+
+        return file_data

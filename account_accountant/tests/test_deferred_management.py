@@ -3,6 +3,7 @@
 import datetime
 
 from odoo import Command, fields
+from odoo.exceptions import UserError
 from odoo.tests import tagged
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
@@ -25,8 +26,18 @@ class TestDeferredManagement(AccountTestInvoicingCommon):
             'account_type': 'income',
         }) for i in range(3)]
 
-        cls.company.deferred_expense_journal_id = cls.company_data['default_journal_misc'].id
-        cls.company.deferred_revenue_journal_id = cls.company_data['default_journal_misc'].id
+        cls.company.deferred_expense_journal_id = cls.env['account.journal'].create({
+            'name': 'Deferred Expense Journal',
+            'code': 'DEFEXP',
+            'type': 'general',
+            'company_id': cls.company.id,
+        })
+        cls.company.deferred_revenue_journal_id = cls.env['account.journal'].create({
+            'name': 'Deferred Revenue Journal',
+            'code': 'DEFREV',
+            'type': 'general',
+            'company_id': cls.company.id,
+        })
         cls.company.deferred_expense_account_id = cls.company_data['default_account_deferred_expense'].id
         cls.company.deferred_revenue_account_id = cls.company_data['default_account_deferred_revenue'].id
 
@@ -45,25 +56,45 @@ class TestDeferredManagement(AccountTestInvoicingCommon):
             [cls.revenue_accounts[2],  225, '2023-04-01', '2023-04-15'],  # 15 days (=450/month)
         ]
 
-    def create_invoice(self, move_type, invoice_lines, date=None, post=True):
-        journal = self.company_data['default_journal_purchase'] if move_type == 'in_invoice' else self.company_data['default_journal_sale']
-        move = self.env['account.move'].create({
+    def create_invoice(self, move_type, move_lines, date=None, post=True):
+        journal = self.company_data['default_journal_misc']
+        if move_type in self.env['account.move'].get_purchase_types():
+            journal = self.company_data['default_journal_purchase']
+        elif move_type in self.env['account.move'].get_sale_types():
+            journal = self.company_data['default_journal_sale']
+        move_vals = {
             'move_type': move_type,
             'partner_id': self.partner_a.id,
             'date': date or '2023-01-01',
             'invoice_date': date or '2023-01-01',
             'journal_id': journal.id,
-            'invoice_line_ids': [
+        }
+        if move_type != "entry":
+            move_vals["invoice_line_ids"] = [
                 Command.create({
                     'product_id': self.product_a.id,
-                    'quantity': 1,
                     'account_id': account.id,
-                    'price_unit': price_unit,
+                    'price_unit': balance,
+                    'quantity': 1,
                     'deferred_start_date': start_date,
                     'deferred_end_date': end_date,
-                }) for account, price_unit, start_date, end_date in invoice_lines
+                }) for account, balance, start_date, end_date in move_lines
             ]
-        })
+        else:
+            move_vals["line_ids"] = [
+                Command.create({
+                    'account_id': account.id,
+                    'balance': balance,
+                    'deferred_start_date': start_date,
+                    'deferred_end_date': end_date,
+                }) for account, balance, start_date, end_date in move_lines
+            ] + [  # Counterpart line
+                Command.create({
+                    'account_id': self.company_data['default_journal_bank'].default_account_id.id,
+                    'balance': -sum(line[1] for line in move_lines),
+                })
+            ]
+        move = self.env['account.move'].create(move_vals)
         if post:
             move.action_post()
         return move
@@ -168,13 +199,19 @@ class TestDeferredManagement(AccountTestInvoicingCommon):
     def test_deferred_expense_generate_entries_method(self):
         # The deferred entries are NOT generated when the invoice is validated if the method is set to 'manual'.
         self.company.generate_deferred_expense_entries_method = 'manual'
-        move2 = self.create_invoice('in_invoice', [self.expense_lines[0]], post=True)
-        self.assertEqual(len(move2.deferred_move_ids), 0)
+        move = self.create_invoice('in_invoice', [self.expense_lines[0]], post=True)
+        self.assertEqual(len(move.deferred_move_ids), 0)
+
+        move = self.create_invoice('in_refund', [self.expense_lines[0]], post=True)
+        self.assertEqual(len(move.deferred_move_ids), 0)
 
         # Test that the deferred entries are generated when the invoice is validated.
         self.company.generate_deferred_expense_entries_method = 'on_validation'
         move = self.create_invoice('in_invoice', [self.expense_lines[0]], post=True)
         self.assertEqual(len(move.deferred_move_ids), 5)  # 1 for the invoice deferred + 4 for the deferred entries
+
+        move = self.create_invoice('in_refund', [self.expense_lines[0]], post=True)
+        self.assertEqual(len(move.deferred_move_ids), 5)
         # See test_deferred_expense_credit_note for the values
 
     def test_deferred_expense_reset_to_draft(self):
@@ -618,7 +655,7 @@ class TestDeferredManagement(AccountTestInvoicingCommon):
         self.assertFalse(move.deferred_move_ids)
 
         # Period of exactly one month: full amount should be in Feb. So we revert 1st Jan, and account for all on 29th Feb.
-        # Deferrals are in different months for this case, so we should the deferrals should be generated.
+        # Deferrals are in different months for this case, so the deferrals should be generated.
         move = self.create_invoice('in_invoice', [(self.expense_accounts[0], 12000, '2024-02-15', '2024-03-14')], date='2024-01-01')
         self.assertRecordValues(move.deferred_move_ids.sorted(lambda m: (m.date, m.amount_total)), [
             {'date': fields.Date.to_date('2024-01-01'), 'amount_total': 12000},
@@ -626,7 +663,7 @@ class TestDeferredManagement(AccountTestInvoicingCommon):
         ])
 
         # Not-round period of 1.5+ month: full amount should be in Feb. So we revert 1st Jan, and account for all on 29th Feb.
-        # Deferrals are in different months for this case, so we should the deferrals should be generated.
+        # Deferrals are in different months for this case, so the deferrals should be generated.
         move = self.create_invoice('in_invoice', [(self.expense_accounts[0], 12000, '2024-02-05', '2024-03-15')], date='2024-01-01')
         self.assertRecordValues(move.deferred_move_ids.sorted(lambda m: (m.date, m.amount_total)), [
             {'date': fields.Date.to_date('2024-01-01'), 'amount_total': 12000},
@@ -643,6 +680,115 @@ class TestDeferredManagement(AccountTestInvoicingCommon):
 
         # Not-round period of 2.5 month, with 3 ends of months, so divide balance by 3
         move = self.create_invoice('in_invoice', [(self.expense_accounts[0], 12000, '2024-01-16', '2024-03-31')], date='2024-01-01')
+        self.assertRecordValues(move.deferred_move_ids.sorted(lambda m: (m.date, m.amount_total)), [
+            {'date': fields.Date.to_date('2024-01-01'), 'amount_total': 12000},
+            {'date': fields.Date.to_date('2024-01-31'), 'amount_total': 4000},
+            {'date': fields.Date.to_date('2024-02-29'), 'amount_total': 4000},
+            {'date': fields.Date.to_date('2024-03-31'), 'amount_total': 4000},
+        ])
+
+    def test_deferred_compute_method_full_months_revenue(self):
+        """
+        Test that the deferred amount is correctly computed when the new full_months method computation is used
+        """
+        self.company.deferred_revenue_amount_computation_method = 'full_months'
+
+        dates = (('2024-06-05', '2025-06-04'), ('2024-06-30', '2025-06-29'))
+        for (date_from, date_to) in dates:
+            move = self.create_invoice('out_invoice', [(self.revenue_accounts[0], 12000, date_from, date_to)], date='2024-06-05')
+            self.assertRecordValues(move.deferred_move_ids.sorted('date'), [
+                {'date': fields.Date.to_date('2024-06-05'), 'amount_total': 12000},
+                {'date': fields.Date.to_date('2024-06-30'), 'amount_total': 1000},
+                {'date': fields.Date.to_date('2024-07-31'), 'amount_total': 1000},
+                {'date': fields.Date.to_date('2024-08-31'), 'amount_total': 1000},
+                {'date': fields.Date.to_date('2024-09-30'), 'amount_total': 1000},
+                {'date': fields.Date.to_date('2024-10-31'), 'amount_total': 1000},
+                {'date': fields.Date.to_date('2024-11-30'), 'amount_total': 1000},
+                {'date': fields.Date.to_date('2024-12-31'), 'amount_total': 1000},
+                {'date': fields.Date.to_date('2025-01-31'), 'amount_total': 1000},
+                {'date': fields.Date.to_date('2025-02-28'), 'amount_total': 1000},
+                {'date': fields.Date.to_date('2025-03-31'), 'amount_total': 1000},
+                {'date': fields.Date.to_date('2025-04-30'), 'amount_total': 1000},
+                {'date': fields.Date.to_date('2025-05-31'), 'amount_total': 1000},
+                # 0 for June 2025, so no move created
+            ])
+
+        # Start of month <=> Equal per month method
+        move = self.create_invoice('out_invoice', [(self.revenue_accounts[0], 12000, '2024-07-01', '2025-06-30')], date='2024-07-01')
+        self.assertRecordValues(move.deferred_move_ids.sorted(lambda m: (m.date, m.amount_total)), [
+            {'date': fields.Date.to_date('2024-07-01'), 'amount_total': 12000},
+            {'date': fields.Date.to_date('2024-07-31'), 'amount_total': 1000},
+            {'date': fields.Date.to_date('2024-08-31'), 'amount_total': 1000},
+            {'date': fields.Date.to_date('2024-09-30'), 'amount_total': 1000},
+            {'date': fields.Date.to_date('2024-10-31'), 'amount_total': 1000},
+            {'date': fields.Date.to_date('2024-11-30'), 'amount_total': 1000},
+            {'date': fields.Date.to_date('2024-12-31'), 'amount_total': 1000},
+            {'date': fields.Date.to_date('2025-01-31'), 'amount_total': 1000},
+            {'date': fields.Date.to_date('2025-02-28'), 'amount_total': 1000},
+            {'date': fields.Date.to_date('2025-03-31'), 'amount_total': 1000},
+            {'date': fields.Date.to_date('2025-04-30'), 'amount_total': 1000},
+            {'date': fields.Date.to_date('2025-05-31'), 'amount_total': 1000},
+            {'date': fields.Date.to_date('2025-06-30'), 'amount_total': 1000},
+        ])
+
+        # Nothing to defer, everything is in the same month
+        move = self.create_invoice('out_invoice', [(self.revenue_accounts[0], 12000, '2024-01-01', '2024-01-16')], date='2024-01-01')
+        self.assertFalse(move.deferred_move_ids)
+
+        # Round period of 2 months -> Divide by 2
+        move = self.create_invoice('out_invoice', [(self.revenue_accounts[0], 12000, '2024-01-01', '2024-02-29')], date='2024-01-01')
+        self.assertRecordValues(move.deferred_move_ids.sorted(lambda m: (m.date, m.amount_total)), [
+            {'date': fields.Date.to_date('2024-01-01'), 'amount_total': 12000},
+            {'date': fields.Date.to_date('2024-01-31'), 'amount_total': 6000},
+            {'date': fields.Date.to_date('2024-02-29'), 'amount_total': 6000},
+        ])
+
+        # Round period of 2 months -> Divide by 2
+        move = self.create_invoice('out_invoice', [(self.revenue_accounts[0], 12000, '2024-01-15', '2024-03-14')], date='2024-01-01')
+        self.assertRecordValues(move.deferred_move_ids.sorted(lambda m: (m.date, m.amount_total)), [
+            {'date': fields.Date.to_date('2024-01-01'), 'amount_total': 12000},
+            {'date': fields.Date.to_date('2024-01-31'), 'amount_total': 6000},
+            {'date': fields.Date.to_date('2024-02-29'), 'amount_total': 6000},
+        ])
+
+        # Period of exactly one month: full amount should be in Jan. So we revert 1st Jan, and account for 31st Jan <=> don't generate anything
+        move = self.create_invoice('out_invoice', [(self.revenue_accounts[0], 12000, '2024-01-15', '2024-02-14')], date='2024-01-01')
+        self.assertFalse(move.deferred_move_ids)
+
+        # Not-round period of 1.5 month with only one end of month in January (same explanation as above)
+        move = self.create_invoice('out_invoice', [(self.revenue_accounts[0], 12000, '2024-01-01', '2024-02-15')], date='2024-01-01')
+        self.assertFalse(move.deferred_move_ids)
+
+        # Not-round period of 1.5+ month with only one end of month in January (same explanation as above)
+        move = self.create_invoice('out_invoice', [(self.revenue_accounts[0], 12000, '2024-01-05', '2024-02-15')], date='2024-01-01')
+        self.assertFalse(move.deferred_move_ids)
+
+        # Period of exactly one month: full amount should be in Feb. So we revert 1st Jan, and account for all on 29th Feb.
+        # Deferrals are in different months for this case, so the deferrals should be generated.
+        move = self.create_invoice('out_invoice', [(self.revenue_accounts[0], 12000, '2024-02-15', '2024-03-14')], date='2024-01-01')
+        self.assertRecordValues(move.deferred_move_ids.sorted(lambda m: (m.date, m.amount_total)), [
+            {'date': fields.Date.to_date('2024-01-01'), 'amount_total': 12000},
+            {'date': fields.Date.to_date('2024-02-29'), 'amount_total': 12000},
+        ])
+
+        # Not-round period of 1.5+ month: full amount should be in Feb. So we revert 1st Jan, and account for all on 29th Feb.
+        # Deferrals are in different months for this case, so the deferrals should be generated.
+        move = self.create_invoice('out_invoice', [(self.revenue_accounts[0], 12000, '2024-02-05', '2024-03-15')], date='2024-01-01')
+        self.assertRecordValues(move.deferred_move_ids.sorted(lambda m: (m.date, m.amount_total)), [
+            {'date': fields.Date.to_date('2024-01-01'), 'amount_total': 12000},
+            {'date': fields.Date.to_date('2024-02-29'), 'amount_total': 12000},
+        ])
+
+        # Not-round period of 1.5 month with 2 ends of months, so divide balance by 2
+        move = self.create_invoice('out_invoice', [(self.revenue_accounts[0], 12000, '2024-01-16', '2024-02-29')], date='2024-01-01')
+        self.assertRecordValues(move.deferred_move_ids.sorted(lambda m: (m.date, m.amount_total)), [
+            {'date': fields.Date.to_date('2024-01-01'), 'amount_total': 12000},
+            {'date': fields.Date.to_date('2024-01-31'), 'amount_total': 6000},
+            {'date': fields.Date.to_date('2024-02-29'), 'amount_total': 6000},
+        ])
+
+        # Not-round period of 2.5 month, with 3 ends of months, so divide balance by 3
+        move = self.create_invoice('out_invoice', [(self.revenue_accounts[0], 12000, '2024-01-16', '2024-03-31')], date='2024-01-01')
         self.assertRecordValues(move.deferred_move_ids.sorted(lambda m: (m.date, m.amount_total)), [
             {'date': fields.Date.to_date('2024-01-01'), 'amount_total': 12000},
             {'date': fields.Date.to_date('2024-01-31'), 'amount_total': 4000},
@@ -754,3 +900,64 @@ class TestDeferredManagement(AccountTestInvoicingCommon):
             self.expense_accounts[0],
             self.company_data['default_account_deferred_expense']
         )
+
+    def test_deferred_moves_from_same_move_different_lines(self):
+        """
+        Test that fully deferred move and deferral move from different lines are not cancelling each other
+        when having the same amount.
+        """
+        move = self.create_invoice('in_invoice', [(self.expense_accounts[0], amount, '2025-10-01', '2025-11-30') for amount in (1000, 500)], date='2025-11-30')
+        self.assertRecordValues(move.deferred_move_ids.sorted('date'), [
+            {'date': fields.Date.to_date('2025-10-31'), 'amount_total': 500},
+            {'date': fields.Date.to_date('2025-10-31'), 'amount_total': 250},
+            {'date': fields.Date.to_date('2025-11-30'), 'amount_total': 1000},
+            {'date': fields.Date.to_date('2025-11-30'), 'amount_total': 500},
+            {'date': fields.Date.to_date('2025-11-30'), 'amount_total': 500},
+            {'date': fields.Date.to_date('2025-11-30'), 'amount_total': 250},
+        ])
+
+    def test_deferred_misc(self):
+        """
+        Now that we allow deferred on misc entries, we need to make sure that the generated deferrals
+        entries created are in the right journal/account.
+        Before, the journal/account was decided based on the move type which was either purchase or sale.
+        Now, different deferred lines in a single misc move can have different deferral accounts/journals
+        as the account type is per line, and not per move.
+        """
+        deferred_move = self.create_invoice('entry', [
+            (self.revenue_accounts[0], 30, '2025-01-01', '2025-03-31'),
+            (self.expense_accounts[0], 300, '2025-01-01', '2025-03-31'),
+        ], date='2025-01-01')
+        deferral_moves = deferred_move.deferred_move_ids.sorted(lambda m: (m.date, m.amount_total))
+        self.assertEqual(len(deferral_moves), 8)  # 4 deferrals for expense (Reverse + 3 months), same for revenue
+
+        # First the 2 reverse moves
+        self.assertRecordValues(deferral_moves[:2].line_ids.sorted('balance'), [
+            {'date': fields.Date.to_date('2025-01-01'), 'balance': -300, 'account_id': self.expense_accounts[0].id, 'journal_id': self.company.deferred_expense_journal_id.id},
+            {'date': fields.Date.to_date('2025-01-01'), 'balance': -30, 'account_id': self.revenue_accounts[0].id, 'journal_id': self.company.deferred_revenue_journal_id.id},
+            {'date': fields.Date.to_date('2025-01-01'), 'balance': 30, 'account_id': self.company.deferred_revenue_account_id.id, 'journal_id': self.company.deferred_revenue_journal_id.id},
+            {'date': fields.Date.to_date('2025-01-01'), 'balance': 300, 'account_id': self.company.deferred_expense_account_id.id, 'journal_id': self.company.deferred_expense_journal_id.id},
+        ])
+        # Monthly deferrals
+        for i, date in enumerate(['2025-01-31', '2025-02-28', '2025-03-31']):
+            self.assertRecordValues(deferral_moves[2 + 2 * i : 2 + 2 * (i + 1)].line_ids.sorted('balance'), [
+                {'date': fields.Date.to_date(date), 'balance': -100, 'account_id': self.company.deferred_expense_account_id.id, 'journal_id': self.company.deferred_expense_journal_id.id},
+                {'date': fields.Date.to_date(date), 'balance': -10, 'account_id': self.company.deferred_revenue_account_id.id, 'journal_id': self.company.deferred_revenue_journal_id.id},
+                {'date': fields.Date.to_date(date), 'balance': 10, 'account_id': self.revenue_accounts[0].id, 'journal_id': self.company.deferred_revenue_journal_id.id},
+                {'date': fields.Date.to_date(date), 'balance': 100, 'account_id': self.expense_accounts[0].id, 'journal_id': self.company.deferred_expense_journal_id.id},
+            ])
+
+    def test_deferred_misc_diff_accounts_diff_methods(self):
+        """
+        Having different deferred entries generation methods for expenses and revenues is not
+        supported on journal entries involving both expense and revenue accounts. User should split
+        the entry into two entries instead.
+        """
+        self.company.generate_deferred_expense_entries_method = 'on_validation'
+        self.company.generate_deferred_revenue_entries_method = 'manual'
+        deferred_move = self.create_invoice('entry', [
+            (self.revenue_accounts[0], 30, '2025-01-01', '2025-03-31'),
+            (self.expense_accounts[0], 300, '2025-01-01', '2025-03-31'),
+        ], date='2025-01-01', post=False)
+        with self.assertRaisesRegex(UserError, r"Having different deferred entries generation methods for expenses and revenues is not supported..."):
+            deferred_move.action_post()

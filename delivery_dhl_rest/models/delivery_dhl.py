@@ -8,7 +8,7 @@ from datetime import timedelta
 
 from odoo import fields, models, _
 from odoo.exceptions import UserError
-from odoo.tools.float_utils import float_round
+from odoo.tools.float_utils import float_round, json_float_round
 from odoo.tools.misc import groupby
 
 from .dhl_request import DHLProvider
@@ -217,6 +217,9 @@ class ProviderDHL(models.Model):
             ))
         return packages
 
+    def _convert_to_utc_string(self, datetime_object):
+        return datetime_object.astimezone(tz=pytz.utc).strftime('%Y-%m-%dT%H:%M:%S GMT+00:00')
+
     def _rate_shipment_vals(self, order=False, picking=False):
         if picking:
             warehouse_partner_id = picking.picking_type_id.warehouse_id.partner_id
@@ -258,7 +261,7 @@ class ProviderDHL(models.Model):
         rating_request['unitOfMeasurement'] = self.dhl_unit_system
         if planned_date <= fields.Datetime.now():
             raise UserError(_("The planned date for the shipment must be in the future."))
-        rating_request['plannedShippingDateAndTime'] = planned_date.strftime('%Y-%m-%dT%H:%M:%S')
+        rating_request['plannedShippingDateAndTime'] = self._convert_to_utc_string(planned_date)
         rating_request['accounts'] = srm._get_billing_vals(account_number, "shipper")
         self._dhl_add_extra_data_to_request(rating_request, 'rate')
         rating_request['productsAndServices'] = [{
@@ -325,7 +328,7 @@ class ProviderDHL(models.Model):
             planned_date = picking.scheduled_date
             if planned_date <= fields.Datetime.now():
                 raise UserError(_("The planned date for the shipment must be in the future."))
-            shipment_request['plannedShippingDateAndTime'] = planned_date.astimezone(tz=pytz.utc).strftime('%Y-%m-%dT%H:%M:%S GMT+00:00')
+            shipment_request['plannedShippingDateAndTime'] = self._convert_to_utc_string(planned_date)
             shipment_request['pickup'] = {'isRequested': True}
             shipment_request['accounts'] = srm._get_billing_vals(account_number, "shipper")
             shipment_request['customerDetails'] = {}
@@ -399,7 +402,7 @@ class ProviderDHL(models.Model):
         planned_date = picking.scheduled_date
         if planned_date <= fields.Datetime.now():
             raise UserError(_("The planned date for the shipment must be in the future."))
-        shipment_request['plannedShippingDateAndTime'] = planned_date.astimezone(pytz.utc).strftime('%Y-%m-%dT%H:%M:%S GMT+00:00')
+        shipment_request['plannedShippingDateAndTime'] = self._convert_to_utc_string(planned_date)
         shipment_request['pickup'] = {'isRequested': False}
         shipment_request['accounts'] = srm._get_billing_vals(account_number, "shipper")
         shipment_request['customerDetails'] = {
@@ -472,7 +475,8 @@ class ProviderDHL(models.Model):
             weight = weight_uom_id._compute_quantity(weight, self.env.ref('uom.product_uom_lb'), round=False)
         else:
             weight = weight_uom_id._compute_quantity(weight, self.env.ref('uom.product_uom_kgm'), round=False)
-        return weight
+        # float_round doesn't work here, for example float_round(0.7000000000000001, 3) = 0.7000000000000001
+        return json_float_round(weight, 3)
 
     def _dhl_calculate_value(self, picking):
         sale_order = picking.sale_id

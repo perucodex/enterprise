@@ -1,4 +1,5 @@
 import { Composer } from "@mail/core/common/composer";
+import { serializeDate } from "@web/core/l10n/dates";
 const { DateTime } = luxon;
 
 export class AccountReportComposer extends Composer {
@@ -7,7 +8,7 @@ export class AccountReportComposer extends Composer {
     get postData() {
         return {
             ...super.postData,
-            account_reports_annotation_date: DateTime.fromISO(this.props.date_to).toFormat("yyyy-MM-dd"),
+            account_reports_annotation_date: serializeDate(DateTime.fromISO(this.props.date_to)),
         };
     }
 
@@ -31,7 +32,7 @@ export class AccountReportComposer extends Composer {
     get fullComposerAdditionalContext() {
         return {
             ...super.fullComposerAdditionalContext,
-            default_account_reports_annotation_date: DateTime.fromISO(this.props.date_to).toFormat("yyyy-MM-dd"),
+            default_account_reports_annotation_date: serializeDate(DateTime.fromISO(this.props.date_to)),
         };
     }
 }

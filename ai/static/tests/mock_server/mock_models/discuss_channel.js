@@ -1,10 +1,10 @@
-import { mailModels } from "@mail/../tests/mail_test_helpers";
+import { DiscussChannel } from "@mail/../tests/mock_server/mock_models/discuss_channel";
 import { Command } from "@web/../tests/web_test_helpers";
+import { patch } from "@web/core/utils/patch";
 
-export class DiscussChannel extends mailModels.DiscussChannel {
-    /**
-     * @param {import("@mail/../tests/mock_server/mock_models/res_partner").ResPartner} partner
-     */
+/** @type {DiscussChannel} */
+const discussChannelPatch = {
+    /** @param {import("@mail/../tests/mock_server/mock_models/res_partner").ResPartner} partner */
     _get_or_create_ai_chat(partner) {
         const channels = this.env["discuss.channel"].search([
             ["is_member", "=", true],
@@ -28,5 +28,7 @@ export class DiscussChannel extends mailModels.DiscussChannel {
         }
 
         return channels[0];
-    }
-}
+    },
+};
+
+patch(DiscussChannel.prototype, discussChannelPatch);

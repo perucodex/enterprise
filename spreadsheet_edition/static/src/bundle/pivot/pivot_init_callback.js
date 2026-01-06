@@ -7,7 +7,7 @@ import { deepCopy } from "@web/core/utils/objects";
 import { _t } from "@web/core/l10n/translation";
 
 const uuidGenerator = new helpers.UuidGenerator();
-const { parseDimension, isDateOrDatetimeField, sanitizeSheetName } = helpers;
+const { parseDimension, isDateOrDatetimeField, sanitizeSheetName, pivotTimeAdapter } = helpers;
 
 const { SidePanelStore } = stores;
 
@@ -42,16 +42,11 @@ export function insertPivot(pivotData) {
         fieldName: measure,
         aggregator: fields[measure]?.aggregator,
     }));
-    const sortedMeasure = pivotData.metaData.sortedColumn?.measure;
-    const sortedColumn = activeMeasures.includes(sortedMeasure)
-        ? getPivotSortedColumn(pivotData)
-        : undefined;
     /** @type {import("@spreadsheet").OdooPivotCoreDefinition} */
     const pivot = deepCopy({
         type: "ODOO",
         domain: new Domain(pivotData.searchParams.domain).toJson(),
         context: pivotData.searchParams.context,
-        sortedColumn,
         measures,
         model: pivotData.metaData.resModel,
         columns: addEmptyGranularity(
@@ -66,6 +61,13 @@ export function insertPivot(pivotData) {
      * @param {import("@spreadsheet").OdooSpreadsheetModel} model
      */
     return async (model, stores) => {
+        const sortedMeasure = pivotData.metaData.sortedColumn?.measure;
+        const sortedColumn = activeMeasures.includes(sortedMeasure)
+            ? getPivotSortedColumn(model, pivotData)
+            : undefined;
+        if (sortedColumn) {
+            pivot.sortedColumn = sortedColumn;
+        }
         const pivotId = uuidGenerator.smallUuid();
         ensureSuccess(
             model.dispatch("ADD_PIVOT", {
@@ -130,7 +132,7 @@ export function insertPivot(pivotData) {
     };
 }
 
-function getPivotSortedColumn(pivotData) {
+function getPivotSortedColumn(model, pivotData) {
     if (!pivotData.metaData.sortedColumn) {
         return undefined;
     }
@@ -138,16 +140,27 @@ function getPivotSortedColumn(pivotData) {
     const fields = pivotData.metaData.fields;
     const sortedValues = pivotData.metaData.sortedColumn.groupId[1];
     const sortColDomain = [];
+    let currentBranch = pivotData.colGroupTree;
 
     for (let i = 0; i < sortedValues.length; i++) {
-        const value = sortedValues[i];
+        let value = sortedValues[i];
+        currentBranch = currentBranch.directSubTrees.get(value);
         const field = pivotData.metaData.fullColGroupBys[i];
         if (!field) {
             return undefined;
         }
 
-        const fieldName = field.split(":")[0];
+        const [fieldName, granularity] = field.split(":");
         const fieldType = fields[fieldName].type;
+        if (fieldType === "date" || fieldType === "datetime") {
+            const normalizer = pivotTimeAdapter(granularity).normalizeServerValue;
+            const readGroupResult = {
+                [field]: [currentBranch.root.values.at(-1), currentBranch.root.labels.at(-1)],
+            };
+            const locale = model.getters.getLocale();
+            value = normalizer(field, fields[fieldName], readGroupResult, locale);
+        }
+
         sortColDomain.push({ value, field, type: fieldType });
     }
 

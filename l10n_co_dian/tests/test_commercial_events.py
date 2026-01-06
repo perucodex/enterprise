@@ -33,6 +33,7 @@ class TestCommercialEvents(TestCoDianCommon):
             freeze_date=self.yesterday,
             partner_id=self.company_data['company'].partner_id.id,
             move_type='in_invoice',
+            invoice_date=self.yesterday,
             journal_id=self.company_data['default_journal_purchase'].id,
             ref=invoice.name,
             l10n_co_edi_cufe_cude_ref=invoice.l10n_co_edi_cufe_cude_ref,

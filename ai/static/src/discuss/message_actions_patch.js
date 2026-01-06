@@ -53,11 +53,13 @@ patch(MessageAction.prototype, {
             "send-message-direct",
             "log-note-direct",
         ];
-        if (thread?.channel_type === "ai_chat" && !requiredActions.includes(this.id)) {
-            return false;
-        }
-        if (this.id === "copy-message") {
-            return super._condition(...arguments) || thread?.channel_type === "ai_chat";
+        if (thread?.channel_type === "ai_chat") {
+            if (!requiredActions.includes(this.id)) {
+                return false;
+            }
+            if (this.id === "copy-message") {
+                return true;
+            }
         }
         return super._condition(...arguments);
     },

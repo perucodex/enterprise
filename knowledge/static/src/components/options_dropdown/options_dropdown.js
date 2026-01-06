@@ -33,6 +33,7 @@ export class OptionsDropdown extends Component {
         this.propertiesPanelState = useState(this.env.propertiesPanelState);
         onWillStart(async () => {
             this.isInternalUser = await user.hasGroup("base.group_user");
+            this.canCreateArticle = await user.checkAccessRight("knowledge.article", "create");
         });
     }
 

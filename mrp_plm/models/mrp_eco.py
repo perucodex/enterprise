@@ -794,7 +794,7 @@ class MrpEco(models.Model):
                         'res_model': 'product.template',
                         'res_id': eco.product_tmpl_id.id,
                     })
-                    attach.origin_attachment_id = new_doc.id
+                    attach.origin_attachment_id = new_doc.ir_attachment_id.id
 
                 vals = {'state': 'done'}
                 stage_id = eco.env['mrp.eco.stage'].search([

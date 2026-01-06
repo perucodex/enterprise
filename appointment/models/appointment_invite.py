@@ -277,8 +277,13 @@ class AppointmentInvite(models.Model):
         Compute a short link linked to an appointment invitation.
         """
         for invite in self:
-            invite.book_url = url_join(invite.base_book_url, invite.short_code) if invite.short_code else False
-            if invite.book_url_params:
+            # short_code is validated separately, so book_url will never be False on save
+            try:
+                invite.book_url = url_join(invite.base_book_url, invite.short_code) if invite.short_code else False
+            except ValueError:
+                invite.book_url = False
+
+            if invite.book_url_params and invite.book_url:
                 invite.book_url += invite.book_url_params
 
     @api.depends('appointment_type_ids', 'staff_user_ids', 'resource_ids')

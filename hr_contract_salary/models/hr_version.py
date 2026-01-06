@@ -25,7 +25,7 @@ class HrVersion(models.Model):
     is_origin_contract_template = fields.Boolean(
         compute='_compute_is_origin_contract_template', string='Is origin contract a contract template?',
         groups="hr.group_hr_user", readonly=True)
-    hash_token = fields.Char('Created From Token', copy=False, groups="hr.group_hr_user", tracking=True)
+    hash_token = fields.Char('Created From Token', groups="hr.group_hr_user", tracking=True)
     applicant_id = fields.Many2one('hr.applicant', groups="hr.group_hr_user",
                                    domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", tracking=True)
     contract_reviews_count = fields.Integer(compute="_compute_contract_reviews_count",
@@ -56,7 +56,7 @@ class HrVersion(models.Model):
         tracking=True, string="Wage with Holidays", groups="hr.group_hr_manager")
     wage_on_signature = fields.Monetary(string="Wage on Signature", tracking=True, aggregator="avg",
                                         groups="hr.group_hr_manager")
-    salary_offer_ids = fields.One2many('hr.contract.salary.offer', 'employee_version_id', groups="hr.group_hr_user", tracking=True)
+    salary_offer_ids = fields.One2many('hr.contract.salary.offer', 'employee_version_id', groups="hr.group_hr_manager", tracking=True)
     originated_offer_id = fields.Many2one('hr.contract.salary.offer', help="The original offer",
                                           groups="hr.group_hr_user", tracking=True)
     salary_offers_count = fields.Integer(compute='_compute_salary_offers_count', compute_sudo=True)
@@ -303,6 +303,7 @@ class HrVersion(models.Model):
             "res_model": "hr.version",
             "views": [[False, "list"], [False, "form"]],
             "domain": [["origin_version_id", "=", self.id]],
+            "context": {"active_test": False},
             "name": "Contracts Reviews",
         }
 

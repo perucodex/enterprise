@@ -318,5 +318,15 @@
         <field name="applies_on">employee</field>
         <field name="info_type_id" ref="hr_contract_salary.hr_contract_salary_personal_info_type_certificate"/>
     </record>
+
+    <record id="hr_contract_salary_personal_info_account_holder_name" model="hr.contract.salary.personal.info">
+        <field name="name">Account Holder Name</field>
+        <field name="res_field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'res.partner.bank'), ('name', '=', 'acc_holder_name')])"/>
+        <field name="applies_on">bank_account</field>
+        <field name="info_type_id" ref="hr_contract_salary.hr_contract_salary_personal_info_type_contact"/>
+        <field name="is_required" eval="True"/>
+        <field name="sequence">300</field>
+        <field name="structure_type_id" ref="hr.structure_type_employee_cp200"/>
+    </record>
     </data>
 </odoo>

@@ -3,13 +3,14 @@
 # * planning
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2025-09-15 21:11+0000\n"
-"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-11-08 19:52+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Catalan <https://translate.odoo.com/projects/odoo-19/planning/"
 "ca/>\n"
 "Language: ca\n"
@@ -697,6 +698,69 @@ msgid ""
 "                </div>\n"
 "            </body>"
 msgstr ""
+"<style>\n"
+"                .planning_mail_template_button {\n"
+"                    padding: 5px 10px;\n"
+"                    text-decoration: none;\n"
+"                    border: 1px;\n"
+"                    border-radius: 3px;\n"
+"                    display: inline-block; \n"
+"                    width: 190px;\n"
+"                    text-align: center;\n"
+"                }\n"
+"                </style>\n"
+"                <body><div>\n"
+"                    <p t-if=\"ctx.get('employee')\">Benvolguda <t t-"
+"out=\"ctx['employee'].name or ''\">Anita Oliver</t>:</p>\n"
+"                    <p t-else=\"\">Hola:</p>\n"
+"                    <br/>\n"
+"                    <p t-if=\"ctx.get('start_datetime') and "
+"ctx.get('end_datetime')\">\n"
+"                        S'han publicat els seus torns de treball pel període "
+"del <t t-out=\"format_date(ctx['start_datetime'])\">05-05-2021</t>\n"
+"                        al <t t-out=\"format_date(ctx['end_datetime'])"
+"\">11-05-2021</t>.\n"
+"                    </p>\n"
+"                    <div style=\"display: flex; margin: 15px;\">\n"
+"                        <div t-if=\"ctx.get('planning_url')\" style=\"margin-"
+"right: 15px;\">\n"
+"                            <a t-att-href=\"ctx['planning_url']\" "
+"target=\"_blank\" class=\"planning_mail_template_button\" t-attf-"
+"style=\"color: {{object.company_id.email_primary_color or '#FFFFFF'}}; "
+"background-color: {{object.company_id.email_secondary_color or '#875A7B'}};"
+"\">Visualitzar la planificació</a>\n"
+"                        </div>\n"
+"                        <div t-if=\"ctx.get('planning_url_ics')\">\n"
+"                            <a t-att-href=\"ctx['planning_url_ics']\" "
+"target=\"_blank\" class=\"planning_mail_template_button\" style=\"color: "
+"#374151; background-color: #E7E9ED; border: solid #E7E9ED;\">Afegir al "
+"calendari</a>\n"
+"                        </div>\n"
+"                    </div>\n"
+"                    <br/>\n"
+"                    <p t-if=\"ctx.get('slot_unassigned') or "
+"(object.allow_self_unassign and object.self_unassign_days_before)\">\n"
+"                        <t t-if=\"ctx.get('slot_unassigned')\">\n"
+"                            També volíem fer un recordatori sobre els torns "
+"de treball disponibles. Si està interessat/da i disponible si us plau, "
+"assigni's vostè mateix el torn de treball.\n"
+"                        </t>\n"
+"                        <t t-if=\"object.allow_self_unassign and "
+"object.self_unassign_days_before\">\n"
+"                            Si finalment no pot cobrir el torn que té "
+"assignat, si us plau, desassigni's vostè mateix <t t-"
+"out=\"object.self_unassign_days_before or ''\">5</t> dies abans del "
+"començament del torn de treball.\n"
+"                        </t>\n"
+"                    </p>\n"
+"                    <p t-if=\"ctx.get('message')\" t-out=\"ctx['message']\"/"
+">\n"
+"                    <p t-if=\"object.allow_self_unassign\">En cas que "
+"l'horari actual no li vagi bé, li recomanem que es posi en contacte amb els "
+"seus companys i els demani fer un canvi. Potser estan interessats a "
+"intercanviar-lo amb vostè.</p>\n"
+"                </div>\n"
+"            </body>"
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_recurrency_check_until_limit
@@ -716,7 +780,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
 msgid "Actions"
-msgstr ""
+msgstr "Accions"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_role__active
@@ -890,7 +954,7 @@ msgstr "Assignador"
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
 msgid "Auto Plan"
-msgstr ""
+msgstr "Planificar automàticament"
 
 #. module: planning
 #. odoo-javascript
@@ -1462,7 +1526,7 @@ msgstr ""
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_view_form_simplified
 msgid "Job Position"
-msgstr ""
+msgstr "Lloc de treball"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__job_title
@@ -1836,7 +1900,7 @@ msgstr ""
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
 msgid "Planned Date"
-msgstr ""
+msgstr "Data planificada"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot_template__start_time
@@ -1977,7 +2041,7 @@ msgstr ""
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
 #: model_terms:ir.ui.view,arch_db:planning.planning_preview_view_form
 msgid "Preview"
-msgstr ""
+msgstr "Vista prèvia"
 
 #. module: planning
 #: model:ir.actions.act_window,name:planning.resource_preview_action
@@ -1989,7 +2053,7 @@ msgstr ""
 #: code:addons/planning/static/src/views/planning_calendar/planning_calendar_controller.xml:0
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
 msgid "Print"
-msgstr ""
+msgstr "Imprimir"
 
 #. module: planning
 #. odoo-javascript
@@ -2017,7 +2081,7 @@ msgstr "Propietats"
 #. module: planning
 #: model:ir.model,name:planning.model_hr_employee_public
 msgid "Public Employee"
-msgstr ""
+msgstr "Empleat públic"
 
 #. module: planning
 #. odoo-javascript
@@ -2843,6 +2907,12 @@ msgstr "No us podeu assignar a un torn ja assignat."
 #: code:addons/planning/models/planning_slot.py:0
 msgid "You can not unassign another employee than yourself."
 msgstr "No pots anul·lar l'assignació d'un empleat que no sigui vostè."
+
+#. module: planning
+#. odoo-python
+#: code:addons/planning/models/planning_slot.py:0
+msgid "You cannot assign yourself to a shift belonging to another company."
+msgstr ""
 
 #. module: planning
 #. odoo-python

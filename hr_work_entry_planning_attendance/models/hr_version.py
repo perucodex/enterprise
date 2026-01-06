@@ -1,11 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from odoo import models
 from odoo.tools.intervals import Intervals
-from datetime import datetime
 
 
 class HrOvertimeRule(models.Model):
@@ -44,10 +44,14 @@ class HrVersion(models.Model):
         ##################################
         mapped_intervals = super()._get_attendance_intervals(start_dt, end_dt)
         planning_based_contracts = self.filtered(lambda c: c.work_entry_source == 'planning' and c.overtime_from_attendance)
-
+        attendances = self.env['hr.attendance'].sudo().search([
+            ('employee_id', 'in', planning_based_contracts.employee_id.ids),
+            ('check_in', '<=', end_dt.replace(tzinfo=None)),
+            ('check_out', '>=', start_dt.replace(tzinfo=None)),  # We ignore attendances which don't have a check_out
+        ])
         overtime_intervals = {r: Intervals(keep_distinct=True) for r in mapped_intervals}
         overtime_intervals.update(planning_based_contracts._get_overtime_intervals(start_dt, end_dt))
-
+        planning_based_contracts._set_real_overtime_intervals(start_dt, end_dt, attendances, mapped_intervals, overtime_intervals)
         work_entry_overtime_intervals = defaultdict(list)
         for r, intervals in overtime_intervals.items():
             for start, end, overtime in intervals:

@@ -30,10 +30,10 @@ class HrVersion(models.Model):
 
     # YTI TODO: Drop those 3 fields in master
     l10n_be_dimona_in_declaration_number = fields.Char(
-        string="Dimona Declaration Number", groups="hr_payroll.group_hr_payroll_user"
+        string="Dimona Declaration Number", groups="hr_payroll.group_hr_payroll_user", tracking=True
     )
     l10n_be_dimona_last_declaration_number = fields.Char(
-        string="Dimona Last Declaration Number", groups="hr_payroll.group_hr_payroll_user"
+        string="Dimona Last Declaration Number", groups="hr_payroll.group_hr_payroll_user", tracking=True
     )
     l10n_be_dimona_declaration_state = fields.Selection(
         string="Dimona Declaration State",
@@ -45,9 +45,8 @@ class HrVersion(models.Model):
             ('refused', 'Declared and refused'),
             ('waiting_sigedis', 'Declared and waiting Sigedis'),
             ('error', "Invalid declaration or restricted access"),
-        ], default='none', groups="hr_payroll.group_hr_payroll_user")
-
-    l10n_be_dimona_planned_hours = fields.Integer("Student Planned Hours", groups="hr_payroll.group_hr_payroll_user")
+        ], default='none', groups="hr_payroll.group_hr_payroll_user", tracking=True)
+    l10n_be_dimona_planned_hours = fields.Integer("Student Planned Hours", groups="hr_payroll.group_hr_payroll_user", tracking=True)
     l10n_be_is_student = fields.Boolean(compute='_compute_l10n_be_is_student', groups="hr_payroll.group_hr_payroll_user")
 
     @api.depends('structure_type_id')

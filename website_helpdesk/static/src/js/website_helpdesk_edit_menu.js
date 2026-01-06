@@ -14,12 +14,14 @@ patch(MenuDialog.prototype, {
     setup() {
         super.setup();
         this.notification = useService('notification');
+        this.originalUrl = this.props.url;
     },
     /**
      * @override
      */
     onClickOk() {
-        if (this.state.url) {
+        const hasUrlChanged = this.state.url !== this.originalUrl;
+        if (hasUrlChanged && this.state.url) {
             const isHelpdeskUrl = this.state.url === "/helpdesk";
             const isHelpdeskTeamPattern = isHelpdeskUrl || /^\/helpdesk\/([a-zA-Z]+-)+\d+$/.test(this.state.url);
             if (isHelpdeskUrl || isHelpdeskTeamPattern) {

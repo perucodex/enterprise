@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, api, models
+from odoo import _, api, models, fields
 from odoo.exceptions import UserError
 from odoo.fields import Domain
 
@@ -39,6 +39,10 @@ class L10n_PeTaxPle141ReportHandler(models.AbstractModel):
         data = []
         period = options["date"]["date_from"].replace("-", "")
         state_error = []
+        credit_note_pe_document_types_codes = set(self.env['l10n_latam.document.type'].search([
+            ('country_id.code', '=', 'PE'),
+            ('internal_type', '=', 'credit_note'),
+        ]).mapped('code'))
         for line in lines:
             columns = line[1]
             # Ignore entries on draft
@@ -53,6 +57,18 @@ class L10n_PeTaxPle141ReportHandler(models.AbstractModel):
             serie_folio = self._get_serie_folio(columns["move_name"])
             serie_folio_related = self._get_serie_folio(columns["related_document"])
             cancelled = columns["status"] == "cancel"
+
+            # If the credit note is related to an invoice from a previous period then it should be included in col 16 and 18 instead of 15 and 17
+            if (columns['document_type'] in credit_note_pe_document_types_codes
+                and columns.get("emission_date_related")
+                and fields.Date.from_string(columns["emission_date_related"]) < fields.Date.from_string(options['date']['date_from'])
+                and not cancelled
+            ):
+                amount_discount = format_float(columns["base_igv"])
+                tax_igv_discount = format_float(columns["tax_igv"])
+            else:
+                amount_discount = tax_igv_discount = '0.00'
+
             data.append(
                 {
                     "ruc": columns["company_vat"],
@@ -69,10 +85,10 @@ class L10n_PeTaxPle141ReportHandler(models.AbstractModel):
                     "customer_vat": columns["customer_vat"] or "",
                     "customer": columns["customer"],
                     "base_exp": not cancelled and format_float(columns["base_exp"]) or "0.00",
-                    "base_igv": not cancelled and format_float(columns["base_igv"]) or "0.00",
-                    "amount_discount": "0.00",
-                    "tax_igv": not cancelled and format_float(columns["tax_igv"]) or "0.00",
-                    "tax_igv_discount": "0.00",
+                    "base_igv": not cancelled and amount_discount == '0.00' and format_float(columns["base_igv"]) or "0.00",
+                    "amount_discount": amount_discount,
+                    "tax_igv": not cancelled and tax_igv_discount == '0.00' and format_float(columns["tax_igv"]) or "0.00",
+                    "tax_igv_discount": tax_igv_discount,
                     "base_exo": not cancelled and format_float(columns["base_exo"]) or "0.00",
                     "base_ina": not cancelled and format_float(columns["base_ina"]) or "0.00",
                     "tax_isc": not cancelled and format_float(columns["tax_isc"]) or "0.00",

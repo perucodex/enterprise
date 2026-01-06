@@ -318,6 +318,16 @@ class TestRentalPlanning(TestSalePlanning):
         rental_order = rental_order_form.save()
         self.assertEqual(planning_slot.end_datetime, rental_order.rental_return_date, "Make sure the dates are sync between planning slot and rental order")
 
+        rental_order.action_confirm()
+        new_slot = self.env['planning.slot'].create({
+            'resource_id': self.projector.id,
+            'role_id': self.planning_role_projector.id,
+            'start_datetime': datetime(2024, 12, 20, 0, 0),
+            'end_datetime': datetime(2024, 12, 21, 0, 0),
+        })
+        new_slot.action_add_last_order()
+        self.assertEqual(rental_order.order_line.product_uom_qty, 2, "Sol should have the 2 qty after adding new shift")
+
     def test_confirm_rental_order_with_unavailable_resource(self):
         """
         Test rental order confirmation with unavailable resource:

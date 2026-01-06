@@ -40,12 +40,12 @@
                 <page string="Timesheets" name="timesheets"
                     invisible="not project_id or not use_helpdesk_timesheet"
                     groups="hr_timesheet.group_hr_timesheet_user">
-                    <field name='timesheet_ids' widget="timesheets_one2many" mode="list,kanban" context="{'default_project_id': project_id}">
+                    <field name='timesheet_ids' widget="timesheets_one2many" mode="list,kanban" context="{'default_project_id': project_id, 'form_view_ref': 'helpdesk_timesheet.timesheet_view_form_helpdesk'}">
                         <list editable="top" string="Timesheet Activities" decoration-muted="readonly_timesheet == True">
                             <field name="readonly_timesheet" column_invisible="True"/>
                             <field name="date" readonly="readonly_timesheet"/>
                             <field name="user_id" column_invisible="True"/>
-                            <field name="employee_id" widget="many2one_avatar_employee" required="1" readonly="readonly_timesheet"/>
+                            <field name="employee_id" widget="many2one_avatar_employee" required="1" context="{'active_test': True}" readonly="readonly_timesheet"/>
                             <field name="name" required="0" readonly="readonly_timesheet"/>
                             <field name="unit_amount" string="Time Spent" widget="timesheet_uom" decoration-danger="unit_amount &gt; 24" readonly="readonly_timesheet"/>
                             <field name="project_id" column_invisible="True"/>
@@ -55,7 +55,7 @@
                         <kanban class="o_kanban_mobile">
                             <templates>
                                 <t t-name="card" class="row g-0">
-                                    <field name="employee_id" class="col-6 fw-bolder"/>
+                                    <field name="employee_id" class="col-6 fw-bolder" context="{'active_test': True}"/>
                                     <field name="date" class="col-6 text-end fw-bolder"/>
                                     <field name="name" class="col-6 text-muted"/>
                                     <field name="unit_amount" widget="float_time" decoration-danger="unit_amount &gt; 24" class="col-6 text-end"/>
@@ -68,7 +68,7 @@
                                     <field name="readonly_timesheet" invisible="1"/>
                                     <field name="date" readonly="readonly_timesheet"/>
                                     <field name="user_id" invisible="1"/>
-                                    <field name="employee_id" required="1" readonly="readonly_timesheet"/>
+                                    <field name="employee_id" required="1"  context="{'active_test': True}" readonly="readonly_timesheet"/>
                                     <field name="name" required="0" readonly="readonly_timesheet"/>
                                     <field name="unit_amount" string="Time Spent" widget="float_time" decoration-danger="unit_amount &gt; 24" readonly="readonly_timesheet"/>
                                     <field name="project_id" invisible="1"/>

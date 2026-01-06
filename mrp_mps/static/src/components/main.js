@@ -191,8 +191,8 @@ export class MainComponent extends Component {
         const ids = resIds.length > 0 && resIds;
         const domain = [['id', 'in', ids]]
         return await rpc("/web/export/get_fields", {
-            ...parentParams,
             model: "mrp.production.schedule",
+            ...parentParams,
             domain,
             import_compat,
         });

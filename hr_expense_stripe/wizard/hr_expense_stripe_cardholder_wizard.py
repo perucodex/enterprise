@@ -173,7 +173,7 @@ class HrExpenseStripeCardholderWizard(models.TransientModel):
         employee_lang = self.employee_id.lang and self.employee_id.lang.split('_')[0]
         preferred_langs.add(employee_lang)
         preferred_langs.add('en')
-        preferred_langs.remove(False)
+        preferred_langs.discard(False)
         payload = {
             'account': self.company_id.sudo().stripe_id,
             'lang': self.employee_id.user_id.lang or self.employee_id.lang or 'en_US',  # Default to en_US if no lang is set

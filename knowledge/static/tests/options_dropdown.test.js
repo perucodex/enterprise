@@ -51,7 +51,12 @@ class KnowledgeArticle extends models.ServerModel {
             favorite_ids: [],
         };
     }
+
+    has_access = function () {
+        return Promise.resolve(true);
+    };
 }
+
 class KnowledgeArticleThread extends models.ServerModel {}
 class KnowledgeCover extends models.ServerModel {}
 
@@ -334,7 +339,6 @@ test("Send Article to Trash", async () => {
 
 test.tags("desktop");
 test("Toggle Properties Panel (desktop)", async () => {
-    onRpc("knowledge.article", "has_access", () => true);
     const mockServer = await makeMockServer();
     const parentId = mockServer.env["knowledge.article"].create({
         name: "parent",
@@ -404,7 +408,6 @@ test("Toggle Properties Panel (desktop)", async () => {
 
 test.tags("mobile");
 test("Toggle Properties Panel (Mobile)", async () => {
-    onRpc("knowledge.article", "has_access", () => true);
     const mockServer = await makeMockServer();
     const parentId = mockServer.env["knowledge.article"].create({
         name: "parent",

@@ -173,13 +173,13 @@ class L10n_PeStockPleWizard(models.TransientModel):
             'type_of_existence': (move.product_id.product_tmpl_id.l10n_pe_type_of_existence or '99').zfill(2),
             'default_code': (move.product_id.default_code or '').replace('_', '')[:24],
             'catalogue_used': '1',  # Only supported 1 because We use Unspsc
-            'unspsc': move.product_id.product_tmpl_id.unspsc_code.code,
+            'unspsc': move.product_id.product_tmpl_id.unspsc_code_id.code or '',
             'date': self.date_from.strftime('%d/%m/%Y'),
             'document_type': invoice.l10n_latam_document_type_id.code or bill.l10n_latam_document_type_id.code or '00',
             'serie': '0',
             'folio': '0',
             'operation_type': '16',
-            'product': move.product_id.with_lang('en_US').name,
+            'product': move.product_id.with_context(lang='en_US').name,
             'uom': move.product_uom.l10n_pe_edi_measure_unit_code,
         }
         count += 1
@@ -207,8 +207,8 @@ class L10n_PeStockPleWizard(models.TransientModel):
         return values
 
     def _append_historic_valuation_lines(self, products, period, count, report):
-        def _get_stock_valuation(categ_id):
-            cost_method = self.env['product.category'].browse(categ_id).property_cost_method
+        def _get_stock_valuation(category_id):
+            cost_method = self.env['product.category'].browse(category_id).property_cost_method
             return {'average': '1', 'fifo': '2', 'standard': '3'}.get(cost_method, '')
 
         domain = Domain([
@@ -259,7 +259,7 @@ class L10n_PeStockPleWizard(models.TransientModel):
                 'serie': '0',
                 'folio': '0',
                 'operation_type': '16',
-                'product': product.with_lang('en_US').name,
+                'product': product.with_context(lang='en_US').name,
                 'uom': product.uom_id.l10n_pe_edi_measure_unit_code,
             }
             count += 1

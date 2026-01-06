@@ -443,8 +443,10 @@ class TableSizeComputer {
     processRow(el, params) {
         const row = { rowIndex: this.rowIndex++ };
         this.rows.set(el, row);
-        for (const child of el.children) {
-            this.processElement(child, { ...params, rowEl: el });
+        let next = el.firstElementChild;
+        while (next) {
+            const _next = this.processElement(next, { ...params, rowEl: el });
+            next = _next === undefined ? next.nextElementSibling : _next;
         }
         if (!this.baseLineRow) {
             this.baseLineRow = row;
@@ -468,20 +470,25 @@ class TableSizeComputer {
         const cellCount = this.cellCount;
         let maxCellCount = cellCount;
 
+        let next;
         for (const conditional of iterConditionalSiblings(el)) {
             this.processElement(conditional, params, false);
             maxCellIndex = Math.max(maxCellIndex, this.cellIndex);
             maxCellCount = Math.max(maxCellCount, this.cellCount);
             this.cellIndex = cellIndex;
             this.cellCount = cellCount;
+            next = conditional;
         }
         this.cellIndex = maxCellIndex;
         this.cellCount = maxCellCount;
+        return next && next.nextElementSibling;
     }
 
     processChildren(el, params = {}) {
-        for (const child of el.children) {
-            this.processElement(child, params);
+        let next = el.firstElementChild;
+        while (next) {
+            const _next = this.processElement(next, params);
+            next = _next === undefined ? next.nextElementSibling : _next;
         }
     }
 

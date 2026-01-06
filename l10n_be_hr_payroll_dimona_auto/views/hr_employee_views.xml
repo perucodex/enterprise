@@ -6,10 +6,14 @@
         <field name="inherit_id" ref="l10n_be_hr_payroll_dimona.hr_employee_view_form"/>
         <field name="arch" type="xml">
             <button name="action_check_dimona" position="after">
-                <button name="action_open_dimona" string="Open Dimona" type="object" invisible="not l10n_be_needs_dimona_in" groups="hr_payroll.group_hr_payroll_user"/>
-                <button name="action_update_dimona" string="Update Dimona" type="object" invisible="not l10n_be_needs_dimona_update" groups="hr_payroll.group_hr_payroll_user"/>
-                <button name="action_close_dimona" string="Close Dimona" type="object" invisible="not l10n_be_needs_dimona_out" groups="hr_payroll.group_hr_payroll_user"/>
-                <button name="action_cancel_dimona" string="Cancel Dimona" type="object" invisible="not l10n_be_needs_dimona_cancel" groups="hr_payroll.group_hr_payroll_user"/>
+                <button name="action_open_dimona" string="Open Dimona" type="object" 
+                    invisible="country_code != 'BE' or not l10n_be_needs_dimona_in" groups="hr_payroll.group_hr_payroll_user"/>
+                <button name="action_update_dimona" string="Update Dimona" type="object"
+                    invisible="country_code != 'BE' or not l10n_be_needs_dimona_update" groups="hr_payroll.group_hr_payroll_user"/>
+                <button name="action_close_dimona" string="Close Dimona" type="object"
+                    invisible="country_code != 'BE' or not l10n_be_needs_dimona_out" groups="hr_payroll.group_hr_payroll_user"/>
+                <button name="action_cancel_dimona" string="Cancel Dimona" type="object"
+                    invisible="country_code != 'BE' or not l10n_be_needs_dimona_cancel" groups="hr_payroll.group_hr_payroll_user"/>
             </button>
             <field name="l10n_be_dimona_in_declaration_number" position="attributes">
                 <attribute name="invisible">1</attribute>
@@ -34,7 +38,7 @@
                     icon="fa-address-book"
                     type="object"
                     groups="hr_payroll.group_hr_payroll_user"
-                    invisible="not l10n_be_dimona_relation_id">
+                    invisible="country_code != 'BE' or not l10n_be_dimona_relation_id">
                     <div class="o_stat_info">
                         Dimona Relation
                     </div>
@@ -67,7 +71,7 @@
         <field name="inherit_id" ref="hr.view_employee_tree"/>
         <field name="arch" type="xml">
             <field name="job_id" position="before">
-                <field name="l10n_be_dimona_next_action" invisible="l10n_be_dimona_next_action == 'nothing'" widget="badge" decoration-success="l10n_be_dimona_next_action == 'in'" decoration-warning="l10n_be_dimona_next_action in ('update', 'out')" decoration-danger="l10n_be_dimona_next_action == 'cancel'"/>
+                <field name="l10n_be_dimona_next_action" invisible="country_code != 'BE' or l10n_be_dimona_next_action == 'nothing'" widget="badge" decoration-success="l10n_be_dimona_next_action == 'in'" decoration-warning="l10n_be_dimona_next_action in ('update', 'out')" decoration-danger="l10n_be_dimona_next_action == 'cancel'"/>
             </field>
         </field>
     </record>

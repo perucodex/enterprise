@@ -559,17 +559,22 @@ class Sign(http.Controller):
         if not request_item_sudo or request_item_sudo.sign_request_id.validity and request_item_sudo.sign_request_id.validity < fields.Date.today():
             return {'success': False}
 
-        result = {'success': True}
+        sign_request = request_item_sudo.sign_request_id
+        company = sign_request.communication_company_id or sign_request.create_uid.company_id
+        result = {'success': True, 'company_country_code': company.country_id.code}
         if request_item_sudo.role_id.auth_method:
             result = self._validate_auth_method(request_item_sudo, sms_token=sms_token, **kwargs)
+            result['company_country_code'] = company.country_id.code
             if not result.get('success'):
                 return result
 
         sign_user = request.env['res.users'].sudo().search([('partner_id', '=', request_item_sudo.partner_id.id)], limit=1)
         if sign_user:
             # sign as a known user
-            request_item_sudo = request_item_sudo.with_user(sign_user).sudo()
-
+            context = {}
+            if request.env.user != sign_user and not request.env.user._is_public():
+                context.update(logged_user_id=request.env.user.id)
+            request_item_sudo = request_item_sudo.with_context(context).with_user(sign_user).sudo()
         request_item_sudo.sign(signature, **kwargs)
         return result
 
@@ -698,8 +703,8 @@ class Sign(http.Controller):
             'token': item['access_token'],
             'requestId': item['sign_request_id'][0],
             'name': item['sign_request_id'][1],
-            'userId': item['create_uid'][0],
-            'user': item['create_uid'][1],
+            'userId': item['create_uid'][0] if item['create_uid'] else False,
+            'user': item['create_uid'][1] if item['create_uid'] else False,
             'date': item['create_date'].date(),
         } for item in items]
 

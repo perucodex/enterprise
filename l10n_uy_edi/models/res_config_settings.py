@@ -2,7 +2,7 @@ import logging
 
 from datetime import datetime, timedelta, timezone
 
-from odoo import _, api, fields, models
+from odoo import fields, models
 from odoo.exceptions import UserError, AccessError
 from odoo.addons.iap.tools import iap_tools
 from odoo.addons.iap import InsufficientCreditError
@@ -26,13 +26,13 @@ class ResConfigSettings(models.TransientModel):
         params have been properly configured """
         error_msg = self.env["l10n_uy_edi.document"]._validate_credentials(self.company_id)
         if error_msg:
-            _logger.info("Error Checking Uruware Credentials: %s", error_msg)
+            _logger.info("Error Checking UCFE Provider Credentials: %s", error_msg)
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
             "params": {
                 "type": "danger" if error_msg else "warning",
-                "message": error_msg or _("Everything is ok"),
+                "message": error_msg or self.env._("Everything is ok"),
                 "next": {"type": "ir.actions.act_window_close"},
             }
         }
@@ -44,7 +44,7 @@ class ResConfigSettings(models.TransientModel):
         notification_email = "your email"
 
         if not self.company_id.vat:
-            raise UserError(_('Please configure your company RUT first'))
+            raise UserError(self.env._('Please configure your company RUT first'))
 
         try:
             res = iap_tools.iap_jsonrpc(
@@ -57,22 +57,22 @@ class ResConfigSettings(models.TransientModel):
                     "user_email": self.env.user.email,  # to be used as the email contact in test mode
                 })
             if res.get("success") is not True:
-                error = _("Error connection to Odoo IAP to create Uruware account")
+                error = self.env._("Error connection to Odoo IAP to create UCFE Provider account")
                 error_code = res.get('error')
                 if error_code == 'error_invalid_dbuuid':
-                    error = _('Make sure you have a valid enterprise contract in this database. '
+                    error = self.env._('Make sure you have a valid enterprise contract in this database. '
                               'If it is new, it might take some time for the system to recognize your contract. ')
                 elif error_code == 'error_sending_mail':
-                    error = _('Your database is valid, but an error happened on our side. ')
+                    error = self.env._('Your database is valid, but an error happened on our side. ')
                 elif error_code == 'error_cooldown':
                     hours = res['hours']
                     minutes = res['minutes']
                     seconds = res['seconds']
-                    error = _("You can't send another request within 24 hours. "
+                    error = self.env._("You can't send another request within 24 hours. "
                               "You will be able to send again in %(hours)s hours, %(minutes)s minutes, and %(seconds)s seconds.",
                               hours=hours, minutes=minutes, seconds=seconds)
                 elif error_code == 'error_too_many_registrations':
-                    error = _("More than 5 registrations have been made within 24 hours in this database. "
+                    error = self.env._("More than 5 registrations have been made within 24 hours in this database. "
                               "Please try again later.")
                 elif error_code:
                     error += ":" + error_code
@@ -83,7 +83,7 @@ class ResConfigSettings(models.TransientModel):
             error = str(exp)
 
         if error:
-            _logger.info("Error creating Uruware account: %s", error)
+            _logger.info("Error creating UCFE Provider account: %s", error)
 
         return {
             "type": "ir.actions.client",
@@ -91,8 +91,8 @@ class ResConfigSettings(models.TransientModel):
             "params": {
                 "type": "danger" if error else "warning",
                 "message":
-                    _("Error creating the Uruware account. Please contact support: ") + error if error else
-                    _("The account creating request has been successfully sent. "
+                    self.env._("Error creating the UCFE Provider account. Please contact support: ") + error if error else
+                    self.env._("The account creating request has been successfully sent. "
                       "The credentials will be sent to %s. "
                       "Please check your email for more instructions",
                       notification_email),

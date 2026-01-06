@@ -1,11 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import Command
-from odoo.tests import HttpCase, tagged
+from odoo.tests import tagged
+from odoo.addons.stock_barcode.tests.test_barcode_client_action import TestBarcodeClientAction
 
 
 @tagged('post_install', '-at_install')
-class TestBarcodeQualityControlMRPClientAction(HttpCase):
+class TestBarcodeQualityControlMRPClientAction(TestBarcodeClientAction):
 
     def test_final_product_quality_check_mrp_barcode(self):
         """
@@ -24,13 +25,10 @@ class TestBarcodeQualityControlMRPClientAction(HttpCase):
                 'title': 'check lovely product',
                 'measure_on': 'product',
                 'product_ids': [Command.link(final_product.id)],
-                'picking_type_ids': [Command.link(self.env.ref('stock.warehouse0').manu_type_id.id)],
+                'picking_type_ids': [Command.link(self.warehouse.manu_type_id.id)],
             },
         ])
-        action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
-        url = "/web#action=" + str(action_id.id)
-
-        self.start_tour(url, 'test_final_product_quality_check_mrp_barcode', login='admin')
+        self.start_tour('/odoo/barcode', 'test_final_product_quality_check_mrp_barcode', login='admin')
 
         quality_checks = self.env['quality.check'].search([('point_id', 'in', quality_points.ids)])
         self.assertRecordValues(quality_checks.sorted('title'), [

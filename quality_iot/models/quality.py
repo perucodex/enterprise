@@ -15,4 +15,5 @@ class QualityCheck(models.Model):
 
     ip = fields.Char(related='point_id.device_id.iot_id.ip')
     identifier = fields.Char(related='point_id.device_id.identifier')
+    iot_box_id = fields.Many2one(related='point_id.device_id.iot_id', store=False)
     device_name = fields.Char(related='point_id.device_id.name', size=30, string='Device Name: ')

@@ -80,3 +80,22 @@ class DocumentsDocument(models.Model):
             'res_id': product.id,
             'view_id': view_id,
         }
+
+    def write(self, vals):
+        """Sync product.document attachment when a document sharing a common
+        attachment with a product/template is updated."""
+        documents_for_products = self.filtered(
+            lambda d: d.res_model in ('product.template', 'product.product')
+            and d.attachment_id
+        )
+        if 'attachment_id' not in vals or not documents_for_products:
+            return super().write(vals)
+        document_by_old_attachment = documents_for_products.grouped('attachment_id')
+        res = super().write(vals)
+        product_docs = self.env['product.document'].search([
+            ('ir_attachment_id', 'in', [a.id for a in document_by_old_attachment])
+        ])
+        for product_doc in product_docs:
+            updated_related_document = document_by_old_attachment[product_doc.ir_attachment_id]
+            product_doc.ir_attachment_id = updated_related_document.attachment_id
+        return res

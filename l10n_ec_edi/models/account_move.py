@@ -1102,7 +1102,7 @@ class AccountMove(models.Model):
             ('description', 'in', product_descriptions),
         ]).grouped('default_code')
         tax_groups = self.env['account.tax.group'].search([('l10n_ec_type', 'in', tax_group_codes)])
-        taxes = self.env['account.tax'].search([('tax_group_id', 'in', tax_groups.ids)]).grouped(lambda tax: tax.tax_group_id.l10n_ec_type)
+        taxes = self.env['account.tax'].search([('tax_group_id', 'in', tax_groups.ids), ('type_tax_use', '=', 'purchase')]).grouped(lambda tax: tax.tax_group_id.l10n_ec_type)
 
         for node in line_nodes:
             # Since descuento is the amount discounted we need to compute the percentage

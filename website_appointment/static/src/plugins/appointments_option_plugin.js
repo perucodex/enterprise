@@ -7,20 +7,19 @@ import { AppointmentsOption } from "./appointments_option";
 class AppointmentsOptionPlugin extends Plugin {
     static id = "AppointmentsOption";
     static dependencies = ["dynamicSnippetOption"];
+    static shared = [
+        "getModelNameFilter",
+    ];
     modelNameFilter = "appointment.type";
-    selector = ".s_appointments";
     resources = {
-        builder_options: withSequence(DYNAMIC_SNIPPET, {
-            OptionComponent: AppointmentsOption,
-            props: {
-                modelNameFilter: this.modelNameFilter,
-            },
-            selector: this.selector,
-        }),
+        builder_options: withSequence(DYNAMIC_SNIPPET, AppointmentsOption),
         on_snippet_dropped_handlers: this.onSnippetDropped.bind(this),
     };
+    getModelNameFilter() {
+        return this.modelNameFilter;
+    }
     async onSnippetDropped({ snippetEl }) {
-        if (snippetEl.matches(this.selector)) {
+        if (snippetEl.matches(AppointmentsOption.selector)) {
             await this.dependencies.dynamicSnippetOption.setOptionsDefaultValues(
                 snippetEl,
                 this.modelNameFilter

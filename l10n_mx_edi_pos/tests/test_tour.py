@@ -6,6 +6,7 @@ from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCom
 from odoo import Command, fields
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.point_of_sale.tests.test_generic_localization import TestGenericLocalization
+from odoo.tools import mute_logger
 
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
@@ -283,6 +284,82 @@ class TestUi(TestMxEdiPosCommon, TestPointOfSaleHttpCommon):
 
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_refund_with_gift_card_mx', login="pos_user")
         self.assertEqual(gift_card_program.coupon_ids.points, 4.2)
+
+    def test_usage_mx_pos_partner(self):
+        """This test makes sure that if usage is set on the partner, it is taken into account instead of the default one."""
+        self.main_pos_config.open_ui()
+
+        self.product_a = self.env['product.product'].create({
+            'name': 'Test Product 1',
+            'is_storable': True,
+            'list_price': 10.0,
+            'taxes_id': False,
+        })
+
+        self.partner_a.l10n_mx_edi_usage = 'D10'
+
+        order_data = {
+            "amount_paid": 10,
+            "amount_tax": 0,
+            "amount_return": 0,
+            "amount_total": 10,
+            "date_order": fields.Datetime.to_string(fields.Datetime.now()),
+            "fiscal_position_id": False,
+            "lines": [
+                Command.create({
+                    "discount": 0,
+                    "pack_lot_ids": [],
+                    "price_unit": 10.0,
+                    "product_id": self.product_a.id,
+                    "price_subtotal": 10.0,
+                    "price_subtotal_incl": 10.0,
+                    "tax_ids": [[6, False, []]],
+                    "qty": 1,
+                }),
+            ],
+            "name": "Order 12345-123-1234",
+            "partner_id": self.partner_a.id,
+            "session_id": self.main_pos_config.current_session_id.id,
+            "sequence_number": 2,
+            "payment_ids": [
+                    Command.create({
+                        "amount": 10,
+                        "name": fields.Datetime.now(),
+                        "payment_method_id": self.bank_payment_method.id,
+                    }),
+            ],
+            "uuid": "12345-123-1234",
+            "last_order_preparation_change": "{}",
+            "user_id": self.env.uid,
+            "to_invoice": False,
+            "l10n_mx_edi_usage": False,
+        }
+
+        order = self.env["pos.order"].sync_from_ui([order_data])["pos.order"][0]
+        usage = order['l10n_mx_edi_usage']
+        self.assertEqual(usage, "D10")
+
+    @mute_logger('odoo.http')
+    def test_invoice_to_general_public(self):
+        self.partner_mx.write({
+            "zip": "",
+            "country_id": ""
+        })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, "tour_invoice_to_general_public", login="pos_user")
+
+    def test_refund_with_discount(self):
+        """
+        Tests that when a refund is processed it's total amount does not exceed the original order total.
+        """
+        if self.env['ir.module.module']._get('pos_discount').state != 'installed':
+            self.skipTest("pos_discount needs to be installed")
+
+        self.main_pos_config.module_pos_discount = True
+        self.main_pos_config.discount_product_id = self.env.ref("pos_discount.product_product_consumable", raise_if_not_found=False)
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_refund_with_discount', login="pos_user")
 
 
 @tagged('post_install', '-at_install', 'post_install_l10n')

@@ -13,12 +13,18 @@ class AccountChartTemplate(models.AbstractModel):
             'impuestos_plantilla_iva_por_cobrar': {
                 'l10n_gt_edi_taxable_unit_code': 1,
                 'l10n_gt_edi_short_name': 'IVA',
-                'sequence': 7,
+                'sequence': 1,
             },
             'impuestos_plantilla_iva_por_pagar': {
                 'l10n_gt_edi_taxable_unit_code': 1,
                 'l10n_gt_edi_short_name': 'IVA',
-                'sequence': 8,
+                'sequence': 2,
+            },
+            'tax_vat_withhold': {
+                'sequence': 11,
+            },
+            'tax_isr_withhold': {
+                'sequence': 12,
             },
         })
         return res

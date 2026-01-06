@@ -3,7 +3,7 @@ import base64
 
 from odoo import Command
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.addons.documents_account.tests.common import DocumentsAccountHelpersCommon
+from odoo.addons.documents_account.tests.common import DocumentsAccountHelpersCommon, PDF
 from odoo.tests import tagged
 
 
@@ -92,3 +92,35 @@ class TestInvoices(AccountTestInvoicingCommon, DocumentsAccountHelpersCommon):
         self.document.account_create_account_move('in_invoice')
         self.assertEqual(self.document.folder_id, self.folder_test)
         self.assertTrue(self.document.active)
+
+    def test_vendor_bill_defaults_to_supplier_currency(self):
+        if 'property_purchase_currency_id' not in self.env['res.partner']:
+            self.skipTest('Purchase module not installed, skipping supplier currency test.')
+
+        eur = self._enable_currency('EUR')
+        usd = self._enable_currency('USD')
+        new_company = self.setup_other_company(name='New Company', currency_id=eur.id)['company']
+        self.env.user.company_id = new_company
+        supplier = self.env['res.partner'].create({
+            'name': 'Supplier USD',
+            'property_purchase_currency_id': usd.id,
+        })
+        folder = self.env['documents.document'].create({
+            'name': 'Test Folder',
+            'type': 'folder',
+        })
+        document = self.env['documents.document'].create({
+            'name': 'bill.pdf',
+            'mimetype': 'application/pdf',
+            'folder_id': folder.id,
+            'partner_id': supplier.id,
+            'datas': PDF,
+        })
+        action = document.account_create_account_move('in_invoice')
+        self.assertTrue(action.get('res_id'), "Vendor bill should be created")
+        bill = self.env['account.move'].browse(action['res_id'])
+        self.assertEqual(
+            bill.currency_id.id,
+            usd.id,
+            "Vendor bill currency should match supplier's purchase currency"
+        )

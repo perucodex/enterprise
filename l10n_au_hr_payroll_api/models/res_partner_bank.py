@@ -9,7 +9,7 @@ class ResPartnerBank(models.Model):
 
     @api.model
     def _get_display_name_fields(self):
-        return ["acc_number", "partner_id.name"]
+        return ["acc_number", "acc_holder_name"]
 
     @api.model
     def _get_audit_logging_fields(self):

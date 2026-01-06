@@ -1,4 +1,8 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from odoo import fields, models
+
+STATES = ['NY', 'CA', 'AL', 'CO', 'VT', 'IL', 'AZ', 'DC', 'NC', 'VA', 'OR', 'ID']
 
 
 class HrEmployee(models.Model):

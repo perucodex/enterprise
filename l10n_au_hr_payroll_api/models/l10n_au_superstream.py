@@ -205,11 +205,11 @@ Source Cancelled - Employer has requested for the direct debit to be stopped. If
                 'payment_method_line_id': pay_method_line.id,
             })
             payment.action_post()
-            payment_message = "A refund payment (%s) has been created successfully!" % payment._get_html_link()
+            payment_message = _("A refund payment (%s) has been created successfully!", payment._get_html_link())
         elif force_cancel:
             # Payment failed and requires cancellation
             self.payment_id.action_cancel()
-            payment_message = "The outgoing payment (%s) has been cancelled!" % self.payment_id._get_html_link()
+            payment_message = _("The outgoing payment (%s) has been cancelled!", self.payment_id._get_html_link())
         else:
             return self.action_check_cancelation_type()
 

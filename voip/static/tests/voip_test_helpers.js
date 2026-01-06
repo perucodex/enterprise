@@ -8,7 +8,15 @@ import { VoipCall } from "./mock_server/mock_models/voip_call";
 import { VoipProvider } from "./mock_server/mock_models/voip_provider";
 
 export function setupVoipTests() {
-    onRpc("/voip/get_country_code", () => "be");
+    onRpc("/voip/get_country_store", () => ({
+        "res.country": {
+            id: 1,
+            name: "Belgium",
+            code: "BE",
+            phone_code: "32",
+            image_url: "/base/static/img/flags/be.png",
+        },
+    }));
     const ringtones = {
         dial: {},
         incoming: {},

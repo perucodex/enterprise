@@ -20,17 +20,16 @@ class HrVersion(models.Model):
             ("max", "Cap 5% VC")],
         string="Volunteer Contribution Option", groups="hr_payroll.group_hr_payroll_user",
         tracking=True,
-        copy=False)
+    )
     l10n_hk_mpf_vc_percentage = fields.Float(
         string="Volunteer Contribution %",
         groups="hr_payroll.group_hr_payroll_user",
         tracking=True,
-        copy=False)
+    )
     l10n_hk_rental_id = fields.Many2one(
         'l10n_hk.rental',
         string='Current Rental',
         groups="hr_payroll.group_hr_payroll_user",
-        copy=False,
         tracking=True,
     )
 

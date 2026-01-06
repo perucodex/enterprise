@@ -108,6 +108,15 @@ class StockMove(models.Model):
         if moves_to_super:
             super(StockMove, moves_to_super)._compute_location_dest_id()
 
+    @api.depends('sale_line_id.order_id.name')
+    def _compute_reference(self):
+        moves_with_reference = set()
+        for move in self:
+            if move.sale_line_id.is_rental and not move.picking_id:
+                move.reference = self.env._("Rental move: %(order)s", order=move.sale_line_id.order_id.name)
+                moves_with_reference.add(move.id)
+        super(StockMove, self - self.env['stock.move'].browse(moves_with_reference))._compute_reference()
+
     def _set_rental_sm_qty(self):
         self.ensure_one()
         return self

@@ -21,7 +21,6 @@ class ProductProduct(models.Model):
             "type": "ir.actions.act_window",
             "res_model": "product.product",
             "domain": [("id", "in", self.ids)],
-            "view_mode": "list",
             "context": {"create": False, "delete": False},
         }
 

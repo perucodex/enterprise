@@ -14,13 +14,14 @@
 # Pedro Castro Silva <pedrocs@exo.pt>, 2022
 # Manuela Silva <mmsrs@sky.com>, 2023
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2025-09-16 21:23+0000\n"
-"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-11-16 17:50+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Portuguese <https://translate.odoo.com/projects/odoo-19/"
 "industry_fsm/pt/>\n"
 "Language: pt\n"
@@ -40,7 +41,7 @@ msgstr "# de Tarefas"
 #. odoo-python
 #: code:addons/industry_fsm/models/project_task.py:0
 msgid "%(partner)s has %(number)s tasks at the same time."
-msgstr ""
+msgstr "%(partner)s tem %(number)s tarefas ao mesmo tempo."
 
 #. module: industry_fsm
 #: model:ir.actions.report,print_report_name:industry_fsm.task_custom_report
@@ -54,27 +55,27 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_sharing_inherit_project_task_view_form
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
 msgid "(incl."
-msgstr ""
+msgstr "(inclusive"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "10 days"
-msgstr ""
+msgstr "10 dias"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "10:00"
-msgstr ""
+msgstr "10:00"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "2023-01-01"
-msgstr ""
+msgstr "2023-01-01"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "5 days"
-msgstr ""
+msgstr "5 dias"
 
 #. module: industry_fsm
 #: model:mail.template,body_html:industry_fsm.mail_template_data_intervention_details
@@ -109,11 +110,40 @@ msgid ""
 "</div>\n"
 "        "
 msgstr ""
+"<div>\n"
+"    <t t-set=\"date_begin\" t-"
+"value=\"format_datetime(object.planned_date_begin, tz=object.partner_id.tz, "
+"lang_code=object.partner_id.lang)\"/>\n"
+"\n"
+"    <t t-set=\"date_end\" t-value=\"format_datetime(object.date_deadline, "
+"tz=object.partner_id.tz, lang_code=object.partner_id.lang)\"/>\n"
+"\n"
+"    Prezado <t t-out=\"object.partner_id.name or 'customer'\">cliente</t>,"
+"<br/><br/>\n"
+"    <t t-if=\"date_begin and date_end\">\n"
+"        O serviço de <t t-out=\"object.name or ''\">Manutenção da caldeira</"
+"t> está agendado entre <t t-out=\"date_begin or ''\">31/05/2021 12h30</t> e "
+"<t t-out=\"date_end or ''\">31/05/2021 14h30</t>.\n"
+"    </t>\n"
+"    <t t-else=\"\">\n"
+"        O serviço de <t t-out=\"object.name or ''\">Manutenção da caldeira</"
+"t> está agendado.\n"
+"    </t>\n"
+"    <br/><br/>\n"
+"    Atenciosamente,\n"
+"    <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
+"        <br/>\n"
+"        <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-"
+"out=\"user.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></"
+"div>\n"
+"    </t>\n"
+"</div>\n"
+"        "
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.portal_task_sign_button
 msgid "<i class=\"fa fa-check me-1\"/>Sign Report"
-msgstr ""
+msgstr "<i class=\"fa fa-check me-1\"/>Assinar relatório"
 
 #. module: industry_fsm
 #: model:mail.template,body_html:industry_fsm.mail_template_data_task_report
@@ -129,6 +159,15 @@ msgid ""
 "            </p>\n"
 "        "
 msgstr ""
+"<p>\n"
+"                Prezado <t t-out=\"object.partner_id.name or "
+"'Customer'\">cliente</t>,<br/><br/>\n"
+"                Segue em anexo o relatório de serviço de campo da nossa "
+"operação no local. <br/><br/>\n"
+"                Em caso de dúvidas, entre em contato conosco.<br/><br/>\n"
+"                Atenciosamente,<br/><br/>\n"
+"            </p>\n"
+"        "
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
@@ -137,11 +176,15 @@ msgid ""
 "title=\"By saving this change, the customer contact number will also be "
 "updated.\" invisible=\"not partner_id or not is_task_phone_update\"/>"
 msgstr ""
+"<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
+"title=\"By saving this change, the customer contact number will also be "
+"updated.\" invisible=\"not partner_id or not is_task_phone_update\"/>"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
 msgid "<span class=\"o_stat_text text-wrap\">Customer Preview</span>"
 msgstr ""
+"<span class=\"o_stat_text text-wrap\">Pré-visualização do Cliente</span>"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
@@ -159,11 +202,24 @@ msgid ""
 "                            Signed\n"
 "                        </span>"
 msgstr ""
+"<span style=\"                             font-size: "
+"10px;                             color: #fff;                             "
+"text-transform: uppercase;                             text-align: "
+"center;                             font-weight: bold; line-height: "
+"20px;                             transform: "
+"rotate(45deg);                             width: 100px; height: auto; "
+"display: block;                             background: "
+"green;                             position: "
+"absolute;                             top: 19px; right: -21px; left: "
+"auto;                             padding: 0;\">\n"
+"                            Assinado\n"
+"                        </span>"
 
 #. module: industry_fsm
 #: model_terms:web_tour.tour,rainbow_man_message:industry_fsm.industry_fsm_tour
 msgid "<span><b>Good job!</b> You went through all steps of this tour.</span>"
 msgstr ""
+"<span><b>Muito bem!</b> Você passou por todas as etapas deste tour.</span>"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
@@ -183,12 +239,12 @@ msgstr ""
 #. module: industry_fsm
 #: model:ir.model.constraint,message:industry_fsm.constraint_project_project_company_id_required_for_fsm_project
 msgid "A fsm project must be company restricted"
-msgstr ""
+msgstr "Um projeto de serviço campo deve ser restrito a uma empresa"
 
 #. module: industry_fsm
 #: model:ir.ui.menu,name:industry_fsm.mail_activity_plan_menu_config_task
 msgid "Activity Plans"
-msgstr ""
+msgstr "Planos de atividades"
 
 #. module: industry_fsm
 #: model:ir.ui.menu,name:industry_fsm.fsm_menu_config_activity_type
@@ -211,13 +267,15 @@ msgstr "Todas as Tarefas"
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_all_fsm_server_action
 msgid "All Tasks Server Action"
-msgstr ""
+msgstr "Todas as tarefas de Ação do servidor"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/models/project_task.py:0
 msgid "All running timers should be linked to a timesheet and a task."
 msgstr ""
+"Todos os cronômetros em execução devem ser vinculados a uma planilha de "
+"horas e a uma tarefa."
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__allocated_hours
@@ -227,7 +285,7 @@ msgstr "Tempo alocado"
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_account_analytic_line
 msgid "Analytic Line"
-msgstr ""
+msgstr "Linha Analítica"
 
 #. module: industry_fsm
 #: model_terms:ir.actions.act_window,help:industry_fsm.project_task_user_action_report_fsm
@@ -248,7 +306,7 @@ msgstr "Data da Atrinuição"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__rating_avg
 msgid "Average Rating (1-5)"
-msgstr ""
+msgstr "Avaliação média (1-5)"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__dependent_ids
@@ -258,7 +316,7 @@ msgstr "Bloquear"
 #. module: industry_fsm
 #: model:ir.ui.menu,name:industry_fsm.project_task_menu_planning_by_location_fsm
 msgid "By Location"
-msgstr ""
+msgstr "Por local"
 
 #. module: industry_fsm
 #: model:ir.ui.menu,name:industry_fsm.project_task_menu_planning_by_project_fsm
@@ -274,7 +332,7 @@ msgstr "Por Utilizador"
 #. odoo-python
 #: code:addons/industry_fsm/models/project_project.py:0
 msgid "Cancelled"
-msgstr ""
+msgstr "Cancelada"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__partner_city
@@ -290,7 +348,7 @@ msgstr "Fechar"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__is_closed
 msgid "Closed state"
-msgstr ""
+msgstr "Estado encerrado"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_res_company
@@ -305,7 +363,7 @@ msgstr "Empresa"
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_base_document_layout
 msgid "Company Document Layout"
-msgstr ""
+msgstr "Estrutura dos Documentos da Empresa"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_res_config_settings
@@ -335,7 +393,7 @@ msgstr ""
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_hr_timesheet_stop_timer_confirmation_wizard
 msgid "Confirm timesheet creation when stop timer"
-msgstr ""
+msgstr "Confirmar a criação da planilha de horas ao parar o cronômetro"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_res_partner
@@ -346,13 +404,13 @@ msgstr "Contacto"
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_map_view_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_mobile_form
 msgid "Contact Number"
-msgstr ""
+msgstr "Número de contato"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__partner_country_id
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__partner_country_id
 msgid "Country"
-msgstr ""
+msgstr "País"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_project_view_form_simplified_footer_fsm
@@ -367,7 +425,7 @@ msgstr "Data de Criação"
 #. module: industry_fsm
 #: model:ir.model,website_form_label:industry_fsm.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Criar um cliente"
 
 #. module: industry_fsm
 #: model:ir.actions.act_window,name:industry_fsm.open_create_project_fsm
@@ -377,7 +435,7 @@ msgstr "Criar um Projeto"
 #. module: industry_fsm
 #: model:ir.model,website_form_label:industry_fsm.model_project_task
 msgid "Create a Task"
-msgstr ""
+msgstr "Criar uma tarefa"
 
 #. module: industry_fsm
 #: model:res.groups,name:industry_fsm.group_fsm_quotation_from_task
@@ -422,7 +480,7 @@ msgstr "Classificações de Clientes"
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__partner_state_id
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__partner_state_id
 msgid "Customer State"
-msgstr ""
+msgstr "Situação do cliente"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
@@ -451,6 +509,8 @@ msgid ""
 "Design tailored worksheet templates for various interventions, and analyze "
 "collected intervention data."
 msgstr ""
+"Elabore modelos de planilhas personalizadas para várias intervenções e "
+"analise os dados de intervenção coletados."
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_project_view_form_simplified_footer_fsm
@@ -500,7 +560,7 @@ msgstr "Deseja parar os cronômetros em execução?"
 #. odoo-python
 #: code:addons/industry_fsm/models/project_project.py:0
 msgid "Done"
-msgstr ""
+msgstr "Concluído"
 
 #. module: industry_fsm
 #: model:mail.template,description:industry_fsm.mail_template_data_task_report
@@ -544,7 +604,7 @@ msgstr "Relatório de serviço de campo - {{ object.name }}"
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "Field Service Report:"
-msgstr ""
+msgstr "Relatório de serviço de campo:"
 
 #. module: industry_fsm
 #: model:mail.template,name:industry_fsm.mail_template_data_task_report
@@ -582,20 +642,20 @@ msgstr "Atividades futuras"
 #. odoo-python
 #: code:addons/industry_fsm/models/project_task.py:0
 msgid "GPS Coordinates: %(localisation_start)s (%(latitude)s, %(longitude)s)"
-msgstr ""
+msgstr "Coordenadas GPS: %(localisation_start)s (%(latitude)s, %(longitude)s)"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/wizard/hr_timesheet_stop_timer_confirmation_wizard.py:0
 msgid "GPS Coordinates: %(localisation_stop)s (%(latitude)s, %(longitude)s)"
-msgstr ""
+msgstr "Coordenadas GPS: %(localisation_stop)s (%(latitude)s, %(longitude)s)"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_hr_timesheet_stop_timer_confirmation_wizard__allow_geolocation
 #: model:ir.model.fields,field_description:industry_fsm.field_project_project__allow_geolocation
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__allow_geolocation
 msgid "Geolocation"
-msgstr ""
+msgstr "Geolocalização"
 
 #. module: industry_fsm
 #. odoo-javascript
@@ -638,7 +698,7 @@ msgstr "Id."
 #: code:addons/industry_fsm/models/project_project.py:0
 #: model:project.task.type,name:industry_fsm.planning_project_stage_2
 msgid "In Progress"
-msgstr ""
+msgstr "Em Progresso"
 
 #. module: industry_fsm
 #. odoo-python
@@ -660,7 +720,7 @@ msgstr "É um seguidor"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__is_template
 msgid "Is Template"
-msgstr ""
+msgstr "É modelo"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
@@ -670,7 +730,7 @@ msgstr ""
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "Jane smith"
-msgstr ""
+msgstr "Jane Smith"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.res_config_settings_view_form
@@ -684,7 +744,7 @@ msgstr ""
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__rating_last_value
 msgid "Last Rating (1-5)"
-msgstr ""
+msgstr "Última avaliação (1-5)"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__date_last_stage_update
@@ -746,18 +806,18 @@ msgstr "Linha"
 #: code:addons/industry_fsm/models/project_task.py:0
 #: code:addons/industry_fsm/wizard/hr_timesheet_stop_timer_confirmation_wizard.py:0
 msgid "Location error"
-msgstr ""
+msgstr "Erro de localização"
 
 #. module: industry_fsm
 #. odoo-javascript
 #: code:addons/industry_fsm/static/src/services/timer_geolocation_service.js:0
 msgid "Location error: %s"
-msgstr ""
+msgstr "Erro de localização: %s"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "Manage SME"
-msgstr ""
+msgstr "Gerenciar SME"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_view_form_inherit
@@ -774,12 +834,12 @@ msgstr "Mapa"
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_fsm_map_server_action
 msgid "Map Server Action"
-msgstr ""
+msgstr "Mapear ação do servidor"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "Marc Demo"
-msgstr ""
+msgstr "Marc Demo"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
@@ -792,6 +852,8 @@ msgid ""
 "Measure your customer satisfaction by sending rating requests when your "
 "tasks reach a certain stage."
 msgstr ""
+"Meça a satisfação de seus clientes enviando solicitações de classificação "
+"quando suas tarefas atingirem um determinado estágio."
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_ir_ui_menu
@@ -806,13 +868,13 @@ msgstr "Milestone"
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
 msgid "My Activities"
-msgstr ""
+msgstr "Minhas atividades"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/controllers/webmanifest.py:0
 msgid "My Calendar"
-msgstr ""
+msgstr "Meu calendário"
 
 #. module: industry_fsm
 #. odoo-python
@@ -826,17 +888,17 @@ msgstr "As Minhas Tarefas"
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_fsm_server_action
 msgid "My Tasks Server Action"
-msgstr ""
+msgstr "Minhas tarefas de Ação do servidor"
 
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_fsm_mobile_server_action
 msgid "My Tasks in mobile Server Action"
-msgstr ""
+msgstr "Minhas tarefas em Ação do servidor móvel"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_project_fsm
 msgid "Name"
-msgstr ""
+msgstr "Nome"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_partner_address_form_industry_fsm
@@ -847,18 +909,18 @@ msgstr "Navegar para"
 #. odoo-python
 #: code:addons/industry_fsm/models/project_project.py:0
 msgid "New"
-msgstr ""
+msgstr "Novo"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/controllers/webmanifest.py:0
 msgid "New task"
-msgstr ""
+msgstr "Nova tarefa"
 
 #. module: industry_fsm
 #: model_terms:ir.actions.act_window,help:industry_fsm.rating_rating_action_fsm
 msgid "No customer ratings yet"
-msgstr ""
+msgstr "Ainda sem avaliações de clientes"
 
 #. module: industry_fsm
 #: model_terms:ir.actions.act_window,help:industry_fsm.project_task_user_action_report_fsm
@@ -921,7 +983,7 @@ msgstr "Planeado"
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_list_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
 msgid "Planned Date"
-msgstr ""
+msgstr "Data Planeada"
 
 #. module: industry_fsm
 #: model:ir.ui.menu,name:industry_fsm.fsm_menu_planning
@@ -932,12 +994,12 @@ msgstr "Planeamento"
 #: model:ir.actions.act_window,name:industry_fsm.project_task_action_fsm_planning_groupby_location
 #: model:ir.actions.act_window,name:industry_fsm.project_task_action_fsm_planning_groupby_location2
 msgid "Planning by Location"
-msgstr ""
+msgstr "Planejamento por local"
 
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_fsm_planning_groupby_location_server_action
 msgid "Planning by Location Server Action"
-msgstr ""
+msgstr "Planejamento por Ação do servidor de localização"
 
 #. module: industry_fsm
 #: model:ir.actions.act_window,name:industry_fsm.project_task_action_fsm_planning_groupby_project
@@ -948,7 +1010,7 @@ msgstr "Planejamento por projeto"
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_fsm_planning_groupby_project_server_action
 msgid "Planning by Project Server Action"
-msgstr ""
+msgstr "Planejamento por Ação do servidor de projetos"
 
 #. module: industry_fsm
 #: model:ir.actions.act_window,name:industry_fsm.project_task_action_fsm_planning_groupby_user
@@ -959,12 +1021,12 @@ msgstr "Planejamento por usuário"
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_fsm_planning_groupby_user_server_action
 msgid "Planning by User Action"
-msgstr ""
+msgstr "Planejamento por ação do usuário"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
 msgid "Preview"
-msgstr ""
+msgstr "Pré-visualizar"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__priority
@@ -997,7 +1059,7 @@ msgstr "Propriedades"
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_rating_rating
 msgid "Rating"
-msgstr ""
+msgstr "Classificação"
 
 #. module: industry_fsm
 #. odoo-javascript
@@ -1012,7 +1074,7 @@ msgstr ""
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_ir_actions_report
 msgid "Report Action"
-msgstr ""
+msgstr "Ação de relatório"
 
 #. module: industry_fsm
 #: model:ir.ui.menu,name:industry_fsm.fsm_menu_reporting
@@ -1046,7 +1108,7 @@ msgstr "Selecione o <b>cliente</b> para sua tarefa."
 #. odoo-python
 #: code:addons/industry_fsm/models/project_task.py:0
 msgid "Send Field Service Report"
-msgstr ""
+msgstr "Enviar relatório de serviço de campo"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
@@ -1071,12 +1133,12 @@ msgstr "Definições"
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
 msgid "Show all records whose next activity date is past"
-msgstr ""
+msgstr "Mostrar todos os registros cuja data da próxima atividade já passou"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.portal_task_sign_modal
 msgid "Sign Field Service Report"
-msgstr ""
+msgstr "Assinar relatório de serviço de campo"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.portal_task_sign_modal
@@ -1105,7 +1167,7 @@ msgstr "Assinado por"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__user_skill_ids
 msgid "Skills"
-msgstr ""
+msgstr "Habilidades"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_stop_timer_wizard_form
@@ -1130,7 +1192,7 @@ msgstr "Etapas"
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
 msgid "Start Date"
-msgstr ""
+msgstr "Data Inicial"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__planned_date_begin
@@ -1140,7 +1202,7 @@ msgstr "Data de Início"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__state
 msgid "State"
-msgstr ""
+msgstr "Estado"
 
 #. module: industry_fsm
 #. odoo-javascript
@@ -1152,13 +1214,13 @@ msgstr "Pare o <b>cronômetro</b> quando terminar."
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__partner_street
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__partner_street
 msgid "Street"
-msgstr ""
+msgstr "Rua"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__partner_street2
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__partner_street2
 msgid "Street2"
-msgstr ""
+msgstr "Rua 2"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.report_project_task_user_fsm_view_tree
@@ -1191,12 +1253,12 @@ msgstr "Recorrência da tarefa"
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_project_task_type
 msgid "Task Stage"
-msgstr ""
+msgstr "Estado da Tarefa"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__name
 msgid "Task Title"
-msgstr ""
+msgstr "Título da Tarefa"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_report_industry_fsm_worksheet_custom
@@ -1231,13 +1293,13 @@ msgstr "Análise de Tarefas"
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "Technician"
-msgstr ""
+msgstr "Técnico"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/controllers/portal.py:0
 msgid "The field service report has been signed by the customer."
-msgstr ""
+msgstr "O relatório de serviço de campo foi assinado pelo cliente."
 
 #. module: industry_fsm
 #. odoo-python
@@ -1246,6 +1308,9 @@ msgid ""
 "The field service report is unavailable for the selected tasks as they do "
 "not contain any timesheets, products, or worksheets."
 msgstr ""
+"O relatório de serviço de campo não está disponível para as tarefas "
+"selecionadas, pois não contêm nenhum produto, planilha de horas ou de "
+"trabalho."
 
 #. module: industry_fsm
 #. odoo-python
@@ -1270,12 +1335,12 @@ msgstr "Tempo"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__remaining_hours
 msgid "Time Remaining"
-msgstr ""
+msgstr "Dias restantes"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__remaining_hours_percentage
 msgid "Time Remaining Percentage"
-msgstr ""
+msgstr "Porcentagem de tempo restante"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__effective_hours
@@ -1323,7 +1388,7 @@ msgstr "A agendar"
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_to_schedule_fsm_server_action
 msgid "To Schedule Server Action"
-msgstr ""
+msgstr "Ação do servidor Para programar"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
@@ -1408,14 +1473,14 @@ msgstr "Utilizador"
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
 msgid "View Itinerary"
-msgstr ""
+msgstr "Ver itinerário"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/models/project_task.py:0
 #: code:addons/industry_fsm/wizard/hr_timesheet_stop_timer_confirmation_wizard.py:0
 msgid "View on Map"
-msgstr ""
+msgstr "Ver no mapa"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task_stop_timers_wizard_line__wizard_id
@@ -1445,7 +1510,7 @@ msgstr "Horas úteis até concluir"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_res_config_settings__module_industry_fsm_report
 msgid "Worksheet Templates"
-msgstr ""
+msgstr "Modelos de planilha de trabalho"
 
 #. module: industry_fsm
 #: model:mail.template,subject:industry_fsm.mail_template_data_intervention_details
@@ -1457,12 +1522,18 @@ msgid ""
 "format_datetime(object.date_deadline, tz=object.partner_id.tz, "
 "lang_code=object.partner_id.lang) or '' }}"
 msgstr ""
+"O serviço está agendado {{ object.planned_date_begin and "
+"object.date_deadline and 'from the ' + "
+"format_datetime(object.planned_date_begin, tz=object.partner_id.tz, "
+"lang_code=object.partner_id.lang) + ' to the ' + "
+"format_datetime(object.date_deadline, tz=object.partner_id.tz, "
+"lang_code=object.partner_id.lang) or '' }}"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__partner_zip
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__partner_zip
 msgid "ZIP"
-msgstr ""
+msgstr "Código Postal"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.quick_create_task_form_fsm_inherited
@@ -1481,6 +1552,8 @@ msgid ""
 "on\n"
 "                        <span class=\"fw-bold text-dark\"> Sub-tasks</span>)"
 msgstr ""
+"em\n"
+"                        <span class=\"fw-bold text-dark\"> Subtarefas</span>)"
 
 #~ msgid "<strong>Worker: </strong>"
 #~ msgstr "<strong>Operário: </strong>"

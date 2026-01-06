@@ -23,7 +23,7 @@ export class DocumentsOperationNewFolder extends Component {
     async onClick() {
         const currentFolder = this.props.record.data.destination;
         const documents = this.props.record.data.document_ids.records.map((f) => ({
-            id: f.data.id,
+            id: f.resId,
             name: f.data.display_name,
         }));
         const attachmentId = this.props.record.data.attachment_id.id;
@@ -46,7 +46,7 @@ export class DocumentsOperationNewFolder extends Component {
                     operation,
                     onClose: async () => this.env.searchModel._reloadSearchModel(true),
                     context: {
-                        default_destination: result.resId,
+                        default_destination: result.resId.toString(),
                         default_display_name: result.data.name,
                     },
                 });

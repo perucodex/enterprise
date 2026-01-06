@@ -53,9 +53,6 @@ patch(WebsiteSale.prototype, {
     onRentingConstraintsChanged(event) {
         super.onRentingConstraintsChanged(...arguments);
         const info = event.detail;
-        if (info.rentingAvailabilities) {
-            this.rentingAvailabilities = info.rentingAvailabilities;
-        }
         if (info.preparationTime !== undefined) {
             this.preparationTime = info.preparationTime;
         }

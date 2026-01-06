@@ -14,7 +14,7 @@ class DocumentsAccess(models.Model):
             user_ids = access.partner_id.with_context(active_test=False).user_ids
             if (
                 access.document_id.handler == 'spreadsheet'
-                and (not user_ids or user_ids.share)
+                and (not user_ids or all(user_ids.mapped("share")))
                 and access.role == 'edit'
             ):
                 raise ValidationError(_('Spreadsheets can not be shared in edit mode to non-internal users.'))

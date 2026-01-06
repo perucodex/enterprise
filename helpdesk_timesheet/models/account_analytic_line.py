@@ -118,6 +118,8 @@ class AccountAnalyticLine(models.Model):
                 vals_update = {'account_id': ticket.analytic_account_id.id}
                 if ticket.project_id:
                     vals_update['project_id'] = ticket.project_id.id
+                    if not vals_update.get('account_id'):
+                        vals_update['account_id'] = ticket.project_id.account_id.id
                 for vals in ticket_vals_list:
                     if 'company_id' not in vals:
                         vals_update['company_id'] = ticket.project_id.company_id.id or ticket.company_id.id

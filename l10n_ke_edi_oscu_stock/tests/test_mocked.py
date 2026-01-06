@@ -22,12 +22,13 @@ class TestKeEdiStockMocked(TestKeEdiStock):
 
     def test_send_invoice_and_credit_note_stock(self):
         with self.patch_session([
-            ('saveTrnsSalesOsdc', 'save_sale_2', 'save_sale_success'),
             ('saveItem', 'save_item_1', 'success'),
             ('saveItem', 'save_item_2', 'success'),
+            ('saveTrnsSalesOsdc', 'save_sale_2', 'save_sale_success'),
             ('insertStockIO', 'save_stock_io_sale_1', 'success'),
             ('saveStockMaster', 'save_stock_master_19', 'success'),
             ('saveStockMaster', 'save_stock_master_19', 'success'),
+            ('selectInvoiceDetails', 'get_invoice_details_1', 'get_invoice_details_success'),
             ('saveTrnsSalesOsdc', 'save_refund_2', 'save_sale_success'),
             ('insertStockIO', 'save_stock_io_refund', 'success'),
             ('saveStockMaster', 'save_stock_master_20', 'success'),
@@ -37,9 +38,9 @@ class TestKeEdiStockMocked(TestKeEdiStock):
 
     def test_send_invoiced_stock_moves(self):
         with self.patch_session([
-            ('saveTrnsSalesOsdc', 'save_sale_2', 'save_sale_success'),
             ('saveItem', 'save_item_1', 'success'),
             ('saveItem', 'save_item_2', 'success'),
+            ('saveTrnsSalesOsdc', 'save_sale_2', 'save_sale_success'),
             ('insertStockIO', 'save_stock_io_sale_1', 'success'),
             ('saveStockMaster', 'save_stock_master_19', 'success'),
             ('saveStockMaster', 'save_stock_master_19', 'success'),
@@ -54,9 +55,9 @@ class TestKeEdiStockMocked(TestKeEdiStock):
     def test_confirm_vendor_bill(self):
         with self.patch_session([
             ('selectTrnsPurchaseSalesList', 'get_purchases', 'get_purchases_2'),
-            ('insertTrnsPurchase', 'save_purchase_2', 'success'),
             ('saveItem', 'save_item_1', 'success'),
             ('saveItem', 'save_item_2', 'success'),
+            ('insertTrnsPurchase', 'save_purchase_2', 'success'),
             ('insertStockIO', 'save_stock_io_purchase_1', 'success'),
             ('saveStockMaster', 'save_stock_master_21', 'success'),
             ('saveStockMaster', 'save_stock_master_21', 'success'),

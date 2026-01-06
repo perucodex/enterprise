@@ -17,7 +17,6 @@
                 <field name="index_content"/>
                 <field name="create_uid" string="Created by"/>
                 <filter string="My Documents" name="my_documents_filter" domain="['|', ('owner_id', '=', uid), ('partner_id.user_ids', '=', uid)]"/>
-                <filter string="My Activities" name="my_activities_filter" domain="[('activity_user_id','=',uid)]"/>
                 <filter string="Starred" name="my_favorites_filter" domain="[('favorited_ids', 'in', uid)]"/>
                 <filter string="Shared with anyone" name="shared_anyone_with_the_link" domain="[('access_via_link', '!=', 'none'), ('is_access_via_link_hidden', '=', False)]"/>
                 <separator/>
@@ -33,6 +32,17 @@
                 <filter string="In Company" name="my_drive_filter" domain="[('user_folder_id', 'child_of', 'COMPANY')]"/>
                 <separator/>
                 <field name="type"/>
+                <separator invisible="1"/>
+                <filter invisible="1" string="My Activities" name="filter_activities_my"
+                    domain="[('activity_user_id', '=', uid)]"/>
+                <separator invisible="1"/>
+                <filter invisible="1" string="Late Activities" name="activities_overdue"
+                    domain="[('my_activity_date_deadline', '&lt;', 'today')]"
+                    help="Show all records whose next activity date is past"/>
+                <filter invisible="1" string="Today Activities" name="activities_today"
+                    domain="[('my_activity_date_deadline', '=', 'today')]"/>
+                <filter invisible="1" string="Future Activities" name="activities_upcoming_all"
+                    domain="[('my_activity_date_deadline', '&gt;', 'today')]"/>
                 <group>
                     <filter string="Contact" name="filter_partner_id" domain="[]" context="{'group_by': 'partner_id'}"/>
                     <filter string="Owner" name="filter_owner_id" domain="[]" context="{'group_by': 'owner_id'}"/>

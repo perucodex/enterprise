@@ -79,6 +79,7 @@ class TestSpreadsheetDocumentsSharing(TransactionCaseDocuments):
                 self.assertIn('Read only spreadsheet(s):', form.error_message_spreadsheet)
                 self.assertIn(self.get_display_names(self.frozen_spreadsheets), form.error_message_spreadsheet)
                 self.assertIn(self.get_display_names(expected_partners), form.error_message_spreadsheet)
+                self.assertFalse(form.has_warning_link_with_more_rights)
 
     @users("dtdm")
     def test_share_to_non_internal_user_edit_error(self):

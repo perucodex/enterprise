@@ -2,6 +2,7 @@
 # pylint: disable=bad-whitespace
 from odoo import fields, Command
 from odoo.tests import tagged
+from odoo.exceptions import UserError
 
 from odoo.addons.account_reports.tests.common import TestAccountReportsCommon
 
@@ -272,3 +273,41 @@ class TestDiot(TestAccountReportsCommon):
         self.assertEqual(
             self.env[diot_report.custom_handler_model_name].action_get_dpiva_txt(options)['file_content'].decode(),
             "|1.0|2022|MES|Enero|1|1|||1|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|04|85|OTE2003102G1|||||||||||||||||||16|")
+
+    def test_diot_report_without_partner(self):
+        date_entry = '2022-07-01'
+        tax = self.env.ref(f'account.{self.env.company.id}_tax14')
+        diot_tag = tax.invoice_repartition_line_ids.tag_ids.filtered(lambda t: 'DIOT' in t.name)
+        line_vals = [
+            {
+                'account_id': self.company_data['default_account_expense'].id,
+                'debit': 100,
+            },
+            {
+                'account_id': self.company_data['default_account_tax_purchase'].id,
+                'debit': 16,
+                'tax_tag_ids': [Command.set(diot_tag.ids)],
+            },
+            {
+                'account_id': self.company_data['default_account_payable'].id,
+                'credit': 116,
+            },
+        ]
+        moves = self.env['account.move'].create([
+            {
+                'move_type': 'entry',
+                'date': date_entry,
+                'line_ids': [
+                    Command.create({**line, 'partner_id': self.partner_a.id if i == 0 else False})
+                    for line in line_vals
+                ]
+            } for i in range(2)
+        ])
+        moves.action_post()
+
+        diot_report = self.env.ref('l10n_mx.diot_report')
+        options = self._generate_options(diot_report, fields.Date.from_string('2022-01-01'), fields.Date.from_string('2022-12-31'))
+        diot_report._init_currency_table(options)
+
+        with self.assertRaises(UserError, msg="The report cannot be generated because there are entries with tax amounts but no partner assigned."):
+            self.env[diot_report.custom_handler_model_name].action_get_diot_txt(options)

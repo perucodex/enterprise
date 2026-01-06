@@ -14,16 +14,109 @@ class TestPayrollAllocatingPaidTimeOff(TestPayrollCommon):
 
     def setUp(self):
         super().setUp()
+
+        self.resource_calendar_40_hours = self.resource_calendar.copy({
+            'name': 'Test Calendar 40 Hours',
+            'hours_per_day': 8,
+            'hours_per_week': 40,
+            'full_time_required_hours': 38,
+            'attendance_ids': [
+                (0, 0, {'name': 'Monday Morning', 'dayofweek': '0', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Monday Lunch', 'dayofweek': '0', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': 'Monday Afternoon', 'dayofweek': '0', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
+                (0, 0, {'name': 'Tuesday Morning', 'dayofweek': '1', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Tuesday Lunch', 'dayofweek': '1', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': 'Tuesday Afternoon', 'dayofweek': '1', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
+                (0, 0, {'name': 'Wednesday Morning', 'dayofweek': '2', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Wednesday Lunch', 'dayofweek': '2', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': 'Wednesday Afternoon', 'dayofweek': '2', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
+                (0, 0, {'name': 'Thursday Morning', 'dayofweek': '3', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Thursday Lunch', 'dayofweek': '3', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': 'Thursday Afternoon', 'dayofweek': '3', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
+                (0, 0, {'name': 'Friday Morning', 'dayofweek': '4', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Friday Lunch', 'dayofweek': '4', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': 'Friday Afternoon', 'dayofweek': '4', 'hour_from': 13, 'hour_to': 17, 'day_period': 'afternoon'}),
+            ],
+        })
+
+        self.resource_calendar_6_day_week = self.resource_calendar.copy({
+            'name': 'Test Calendar 6 Day Week',
+            'hours_per_day': 7.6,
+            'hours_per_week': 45.6,
+            'full_time_required_hours': 38,
+            'attendance_ids': [
+                (0, 0, {'name': 'Monday Morning', 'dayofweek': '0', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Monday Lunch', 'dayofweek': '0', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': 'Monday Afternoon', 'dayofweek': '0', 'hour_from': 13, 'hour_to': 16.6, 'day_period': 'afternoon'}),
+                (0, 0, {'name': 'Tuesday Morning', 'dayofweek': '1', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Tuesday Lunch', 'dayofweek': '1', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': 'Tuesday Afternoon', 'dayofweek': '1', 'hour_from': 13, 'hour_to': 16.6, 'day_period': 'afternoon'}),
+                (0, 0, {'name': 'Wednesday Morning', 'dayofweek': '2', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Wednesday Lunch', 'dayofweek': '2', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': 'Wednesday Afternoon', 'dayofweek': '2', 'hour_from': 13, 'hour_to': 16.6, 'day_period': 'afternoon'}),
+                (0, 0, {'name': 'Thursday Morning', 'dayofweek': '3', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Thursday Lunch', 'dayofweek': '3', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': 'Thursday Afternoon', 'dayofweek': '3', 'hour_from': 13, 'hour_to': 16.6, 'day_period': 'afternoon'}),
+                (0, 0, {'name': 'Friday Morning', 'dayofweek': '4', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Friday Lunch', 'dayofweek': '4', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': 'Friday Afternoon', 'dayofweek': '4', 'hour_from': 13, 'hour_to': 16.6, 'day_period': 'afternoon'}),
+                (0, 0, {'name': 'Saturday Morning', 'dayofweek': '5', 'hour_from': 8, 'hour_to': 12, 'day_period': 'morning'}),
+                (0, 0, {'name': 'Saturday Lunch', 'dayofweek': '5', 'hour_from': 12, 'hour_to': 13, 'day_period': 'lunch'}),
+                (0, 0, {'name': 'Saturday Afternoon', 'dayofweek': '5', 'hour_from': 13, 'hour_to': 16.6, 'day_period': 'afternoon'}),
+            ],
+        })
+
+        self.resource_calendar_two_weeks = self.resource_calendar.copy({
+            'name': 'Test Two Week Calendar No Breaks',
+            'hours_per_day': 7.6,
+            'hours_per_week': 38,
+            'full_time_required_hours': 38,
+            'two_weeks_calendar': True,
+            'attendance_ids': [
+                (0, 0, {'name': 'Monday First Week', 'week_type': '0', 'dayofweek': '0', 'hour_from': 8, 'hour_to': 15.6, 'day_period': 'full_day'}),
+                (0, 0, {'name': 'Tuesday First Week', 'week_type': '0', 'dayofweek': '1', 'hour_from': 8, 'hour_to': 15.6, 'day_period': 'full_day'}),
+                (0, 0, {'name': 'Wednesday First Week', 'week_type': '0', 'dayofweek': '2', 'hour_from': 8, 'hour_to': 15.6, 'day_period': 'full_day'}),
+                (0, 0, {'name': 'Thursday First Week', 'week_type': '0', 'dayofweek': '3', 'hour_from': 8, 'hour_to': 15.6, 'day_period': 'full_day'}),
+                (0, 0, {'name': 'Friday First Week', 'week_type': '0', 'dayofweek': '4', 'hour_from': 8, 'hour_to': 15.6, 'day_period': 'full_day'}),
+                (0, 0, {'name': 'Monday Second Week', 'week_type': '1', 'dayofweek': '0', 'hour_from': 8, 'hour_to': 15.6, 'day_period': 'full_day'}),
+                (0, 0, {'name': 'Tuesday Second Week', 'week_type': '1', 'dayofweek': '1', 'hour_from': 8, 'hour_to': 15.6, 'day_period': 'full_day'}),
+                (0, 0, {'name': 'Wednesday Second Week', 'week_type': '1', 'dayofweek': '2', 'hour_from': 8, 'hour_to': 15.6, 'day_period': 'full_day'}),
+                (0, 0, {'name': 'Thursday Second Week', 'week_type': '1', 'dayofweek': '3', 'hour_from': 8, 'hour_to': 15.6, 'day_period': 'full_day'}),
+                (0, 0, {'name': 'Friday Second Week', 'week_type': '1', 'dayofweek': '4', 'hour_from': 8, 'hour_to': 15.6, 'day_period': 'full_day'}),
+            ],
+        })
+
         with freeze_time('2023-01-01'):
 
             today = date.today()
             self.paid_time_off_type = self.holiday_leave_types  # self.holiday_leave_types.filtered(lambda leave_type: leave_type.validity_start == date(today.year, 1, 1) and leave_type.validity_stop == date(today.year, 12, 31))
 
+            self.employee_gustavo = self.create_employee({
+                'name': 'Gustavo Garcia',
+                'date_version': date(today.year - 2, 1, 1),
+                'contract_date_start': date(today.year - 2, 1, 1),
+                'resource_calendar_id': self.resource_calendar_40_hours.id,
+            })
+
+            self.employee_fernando = self.create_employee({
+                'name': 'Fernando Alonso',
+                'date_version': date(today.year - 2, 1, 1),
+                'contract_date_start': date(today.year - 2, 1, 1),
+                'resource_calendar_id': self.resource_calendar_6_day_week.id,
+            })
+
+            self.employee_bertrand = self.create_employee({
+                'name': 'Bertrand Guru',
+                'date_version': date(today.year - 2, 1, 1),
+                'contract_date_start': date(today.year - 2, 1, 1),
+                'resource_calendar_id': self.resource_calendar_two_weeks.id,
+            })
+
             self.wizard = self.env['hr.payroll.alloc.paid.leave'].create({
                 'year': today.year - 1,
                 'holiday_status_id': self.paid_time_off_type.id
             })
-            self.wizard.alloc_employee_ids = self.wizard.alloc_employee_ids.filtered(lambda alloc_employee: alloc_employee.employee_id.id in [self.employee_georges.id, self.employee_john.id, self.employee_with_attestation.id])
+            self.wizard.alloc_employee_ids = self.wizard.alloc_employee_ids.filtered(lambda alloc_employee: alloc_employee.employee_id.id in [self.employee_georges.id, self.employee_john.id, self.employee_with_attestation.id, self.employee_gustavo.id, self.employee_fernando.id, self.employee_bertrand.id])
 
     def test_allocating_paid_time_off(self):
         """
@@ -57,10 +150,13 @@ class TestPayrollAllocatingPaidTimeOff(TestPayrollCommon):
             In total, we have 121.6 hours and we convert it in days to have the value in paid_time_off which is
             16 days = 121.6 / (38 / 5) = 121.6 hours / 7.6 hours/day
         """
-        self.assertEqual(len(self.wizard.alloc_employee_ids), 3, "Normally we should find 3 employees to allocate their paid time off for the next period")
+        self.assertEqual(len(self.wizard.alloc_employee_ids), 6, "Normally we should find 6 employees to allocate their paid time off for the next period")
 
         self.assertEqual(self.wizard.alloc_employee_ids.filtered(lambda alloc_employee: alloc_employee.employee_id.id == self.employee_georges.id).paid_time_off, 15, "Georges should have 15 days paid time offs for this year.")
         self.assertEqual(self.wizard.alloc_employee_ids.filtered(lambda alloc_employee: alloc_employee.employee_id.id == self.employee_john.id).paid_time_off, 16, "John Doe should have 16 days paid time offs for this year.")
+        self.assertEqual(self.wizard.alloc_employee_ids.filtered(lambda alloc_employee: alloc_employee.employee_id.id == self.employee_gustavo.id).paid_time_off, 20, "Gustavo should have 20 days paid time offs for this year.")
+        self.assertEqual(self.wizard.alloc_employee_ids.filtered(lambda alloc_employee: alloc_employee.employee_id.id == self.employee_fernando.id).paid_time_off, 24, "Fernando should have 24 days paid time offs for this year.")
+        self.assertEqual(self.wizard.alloc_employee_ids.filtered(lambda alloc_employee: alloc_employee.employee_id.id == self.employee_bertrand.id).paid_time_off, 20, "Bertrand should have 20 days paid time offs for this year.")
 
     def test_reallocate_paid_time_off_based_contract_next_year(self):
         """
@@ -78,7 +174,7 @@ class TestPayrollAllocatingPaidTimeOff(TestPayrollCommon):
         121.6 / (19 hours per week / 3 days) = 19.2 days (we round to 19 days)
         But since an employee should never have more than 4 weeks of paid time off, his total is reduced to 4 weeks of 3 days a week aka 12 days
         """
-        self.assertEqual(len(self.wizard.alloc_employee_ids), 3, "Normally, we should find 3 employees to allocate their paid time off for the next period")
+        self.assertEqual(len(self.wizard.alloc_employee_ids), 6, "Normally, we should find 6 employees to allocate their paid time off for the next period")
 
         alloc_employee = self.wizard.alloc_employee_ids.filtered(lambda alloc_employee: alloc_employee.employee_id.id == self.employee_georges.id)
         self.assertEqual(alloc_employee.paid_time_off_to_allocate, 14.5, "With a 4/5 time in this period, Georges could have 16 days of paid time off but his working schedule in last period allow him 14.5 days")
@@ -122,3 +218,44 @@ class TestPayrollAllocatingPaidTimeOff(TestPayrollCommon):
             ).paid_time_off,
             8,
             "The employee should have 8 days paid time offs for this year.")
+
+    # This situation occurred during the migration to the version model. Some employees had one version in BE
+    # while the rest of their versions were in HK. Normally, this should not happen because we create a separate
+    # employee record for each company, and an employee's versions are linked to the company of that employee.
+    def test_allocating_paid_time_off_with_versions_in_different_companies(self):
+        """
+        Last year, the employee Georges had these contracts: :
+        - From 01/01 to 31/05, he worked at mid time, 3 days/week   ->   BE Company
+        - From 01/06 to 31/08, he worked at full time, 5 days/week  ->   BE Company
+        - From 01/09 to 31/12, he worked at 4/5, 4 days/week        ->   HK Company
+
+        Since Georges switched to HK company on 01/09, there shouldn't be any allocation for him.
+        """
+        with freeze_time('2023-12-01'):
+            hongkong_company = self.env['res.company'].create({
+                'name': 'My HK Company - Test',
+                'country_id': self.env.ref('base.hk').id,
+                'currency_id': self.env.ref('base.EUR').id,
+                'street': 'not Rue du Paradis',
+                'zip': '6870',
+                'city': 'not Eghezee',
+                'vat': 'BE0897223670',
+                'phone': '061928374',
+            })
+            self.employee_georges.company_id = hongkong_company.id
+            self.employee_georges.flush_recordset()
+            last_year = date.today().year - 1
+            target_dates = [
+                date(last_year, 1, 1),
+                date(last_year, 6, 1),
+            ]
+            versions = self.employee_georges.version_ids.search([
+                ('date_version', 'in', target_dates)
+            ])
+            versions.write({'company_id': self.belgian_company.id})
+            self.wizard = self.env['hr.payroll.alloc.paid.leave'].create({
+                'year': date.today().year - 1,
+                'holiday_status_id': self.paid_time_off_type.id
+            })
+            self.wizard.alloc_employee_ids = self.wizard.alloc_employee_ids.filtered(lambda alloc_employee: alloc_employee.employee_id.id == self.employee_georges.id)
+            self.assertEqual(len(self.wizard.alloc_employee_ids), 0, "Since Georges switched to HK company on 01/09, there shouldn't be any allocation for him.")

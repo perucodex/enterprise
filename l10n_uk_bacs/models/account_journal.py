@@ -141,7 +141,7 @@ class AccountJournal(models.Model):
                 payment_reference = format_communication(payment['ref'])[:18].ljust(18)
 
                 amount = payment['amount']
-                amount_in_pence = int(amount * 100)
+                amount_in_pence = round(amount * 100)
                 transaction_line = f"{partner_sort_code}{partner_account_number}099{company_account_number}    {amount_in_pence:011}{company_name}{payment_reference}{partner_name}"
                 credit_total += amount_in_pence
                 credit_count += 1
@@ -231,7 +231,7 @@ class AccountJournal(models.Model):
                 payment_reference = format_communication(payment['ref'])[:18].ljust(18)
 
                 amount = payment['amount']
-                amount_in_pence = int(amount * 100)
+                amount_in_pence = round(amount * 100)
                 transaction_code = PAYMENT_CODE_MAPPINGS[payment['bacs_payment_type']]
                 transaction_line = f"{partner_sort_code}{partner_account_number}0{transaction_code}{company_account_number}    {amount_in_pence:011}{company_name}{payment_reference}{partner_name}"
 

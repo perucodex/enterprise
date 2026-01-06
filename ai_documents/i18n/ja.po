@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:45+0000\n"
-"PO-Revision-Date: 2025-10-20 07:57+0000\n"
+"POT-Creation-Date: 2025-12-30 18:43+0000\n"
+"PO-Revision-Date: 2025-12-06 10:00+0000\n"
 "Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-19/"
 "ai_documents/ja/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: ai_documents
 #: model_terms:ir.ui.view,arch_db:ai_documents.ai_documents_sort_view_form
@@ -194,8 +194,9 @@ msgid ""
 "Here is a document called %(document_name)s and whose content is %(content)s "
 "and tags are %(tags)s. The mimetype of the document is %(mimetype)s."
 msgstr ""
-"次のドキュメントがあります：名前は「%(document_name)s」、内容は「%(content)s"
-"」、タグは「%(tags)s」です。ドキュメントのMIMEタイプは「%(mimetype)s」です。"
+"次のドキュメントがあります：名前は「%(document_name)s」、内容は「%"
+"(content)s」、タグは「%(tags)s」です。ドキュメントのMIMEタイプは「%"
+"(mimetype)s」です。"
 
 #. module: ai_documents
 #: model:ir.model.fields,field_description:ai_documents.field_ai_documents_sort__id
@@ -261,6 +262,11 @@ msgid "No document suitable for AI sorting."
 msgstr "AI自動整理に適したドキュメントがありません。"
 
 #. module: ai_documents
+#: model:ir.model.constraint,message:ai_documents.constraint_documents_document_check_ai_sort_prompt
+msgid "Only folders can be auto-sorted."
+msgstr "フォルダのみが自動ソート可能です。"
+
+#. module: ai_documents
 #: model:ir.model.constraint,message:ai_documents.constraint_base_automation_unique_ai_autosort_folder_id
 msgid "Only one automation rule can be used to sort with AI a given folder"
 msgstr "1つのフォルダに対して、AIによる整理に使える自動化規則は1つだけです"
@@ -268,7 +274,8 @@ msgstr "1つのフォルダに対して、AIによる整理に使える自動化
 #. module: ai_documents
 #: model:ir.model.fields,help:ai_documents.field_documents_document__ai_sort_prompt
 msgid "Prompt used to automatically sort files moved in this folder"
-msgstr "このフォルダに移動されたファイルを自動で整理するために使用されるプロンプト"
+msgstr ""
+"このフォルダに移動されたファイルを自動で整理するために使用されるプロンプト"
 
 #. module: ai_documents
 #: model:ir.model.fields,field_description:ai_documents.field_ai_documents_sort__relation
@@ -324,12 +331,6 @@ msgstr "タグが見つかりません: %s"
 #. module: ai_documents
 #. odoo-python
 #: code:addons/ai_documents/models/documents_document.py:0
-msgid "The AI Sort Prompt can only be set on folder."
-msgstr "AI整理プロンプトはフォルダにのみ設定できます。"
-
-#. module: ai_documents
-#. odoo-python
-#: code:addons/ai_documents/models/documents_document.py:0
 msgid "This document cannot be auto-sorted."
 msgstr "このドキュメントは自動整理できません。"
 
@@ -337,7 +338,8 @@ msgstr "このドキュメントは自動整理できません。"
 #. odoo-python
 #: code:addons/ai_documents/models/documents_document.py:0
 msgid "This folder isn't specified in the prompt and cannot be used as target."
-msgstr "このフォルダはプロンプトで指定されていないため、対象として使用できません。"
+msgstr ""
+"このフォルダはプロンプトで指定されていないため、対象として使用できません。"
 
 #. module: ai_documents
 #. odoo-python
@@ -353,14 +355,17 @@ msgid ""
 "to Photos,                                     otherwise, create an activity "
 "'Document to sort' for Admin"
 msgstr ""
-"例:                                     "
-"ドキュメントが請求書の場合は、「会計」に移動し、"
-"                                     画像の場合は、「写真」に移動。"
-"                                     "
-"それ以外の場合は、管理者向けに「整理が必要なドキュメント」という活動を作成"
+"例:                                     ドキュメントが請求書の場合は、「会"
+"計」に移動し、                                     画像の場合は、「写真」に移"
+"動。                                     それ以外の場合は、管理者向けに「整理"
+"が必要なドキュメント」という活動を作成"
 
 #. module: ai_documents
 #. odoo-javascript
 #: code:addons/ai_documents/static/src/ai_sort_documents_prompt.js:0
 msgid "⚠️ Tell the AI where to sort your documents with /record."
-msgstr "⚠️ /record を使って、ドキュメントをどこに仕分けるかを AI に指示してください。"
+msgstr ""
+"⚠️ /record を使って、ドキュメントをどこに仕分けるかを AI に指示してください。"
+
+#~ msgid "The AI Sort Prompt can only be set on folder."
+#~ msgstr "AI整理プロンプトはフォルダにのみ設定できます。"

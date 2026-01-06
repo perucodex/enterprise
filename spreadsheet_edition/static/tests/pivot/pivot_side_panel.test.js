@@ -773,3 +773,35 @@ test("display pivot related filters panel", async function () {
     await addGlobalFilter(model, { id: "43", type: "relation", label: "Filter 2" });
     expect(".o_side_panel_collapsible_title:contains(Matching 1 / 2 filters)").toHaveCount(1);
 });
+
+test("PivotModelFieldSelectorPopover in debug mode for column", async function () {
+    const { model, env, pivotId } = await createSpreadsheetWithPivot({
+        arch: /*xml*/ `
+            <pivot>
+                <field name="probability" type="measure"/>
+            </pivot>
+        `,
+    });
+    env.debug = true;
+    await openSidePanel(model, env, pivotId);
+    await contains(".add-dimension.o-button:eq(0)").click();
+    expect(
+        "li.o_model_field_selector_popover_item div.o_model_field_selector_popover_item_title"
+    ).toHaveCount(12);
+});
+
+test("PivotModelFieldSelectorPopover in debug mode for row", async function () {
+    const { model, env, pivotId } = await createSpreadsheetWithPivot({
+        arch: /*xml*/ `
+            <pivot>
+                <field name="probability" type="measure"/>
+            </pivot>
+        `,
+    });
+    env.debug = true;
+    await openSidePanel(model, env, pivotId);
+    await contains(".add-dimension.o-button:eq(1)").click();
+    expect(
+        "li.o_model_field_selector_popover_item div.o_model_field_selector_popover_item_title"
+    ).toHaveCount(12);
+});

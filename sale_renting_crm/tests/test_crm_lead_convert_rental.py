@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.fields import Command
+from odoo.tests import tagged, users
 
 from odoo.addons.crm.tests import common as crm_common
-from odoo.tests.common import tagged, users
 
 
 @tagged('lead_manage')
@@ -14,6 +14,7 @@ class TestLeadConvertToRental(crm_common.TestCrmCommon):
         super(TestLeadConvertToRental, cls).setUpClass()
         cls.lead_1.write({
             'user_id': cls.user_sales_salesman.id,
+            'tag_ids': [Command.create({'name': "From lead"})],
         })
 
     @users('user_sales_salesman')
@@ -43,6 +44,8 @@ class TestLeadConvertToRental(crm_common.TestCrmCommon):
         # test wizard action (does not create anything, just returns action)
         self.assertEqual(action['res_model'], 'sale.order')
         self.assertEqual(action['context']['default_partner_id'], new_partner.id)
+        self.assertEqual(action['context']['default_tag_ids'][0][-1], self.lead_1.tag_ids.ids)
+        self.assertTrue(action['context'].get('in_rental_app'))
 
     @users('user_sales_salesman')
     def test_lead_convert_to_rental_exist(self):

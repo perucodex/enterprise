@@ -89,6 +89,9 @@ export const FIELD_TYPE_ATTRIBUTES = {
     text: {
         common: [EDITABLE_FIELD_ATTRIBUTES.placeholder],
     },
+    json: {
+        common: [EDITABLE_FIELD_ATTRIBUTES.placeholder],
+    },
 };
 
 /**

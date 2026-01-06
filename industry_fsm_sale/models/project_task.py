@@ -323,6 +323,7 @@ class ProjectTask(models.Model):
                 'res_id': invoices.id,
                 'context': {
                     'create': False,
+                    'default_move_type': 'out_invoice',
                 }
             }
         return {
@@ -334,6 +335,7 @@ class ProjectTask(models.Model):
             'domain': [('id', 'in', invoices.ids)],
             'context': {
                 'create': False,
+                'default_move_type': 'out_invoice',
             }
         }
 
@@ -598,7 +600,7 @@ class ProjectTask(models.Model):
             existing_service_sols = self.sudo().sale_order_id.order_line.filtered('is_service')
             sols_by_product_and_price_dict = defaultdict(lambda: self.env['sale.order.line'])  # key: (product_id, price_unit), value: sales order items
             for sol in existing_service_sols:  # classify the SOLs to easily find the ones that we want.
-                sols_by_product_and_price_dict[sol.product_id.id, sol.price_unit] |= sol
+                sols_by_product_and_price_dict.setdefault((sol.product_id.id, sol.price_unit), sol)
 
             task_values = defaultdict()  # values to update the current task
             update_timesheet_commands = []  # used to update the so_line field of each timesheet in the current task.

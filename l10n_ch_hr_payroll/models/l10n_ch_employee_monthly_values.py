@@ -78,6 +78,33 @@ class L10nCHEmployeeMonthlySnapshot(models.Model):
     def _amount2str(amount):
         return f"{amount:.2f}"
 
+    def _get_additional_meta_data(self):
+        if 'l10n_ch_telework_percentage' not in self.employee_id:
+            return {}
+        return {
+            "TeleWorkPercentage": self._amount2str(self.employee_id.l10n_ch_telework_percentage * 100)
+        }
+
+    def _get_additional_txb_values(self):
+        values = {}
+
+        telework_percentage = "0.00"
+        if self.employee_meta_data and self.employee_meta_data.get('TeleWorkPercentage', False):
+            telework_percentage = self.employee_meta_data.get('TeleWorkPercentage')
+        values["TeleWorkPercentage"] = telework_percentage
+
+        return values
+
+    def _get_additional_avs_values(self, avs_base, avs_status):
+        values = {
+            'AHV-AVS-BaseSalary': self._amount2str(avs_base)
+        }
+        if avs_status == 'retired_wave_deduct':
+            values["WaiveOfPensionDeduct"] = XSD_SKIP_VALUE
+
+        return values
+
+
     @api.depends('yearly_values_id', 'month')
     def _compute_employee_meta_data(self):
         swissdec_helper = SwissdecDeclaration()
@@ -99,6 +126,7 @@ class L10nCHEmployeeMonthlySnapshot(models.Model):
                 "AdditionalParticulars": snapshot.additional_particular if snapshot.additional_particular else {},
                 "ContractValues": {},
                 "EmployeeValues": {},
+                **snapshot._get_additional_meta_data()
             }
 
             self._fill_xml_scheme(meta_data['Statistic'], "Position", version.l10n_ch_job_type, True, res_model='hr.version', employee_id=snapshot.employee_id.id, res_id=version.id, res_field="l10n_ch_job_type")
@@ -213,14 +241,14 @@ class L10nCHEmployeeMonthlySnapshot(models.Model):
             self._fill_xml_scheme(civil_status, "Status", employee._get_l10n_ch_declaration_marital(), True, res_model='hr.version', employee_id=snapshot.employee_id.id, res_id=employee.id, res_field="marital")
             self._fill_xml_scheme(civil_status, "ValidAsOf", employee.l10n_ch_marital_from, True, lambda d: format_date(self.env, d, date_format='yyyy-MM-dd'), res_model='hr.version', employee_id=snapshot.employee_id.id, res_id=employee.id, res_field="l10n_ch_marital_from")
 
-            self._fill_xml_scheme(particular, "EmployeeNumber", employee.employee_id.registration_number, True, res_model='hr.employee', res_id=employee.id, res_field="registration_number")
-            self._fill_xml_scheme(particular, "Lastname", employee.employee_id.l10n_ch_legal_last_name, True, res_model='hr.employee', res_id=employee.id, res_field="l10n_ch_legal_last_name")
-            self._fill_xml_scheme(particular, "Firstname", employee.employee_id.l10n_ch_legal_first_name, True, res_model='hr.employee', res_id=employee.id, res_field="l10n_ch_legal_first_name")
-            self._fill_xml_scheme(particular, "Sex", employee.employee_id.sex, True, lambda_f=lambda g: "M" if g == "male" else "F" if g == "female" else False, res_model='hr.employee', res_id=employee.id, res_field="sex")
-            self._fill_xml_scheme(particular, "DateOfBirth", employee.employee_id.birthday, True, lambda d: format_date(self.env, d, date_format='yyyy-MM-dd'), res_model='hr.employee', res_id=employee.id, res_field="birthday")
+            self._fill_xml_scheme(particular, "EmployeeNumber", employee.employee_id.registration_number, True, res_model='hr.employee', res_id=snapshot.employee_id.id, res_field="registration_number")
+            self._fill_xml_scheme(particular, "Lastname", employee.employee_id.l10n_ch_legal_last_name, True, res_model='hr.employee', res_id=snapshot.employee_id.id, res_field="l10n_ch_legal_last_name")
+            self._fill_xml_scheme(particular, "Firstname", employee.employee_id.l10n_ch_legal_first_name, True, res_model='hr.employee', res_id=snapshot.employee_id.id, res_field="l10n_ch_legal_first_name")
+            self._fill_xml_scheme(particular, "Sex", employee.employee_id.sex, True, lambda_f=lambda g: "M" if g == "male" else "F" if g == "female" else False, res_model='hr.employee', res_id=snapshot.employee_id.id, res_field="sex")
+            self._fill_xml_scheme(particular, "DateOfBirth", employee.employee_id.birthday, True, lambda d: format_date(self.env, d, date_format='yyyy-MM-dd'), res_model='hr.employee', res_id=snapshot.employee_id.id, res_field="birthday")
             self._fill_xml_scheme(particular, "Nationality", employee.country_id, True, lambda_f=lambda d: d.code if d else employee.l10n_ch_no_nationality or False, res_model='hr.version', employee_id=snapshot.employee_id.id, res_id=employee.id, res_field="country_id")
             self._fill_xml_scheme(particular, "ResidenceCanton", employee.l10n_ch_canton, True, res_model='hr.version', employee_id=snapshot.employee_id.id, res_id=employee.id, res_field="l10n_ch_canton")
-            self._fill_xml_scheme(particular, "LanguageCode", employee.employee_id.lang, True, lambda_f=lambda l: l[:2] if l else False, res_model='hr.employee', res_id=employee.id, res_field="lang")
+            self._fill_xml_scheme(particular, "LanguageCode", employee.employee_id.lang, True, lambda_f=lambda l: l[:2] if l else False, res_model='hr.employee', res_id=snapshot.employee_id.id, res_field="lang")
             self._fill_xml_scheme(particular, "ResidenceCategory", employee.l10n_ch_residence_category, condition=employee.l10n_ch_has_withholding_tax and employee.country_id.code != "CH", res_model='hr.version', employee_id=snapshot.employee_id.id, res_id=employee.id, res_field="l10n_ch_residence_category")
             self._fill_xml_scheme(particular, "MunicipalityID", employee.l10n_ch_municipality if employee.l10n_ch_canton != 'EX' else False, condition=employee.l10n_ch_has_withholding_tax and employee.l10n_ch_canton != 'EX', res_model='hr.version', employee_id=snapshot.employee_id.id, res_id=employee.id, res_field="l10n_ch_municipality")
 

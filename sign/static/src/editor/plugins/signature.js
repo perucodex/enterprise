@@ -1,7 +1,7 @@
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
-import { withSequence } from "@html_editor/utils/resource";
+import { registry } from "@web/core/registry";
 import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 import { SignNameAndSignatureDialog } from "@sign/dialogs/dialogs";
 
@@ -19,10 +19,9 @@ export class SignaturePlugin extends Plugin {
                 isAvailable: isHtmlContentSupported,
             },
         ],
-        powerbox_categories: withSequence(100, { id: "basic_block", name: _t("Basic Bloc") }),
         powerbox_items: [
             {
-                categoryId: "basic_block",
+                categoryId: "modules",
                 commandId: "insertSignature",
             },
         ],
@@ -48,3 +47,6 @@ export class SignaturePlugin extends Plugin {
         });
     }
 }
+
+registry.category("basic-editor-plugins").add(SignaturePlugin.id, SignaturePlugin);
+registry.category("mass_mailing-plugins").add(SignaturePlugin.id, SignaturePlugin);

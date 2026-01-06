@@ -7,6 +7,7 @@ import {
     startServer,
 } from "@mail/../tests/mail_test_helpers";
 import { expect, describe, test } from "@odoo/hoot";
+import { runAllTimers } from "@odoo/hoot-mock";
 import { setupVoipTests } from "@voip/../tests/voip_test_helpers";
 import { onRpc } from "@web/../tests/web_test_helpers";
 
@@ -84,4 +85,25 @@ test("Contacts with are listed under the their corresponding section", async () 
         count: 2,
         parent: ["section", { contains: [["h2", { text: "#" }]] }],
     });
+});
+
+test("Contact search term should be taken into account", async () => {
+    const searchTerm = "Bob";
+    onRpc("res.partner", "get_contacts", (args) => {
+        if (args.kwargs.search_terms === searchTerm) {
+            expect.step("get_contacts called with search term");
+        }
+    });
+    await start();
+    await click(".o_menu_systray button[title='Show Softphone']");
+    await click("button span:contains('Contacts')");
+    await runAllTimers();
+    await insertText("input[id='o-voip-Tab-searchInput']", searchTerm);
+    await runAllTimers();
+    expect.verifySteps(["get_contacts called with search term"]);
+    await click("button span:contains('Recent')");
+    await contains("button.active span:contains('Recent')");
+    await click("button span:contains('Contacts')");
+    await runAllTimers();
+    expect.verifySteps(["get_contacts called with search term"]);
 });

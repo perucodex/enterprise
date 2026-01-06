@@ -92,3 +92,38 @@ class PosPrepOrder(models.Model):
         if table.parent_id:
             name += f" &{table.parent_id.table_number}"
         return name
+
+    @api.model
+    def merge_orders(self, source_order_id, dest_order_id):
+        prep_source_orders = self.env['pos.prep.order'].search([('pos_order_id', '=', source_order_id)])
+        pos_dest_order = self.env['pos.order'].browse(dest_order_id)
+
+        if not prep_source_orders and not pos_dest_order:
+            return False
+
+        prep_source_orders.write({'pos_order_id': dest_order_id})
+        self.notify_pdis([dest_order_id])
+        return True
+
+    @api.model
+    def unmerge_orders(self, pos_orderline_uuids, new_pos_order_id):
+        prep_orders = self.env['pos.prep.order']
+        for former_pos_orderline_uuid, new_pos_orderline_uuid in pos_orderline_uuids.items():
+            prep_orderlines = self.env['pos.prep.line'].search([('pos_order_line_uuid', '=', former_pos_orderline_uuid)])
+            new_pos_orderline = self.env['pos.order.line'].search([('uuid', '=', new_pos_orderline_uuid)])
+            prep_orderlines.write({'pos_order_line_id': new_pos_orderline.id, 'pos_order_line_uuid': new_pos_orderline.uuid})
+
+            prep_orders |= prep_orderlines.mapped('prep_order_id')
+
+        prep_orders.write({'pos_order_id': new_pos_order_id})
+        self.notify_pdis([new_pos_order_id])
+        return True
+
+    @api.model
+    def notify_pdis(self, pos_order_ids):
+        for pos_order_id in pos_order_ids:
+            pos_order = self.env['pos.order'].browse(pos_order_id)
+            category_ids = set(pos_order.lines.mapped('product_id.pos_categ_ids.id'))
+            for p_dis in self.env['pos.prep.display']._get_preparation_displays(pos_order, category_ids):
+                p_dis._send_load_orders_message(True, False, pos_order_id)
+        return True

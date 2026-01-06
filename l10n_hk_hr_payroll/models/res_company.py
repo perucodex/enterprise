@@ -14,7 +14,7 @@ class ResCompany(models.Model):
         default='h2h',
     )
     l10n_hk_autopay_partner_bank_id = fields.Many2one(string="Autopay Account", comodel_name='res.partner.bank', copy=False)
-    l10n_hk_employer_name = fields.Char("Employer's Name shown on reports")
+    l10n_hk_employer_name = fields.Char("Employer's Name shown on reports", compute='_compute_l10n_hk_employer_name', store=True, readonly=False)
     l10n_hk_employer_file_number = fields.Char("Employer's File Number")
     l10n_hk_manulife_mpf_scheme = fields.Char("Manulife MPF Scheme", size=8)
     l10n_hk_eoy_pay_month = fields.Selection(
@@ -55,3 +55,8 @@ class ResCompany(models.Model):
         for company in self:
             if company.l10n_hk_manulife_mpf_scheme and len(company.l10n_hk_manulife_mpf_scheme) != 8:
                 raise UserError(company.env._("The Manulife MPF Scheme must be 8 characters long."))
+
+    @api.depends("name")
+    def _compute_l10n_hk_employer_name(self):
+        for company in self:
+            company.l10n_hk_employer_name = company.l10n_hk_employer_name or company.name

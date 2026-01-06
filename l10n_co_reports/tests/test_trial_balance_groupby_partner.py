@@ -20,10 +20,6 @@ class TestL10nCoReportsTrialBalanceReport(TestAccountReportsCommon):
         ], limit=1)
         cls.account_asset_name = cls.account_asset.display_name
         cls.account_receivable_name = cls.company_data['default_account_receivable'].display_name
-        cls.undistributed_pl_account_name = cls.env['account.account'].search([
-            *cls.env['account.account']._check_company_domain(cls.company_data['company'].id),
-            ('account_type', '=', 'equity_unaffected'),
-        ]).display_name
 
         cls.report = cls.env.ref('l10n_co_reports.l10n_co_reports_trial_balance_per_partner')
         cls.company_data['company'].totals_below_sections = False
@@ -88,19 +84,27 @@ class TestL10nCoReportsTrialBalanceReport(TestAccountReportsCommon):
 
         self.assertLinesValues(
             self.report._get_lines(options),
-            #                                                       [ Initial  ]  [     Q1 2023      ]   [ End Balance ]
-            #    Name                                 Partner VAT     Balance     Debit       Credit         Balance
-            [0,                                            1,            2,          3,          4,          5],
+            #                                                                     [ Initial  ]  [     Q1 2023      ]   [ End Balance ]
+            #    Name                                               Partner VAT     Balance     Debit       Credit         Balance
+            [0,                                                          1,            2,          3,          4,          5],
             [
-                (self.account_asset_name,                 '',        3300.0,        0.0,        0.0,       3300.0),
-                ('partner_a',                        '11111',        1000.0,        0.0,        0.0,       1000.0),
-                ('partner_b',                        '22222',        1000.0,        0.0,        0.0,       1000.0),
-                ('Unknown',                               '',        1300.0,        0.0,        0.0,       1300.0),
-                (self.account_receivable_name,            '',       -3000.0,        0.0,        0.0,      -3000.0),
-                ('partner_a',                        '11111',       -3000.0,        0.0,        0.0,      -3000.0),
-                (self.undistributed_pl_account_name,      '',        -300.0,        0.0,        0.0,       -300.0),
-                ('Total',                                 '',           0.0,        0.0,        0.0,          0.0),
+                ('1 Assets',),
+                ('11 Cash and Cash Equivalents',),
+                ('1120 Savings Accounts',),
+                (self.account_asset_name,                               '',        3300.0,        0.0,        0.0,       3300.0),
 
+                ('partner_a',                                      '11111',        1000.0,        0.0,        0.0,       1000.0),
+                ('partner_b',                                      '22222',        1000.0,        0.0,        0.0,       1000.0),
+                ('Unknown',                                             '',        1300.0,        0.0,        0.0,       1300.0),
+
+                ('13 Debtors',),
+                ('1305 Clients',),
+
+                (self.account_receivable_name,                          '',       -3000.0,        0.0,        0.0,      -3000.0),
+                ('partner_a',                                      '11111',       -3000.0,        0.0,        0.0,      -3000.0),
+
+                ('Undistributed Profits/Losses - company_1_data',       '',        -300.0,        0.0,        0.0,       -300.0),
+                ('Total',                                               '',           0.0,        0.0,        0.0,          0.0),
             ],
             options,
         )

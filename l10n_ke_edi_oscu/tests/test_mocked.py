@@ -83,13 +83,16 @@ class TestKeEdiMocked(TestKeEdi):
 
     def test_send_invoice_and_credit_note(self):
         with freeze_time('2024-04-15'), self.patch_session([
+            ('saveItem', 'save_item_0', 'success'),
             ('saveTrnsSalesOsdc', 'save_sale_1', 'save_sale_success'),
+            ('selectInvoiceDetails', 'get_invoice_details_1', 'get_invoice_details_success'),
             ('saveTrnsSalesOsdc', 'save_refund_1', 'save_sale_success'),
         ]):
             self._test_send_invoice_and_credit_note()
 
     def test_send_invoice_complex(self):
         with freeze_time('2024-04-15'), self.patch_session([
+            ('saveItem', 'save_item_0', 'success'),
             ('saveTrnsSalesOsdc', 'save_sale_complex', 'save_sale_success'),
         ]):
             self._test_send_invoice_complex()
@@ -97,6 +100,7 @@ class TestKeEdiMocked(TestKeEdi):
     def test_confirm_vendor_bill(self):
         with freeze_time('2024-04-15'), self.patch_session([
             ('selectTrnsPurchaseSalesList', 'get_purchases', 'get_purchases_1'),
+            ('saveItem', 'save_item_0', 'success'),
             ('insertTrnsPurchase', 'save_purchase_1', 'success'),
         ]):
             vendor_bill = self._test_get_vendor_bill()

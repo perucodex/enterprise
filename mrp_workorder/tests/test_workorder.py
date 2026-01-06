@@ -2,12 +2,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import unittest
 
-from odoo import Command
+from odoo import Command, fields
 from odoo.addons.mrp_workorder.tests.common import TestMrpWorkorderCommon
 from odoo.addons.base.tests.common import HttpCase
 from odoo.tests import Form, tagged
 from odoo.tools import mute_logger
 from odoo.exceptions import UserError
+from datetime import timedelta
+from freezegun import freeze_time
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -582,6 +584,73 @@ class TestWorkOrder(TestMrpWorkorderCommon):
         mo.button_mark_done()
         self.assertEqual(mo.state, 'done')
 
+    @freeze_time('2025-10-01')
+    def test_workorder_duration_inverse_time_ids_consistency(self):
+        """
+        Verify that the inverse method of the workorder duration field correctly
+        mirrors the logic of its compute method.
+
+        Specifically, the duration is computed as the total interval duration,
+        counting overlapping time_ids only once. This ensures that the inverse
+        method does not accidentally unlink any time_ids when updating durations.
+        """
+        now = fields.Datetime.now()
+        mo = self.env['mrp.production'].create({
+            'product_qty': 1,
+            'product_id': self.product_1.id,
+            'workorder_ids': [Command.create({
+                'name': 'workorder_1',
+                'workcenter_id': self.workcenter_1.id,
+                'time_ids': [
+                    Command.create({
+                        'workcenter_id': self.workcenter_1.id,
+                        'date_start': now - timedelta(minutes=30),
+                        'date_end': now,
+                        'loss_id': self.ref('mrp.block_reason4'),
+                    }),
+                    Command.create({
+                        'workcenter_id': self.workcenter_1.id,
+                        'date_start': now - timedelta(minutes=20),
+                        'date_end': now - timedelta(minutes=5),
+                        'loss_id': self.ref('mrp.block_reason4'),
+                    }),
+                ],
+            })],
+        })
+        wo = mo.workorder_ids
+        wo.duration = wo.duration
+        self.assertEqual(wo.duration, 30.0)
+        self.assertRecordValues(wo.time_ids, [{'duration': 30.0}, {'duration': 15.0}])
+
+    def test_workorder_timelog_for_assigned_employee(self):
+        """This test ensures that when a work order is assigned to an employee (not the current/logged-in user)
+        and is marked as done by the current user, the time log for workorder is correctly recorded
+        under the assigned employee instead of the current user.
+        """
+        # Create employees
+        assigned_employee, current_employee = self.env['hr.employee'].create([
+            {'name': 'Assigned Employee'},
+            {'name': 'Current User Employee', 'user_id': self.env.user.id},
+        ])
+
+        # Create and confirm a Manufacturing Order with workorders.
+        mo_form = Form(self.env['mrp.production'])
+        mo_form.product_id = self.submarine_pod
+        mo_form.bom_id = self.bom_submarine
+        mo = mo_form.save()
+        mo.action_confirm()
+
+        workorder_1, workorder_2 = mo.workorder_ids[:2]
+        # Assign a different employee to the workorder_1 and keep workorder_2 unassigned.
+        workorder_1.employee_assigned_ids = assigned_employee
+        # mark the workorders as done.
+        mo.workorder_ids.action_mark_as_done()
+
+        # The time log should be assigned to the employee assigned in the workorder_1,
+        # and to the current user in workorder_2.
+        self.assertEqual(workorder_1.time_ids[0].employee_id, assigned_employee)
+        self.assertEqual(workorder_2.time_ids[0].employee_id, current_employee)
+
 
 @tagged("post_install", "-at_install")
 class TestShopFloor(HttpCase, TestMrpWorkorderCommon):
@@ -637,6 +706,7 @@ class TestShopFloor(HttpCase, TestMrpWorkorderCommon):
         user_admin.write({
             'group_ids': [Command.link(self.ref('mrp.group_mrp_routings'))],
         })
+        (self.product_1 | self.product_2).is_favorite = True
         mo_form = Form(self.env['mrp.production'])
         mo_form.product_id = self.bom_2.product_id
         mo_form.bom_id = self.bom_2
@@ -673,6 +743,7 @@ class TestShopFloor(HttpCase, TestMrpWorkorderCommon):
             self.env.ref('mrp.group_mrp_routings')
         )
         warehouse = self.warehouse_1
+        self.product_1.is_favorite = True
         # manufacture in 2 steps
         warehouse.manufacture_steps = "pbm"
         mo_form = Form(self.env['mrp.production'].with_context(warehouse_id=warehouse.id))

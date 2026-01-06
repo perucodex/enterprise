@@ -3,6 +3,7 @@ import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { Component, useState } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
+import { _t } from "@web/core/l10n/translation";
 
 export class IoTRemoteDebug extends Component {
     static template = `iot.HeaderButton`;
@@ -14,14 +15,15 @@ export class IoTRemoteDebug extends Component {
 
     setup() {
         super.setup();
-        this.iotHttpService = useService("iot_http");
+        this.iotHttp = useService("iot_http");
         this.dialog = useService("dialog");
+        this.notification = useService("notification");
 
         this.state = useState({ enabled: false });
 
         // Get ngrok status on view load
-        this.iotHttpService.websocket.onMessage(this.identifier, null, this.onMessageUpdateStatus.bind(this));
-        this.iotHttpService.websocket.sendMessage(this.identifier, { 'status': true }, null, 'remote_debug');
+        this.iotHttp.websocket.onMessage(this.identifier, null, this.onMessageUpdateStatus.bind(this));
+        this.iotHttp.websocket.sendMessage(this.identifier, { 'status': true }, null, 'remote_debug');
     }
 
     get identifier() {
@@ -36,12 +38,33 @@ export class IoTRemoteDebug extends Component {
     }
 
     async enableRemoteDebug(token) {
-        this.iotHttpService.websocket.onMessage(this.identifier, null, this.onMessageUpdateStatus.bind(this));
-        this.iotHttpService.websocket.sendMessage(this.identifier, { token }, null, "remote_debug");
+        this.iotHttp.websocket.onMessage(
+            this.identifier,
+            null,
+            (message) => {
+                this.onMessageUpdateStatus(message);
+                if (token && !this.state.enabled) {
+                    return this.onFailure();
+                }
+                this.notification.add(
+                    _t("Remote debug is %s.", this.state.enabled ? _t("enabled") : _t("disabled")), {
+                        type: "info",
+                    }
+                );
+            },
+            this.onFailure.bind(this),
+        );
+        this.iotHttp.websocket.sendMessage(this.identifier, { token }, null, "remote_debug");
     }
 
     onMessageUpdateStatus(message) {
         this.state.enabled = message.result?.enabled;
+    }
+
+    onFailure() {
+        this.notification.add(_t("Failed to toggle remote debug."), {
+            type: "danger",
+        });
     }
 }
 

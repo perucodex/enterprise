@@ -88,7 +88,7 @@ class AccountTestSIE4Export(TestAccountReportsCommon):
             self.create_move('2024-01-05', [(code_to_debit[idx], amounts[idx]), (code_to_credit[idx], -amounts[idx])])
 
         # Fill #RES lines
-        code_to_debit = ('3000', '3001', '3002', '3003', '3004', '3100', '3105', '3106', '3108')
+        code_to_debit = ('3000', '30011', '30021', '30031', '30041', '3100', '3105', '3106', '3108')
         code_to_credit = ('4533', '4535', '4536', '4537', '4538', '4545', '4546', '4547', '4600')
         for idx in range(9):
             self.create_move('2023-04-01', [(code_to_debit[idx], amounts[idx]), (code_to_credit[idx], -amounts[idx])])
@@ -113,7 +113,7 @@ class AccountTestSIE4Export(TestAccountReportsCommon):
         options = self._generate_options(report_branch_company, '2024-01-01', '2024-12-31')
         res = self.export_sie4_result_list(options)
 
-        self.assertEqual(len(res), 689)
+        self.assertEqual(len(res), 697)
         self.assertListEqual(res[:10], [  # check first 10 lines to make sure the header data and some accounts are exported
             '#FLAGGA 0',
             '#FORMAT PC8',

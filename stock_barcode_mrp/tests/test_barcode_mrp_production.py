@@ -5,7 +5,6 @@ from odoo.tests import Form, tagged
 from odoo.addons.stock_barcode.tests.test_barcode_client_action import TestBarcodeClientAction
 
 
-@tagged('post_install', '-at_install')
 class TestMRPBarcodeClientAction(TestBarcodeClientAction):
     def setUp(self):
         super().setUp()
@@ -239,7 +238,7 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
         mo = mo_form.save()
         mo.action_confirm()
 
-        url = f'/odoo/{mo.id}/action-stock_barcode_mrp.stock_barcode_mo_client_action?debug=assets'
+        url = f'/odoo/{mo.id}/action-stock_barcode_mrp.stock_barcode_mo_client_action'
         self.start_tour(url, 'test_barcode_production_reserved_from_multiple_locations', login='admin', timeout=180)
 
     def test_barcode_production_scan_other_than_reserved(self):
@@ -255,6 +254,7 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
         picking_type_production = self.env['stock.picking.type'].search([
             ('code', '=', 'mrp_operation'), ('company_id', '=', self.env.company.id)])
         picking_type_production.restrict_scan_source_location = 'mandatory'
+        picking_type_production.show_reserved_sns = True
         # Prepares a production for 2x final product, then process it in the Barcode App.
         lot_01 = self.env['stock.lot'].create({
             'name': 'lot_01',
@@ -295,7 +295,7 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
         mo = mo_form.save()
         mo.action_confirm()
 
-        url = f'/odoo/{mo.id}/action-stock_barcode_mrp.stock_barcode_mo_client_action?debug=assets'
+        url = f'/odoo/{mo.id}/action-stock_barcode_mrp.stock_barcode_mo_client_action'
         self.start_tour(url, 'test_barcode_production_scan_other_than_reserved', login='admin', timeout=180)
 
         # Checks move lines values after MO is completed.
@@ -343,7 +343,7 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
         # Ensure state != 'cancel' && state != 'draft' to allow Scrap
         mo.action_confirm()
 
-        url = f'/odoo/{mo.id}/action-stock_barcode_mrp.stock_barcode_mo_client_action?debug=assets'
+        url = f'/odoo/{mo.id}/action-stock_barcode_mrp.stock_barcode_mo_client_action'
         self.start_tour(url, 'test_mo_scrap_digipad_view', login='admin', timeout=180)
 
     def test_barcode_production_components_reservation_state(self):
@@ -423,9 +423,9 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
         })
         # Disable creation of new lots for component, the purpose is to check
         # by-products lots can still be created anyway.
-        self.env['stock.picking.type'].search(
-            [('code', '=', 'mrp_operation')], limit=1
-        ).use_create_components_lots = False
+        warehouse = self.stock_location.warehouse_id
+        warehouse.manu_type_id.use_create_components_lots = False
+        warehouse.manufacture_steps = 'pbm_sam'
         # Creates a BoM.
         component02 = self.env['product.product'].create({
             'name': 'Compo 02',
@@ -445,15 +445,16 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
             self.env['stock.quant'].create({
                 'quantity': 99,
                 'product_id': component.id,
-                'location_id': self.stock_location.id,
+                'location_id': warehouse.pbm_loc_id.id,
             })
 
         url = "/odoo/action-stock_barcode.stock_picking_type_action_kanban"
         self.start_tour(url, 'test_barcode_production_add_byproduct', login='admin', timeout=180)
         mo = self.env['mrp.production'].search([], order='id desc', limit=1)
-        self.assertEqual(len(mo.move_byproduct_ids), 2)
-        self.assertEqual(mo.move_byproduct_ids[0].product_id.display_name, 'By Product')
-        self.assertEqual(mo.move_byproduct_ids[1].product_id.display_name, 'Compo Lot')
+        self.assertRecordValues(mo.move_byproduct_ids, [
+            {'product_id': self.by_product.id, 'location_dest_id': warehouse.sam_loc_id.id},
+            {'product_id': self.component_lot.id, 'location_dest_id': warehouse.sam_loc_id.id},
+        ])
         self.assertEqual(mo.move_byproduct_ids[1].lot_ids.name, 'byprod_lot_001')
 
     def test_split_line_on_exit_for_production(self):
@@ -751,7 +752,7 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
         self.start_tour(url, 'test_backorder_partial_completion_save_sensible_split', login='admin', timeout=180)
         # Check that the unavailable + unedited component move was unaffected by the split
         self.assertEqual(manufacturing_order.state, 'done')
-        self.assertEqual(manufacturing_order.move_raw_ids.filtered(lambda m: m.product_id == unavailable_comp).mapped('quantity'), [0.00])
+        self.assertEqual(manufacturing_order.move_raw_ids.filtered(lambda m: m.product_id == unavailable_comp).mapped('quantity'), [2.00])
         backorder_mo = manufacturing_order.backorder_ids - manufacturing_order
         self.assertRecordValues(
             backorder_mo.move_raw_ids.sorted('product_uom_qty'), [
@@ -774,7 +775,7 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
             'barcode': 'MO2_BARCODE',
             'code': 'mrp_operation',
             'sequence_code': 'MO2',
-            'warehouse_id': self.env.ref('stock.warehouse0').id,
+            'warehouse_id': self.warehouse.id,
         })
 
         product_to_manufacture = self.env['product.product'].create({
@@ -798,7 +799,7 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
             'name': 'MO2',
             'code': 'mrp_operation',
             'sequence_code': 'MO2',
-            'warehouse_id': self.env.ref('stock.warehouse0').id,
+            'warehouse_id': self.warehouse.id,
         })
 
         product_to_manufacture = self.env['product.product'].create({
@@ -817,7 +818,7 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
         """ This test ensures that non-reserved products cannot be added when the
             "allow extra product" option is disabled for the manufacturing operation type
         """
-        picking_type_manufacturing = self.env.ref('stock.warehouse0').manu_type_id
+        picking_type_manufacturing = self.warehouse.manu_type_id
         picking_type_manufacturing.barcode_allow_extra_product = False
 
         # Create a manufacturing order in the backend and process it in the barcode app.
@@ -899,8 +900,6 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
                 Command.link(self.env.ref('mrp.group_mrp_byproducts').id),
             ],
         })
-        # disable "Create New Lots/Serial Numbers for Components"
-        self.env.ref('stock.warehouse0').manu_type_id.use_create_components_lots = False
         product = self.final_product
         bom = self.env['mrp.bom'].create({
             'product_tmpl_id': product.product_tmpl_id.id,

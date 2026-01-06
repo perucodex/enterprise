@@ -44,13 +44,37 @@ class TestLuSaftReport(TestSaftReport):
         cls.product_d = cls._create_product(name='product_d', lst_price=1000.0, standard_price=800.0, default_code=False)
 
         # Create invoices
+
         invoices = cls.env['account.move'].create(
             list(starmap(cls._l10n_lu_saft_invoice_data, [
                 ('out_invoice', '2019-01-01', cls.partner_a, cls.product_a, 5.0, 1000.0),
                 ('out_refund', '2019-03-01', cls.partner_a, cls.product_a, 3.0, 1000.0),
                 ('in_invoice', '2018-12-31', cls.partner_b, cls.product_b, 10.0, 800.0),
+                ('in_invoice', '2019-01-01', cls.partner_b, cls.product_b, 10.0, 800.0),
             ])))
         invoices.action_post()
+        # Create an allocation entry
+        ChartTemplate = cls.env['account.chart.template']
+        allocation_acc = ChartTemplate.ref('lu_2020_account_6492')
+        provision_acc = ChartTemplate.ref('lu_2011_account_1881')
+        cls.env['account.move'].create({
+            'move_type': 'entry',
+            'date': '2018-12-31',
+            'line_ids': [
+                Command.create({
+                    'name': 'Distribute earnings',
+                    'account_id': provision_acc.id,
+                    'debit': 8000.0,
+                    'credit': 0.0,
+                }),
+                Command.create({
+                    'name': 'Distribute earnings',
+                    'account_id': allocation_acc.id,
+                    'debit': 0.0,
+                    'credit': 8000.0,
+                }),
+            ]
+        }).action_post()
 
     @classmethod
     def _l10n_lu_saft_invoice_data(cls, move_type, invoice_date, partner, product, quantity, price_unit):
@@ -77,12 +101,13 @@ class TestLuSaftReport(TestSaftReport):
         invoice_data = list(starmap(self._l10n_lu_saft_invoice_data, [
             ('out_invoice', '2019-01-01', self.partner_a, self.product_c, 5.0, 1000.0),
             ('out_invoice', '2019-01-01', self.partner_a, self.product_d, 5.0, 1000.0),
+            ('out_invoice', '2018-12-31', self.partner_a, self.product_a, 5.0, 1000.0),
         ]))
         new_invoices = self.env['account.move'].create(invoice_data)
         new_invoices.action_post()
         with self.assertRaises(self.ReportException) as cm:
             self._l10n_lu_saft_generate_report()
-        self.assertEqual(set(cm.exception.errors), {'product_duplicate_ref', 'product_missing_ref'})
+        self.assertEqual(set(cm.exception.errors), {'product_duplicate_ref', 'product_missing_ref', 'undistributed_earnings'})
 
     def test_saft_report_values(self):
         self.assertXmlTreeEqual(
@@ -123,9 +148,9 @@ class TestLuSaftReport(TestSaftReport):
                         <GeneralLedgerAccounts>
                             <Account>
                                 <AccountID>___ignore___</AccountID>
-                                <AccountDescription>Result for the financial year</AccountDescription>
-                                <StandardAccountID>142000</StandardAccountID>
-                                <AccountType>Current Year Earni</AccountType>
+                                <AccountDescription>Operating provisions</AccountDescription>
+                                <StandardAccountID>188100</StandardAccountID>
+                                <AccountType>Non-current Liabil</AccountType>
                                 <OpeningDebitBalance>8000.00</OpeningDebitBalance>
                                 <ClosingDebitBalance>8000.00</ClosingDebitBalance>
                             </Account>
@@ -143,7 +168,7 @@ class TestLuSaftReport(TestSaftReport):
                                 <StandardAccountID>421611</StandardAccountID>
                                 <AccountType>Current Assets</AccountType>
                                 <OpeningDebitBalance>1360.00</OpeningDebitBalance>
-                                <ClosingDebitBalance>1360.00</ClosingDebitBalance>
+                                <ClosingDebitBalance>2720.00</ClosingDebitBalance>
                             </Account>
                             <Account>
                                 <AccountID>___ignore___</AccountID>
@@ -151,7 +176,7 @@ class TestLuSaftReport(TestSaftReport):
                                 <StandardAccountID>441111</StandardAccountID>
                                 <AccountType>Payable</AccountType>
                                 <OpeningCreditBalance>9360.00</OpeningCreditBalance>
-                                <ClosingCreditBalance>9360.00</ClosingCreditBalance>
+                                <ClosingCreditBalance>18720.00</ClosingCreditBalance>
                             </Account>
                             <Account>
                                 <AccountID>___ignore___</AccountID>
@@ -160,6 +185,14 @@ class TestLuSaftReport(TestSaftReport):
                                 <AccountType>Current Liabilitie</AccountType>
                                 <OpeningDebitBalance>0.00</OpeningDebitBalance>
                                 <ClosingCreditBalance>340.00</ClosingCreditBalance>
+                            </Account>
+                            <Account>
+                                <AccountID>___ignore___</AccountID>
+                                <AccountDescription>Purchases of raw materials</AccountDescription>
+                                <StandardAccountID>601000.1</StandardAccountID>
+                                <AccountType>Expenses</AccountType>
+                                <OpeningDebitBalance>0.00</OpeningDebitBalance>
+                                <ClosingDebitBalance>8000.00</ClosingDebitBalance>
                             </Account>
                             <Account>
                                 <AccountID>___ignore___</AccountID>
@@ -190,7 +223,37 @@ class TestLuSaftReport(TestSaftReport):
                                 <ClosingDebitBalance>2340.00</ClosingDebitBalance>
                             </Customer>
                         </Customers>
+                        <Suppliers>
+                            <Supplier>
+                                <Name>partner_b</Name>
+                                <Address>
+                                    <City>Garnich</City>
+                                    <PostalCode>L-8353</PostalCode>
+                                    <Country>LU</Country>
+                                </Address>
+                                <Contact>
+                                    <ContactPerson>
+                                        <FirstName>NotUsed</FirstName>
+                                        <LastName>partner_b</LastName>
+                                    </ContactPerson>
+                                    <Telephone>+352 24 11 11 11</Telephone>
+                                </Contact>
+                                <SupplierID>___ignore___</SupplierID>
+                                <OpeningCreditBalance>9360.00</OpeningCreditBalance>
+                                <ClosingCreditBalance>18720.00</ClosingCreditBalance>
+                            </Supplier>
+                        </Suppliers>
                         <TaxTable>
+                            <TaxTableEntry>
+                                <TaxType>___ignore___</TaxType>
+                                <Description>Taxe sur la valeur ajoutée</Description>
+                                <TaxCodeDetails>
+                                    <TaxCode>___ignore___</TaxCode>
+                                    <Description>17% S</Description>
+                                    <TaxPercentage>17.0</TaxPercentage>
+                                    <Country>LU</Country>
+                                </TaxCodeDetails>
+                            </TaxTableEntry>
                             <TaxTableEntry>
                                 <TaxType>___ignore___</TaxType>
                                 <Description>Taxe sur la valeur ajoutée</Description>
@@ -206,6 +269,9 @@ class TestLuSaftReport(TestSaftReport):
                             <UOMTableEntry>
                                 <UnitOfMeasure>Units</UnitOfMeasure>
                             </UOMTableEntry>
+                            <UOMTableEntry>
+                                <UnitOfMeasure>Dozens</UnitOfMeasure>
+                            </UOMTableEntry>
                         </UOMTable>
                         <Products>
                             <Product>
@@ -213,6 +279,12 @@ class TestLuSaftReport(TestSaftReport):
                                 <ProductGroup>Test Category</ProductGroup>
                                 <Description>product_a</Description>
                                 <UOMStandard>Units</UOMStandard>
+                            </Product>
+                            <Product>
+                                <ProductCode>PB</ProductCode>
+                                <ProductGroup>Test Category</ProductGroup>
+                                <Description>product_b</Description>
+                                <UOMStandard>Dozens</UOMStandard>
                             </Product>
                         </Products>
                         <Owners>
@@ -236,9 +308,9 @@ class TestLuSaftReport(TestSaftReport):
                         </Owners>
                     </MasterFiles>
                     <GeneralLedgerEntries>
-                        <NumberOfEntries>2</NumberOfEntries>
-                        <TotalDebit>9360.00</TotalDebit>
-                        <TotalCredit>9360.00</TotalCredit>
+                        <NumberOfEntries>3</NumberOfEntries>
+                        <TotalDebit>18720.00</TotalDebit>
+                        <TotalCredit>18720.00</TotalCredit>
                         <Journal>
                             <JournalID>___ignore___</JournalID>
                             <Description>Sales</Description>
@@ -346,6 +418,75 @@ class TestLuSaftReport(TestSaftReport):
                                     <Description>RINV/2019/00001</Description>
                                     <CreditAmount>
                                         <Amount>3510.00</Amount>
+                                    </CreditAmount>
+                                </Line>
+                            </Transaction>
+                        </Journal>
+                        <Journal>
+                            <JournalID>___ignore___</JournalID>
+                            <Description>Purchases</Description>
+                            <Type>purchase</Type>
+                            <Transaction>
+                                <TransactionID>___ignore___</TransactionID>
+                                <Period>01</Period>
+                                <PeriodYear>2019</PeriodYear>
+                                <TransactionDate>2019-01-01</TransactionDate>
+                                <TransactionType>in_invoic</TransactionType>
+                                <Description>BILL/2019/01/0001</Description>
+                                <SystemEntryDate>___ignore___</SystemEntryDate>
+                                <GLPostingDate>2019-01-01</GLPostingDate>
+                                <SupplierID>___ignore___</SupplierID>
+                                <Line>
+                                    <RecordID>___ignore___</RecordID>
+                                    <AccountID>___ignore___</AccountID>
+                                    <ValueDate>2019-01-01</ValueDate>
+                                    <SourceDocumentID>___ignore___</SourceDocumentID>
+                                    <SupplierID>___ignore___</SupplierID>
+                                    <Description>[PB] product_b</Description>
+                                    <DebitAmount>
+                                        <Amount>8000.00</Amount>
+                                    </DebitAmount>
+                                    <TaxInformation>
+                                        <TaxType>___ignore___</TaxType>
+                                        <TaxCode>___ignore___</TaxCode>
+                                        <TaxPercentage>17.0</TaxPercentage>
+                                        <TaxBaseDescription>17% S</TaxBaseDescription>
+                                        <TaxAmount>
+                                            <Amount>1360.00</Amount>
+                                        </TaxAmount>
+                                    </TaxInformation>
+                                </Line>
+                                <Line>
+                                    <RecordID>___ignore___</RecordID>
+                                    <AccountID>___ignore___</AccountID>
+                                    <ValueDate>2019-01-01</ValueDate>
+                                    <SourceDocumentID>___ignore___</SourceDocumentID>
+                                    <SupplierID>___ignore___</SupplierID>
+                                    <Description>17% S</Description>
+                                    <DebitAmount>
+                                        <Amount>1360.00</Amount>
+                                    </DebitAmount>
+                                </Line>
+                                <Line>
+                                    <RecordID>___ignore___</RecordID>
+                                    <AccountID>___ignore___</AccountID>
+                                    <ValueDate>2019-01-01</ValueDate>
+                                    <SourceDocumentID>___ignore___</SourceDocumentID>
+                                    <SupplierID>___ignore___</SupplierID>
+                                    <Description>installment #1</Description>
+                                    <CreditAmount>
+                                        <Amount>2808.00</Amount>
+                                    </CreditAmount>
+                                </Line>
+                                <Line>
+                                    <RecordID>___ignore___</RecordID>
+                                    <AccountID>___ignore___</AccountID>
+                                    <ValueDate>2019-01-01</ValueDate>
+                                    <SourceDocumentID>___ignore___</SourceDocumentID>
+                                    <SupplierID>___ignore___</SupplierID>
+                                    <Description>installment #2</Description>
+                                    <CreditAmount>
+                                        <Amount>6552.00</Amount>
                                     </CreditAmount>
                                 </Line>
                             </Transaction>
@@ -471,6 +612,68 @@ class TestLuSaftReport(TestSaftReport):
                                 </DocumentTotals>
                             </Invoice>
                         </SalesInvoices>
+                        <PurchaseInvoices>
+                        <NumberOfEntries>1</NumberOfEntries>
+                        <TotalDebit>8000.00</TotalDebit>
+                        <TotalCredit>0.00</TotalCredit>
+                        <Invoice>
+                            <InvoiceNo>BILL/2019/01/0001</InvoiceNo>
+                            <SupplierInfo>
+                                <SupplierID>___ignore___</SupplierID>
+                                <BillingAddress>
+                                    <City>Garnich</City>
+                                    <PostalCode>L-8353</PostalCode>
+                                    <Country>LU</Country>
+                                </BillingAddress>
+                            </SupplierInfo>
+                            <Period>01</Period>
+                            <PeriodYear>2019</PeriodYear>
+                            <InvoiceDate>2019-01-01</InvoiceDate>
+                            <InvoiceType>in_invoic</InvoiceType>
+                            <GLPostingDate>2019-01-01</GLPostingDate>
+                            <TransactionID>___ignore___</TransactionID>
+                            <Line>
+                                <AccountID>___ignore___</AccountID>
+                                <OrderReferences>
+                                    <OriginatingON>BILL/2019/01/0001</OriginatingON>
+                                    <OrderDate>2019-01-01</OrderDate>
+                                </OrderReferences>
+                                <ProductCode>PB</ProductCode>
+                                <ProductDescription>[PB] product_b</ProductDescription>
+                                <Quantity>10.0</Quantity>
+                                <InvoiceUOM>Dozens</InvoiceUOM>
+                                <UnitPrice>800.00</UnitPrice>
+                                <TaxPointDate>2019-01-01</TaxPointDate>
+                                <Description>[PB] product_b</Description>
+                                <InvoiceLineAmount>
+                                    <Amount>8000.00</Amount>
+                                </InvoiceLineAmount>
+                                <DebitCreditIndicator>D</DebitCreditIndicator>
+                                <TaxInformation>
+                                    <TaxType>___ignore___</TaxType>
+                                    <TaxCode>___ignore___</TaxCode>
+                                    <TaxPercentage>17.0</TaxPercentage>
+                                    <TaxBaseDescription>17% S</TaxBaseDescription>
+                                    <TaxAmount>
+                                        <Amount>1360.00</Amount>
+                                    </TaxAmount>
+                                </TaxInformation>
+                            </Line>
+                            <DocumentTotals>
+                                <TaxInformationTotals>
+                                    <TaxType>___ignore___</TaxType>
+                                    <TaxCode>___ignore___</TaxCode>
+                                    <TaxPercentage>17.0</TaxPercentage>
+                                    <TaxBaseDescription>17% S</TaxBaseDescription>
+                                    <TaxAmount>
+                                        <Amount>1360.00</Amount>
+                                    </TaxAmount>
+                                </TaxInformationTotals>
+                                <NetTotal>-8000.00</NetTotal>
+                                <GrossTotal>-9360.00</GrossTotal>
+                            </DocumentTotals>
+                        </Invoice>
+                        </PurchaseInvoices>
                     </SourceDocuments>
                 </AuditFile>
             '''),

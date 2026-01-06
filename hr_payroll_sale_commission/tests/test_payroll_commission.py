@@ -79,8 +79,8 @@ class TestPayrollCommission(TestPayslipContractBase):
             })],
         })
         so.action_confirm()
-
         self.env.invalidate_all()
+        self.env['sale.commission.achievement.report']._pre_achievement_operation()
         achievements = self.env['sale.commission.achievement.report'].sudo().search([('plan_id', '=', commission_plan.id)])
         self.assertEqual(len(achievements), 1, 'The one line should count as an achievement')
         commission_amount = so.amount_untaxed * plan_sold.rate

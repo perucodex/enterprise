@@ -86,6 +86,13 @@ class TestSepaDirectDebit(SepaDirectDebitCommon):
         self.assertEqual(tx.token_id, token)
         self.assertEqual(self.mandate.state, 'active')
 
+    def test_revoking_mandate_archives_token(self):
+        tx = self._create_transaction(flow='direct', state='pending', mandate_id=self.mandate.id)
+        tx._set_done()
+        token = self.env['payment.token'].search([('sdd_mandate_id', '=', self.mandate.id)])
+        self.mandate.with_user(self.invoicing_banks_user).action_revoke_mandate()
+        self.assertFalse(token.active)
+
     def test_creating_batch_payment_generates_export_file(self):
         """ Test the XML generation when validating a batch payment. """
         sdd_provider_method_line = self.company_data['default_journal_bank'] \

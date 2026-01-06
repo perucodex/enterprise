@@ -55,6 +55,9 @@ export class ChatGPTPlugin extends Plugin {
     };
 
     isNotReplaceableByAI(selection = this.dependencies.selection.getEditableSelection()) {
+        if (selection.isCollapsed) {
+            return false;
+        }
         const isEmpty = !selection.textContent().replace(/\s+/g, "");
         const cannotReplace = this.dependencies.selection
             .getTargetedNodes()

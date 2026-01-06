@@ -42,7 +42,7 @@ class TestSalaryRules(TestL10NHkHrPayrollAccountCommon):
             'HKLEAVE600': (9.0, 72.0, 5806.45),
         })
 
-        payslip_results = {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'GROSS': 20200.0, 'NET': 20200.0, 'MEA': 20200.0}
+        payslip_results = {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'GROSS': 21210.0, 'ERMC': -1010.0, 'NET': 20200.0, 'MEA': 20200.0}
         self._validate_payslip(payslip, payslip_results)
 
     def test_001_b_moving_daily_wage_computation(self):
@@ -64,11 +64,11 @@ class TestSalaryRules(TestL10NHkHrPayrollAccountCommon):
         results = {
             1: {
                 'moving_daily_wage': 0,
-                'payslip': {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'GROSS': 20200.0, 'NET': 20200.0, 'MEA': 20200.0}
+                'payslip': {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'GROSS': 21210.0, 'ERMC': -1010.0, 'NET': 20200.0, 'MEA': 20200.0}
             },
             2: {
                 'moving_daily_wage': 651.61,
-                'payslip': {'BASIC': 20000.0, 'COMMISSION': 10000.0, 'ALW.INT': 200.0, '713_GROSS': 30200.0, 'MPF_GROSS': 30200.0, 'EEMC': -1500.0, 'ERMC': -2510.0, 'GROSS': 32710.0, 'NET': 28700.0, 'MEA': 28700.0},
+                'payslip': {'BASIC': 20000.0, 'COMMISSION': 10000.0, 'ALW.INT': 200.0, '713_GROSS': 30200.0, 'MPF_GROSS': 30200.0, 'GROSS': 31700.0, 'EEMC': -1500.0, 'ERMC': -1500.0, 'NET': 28700.0, 'MEA': 28700.0},
             },
             3: {
                 'moving_daily_wage': 854.24,
@@ -149,7 +149,7 @@ class TestSalaryRules(TestL10NHkHrPayrollAccountCommon):
             'HKLEAVE600': (9.0, 36.0, 2903.23),
         })
 
-        payslip_results = {'BASIC': 10000.0, 'ALW.INT': 200.0, '713_GROSS': 10200.0, 'MPF_GROSS': 10200.0, 'GROSS': 10200.0, 'NET': 10200.0, 'MEA': 10200.0}
+        payslip_results = {'BASIC': 10000.0, 'ALW.INT': 200.0, '713_GROSS': 10200.0, 'MPF_GROSS': 10200.0, 'GROSS': 10710.0, 'ERMC': -510.0, 'NET': 10200.0, 'MEA': 10200.0}
         self._validate_payslip(payslip, payslip_results)
 
     def test_002_b_credit_time_moving_daily_wage(self):
@@ -161,11 +161,11 @@ class TestSalaryRules(TestL10NHkHrPayrollAccountCommon):
         results = {
             1: {
                 'moving_daily_wage': 0,
-                'payslip': {'BASIC': 10000.0, 'ALW.INT': 200.0, '713_GROSS': 10200.0, 'MPF_GROSS': 10200.0, 'GROSS': 10200.0, 'NET': 10200.0, 'MEA': 10200.0},
+                'payslip': {'BASIC': 10000.0, 'ALW.INT': 200.0, '713_GROSS': 10200.0, 'MPF_GROSS': 10200.0, 'GROSS': 10710.0, 'ERMC': -510.0, 'NET': 10200.0, 'MEA': 10200.0},
             },
             2: {
                 'moving_daily_wage': 329.03,
-                'payslip': {'BASIC': 10000.0, 'ALW.INT': 200.0, '713_GROSS': 10200.0, 'MPF_GROSS': 10200.0, 'EEMC': -510.0, 'ERMC': -1020.0, 'GROSS': 11220.0, 'NET': 9690.0, 'MEA': 9690.0},
+                'payslip': {'BASIC': 10000.0, 'ALW.INT': 200.0, '713_GROSS': 10200.0, 'MPF_GROSS': 10200.0, 'EEMC': -510.0, 'ERMC': -510.0, 'GROSS': 10710.0, 'NET': 9690.0, 'MEA': 9690.0},
             }
         }
 
@@ -207,13 +207,13 @@ class TestSalaryRules(TestL10NHkHrPayrollAccountCommon):
             'OUT': (9.0, 72.0, 0.0),
         })
 
-        payslip_results = {'BASIC': 12258.07, 'ALW.INT': 122.58, '713_GROSS': 12380.65, 'MPF_GROSS': 12380.65, 'GROSS': 12380.65, 'NET': 12380.65, 'MEA': 12380.65}
+        payslip_results = {'BASIC': 12258.07, 'ALW.INT': 122.58, '713_GROSS': 12380.65, 'MPF_GROSS': 12380.65, 'GROSS': 12999.68, 'ERMC': -619.03, 'NET': 12380.65, 'MEA': 12380.65}
         self._validate_payslip(payslip, payslip_results)
 
     def test_004_a_mpf_computation(self):
         payslip_results = {
-            1: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'GROSS': 20200.0, 'NET': 20200.0, 'MEA': 20200.0},
-            2: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'EEMC': -1010.0, 'ERMC': -2020.0, 'GROSS': 22220.0, 'NET': 19190.0, 'MEA': 19190.0},
+            1: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'GROSS': 21210.0, 'ERMC': -1010.0, 'NET': 20200.0, 'MEA': 20200.0},
+            2: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'EEMC': -1010.0, 'ERMC': -1010.0, 'GROSS': 21210.0, 'NET': 19190.0, 'MEA': 19190.0},
             3: {'BASIC': 20000.0, 'COMMISSION': 10000.0, 'ALW.INT': 200.0, '713_GROSS': 30200.0, 'MPF_GROSS': 30200.0, 'EEMC': -1500.0, 'ERMC': -1500.0, 'GROSS': 31700.0, 'NET': 28700.0, 'MEA': 28700.0},
         }
         for month in range(1, 4):
@@ -232,9 +232,9 @@ class TestSalaryRules(TestL10NHkHrPayrollAccountCommon):
             'contract_date_start': date(2023, 2, 1),
         })
         payslip_results = {
-            2: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'GROSS': 20200.0, 'NET': 20200.0, 'MEA': 20200.0},
-            3: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'GROSS': 20200.0, 'NET': 20200.0, 'MEA': 20200.0},
-            4: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'EEMC': -1010.0, 'ERMC': -3030.0, 'GROSS': 23230.0, 'NET': 19190.0, 'MEA': 19190.0},
+            2: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'GROSS': 21210.0, 'ERMC': -1010.0, 'NET': 20200.0, 'MEA': 20200.0},
+            3: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'GROSS': 21210.0, 'ERMC': -1010.0, 'NET': 20200.0, 'MEA': 20200.0},
+            4: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'EEMC': -1010.0, 'ERMC': -1010.0, 'GROSS': 21210.0, 'NET': 19190.0, 'MEA': 19190.0},
             5: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'EEMC': -1010.0, 'ERMC': -1010.0, 'GROSS': 21210.0, 'NET': 19190.0, 'MEA': 19190.0},
         }
         for month in range(2, 6):
@@ -250,50 +250,48 @@ class TestSalaryRules(TestL10NHkHrPayrollAccountCommon):
         self.contract.write({
             'wage': 21000.0,
             'l10n_hk_internet': 0.0,
+            "l10n_hk_member_class_id": self.member_class.id,
         })
         payslip = self._generate_payslip(date(2023, 1, 1), date(2023, 1, 31))
         payslip.action_payslip_done()
         payslip.action_payslip_paid()
-        self.employee.write({
-            'l10n_hk_mpf_vc_option': 'custom',
-            'l10n_hk_mpf_vc_percentage': 0.05
-        })
+        self.employee.l10n_hk_member_class_ct_eevc_id.contribution_option = 'percentage'
         inputs = {
             2: {
                 'wage': 21000.0,
                 'commission': 0.0,
-                'vc_percentage': 0.05
+                'vc_percentage': 5,
             },
             3: {
                 'wage': 21000.0,
                 'commission': 0.0,
-                'vc_percentage': 0.05
+                'vc_percentage': 5,
             },
             4: {
                 'wage': 32000.0,
                 'commission': 0.0,
-                'vc_percentage': 0.05
+                'vc_percentage': 5,
             },
             5: {
                 'wage': 22000.0,
                 'commission': 0.0,
-                'vc_percentage': 0.03
+                'vc_percentage': 3,
             },
             6: {
                 'wage': 22000.0,
                 'commission': 13000.0,
-                'vc_percentage': 0.03
+                'vc_percentage': 3,
             },
         }
         payslip_results = {
-            2: {'BASIC': 21000.0, '713_GROSS': 21000.0, 'MPF_GROSS': 21000.0, 'EEMC': -1050.0, 'ERMC': -2100.0, 'EEVC': -1050.0, 'ERVC': -1050.0, 'GROSS': 24150.0, 'NET': 18900.0, 'MEA': 18900.0},
+            2: {'BASIC': 21000.0, '713_GROSS': 21000.0, 'MPF_GROSS': 21000.0, 'EEMC': -1050.0, 'ERMC': -1050.0, 'EEVC': -1050.0, 'ERVC': -1050.0, 'GROSS': 23100.0, 'NET': 18900.0, 'MEA': 18900.0},
             3: {'BASIC': 21000.0, '713_GROSS': 21000.0, 'MPF_GROSS': 21000.0, 'EEMC': -1050.0, 'ERMC': -1050.0, 'EEVC': -1050.0, 'ERVC': -1050.0, 'GROSS': 23100.0, 'NET': 18900.0, 'MEA': 18900.0},
             4: {'BASIC': 32000.0, '713_GROSS': 32000.0, 'MPF_GROSS': 32000.0, 'EEMC': -1500.0, 'ERMC': -1500.0, 'EEVC': -1600.0, 'ERVC': -1600.0, 'GROSS': 35100.0, 'NET': 28900.0, 'MEA': 28900.0},
             5: {'BASIC': 22000.0, '713_GROSS': 22000.0, 'MPF_GROSS': 22000.0, 'EEMC': -1100.0, 'ERMC': -1100.0, 'EEVC': -660.0, 'ERVC': -660.0, 'GROSS': 23760.0, 'NET': 20240.0, 'MEA': 20240.0},
             6: {'BASIC': 22000.0, 'COMMISSION': 13000.0, '713_GROSS': 35000.0, 'MPF_GROSS': 35000.0, 'EEMC': -1500.0, 'ERMC': -1500.0, 'EEVC': -1050.0, 'ERVC': -1050.0, 'GROSS': 37550.0, 'NET': 32450.0, 'MEA': 32450.0}
         }
         for month in range(2, 7):
-            self.employee.write({'l10n_hk_mpf_vc_percentage': inputs[month]['vc_percentage']})
+            self.employee.l10n_hk_member_class_ct_eevc_id.amount = inputs[month]['vc_percentage']
             self.contract.write({'wage': inputs[month]['wage']})
             payslip = self._generate_payslip(
                 date(2023, month, 1),
@@ -308,11 +306,11 @@ class TestSalaryRules(TestL10NHkHrPayrollAccountCommon):
         self.contract.write({
             'wage': 21000.0,
             'l10n_hk_internet': 0.0,
+            "l10n_hk_member_class_id": self.member_class.id,
         })
         payslip = self._generate_payslip(date(2023, 1, 1), date(2023, 1, 31))
         payslip.action_payslip_done()
         payslip.action_payslip_paid()
-        self.employee.write({'l10n_hk_mpf_vc_option': 'max'})
         inputs = {
             2: {
                 'wage': 21000.0,
@@ -336,7 +334,7 @@ class TestSalaryRules(TestL10NHkHrPayrollAccountCommon):
             },
         }
         payslip_results = {
-            2: {'BASIC': 21000.0, '713_GROSS': 21000.0, 'MPF_GROSS': 21000.0, 'EEMC': -1050.0, 'ERMC': -2100.0, 'EEVC': 0, 'ERVC': 0, 'GROSS': 23100.0, 'NET': 19950.0, 'MEA': 19950.0},
+            2: {'BASIC': 21000.0, '713_GROSS': 21000.0, 'MPF_GROSS': 21000.0, 'EEMC': -1050.0, 'ERMC': -1050.0, 'EEVC': 0, 'ERVC': 0, 'GROSS': 22050.0, 'NET': 19950.0, 'MEA': 19950.0},
             3: {'BASIC': 21000.0, '713_GROSS': 21000.0, 'MPF_GROSS': 21000.0, 'EEMC': -1050.0, 'ERMC': -1050.0, 'EEVC': 0, 'ERVC': 0, 'GROSS': 22050.0, 'NET': 19950.0, 'MEA': 19950.0},
             4: {'BASIC': 32000.0, '713_GROSS': 32000.0, 'MPF_GROSS': 32000.0, 'EEMC': -1500.0, 'ERMC': -1500.0, 'EEVC': -100.0, 'ERVC': -100.0, 'GROSS': 33600.0, 'NET': 30400.0, 'MEA': 30400.0},
             5: {'BASIC': 22000.0, '713_GROSS': 22000.0, 'MPF_GROSS': 22000.0, 'EEMC': -1100.0, 'ERMC': -1100.0, 'EEVC': 0, 'ERVC': 0, 'GROSS': 23100.0, 'NET': 20900.0, 'MEA': 20900.0},
@@ -359,8 +357,8 @@ class TestSalaryRules(TestL10NHkHrPayrollAccountCommon):
             'contract_date_start': date(2023, 7, 3),
         })
         payslip_results = {
-            7: {'BASIC': 18709.68, 'ALW.INT': 187.1, '713_GROSS': 18896.78, 'MPF_GROSS': 18896.78, 'GROSS': 18896.78, 'NET': 18896.78, 'MEA': 18896.78},
-            8: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'ERMC': -1954.84, 'GROSS': 22154.84, 'NET': 20200.0, 'MEA': 20200.0},
+            7: {'BASIC': 18709.68, 'ALW.INT': 187.1, '713_GROSS': 18896.78, 'MPF_GROSS': 18896.78, 'GROSS': 19841.62, 'ERMC': -944.84, 'NET': 18896.78, 'MEA': 18896.78},
+            8: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'ERMC': -1010.0, 'GROSS': 21210.0, 'NET': 20200.0, 'MEA': 20200.0},
             9: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'EEMC': -1010.0, 'ERMC': -1010.0, 'GROSS': 21210.0, 'NET': 19190.0, 'MEA': 19190.0},
             10: {'BASIC': 20000.0, 'ALW.INT': 200.0, '713_GROSS': 20200.0, 'MPF_GROSS': 20200.0, 'EEMC': -1010.0, 'ERMC': -1010.0, 'GROSS': 21210.0, 'NET': 19190.0, 'MEA': 19190.0},
         }
@@ -383,7 +381,7 @@ class TestSalaryRules(TestL10NHkHrPayrollAccountCommon):
         payslip.action_payslip_paid()
 
         payslip_results = {
-            2: {'BASIC': 5000.0, '713_GROSS': 5000.0, 'MPF_GROSS': 5000.0, 'ERMC': -500, 'GROSS': 5500.0, 'NET': 5000.0, 'MEA': 5000.0},
+            2: {'BASIC': 5000.0, '713_GROSS': 5000.0, 'MPF_GROSS': 5000.0, 'ERMC': -250, 'GROSS': 5250.0, 'NET': 5000.0, 'MEA': 5000.0},
             3: {'BASIC': 5000.0, '713_GROSS': 5000.0, 'MPF_GROSS': 5000.0, 'ERMC': -250, 'GROSS': 5250.0, 'NET': 5000.0, 'MEA': 5000.0}
         }
 

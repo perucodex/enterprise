@@ -54,3 +54,15 @@ class TestTaskGroupExpand(TestProjectCommon):
             gantt_domain + [('user_ids', 'in', self.user_projectmanager.id)], ['user_ids'])
         self.assertTrue(user_in_groups(self.user_projectuser.id),
                         "Even if a filter is applied on user_ids, all user row containing visible tasks in the gantt view should be displayed")
+
+        # 5. Search for a user with no tasks → user row should show
+        user_no_task = self.user_portal
+        search_domain = [
+            ('user_ids', 'in', user_no_task.id),
+            ('planned_date_begin', '>=', datetime.today()),
+            ('date_deadline', '<=', datetime.today() + timedelta(days=7)),
+        ]
+        groups = Task.formatted_read_group(search_domain, ['user_ids'])
+        self.assertTrue(user_in_groups(user_no_task.id),
+            "The row for searched user should appear even if they have no task."
+        )

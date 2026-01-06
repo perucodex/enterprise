@@ -25,7 +25,7 @@ class PosConfig(models.Model):
 
     def _load_self_data_models(self):
         models = super()._load_self_data_models()
-        models += ['iot.device']
+        models += ['iot.device', 'iot.box']
         return models
 
     def action_open_wizard(self):

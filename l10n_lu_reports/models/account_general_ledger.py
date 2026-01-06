@@ -91,16 +91,28 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
         res = {
             'total_invoices_debit': 0.0,
             'total_invoices_credit': 0.0,
+            'total_bills_debit': 0.0,
+            'total_bills_credit': 0.0,
             'invoice_vals_list': [],
             'uoms': [],
             'product_vals_list': [],
         }
 
-        # Fill 'total_invoices_debit', 'total_invoices_credit', 'invoice_vals_list'.
+        # Fill 'total_invoices_debit', 'total_invoices_credit', 'total_bills_debit', 'total_bills_credit', 'invoice_vals_list'.
         encountered_product_ids = set()
         encountered_product_uom_ids = set()
+
+        # TODO: to remove in master, do not include the in_invoice if the template was not updated
+        template_tree = self.env['ir.qweb']._get_template('l10n_lu_reports.saft_template_inherit_l10n_lu_saft')[0]
+        missing_tree_node = template_tree.findall('.//PurchaseInvoices')
+
         for move_vals in values['move_vals_list']:
-            if move_vals['type'] not in ('out_invoice', 'out_refund'):
+
+            if move_vals['type'] not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund'):
+                continue
+
+            # TODO: to remove in master, do not include the in_invoice if the template was not updated
+            if not missing_tree_node and move_vals['type'] not in ('out_invoice', 'out_refund'):
                 continue
 
             move_vals.update({
@@ -126,9 +138,11 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                 elif not line_vals['account_type'] in ('asset_receivable', 'liability_payable') and line_vals['display_type'] == 'product':
                     move_vals['total_invoice_untaxed_balance'] -= line_vals['balance']
                     if line_vals['balance'] > 0.0:
-                        res['total_invoices_debit'] += line_vals['balance']
+                        total_debit_key = 'total_invoices_debit' if move_vals['type'] in ('out_invoice', 'out_refund') else 'total_bills_debit'
+                        res[total_debit_key] += line_vals['balance']
                     else:
-                        res['total_invoices_credit'] -= line_vals['balance']
+                        total_credit_key = 'total_invoices_credit' if move_vals['type'] in ('out_invoice', 'out_refund') else 'total_bills_credit'
+                        res[total_credit_key] -= line_vals['balance']
                     if line_vals['product_id']:
                         encountered_product_ids.add(line_vals['product_id'])
                     if line_vals['product_uom_id']:

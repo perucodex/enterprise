@@ -5,10 +5,18 @@ const { DateTime } = luxon;
 
 patch(PosPreset.prototype, {
     get nextSlot() {
-        const dateNow = DateTime.now();
-        const sqlDate = dateNow.toFormat("yyyy-MM-dd");
-        return Object.values(this.uiState.availabilities[sqlDate]).find(
-            (s) => s.datetime > dateNow
-        );
+        const availabilities = this.uiState.availabilities || {};
+        const dates = Object.keys(availabilities).sort();
+
+        for (const date of dates) {
+            const slotTimes = Object.keys(availabilities[date]).sort();
+            for (const slotTime of slotTimes) {
+                const slot = availabilities[date][slotTime];
+                if (slot.datetime > DateTime.now()) {
+                    return slot;
+                }
+            }
+        }
+        return null;
     },
 });

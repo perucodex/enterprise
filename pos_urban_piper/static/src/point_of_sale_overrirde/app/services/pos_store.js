@@ -101,17 +101,18 @@ patch(PosStore.prototype, {
 
     async getServerOrders() {
         if (this.config.module_pos_urban_piper && this.config.urbanpiper_store_identifier) {
-            return await this.data.loadServerOrders([
+            await this.data.loadServerOrders([
                 ["company_id", "=", this.config.company_id.id],
+                ["state", "=", "draft"],
+                ["session_id", "=", this.session.id],
                 [
                     "delivery_provider_id",
                     "in",
                     this.config.urbanpiper_delivery_provider_ids.map((provider) => provider.id),
                 ],
             ]);
-        } else {
-            return await super.getServerOrders(...arguments);
         }
+        return await super.getServerOrders(...arguments);
     },
     _fetchStoreAction(data) {
         const params = {
@@ -237,7 +238,10 @@ patch(PosStore.prototype, {
         if (order.delivery_provider_id) {
             orderData = {
                 ...orderData,
-                delivery_provider_id: order.delivery_provider_id,
+                delivery_provider_id: {
+                    id: order.delivery_provider_id.id,
+                    name: order.delivery_provider_id.name,
+                },
                 order_otp: JSON.parse(order.delivery_json)?.order?.details?.ext_platforms?.[0].id,
                 prep_time: order.prep_time,
             };

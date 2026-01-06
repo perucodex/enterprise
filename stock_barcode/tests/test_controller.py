@@ -87,3 +87,42 @@ class TestStockBarcodeController(HttpCase):
             headers={'Content-Type': 'application/json'},
         )
         self.assertNotIn("AttributeError", response.text)
+
+    def test_barcode_with_uri_without_gs1_nomenclature(self):
+        self.authenticate('admin', 'admin')
+        barcode_value = "urn:epc:tag:sgtin-96 : 3.0614141.038656.0"
+        payload = json.dumps({
+            'jsonrpc': '2.0',
+            'method': 'call',
+            'id': 0,
+            'params': {
+                "barcode": barcode_value,
+            }
+        })
+        response = self.url_open(
+            '/stock_barcode/scan_from_main_menu',
+            data=payload,
+            headers={'Content-Type': 'application/json'},
+        )
+        result = response.json()
+        self.assertIn("result", result)
+
+    def test_barcode_with_uri_with_gs1_nomenclature(self):
+        self.env.company.nomenclature_id = self.env.ref('barcodes_gs1_nomenclature.default_gs1_nomenclature')
+        self.authenticate('admin', 'admin')
+        barcode_value = "urn:epc:tag:sgtin-96 : 3.0614141.038656.0"
+        payload = json.dumps({
+            'jsonrpc': '2.0',
+            'method': 'call',
+            'id': 0,
+            'params': {
+                "barcode": barcode_value,
+            }
+        })
+        response = self.url_open(
+            '/stock_barcode/scan_from_main_menu',
+            data=payload,
+            headers={'Content-Type': 'application/json'},
+        )
+        result = response.json()
+        self.assertIn("result", result)

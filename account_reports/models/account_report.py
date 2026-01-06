@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from __future__ import annotations
 
 import ast
 import base64
@@ -9,6 +10,7 @@ import io
 import itertools
 import json
 import logging
+import typing
 import re
 from ast import literal_eval
 from collections import defaultdict
@@ -25,12 +27,16 @@ from odoo.addons.account.models.account_report import ACCOUNT_CODES_ENGINE_SPLIT
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
 from odoo.fields import Command, Domain
 from odoo.service.model import get_public_method
-from odoo.tools import date_utils, get_lang, float_is_zero, float_repr, html2plaintext, SQL, parse_version, Query
+from odoo.tools import date_utils, get_lang, float_is_zero, float_repr, html2plaintext, SQL, parse_version, Query, LazyTranslate
 from odoo.tools.float_utils import float_round, float_compare
 from odoo.tools.mail import html_to_inner_content
 from odoo.tools.misc import file_path, format_date, formatLang
 from odoo.tools.safe_eval import expr_eval, safe_eval
 
+if typing.TYPE_CHECKING:
+    from collections.abc import Collection
+
+_lt = LazyTranslate(__name__)
 _logger = logging.getLogger(__name__)
 
 ACCOUNT_CODES_ENGINE_TAG_ID_PREFIX_REGEX = re.compile(r"tag\(((?P<id>\d+)|(?P<ref>\w+\.\w+))\)")
@@ -43,6 +49,8 @@ NUMBER_FIGURE_TYPES = ('float', 'integer', 'monetary', 'percentage')
 LINE_ID_HIERARCHY_DELIMITER = '|'
 
 CURRENCIES_USING_LAKH = {'AFN', 'BDT', 'INR', 'MMK', 'NPR', 'PKR', 'LKR'}
+
+UNDISTR_LINE_NAME = _lt("Undistributed Profits/Losses")
 
 
 class AccountReportAnnotation(models.Model):
@@ -72,7 +80,7 @@ class AccountReport(models.Model):
 
     # Account Audit Status
     allow_account_audit_status_on_lines = fields.Boolean(string="Allow Account Audit Status On Lines",
-        compute=lambda x: x._compute_report_option_filter('filter_account_type', 'disabled'), readonly=False,
+        compute=lambda x: x._compute_report_option_filter('allow_account_audit_status_on_lines'), readonly=False,
         precompute=True, store=True, depends=['root_report_id'])
 
     @api.constrains('custom_handler_model_id')
@@ -97,10 +105,10 @@ class AccountReport(models.Model):
     def write(self, vals):
         if 'active' in vals:
             reports = {r.id: r.name for r in self}
-            actions = self.env['ir.actions.client'] \
+            actions = self.env['ir.actions.client'].sudo() \
                 .search([('name', 'in', list(reports.values())), ('tag', '=', 'account_report')]) \
                 .filtered(lambda act: (ast.literal_eval(act.context).get('report_id'), act.name) in reports.items())
-            self.env['ir.ui.menu'] \
+            self.env['ir.ui.menu'].sudo() \
                 .search([
                     ('active', '=', not vals['active']),
                     ('action', 'in', [f'ir.actions.client,{action.id}' for action in actions]),
@@ -111,8 +119,28 @@ class AccountReport(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         reports = super().create(vals_list)
+
+        reports_by_impacted_field = {}
+        for report, impacted_fields in zip(reports, vals_list):
+            for field_name in impacted_fields:
+                reports_by_impacted_field.setdefault(field_name, self.env['account.report'])
+                reports_by_impacted_field[field_name] += report
+
         if root_annual_statements := self.env.ref('account_reports.annual_statements', raise_if_not_found=False):
             asr_section_reports = reports.filtered_domain(self._asr_sections_domain(root_annual_statements))
+
+            if asr_section_reports:
+                # When the report needs to be added to the annual statement, the computation of some of its filters
+                # might be skipped (because it's linked to a single composite report). Make sure we compute those
+                # filters once before setting the link to the composite report.
+                for name, field in asr_section_reports._fields.items():
+                    if field._depends and 'section_main_report_ids' in field._depends and field.store:
+                        # We then need to recompute the fields on the reports not setting it in the create (all the filters are also editable)
+                        reports_to_recompute = reports - reports_by_impacted_field.get(name, self.env['account.report'])
+                        if reports_to_recompute:
+                            self.env.add_to_compute(field, reports_to_recompute)
+                            reports_to_recompute._recompute_field(field)
+
             asr_section_reports._link_annual_statements(root_annual_statements)
         return reports
 
@@ -303,6 +331,10 @@ class AccountReport(models.Model):
         # 1. Handle journal group selection
         for group in all_journal_groups:
             group_journals = all_journals - group.excluded_journal_ids
+            if group.company_id:
+                company_domain = self.env['account.journal']._check_company_domain(group.company_id)
+                group_journals = group_journals.filtered_domain(company_domain)
+
             selected = False
             first_group_already_selected = bool(options['selected_journal_groups'])  # only one group should be selected at most
 
@@ -808,15 +840,15 @@ class AccountReport(models.Model):
                 **previous_options['return_periodicity'],
                 'report_id': self.id,
             }
-        elif len(self.return_type_ids) == 1:
+        elif len(return_type := self.env['account.report'].browse(options['sections_source_id']).return_type_ids) == 1:
             main_company = self.env.company
-            start_day, start_month = self.return_type_ids._get_start_date_elements(main_company)
+            start_day, start_month = return_type._get_start_date_elements(main_company)
             options['return_periodicity'] = {
-                'periodicity': self.return_type_ids._get_periodicity(main_company),
-                'months_per_period': self.return_type_ids._get_periodicity_months_delay(main_company),
+                'periodicity': return_type._get_periodicity(main_company),
+                'months_per_period': return_type._get_periodicity_months_delay(main_company),
                 'start_day': start_day,
                 'start_month': start_month,
-                'return_type_id': self.return_type_ids.id,
+                'return_type_id': return_type.id,
                 'report_id': self.id,
             }
 
@@ -1781,7 +1813,7 @@ class AccountReport(models.Model):
         ]
 
         if self.return_type_ids:
-            options['buttons'].append({'name': _('Returns'), 'action': 'action_open_returns', 'sequence': 110, 'always_show': True})
+            options['buttons'].append({'name': _('Returns'), 'action': 'action_open_returns', 'sequence': 110, 'always_show': True, 'branch_allowed': True})
 
     def open_account_report_file_download_error_wizard(self, errors, content):
         self.ensure_one()
@@ -1846,7 +1878,7 @@ class AccountReport(models.Model):
         options['has_inactive_variants'] = False
         allowed_country_variant_ids = {}
         all_variants = self._get_variants(options['variants_source_id'])
-        for variant in all_variants.filtered(lambda x: x._is_available_for(options)):
+        for variant in all_variants._is_available_for(options):
             if not self.root_report_id and variant != self and variant.active: # Non-route reports don't reroute the variant when computing their options
                 allowed_variant_ids.add(variant.id)
                 if variant.country_id:
@@ -2543,22 +2575,35 @@ class AccountReport(models.Model):
         # as it opens what client asked. And "Unfold All" is 1 clic away.
         options["unfold_all"] = True
         general_ledger = self.env.ref('account_reports.general_ledger_report')
-        record_id_to_search = self._get_res_id_from_line_id(params['line_id'], 'account.account')
-        if not record_id_to_search:
-            raise UserError(_("'Open General Ledger' caret option is only available form report lines targetting accounts."))
+        account_id_to_search = self._get_res_id_from_line_id(params['line_id'], 'account.account')
+        company_id_to_search = self._get_res_id_from_line_id(params['line_id'], 'res.company')
+        if not account_id_to_search and not company_id_to_search:
+            raise UserError(_(
+                "'Open General Ledger' caret option is only available form report lines targetting "
+                "accounts or Undistributed Profits/Losses."
+            ))
 
-        account = self.env['account.account'].browse(record_id_to_search)
+        if account_id_to_search:
+            search_content = self.env['account.account'].browse(account_id_to_search).code
+        elif len(self.env.companies) == 1:
+            search_content = str(UNDISTR_LINE_NAME)
+        else:
+            search_content = _(
+                "%(line_name)s - %(company_name)s",
+                line_name=UNDISTR_LINE_NAME,
+                company_name=self.env['res.company'].browse(company_id_to_search).name,
+            )
         gl_options = general_ledger.get_options(options)
         gl_options['not_reset_journals_filter'] = True  # prevents resetting the default journal group
         gl_options['unfold_all'] = True
-        gl_options['filter_search_bar'] = account.code
+        gl_options['filter_search_bar'] = search_content
 
         action_vals = self.env['ir.actions.actions']._for_xml_id('account_reports.action_account_report_general_ledger')
         action_vals['params'] = {
             'options': gl_options,
             'ignore_session': True,
         }
-        action_vals['context'] = dict(ast.literal_eval(action_vals['context']), default_filter_accounts=account.code)
+        action_vals['context'] = dict(ast.literal_eval(action_vals['context']), default_filter_accounts=search_content)
 
         return action_vals
 
@@ -2771,8 +2816,15 @@ class AccountReport(models.Model):
 
         return lines
 
+    # Deprecated, removed in master.
     @api.model
     def format_column_values(self, options, lines):
+        self._format_column_values(options, lines, force_format=True)
+
+        return lines
+
+    def format_column_values_from_client(self, options, lines):
+        """ Format column values for display. Called via dispatch_report_action when rounding unit changes on client side."""
         self._format_column_values(options, lines, force_format=True)
 
         return lines
@@ -2907,7 +2959,7 @@ class AccountReport(models.Model):
 
         for line in lines:
             model, id = self._get_model_info_from_id(line['id'])
-            if id in account_statuses:
+            if model == 'account.account' and id in account_statuses:
                 line['account_status'] = account_statuses[id]
 
         return lines
@@ -3054,7 +3106,7 @@ class AccountReport(models.Model):
                         'target_expression_id': column_expression.id,
                         'rounding': rounding,
                         'figure_type': figure_type,
-                        'column_value': column_value,
+                        'column_value': self.env.company.currency_id.round(column_value) if figure_type == 'monetary' and column_value else column_value,
                     }
 
                 formatter_params['digits'] = rounding
@@ -3067,7 +3119,7 @@ class AccountReport(models.Model):
                     'target_expression_id': column_expression.id,
                     'rounding': self.env.company.currency_id.decimal_places,
                     'figure_type': 'monetary',
-                    'column_value': column_value,
+                    'column_value': self.env.company.currency_id.round(column_value) if column_value else column_value,
                 }
 
             # Build result
@@ -4043,7 +4095,7 @@ class AccountReport(models.Model):
         self._check_groupby_fields((next_groupby.split(',') if next_groupby else []) + ([current_groupby] if current_groupby else []))
         prefilter = self.env['account.account']._check_company_domain(self.get_report_company_ids(options))
 
-        accounts = self.env['account.account'].search_read([*prefilter, ('code', '!=', False)], ['code', 'tag_ids'])
+        accounts = self.env['account.account'].with_context(active_test=False).search_read([*prefilter, ('code', '!=', False)], ['code', 'tag_ids'])
         accounts.sort(key=lambda acc: acc['code'])
         tags_map = defaultdict(list)
         for acc in accounts:
@@ -4591,6 +4643,9 @@ class AccountReport(models.Model):
                 'res_model': 'account.move.line',
                 'view_mode': 'list',
                 'views': [(False, 'list')],
+                'context': {
+                    'active_test': False,
+                },
             }
 
         action = clean_action(action_dict, env=self.env)
@@ -4607,9 +4662,7 @@ class AccountReport(models.Model):
             'context': {
                 'active_test': False,
             },
-            'domain': [('id', 'in', self._get_variants(options['variants_source_id']).filtered(
-                lambda x: x._is_available_for(options)
-            ).ids)],
+            'domain': [('id', 'in', self._get_variants(options['variants_source_id'])._is_available_for(options).ids)],
         }
 
     def _get_audit_line_domain(self, column_group_options, expression, params):
@@ -4766,7 +4819,9 @@ class AccountReport(models.Model):
 
         action_domain = [('display_type', 'not in', ('line_section', 'line_subsection', 'line_note'))]
 
-        if record_id is None:
+        if record_model == 'account.group':
+            action_domain += [('account_id.group_id', '=', False)] if record_id is None else [('account_id.group_id', 'child_of', record_id)]
+        elif record_id is None:
             # Default filters don't support the 'no set' value. For this case, we use a domain on the action instead
             model_fields_map = {
                 'account.account': 'account_id',
@@ -4819,6 +4874,25 @@ class AccountReport(models.Model):
             'context': ctx,
         }
 
+    def open_unallocated_items_journal_items(self, options, params):
+        _record_model, record_id = self._get_model_info_from_id(params.get('line_id'))
+        fiscal_year = self.env.company.compute_fiscalyear_dates(
+            fields.Date.to_date(options.get('date').get('date_from'))
+        )
+        options_for_audit = {
+            **options,
+            'date': {
+                **options['date'],
+                'date_from': fields.Date.to_string(fiscal_year['date_from']),
+                'date_to': fields.Date.to_string(fiscal_year['date_to']),
+            },
+        }
+
+        action = self.open_journal_items(options=options_for_audit, params=params)
+        action['domain'] += self._get_unallocated_earnings_lines_domain(action['context']['date_from'], record_id)
+        action.get('context', {}).update({'search_default_date_between': 0})
+        return action
+
     def open_unposted_moves(self, options, params=None):
         ''' Open the list of draft journal entries that might impact the reporting'''
         action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_journal_line")
@@ -4864,22 +4938,6 @@ class AccountReport(models.Model):
                 'search_default_group_by_move': True,
                 'expand': True,
             }
-        }
-
-    @api.model
-    def _get_unaffected_earnings_accounts_per_company(self, options):
-        """ Return the unaffected earnings accounts for the report's companies. """
-        unaffected_earnings_accounts = self.env['account.account']._read_group(
-            domain=[
-                *self.env['account.account']._check_company_domain(self.env['account.report'].get_report_company_ids(options)),
-                ('account_type', '=', 'equity_unaffected'),
-            ],
-            groupby=['company_ids'],
-            aggregates=['id:min'],
-        )
-        return {
-            company.id: account_id
-            for company, account_id in unaffected_earnings_accounts
         }
 
     def action_modify_manual_value(self, line_id, options, column_group_key, new_value_str, target_expression_id, rounding, json_friendly_column_group_totals):
@@ -5304,9 +5362,9 @@ class AccountReport(models.Model):
             dates_domain = self._adjust_domain_for_unjoined_comparison(options, dates_domain)
             domain &= dates_domain
 
-        order = 'create_date DESC' if options['export_mode'] else ''
-        annotations = self.env['account.report.annotation'].search(domain, order=order)
-        for annotation in annotations:
+        order = 'create_date ASC' if options['export_mode'] else ''
+        report_annotations = self.env['account.report.annotation'].search(domain, order=order)
+        for annotation in report_annotations:
             message = annotation.message_id
             for line_id in line_dict_ids_by_record[message.model, message.res_id]:
                 annotations_by_line[line_id].append({
@@ -5334,7 +5392,7 @@ class AccountReport(models.Model):
                 continue
 
             model, record_id = self._get_model_info_from_id(line.get('id'))
-            if model == 'account.move.line':
+            if model == 'account.move.line' and record_id is not None:
                 aml_id_to_report_lines_map[record_id].append(line)
             elif model in self._get_annotatable_models():
                 line['chatter'] = {
@@ -5355,8 +5413,8 @@ class AccountReport(models.Model):
 
     def _get_last_comments_by_line(self, options, lines):
         annotations_by_line = self.get_annotations(options, lines)
-        for line, annotations in annotations_by_line.items():
-            last_annotation = annotations[0]['body'] if annotations else ''
+        for line, report_annotations in annotations_by_line.items():
+            last_annotation = report_annotations[0]['body'] if report_annotations else ''
             annotations_by_line[line] = markupsafe.Markup('<br/>').join(html2plaintext(last_annotation).split("\n"))
         return annotations_by_line
 
@@ -5413,26 +5471,36 @@ class AccountReport(models.Model):
         Note that only the options initialized by the init_options with a more prioritary sequence than _init_options_variants are guaranteed to
         be in the provided options' dict (since this function is called by _init_options_variants, while resolving a call to get_options()).
         """
-        self.ensure_one()
-
         companies = self.env['res.company'].browse(self.get_report_company_ids(options))
 
-        if self.availability_condition == 'country':
-            countries = companies.account_fiscal_country_id
-            if self.allow_foreign_vat:
+        reports = self.filtered(lambda r: r.availability_condition == 'always')
+
+        reports_by_country = self.filtered(lambda r: r.availability_condition == 'country')
+        if reports_by_country:
+            company_countries = companies.account_fiscal_country_id
+
+            reports_foreign_vat = reports_by_country.filtered('allow_foreign_vat')
+            reports_no_foreign_vat = reports_by_country - reports_foreign_vat
+
+            fp_countries = self.env['res.country']
+            if reports_foreign_vat:
                 foreign_vat_fpos = self.env['account.fiscal.position'].search([
                     ('foreign_vat', '!=', False),
                     ('company_id', 'in', companies.ids),
                 ])
-                countries += foreign_vat_fpos.country_id
+                fp_countries |= foreign_vat_fpos.country_id
 
-            return not self.country_id or self.country_id in countries
+            reports += reports_by_country.filtered(lambda r: not r.country_id)
+            reports += reports_no_foreign_vat.filtered(lambda r: r.country_id and r.country_id in company_countries)
+            reports += reports_foreign_vat.filtered(lambda r: r.country_id and r.country_id in (company_countries | fp_countries))
 
-        elif self.availability_condition == 'coa':
-            # When restricting to 'coa', the report is only available is all the companies have the same CoA as the report
-            return self.chart_template in set(companies.mapped('chart_template'))
+        reports_by_coa = self.filtered(lambda r: r.availability_condition == 'coa')
+        if reports_by_coa:
+            # When restricting to 'coa', the report is only available if all the companies have the same CoA as the report
+            chart_templates = set(companies.mapped('chart_template'))
+            reports += reports_by_coa.filtered(lambda r: r.chart_template in chart_templates)
 
-        return True
+        return reports
 
     def _get_column_headers_render_data(self, options):
         column_headers_render_data = {}
@@ -6245,7 +6313,7 @@ class AccountReport(models.Model):
 
         print_mode_self = self.with_context(no_format=True)
         lines = self._filter_out_folded_children(print_mode_self._get_lines(options))
-        annotations = self.get_annotations(options, lines)
+        report_annotations = self.get_annotations(options, lines)
 
         # For reports with lines generated for accounts, the account name and codes are shown in a single column.
         # To help user post-process the report if they need, we should in such a case split the account name and code in two columns.
@@ -6305,7 +6373,7 @@ class AccountReport(models.Model):
                 horizontal_group_name = next((group['name'] for group in options['available_horizontal_groups'] if group['id'] == options['selected_horizontal_group_id']), None)
                 write_cell(sheet, x_offset, y_offset, horizontal_group_name, title_format)
                 x_offset += 1
-            if annotations:
+            if report_annotations:
                 annotations_x_offset = x_offset
                 write_cell(sheet, annotations_x_offset, y_offset, 'Annotations', title_format)
                 x_offset += 1
@@ -6408,7 +6476,7 @@ class AccountReport(models.Model):
                 write_cell(sheet, x + line.get('colspan', 1) - 1, y + y_offset, cell_value, cell_format, datetime=cell_type == 'date')
 
             # Write annotations.
-            if annotations and (line_annotations := annotations.get(line['id'])):
+            if report_annotations and (line_annotations := report_annotations.get(line['id'])):
                 line_annotation_text = []
                 record_to_number_map = {}
                 for line_annotation in line_annotations:
@@ -6620,6 +6688,81 @@ class AccountReport(models.Model):
         render this report, following the provided options.
         """
         return [comp_data['id'] for comp_data in options['companies']]
+
+    def _get_unallocated_earnings_lines_domain(self, fiscalyear_start, company_id=None):
+        domain = [
+            ('account_id.include_initial_balance', '=', False),
+            ('date', '<', fiscalyear_start),
+        ]
+        if company_id:
+            domain += [('company_id', '=', company_id)]
+        return domain
+
+    def _get_unallocated_earnings_lines(self, options, date_scope, auditable=False):
+        def get_column_group_result(query_options, date_scope):
+            query = self._get_report_query(query_options, date_scope, domain=self._get_unallocated_earnings_lines_domain(
+                self.env[self.custom_handler_model_name]._get_fiscalyear_start_date(query_options)
+            ))
+            return self.env.execute_query_dict(SQL(
+                """
+                SELECT account_move_line.company_id,
+                       COALESCE(SUM(%(select_balance)s), 0.0) AS balance,
+                       COALESCE(SUM(%(select_debit)s), 0.0) AS debit,
+                       COALESCE(SUM(%(select_credit)s), 0.0) AS credit
+                  FROM %(table_references)s
+                       %(currency_table_join)s
+                 WHERE %(search_condition)s
+              GROUP BY account_move_line.company_id
+                """,
+                select_balance=self._currency_table_apply_rate(SQL("account_move_line.balance")),
+                select_debit=self._currency_table_apply_rate(SQL("account_move_line.debit")),
+                select_credit=self._currency_table_apply_rate(SQL("account_move_line.credit")),
+                table_references=query.from_clause,
+                currency_table_join=self._currency_table_aml_join(query_options),
+                search_condition=query.where_clause,
+            ))
+
+        if not self.custom_handler_model_id:
+            return []
+        if options.get('filter_search_bar') and options.get('filter_search_bar') not in str(UNDISTR_LINE_NAME).lower():
+            return []
+
+        unallocated_earnings_lines = defaultdict(dict)
+        company_to_line_id = dict()
+        for column_group_key, column_group_options in self._split_options_per_column_group(options).items():
+            # When groupby = id, the forced_domain is used to prevent displaying move lines that do not belong
+            # to the period that is selected. In the unallocated earning lines, this is not needed.
+            data = get_column_group_result(column_group_options | {
+                'forced_domain': [domain for domain in column_group_options['forced_domain'] if domain != ('id', '=', False)],
+            }, date_scope)
+
+            for company_line in data:
+                line_id = self._get_generic_line_id('res.company', company_line['company_id'], markup='undistributed_profits_losses')
+                company_to_line_id[company_line['company_id']] = line_id
+                unallocated_earnings_lines[column_group_key] |= {line_id: company_line}
+
+        return [{
+            'id': line_id,
+            'name': (
+                str(UNDISTR_LINE_NAME) if len(self.env.companies) == 1 else
+                _('%(line_name)s - %(company)s', line_name=UNDISTR_LINE_NAME, company=self.env['res.company'].browse(company_id).name)
+            ),
+            'level': 1,
+            'columns': [
+                self._build_column_dict(
+                    unallocated_earnings_lines.get(column['column_group_key'], {}).get(line_id, {}).get(
+                        column['expression_label'],
+                        0.0 if column['figure_type'] == 'monetary' else None
+                    ),
+                    column,
+                    options=options
+                ) | {'auditable': auditable}
+                for column in options['columns']
+            ],
+            'unfoldable': False,
+            'unfolded': False,
+            'caret_options': 'undistributed_profits_losses',
+        } for company_id, line_id in company_to_line_id.items()]
 
     def _get_partner_and_general_ledger_initial_balance_line(self, options, parent_line_id, eval_dict, account_currency=None, level_shift=0):
         """ Helper to generate dynamic 'initial balance' lines, used by general ledger and partner ledger.
@@ -7231,6 +7374,16 @@ class AccountReportLine(models.Model):
 
     display_custom_groupby_warning = fields.Boolean(compute='_compute_display_custom_groupby_warning')
 
+    def fetch(self, field_names: Collection[str] | None = None) -> None:
+        super().fetch(field_names)
+        # TODO remove in master: `account_or_unaff_id` falls back to `account_id`
+        if field_names is None or 'groupby' in field_names or 'user_groupby' in field_names:
+            for line in self:
+                if 'account_or_unaff_id' in (line.groupby or ''):
+                    line.groupby = line.groupby.replace('account_or_unaff_id', 'account_id')
+                if 'account_or_unaff_id' in (line.user_groupby or ''):
+                    line.user_groupby = line.user_groupby.replace('account_or_unaff_id', 'account_id')
+
     @api.depends('groupby', 'user_groupby')
     def _compute_display_custom_groupby_warning(self):
         for line in self:
@@ -7266,8 +7419,10 @@ class AccountReportLine(models.Model):
         prefix_groups_count = 0
         sub_groupby_domain = []
         full_sub_groupby_key_elements = []
+        parent_groupby_nber = 0
         for markup, model, value in line_id_list:
             if isinstance(markup, dict) and 'groupby' in markup:
+                parent_groupby_nber += 1
                 field_name = markup['groupby']
                 if field_name in custom_groupby_map:
                     sub_groupby_domain += custom_groupby_map[field_name]['domain_builder'](value)
@@ -7355,7 +7510,7 @@ class AccountReportLine(models.Model):
                 'unfolded': (has_children and next_groupby and options['unfold_all']) or line_id in options['unfolded_lines'],
                 'groupby': next_groupby,
                 'columns': columns,
-                'level': self.hierarchy_level + 2 * (prefix_groups_count + len(sub_groupby_domain) + 1) + (group_indent - 1),
+                'level': self.hierarchy_level + 2 * (prefix_groups_count + parent_groupby_nber + 1) + (group_indent - 1),
                 'parent_id': line_dict_id,
                 'expand_function': '_report_expand_unfoldable_line_with_groupby' if next_groupby else None,
                 'caret_options': caret_option,

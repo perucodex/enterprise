@@ -785,7 +785,7 @@ class IngenicoDriver(Driver):
         Override
         """
         try:
-            self.data["Ticket"] = False
+            self.data = {'value': '', 'Stage': False, 'Response': False, 'Ticket': False, 'Error': False}
             if data['messageType'] == 'Transaction':
                 self.cid = data['cid']
                 if data['amount'] < 0:
@@ -828,6 +828,13 @@ class IngenicoDriver(Driver):
                     self.data["Response"] = False
                     self.data["Error"] = False
                     msgType = msg.getMessageType()
+                    to_notify = False
+                    stage = msg.getTransactionStage()
+                    if stage and stage != self.data['Stage']:
+                        self.data['Stage'] = stage
+                        if stage in ['WaitingForCard', 'WaitingForPin']:
+                            to_notify = True
+                    self.data['cid'] = self.cid
                     if msgType == "KeepAliveRequest":
                         self._outgoingMessage( "KeepAliveResponse", reason=msg.getKeepAliveReasonId())
                     elif msgType == "TransactionResponse":
@@ -835,13 +842,13 @@ class IngenicoDriver(Driver):
                         if self.data["Response"] == 'Error':
                             self.data["Error"] = 'Canceled'
                         self.data["Ticket"] = msg.getTransactionTicket() if msg.getTransactionTicket() else self.data["Ticket"]
-                    self.data['Stage'] = msg.getTransactionStage() if msg.getTransactionStage() else self.data['Stage']
-                    self.data['cid'] = self.cid
+                        to_notify = True
+                    if to_notify:
+                        event_manager.device_changed(self)
                 else:
                     _logger.info("Terminating due to an invalid message")
                     self.disconnect()
                     break
-                event_manager.device_changed(self)
         except Exception:
             _logger.info("Terminating due to an exception")
             self.disconnect()

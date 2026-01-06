@@ -23,8 +23,8 @@ class IotBox(models.Model):
     def get_computed_img_version(self):
         # Once connected to db, version is like 'L24.08-17.0#f30b83ff': we need to extract between 'L' and '-'
         try:
-            version_str = self.version.split('L')[1].split('-')[0]
-            return float(version_str)
+            version_str = self.version.split('-')[0]
+            return float(version_str[1:8])
         except IndexError:
             return float(self.version)
         except ValueError:

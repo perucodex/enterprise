@@ -106,7 +106,7 @@ export default class BarcodeMRPModel extends BarcodePickingModel {
     }
 
     get showReservedSns() {
-        return true;
+        return this.record.picking_type_id.show_reserved_sns;
     }
 
     get isComplete() {

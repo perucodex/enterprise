@@ -23,3 +23,11 @@ class ResConfigSettings(models.TransientModel):
     stock_valuation_account_id = fields.Many2one(
         'account.account', "Stock Valuation Account", readonly=False,
         related='company_id.account_stock_valuation_id')
+
+    def action_stock_open_valued_locations(self):
+        action = self.env["ir.actions.actions"]._for_xml_id('stock.action_prod_inv_location_form')
+        action['context'] = {
+            'search_default_inventory': 1,
+            'search_default_prod_inv_location': 1,
+        }
+        return action

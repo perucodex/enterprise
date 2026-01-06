@@ -11,7 +11,14 @@ export class TaskGanttRendererControls extends GanttRendererControls {
         });
     }
 
+    get projectDependencies() {
+        return this.dependenciesActive && (
+            !this.props.model.searchParams.context.default_project_id
+            || this.model.data.records?.[0]?.allow_task_dependencies
+        );
+    }
+
     get displayRescheduleMethods() {
-        return super.displayRescheduleMethods && this.dependenciesActive;
+        return super.displayRescheduleMethods && this.projectDependencies;
     }
 }

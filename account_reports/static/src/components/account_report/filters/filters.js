@@ -827,11 +827,16 @@ export class AccountReportFilters extends Component {
 
         this.controller.lines = await this.controller.orm.call(
             "account.report",
-            "format_column_values",
+            "dispatch_report_action",
             [
+                this.controller.cachedFilterOptions.report_id,
                 this.controller.cachedFilterOptions,
+                "format_column_values_from_client",
                 this.controller.lines,
             ],
+            {
+                context: this.controller.context,
+            }
         );
     }
 

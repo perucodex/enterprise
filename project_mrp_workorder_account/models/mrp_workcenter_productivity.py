@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, api
+from odoo import models, api, Command
 
 
 class MrpWorkcenterProductivity(models.Model):
@@ -31,7 +31,7 @@ class MrpWorkcenterProductivity(models.Model):
         line_vals = self.env['account.analytic.account']._perform_analytic_distribution(
             self.workorder_id.production_id.project_id.sudo()._get_analytic_distribution(), amount, duration, employee_aal, self, not distribution_update)
         if line_vals:
-            self.workorder_id.employee_analytic_account_line_ids += self.env['account.analytic.line'].sudo().create(line_vals)
+            self.workorder_id.sudo().employee_analytic_account_line_ids = [Command.create(line_val) for line_val in line_vals]
 
     def unlink(self):
         for time in self:

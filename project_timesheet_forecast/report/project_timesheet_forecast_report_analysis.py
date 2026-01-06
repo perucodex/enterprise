@@ -37,10 +37,11 @@ class ProjectTimesheetForecastReportAnalysis(models.Model):
                     planning_slot F
                     JOIN hr_employee E ON F.employee_id = E.id
                     JOIN resource_resource R ON E.resource_id = R.id
-                    JOIN resource_calendar_attendance A ON A.calendar_id = R.calendar_id,
+                    JOIN resource_calendar_attendance A ON A.calendar_id = R.calendar_id
+                    JOIN resource_calendar C ON R.calendar_id = C.id,
                     generate_series(F.start_datetime::date, F.end_datetime::date, '1 day') g
                 WHERE
-                    EXTRACT(ISODOW FROM g) = (A.dayofweek::integer + 1)
+                    EXTRACT(ISODOW FROM g) = (A.dayofweek::integer + 1) OR C.flexible_hours
                 GROUP BY F.id
             )
         """
@@ -79,6 +80,12 @@ class ProjectTimesheetForecastReportAnalysis(models.Model):
                 LEFT JOIN hr_employee E ON F.employee_id = E.id
                 LEFT JOIN resource_resource R ON E.resource_id = R.id
                 LEFT JOIN no_weekend_days W ON F.id = W.forecast_id
+                LEFT JOIN resource_calendar_leaves RL ON (
+                    (R.id = RL.resource_id OR RL.resource_id IS NULL)
+                    AND R.calendar_id = RL.calendar_id
+                    AND d::date >= RL.date_from::date
+                    AND d::date <= RL.date_to::date
+                )
         """
         return from_str
 
@@ -131,10 +138,21 @@ class ProjectTimesheetForecastReportAnalysis(models.Model):
     @api.model
     def _where(self):
         where_str = """
-            WHERE
-                EXTRACT(ISODOW FROM d.date) IN (
-                    SELECT A.dayofweek::integer+1 FROM resource_calendar_attendance A WHERE A.calendar_id = R.calendar_id
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM resource_calendar_attendance A
+                    JOIN resource_calendar C ON C.id = A.calendar_id
+                    WHERE A.calendar_id = R.calendar_id
+                    AND (
+                        C.flexible_hours
+                        OR (
+                            A.dayofweek::int + 1 = EXTRACT(ISODOW FROM d)
+                            AND F.start_datetime < (d::date + (A.hour_to || ' hour')::interval)
+                            AND F.end_datetime > (d::date + (A.hour_from || ' hour')::interval)
+                        )
+                    )
                 )
+                AND RL.id IS NULL
         """
         return where_str
 

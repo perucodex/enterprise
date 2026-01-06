@@ -150,7 +150,6 @@ export class TimerTimesheetGridModel extends TimesheetGridModel {
                 data.timer.row.timerRunning = false;
             }
             data.timer.row = row;
-            row.timerRunning = true;
         } else if (data.timer.row) {
             data.timer.row.timerRunning = false;
             delete data.timer.row;

@@ -32,6 +32,8 @@ class ResCompany(models.Model):
     onss_technical_user_name = fields.Char(string="ONSS Technical User Name", groups="base.group_system",
         help="ONSS Technical User Name provided when registering service on the ONSS platform")
     onss_sftp_private_key = fields.Many2one('certificate.key', string="ONSS Technical User Private Key", groups="base.group_system")
+
+    # Deprecated
     l10n_be_legal_time_off_type = fields.Many2one('hr.leave.type', string="Legal Time Off Type",
         help="Define the Time Off Type used for legal allocation of holidays",
         default=lambda self: self.env.ref('hr_holidays.leave_type_paid_time_off', raise_if_not_found=False))

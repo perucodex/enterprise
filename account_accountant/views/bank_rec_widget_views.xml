@@ -38,10 +38,11 @@
                         </group>
                         <notebook>
                             <page string="Statement Lines">
-                                <field name="line_ids">
+                                <field name="line_ids" context="{'default_journal_id': journal_id}">
                                     <list editable="bottom">
                                         <field name="date"/>
-                                        <field name="payment_ref"/>
+                                        <field name="payment_ref" required="1"/>
+                                        <field name="journal_id" column_invisible="1"/>
                                         <field name="account_number" optional="hide"/>
                                         <field name="foreign_currency_id" optional="hide"/>
                                         <field name="amount_currency" optional="hide"/>
@@ -57,12 +58,41 @@
             </field>
         </record>
 
+        <record id="view_bank_create_statement_form_bank_rec_widget" model="ir.ui.view">
+            <field name="name">account.create.bank.statement.form.bank_rec_widget</field>
+            <field name="model">account.bank.statement</field>
+            <field name="arch" type="xml">
+                <form string="Bank Statement">
+                    <div class="alert alert-warning text-center" role="alert" invisible="is_valid and is_complete and (not context.get('at_creation') or not journal_has_invalid_statements)">
+                        <div invisible="is_valid">The starting balance doesn't match the ending balance of the previous statement, or an earlier statement is missing.</div>
+                        <div invisible="is_complete">The running balance (<field name="balance_end"/>) doesn't match the specified ending balance.</div>
+                        <div invisible="not context.get('at_creation') or not journal_has_invalid_statements">
+                            There are one or more <a type="object" name="action_open_journal_invalid_statements" string="invalid statement(s)"/>
+                        </div>
+                    </div>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_open_bank_reconcile_widget" type="object" class="oe_stat_button" invisible="not line_ids">
+                            <field name="line_ids" string="Transactions" widget="statinfo" />
+                        </button>
+                        </div>
+                        <group>
+                            <field name="name" required="1" />
+                            <field name="balance_start"/>
+                            <field name="balance_end_real"/>
+                            <field name="attachment_ids" widget="many2many_binary"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
         <record id="action_bank_statement_form_bank_rec_widget" model="ir.actions.act_window">
             <!-- Binding removed since the same can be achieved with multi-edit -->
             <field name="name">Create Statement</field>
             <field name="res_model">account.bank.statement</field>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="view_bank_statement_form_bank_rec_widget"/>
+            <field name="view_id" ref="view_bank_create_statement_form_bank_rec_widget"/>
             <field name="target">new</field>
             <field name="context">{'dialog_size': 'medium', 'show_running_balance_latest': True, 'at_creation': True}</field>
         </record>
@@ -253,6 +283,7 @@
                                 'st_line_id':id,
                             }"
                            decoration-danger="statement_complete == False or statement_valid == False"
+                           widget="bank_rec_list_many2one_multi_id"
                            readonly="not id"/>
                     <field name="state"
                            optional="hide"
@@ -425,7 +456,7 @@
             <field name="model">account.account</field>
             <field name="arch" type="xml">
                 <list string="Account" create="false" edit="false">
-                    <field name="code"/>
+                    <field name="code" groups="account.group_account_readonly"/>
                     <field name="name" optional="show"/>
                     <field name="description" optional="hide" width="350px"/>
                     <field name="account_type" optional="hide"/>

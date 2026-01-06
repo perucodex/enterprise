@@ -30,7 +30,9 @@ class PosOrder(models.Model):
                 raise UserError(_("Deleting of registered orders is not allowed."))
 
     def set_is_reprint(self):
-        self.is_reprint = True
+        """No longer used, remove in master"""
+        return True
 
     def is_already_reprint(self):
-        return self.is_reprint
+        """No longer used, remove in master"""
+        return True

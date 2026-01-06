@@ -9,13 +9,14 @@
 # Emily Jia <eji@odoo.com>, 2023
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
 # "Chloe Wang (chwa)" <chwa@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2025-09-29 12:10+0000\n"
-"Last-Translator: \"Chloe Wang (chwa)\" <chwa@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:41+0000\n"
+"PO-Revision-Date: 2025-11-13 13:13+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
 "projects/odoo-19/timesheet_grid/zh_Hans/>\n"
 "Language: zh_CN\n"
@@ -167,6 +168,132 @@ msgid ""
 "</table>\n"
 "            "
 msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"padding: 16px; background-color: white; color: #454748; border-"
+"collapse:separate;\">\n"
+"<tbody>\n"
+"    <!-- HEADER -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\">\n"
+"                    <span style=\"font-size: 10px;\">您的工时单</span><br/>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\" t-"
+"out=\"object.name or ''\">Abigail Peterson</span>\n"
+"                </td><td valign=\"middle\" align=\"right\" t-if=\"not "
+"object.company_id.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?"
+"company={{ object.company_id.id }}\" style=\"padding: 0px; margin: 0px; "
+"height: auto; width: 80px;\" t-att-alt=\"object.company_id.name\"/>\n"
+"                </td></tr>\n"
+"                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                  <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- CONTENT -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    <t t-set=\"timesheet_hours\" t-"
+"value=\"ctx.get('timesheet_hours', 0)\"/>\n"
+"                    <t t-set=\"working_hours\" t-"
+"value=\"ctx.get('working_hours', 0)\"/>\n"
+"                    <div>\n"
+"                        <t t-out=\"object.name or ''\">Abigail Peterson</t>您"
+"好，<br/><br/>\n"
+"                        友情提醒，请记录以下时工时：<t t-"
+"out=\"ctx.get('date_start') or ''\">05/05/2021</t> <i class=\"fa fa-long-"
+"arrow-right\"/> <t t-out=\"ctx.get('date_stop') or ''\">05/06/2021</t>.\n"
+"                        目前，您<t t-if=\"timesheet_hours != 0\">仅</t> 记录"
+"了 <t t-out=\"'%d' %int(timesheet_hours)\">2 小时</t><t t-"
+"if=\"timesheet_hours % 1 != 0\" t-out=\"':%02d' % (round(timesheet_hours % 1 "
+"* 60))\">30 分钟</t>，要求为 <t t-out=\"'%d' %int(working_hours)\">8 小时</"
+"t><t t-if=\"working_hours % 1 != 0\" t-out=\"':%02d' % (round(working_hours "
+"% 1 * 60))\">30 分钟</t> 。<br/>\n"
+"                        <div t-if=\"ctx.get('action_url')\" style=\"margin: "
+"16px 0px 16px 0px;\">\n"
+"                            <a t-att-href=\"ctx.get('action_url')\" t-attf-"
+"style=\"background-color: {{object.company_id.email_secondary_color or "
+"'#875A7B'}};; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size: 13px;\">填写您的时间表</a>\n"
+"                        </div>\n"
+"                        <br/>谢谢！<br/>\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-"
+"quote=\"1\">Mitchell Admin</t></div>\n"
+"                        </t>\n"
+"                    </div>\n"
+"                </td></tr>\n"
+"                <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- FOOTER -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\" align=\"left\">\n"
+"                    <t t-out=\"object.company_id.name or ''\">YourCompany</"
+"t>\n"
+"                </td></tr>\n"
+"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: "
+"0.7;\">\n"
+"                    <t t-out=\"object.company_id.phone or ''\">+1 "
+"650-123-4567</t>\n"
+"                    <t t-if=\"object.company_id.email\">\n"
+"                        | <a t-attf-href=\"'mailto:%s' % "
+"{{ object.company_id.email }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.company_id.email or ''\">info@yourcompany.com</a>\n"
+"                    </t>\n"
+"                    <t t-if=\"object.company_id.website\">\n"
+"                        | <a t-attf-href=\"'%s' % "
+"{{ object.company_id.website }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.company_id.website or ''\">http://www.example.com</"
+"a>\n"
+"                    </t>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"</tbody>\n"
+"</table>\n"
+"</td></tr>\n"
+"<!-- POWERED BY -->\n"
+"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; "
+"padding: 8px; border-collapse:separate;\">\n"
+"      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"        由<a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}};\">Odoo</a>驱动\n"
+"      </td></tr>\n"
+"    </table>\n"
+"</td></tr>\n"
+"</table>\n"
+"            "
 
 #. module: timesheet_grid
 #: model:mail.template,body_html:timesheet_grid.mail_template_timesheet_reminder
@@ -290,6 +417,122 @@ msgid ""
 "</table>\n"
 "            "
 msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"padding: 16px; background-color: white; color: #454748; border-"
+"collapse:separate;\">\n"
+"<tbody>\n"
+"    <!-- HEADER -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\">\n"
+"                    <span style=\"font-size: 10px;\">您的工时单</span><br/>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\" t-"
+"out=\"object.name or ''\">Abigail Peterson</span>\n"
+"                </td><td valign=\"middle\" align=\"right\" t-if=\"not "
+"object.company_id.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?"
+"company={{ object.company_id.id }}\" style=\"padding: 0px; margin: 0px; "
+"height: auto; width: 80px;\" t-att-alt=\"object.company_id.name\"/>\n"
+"                </td></tr>\n"
+"                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- CONTENT -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    <div>\n"
+"                        <t t-out=\"object.name or ''\">Abigail Peterson</t>您"
+"好！<br/><br/>\n"
+"                        友情提示，提醒您批准团队以下时段的工时单：<t t-"
+"out=\"ctx.get('date_start') or ''\">05/05/2021</t> - <t t-"
+"out=\"ctx.get('date_stop') or ''\">06/05/2021</t>.<br/>\n"
+"                        <div t-if=\"ctx.get('action_url')\" style=\"margin: "
+"16px 0px 16px 0px;\">\n"
+"                            <a t-att-href=\"ctx.get('action_url')\" t-attf-"
+"style=\"background-color: {{object.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size: 13px;\">验证工时单</a>\n"
+"                        </div>\n"
+"                        <br/>谢谢！<br/>\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-"
+"quote=\"1\">Mitchell Admin</t></div>\n"
+"                        </t>\n"
+"                    </div>\n"
+"                </td></tr>\n"
+"                <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- FOOTER -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\" align=\"left\">\n"
+"                    <t t-out=\"object.company_id.name or ''\">YourCompany</"
+"t>\n"
+"                </td></tr>\n"
+"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: "
+"0.7;\">\n"
+"                    <t t-out=\"object.company_id.phone or ''\">+1 "
+"650-123-4567</t>\n"
+"                    <t t-if=\"object.company_id.email\">\n"
+"                        | <a t-attf-href=\"'mailto:%s' % "
+"{{ object.company_id.email }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.company_id.email or ''\">info@yourcompany.com</a>\n"
+"                    </t>\n"
+"                    <t t-if=\"object.company_id.website\">\n"
+"                        | <a t-attf-href=\"'%s' % "
+"{{ object.company_id.website }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.company_id.website or ''\">http://www.example.com</"
+"a>\n"
+"                    </t>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"</tbody>\n"
+"</table>\n"
+"</td></tr>\n"
+"<!-- POWERED BY -->\n"
+"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; "
+"padding: 8px; border-collapse:separate;\">\n"
+"      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"        由 <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}};\">Odoo</a>驱动\n"
+"      </td></tr>\n"
+"    </table>\n"
+"</td></tr>\n"
+"</table>\n"
+"            "
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -316,7 +559,7 @@ msgstr "员工必须与你的用户相联系才能记录时间。"
 #. module: timesheet_grid
 #: model:ir.model,name:timesheet_grid.model_account_analytic_line
 msgid "Analytic Line"
-msgstr ""
+msgstr "分析行"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_config_settings__reminder_allow
@@ -368,7 +611,7 @@ msgstr "确认花费的时间"
 #. module: timesheet_grid
 #: model:ir.model,name:timesheet_grid.model_hr_timesheet_stop_timer_confirmation_wizard
 msgid "Confirm timesheet creation when stop timer"
-msgstr ""
+msgstr "停止计时器时确认工时表创建"
 
 #. module: timesheet_grid
 #: model_terms:web_tour.tour,rainbow_man_message:timesheet_grid.timesheet_tour
@@ -378,7 +621,7 @@ msgstr "恭喜您，您现在是一个工时表的大师。"
 #. module: timesheet_grid
 #: model:ir.model,website_form_label:timesheet_grid.model_project_task
 msgid "Create a Task"
-msgstr ""
+msgstr "创建任务"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_hr_timesheet_merge_wizard__create_uid
@@ -457,6 +700,8 @@ msgid ""
 "Difference between the allocated %(uom)s (%(allocated_hours)s) and the %"
 "(uom)s spent (%(worked_hours)s) on the project"
 msgstr ""
+"已分配的 %(uom)s（%(allocated_hours)s）与项目已花费的 %(uom)s（%"
+"(worked_hours)s）之间的差异"
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -465,6 +710,8 @@ msgid ""
 "Difference between the allocated %(uom)s (%(allocated_hours)s) and the %"
 "(uom)s spent (%(worked_hours)s) on the task"
 msgstr ""
+"已分配的 %(uom)s（%(allocated_hours)s）与任务已花费的 %(uom)s（%"
+"(worked_hours)s）之间的差异"
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -565,12 +812,12 @@ msgstr "ID"
 msgid ""
 "Keep track of your working hours by project every day and bill your "
 "customers for that time."
-msgstr ""
+msgstr "追踪不同项目每天的工时，向客户收取工时费用。"
 
 #. module: timesheet_grid
 #: model:ir.ui.menu,name:timesheet_grid.menu_timesheet_grid_validate_previous_week
 msgid "Last Period"
-msgstr ""
+msgstr "上一期间"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_hr_timesheet_merge_wizard__write_uid
@@ -612,12 +859,12 @@ msgstr "启动<b>计时器</b>，开始一个新的活动。"
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/views/timesheet_calendar_my_timesheets/timesheet_calendar_my_timesheets_side_panel.xml:0
 msgid "Legend"
-msgstr ""
+msgstr "图例"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.hr_timesheet_stop_timer_confirmation_wizard_view_form
 msgid "Log Time"
-msgstr ""
+msgstr "记录时间"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.timesheet_merge_wizard_view_form
@@ -662,6 +909,8 @@ msgid ""
 "timesheet drafts in the original project. Although they won't be visible "
 "here, you can still edit them using the Timesheets app."
 msgstr ""
+"将此任务移动到不支持工时单的项目中，会在原项目中保留工时单草稿。虽然这些草稿"
+"在这里不可见，但您仍然可以使用工时单应用程序对其进行编辑。"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.timesheet_view_search
@@ -686,13 +935,13 @@ msgstr "我的团队"
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_hr_timesheet_stop_timer_confirmation_wizard__timesheet_name
 msgid "Name"
-msgstr ""
+msgstr "名称"
 
 #. module: timesheet_grid
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/views/timesheet_grid/timesheet_grid_renderer.js:0
 msgid "No timesheets found. Let's create one!"
-msgstr ""
+msgstr "找不到工时表。让我们创建一个吧！"
 
 #. module: timesheet_grid
 #: model_terms:ir.actions.act_window,help:timesheet_grid.timesheet_grid_to_validate_action
@@ -731,7 +980,7 @@ msgstr "只有工时表审批人或经理可以修改已验证的条目。"
 #. odoo-python
 #: code:addons/timesheet_grid/models/account_analytic_line.py:0
 msgid "Open Form"
-msgstr ""
+msgstr "开启表单"
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -781,7 +1030,7 @@ msgstr "重置为草稿"
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.hr_timesheet_stop_timer_confirmation_wizard_view_form
 msgid "Resume Timer"
-msgstr ""
+msgstr "重启计时器"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_config_settings__timesheet_rounding
@@ -832,7 +1081,7 @@ msgstr ""
 #: code:addons/timesheet_grid/static/src/components/grid_timesheet_timer_header/grid_timesheet_timer_header.xml:0
 #: code:addons/timesheet_grid/static/src/components/timesheet_timer_header/timesheet_timer_header.xml:0
 msgid "Shift"
-msgstr ""
+msgstr "时段"
 
 #. module: timesheet_grid
 #. odoo-python
@@ -932,13 +1181,13 @@ msgstr "没有工时表可以重设为草稿，或者已经开过发票。"
 #. odoo-python
 #: code:addons/timesheet_grid/models/project_project.py:0
 msgid "This Progress Bar is not implemented."
-msgstr ""
+msgstr "进度条尚未走完。"
 
 #. module: timesheet_grid
 #. odoo-python
 #: code:addons/timesheet_grid/models/project_task.py:0
 msgid "This project isn't expected to have task during this period."
-msgstr ""
+msgstr "此项目在此期间并不预期有任务。"
 
 #. module: timesheet_grid
 #. odoo-python
@@ -946,7 +1195,7 @@ msgstr ""
 msgid ""
 "This user isn't expected to have any projects assigned during this period "
 "because they don't have any running contract."
-msgstr ""
+msgstr "该用户在此期间不会有任何项目分配，因为他们没有任何正在执行的合同。"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.res_config_settings_view_form
@@ -984,7 +1233,7 @@ msgstr "工时表网格混合"
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_project_task__timesheet_unit_amount
 msgid "Timesheet Unit Amount"
-msgstr ""
+msgstr "工时表单位金额"
 
 #. module: timesheet_grid
 #: model:ir.actions.server,name:timesheet_grid.timesheet_reminder_ir_actions_server
@@ -1014,7 +1263,7 @@ msgstr "工时表分析报表"
 msgid ""
 "Timesheets before the %(date)s (included) have been validated, and can no "
 "longer be deleted."
-msgstr ""
+msgstr "%(date)s及之前的工时单已完成验证，无法删除。"
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1022,7 +1271,7 @@ msgstr ""
 msgid ""
 "Timesheets before the %(date)s (included) have been validated, and can no "
 "longer be modified."
-msgstr ""
+msgstr "%(date)s及之前的工时单已完成验证，无法修改。"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.res_config_settings_view_form
@@ -1137,7 +1386,7 @@ msgstr "验证完毕的线"
 #. odoo-python
 #: code:addons/timesheet_grid/models/project_task.py:0
 msgid "Warning"
-msgstr ""
+msgstr "警告"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.timesheet_view_grid
@@ -1162,7 +1411,7 @@ msgstr "当前用户是否可以验证/重置来起草记录。"
 #: code:addons/timesheet_grid/models/hr_employee.py:0
 #: code:addons/timesheet_grid/models/res_users.py:0
 msgid "You are not allowed to see timesheets."
-msgstr ""
+msgstr "您不被允许查看时间表。"
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1184,7 +1433,7 @@ msgstr "你只能验证你是经理或工时表审批人的员工的工时表。
 #. odoo-python
 #: code:addons/timesheet_grid/models/account_analytic_line.py:0
 msgid "You can't encode numbers with more than six digits."
-msgstr ""
+msgstr "您不可编码多于六位数的数字。"
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1206,7 +1455,7 @@ msgstr "工时表禁用时，无法调整项目时间表的时间。"
 msgid ""
 "You cannot delete a validated entry. Please contact your manager or your "
 "timesheet approver."
-msgstr ""
+msgstr "无法删除已验证的条目。请联系您的经理或工时单审批人。"
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1230,6 +1479,8 @@ msgid ""
 "employees who are not part of your team or are not in a state that can be "
 "validated. This may be due to the fact that they are dated in the future."
 msgstr ""
+"您无法验证所选工时单，这些工时单对应的员工可能不属于您的团队，或者处于无法验"
+"证的状态。可能原因时日期发生在未来。"
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1238,6 +1489,8 @@ msgid ""
 "Your timesheet entry is missing a project. Please either group the Grid view "
 "by project or enter your timesheets by adding a line via the Form view."
 msgstr ""
+"您的工时单记项缺少项目。请按项目对网格视图进行分组，或通过表格视图添加一行，"
+"以输入工时单。"
 
 #. module: timesheet_grid
 #: model:ir.model.fields.selection,name:timesheet_grid.selection__res_company__timesheet_mail_employee_interval__months
@@ -1255,7 +1508,7 @@ msgstr "周末后"
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/components/timesheet_timer_header/timesheet_timer_header.xml:0
 msgid "and click on"
-msgstr ""
+msgstr "并点击"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.res_config_settings_view_form
@@ -1273,13 +1526,13 @@ msgstr "最小"
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/components/grid_timesheet_timer_header/grid_timesheet_timer_header.xml:0
 msgid "or"
-msgstr ""
+msgstr "或"
 
 #. module: timesheet_grid
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/components/timesheet_timer_header/timesheet_timer_header.xml:0
 msgid "or click on"
-msgstr ""
+msgstr "或点击"
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -1293,7 +1546,7 @@ msgstr "添加"
 #: code:addons/timesheet_grid/static/src/components/grid_timesheet_timer_header/grid_timesheet_timer_header.xml:0
 #: code:addons/timesheet_grid/static/src/components/timesheet_timer_header/timesheet_timer_header.xml:0
 msgid "to launch the timer"
-msgstr ""
+msgstr "启动计时器"
 
 #~ msgid "%s Spent"
 #~ msgstr "%s花费"

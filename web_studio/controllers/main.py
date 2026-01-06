@@ -120,6 +120,7 @@ class WebStudioController(http.Controller):
             "delivery_iot.report_shipping_labels",
             "delivery_iot.report_shipping_docs",
             "l10n_co_reports.report_libro_diario",
+            "account.report_original_vendor_bill",
         ]
         report_domain = Domain.AND([
             # One can edit only reports backed by persisting models
@@ -585,10 +586,12 @@ class WebStudioController(http.Controller):
             if node and node.get('tag') == 'field' and node.get('field_description') and node['field_description'].get('related'):
                 model_name = node['field_description'].get("model_name") or model
                 related_filename = node['field_description']['related'] + '_filename'
+                related_model_path = related_filename.split(".")[:-1]
                 related_filename = request.env["ir.model.fields"]._get_related_field(model_name, related_filename)
                 if not related_filename:
                     continue
-                char_op['node']['field_description'].update({'related': related_filename.name})
+                path = ".".join(chain(related_model_path, [related_filename.name]))
+                char_op['node']['field_description'].update({'related': path})
             char_op['node']['attrs']['invisible'] = 'True'
 
             # put the filename field after the binary field

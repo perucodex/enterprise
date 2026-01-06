@@ -153,7 +153,10 @@ class MarketingActivity(models.Model):
                    'weeks': 168,
                    'months': 720}
         for activity in self:
-            activity.interval_standardized = activity.interval_number * factors[activity.interval_type]
+            activity.interval_standardized = (
+                (activity.interval_number * factors[activity.interval_type])
+                if activity.interval_type else 0
+            )
 
     @api.depends('trigger_type')
     def _compute_parent_id(self):
@@ -221,6 +224,9 @@ class MarketingActivity(models.Model):
         activity's starting point, the linked Server Action or Mail/SMS Template, trigger type, and the expiry duration.
         """
         for activity in self:
+            if not activity.interval_type or not activity.validity_duration_type:
+                activity.activity_summary = ''
+                continue
             activity.activity_summary = self.env['ir.qweb']._render('marketing_automation.marketing_activity_summary_template', {
                 'activity': activity,
                 'parent_activity_name': activity.parent_id.name,

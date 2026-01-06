@@ -4,12 +4,13 @@
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # "Junko Augias (juau)" <juau@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:44+0000\n"
-"PO-Revision-Date: 2025-10-27 02:41+0000\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-12-24 10:24+0000\n"
 "Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-19/"
 "appointment/ja/>\n"
@@ -18,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_invite_view_form
@@ -94,6 +95,8 @@ msgid ""
 "%(capacity)d seats are missing to be able to book the %(appointment_name)s: %"
 "(event_name)s (%(event_id)s)"
 msgstr ""
+"%(capacity)d席不足しています：%(appointment_name)s: %(event_name)s (%"
+"(event_id)s)"
 
 #. module: appointment
 #. odoo-python
@@ -117,7 +120,7 @@ msgstr "%s - 会いましょう"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form_gantt_booking
 msgid "'e.g. \"John Doe - Tennis Court Booking\""
-msgstr ""
+msgstr "'例: \"John Doe - テニスコート予約\""
 
 #. module: appointment
 #. odoo-javascript
@@ -135,6 +138,8 @@ msgid ""
 "<br/>\n"
 "                                    <span class=\"fw-light\">Duration</span>"
 msgstr ""
+"<br/>\n"
+"                                    <span class=\"fw-light\">所要時間</span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_kanban
@@ -142,6 +147,8 @@ msgid ""
 "<br/>\n"
 "                                <span class=\"fw-light\">To Confirm</span>"
 msgstr ""
+"<br/>\n"
+"                                <span class=\"fw-light\">要確認</span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_kanban
@@ -149,6 +156,8 @@ msgid ""
 "<br/>\n"
 "                                <span class=\"fw-light\">Total</span>"
 msgstr ""
+"<br/>\n"
+"                                <span class=\"fw-light\">合計</span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_kanban
@@ -156,6 +165,8 @@ msgid ""
 "<br/>\n"
 "                                <span class=\"fw-light\">Upcoming</span>"
 msgstr ""
+"<br/>\n"
+"                                <span class=\"fw-light\">近日予定</span>"
 
 #. module: appointment
 #: model:mail.template,body_html:appointment.attendee_invitation_mail_template
@@ -431,6 +442,271 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"font-size: 13px; color: #374151;\">\n"
+"    <t t-set=\"customer\" t-value=\" object.event_id.find_partner_customer()"
+"\"/>\n"
+"    <t t-set=\"target_responsible\" t-value=\"object.partner_id == "
+"object.event_id.partner_id\"/>\n"
+"    <t t-set=\"target_customer\" t-value=\"object.partner_id == customer\"/"
+">\n"
+"    <t t-set=\"recurrent\" t-value=\"object.recurrence_id and not "
+"ctx.get('calendar_template_ignore_recurrence')\"/>\n"
+"\n"
+"    <h1 style=\"font-size: 18px; font-weight: bold; color: #374151; margin-"
+"bottom: 28px;\">\n"
+"        Invitation\n"
+"    </h1>\n"
+"    <p style=\"margin: 0;\">\n"
+"        <span style=\"display: block; margin-bottom: 8px;\"><t t-"
+"out=\"object.common_name or ''\">Wood Corner</t>様</span>\n"
+"\n"
+"        <t t-if=\"target_customer\">\n"
+"            <t t-if=\"not "
+"object.event_id.appointment_type_id.is_always_confirm\">\n"
+"                <t t-if=\"object.event_id.appointment_status == 'booked'\">\n"
+"                    いつもお世話になっております。お客様の<strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\">デモ予約</strong><t t-"
+"if=\"object.event_id.appointment_type_id.category not in ['custom', "
+"'anytime'] and object.event_id.appointment_type_id.schedule_based_on == "
+"'users'\">担当： <t t-out=\"object.event_id.user_id.name or ''\">Ready Mat</"
+"t></t>が確定しましたのでお知らせいたします。<br/>\n"
+"                </t>\n"
+"                <t t-elif=\"object.event_id.appointment_status == "
+"'request'\">\n"
+"                    お客様の<strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\">デモ予約</strong><t t-"
+"if=\"object.event_id.appointment_type_id.category not in ['custom', "
+"'anytime'] and object.event_id.appointment_type_id.schedule_based_on == "
+"'users'\">担当：<t t-out=\"object.event_id.user_id.name or ''\">Ready Mat</"
+"t></t>を受付いたしました。<br/>\n"
+"                    確定いたしましたら、ご連絡いたします。\n"
+"                </t>\n"
+"            </t>\n"
+"            <t t-else=\"\">\n"
+"                お客様の<strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\">デモ予約</strong> <t "
+"t-if=\"object.event_id.appointment_type_id.category not in ['custom', "
+"'anytime'] and object.event_id.appointment_type_id.schedule_based_on == "
+"'users'\">担当：<t t-out=\"object.event_id.user_id.name or ''\">Ready Mat</"
+"t></t>が予約されました。\n"
+"            </t>\n"
+"        </t>\n"
+"        <t t-elif=\"target_responsible\">\n"
+"            <t t-if=\"customer\">\n"
+"                <t t-out=\"customer.name or ''\"/> がお客様との <strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\">デモ予約</strong>をス"
+"ケジュールしました。\n"
+"                <t t-if=\"object.event_id.appointment_type_id and "
+"object.event_id.appointment_status == 'request'\">\n"
+"                    この予約は確定待ちです。\n"
+"                </t>\n"
+"            </t>\n"
+"            <t t-else=\"\">\n"
+"                お客様の<strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\">デモ予約</strong> が予"
+"約されました。\n"
+"            </t>\n"
+"        </t>\n"
+"        <t t-else=\"\">\n"
+"            <strong t-out=\"object.event_id.appointment_type_id.name or ''\">"
+"デモ予約</strong>に招待されています。\n"
+"        </t>\n"
+"    </p>\n"
+"    <div style=\"text-align: center; padding: 16px 0px 16px 0px;\">\n"
+"        <t t-if=\"object.state != 'accepted'\">\n"
+"            <a t-attf-href=\"/calendar/meeting/accept?"
+"token={{object.access_token}}&amp;id={{object.event_id.id}}\" t-attf-"
+"style=\"display: inline-block; padding: 7px 14px; color: "
+"{{user.company_id.email_primary_color or '#FFFFFF'}}; text-decoration: none; "
+"background-color: {{user.company_id.email_secondary_color or '#875A7B'}}; "
+"border-radius: 3px\">\n"
+"                承諾する</a>\n"
+"            <a t-attf-href=\"/calendar/meeting/decline?"
+"token={{object.access_token}}&amp;id={{object.event_id.id}}\" t-attf-"
+"style=\"display: inline-block; margin-left: 6px; padding: 7px 14px; color: "
+"{{user.company_id.email_primary_color or '#FFFFFF'}}; text-decoration: none; "
+"background-color: {{user.company_id.email_secondary_color or '#875A7B'}}; "
+"border-radius: 3px\">\n"
+"                辞退する</a>\n"
+"        </t>\n"
+"        <a t-if=\"not target_responsible and not target_customer\" t-attf-"
+"href=\"/calendar/meeting/view?token={{object.access_token}}"
+"&amp;id={{object.event_id.id}}\" style=\"display: inline-block; margin-left: "
+"12px; padding: 5px 10px; color: #111827; text-decoration: none; background-"
+"color: #E7E9ED; border-radius: 3px; border-radius: 3px\">見る</a>\n"
+"        <a t-elif=\"not target_customer\" t-attf-href=\"/mail/view?"
+"model=calendar.event&amp;res_id={{object.event_id.id}}\" t-attf-"
+"style=\"display: inline-block; margin-left: 12px; padding: 5px 10px; color: "
+"#111827; text-decoration: none; background-color: #E7E9ED; border-radius: "
+"3px; border-radius: 3px\">見る</a>\n"
+"    </div>\n"
+"    <div style=\"margin: 16px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">詳細</h2>\n"
+"        <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"font-"
+"size: 13px; color: #374151;\">\n"
+"            <tr>\n"
+"                <td style=\"width: 100px; color: #676F7B;\">日時</td>\n"
+"                <td style=\"font-weight: bold;\">\n"
+"                    <t t-out=\"format_datetime(dt=object.event_id.start, "
+"tz=object.mail_tz if not object.event_id.allday else None, dt_format='EEEE', "
+"lang_code=object.env.lang) or ''\">火曜日</t>\n"
+"                    <t t-out=\"format_datetime(dt=object.event_id.start, "
+"tz=object.mail_tz if not object.event_id.allday else None, dt_format='d', "
+"lang_code=object.env.lang) or ''\">4日</t>\n"
+"                    <t t-out=\"format_datetime(dt=object.event_id.start, "
+"tz=object.mail_tz if not object.event_id.allday else None, dt_format='MMMM "
+"y', lang_code=object.env.lang) or ''\">2021年5月</t>\n"
+"                    <t t-if=\"not object.event_id.allday\">\n"
+"                        <t t-out=\"format_time(time=object.event_id.start, "
+"tz=object.mail_tz, time_format='short', lang_code=object.env.lang) or "
+"''\">11:00 AM</t>\n"
+"                        <t t-if=\"not "
+"object.event_id.appointment_type_id.hide_timezone and object.mail_tz\">\n"
+"                            <span style=\"font-size: 11px; font-weight: "
+"normal;\">\n"
+"                                (<t t-out=\"object.mail_tz or ''\">Europe/"
+"Brussels</t>)\n"
+"                            </span>\n"
+"                        </t>\n"
+"                    </t>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <tr t-if=\"recurrent\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">開催日</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-"
+"out=\"object.recurrence_id.name or ''\">毎週1回、3回開催</t></td>\n"
+"            </tr>\n"
+"            <tr t-if=\"not object.event_id.appointment_type_id.hide_duration "
+"and not object.event_id.allday and object.event_id.duration\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">所要時間</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-out=\"('%dH%02d' % "
+"(object.event_id.duration,round(object.event_id.duration*60)%60)) or "
+"''\">0H30</t></td>\n"
+"            </tr>\n"
+"            <tr t-if=\"object.event_id.location\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B; "
+"vertical-align: top;\">場所</td>\n"
+"                <td style=\"padding-top: 6px;\">\n"
+"                    <t t-out=\"object.event_id.location or ''\">Bruxelles</"
+"t>\n"
+"                    <a target=\"_blank\" t-if=\"object.event_id.location != "
+"object.event_id.appointment_type_id.location_id.name\" t-attf-href=\"http://"
+"maps.google.com/maps?oi=map&amp;q={{object.event_id.location}}\" "
+"style=\"margin-left: 12px; font-size: 12px; color: #008f8c; text-decoration: "
+"underline;\">地図を表示</a>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <tr t-"
+"if=\"object.event_id.appointment_type_id.manage_capacity\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">対象人数：</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-"
+"out=\"object.event_id.total_capacity_reserved\"/>名</td>\n"
+"            </tr>\n"
+"            <tr t-if=\"not "
+"object.event_id.appointment_type_id.is_auto_assign and "
+"object.event_id.appointment_resource_ids\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B; "
+"vertical-align: top;\">リソース</td>\n"
+"                <td style=\"padding-top: 6px;\">\n"
+"                    <ul style=\"padding: 0 15px;\">\n"
+"                        <li t-"
+"foreach=\"object.event_id.appointment_resource_ids\" t-as=\"resource\">\n"
+"                            <span style=\"margin-left:5px\" t-"
+"out=\"resource.name or ''\">テーブル1台</span>\n"
+"                        </li>\n"
+"                    </ul>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <tr t-if=\"object.event_id.videocall_redirection\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">\n"
+"                    <t t-if=\"object.event_id.videocall_source == "
+"'discuss'\">以下より参加：</t>\n"
+"                    <t t-else=\"\">参加する</t>\n"
+"                </td>\n"
+"                <td style=\"padding-top: 6px;\">\n"
+"                    <a t-attf-"
+"href=\"{{ object.event_id.videocall_redirection }}\" target=\"_blank\" "
+"style=\"color: #008f8c;\">\n"
+"                        <t t-if=\"object.event_id.videocall_source == "
+"'discuss'\">Odooディスカス</t>\n"
+"                        <t t-else=\"\">ビデオミーティング</t>\n"
+"                    </a>\n"
+"                </td>\n"
+"            </tr>\n"
+"        </table>\n"
+"    </div>\n"
+"    <div style=\"margin: 32px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">参加者</h2>\n"
+"        <div t-foreach=\"object.event_id.attendee_ids\" t-as=\"attendee\" "
+"style=\"margin-bottom: 5px;\">\n"
+"            <img t-if=\"attendee.state\" t-attf-src=\"/calendar/static/src/"
+"img/state_{{ attendee.state }}.png\" style=\"border:0; width: 15px; height: "
+"15px; vertical-align: text-bottom;\"/>\n"
+"            <t t-if=\"attendee != object\">\n"
+"                <span style=\"margin-left: 5px\" t-"
+"out=\"attendee.common_name or ''\">Mitchell Admin</span>\n"
+"            </t>\n"
+"            <t t-else=\"\">\n"
+"                <span style=\"margin-left:5px\">あなた</span>\n"
+"            </t>\n"
+"        </div>\n"
+"    </div>\n"
+"    <div t-if=\"not is_html_empty(object.event_id.description)\" "
+"style=\"margin: 32px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">ミーティングの内容</h2>\n"
+"        <div t-out=\"object.event_id.description\"/>\n"
+"    </div>\n"
+"    <div t-if=\"target_customer\" style=\"margin: 32px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">このミーティングを変更する</h2>\n"
+"        <a t-attf-href=\"/calendar/meeting/view?token={{object.access_token}}"
+"&amp;id={{object.event_id.id}}\" style=\"color: color: #008f8c; text-"
+"decoration: underline;\">予約変更する</a>\n"
+"    </div>\n"
+"    <t t-set=\"upcoming_appointments\" t-"
+"value=\"(object.event_id.appointment_booker_id.upcoming_appointment_ids - "
+"object.event_id).sorted('start')\"/>\n"
+"    <div t-if=\"upcoming_appointments\" style=\"margin: 32px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">その他の今後の予約</h2>\n"
+"        <ul style=\"margin: 6px 0 0; padding: 0 18px;\">\n"
+"            <li style=\"margin-top: 6px;\" t-"
+"foreach=\"upcoming_appointments\" t-as=\"upcoming_appointment\">\n"
+"                <span t-out=\"upcoming_appointment.appointment_type_id.name "
+"or ''\">技術デモ</span>\n"
+"                <span style=\"margin: 0 10px;\">-</span>\n"
+"                <span t-out=\"upcoming_appointment.start or ''\" t-"
+"options=\"{&quot;widget&quot;: &quot;datetime&quot;, &quot;format&quot;: "
+"&quot;medium&quot;, &quot;tz_name&quot;: object.mail_tz}\" style=\"font-"
+"weight: bold;\">6月20日15:00</span>\n"
+"                <a t-attf-href=\"/calendar/view/"
+"#{upcoming_appointment.access_token}?partner_id=#{appointment_booker_id}\" "
+"target=\"_blank\" style=\"margin-left: 10px; font-size: 12px; color: "
+"#008f8c; text-decoration: underline;\">詳細を表示</a>\n"
+"            </li>\n"
+"        </ul>\n"
+"    </div>\n"
+"    <p style=\"margin: 32px 0 0;\">\n"
+"        よろしくお願いいたします。\n"
+"        <t t-if=\"object.event_id.user_id.signature\">\n"
+"            <span style=\"display: block; margin-top: 8px;\"><t t-"
+"out=\"object.event_id.user_id.signature or ''\">Mitchell Admin</t></span>\n"
+"        </t>\n"
+"    </p>\n"
+"</div>\n"
+"            "
 
 #. module: appointment
 #: model:mail.template,body_html:appointment.appointment_canceled_mail_template
@@ -553,6 +829,121 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"font-size: 13px; color: #374151;\">\n"
+"    <t t-set=\"recurrent\" t-value=\"object.recurrence_id and not "
+"ctx.get('calendar_template_ignore_recurrence')\"/>\n"
+"    <t t-set=\"mail_tz\" t-value=\"object._get_mail_tz() or "
+"ctx.get('mail_tz')\"/>\n"
+"    <t t-set=\"appointment_booker_name\" t-"
+"value=\"object.appointment_booker_id.display_name\"/>\n"
+"    <h1 style=\"font-size: 18px; font-weight: bold; color: #374151; margin-"
+"bottom: 28px;\">\n"
+"        Appointment canceled\n"
+"        <img src=\"/calendar/static/src/img/times-circle.png\" "
+"style=\"border:0; width: 24px; height: 24px; margin-left: 10px; text-"
+"decoration:none; vertical-align: bottom;\"/>\n"
+"    </h1>\n"
+"    <p style=\"margin: 0;\">\n"
+"        <t t-if=\"appointment_booker_name\">\n"
+"            <t t-out=\"appointment_booker_name\"/>様\n"
+"        </t>\n"
+"        <t t-else=\"\">\n"
+"            いつもお世話になっております。\n"
+"        </t>\n"
+"        <br/>\n"
+"        <span style=\"display: block; margin-top: 8px;\">お客様のご予約<t t-"
+"out=\"object.appointment_type_id.name or ''\">技術デモ</t> <t t-"
+"if=\"object.appointment_type_id.category not in ['custom', 'anytime'] and "
+"object.appointment_type_id.schedule_based_on == 'users' and "
+"object.partner_id\">担当：<t t-out=\"object.partner_id.name or ''\">Brandon "
+"Freeman</t></t> がキャンセルされました。</span>\n"
+"    </p>\n"
+"    <div style=\"margin: 32px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">詳細</h2>\n"
+"        <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"font-"
+"size: 13px; color: #374151;\">\n"
+"            <tr>\n"
+"                <td style=\"width: 100px; color: #676F7B;\">日時</td>\n"
+"                <td style=\"font-weight: bold;\">\n"
+"                    <t t-out=\"format_datetime(dt=object.start, tz=mail_tz "
+"if not object.allday else None, dt_format='EEEE', lang_code=object.env.lang) "
+"or ''\">水曜日</t>\n"
+"                    <t t-out=\"format_datetime(dt=object.start, tz=mail_tz "
+"if not object.allday else None, dt_format='d', lang_code=object.env.lang) or "
+"''\">1</t>\n"
+"                    <t t-out=\"format_datetime(dt=object.start, tz=mail_tz "
+"if not object.allday else None, dt_format='MMMM y', "
+"lang_code=object.env.lang) or ''\">2020年1月</t>\n"
+"                    <t t-if=\"not object.allday\">\n"
+"                        <t t-out=\"format_time(time=object.start, "
+"tz=mail_tz, time_format='short', lang_code=object.env.lang) or ''\">8:00</"
+"t>\n"
+"                        <t t-if=\"not "
+"object.appointment_type_id.hide_timezone and mail_tz\">\n"
+"                            <span style=\"font-size: 11px; font-weight: "
+"normal;\">\n"
+"                                (<t t-out=\"mail_tz\"/>)\n"
+"                            </span>\n"
+"                        </t>\n"
+"                    </t>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <tr t-if=\"recurrent\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">開催日</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-"
+"out=\"object.recurrence_id.name or ''\">毎週1回、3回開催</t></td>\n"
+"            </tr>\n"
+"            <tr t-if=\"not object.appointment_type_id.hide_duration and not "
+"object.allday and object.duration\" style=\"padding-top: 6px;\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">所要時間</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-out=\"('%dH%02d' % "
+"(object.duration,round(object.duration*60)%60)) or ''\">0H30</t></td>\n"
+"            </tr>\n"
+"            <tr t-if=\"object.location\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B; "
+"vertical-align: top;\">場所</td>\n"
+"                <td style=\"padding-top: 6px;\">\n"
+"                    <t t-out=\"object.location or ''\">Bruxelles</t>\n"
+"                    <a target=\"_blank\" t-if=\"object.location != "
+"object.appointment_type_id.location_id.name\" t-attf-href=\"http://"
+"maps.google.com/maps?oi=map&amp;q={{ object.location }}\" style=\"margin-"
+"left: 12px; font-size: 12px; color: #008f8c; text-decoration: underline;\">地"
+"図を表示</a>\n"
+"                </td>\n"
+"            </tr>\n"
+"        </table>\n"
+"    </div>\n"
+"    <div style=\"margin: 32px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">参加者</h2>\n"
+"        <div t-foreach=\"object.attendee_ids\" t-as=\"attendee\" "
+"style=\"margin-bottom: 5px;\">\n"
+"            <img t-if=\"attendee.state\" t-attf-src=\"/calendar/static/src/"
+"img/state_{{ attendee.state }}.png\" style=\"border:0; width: 15px; height: "
+"15px; vertical-align: text-bottom;\"/>\n"
+"            <t t-if=\"attendee.common_name\">\n"
+"                <span style=\"margin-left: 5px\" t-"
+"out=\"attendee.common_name or ''\">Mitchell Admin</span>\n"
+"            </t>\n"
+"            <t t-else=\"\">\n"
+"                <span style=\"margin-left:5px\">あなた</span>\n"
+"            </t>\n"
+"        </div>\n"
+"    </div>\n"
+"    <div t-if=\"not is_html_empty(object.description)\" style=\"margin: 32px "
+"0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">詳細</h2>\n"
+"        <div t-out=\"object.description\"/>\n"
+"    </div>\n"
+"</div>\n"
+"            "
 
 #. module: appointment
 #: model:mail.template,body_html:appointment.appointment_booked_mail_template
@@ -756,6 +1147,202 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"font-size: 13px; color: #374151;\">\n"
+"    <t t-set=\"recurrent\" t-value=\"object.recurrence_id and not "
+"ctx.get('calendar_template_ignore_recurrence')\"/>\n"
+"    <t t-set=\"mail_tz\" t-value=\"object._get_mail_tz() or "
+"ctx.get('mail_tz')\"/>\n"
+"    <t t-set=\"appointment_booker_name\" t-"
+"value=\"object.appointment_booker_id.display_name\"/>\n"
+"    <h1 style=\"font-size: 18px; font-weight: bold; color: #374151;\">\n"
+"        <t t-if=\"not object.appointment_type_id.is_always_confirm and "
+"object.appointment_status == 'request'\">予約リクエスト</t>\n"
+"        <t t-else=\"\">\n"
+"            予約が確定しました\n"
+"            <img src=\"/calendar/static/src/img/check-circle.png\" "
+"style=\"border:0; width: 24px; height: 24px; margin-left: 10px; text-"
+"decoration:none; vertical-align: bottom;\"/>\n"
+"        </t>\n"
+"    </h1>\n"
+"    <p style=\"margin: 0;\">\n"
+"        <span style=\"display: block; margin-top: 8px;\">\n"
+"            <t t-out=\"appointment_booker_name or ''\">John Booker</t>\n"
+"            <t t-if=\"not object.appointment_type_id.is_always_confirm and "
+"object.appointment_status == 'request'\"> が予約をリクエストしています </t>\n"
+"            <t t-else=\"\"> が予約をしました </t>\n"
+"            予約件名: <t t-out=\"object.appointment_type_id.name or ''\">技術"
+"デモ</t>\n"
+"            <t t-if=\"object.appointment_type_id.category not in ['custom', "
+"'anytime'] and object.appointment_type_id.schedule_based_on == 'users' and "
+"object.partner_id\">\n"
+"                担当者： <t t-out=\"object.partner_id.name or ''\">Brandon "
+"Freeman</t>\n"
+"            </t>.\n"
+"        </span>\n"
+"    </p>\n"
+"    <div style=\"text-align: center; padding: 16px 0px 16px 0px; margin-top: "
+"16px;\">\n"
+"        <a t-attf-href=\"/calendar/meeting/join?"
+"token={{ object.access_token }}\" t-attf-style=\"display: inline-block; "
+"padding: 7px 14px; color: {{user.company_id.email_primary_color or "
+"'#FFFFFF'}}; text-decoration: none; background-color: "
+"{{user.company_id.email_secondary_color or '#875A7B'}}; border-radius: "
+"3px\">\n"
+"            参加する</a>\n"
+"        <a t-attf-href=\"/odoo/calendar.event/{{ object.id }}\" t-attf-"
+"style=\"display: inline-block; margin-left: 12px; padding: 7px 14px; color: "
+"#111827; text-decoration: none; background-color: #E7E9ED; border-radius: "
+"3px;\">\n"
+"            見る</a>\n"
+"    </div>\n"
+"    <div style=\"margin: 16px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">詳細</h2>\n"
+"        <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"font-"
+"size: 13px; color: #374151;\">\n"
+"            <tr>\n"
+"                <td style=\"width: 100px; color: #676F7B;\">日時</td>\n"
+"                <td style=\"font-weight: bold;\">\n"
+"                    <t t-out=\"format_datetime(dt=object.start, tz=mail_tz "
+"if not object.allday else None, dt_format='EEEE', lang_code=object.env.lang) "
+"or ''\">水曜日</t>\n"
+"                    <t t-out=\"format_datetime(dt=object.start, tz=mail_tz "
+"if not object.allday else None, dt_format='d', lang_code=object.env.lang) or "
+"''\">1日</t>\n"
+"                    <t t-out=\"format_datetime(dt=object.start, tz=mail_tz "
+"if not object.allday else None, dt_format='MMMM y', "
+"lang_code=object.env.lang) or ''\">2020年1月</t>\n"
+"                    <t t-if=\"not object.allday\">\n"
+"                        <t t-out=\"format_time(time=object.start, "
+"tz=mail_tz, time_format='short', lang_code=object.env.lang) or ''\">8:00</"
+"t>\n"
+"                        <t t-if=\"not "
+"object.appointment_type_id.hide_timezone and mail_tz\">\n"
+"                            <span style=\"font-size: 11px; font-weight: "
+"normal;\">\n"
+"                                (<t t-out=\"mail_tz\"/>)\n"
+"                            </span>\n"
+"                        </t>\n"
+"                    </t>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <tr t-if=\"recurrent\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">開催日</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-"
+"out=\"object.recurrence_id.name or ''\">週1回、3回開催</t></td>\n"
+"            </tr>\n"
+"            <tr t-if=\"not object.appointment_type_id.hide_duration and not "
+"object.allday and object.duration\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">所要時間</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-out=\"('%dH%02d' % "
+"(object.duration,round(object.duration*60)%60)) or ''\">0H30</t></td>\n"
+"            </tr>\n"
+"            <tr t-if=\"object.location\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B; "
+"vertical-align: top;\">場所</td>\n"
+"                <td style=\"padding-top: 6px;\">\n"
+"                    <t t-out=\"object.location or ''\">Bruxelles</t>\n"
+"                    <a target=\"_blank\" t-if=\"object.location != "
+"object.appointment_type_id.location_id.name\" t-attf-href=\"http://"
+"maps.google.com/maps?oi=map&amp;q={{ object.location }}\" style=\"margin-"
+"left: 12px; font-size: 12px; color: #008f8c; text-decoration: underline;\">地"
+"図を表示</a>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <tr t-if=\"object.appointment_type_id.manage_capacity\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">対象人数：</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-"
+"out=\"object.total_capacity_reserved\"/>名</td>\n"
+"            </tr>\n"
+"            <tr t-if=\"not object.appointment_type_id.is_auto_assign and "
+"object.appointment_resource_ids\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B; "
+"vertical-align: top;\">リソース：</td>\n"
+"                <td style=\"padding-top: 6px;\">\n"
+"                    <ul style=\"padding: 0 15px;\">\n"
+"                        <li t-foreach=\"object.appointment_resource_ids\" t-"
+"as=\"resource\">\n"
+"                            <span style=\"margin-left:5px\" t-"
+"out=\"resource.name or ''\">テーブル1</span>\n"
+"                        </li>\n"
+"                    </ul>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <tr t-if=\"object.videocall_redirection\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">\n"
+"                    <t t-if=\"object.videocall_source == 'discuss'\">以下より"
+"参加：</t>\n"
+"                    <t t-else=\"\">参加する</t>\n"
+"                </td>\n"
+"                <td style=\"padding-top: 6px;\">\n"
+"                    <a t-attf-href=\"{{ object.videocall_redirection }}\" "
+"target=\"_blank\" style=\"color: #008f8c;\">\n"
+"                        <t t-if=\"object.videocall_source == 'discuss'\">Odoo"
+"ディスカス</t>\n"
+"                        <t t-else=\"\">ビデオミーティング</t>\n"
+"                    </a>\n"
+"                </td>\n"
+"            </tr>\n"
+"        </table>\n"
+"    </div>\n"
+"    <div style=\"margin: 32px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">参加者</h2>\n"
+"        <div t-foreach=\"object.attendee_ids\" t-as=\"attendee\" "
+"style=\"margin-bottom: 5px;\">\n"
+"            <img t-if=\"attendee.state\" t-attf-src=\"/calendar/static/src/"
+"img/state_{{ attendee.state }}.png\" style=\"border:0; width: 15px; height: "
+"15px; vertical-align: text-bottom;\"/>\n"
+"            <t t-if=\"attendee.common_name\">\n"
+"                <span style=\"margin-left: 5px\" t-"
+"out=\"attendee.common_name or ''\">Mitchell Admin</span>\n"
+"            </t>\n"
+"            <t t-else=\"\">\n"
+"                <span style=\"margin-left:5px\">あなた</span>\n"
+"            </t>\n"
+"        </div>\n"
+"    </div>\n"
+"    <div t-if=\"not is_html_empty(object.description)\" style=\"margin: 32px "
+"0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">内容</h2>\n"
+"        <div t-out=\"object.description\"/>\n"
+"    </div>\n"
+"    <t t-set=\"upcoming_appointments\" t-"
+"value=\"(object.appointment_booker_id.upcoming_appointment_ids - "
+"object).sorted('start')\"/>\n"
+"    <div t-if=\"upcoming_appointments\" style=\"margin: 32px 0 0;\">\n"
+"        <t t-set=\"appointment_booker_id\" t-"
+"value=\"object.appointment_booker_id.id\"/>\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">その他の今後の予約</h2>\n"
+"        <ul style=\"margin: 6px 0 0; padding: 0 18px;\">\n"
+"            <li style=\"margin-top: 6px;\" t-"
+"foreach=\"upcoming_appointments\" t-as=\"upcoming_appointment\">\n"
+"                <span t-out=\"upcoming_appointment.appointment_type_id.name "
+"or ''\">技術デモ</span>\n"
+"                <span style=\"margin: 0 10px;\">-</span>\n"
+"                <span t-out=\"upcoming_appointment.start or ''\" t-"
+"options=\"{&quot;widget&quot;: &quot;datetime&quot;, &quot;format&quot;: "
+"&quot;medium&quot;, &quot;tz_name&quot;: mail_tz}\" style=\"font-weight: "
+"bold;\">6月20日15:00</span>\n"
+"                <a t-attf-href=\"/calendar/view/"
+"#{upcoming_appointment.access_token}?partner_id=#{appointment_booker_id}\" "
+"target=\"_blank\" style=\"margin-left: 10px; font-size: 12px; color: "
+"#008f8c; text-decoration: underline;\">詳細を表示</a>\n"
+"            </li>\n"
+"        </ul>\n"
+"    </div>\n"
+"</div>\n"
+"            "
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -767,21 +1354,23 @@ msgstr "<i class=\"fa fa-check-circle text-success me-3\"/>予約が完了しま
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_gantt_kanban_popover
 msgid "<i class=\"fa fa-circle text-400 me-1\" title=\"Appointment Status\"/>"
 msgstr ""
+"<i class=\"fa fa-circle text-400 me-1\" title=\"アポイントメントステータス\"/"
+">"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form_gantt_booking
 msgid "<i class=\"fa fa-circle\" title=\"Status\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-circle\" title=\"ステータス\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_gantt_kanban_popover
 msgid "<i class=\"fa fa-clock-o text-400 me-1\" title=\"Date and time\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-clock-o text-400 me-1\" title=\"日時\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form_gantt_booking
 msgid "<i class=\"fa fa-cubes text-600\" title=\"Resources\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-cubes text-600\" title=\"リソース\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_invite_view_form
@@ -800,13 +1389,13 @@ msgstr ""
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_gantt_kanban_popover
 msgid "<i class=\"fa fa-map-marker text-400 me-1\" title=\"Location\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-map-marker text-400 me-1\" title=\"場所\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_gantt_kanban_popover
 msgid ""
 "<i class=\"fa fa-sticky-note text-400 mt-1 me-1\" title=\"Description\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-sticky-note text-400 mt-1 me-1\" title=\"説明\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -821,12 +1410,12 @@ msgstr "<i class=\"fa fa-times text-danger me-3\"/>予約がキャンセルさ�
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_gantt_kanban_popover
 msgid "<i class=\"fa fa-user text-400 me-1\" title=\"Guests\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-user text-400 me-1\" title=\"ゲスト\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form_gantt_booking
 msgid "<i class=\"fa fa-user-plus text-600\" title=\"Reserved Capacity\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-user-plus text-600\" title=\"予約済みの枠\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_meeting_details
@@ -842,6 +1431,7 @@ msgstr ""
 msgid ""
 "<i class=\"fa fa-video-camera text-400 me-1\" title=\"Video Call URL\"/>"
 msgstr ""
+"<i class=\"fa fa-video-camera text-400 me-1\" title=\"ビデオコールURL\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_invite_view_form
@@ -881,22 +1471,22 @@ msgstr ""
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "<i class=\"oi oi-fw o_button_icon oi-arrow-right\"/> Create Resources"
-msgstr ""
+msgstr "<i class=\"oi oi-fw o_button_icon oi-arrow-right\"/> リソースを作成"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_form
 msgid "<i class=\"oi oi-plus me-1\"/> Add Guests"
-msgstr ""
+msgstr "<i class=\"oi oi-plus me-1\"/> ゲストを追加"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
 msgid "<i class=\"oi oi-plus me-1\"/>Add Guests"
-msgstr ""
+msgstr "<i class=\"oi oi-plus me-1\"/>ゲストを追加"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "<i class=\"oi oi-plus o_button_icon\"/> Add Video"
-msgstr ""
+msgstr "<i class=\"oi oi-plus o_button_icon\"/> 動画を追加"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_meeting_date
@@ -926,6 +1516,14 @@ msgid ""
 "selected time\n"
 "                    </span>"
 msgstr ""
+"<span class=\"me-1\">以下の\n"
+"                        <span invisible=\"not unavailable_partner_ids\">参加"
+"者</span>\n"
+"                        <span invisible=\"not unavailable_partner_ids or not "
+"unavailable_resource_ids\">/</span>\n"
+"                        <span invisible=\"not unavailable_resource_ids\">リ"
+"ソース</span> は選択された時間に空きがありません\n"
+"                    </span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_form
@@ -1004,17 +1602,17 @@ msgstr "<span>オンライン</span>"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "<span>by visitor</span>"
-msgstr ""
+msgstr "<span>訪問者による選択</span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "<span>hours</span>"
-msgstr ""
+msgstr "<span>時間</span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "<span>seats max</span>"
-msgstr ""
+msgstr "<span>最大席数</span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_info
@@ -1063,7 +1661,7 @@ msgstr "A %s予約 の種類は、日付によって制限されてはいけま�
 #. module: appointment
 #: model:ir.model.constraint,message:appointment.constraint_appointment_question_check_default_question_is_reusable
 msgid "A default question must be reusable."
-msgstr ""
+msgstr "デフォルトの質問は再利用可能でなければなりません。"
 
 #. module: appointment
 #. odoo-python
@@ -1122,7 +1720,7 @@ msgstr "例外の活動を示す装飾"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__activity_state
 msgid "Activity State"
-msgstr "活動状態"
+msgstr "活動ステータス"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__activity_type_icon
@@ -1131,6 +1729,8 @@ msgstr "活動種別アイコン"
 
 #. module: appointment
 #. odoo-javascript
+#: code:addons/appointment/static/src/views/appointment_calendar/appointment_calendar_controller.js:0
+#: code:addons/appointment/static/src/views/appointment_calendar/appointment_calendar_controller.xml:0
 #: code:addons/appointment/static/src/views/gantt/gantt_renderer.js:0
 #: code:addons/appointment/static/src/views/gantt/gantt_renderer_controls.xml:0
 #: code:addons/appointment/static/src/views/list/list_renderer.js:0
@@ -1152,7 +1752,7 @@ msgstr "ここに機能を追加..."
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form
 msgid "Add a line"
-msgstr ""
+msgstr "明細追加"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_meeting_user
@@ -1207,12 +1807,12 @@ msgstr "許可"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Allow Bookings"
-msgstr ""
+msgstr "予約を許可"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__allow_guests
 msgid "Allow invitations"
-msgstr ""
+msgstr "招待を許可"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__country_ids
@@ -1513,12 +2113,12 @@ msgstr "アーカイブ済"
 #. module: appointment
 #: model_terms:ir.actions.act_window,help:appointment.appointment_question_action
 msgid "Ask the right questions, get the right answers"
-msgstr ""
+msgstr "適切な質問をすれば、適切な回答が得られます"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__is_auto_assign
 msgid "Assign automatically"
-msgstr ""
+msgstr "自動で割当"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_invite__resources_choice
@@ -1529,7 +2129,7 @@ msgstr "担当者"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__assignment_method
 msgid "Assignment"
-msgstr ""
+msgstr "割当"
 
 #. module: appointment
 #. odoo-python
@@ -1551,12 +2151,12 @@ msgstr "出席者"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__auto_confirm
 msgid "Auto Confirm"
-msgstr ""
+msgstr "自動確定"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__assignment_method__auto
 msgid "Automatically"
-msgstr ""
+msgstr "自動的に"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__auto_confirm
@@ -1568,6 +2168,12 @@ msgid ""
 "            Requested appointments are still considered as reserved for the "
 "slots availability"
 msgstr ""
+"予約の作成時に、指定された割合まで自動的に予約を確定します(全体の予約枠に対す"
+"る割合)。\n"
+"            チェックを外すと、予約はリクエストとして作成され、手動での確定が"
+"必要になります。\n"
+"            リクエスト状態の予約も、空き状況においては予約済みとして扱われま"
+"す"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__slot_ids
@@ -1624,7 +2230,7 @@ msgstr "背景画像"
 #. odoo-javascript
 #: code:addons/appointment/static/src/fields/badge_selection_icon_mapping_field.js:0
 msgid "Badges with Icon for Selection Field"
-msgstr ""
+msgstr "選択フィールド用のアイコンつきバッジ"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_invite__base_book_url
@@ -1660,7 +2266,7 @@ msgstr "確定済みの予約"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form
 msgid "Booked Capacity"
-msgstr ""
+msgstr "予約済枠"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_tree_booking
@@ -1717,11 +2323,14 @@ msgid ""
 "        reserved user/resource capacity exceeds this percentage of total "
 "capacity."
 msgstr ""
+"予約済みのユーザー／リソースの合計キャパシティが、全体のキャパシティに対して"
+"この割合を超えると、\n"
+"        予約は自動的に確定されなくなります。"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__assignment_method__manual
 msgid "By visitor"
-msgstr ""
+msgstr "訪問者による選択"
 
 #. module: appointment
 #: model:ir.model,name:appointment.model_calendar_attendee
@@ -1737,12 +2346,12 @@ msgstr "カレンダーイベント"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category__anytime
 msgid "Calendar Link"
-msgstr ""
+msgstr "カレンダーリンク"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_search
 msgid "Calendar Links"
-msgstr ""
+msgstr "カレンダーリンク"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_form
@@ -1764,7 +2373,7 @@ msgstr "予約をキャンセルする"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Cancellation"
-msgstr ""
+msgstr "取消"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__canceled_mail_template_id
@@ -1823,7 +2432,7 @@ msgstr "カテゴリー"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form
 msgid "Check in"
-msgstr ""
+msgstr "チェックイン"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_question__question_type__checkbox
@@ -1833,7 +2442,7 @@ msgstr "チェックボックス(複数回答)"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form
 msgid "Checked in"
-msgstr ""
+msgstr "チェックイン"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__calendar_event__appointment_status__attended
@@ -1849,7 +2458,7 @@ msgstr "チェックイン済"
 #. odoo-javascript
 #: code:addons/appointment/static/src/components/appointment_template_picker_dialog/appointment_template_picker_dialog.xml:0
 msgid "Choose an appointment preset"
-msgstr ""
+msgstr "予約プリセットを選択"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointments_list_layout
@@ -1872,7 +2481,7 @@ msgstr "閉じる"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Communication"
-msgstr ""
+msgstr "通信"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_resource__company_id
@@ -1927,7 +2536,7 @@ msgstr "確認メッセージ"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Confirmation Page"
-msgstr ""
+msgstr "確認ページ"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -1954,7 +2563,7 @@ msgstr "連絡先"
 #. odoo-python
 #: code:addons/appointment/controllers/appointment.py:0
 msgid "Contact Details"
-msgstr "コンタクトの詳細"
+msgstr "連絡先詳細"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointments_list_layout
@@ -2021,12 +2630,12 @@ msgstr "予約リソースを作成"
 #: model_terms:ir.actions.act_window,help:appointment.appointment_question_action
 msgid ""
 "Create questions your attendees can answer when booking their appointments."
-msgstr ""
+msgstr "参加者が予約時に回答できる質問を作成してください。"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__slot_creation_interval
 msgid "Create slot every"
-msgstr ""
+msgstr "スロットを作成、毎"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_answer__create_uid
@@ -2090,7 +2699,7 @@ msgstr "日付 &amp; 時間"
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category__punctual
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_search
 msgid "Date-limited"
-msgstr ""
+msgstr "期限付き"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_manage_leaves_view_form
@@ -2105,12 +2714,12 @@ msgstr "拒否済"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_search
 msgid "Default Questions"
-msgstr ""
+msgstr "デフォルトの質問"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_question__is_default
 msgid "Default question"
-msgstr ""
+msgstr "デフォルトの質問"
 
 #. module: appointment
 #. odoo-python
@@ -2216,12 +2825,12 @@ msgstr "表示名"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__show_avatars
 msgid "Display pictures"
-msgstr ""
+msgstr "画像を表示"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__show_avatars
 msgid "Display user or resource images across the entire booking flow."
-msgstr ""
+msgstr "予約フロー全体でユーザまたはリソースの画像を表示します。"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__category_time_display
@@ -2231,7 +2840,7 @@ msgstr "表示済カテゴリ時間フィールド"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_form
 msgid "Displayed when the field is empty"
-msgstr ""
+msgstr "フィールドが空の場合に表示されます"
 
 #. module: appointment
 #. odoo-python
@@ -2268,7 +2877,7 @@ msgstr "メール*"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Emails & SMS"
-msgstr ""
+msgstr "EメールとSMS"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_manage_leaves__leave_end_dt
@@ -2303,7 +2912,7 @@ msgstr "すべての"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_question__extra_comment
 msgid "Extra Comment"
-msgstr ""
+msgstr "追加コメント"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form_custom_share
@@ -2313,7 +2922,7 @@ msgstr "確認時の追加メッセージ"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_form
 msgid "Extra comments..."
-msgstr ""
+msgstr "追加コメント..."
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__message_confirmation
@@ -2323,13 +2932,13 @@ msgstr "予約確定後に提供される追加情報"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category_slot_scheduling__flexible
 msgid "Flexible"
-msgstr ""
+msgstr "柔軟性"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category__custom
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_search
 msgid "Flexible Schedule"
-msgstr ""
+msgstr "柔軟なスケジュール"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.portal_my_home_appointment
@@ -2429,6 +3038,8 @@ msgid ""
 "How users and resources will be assigned to the meetings that customers book "
 "on your website."
 msgstr ""
+"ウェブサイト上で顧客が予約したミーティングに、ユーザやリソースをどのように割"
+"り当てるかを設定します。"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_answer__id
@@ -2461,7 +3072,7 @@ msgstr "例外活動を示すアイコン"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_invite__identical_config_id
 msgid "Identical Config"
-msgstr ""
+msgstr "同一設定"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__message_needaction
@@ -2567,7 +3178,7 @@ msgstr "画像512"
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_question__is_default
 msgid "Include by default in new appointment types."
-msgstr ""
+msgstr "新しい予定タイプにデフォルトで含めます。"
 
 #. module: appointment
 #. odoo-javascript
@@ -2594,7 +3205,7 @@ msgstr "紹介メッセージ"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Introduction Page"
-msgstr ""
+msgstr "紹介ページ"
 
 #. module: appointment
 #. odoo-javascript
@@ -2622,7 +3233,7 @@ msgstr "{{ object.event_id.name }} への招待"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__is_always_confirm
 msgid "Is Always Confirm"
-msgstr ""
+msgstr "常に確定する"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__message_is_follower
@@ -2637,7 +3248,7 @@ msgstr "公開済"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_question__is_reusable
 msgid "Is Reusable"
-msgstr ""
+msgstr "再利用可能"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -2688,24 +3299,24 @@ msgstr "会議の登録時に参加者にゲストを招待させます。"
 #. odoo-python
 #: code:addons/appointment/models/templates/appointment_type.py:0
 msgid "Let customers book a resource such as a room, a tennis court, etc."
-msgstr ""
+msgstr "顧客が会議室やテニスコートなどのリソースを予約できるようにします。"
 
 #. module: appointment
 #. odoo-python
 #: code:addons/appointment/models/templates/appointment_type.py:0
 msgid "Let customers book a table in your restaurant or bar"
-msgstr ""
+msgstr "顧客がレストランやバーのテーブルを予約できるようにします"
 
 #. module: appointment
 #. odoo-python
 #: code:addons/appointment/models/templates/appointment_type.py:0
 msgid "Let others book a meeting in your calendar"
-msgstr ""
+msgstr "他のユーザがあなたのカレンダーに会議を予約できるようにします"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_invite_view_form
 msgid "Link"
-msgstr ""
+msgstr "リンク"
 
 #. module: appointment
 #. odoo-javascript
@@ -2807,12 +3418,12 @@ msgstr "自分"
 #. odoo-python
 #: code:addons/appointment/models/templates/appointment_type.py:0
 msgid "Meeting"
-msgstr ""
+msgstr "ミーティング"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_calendar_event__name
 msgid "Meeting Subject"
-msgstr ""
+msgstr "ミーティング議題"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_meeting_details
@@ -2828,7 +3439,7 @@ msgstr "ミーティングリダイレクションURL"
 #. odoo-python
 #: code:addons/appointment/controllers/calendar_view.py:0
 msgid "Meeting with %(name)s"
-msgstr ""
+msgstr "%(name)sとのミーティング"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_kanban
@@ -2869,12 +3480,12 @@ msgstr "自分の予約"
 #. odoo-javascript
 #: code:addons/appointment/static/src/views/appointment_calendar/appointment_calendar_controller.xml:0
 msgid "My Calendar"
-msgstr ""
+msgstr "自分のカレンダ"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_search
 msgid "My Calendar Link"
-msgstr ""
+msgstr "自分のカレンダーリンク"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_invite_view_search
@@ -2964,7 +3575,7 @@ msgstr "まだデータはありません！"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form
 msgid "No show"
-msgstr ""
+msgstr "無断キャンセル"
 
 #. module: appointment
 #. odoo-python
@@ -2977,7 +3588,7 @@ msgstr "なし"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_search
 msgid "Not Reusable"
-msgstr ""
+msgstr "再利用不可"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_calendar_event__alarm_ids
@@ -3018,7 +3629,7 @@ msgstr "Odooディスカス"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category_time_display__punctual_fields
 msgid "On specific dates"
-msgstr ""
+msgstr "特定日"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_slot__slot_type__unique
@@ -3058,7 +3669,7 @@ msgstr "特定のユーザに許可される予定タイプは1つだけです�
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_invite_view_form
 msgid "Oops! The extension \""
-msgstr ""
+msgstr "おっと!拡張機能 \""
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -3117,12 +3728,12 @@ msgstr "予約する人"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_question__question_type__phone
 msgid "Phone Number"
-msgstr ""
+msgstr "電話番号"
 
 #. module: appointment
 #: model:appointment.question,name:appointment.appointment_question_phone
 msgid "Phone number"
-msgstr ""
+msgstr "電話番号"
 
 #. module: appointment
 #. odoo-javascript
@@ -3179,7 +3790,7 @@ msgstr "質問"
 #. odoo-python
 #: code:addons/appointment/controllers/appointment.py:0
 msgid "Questions & Answers"
-msgstr ""
+msgstr "質問＆回答"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_question__question_type__radio
@@ -3324,7 +3935,7 @@ msgstr "ユーザに制限"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_search
 msgid "Reusable"
-msgstr ""
+msgstr "再利用可"
 
 #. module: appointment
 #. odoo-javascript
@@ -3455,7 +4066,7 @@ msgstr "時間を選択してください"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__is_date_first
 msgid "Select date and time first"
-msgstr ""
+msgstr "まず日付と時間を選択してください"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_answer_input__value_answer_id
@@ -3584,7 +4195,7 @@ msgstr "スロットタイプ"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Slots"
-msgstr ""
+msgstr "スロット"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__message_intro
@@ -3595,7 +4206,7 @@ msgstr "アポイントメントタイプの短い説明"
 #. odoo-python
 #: code:addons/appointment/controllers/appointment.py:0
 msgid "Some required answers are missing in the form."
-msgstr ""
+msgstr "フォーム内に不足している必須の回答があります。"
 
 #. module: appointment
 #. odoo-javascript
@@ -3698,14 +4309,14 @@ msgstr ""
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__select_first
 msgid "Starts with"
-msgstr ""
+msgstr "以下で始まる:"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form_gantt_booking
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_search_booking
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_tree_booking
 msgid "Status"
-msgstr "状態"
+msgstr "ステータス"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__activity_state
@@ -3980,12 +4591,12 @@ msgstr "これは顧客予約フォームのプレビューです。"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_form
 msgid "This question is used by"
-msgstr ""
+msgstr "この質問の使用者："
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_question__extra_comment
 msgid "This will appear below the question in the appointment form."
-msgstr ""
+msgstr "これは予約フォームの質問の下に表示されます。"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_slot__weekday__4
@@ -4134,6 +4745,21 @@ msgid ""
 "            - Calendar Link: the user will create and share to another user "
 "an appointment type covering all their time slots"
 msgstr ""
+"このアポイントメントタイプのカテゴリを定義するために使用されます。\n"
+"\n"
+"        以下のいずれかを選択できます：\n"
+"\n"
+"            - 週次スケジュール：デフォルトカテゴリ。毎週繰り返される予約枠。"
+"ウェブサイトからアクセス可能\n"
+"\n"
+"            - 日時限定：2つの日時間で制限された定期的な予約枠。 ウェブサイト"
+"からアクセス可能\n"
+"\n"
+"            - 柔軟なスケジュール：ユーザが手動で選択した時間帯でカスタム予約"
+"タイプを作成し、他のユーザと共有する\n"
+"\n"
+"            - カレンダーリンク：ユーザが自身の全時間帯をカバーする予約タイプ"
+"を作成し、他のユーザと共有する"
 
 #. module: appointment
 #: model:res.groups,name:appointment.group_appointment_user
@@ -4143,7 +4769,7 @@ msgstr "ユーザ"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__select_first__user_resource
 msgid "User / Resource"
-msgstr ""
+msgstr "ユーザ / リソース"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__user_capacity
@@ -4166,7 +4792,7 @@ msgstr "ビデオ通話"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__event_videocall_source
 msgid "Video Link"
-msgstr ""
+msgstr "動画リンク"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_info
@@ -4201,18 +4827,18 @@ msgstr "平日"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category_slot_scheduling__weekly
 msgid "Weekly"
-msgstr ""
+msgstr "週次"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category__recurring
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_search
 msgid "Weekly Schedule"
-msgstr ""
+msgstr "週間スケジュール"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__select_first
 msgid "What is selected first by the customer when booking an appointment."
-msgstr ""
+msgstr "顧客が予約時に最初に選択する項目です。"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_question__is_reusable
@@ -4220,6 +4846,8 @@ msgid ""
 "Will appear in the list of available questions when adding one in any "
 "appointment. Always true for default questions."
 msgstr ""
+"すべてのアポイントメントで質問を追加する際、利用可能な質問一覧に表示されま"
+"す。デフォルトの質問は常に表示されます。"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.staff_user_select
@@ -4229,12 +4857,12 @@ msgstr "以下と:"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Within availabilities,"
-msgstr ""
+msgstr "利用可能時間内で、"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category_time_display__recurring_fields
 msgid "Within the next"
-msgstr ""
+msgstr "次の期間内："
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_resource__resource_calendar_id
@@ -4273,7 +4901,7 @@ msgstr "あなたの選択"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_form
 msgid "appointments"
-msgstr ""
+msgstr "アポイントメント"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_info
@@ -4288,17 +4916,17 @@ msgstr "於"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "at least"
-msgstr ""
+msgstr "少なくとも"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "days,"
-msgstr ""
+msgstr "日間、"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_form
 msgid "e.g. \"Anything else we should know?\""
-msgstr ""
+msgstr "例： \"他に伝えておくべきことはありますか?\""
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
@@ -4323,7 +4951,7 @@ msgstr ""
 #. module: appointment
 #: model:appointment.question,placeholder:appointment.appointment_question_phone
 msgid "e.g. +1 555-555-5555"
-msgstr ""
+msgstr "例： +1 555-555-5555"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_manage_leaves_view_form
@@ -4376,7 +5004,7 @@ msgstr "例: john.smith@example.com"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_gantt_kanban_popover
 msgid "guests"
-msgstr ""
+msgstr "ゲスト"
 
 #. module: appointment
 #. odoo-javascript
@@ -4398,17 +5026,17 @@ msgstr "時間のため、今キャンセルすることはできません。<br
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "hour(s) before start time"
-msgstr ""
+msgstr "時間前(開始時刻の)"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "hour(s) before the booking"
-msgstr ""
+msgstr "時間前(予約の)"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "of total capacity"
-msgstr ""
+msgstr "総定員のうち"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -4425,7 +5053,7 @@ msgstr "人"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "seats max"
-msgstr ""
+msgstr "最大座席数"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
@@ -4436,6 +5064,11 @@ msgid ""
 "                                    <span invisible=\"schedule_based_on != "
 "'resources'\">resource</span>"
 msgstr ""
+"同時予約数( \n"
+"                                    <span invisible=\"schedule_based_on != "
+"'users'\">ユーザ</span>\n"
+"                                    <span invisible=\"schedule_based_on != "
+"'resources'\">リソース</span>あたり)"
 
 #. module: appointment
 #. odoo-python
@@ -4463,7 +5096,7 @@ msgstr "終了"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "up to"
-msgstr ""
+msgstr "以下まで:"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.portal_my_appointments
@@ -4478,3 +5111,7 @@ msgid ""
 "== 'request' else 'Appointment Booked: ' }}"
 "{{ object.appointment_type_id.name }}"
 msgstr ""
+"{{ 'アポイントメントがリクエストされました: ' if not "
+"object.appointment_type_id.is_always_confirm and object.appointment_status "
+"== 'request' else 'アポイントが予約されました: ' }}"
+"{{ object.appointment_type_id.name }}"

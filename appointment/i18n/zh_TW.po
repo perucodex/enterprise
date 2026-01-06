@@ -7,13 +7,14 @@
 # Tony Ng, 2025
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
-# "Tony Ng (ngto)" <ngto@odoo.com>, 2025.
+# "Tony Ng (ngto)" <ngto@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.3+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:44+0000\n"
-"PO-Revision-Date: 2025-10-20 10:24+0000\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2026-01-02 11:37+0000\n"
 "Last-Translator: \"Tony Ng (ngto)\" <ngto@odoo.com>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
 "projects/odoo-19/appointment/zh_Hant/>\n"
@@ -22,7 +23,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_invite_view_form
@@ -39,7 +40,7 @@ msgstr "\" 在"
 #. odoo-python
 #: code:addons/appointment/models/appointment_booking_line.py:0
 msgid "\"%(name_list)s\" cannot be used for \"%(appointment_type_name)s\""
-msgstr ""
+msgstr "「%(name_list)s」不可在「%(appointment_type_name)s」使用"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_question__appointment_count
@@ -98,6 +99,8 @@ msgid ""
 "%(capacity)d seats are missing to be able to book the %(appointment_name)s: %"
 "(event_name)s (%(event_id)s)"
 msgstr ""
+"需要額外 %(capacity)d 個空缺座位/名額，才可預約此項 %(appointment_name)s。活"
+"動：%(event_name)s (%(event_id)s)"
 
 #. module: appointment
 #. odoo-python
@@ -436,12 +439,12 @@ msgid ""
 "            "
 msgstr ""
 "<div style=\"font-size: 13px; color: #374151;\">\n"
-"    <t t-set=\"customer\" t-value="
-"\" object.event_id.find_partner_customer()\"/>\n"
-"    <t t-set=\"target_responsible\" t-value="
-"\"object.partner_id == object.event_id.partner_id\"/>\n"
-"    <t t-set=\"target_customer\" t-value=\"object.partner_id == customer\"/>"
-"\n"
+"    <t t-set=\"customer\" t-value=\" object.event_id.find_partner_customer()"
+"\"/>\n"
+"    <t t-set=\"target_responsible\" t-value=\"object.partner_id == "
+"object.event_id.partner_id\"/>\n"
+"    <t t-set=\"target_customer\" t-value=\"object.partner_id == customer\"/"
+">\n"
 "    <t t-set=\"recurrent\" t-value=\"object.recurrence_id and not "
 "ctx.get('calendar_template_ignore_recurrence')\"/>\n"
 "\n"
@@ -450,97 +453,95 @@ msgstr ""
 "        邀請\n"
 "    </h1>\n"
 "    <p style=\"margin: 0;\">\n"
-"        <span style=\"display: block; margin-bottom: 8px;\"><t t-out="
-"\"object.common_name or ''\">Wood Corner</t> 你好！</span>\n"
+"        <span style=\"display: block; margin-bottom: 8px;\"><t t-"
+"out=\"object.common_name or ''\">Wood Corner</t> 你好！</span>\n"
 "\n"
 "        <t t-if=\"target_customer\">\n"
-"            <t t-if="
-"\"not object.event_id.appointment_type_id.is_always_confirm\">\n"
+"            <t t-if=\"not "
+"object.event_id.appointment_type_id.is_always_confirm\">\n"
 "                <t t-if=\"object.event_id.appointment_status == 'booked'\">\n"
-"                    很高興通知你，你的預約「<strong t-out="
-"\"object.event_id.appointment_type_id.name or ''\">預約功能示範</strong>」<t "
-"t-if=\"object.event_id.appointment_type_id.category not in "
+"                    很高興通知你，你的預約「<strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\">預約功能示範</"
+"strong>」<t t-if=\"object.event_id.appointment_type_id.category not in "
 "['custom', 'anytime'] and "
-"object.event_id.appointment_type_id.schedule_based_on == 'users'"
-"\">（由 <t t-out=\"object.event_id.user_id.name or ''\">Ready Mat</t> "
-"主持）</t> 已獲確認。<br/>\n"
+"object.event_id.appointment_type_id.schedule_based_on == 'users'\">（由 <t t-"
+"out=\"object.event_id.user_id.name or ''\">Ready Mat</t> 主持）</t> 已獲確"
+"認。<br/>\n"
 "                </t>\n"
-"                <t t-elif=\"object.event_id.appointment_status == 'request'\""
-">\n"
-"                    我們已收到你預約「<strong t-out="
-"\"object.event_id.appointment_type_id.name or ''\">預約功能示範</strong>」<t "
-"t-if=\"object.event_id.appointment_type_id.category not in "
+"                <t t-elif=\"object.event_id.appointment_status == "
+"'request'\">\n"
+"                    我們已收到你預約「<strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\">預約功能示範</"
+"strong>」<t t-if=\"object.event_id.appointment_type_id.category not in "
 "['custom', 'anytime'] and "
-"object.event_id.appointment_type_id.schedule_based_on == 'users'"
-"\">（由 <t t-out=\"object.event_id.user_id.name or ''\">Ready Mat</t> "
-"主持）</t>。<br/>\n"
+"object.event_id.appointment_type_id.schedule_based_on == 'users'\">（由 <t t-"
+"out=\"object.event_id.user_id.name or ''\">Ready Mat</t> 主持）</t>。<br/>\n"
 "                    確認後，我們會通知你。\n"
 "                </t>\n"
 "            </t>\n"
 "            <t t-else=\"\">\n"
-"                你已預約「<strong t-out="
-"\"object.event_id.appointment_type_id.name or ''\">預約功能示範</strong>」<t "
-"t-if=\"object.event_id.appointment_type_id.category not in "
+"                你已預約「<strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\">預約功能示範</"
+"strong>」<t t-if=\"object.event_id.appointment_type_id.category not in "
 "['custom', 'anytime'] and "
-"object.event_id.appointment_type_id.schedule_based_on == 'users'"
-"\">，活動將由 <t t-out=\"object.event_id.user_id.name or ''\">Ready Mat</t> "
-"主持</t>。\n"
+"object.event_id.appointment_type_id.schedule_based_on == 'users'\">，活動將"
+"由 <t t-out=\"object.event_id.user_id.name or ''\">Ready Mat</t> 主持</t>。\n"
 "            </t>\n"
 "        </t>\n"
 "        <t t-elif=\"target_responsible\">\n"
 "            <t t-if=\"customer\">\n"
 "                <t t-out=\"customer.name or ''\"/> 已為你預約以下活動："
-"<strong t-out=\"object.event_id.appointment_type_id.name or ''\""
-">預約功能示範</strong>。\n"
+"<strong t-out=\"object.event_id.appointment_type_id.name or ''\">預約功能示範"
+"</strong>。\n"
 "                <t t-if=\"object.event_id.appointment_type_id and "
 "object.event_id.appointment_status == 'request'\">\n"
 "                    預約目前仍有待確認。\n"
 "                </t>\n"
 "            </t>\n"
 "            <t t-else=\"\">\n"
-"                你已預約「<strong t-out="
-"\"object.event_id.appointment_type_id.name or ''\">預約功能示範</strong>」。"
-"\n"
+"                你已預約「<strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\">預約功能示範</"
+"strong>」。\n"
 "            </t>\n"
 "        </t>\n"
 "        <t t-else=\"\">\n"
-"            你獲邀請參加以下預約活動：<strong t-out="
-"\"object.event_id.appointment_type_id.name or ''\">預約功能示範</strong>。\n"
+"            你獲邀請參加以下預約活動：<strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\">預約功能示範</"
+"strong>。\n"
 "        </t>\n"
 "    </p>\n"
 "    <div style=\"text-align: center; padding: 16px 0px 16px 0px;\">\n"
 "        <t t-if=\"object.state != 'accepted'\">\n"
-"            <a t-attf-href=\"/calendar/meeting/"
-"accept?token={{object.access_token}}&amp;id={{object.event_id.id}}"
-"\" t-attf-style=\"display: inline-block; padding: 7px 14px; color: {{"
-"user.company_id.email_primary_color or '#FFFFFF'}}; text-decoration: none; "
+"            <a t-attf-href=\"/calendar/meeting/accept?"
+"token={{object.access_token}}&amp;id={{object.event_id.id}}\" t-attf-"
+"style=\"display: inline-block; padding: 7px 14px; color: "
+"{{user.company_id.email_primary_color or '#FFFFFF'}}; text-decoration: none; "
 "background-color: {{user.company_id.email_secondary_color or '#875A7B'}}; "
 "border-radius: 3px\">\n"
 "                接納</a>\n"
-"            <a t-attf-href=\"/calendar/meeting/"
-"decline?token={{object.access_token}}&amp;id={{object.event_id.id}}"
-"\" t-attf-style=\"display: inline-block; margin-left: 6px; padding: 7px 14px;"
-" color: {{user.company_id.email_primary_color or '#FFFFFF'}}; text-"
-"decoration: none; background-color: {{user.company_id.email_secondary_color "
-"or '#875A7B'}}; border-radius: 3px\">\n"
+"            <a t-attf-href=\"/calendar/meeting/decline?"
+"token={{object.access_token}}&amp;id={{object.event_id.id}}\" t-attf-"
+"style=\"display: inline-block; margin-left: 6px; padding: 7px 14px; color: "
+"{{user.company_id.email_primary_color or '#FFFFFF'}}; text-decoration: none; "
+"background-color: {{user.company_id.email_secondary_color or '#875A7B'}}; "
+"border-radius: 3px\">\n"
 "                拒絕</a>\n"
 "        </t>\n"
 "        <a t-if=\"not target_responsible and not target_customer\" t-attf-"
-"href=\"/calendar/meeting/"
-"view?token={{object.access_token}}&amp;id={{object.event_id.id}}\" style=\""
-"display: inline-block; margin-left: 12px; padding: 5px 10px; color: #111827; "
-"text-decoration: none; background-color: #E7E9ED; border-radius: 3px; border-"
-"radius: 3px\">查看</a>\n"
-"        <a t-elif=\"not target_customer\" t-attf-href="
-"\"/mail/view?model=calendar.event&amp;res_id={{object.event_id.id}}\" t-attf-"
+"href=\"/calendar/meeting/view?token={{object.access_token}}"
+"&amp;id={{object.event_id.id}}\" style=\"display: inline-block; margin-left: "
+"12px; padding: 5px 10px; color: #111827; text-decoration: none; background-"
+"color: #E7E9ED; border-radius: 3px; border-radius: 3px\">查看</a>\n"
+"        <a t-elif=\"not target_customer\" t-attf-href=\"/mail/view?"
+"model=calendar.event&amp;res_id={{object.event_id.id}}\" t-attf-"
 "style=\"display: inline-block; margin-left: 12px; padding: 5px 10px; color: "
 "#111827; text-decoration: none; background-color: #E7E9ED; border-radius: "
 "3px; border-radius: 3px\">查看</a>\n"
 "    </div>\n"
 "    <div style=\"margin: 16px 0 0;\">\n"
-"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-weight:"
-" bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};\""
-">活動詳情</h2>\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">活動詳情</h2>\n"
 "        <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"font-"
 "size: 13px; color: #374151;\">\n"
 "            <tr>\n"
@@ -557,11 +558,10 @@ msgstr ""
 "lang_code=object.env.lang) or ''\">星期二</t>\n"
 "                    <t t-if=\"not object.event_id.allday\">\n"
 "                        <t t-out=\"format_time(time=object.event_id.start, "
-"tz=object.mail_tz, time_format='short', lang_code=object.env.lang) or ''\""
-">上午 11:00</t>\n"
-"                        <t t-if="
-"\"not object.event_id.appointment_type_id.hide_timezone and object.mail_tz\">"
-"\n"
+"tz=object.mail_tz, time_format='short', lang_code=object.env.lang) or ''\">上"
+"午 11:00</t>\n"
+"                        <t t-if=\"not "
+"object.event_id.appointment_type_id.hide_timezone and object.mail_tz\">\n"
 "                            <span style=\"font-size: 11px; font-weight: "
 "normal;\">\n"
 "                                (<t t-out=\"object.mail_tz or ''\">Europe/"
@@ -572,69 +572,67 @@ msgstr ""
 "                </td>\n"
 "            </tr>\n"
 "            <tr t-if=\"recurrent\">\n"
-"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;\""
-">頻率</td>\n"
-"                <td style=\"padding-top: 6px;\"><t t-out=\""
-"object.recurrence_id.name or ''\">每 1 星期舉行，共 3 次</t></td>\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">頻率</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-"
+"out=\"object.recurrence_id.name or ''\">每 1 星期舉行，共 3 次</t></td>\n"
 "            </tr>\n"
 "            <tr t-if=\"not object.event_id.appointment_type_id.hide_duration "
 "and not object.event_id.allday and object.event_id.duration\">\n"
-"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;\""
-">時長</td>\n"
-"                <td style=\"padding-top: 6px;\"><t t-out=\"('%d 小時 %02d "
-"分鐘' % (object.event_id.duration,round(object.event_id.duration*60)%60)) or "
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">時長</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-out=\"('%d 小時 %02d 分"
+"鐘' % (object.event_id.duration,round(object.event_id.duration*60)%60)) or "
 "''\">0 小時 30 分鐘</t></td>\n"
 "            </tr>\n"
 "            <tr t-if=\"object.event_id.location\">\n"
-"                <td style="
-"\"width: 100px; padding-top: 6px; color: #676F7B; vertical-align: top;\""
-">地點</td>\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B; "
+"vertical-align: top;\">地點</td>\n"
 "                <td style=\"padding-top: 6px;\">\n"
-"                    <t t-out=\"object.event_id.location or ''\">布魯塞爾</t>"
-"\n"
+"                    <t t-out=\"object.event_id.location or ''\">布魯塞爾</"
+"t>\n"
 "                    <a target=\"_blank\" t-if=\"object.event_id.location != "
-"object.event_id.appointment_type_id.location_id.name\" t-attf-href="
-"\"http://maps.google.com/maps?oi=map&amp;q={{object.event_id.location}}\" "
+"object.event_id.appointment_type_id.location_id.name\" t-attf-href=\"http://"
+"maps.google.com/maps?oi=map&amp;q={{object.event_id.location}}\" "
 "style=\"margin-left: 12px; font-size: 12px; color: #008f8c; text-decoration: "
 "underline;\">查看地圖</a>\n"
 "                </td>\n"
 "            </tr>\n"
-"            <tr t-if=\"object.event_id.appointment_type_id.manage_capacity\">"
-"\n"
-"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;\""
-">可容納</td>\n"
-"                <td style=\"padding-top: 6px;\"><t t-out=\"object.event_id."
-"total_capacity_reserved\"/> 人</td>\n"
+"            <tr t-"
+"if=\"object.event_id.appointment_type_id.manage_capacity\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">可容納</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-"
+"out=\"object.event_id.total_capacity_reserved\"/> 人</td>\n"
 "            </tr>\n"
 "            <tr t-if=\"not "
-"object.event_id.appointment_type_id.is_auto_assign and object.event_id."
-"appointment_resource_ids\">\n"
-"                <td style="
-"\"width: 100px; padding-top: 6px; color: #676F7B; vertical-align: top;\""
-">資源</td>\n"
+"object.event_id.appointment_type_id.is_auto_assign and "
+"object.event_id.appointment_resource_ids\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B; "
+"vertical-align: top;\">資源</td>\n"
 "                <td style=\"padding-top: 6px;\">\n"
 "                    <ul style=\"padding: 0 15px;\">\n"
-"                        <li t-foreach="
-"\"object.event_id.appointment_resource_ids\" t-as=\"resource\">\n"
-"                            <span style=\"margin-left:5px\" t-out="
-"\"resource.name or ''\">1 號桌</span>\n"
+"                        <li t-"
+"foreach=\"object.event_id.appointment_resource_ids\" t-as=\"resource\">\n"
+"                            <span style=\"margin-left:5px\" t-"
+"out=\"resource.name or ''\">1 號桌</span>\n"
 "                        </li>\n"
 "                    </ul>\n"
 "                </td>\n"
 "            </tr>\n"
 "            <tr t-if=\"object.event_id.videocall_redirection\">\n"
-"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;\""
-">\n"
-"                    <t t-if=\"object.event_id.videocall_source == 'discuss'\""
-">如何參加</t>\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">\n"
+"                    <t t-if=\"object.event_id.videocall_source == "
+"'discuss'\">如何參加</t>\n"
 "                    <t t-else=\"\">參與連結</t>\n"
 "                </td>\n"
 "                <td style=\"padding-top: 6px;\">\n"
-"                    <a t-attf-href="
-"\"{{ object.event_id.videocall_redirection }}\" target=\"_blank\" style="
-"\"color: #008f8c;\">\n"
-"                        <t t-if="
-"\"object.event_id.videocall_source == 'discuss'\">Odoo 聊天應用程式</t>\n"
+"                    <a t-attf-"
+"href=\"{{ object.event_id.videocall_redirection }}\" target=\"_blank\" "
+"style=\"color: #008f8c;\">\n"
+"                        <t t-if=\"object.event_id.videocall_source == "
+"'discuss'\">Odoo 聊天應用程式</t>\n"
 "                        <t t-else=\"\">視像會議</t>\n"
 "                    </a>\n"
 "                </td>\n"
@@ -642,58 +640,58 @@ msgstr ""
 "        </table>\n"
 "    </div>\n"
 "    <div style=\"margin: 32px 0 0;\">\n"
-"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-weight:"
-" bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};\""
-">參加者</h2>\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">參加者</h2>\n"
 "        <div t-foreach=\"object.event_id.attendee_ids\" t-as=\"attendee\" "
 "style=\"margin-bottom: 5px;\">\n"
-"            <img t-if=\"attendee.state\" t-attf-src="
-"\"/calendar/static/src/img/state_{{ attendee.state }}.png\" style="
-"\"border:0; width: 15px; height: 15px; vertical-align: text-bottom;\"/>\n"
+"            <img t-if=\"attendee.state\" t-attf-src=\"/calendar/static/src/"
+"img/state_{{ attendee.state }}.png\" style=\"border:0; width: 15px; height: "
+"15px; vertical-align: text-bottom;\"/>\n"
 "            <t t-if=\"attendee != object\">\n"
-"                <span style=\"margin-left: 5px\" t-out="
-"\"attendee.common_name or ''\">Mitchell Admin</span>\n"
+"                <span style=\"margin-left: 5px\" t-"
+"out=\"attendee.common_name or ''\">Mitchell Admin</span>\n"
 "            </t>\n"
 "            <t t-else=\"\">\n"
 "                <span style=\"margin-left:5px\">你</span>\n"
 "            </t>\n"
 "        </div>\n"
 "    </div>\n"
-"    <div t-if=\"not is_html_empty(object.event_id.description)\" style="
-"\"margin: 32px 0 0;\">\n"
-"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-weight:"
-" bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};\""
-">活動描述</h2>\n"
+"    <div t-if=\"not is_html_empty(object.event_id.description)\" "
+"style=\"margin: 32px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">活動描述</h2>\n"
 "        <div t-out=\"object.event_id.description\"/>\n"
 "    </div>\n"
 "    <div t-if=\"target_customer\" style=\"margin: 32px 0 0;\">\n"
-"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-weight:"
-" bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};\""
-">更改活動詳情</h2>\n"
-"        <a t-attf-href=\"/calendar/meeting/"
-"view?token={{object.access_token}}&amp;id={{object.event_id.id}}\" style=\""
-"color: color: #008f8c; text-decoration: underline;\">改期</a>\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">更改活動詳情</h2>\n"
+"        <a t-attf-href=\"/calendar/meeting/view?token={{object.access_token}}"
+"&amp;id={{object.event_id.id}}\" style=\"color: color: #008f8c; text-"
+"decoration: underline;\">改期</a>\n"
 "    </div>\n"
-"    <t t-set=\"upcoming_appointments\" t-value=\"("
-"object.event_id.appointment_booker_id.upcoming_appointment_ids - "
+"    <t t-set=\"upcoming_appointments\" t-"
+"value=\"(object.event_id.appointment_booker_id.upcoming_appointment_ids - "
 "object.event_id).sorted('start')\"/>\n"
 "    <div t-if=\"upcoming_appointments\" style=\"margin: 32px 0 0;\">\n"
-"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-weight:"
-" bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};\""
-">即將進行的其他預約</h2>\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">即將進行的其他預約</h2>\n"
 "        <ul style=\"margin: 6px 0 0; padding: 0 18px;\">\n"
-"            <li style=\"margin-top: 6px;\" t-foreach=\""
-"upcoming_appointments\" t-as=\"upcoming_appointment\">\n"
-"                <span t-out="
-"\"upcoming_appointment.appointment_type_id.name or ''\">技術示範</span>\n"
+"            <li style=\"margin-top: 6px;\" t-"
+"foreach=\"upcoming_appointments\" t-as=\"upcoming_appointment\">\n"
+"                <span t-out=\"upcoming_appointment.appointment_type_id.name "
+"or ''\">技術示範</span>\n"
 "                <span style=\"margin: 0 10px;\">-</span>\n"
-"                <span t-out=\"upcoming_appointment.start or ''\" t-options=\""
-"{&quot;widget&quot;: &quot;datetime&quot;, &quot;format&quot;: "
+"                <span t-out=\"upcoming_appointment.start or ''\" t-"
+"options=\"{&quot;widget&quot;: &quot;datetime&quot;, &quot;format&quot;: "
 "&quot;medium&quot;, &quot;tz_name&quot;: object.mail_tz}\" style=\"font-"
 "weight: bold;\">6 月 20 日 15:00</span>\n"
 "                <a t-attf-href=\"/calendar/view/"
-"#{upcoming_appointment.access_token}?partner_id=#{appointment_booker_id}"
-"\" target=\"_blank\" style=\"margin-left: 10px; font-size: 12px; color: "
+"#{upcoming_appointment.access_token}?partner_id=#{appointment_booker_id}\" "
+"target=\"_blank\" style=\"margin-left: 10px; font-size: 12px; color: "
 "#008f8c; text-decoration: underline;\">查看詳情</a>\n"
 "            </li>\n"
 "        </ul>\n"
@@ -701,8 +699,8 @@ msgstr ""
 "    <p style=\"margin: 32px 0 0;\">\n"
 "        謝謝！\n"
 "        <t t-if=\"object.event_id.user_id.signature\">\n"
-"            <span style=\"display: block; margin-top: 8px;\"><t t-out="
-"\"object.event_id.user_id.signature or ''\">Mitchell Admin</t></span>\n"
+"            <span style=\"display: block; margin-top: 8px;\"><t t-"
+"out=\"object.event_id.user_id.signature or ''\">Mitchell Admin</t></span>\n"
 "        </t>\n"
 "    </p>\n"
 "</div>\n"
@@ -1151,17 +1149,17 @@ msgstr ""
 "<div style=\"font-size: 13px; color: #374151;\">\n"
 "    <t t-set=\"recurrent\" t-value=\"object.recurrence_id and not "
 "ctx.get('calendar_template_ignore_recurrence')\"/>\n"
-"    <t t-set=\"mail_tz\" t-value="
-"\"object._get_mail_tz() or ctx.get('mail_tz')\"/>\n"
-"    <t t-set=\"appointment_booker_name\" t-value="
-"\"object.appointment_booker_id.display_name\"/>\n"
+"    <t t-set=\"mail_tz\" t-value=\"object._get_mail_tz() or "
+"ctx.get('mail_tz')\"/>\n"
+"    <t t-set=\"appointment_booker_name\" t-"
+"value=\"object.appointment_booker_id.display_name\"/>\n"
 "    <h1 style=\"font-size: 18px; font-weight: bold; color: #374151;\">\n"
 "        <t t-if=\"not object.appointment_type_id.is_always_confirm and "
 "object.appointment_status == 'request'\">預約請求</t>\n"
 "        <t t-else=\"\">\n"
 "            預約已確認\n"
-"            <img src=\"/calendar/static/src/img/check-circle.png\" style="
-"\"border:0; width: 24px; height: 24px; margin-left: 10px; text-"
+"            <img src=\"/calendar/static/src/img/check-circle.png\" "
+"style=\"border:0; width: 24px; height: 24px; margin-left: 10px; text-"
 "decoration:none; vertical-align: bottom;\"/>\n"
 "        </t>\n"
 "    </h1>\n"
@@ -1171,11 +1169,11 @@ msgstr ""
 "            <t t-if=\"not object.appointment_type_id.is_always_confirm and "
 "object.appointment_status == 'request'\">要求你參加</t>\n"
 "            <t t-else=\"\">已為你預約</t>\n"
-"            以下活動：「<t t-out=\"object.appointment_type_id.name or ''\""
-">技術示範</t>」\n"
-"            <t t-if=\"object.appointment_type_id.category not in "
-"['custom', 'anytime'] and object.appointment_type_id.schedule_based_on == "
-"'users' and object.partner_id\">\n"
+"            以下活動：「<t t-out=\"object.appointment_type_id.name or ''\">技"
+"術示範</t>」\n"
+"            <t t-if=\"object.appointment_type_id.category not in ['custom', "
+"'anytime'] and object.appointment_type_id.schedule_based_on == 'users' and "
+"object.partner_id\">\n"
 "                ，活動由 <t t-out=\"object.partner_id.name or ''\">Brandon "
 "Freeman</t> 主持\n"
 "            </t>。\n"
@@ -1183,23 +1181,23 @@ msgstr ""
 "    </p>\n"
 "    <div style=\"text-align: center; padding: 16px 0px 16px 0px; margin-top: "
 "16px;\">\n"
-"        <a t-attf-href="
-"\"/calendar/meeting/join?token={{ object.access_token }}\" t-attf-style="
-"\"display: inline-block; padding: 7px 14px; color: {{"
-"user.company_id.email_primary_color or '#FFFFFF'}}; text-decoration: none; "
-"background-color: {{user.company_id.email_secondary_color or '#875A7B'}}; "
-"border-radius: 3px\">\n"
+"        <a t-attf-href=\"/calendar/meeting/join?"
+"token={{ object.access_token }}\" t-attf-style=\"display: inline-block; "
+"padding: 7px 14px; color: {{user.company_id.email_primary_color or "
+"'#FFFFFF'}}; text-decoration: none; background-color: "
+"{{user.company_id.email_secondary_color or '#875A7B'}}; border-radius: "
+"3px\">\n"
 "            參加</a>\n"
-"        <a t-attf-href=\"/odoo/calendar.event/{{ object.id }}\" t-attf-style="
-"\"display: inline-block; margin-left: 12px; padding: 7px 14px; color: "
+"        <a t-attf-href=\"/odoo/calendar.event/{{ object.id }}\" t-attf-"
+"style=\"display: inline-block; margin-left: 12px; padding: 7px 14px; color: "
 "#111827; text-decoration: none; background-color: #E7E9ED; border-radius: "
 "3px;\">\n"
 "            查看</a>\n"
 "    </div>\n"
 "    <div style=\"margin: 16px 0 0;\">\n"
-"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-weight:"
-" bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};\""
-">活動詳情</h2>\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">活動詳情</h2>\n"
 "        <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"font-"
 "size: 13px; color: #374151;\">\n"
 "            <tr>\n"
@@ -1216,10 +1214,10 @@ msgstr ""
 "or ''\">星期三</t>\n"
 "                    <t t-if=\"not object.allday\">\n"
 "                        <t t-out=\"format_time(time=object.start, "
-"tz=mail_tz, time_format='short', lang_code=object.env.lang) or ''\">8:00</t>"
-"\n"
-"                        <t t-if="
-"\"not object.appointment_type_id.hide_timezone and mail_tz\">\n"
+"tz=mail_tz, time_format='short', lang_code=object.env.lang) or ''\">8:00</"
+"t>\n"
+"                        <t t-if=\"not "
+"object.appointment_type_id.hide_timezone and mail_tz\">\n"
 "                            <span style=\"font-size: 11px; font-weight: "
 "normal;\">\n"
 "                                (<t t-out=\"mail_tz\"/>)\n"
@@ -1229,65 +1227,63 @@ msgstr ""
 "                </td>\n"
 "            </tr>\n"
 "            <tr t-if=\"recurrent\">\n"
-"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;\""
-">頻率</td>\n"
-"                <td style=\"padding-top: 6px;\"><t t-out=\""
-"object.recurrence_id.name or ''\">每 1 星期舉行，共 3 次</t></td>\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">頻率</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-"
+"out=\"object.recurrence_id.name or ''\">每 1 星期舉行，共 3 次</t></td>\n"
 "            </tr>\n"
 "            <tr t-if=\"not object.appointment_type_id.hide_duration and not "
 "object.allday and object.duration\">\n"
-"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;\""
-">時長</td>\n"
-"                <td style=\"padding-top: 6px;\"><t t-out=\"('%d 小時 %02d "
-"分鐘' % (object.duration,round(object.duration*60)%60)) or ''\">0 小時 30 "
-"分鐘</t></td>\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">時長</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-out=\"('%d 小時 %02d 分"
+"鐘' % (object.duration,round(object.duration*60)%60)) or ''\">0 小時 30 分鐘"
+"</t></td>\n"
 "            </tr>\n"
 "            <tr t-if=\"object.location\">\n"
-"                <td style="
-"\"width: 100px; padding-top: 6px; color: #676F7B; vertical-align: top;\""
-">地點</td>\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B; "
+"vertical-align: top;\">地點</td>\n"
 "                <td style=\"padding-top: 6px;\">\n"
 "                    <t t-out=\"object.location or ''\">布魯塞爾</t>\n"
-"                    <a target=\"_blank\" t-if="
-"\"object.location != object.appointment_type_id.location_id.name\" t-attf-"
-"href=\"http://maps.google.com/maps?oi=map&amp;q={{ object.location }}\" style"
-"=\"margin-left: 12px; font-size: 12px; color: #008f8c; text-decoration: "
-"underline;\">查看地圖</a>\n"
+"                    <a target=\"_blank\" t-if=\"object.location != "
+"object.appointment_type_id.location_id.name\" t-attf-href=\"http://"
+"maps.google.com/maps?oi=map&amp;q={{ object.location }}\" style=\"margin-"
+"left: 12px; font-size: 12px; color: #008f8c; text-decoration: underline;\">查"
+"看地圖</a>\n"
 "                </td>\n"
 "            </tr>\n"
 "            <tr t-if=\"object.appointment_type_id.manage_capacity\">\n"
-"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;\""
-">可容納</td>\n"
-"                <td style=\"padding-top: 6px;\"><t t-out=\"object."
-"total_capacity_reserved\"/> 人</td>\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">可容納</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-"
+"out=\"object.total_capacity_reserved\"/> 人</td>\n"
 "            </tr>\n"
 "            <tr t-if=\"not object.appointment_type_id.is_auto_assign and "
 "object.appointment_resource_ids\">\n"
-"                <td style="
-"\"width: 100px; padding-top: 6px; color: #676F7B; vertical-align: top;\""
-">資源</td>\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B; "
+"vertical-align: top;\">資源</td>\n"
 "                <td style=\"padding-top: 6px;\">\n"
 "                    <ul style=\"padding: 0 15px;\">\n"
-"                        <li t-foreach=\"object.appointment_resource_ids\" "
-"t-as=\"resource\">\n"
-"                            <span style=\"margin-left:5px\" t-out="
-"\"resource.name or ''\">1 號桌</span>\n"
+"                        <li t-foreach=\"object.appointment_resource_ids\" t-"
+"as=\"resource\">\n"
+"                            <span style=\"margin-left:5px\" t-"
+"out=\"resource.name or ''\">1 號桌</span>\n"
 "                        </li>\n"
 "                    </ul>\n"
 "                </td>\n"
 "            </tr>\n"
 "            <tr t-if=\"object.videocall_redirection\">\n"
-"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;\""
-">\n"
-"                    <t t-if=\"object.videocall_source == 'discuss'\""
-">如何參加</t>\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">\n"
+"                    <t t-if=\"object.videocall_source == 'discuss'\">如何參加"
+"</t>\n"
 "                    <t t-else=\"\">參與連結</t>\n"
 "                </td>\n"
 "                <td style=\"padding-top: 6px;\">\n"
 "                    <a t-attf-href=\"{{ object.videocall_redirection }}\" "
 "target=\"_blank\" style=\"color: #008f8c;\">\n"
-"                        <t t-if=\"object.videocall_source == 'discuss'\""
-">Odoo 聊天應用程式</t>\n"
+"                        <t t-if=\"object.videocall_source == "
+"'discuss'\">Odoo 聊天應用程式</t>\n"
 "                        <t t-else=\"\">視像會議</t>\n"
 "                    </a>\n"
 "                </td>\n"
@@ -1295,52 +1291,52 @@ msgstr ""
 "        </table>\n"
 "    </div>\n"
 "    <div style=\"margin: 32px 0 0;\">\n"
-"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-weight:"
-" bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};\""
-">參加者</h2>\n"
-"        <div t-foreach=\"object.attendee_ids\" t-as=\"attendee\" style"
-"=\"margin-bottom: 5px;\">\n"
-"            <img t-if=\"attendee.state\" t-attf-src="
-"\"/calendar/static/src/img/state_{{ attendee.state }}.png\" style="
-"\"border:0; width: 15px; height: 15px; vertical-align: text-bottom;\"/>\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">參加者</h2>\n"
+"        <div t-foreach=\"object.attendee_ids\" t-as=\"attendee\" "
+"style=\"margin-bottom: 5px;\">\n"
+"            <img t-if=\"attendee.state\" t-attf-src=\"/calendar/static/src/"
+"img/state_{{ attendee.state }}.png\" style=\"border:0; width: 15px; height: "
+"15px; vertical-align: text-bottom;\"/>\n"
 "            <t t-if=\"attendee.common_name\">\n"
-"                <span style=\"margin-left: 5px\" t-out="
-"\"attendee.common_name or ''\">Mitchell Admin</span>\n"
+"                <span style=\"margin-left: 5px\" t-"
+"out=\"attendee.common_name or ''\">Mitchell Admin</span>\n"
 "            </t>\n"
 "            <t t-else=\"\">\n"
 "                <span style=\"margin-left:5px\">你</span>\n"
 "            </t>\n"
 "        </div>\n"
 "    </div>\n"
-"    <div t-if=\"not is_html_empty(object.description)\" style="
-"\"margin: 32px 0 0;\">\n"
-"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-weight:"
-" bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};\""
-">活動描述</h2>\n"
+"    <div t-if=\"not is_html_empty(object.description)\" style=\"margin: 32px "
+"0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">活動描述</h2>\n"
 "        <div t-out=\"object.description\"/>\n"
 "    </div>\n"
-"    <t t-set=\"upcoming_appointments\" t-value=\"("
-"object.appointment_booker_id.upcoming_appointment_ids - "
+"    <t t-set=\"upcoming_appointments\" t-"
+"value=\"(object.appointment_booker_id.upcoming_appointment_ids - "
 "object).sorted('start')\"/>\n"
 "    <div t-if=\"upcoming_appointments\" style=\"margin: 32px 0 0;\">\n"
-"        <t t-set=\"appointment_booker_id\" t-value="
-"\"object.appointment_booker_id.id\"/>\n"
-"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-weight:"
-" bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};\""
-">即將進行的其他預約</h2>\n"
+"        <t t-set=\"appointment_booker_id\" t-"
+"value=\"object.appointment_booker_id.id\"/>\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">即將進行的其他預約</h2>\n"
 "        <ul style=\"margin: 6px 0 0; padding: 0 18px;\">\n"
-"            <li style=\"margin-top: 6px;\" t-foreach=\""
-"upcoming_appointments\" t-as=\"upcoming_appointment\">\n"
-"                <span t-out="
-"\"upcoming_appointment.appointment_type_id.name or ''\">技術示範</span>\n"
+"            <li style=\"margin-top: 6px;\" t-"
+"foreach=\"upcoming_appointments\" t-as=\"upcoming_appointment\">\n"
+"                <span t-out=\"upcoming_appointment.appointment_type_id.name "
+"or ''\">技術示範</span>\n"
 "                <span style=\"margin: 0 10px;\">-</span>\n"
-"                <span t-out=\"upcoming_appointment.start or ''\" t-options=\""
-"{&quot;widget&quot;: &quot;datetime&quot;, &quot;format&quot;: "
+"                <span t-out=\"upcoming_appointment.start or ''\" t-"
+"options=\"{&quot;widget&quot;: &quot;datetime&quot;, &quot;format&quot;: "
 "&quot;medium&quot;, &quot;tz_name&quot;: mail_tz}\" style=\"font-weight: "
 "bold;\">6 月 20 日 15:00</span>\n"
 "                <a t-attf-href=\"/calendar/view/"
-"#{upcoming_appointment.access_token}?partner_id=#{appointment_booker_id}"
-"\" target=\"_blank\" style=\"margin-left: 10px; font-size: 12px; color: "
+"#{upcoming_appointment.access_token}?partner_id=#{appointment_booker_id}\" "
+"target=\"_blank\" style=\"margin-left: 10px; font-size: 12px; color: "
 "#008f8c; text-decoration: underline;\">查看詳情</a>\n"
 "            </li>\n"
 "        </ul>\n"
@@ -1652,7 +1648,7 @@ msgstr "%s約會類型不應受日期限制。"
 #. module: appointment
 #: model:ir.model.constraint,message:appointment.constraint_appointment_question_check_default_question_is_reusable
 msgid "A default question must be reusable."
-msgstr ""
+msgstr "預設問題必須設定為可重用。"
 
 #. module: appointment
 #. odoo-python
@@ -1716,6 +1712,8 @@ msgstr "活動類型圖示"
 
 #. module: appointment
 #. odoo-javascript
+#: code:addons/appointment/static/src/views/appointment_calendar/appointment_calendar_controller.js:0
+#: code:addons/appointment/static/src/views/appointment_calendar/appointment_calendar_controller.xml:0
 #: code:addons/appointment/static/src/views/gantt/gantt_renderer.js:0
 #: code:addons/appointment/static/src/views/gantt/gantt_renderer_controls.xml:0
 #: code:addons/appointment/static/src/views/list/list_renderer.js:0
@@ -1737,7 +1735,7 @@ msgstr "在此加入功能⋯"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form
 msgid "Add a line"
-msgstr ""
+msgstr "加入資料行"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_meeting_user
@@ -1787,7 +1785,7 @@ msgstr "全天"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Allow"
-msgstr ""
+msgstr "允許"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
@@ -2019,7 +2017,7 @@ msgstr "預約類型"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_booking_line__appointment_user_id
 msgid "Appointment User"
-msgstr ""
+msgstr "預約使用者"
 
 #. module: appointment
 #. odoo-python
@@ -2102,7 +2100,7 @@ msgstr ""
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__is_auto_assign
 msgid "Assign automatically"
-msgstr ""
+msgstr "自動分配"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_invite__resources_choice
@@ -2113,7 +2111,7 @@ msgstr "分配給"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__assignment_method
 msgid "Assignment"
-msgstr ""
+msgstr "指派"
 
 #. module: appointment
 #. odoo-python
@@ -2140,7 +2138,7 @@ msgstr ""
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__assignment_method__auto
 msgid "Automatically"
-msgstr ""
+msgstr "自動"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__auto_confirm
@@ -2220,7 +2218,7 @@ msgstr "基本連結網址"
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__schedule_based_on
 #: model:ir.model.fields,field_description:appointment.field_calendar_event__appointment_type_schedule_based_on
 msgid "Book"
-msgstr ""
+msgstr "預訂"
 
 #. module: appointment
 #. odoo-python
@@ -2285,7 +2283,7 @@ msgstr "預約詳情"
 #. odoo-python
 #: code:addons/appointment/models/appointment_booking_line.py:0
 msgid "Booking line must have a user or resource set."
-msgstr ""
+msgstr "預訂資料行必須設定使用者或資源。"
 
 #. module: appointment
 #: model:ir.ui.menu,name:appointment.menu_appointment_reporting_bookings
@@ -2348,7 +2346,7 @@ msgstr "取消預約"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Cancellation"
-msgstr ""
+msgstr "取消"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__canceled_mail_template_id
@@ -2390,13 +2388,13 @@ msgstr "用戶預留容納人數"
 #. module: appointment
 #: model:ir.model.constraint,message:appointment.constraint_appointment_type_check_capacity_positive
 msgid "Capacity should be at least 1."
-msgstr ""
+msgstr "容量應最少為 1。"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_booking_line__capacity_used
 msgid ""
 "Capacity that will be used based on the capacity and user/resource selected"
-msgstr ""
+msgstr "根據選取的容量及使用者/資源，而將會使用的容量"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__category
@@ -2407,7 +2405,7 @@ msgstr "類別"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form
 msgid "Check in"
-msgstr ""
+msgstr "簽到"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_question__question_type__checkbox
@@ -2417,7 +2415,7 @@ msgstr "勾選方格（可選多項）"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form
 msgid "Checked in"
-msgstr ""
+msgstr "已上班打卡"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__calendar_event__appointment_status__attended
@@ -2456,7 +2454,7 @@ msgstr "關閉"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Communication"
-msgstr ""
+msgstr "溝通"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_resource__company_id
@@ -2688,12 +2686,12 @@ msgstr "已拒絕"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_search
 msgid "Default Questions"
-msgstr ""
+msgstr "預設問題"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_question__is_default
 msgid "Default question"
-msgstr ""
+msgstr "預設問題"
 
 #. module: appointment
 #. odoo-python
@@ -2729,7 +2727,7 @@ msgstr "定義用於生成事件的視頻通話連結類型, 留空可避免生�
 #. module: appointment
 #: model:appointment.type,name:appointment.appointment_type_dental_care
 msgid "Dental Care"
-msgstr ""
+msgstr "牙科護理"
 
 #. module: appointment
 #. odoo-python
@@ -2836,7 +2834,7 @@ msgstr "時長"
 #. module: appointment
 #: model_terms:appointment.type,message_intro:appointment.appointment_type_tennis_court
 msgid "Easily reserve tennis courts for your next match, anytime and anywhere."
-msgstr ""
+msgstr "隨時隨地，輕鬆為下一場比賽預訂網球場。"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_form
@@ -2881,7 +2879,7 @@ msgstr "每"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_question__extra_comment
 msgid "Extra Comment"
-msgstr ""
+msgstr "額外備註"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form_custom_share
@@ -2891,7 +2889,7 @@ msgstr "確認時的額外訊息"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_form
 msgid "Extra comments..."
-msgstr ""
+msgstr "額外評論⋯"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__message_confirmation
@@ -2901,7 +2899,7 @@ msgstr "成功預約後，會提供額外資訊。"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category_slot_scheduling__flexible
 msgid "Flexible"
-msgstr ""
+msgstr "靈活"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category__custom
@@ -3209,7 +3207,7 @@ msgstr "已發佈"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_question__is_reusable
 msgid "Is Reusable"
-msgstr ""
+msgstr "可重用"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -3275,7 +3273,7 @@ msgstr ""
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_invite_view_form
 msgid "Link"
-msgstr ""
+msgstr "連結"
 
 #. module: appointment
 #. odoo-javascript
@@ -3354,7 +3352,7 @@ msgstr "管理容納人數"
 msgid ""
 "Manage the maximum amount of people a user/resource can handle (e.g. Table "
 "for 6 persons, ...)"
-msgstr ""
+msgstr "管理使用者/資源最多可以處理的人數（例如：6 人桌）"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
@@ -3375,12 +3373,12 @@ msgstr "我"
 #. odoo-python
 #: code:addons/appointment/models/templates/appointment_type.py:0
 msgid "Meeting"
-msgstr ""
+msgstr "會議"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_calendar_event__name
 msgid "Meeting Subject"
-msgstr ""
+msgstr "會議主題"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_meeting_details
@@ -3437,7 +3435,7 @@ msgstr "我的預約"
 #. odoo-javascript
 #: code:addons/appointment/static/src/views/appointment_calendar/appointment_calendar_controller.xml:0
 msgid "My Calendar"
-msgstr ""
+msgstr "我的日曆"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_search
@@ -3532,7 +3530,7 @@ msgstr "暫無資料！"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form
 msgid "No show"
-msgstr ""
+msgstr "缺席"
 
 #. module: appointment
 #. odoo-python
@@ -3545,7 +3543,7 @@ msgstr "無"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_search
 msgid "Not Reusable"
-msgstr ""
+msgstr "不可重用"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_calendar_event__alarm_ids
@@ -3681,12 +3679,12 @@ msgstr "預約人"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_question__question_type__phone
 msgid "Phone Number"
-msgstr ""
+msgstr "電話號碼"
 
 #. module: appointment
 #: model:appointment.question,name:appointment.appointment_question_phone
 msgid "Phone number"
-msgstr ""
+msgstr "電話號碼"
 
 #. module: appointment
 #. odoo-javascript
@@ -3743,7 +3741,7 @@ msgstr "問題"
 #. odoo-python
 #: code:addons/appointment/controllers/appointment.py:0
 msgid "Questions & Answers"
-msgstr ""
+msgstr "問題及答案"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_question__question_type__radio
@@ -3888,7 +3886,7 @@ msgstr "只限用戶"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_search
 msgid "Reusable"
-msgstr ""
+msgstr "可重用"
 
 #. module: appointment
 #. odoo-javascript
@@ -3957,7 +3955,7 @@ msgstr "安排不遲於（天）"
 msgid ""
 "Schedule your visit today and experience expert dental care brought right to "
 "your doorstep."
-msgstr ""
+msgstr "今天就預約就診，體驗專業的上門牙科護理服務。"
 
 #. module: appointment
 #. odoo-python
@@ -4144,7 +4142,7 @@ msgstr "時間段類型"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Slots"
-msgstr ""
+msgstr "時段"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__message_intro
@@ -4257,7 +4255,7 @@ msgstr ""
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__select_first
 msgid "Starts with"
-msgstr ""
+msgstr "以此開始:"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form_gantt_booking
@@ -4302,7 +4300,7 @@ msgstr "星期日"
 #. module: appointment
 #: model:appointment.question,name:appointment.appointment_type_dental_care_question_1
 msgid "Symptoms"
-msgstr ""
+msgstr "症狀"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
@@ -4330,7 +4328,7 @@ msgstr "訂枱"
 #. module: appointment
 #: model:appointment.type,name:appointment.appointment_type_tennis_court
 msgid "Tennis Court"
-msgstr ""
+msgstr "網球場"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_answer_input__value_text_box
@@ -4416,13 +4414,16 @@ msgid ""
 "            This field is only used if the appointment type is not set to "
 "manage capacity."
 msgstr ""
+"每個預約時段最多可以處理的預訂數量（例如：指定使用者/資源最多可接受 6 項預"
+"訂）。\n"
+"            只會在預約類型並非設定為「管理容量」時，才會使用此欄位。"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__user_capacity
 msgid ""
 "The maximum amount of capacity a user can handle when manage capacity is "
 "enabled."
-msgstr ""
+msgstr "啟用「管理容量」後，使用者可以處理的最大容量。"
 
 #. module: appointment
 #: model:ir.model.constraint,message:appointment.constraint_appointment_resource_check_capacity
@@ -4516,7 +4517,7 @@ msgstr "這是一個客戶預約表單的預覽。"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_form
 msgid "This question is used by"
-msgstr ""
+msgstr "此問題由以下項目使用："
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_question__extra_comment
@@ -4569,7 +4570,7 @@ msgstr "代碼(token)"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__max_bookings
 msgid "Total Bookings"
-msgstr ""
+msgstr "預訂總數"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__resource_total_capacity
@@ -4684,7 +4685,7 @@ msgstr ""
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__user_capacity
 msgid "User Capacity"
-msgstr ""
+msgstr "使用者容量"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_invite__staff_user_ids
@@ -4702,7 +4703,7 @@ msgstr "視像通話"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__event_videocall_source
 msgid "Video Link"
-msgstr ""
+msgstr "影片連結"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_info
@@ -4737,7 +4738,7 @@ msgstr "平日"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category_slot_scheduling__weekly
 msgid "Weekly"
-msgstr ""
+msgstr "每週"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category__recurring
@@ -4755,7 +4756,8 @@ msgstr ""
 msgid ""
 "Will appear in the list of available questions when adding one in any "
 "appointment. Always true for default questions."
-msgstr ""
+msgstr "在任何預約中加入問題時，此問題將會在可用問題清單中顯示。預設問題的此項設定必"
+"為「真」。"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.staff_user_select
@@ -4910,7 +4912,7 @@ msgstr "例：john.smith@example.com"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_gantt_kanban_popover
 msgid "guests"
-msgstr ""
+msgstr "賓客"
 
 #. module: appointment
 #. odoo-javascript
@@ -4997,7 +4999,7 @@ msgstr "至"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "up to"
-msgstr ""
+msgstr "直至"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.portal_my_appointments

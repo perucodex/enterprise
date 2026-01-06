@@ -111,7 +111,7 @@ class SaleTemporalRecurrence(models.Model):
         self.ensure_one()
         if self.overnight:
             night_duration = round(duration / 24)
-            label = "Night" if night_duration == 1 else "Nights"
-            return [night_duration, self.env._("%s", label)]
+            label = self.env._("Night") if night_duration == 1 else self.env._("Nights")
+            return [night_duration, label]
         else:
             return [duration, self._get_unit_label(duration)]

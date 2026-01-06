@@ -136,6 +136,15 @@ class VoipCall(models.Model):
         for call in self:
             call.country_id = country_id_by_iso_code.get(call.country_code_from_phone, False)
 
+    @api.ondelete(at_uninstall=False)
+    def _unlink_send_notification(self):
+        for partner, calls in self.grouped(lambda c: c.user_id.partner_id).items():
+            self.env["bus.bus"]._sendone(
+                partner,
+                "voip.call/delete",
+                {"ids": calls.ids},
+            )
+
     def action_open_calls(self):
         self.ensure_one()
         domain = Domain("phone_number", "=", self.phone_number)
@@ -262,22 +271,26 @@ class VoipCall(models.Model):
             domain = [("phone_mobile_search", "=", number)]
         partner = self.env["res.partner"].search(domain, limit=1)
         if not partner:
-            partner = self.env["res.users.settings"].search([
-                ("voip_username", "=", number)
-            ], limit=1).user_id.partner_id
+            partner = (
+                self.env["res.users.settings"]
+                .sudo()
+                .search([("voip_username", "=", number)], limit=1)
+                .user_id.partner_id.sudo(False)
+            )
         if not partner:
             return False
-        self.partner_id = partner
+        self.check_access("read")
+        self.sudo().partner_id = partner
         return Store().add(self, self._get_voip_store_fields()).get_result()
 
     def _get_voip_store_fields(self):
         return [
-            "country_code_from_phone",
             "create_date",
             "direction",
             "display_name",
             "end_date",
             Store.One("partner_id", self.partner_id._voip_get_store_fields()),
+            Store.One("phone_country_id", self.phone_country_id._voip_get_store_fields()),
             "phone_number",
             "start_date",
             "state",

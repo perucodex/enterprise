@@ -19,9 +19,12 @@ class TestQualityRepair(TestRepairCommon):
             'product_id': self.product_storable_lot.id,
             'partner_id': self.res_partner_1.id,
         })
-        repair.action_generate_serial()
+        quant = self.create_quant(self.product_storable_lot, 1)
+        quant.action_apply_inventory()
+        repair.lot_id = quant.lot_id
         repair.action_validate()
-        # Quality check should be created at repair validation
+        self.assertEqual(repair.state, 'confirmed')
+        # Quality check should be created at repair confirmation
         qc = repair.quality_check_ids
         lot_1 = repair.lot_id
         self.assertEqual(len(qc), 1)
@@ -41,3 +44,20 @@ class TestQualityRepair(TestRepairCommon):
         self.assertEqual(qc.quality_state, 'pass')
         repair.action_repair_end()
         self.assertEqual(repair.state, 'done')
+
+    def test_repair_multi_record_create_write(self):
+        """Test that creating and writing multiple repair orders works as expected."""
+        repairs = self.env['repair.order'].create([
+            {
+                'product_id': self.product_storable_lot.id,
+                'partner_id': self.res_partner_1.id,
+            },
+            {
+                'product_id': self.product_storable_lot.id,
+                'partner_id': self.res_partner_1.id,
+            },
+        ])
+        self.assertEqual(len(repairs), 2, "Model should create two repair orders.")
+
+        repairs.write({'name': 'test'})
+        self.assertEqual(set(repairs.mapped('name')), {'test'}, "Model should write the name on both records.")

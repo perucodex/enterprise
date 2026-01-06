@@ -24,11 +24,10 @@ export class VersionPayrunListController extends ListController {
 
     buildRawRecord(rawRecord) {
         return {
-            name: rawRecord.name,
+            ...rawRecord,
             date_start: luxon.DateTime.fromISO(rawRecord.date_start).toISODate(),
             date_end: luxon.DateTime.fromISO(rawRecord.date_end).toISODate(),
             structure_id: rawRecord.structure_id.id,
-            schedule_pay: rawRecord.schedule_pay,
             company_id: rawRecord.company_id?.id,
         };
     }

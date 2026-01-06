@@ -1,8 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import uuid
 
-from dateutil.relativedelta import relativedelta
 from markupsafe import Markup
 
 from odoo import fields, models, _
@@ -125,11 +123,10 @@ class HrApplicant(models.Model):
             'company_id': contract_template.company_id.id or self.company_id.id or self.env.company.id,
             'contract_template_id': contract_template.id,
             'applicant_id': self.id,
-            'final_yearly_costs': contract_template.final_yearly_costs,
+            'final_yearly_costs': contract_template.sudo().final_yearly_costs,
             'job_title': self.job_id.name,
             'employee_job_id': self.job_id.id,
             'department_id': self.department_id.id,
-            'access_token':  uuid.uuid4().hex,
         }
 
     def _get_contract_template(self):

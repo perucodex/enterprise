@@ -108,6 +108,16 @@ class TestDeliveryFedex(TransactionCase):
             'state_id': self.env.ref('base.state_us_41').id,
             'country_id': self.env.ref('base.us').id,
         })
+        self.hong_kong_partner = self.env['res.partner'].create({
+            'name': 'HK Island Customer',
+            'phone': '12345678',
+            'street': "1 H-K Road",
+            'street2': "",
+            'city': "Hong Kong",
+            'zip': '999077',
+            'state_id': self.env.ref('base.state_hk_hk').id,
+            'country_id': self.env.ref('base.hk').id,
+        })
         self.stock_location = self.env.ref('stock.stock_location_stock')
         self.customer_location = self.env.ref('stock.stock_location_customers')
 
@@ -215,7 +225,7 @@ class TestDeliveryFedex(TransactionCase):
                       'product_uom_qty': 1.0,
                       'price_unit': self.large_desk.lst_price}
 
-        so_vals = {'partner_id': self.agrolait.id,
+        so_vals = {'partner_id': self.hong_kong_partner.id,
                    'order_line': [(0, None, sol_1_vals), (0, None, sol_2_vals)]}
 
         sale_order = SaleOrder.create(so_vals)
@@ -237,10 +247,10 @@ class TestDeliveryFedex(TransactionCase):
             self.assertEqual(picking.carrier_id.id, sale_order.carrier_id.id, "Carrier is not the same on Picking and on SO.")
 
             move0 = picking.move_line_ids[0]
+            move1 = picking.move_line_ids[1]
             move0.quantity = 1.0
             move0.picked = True
             self.wiz_put_in_pack(picking)
-            move1 = picking.move_line_ids[1]
             move1.quantity = 1.0
             move1.picked = True
             self.wiz_put_in_pack(picking)

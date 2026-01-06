@@ -100,6 +100,24 @@ export class PDFIframe {
     }
 
     clearNativePDFViewerButtons() {
+        const selectors = [
+            "#pageRotateCw",
+            "#pageRotateCcw",
+            "#openFile",
+            "#presentationMode",
+            "#viewBookmark",
+            "#printButton",
+            "#downloadButton",
+            "#secondaryOpenFile",
+            "#secondaryPresentationMode",
+            "#secondaryViewBookmark",
+            "#secondaryPrint",
+            "#secondaryDownload",
+        ];
+        const elements = this.root.querySelectorAll(selectors.join(", "));
+        elements.forEach((element) => {
+            element.style.display = "none";
+        });
         this.root.querySelector("#lastPage").nextElementSibling.style.display = "none";
         // prevent password from being autocompleted in search input
         this.root.querySelector("#findInput").value = "";

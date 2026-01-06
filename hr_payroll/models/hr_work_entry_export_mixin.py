@@ -242,15 +242,24 @@ class HrWorkEntryExportEmployeeMixin(models.AbstractModel):
         messages = []
         for model_display_name, field_chain in self._relations_to_check():
             if problematic_records := explore_and_check(field_chain):
+                parts = field_chain.split('.')
+                parent_field, final_field_name = parts[-2], parts[-1]
+                if parent_field == 'version_ids':
+                    readable_labels = [
+                        f"{rec.employee_id.name} – {rec.display_name}"
+                        for rec in problematic_records
+                    ]
+                else:
+                    readable_labels = problematic_records.mapped('display_name')
                 final_field_name = field_chain.rsplit('.', maxsplit=1)[-1]
                 field_display_name = problematic_records._fields[final_field_name].string
-                record_names = '\n    • '.join(problematic_records.mapped('name'))
+                record_names = '\n    • '.join(readable_labels)
 
                 message = self.env._(
                     "The following %(model_name)s are missing a %(field_name)s:\n    • %(names)s",
                     model_name=model_display_name,
                     field_name=field_display_name,
-                    names=record_names
+                    names=record_names,
                 )
                 messages.append(message)
 

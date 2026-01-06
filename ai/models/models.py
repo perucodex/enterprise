@@ -59,7 +59,7 @@ class Model(models.AbstractModel):
                 else:
                     # Handle basic field types (dates, etc.)
                     if isinstance(field_value, datetime.datetime):
-                        user_tz = pytz.timezone(self.env.user.tz)
+                        user_tz = pytz.timezone(self.env.user.tz or 'UTC')
                         result[field_name] = (
                             field_value.astimezone(user_tz).strftime(
                                 "%Y-%m-%d %H:%M:%S"

@@ -21,7 +21,6 @@ class TestISO20022CommonCreditTransfer(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.env.user.group_ids |= cls.env.ref('account.group_validate_bank_account')
 
     @classmethod
     def create_payment(cls, bank_journal, partner, payment_method, amount, memo=None):

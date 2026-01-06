@@ -120,3 +120,31 @@ class TestFsmSaleProducts(HttpCase, TestFsmFlowCommon):
             sale_order.order_line.ids[-1], previous_sale_order_line_ids,
             "The last SOL should be the one that was added after the confirmation of the SO."
         )
+
+    def test_industry_fsm_sale_add_product_on_invoice(self):
+        """
+        Checks that we can add the products in the draft invoice.
+        """
+        self.env['product.product'].create({
+            'name': 'Sale Product',
+            'invoice_policy': 'order',
+            'list_price': 100,
+            'sale_ok': True,
+            'purchase_ok': False,
+        })
+        sale_order_1 = self.env['sale.order'].create({
+            'partner_id': self.partner_1.id,
+            'order_line': [
+                Command.create({
+                    'product_id': self.consu_product_ordered.id,
+                    'product_uom_qty': 10,
+                })
+            ]
+        })
+
+        self.task.update({
+            'sale_order_id': sale_order_1.id,
+        })
+        sale_order_1.action_confirm()
+        sale_order_1._create_invoices()
+        self.start_tour("/odoo/field-service", 'test_industry_fsm_sale_add_product_on_invoice_tour', login="admin")

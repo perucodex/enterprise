@@ -588,6 +588,8 @@ class Envia:
 
         url: locate/{country_code}/{state_code}/{city_name}
         """
+        if not (partner.country_id and (partner.city_id or partner.city) and partner.state_id):
+            return False
         country_code = quote(partner.country_id.code)
         city_name = quote(self._get_envia_city(partner))
         state_code = quote(self._get_envia_state_code(partner))

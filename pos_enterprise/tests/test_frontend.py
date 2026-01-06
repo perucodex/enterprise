@@ -29,7 +29,6 @@ class TestPreparationDisplayHttpCommon(TestPointOfSaleHttpCommon):
 class TestUi(TestPreparationDisplayHttpCommon):
 
     def test_01_preparation_display(self):
-
         self.main_pos_config.write({
             'iface_tipproduct': True,
             'tip_product_id': self.tip.id,
@@ -77,7 +76,6 @@ class TestUi(TestPreparationDisplayHttpCommon):
         self.assertEqual(preparation_order.prep_line_ids.product_id, self.letter_tray.product_variant_id, "The preparation orderline has the product " + self.letter_tray.name)
 
     def test_02_preparation_display(self):
-
         self.main_pos_config.write({
             'iface_tipproduct': True,
             'tip_product_id': self.tip.id,
@@ -137,3 +135,41 @@ class TestUi(TestPreparationDisplayHttpCommon):
             self.start_pos_tour('test_sending_order_in_preparation_should_not_sync_more')
 
         self.assertEqual(stats['nb_call'], 2, "sync_from_ui should be called once")
+
+    def test_preparation_display_filters(self):
+        self.pdis.write({
+            'category_ids': [(5, 0)]
+        })
+        self.preset_eat_in = self.env['pos.preset'].create({
+            'name': 'Eat in',
+        })
+        self.preset_takeaway = self.env['pos.preset'].create({
+            'name': 'Takeaway',
+        })
+        self.preset_delivery = self.env['pos.preset'].create({
+            'name': 'Delivery',
+        })
+        resource_calendar = self.env['resource.calendar'].create({
+            'name': 'Takeaway',
+            'attendance_ids': [(0, 0, {
+                'name': 'Takeaway',
+                'dayofweek': str(day),
+                'hour_from': 0,
+                'hour_to': 24,
+                'day_period': 'morning',
+            }) for day in range(7)],
+        })
+        self.preset_takeaway.write({
+            'use_timing': True,
+            'resource_calendar_id': resource_calendar
+        })
+        self.main_pos_config.write({
+            'use_presets': True,
+            'default_preset_id': self.preset_eat_in.id,
+            'available_preset_ids': [(6, 0, [self.preset_takeaway.id, self.preset_delivery.id])],
+        })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        # Create various orders from POS
+        self.start_pos_tour('PosOrderCreationTourPdis', login="pos_user")
+        # Check orders visibility on PDIS with filters
+        self.start_pdis_tour('PreparationDisplayFilterTour')

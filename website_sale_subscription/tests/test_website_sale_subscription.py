@@ -3,6 +3,7 @@
 from odoo.exceptions import UserError
 from odoo.tests import tagged
 
+from odoo.addons.portal.controllers.portal import CustomerPortal
 from odoo.addons.website_sale.controllers.cart import Cart
 from odoo.addons.website_sale.tests.common import MockRequest
 
@@ -200,3 +201,18 @@ class TestWebsiteSaleSubscription(WebsiteSaleSubscriptionCommon):
 
             so._cart_add(product_id=self.sub_product.product_variant_ids.id, quantity=1)
             self.assertEqual(so.plan_id, self.plan_week)
+
+    def test_subscription_requires_partner_country(self):
+        """ Test that a subscription product in the cart requires the partner to set its country."""
+        self.partner.country_id = False
+        with MockRequest(self.env, website=self.website) as request:
+            request.website._create_cart()
+            Cart().add_to_cart(
+                product_template_id=self.sub_product.id,
+                product_id=self.sub_product.product_variant_id.id,
+                quantity=1.0,
+            )
+            mandatory_fields = CustomerPortal()._get_mandatory_delivery_address_fields(
+                self.partner.country_id
+            )
+            self.assertTrue('country_id' in mandatory_fields)

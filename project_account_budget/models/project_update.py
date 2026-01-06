@@ -26,7 +26,6 @@ class ProjectUpdate(models.Model):
             for budget in budgets['data']:
                 budget['progress'] = budget['allocated'] and (budget['spent'] - budget['allocated']) / abs(budget['allocated'])
             vals['show_activities'] = bool(project.total_budget_amount) or vals.get('show_activities', False)
-            vals['show_profitability'] = bool(project.total_budget_amount) or vals.get('show_profitability', False)
             budget = project.total_budget_amount
             cost = -project._get_budget_items()['total']['spent']
             vals['budget'] = {

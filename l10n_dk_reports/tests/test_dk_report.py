@@ -4,6 +4,7 @@ import io
 
 from odoo import Command, fields, tools
 from odoo.addons.account_reports.tests.common import TestAccountReportsCommon
+from odoo.addons.account_reports.models.account_report import AccountReportFileDownloadException
 from odoo.tests import tagged, freeze_time
 from odoo.tests.common import test_xsd
 
@@ -114,6 +115,28 @@ class TestDKReportCommon(TestAccountReportsCommon):
 class TestDKReport(TestDKReportCommon):
 
     def test_validate_dk_saft_report_values(self):
+        payable_account = self.env['account.chart.template'].ref("dk_coa_7440")
+        liability_account = self.env['account.chart.template'].ref("dk_coa_7350")
+        # Create a move without a partner but with a receivable line
+        move = self.env['account.move'].create({
+                'move_type': 'entry',
+                'invoice_date': '2021-03-01',
+                'date': '2021-03-01',
+                'partner_id': None,
+                'invoice_line_ids': [
+                    Command.create({
+                        'credit': 67.0,
+                        'account_id': payable_account.id,
+                    }),
+                    Command.create({
+                        'debit': 67.0,
+                        'account_id': liability_account.id,
+                    })
+                ],
+            })
+        move._post()
+        self.env.flush_all()
+
         with tools.file_open("l10n_dk_reports/tests/xml/expected_test_saft_report.xml", "rb") as expected_xml:
             stringified_xml = self._generate_xml()
             self.assertXmlTreeEqual(
@@ -127,7 +150,33 @@ class TestDKReport(TestDKReportCommon):
         for account_type in account_selection:
             self.env[report.custom_handler_model_name]._saft_get_account_type(account_type)
 
+    def test_l10n_dk_general_ledger_undistributed_csv_export(self):
+        report = self.env.ref('account_reports.general_ledger_report')
+        options = report.get_options({})
+        with self.assertRaises(AccountReportFileDownloadException) as error_catcher:
+            self.env[report.custom_handler_model_name].l10n_dk_export_general_ledger_csv(options)
+        self.assertEqual(set(error_catcher.exception.errors), {'undistributed_earnings'})
+
     def test_l10n_dk_general_ledger_csv_export(self):
+        reserve_acc = self.env['account.chart.template'].ref('dk_coa_6560')
+        self.env['account.move'].create({
+            'move_type': 'entry',
+            'date': '2021-12-31',
+            'line_ids': [
+                Command.create({
+                    'name': 'Distribute earnings',
+                    'account_id': reserve_acc.id,
+                    'debit': 3000.0,
+                    'credit': 0.0,
+                }),
+                Command.create({
+                    'name': 'Distribute earnings',
+                    'account_id': self.company_data['default_account_expense'].id,
+                    'debit': 0.0,
+                    'credit': 3000.0,
+                }),
+            ]
+        }).action_post()
         report = self.env.ref('account_reports.general_ledger_report')
         options = report.get_options({})
         csv_content = self.env[report.custom_handler_model_name].l10n_dk_export_general_ledger_csv(options)['file_content']
@@ -137,10 +186,10 @@ class TestDKReport(TestDKReportCommon):
             # _20230131 is not the export date, but rather the date at which the norm of this csv export was enforced
             ('KONTONUMMER_20230131', 'KONTONAVN_20230131', 'VAERDI_20230131'),
             ('6190', 'Trade and other receivables', '6250'),
-            ('7441', 'Suppliers of goods and services (copy)', '-10000'),
+            ('6560', 'Revaluation reserve', '3000'),
+            ('7441', 'Suppliers of goods and services (short-term) (copy)', '-10000'),
             ('7680', 'Sales tax', '-1250'),
             ('7740', 'VAT on purchases', '2000'),
-            ('999999', 'Undistributed Profits/Losses', '3000'),
         )
         for idx, content in enumerate(reader):
             self.assertSequenceEqual(expected_values[idx], content)

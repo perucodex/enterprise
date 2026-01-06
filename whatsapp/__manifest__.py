@@ -29,6 +29,9 @@
         'views/whatsapp_menus.xml',
         'views/res_partner_views.xml',
     ],
+    'demo': [
+        'data/whatsapp_demo.xml',
+    ],
     'external_dependencies': {
         'python': ['phonenumbers'],
         'apt': {

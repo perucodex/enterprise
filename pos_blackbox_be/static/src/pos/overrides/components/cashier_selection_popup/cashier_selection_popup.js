@@ -26,7 +26,7 @@ patch(CashierSelectionPopup.prototype, {
         const rawClockIn = this.pos.session._user_latest_clock_in;
         const employee = this.props.currentCashier;
 
-        if (!rawClockIn || !this.isClockedIn(employee)) {
+        if (!rawClockIn || !employee || !this.isClockedIn(employee)) {
             return null;
         }
 

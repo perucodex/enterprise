@@ -109,13 +109,18 @@ class DocumentsDocument(models.Model):
             return journal_id.create_document_from_attachment(attachment_ids=self.attachment_id.ids)
 
         for document in self:
+            partner = partner_id or document.partner_id
             if document.res_model == 'account.move' and document.res_id:
                 move = self.env['account.move'].browse(document.res_id)
             else:
+                creation_context = {'default_move_type': move_type}
+                if move_type in ('in_invoice', 'in_refund') and partner and 'property_purchase_currency_id' in partner:
+                    supplier_currency = partner.with_company(document.company_id).property_purchase_currency_id
+                    if supplier_currency:
+                        creation_context['default_currency_id'] = supplier_currency.id
                 move = journal_id\
-                    .with_context(default_move_type=move_type)\
+                    .with_context(**creation_context)\
                     ._create_document_from_attachment(attachment_ids=document.attachment_id.id)
-            partner = partner_id or document.partner_id
             if partner:
                 move.partner_id = partner
             if move.statement_line_id:

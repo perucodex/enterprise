@@ -918,7 +918,7 @@ class SwissdecDeclaration:
             }
 
             salary_declaration = {"SalaryDeclaration": {
-                "schemaVersion": "1.0",
+                "schemaVersion": "3.0",
                 "Company": {
                     **staff
                 },

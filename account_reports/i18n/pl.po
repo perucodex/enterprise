@@ -29,21 +29,22 @@
 # Tadeusz Karpiński <tadeuszkarpinski@gmail.com>, 2023
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # "Marta (wacm)" <wacm@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:45+0000\n"
-"PO-Revision-Date: 2025-10-23 06:40+0000\n"
-"Last-Translator: \"Marta (wacm)\" <wacm@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:43+0000\n"
+"PO-Revision-Date: 2025-11-14 15:21+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Polish <https://translate.odoo.com/projects/odoo-19/"
 "account_reports/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && ("
-"n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
+"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
 "n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 "X-Generator: Weblate 5.12.2\n"
 
@@ -58,6 +59,18 @@ msgstr "\" na saldo konta mają wpływ"
 #: code:addons/account_reports/models/account_journal_report.py:0
 msgid "%(journal)s - %(account)s"
 msgstr "%(journal)s - %(account)s"
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_report.py:0
+msgid "%(line_name)s - %(company)s"
+msgstr ""
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_report.py:0
+msgid "%(line_name)s - %(company_name)s"
+msgstr ""
 
 #. module: account_reports
 #. odoo-python
@@ -121,10 +134,8 @@ msgstr ""
 #: code:addons/account_reports/models/account_report.py:0
 msgid ""
 "'Open General Ledger' caret option is only available form report lines "
-"targetting accounts."
+"targetting accounts or Undistributed Profits/Losses."
 msgstr ""
-"Opcja znacznika \"Otwórz księgę główną\" jest dostępna tylko w wierszach "
-"raportów dotyczących kont."
 
 #. module: account_reports
 #. odoo-python
@@ -207,6 +218,27 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p style=\"margin: 0px; padding: 0px;\">\n"
+"                    <t t-if=\"object.id != "
+"object.commercial_partner_id.id\">Dear <t t-out=\"object.name or ''\"/> (<t "
+"t-out=\"object.commercial_partner_id.name or ''\"/>),</t>\n"
+"                    <t t-else=\"\">Dzień dobry <t t-out=\"object.name or "
+"''\"/>,</t>\n"
+"                    <br/>\n"
+"                    W załączniku znajdziesz listę swoich otwartych faktur.\n"
+"                    <br/>\n"
+"                    Jeśli masz jakiekolwiek pytania, nie wahaj się z nami "
+"skontaktować.\n"
+"                    <br/>\n"
+"                    Z poważaniem,\n"
+"                    <br/>\n"
+"                    <t t-out=\"object._get_followup_responsible().name if "
+"is_html_empty(object._get_followup_responsible().signature) else "
+"object._get_followup_responsible().signature\"/>\n"
+"                </p>\n"
+"            </div>\n"
+"        "
 
 #. module: account_reports
 #: model:mail.template,body_html:account_reports.email_template_customer_statement
@@ -294,6 +326,41 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p>\n"
+"                    Dzień dobry <t t-"
+"out=\"object.company_id.name\">YourCompany</t>,\n"
+"                </p>\n"
+"                <p>\n"
+"                    Na podstawie otrzymanych dokumentów i informacji, zwrot "
+"VAT dla <t t-out=\"object.company_id.name\">YourCompany</t>\n"
+"                    na okres <t t-"
+"out=\"object.type_id._get_period_name(object.company_id, object.date_from, "
+"object.date_to)\"/> został przesłany.\n"
+"                </p>\n"
+"                <p>\n"
+"                    Określono, że kwota <t t-"
+"out=\"format_amount(object.total_amount_to_pay, "
+"object.amount_to_pay_currency_id)\"/> pozostaje należna.\n"
+"                </p>\n"
+"                <table style=\"border:1px solid black; padding:20px; text-"
+"align:left; border-spacing: 16px;\">\n"
+"                    <tr>\n"
+"                        <td>Kwota do zapłaty</td>\n"
+"                        <td><t t-"
+"out=\"format_amount(object.total_amount_to_pay, "
+"object.amount_to_pay_currency_id)\"/></td>\n"
+"                    </tr>\n"
+"                    <tr>\n"
+"                        <td>Z terminem</td>\n"
+"                        <td><t t-out=\"format_date(object.date_deadline)\"/"
+"></td>\n"
+"                    </tr>\n"
+"                </table>\n"
+"                <p>Z poważaniem,</p>\n"
+"                <p><t t-out=\"user.name\">Maciej Adminczak</t></p>\n"
+"            </div>\n"
+"        "
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
@@ -303,7 +370,7 @@ msgstr "<i class=\"fa fa-ellipsis-v\" title=\"Rozwijane menu\"/>"
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 msgid "<i class=\"fa fa-paperclip fa-lg\" title=\"Open Attachments\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-paperclip fa-lg\" title=\"Otwórz załączniki\"/>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_send_form
@@ -328,7 +395,7 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 msgid "<span class=\"oe_stat_text pe-1 text-black\">Deadline: </span>"
-msgstr ""
+msgstr "<span class=\"oe_stat_text pe-1 text-black\">Termin: </span>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
@@ -343,6 +410,9 @@ msgid ""
 "0 or resolved_check_count &lt;= 0\" class=\"oe_stat_text ps-0 text-"
 "success\">Passed</span>"
 msgstr ""
+"<span invisible=\"context.get('in_checks_view') or unresolved_check_count != "
+"0 or resolved_check_count &lt;= 0\" class=\"oe_stat_text ps-0 text-"
+"success\">Zatwierdzone</span>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
@@ -350,6 +420,8 @@ msgid ""
 "<span invisible=\"context.get('in_checks_view') or unresolved_check_count "
 "&lt;= 0\" class=\"oe_stat_text ps-0 text-danger\">Pending</span>"
 msgstr ""
+"<span invisible=\"context.get('in_checks_view') or unresolved_check_count "
+"&lt;= 0\" class=\"oe_stat_text ps-0 text-danger\">Oczekujące</span>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_kanban_view
@@ -358,6 +430,9 @@ msgid ""
 "                                                    <span invisible=\"not "
 "records_count\"> </span>"
 msgstr ""
+"<span invisible=\"not records_count or records_count &lt; 21\">20+</span>\n"
+"                                                    <span invisible=\"not "
+"records_count\"> </span>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.return_creation_wizard_form
@@ -369,6 +444,17 @@ msgid ""
 "show_warning_existing_return\" class=\"fa fa-exclamation-triangle text-"
 "danger pb-2\" title=\"A return already exists for the selected period.\"/>"
 msgstr ""
+"<span invisible=\"not show_warning_wrong_dates\" class=\"fa fa-exclamation-"
+"triangle text-danger pb-2\" title=\"Wybrany okres nie pasuje do żadnego "
+"okresu podatkowego.\"/>\n"
+"                            <span invisible=\"not "
+"show_warning_existing_return\" class=\"fa fa-exclamation-triangle text-"
+"danger pb-2\" title=\"Dla wybranego okresu już istnieje zwrot.\"/>"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_form_view
+msgid "<span style=\"width: 85%\">days after tax period</span>"
+msgstr "<span style=\"width: 85%\">dni po okresie podatkowym</span>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_report_file_download_error_wizard_form
@@ -436,12 +522,12 @@ msgstr "Konto"
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_audit_account_status
 msgid "Account Audit Account Status"
-msgstr ""
+msgstr "Status konta podczas audytu konta"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_account_balances_search_view
 msgid "Account Audit Status"
-msgstr ""
+msgstr "Status audytu konta"
 
 #. module: account_reports
 #. odoo-python
@@ -517,7 +603,7 @@ msgstr "Rozliczenie konta"
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_return_check_template
 msgid "Account Return Check Template"
-msgstr ""
+msgstr "Szablon czeku zwrotu konta"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_res_company__account_revaluation_journal_id
@@ -528,17 +614,17 @@ msgstr "Dziennik przeszacowania konta"
 #: model:ir.model.fields,field_description:account_reports.field_account_account__account_status
 #: model:ir.model.fields,field_description:account_reports.field_account_return__audit_account_status_ids
 msgid "Account Status"
-msgstr ""
+msgstr "Status konta"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_account_balances_search_view
 msgid "Account Type"
-msgstr ""
+msgstr "Typ konta"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_account_balances_search_view
 msgid "Account with Entries"
-msgstr ""
+msgstr "Konto z wpisami"
 
 #. module: account_reports
 #. odoo-javascript
@@ -560,7 +646,7 @@ msgstr "Okresy księgowe"
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_audit_accounting_process
 msgid "Accounting Process"
-msgstr ""
+msgstr "Proces księgowy"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_report
@@ -585,7 +671,7 @@ msgstr "Wyrażenie Raportu księgowego"
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_report_external_value
 msgid "Accounting Report External Value"
-msgstr ""
+msgstr "Zewnętrzna wartość raportu księgowego"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_report_line
@@ -653,7 +739,7 @@ msgstr "Wymagane działanie"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__action_id
 msgid "Action on Click"
-msgstr ""
+msgstr "Akcja przy kliknięciu"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_file_download_error_wizard__actionable_errors
@@ -664,7 +750,7 @@ msgstr "Błędy wymagające działania"
 #: model:ir.model.fields,field_description:account_reports.field_account_return__active
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__is_return_active
 msgid "Active"
-msgstr ""
+msgstr "Aktywny"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__activity_ids
@@ -712,17 +798,17 @@ msgstr "Dodaj sumy poniżej sekcji"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__additional_action_context
 msgid "Additional Action Context"
-msgstr ""
+msgstr "Dodatkowy kontekst akcji"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__additional_action_domain
 msgid "Additional Action Domain"
-msgstr ""
+msgstr "Dodatkowa domena akcji"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__additional_action_params
 msgid "Additional Action Params"
-msgstr ""
+msgstr "Dodatkowe parametry akcji"
 
 #. module: account_reports
 #: model:account.report.column,name:account_reports.multicurrency_revaluation_report_adjustment
@@ -787,7 +873,7 @@ msgstr "Wiekowane zobowiązania"
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_aged_payable_review
 msgid "Aged Payables Review"
-msgstr ""
+msgstr "Przegląd należności przeterminowanych"
 
 #. module: account_reports
 #: model:account.report,name:account_reports.aged_receivable_report
@@ -816,7 +902,7 @@ msgstr "Wiekowane zobowiązania według partnera"
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_aged_receivable_followup
 msgid "Aged receivables and follow-up"
-msgstr ""
+msgstr "Przeterminowane zobowiązań i przypomnienia o płatnościach"
 
 #. module: account_reports
 #. odoo-python
@@ -861,7 +947,7 @@ msgstr "Warianty wszystkich raportów"
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
 msgid "All checks and approvers have been reset"
-msgstr ""
+msgstr "Wszystkie kontrole i osoby zatwierdzające zostały zresetowane"
 
 #. module: account_reports
 #. odoo-python
@@ -892,7 +978,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report__allow_account_audit_status_on_lines
 msgid "Allow Account Audit Status On Lines"
-msgstr ""
+msgstr "Zezwalaj na sprawdzanie statusu audytu konta w wierszach"
 
 #. module: account_reports
 #: model:account.report.column,name:account_reports.account_financial_report_ec_sales_amount
@@ -973,12 +1059,12 @@ msgstr "Symulacje analityczne"
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_analytical_review
 msgid "Analytical Review"
-msgstr ""
+msgstr "Przegląd analityczny"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_inventory_analytical_review
 msgid "Analyze the change in assets between year N and year N-1."
-msgstr ""
+msgstr "Analizuj zmianę w aktywach między rokiem N i rokiem N-1."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_revenue_receivables_review
@@ -986,24 +1072,26 @@ msgid ""
 "Analyze the change in revenue and trade receivables between year N and year "
 "N-1."
 msgstr ""
+"Analizuj zmianę przychodów i należności handlowych pomiędzy rokiem N i "
+"rokiem N-1."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_fixed_assets_review
 msgid ""
 "Analyze the evolution of fixed assets and depreciation between N and N-1."
-msgstr ""
+msgstr "Analizuj ewolucję środków stałych i amortyzacji pomiędzy N a N-1."
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_mail_compose_message__account_reports_annotation_date
 #: model:ir.model.fields,field_description:account_reports.field_mail_scheduled_message__account_reports_annotation_date
 msgid "Annotated For"
-msgstr ""
+msgstr "Adnotacje dla"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/mail/message_patch.xml:0
 msgid "Annotated for"
-msgstr ""
+msgstr "Adnotowano dla"
 
 #. module: account_reports
 #: model:account.return.type,name:account_reports.annual_corporate_tax_return_type
@@ -1031,12 +1119,12 @@ msgstr "Rocznie"
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__result__anomaly
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_search_view
 msgid "Anomaly"
-msgstr ""
+msgstr "Anomalia"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__country_ids
 msgid "Applicable Countries"
-msgstr ""
+msgstr "Kraje objęte"
 
 #. module: account_reports
 #. odoo-javascript
@@ -1052,20 +1140,26 @@ msgstr "Zatwierdzone przez"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__approver_supervisor_ids
 msgid "Approvers and Supervisor"
-msgstr ""
+msgstr "Osoby zatwierdzające i nadzorujące"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_kanban_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 msgid "Archive"
-msgstr ""
+msgstr "Archiwizuj"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
 msgid "Archived"
-msgstr ""
+msgstr "Zarchiwizowano"
+
+#. module: account_reports
+#. odoo-javascript
+#: code:addons/account_reports/static/src/views/accrual_list_view.xml:0
+msgid "As of"
+msgstr "Na dzień"
 
 #. module: account_reports
 #. odoo-python
@@ -1082,13 +1176,19 @@ msgstr "Rosnąco"
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_audit_assets_listing
 msgid "Assets Listing"
-msgstr ""
+msgstr "Wykaz aktywów"
 
 #. module: account_reports
 #: model:account.report.column,name:account_reports.aged_payable_report_period0
 #: model:account.report.column,name:account_reports.aged_receivable_report_period0
 msgid "At Date"
 msgstr "Dla daty"
+
+#. module: account_reports
+#. odoo-javascript
+#: code:addons/account_reports/static/src/views/accrual_list_view.xml:0
+msgid "At the date of"
+msgstr "W dniu"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_send_form
@@ -1127,43 +1227,43 @@ msgstr "Audyt"
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_account_balances_search_view
 msgid "Audit Accounts"
-msgstr ""
+msgstr "Konta audytów"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__audit_balance_show_warning
 msgid "Audit Balance Show Warning"
-msgstr ""
+msgstr "Pokaż ostrzeżenie podczas audytu salda"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__audit_previous_balance_show_warning
 msgid "Audit Previous Balance Show Warning"
-msgstr ""
+msgstr "Ostrzeżenie pokazujące poprzednie saldo audytu"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__audit_status
 msgid "Audit Status"
-msgstr ""
+msgstr "Status audytu"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_audit_balance_clickable_char_field.xml:0
 msgid "Audit account"
-msgstr ""
+msgstr "Konto audytowe"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__auto_generate
 msgid "Auto Generated"
-msgstr ""
+msgstr "Generowane automatycznie"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_search_view
 msgid "Automated"
-msgstr ""
+msgstr "Automatyczne"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_form_view
 msgid "Automated Checks"
-msgstr ""
+msgstr "Automatyczne kontrole"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__available_return_type_ids
@@ -1208,7 +1308,7 @@ msgstr "Saldo"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__audit_previous_balance
 msgid "Balance N-1"
-msgstr ""
+msgstr "Saldo N-1"
 
 #. module: account_reports
 #: model:account.report,name:account_reports.balance_sheet
@@ -1266,17 +1366,17 @@ msgstr "Rachunek bieżący podatku (należności)"
 #: model:ir.embedded.actions,name:account_reports.account_audit_embedded_action_account_balances_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_kanban_view
 msgid "Balances"
-msgstr ""
+msgstr "Salda"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__audit_balances_count
 msgid "Balances Count"
-msgstr ""
+msgstr "Liczba sald"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_bank_fees_analytical_review
 msgid "Bank Fees Analytical Review"
-msgstr ""
+msgstr "Przegląd analityczny opłat bankowych"
 
 #. module: account_reports
 #. odoo-python
@@ -1304,12 +1404,12 @@ msgstr "Niestandardowy moduł obsługi raportów bankowych"
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__model__account_bank_statement_line
 msgid "Bank Statement Line"
-msgstr ""
+msgstr "Pozycja wyciągu bankowego"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_bank_statements
 msgid "Bank Statements"
-msgstr ""
+msgstr "Wyciągi bankowe"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_bank_view0
@@ -1324,6 +1424,11 @@ msgid ""
 msgstr ""
 "Dopasowanie bankowe nie jest wymagane w przypadku zwrotów podatku VAT, ale "
 "pomaga wykryć brakujące rachunki."
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.bank_information_customer_report
+msgid "Bank:"
+msgstr "Bank:"
 
 #. module: account_reports
 #. odoo-javascript
@@ -1394,6 +1499,9 @@ msgid ""
 "By default, Odoo applies its own deadline for returns (shown as 0). Entering "
 "a value here will override it and be used as the new deadline."
 msgstr ""
+"Domyślnie Odoo stosuje własny termin zwrotu (wyświetlany jako 0). "
+"Wprowadzenie wartości w tym miejscu spowoduje jej zastąpienie i będzie "
+"używane jako nowy termin."
 
 #. module: account_reports
 #. odoo-python
@@ -1510,7 +1618,7 @@ msgstr "Włożenie gotówki"
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_cash_inventory_reconciliation
 msgid "Cash inventory reconciliation"
-msgstr ""
+msgstr "Uzgodnienie magazynowania gotówki"
 
 #. module: account_reports
 #. odoo-python
@@ -1549,7 +1657,7 @@ msgstr "Nadwyżka gotówki"
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__category
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_search_view
 msgid "Category"
-msgstr ""
+msgstr "Kategoria"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_change_lock_date
@@ -1567,7 +1675,7 @@ msgstr "Czat"
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__type__check
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__type__check
 msgid "Check"
-msgstr ""
+msgstr "Sprawdź"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__code
@@ -1584,7 +1692,7 @@ msgstr "Sprawdź e-mail(e) Partnera/-ów"
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
 msgid "Check State"
-msgstr ""
+msgstr "Stan kontroli"
 
 #. module: account_reports
 #: model:ir.actions.act_window,name:account_reports.action_view_account_return_check_templates
@@ -1849,6 +1957,12 @@ msgid ""
 msgstr ""
 
 #. module: account_reports
+#. odoo-javascript
+#: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
+msgid "Consolidation"
+msgstr "Konsolidacja"
+
+#. module: account_reports
 #: model:ir.model,name:account_reports.model_res_partner
 msgid "Contact"
 msgstr "Kontakt"
@@ -1989,11 +2103,6 @@ msgstr "Data utworzenia"
 #: model:ir.model.fields,field_description:account_reports.field_account_account__audit_credit
 msgid "Credit"
 msgstr "Ma"
-
-#. module: account_reports
-#: model:ir.ui.menu,name:account_reports.menu_action_account_report_multicurrency_revaluation
-msgid "Currencies"
-msgstr ""
 
 #. module: account_reports
 #: model:account.report.column,name:account_reports.aged_payable_report_currency
@@ -2160,7 +2269,9 @@ msgstr "Dni do terminu końcowego"
 #: model:ir.model.fields,field_description:account_reports.field_account_return__date_deadline
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__date_deadline
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__deadline_days_delay
+#: model:ir.model.fields,field_description:account_reports.field_res_config_settings__account_return_reminder_day
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
+#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
 msgid "Deadline"
 msgstr "Termin końcowy"
 
@@ -2397,6 +2508,8 @@ msgid ""
 "Displays the value of the selected field as a textual hint. If the selected "
 "field is empty, the static placeholder attribute is displayed instead."
 msgstr ""
+"Wyświetla wartość wybranego pola jako podpowiedź tekstową. Jeśli wybrane "
+"pole jest puste, zamiast niego wyświetlany jest statyczny atrybut zastępczy."
 
 #. module: account_reports
 #. odoo-python
@@ -2413,6 +2526,11 @@ msgstr ""
 #: model:account.return.check.template,description:account_reports.account_return_check_template_audit_accounting_process
 msgid "Document current accounting processes (especially if done in-house)."
 msgstr ""
+
+#. module: account_reports
+#: model:account.report.column,name:account_reports.journal_report_count
+msgid "Documents"
+msgstr "Dokumenty"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard__doc_name
@@ -2454,6 +2572,11 @@ msgid "Draft Entries"
 msgstr "Wersje robocze wpisów"
 
 #. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.view_journal_report_audit_move_line_search
+msgid "Draft To Review"
+msgstr ""
+
+#. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
 msgid "Draft entries"
@@ -2482,7 +2605,7 @@ msgstr "Termin"
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_audit_balance_clickable_char_field.js:0
 msgid "Dynamic Placeholder"
-msgstr ""
+msgstr "Dynamiczny element zastępczy"
 
 #. module: account_reports
 #: model:account.report,name:account_reports.generic_ec_sales_report
@@ -2546,7 +2669,7 @@ msgstr "E-mail"
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_mail_compose_message
 msgid "Email composition wizard"
-msgstr ""
+msgstr "Kreator email"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__mail_template_id
@@ -2656,7 +2779,7 @@ msgstr "Wpisy z partnerami bez VAT"
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__equity
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__equity
 msgid "Equity"
-msgstr ""
+msgstr "Kapitał własny"
 
 #. module: account_reports
 #. odoo-python
@@ -2916,7 +3039,7 @@ msgstr "Niestandardowy procesor raportu działań następczych"
 #. module: account_reports
 #: model:ir.actions.client,name:account_reports.action_account_report_followup
 msgid "Follow-up Report"
-msgstr ""
+msgstr "Raporty z monitowania"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_follower_ids
@@ -3098,7 +3221,7 @@ msgstr "Klasyfikacja dóbr i usług"
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__government
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__state
 msgid "Government"
-msgstr ""
+msgstr "Rząd"
 
 #. module: account_reports
 #. odoo-javascript
@@ -3526,7 +3649,7 @@ msgstr "Nieprawidłowy token '%(token)s' w formule account_codes '%(formula)s'"
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__inventory
 #: model:ir.ui.menu,name:account_reports.account_audit_inventory_entries_menu
 msgid "Inventory"
-msgstr ""
+msgstr "Magazynowanie"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_inventory_analytical_review
@@ -3647,6 +3770,7 @@ msgstr "Pozycja dziennika"
 #. odoo-javascript
 #. odoo-python
 #: code:addons/account_reports/models/account_deferred_reports.py:0
+#: code:addons/account_reports/models/account_general_ledger.py:0
 #: code:addons/account_reports/models/account_report.py:0
 #: code:addons/account_reports/models/account_return.py:0
 #: code:addons/account_reports/models/account_trial_balance_report.py:0
@@ -3695,7 +3819,7 @@ msgstr "Dzienniki:"
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_kpi_provider
 msgid "KPI Provider"
-msgstr ""
+msgstr "Dostawca KPI"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_liabilities_view0
@@ -3807,6 +3931,11 @@ msgid "Ledgers"
 msgstr ""
 
 #. module: account_reports
+#: model:account.report.line,name:account_reports.account_financial_report_allocations_withdrawals0
+msgid "Less Allocations and Plus Withdrawals"
+msgstr ""
+
+#. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_cost_sales0
 msgid "Less Costs of Revenue"
 msgstr "Mniejsze koszty uzyskania przychodów"
@@ -3846,7 +3975,7 @@ msgstr "Załaduj więcej..."
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/account_report.xml:0
 msgid "Loading..."
-msgstr ""
+msgstr "Pobieranie..."
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__date_lock
@@ -3866,7 +3995,7 @@ msgstr "Widżet załączników poczty"
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_mail_tracking_value
 msgid "Mail Tracking Value"
-msgstr ""
+msgstr "Wartość śledzenia poczty"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_main_attachment_id
@@ -3908,7 +4037,7 @@ msgstr "Zarządzaj błędami generowania plików z eksportów raportów."
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_search_view
 msgid "Manual"
-msgstr ""
+msgstr "Manualna"
 
 #. module: account_reports
 #. odoo-python
@@ -3973,7 +4102,7 @@ msgstr "Menu"
 #: model:ir.model,name:account_reports.model_mail_message
 #: model:ir.model.fields,field_description:account_reports.field_account_report_annotation__message_id
 msgid "Message"
-msgstr ""
+msgstr "Wiadomość"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_has_error
@@ -4130,6 +4259,11 @@ msgid "Net Profit"
 msgstr "Zysk netto"
 
 #. module: account_reports
+#: model:account.report.line,name:account_reports.account_financial_report_net_profit_after_allocations0
+msgid "Net Profit Left After Allocations and Withdrawals"
+msgstr ""
+
+#. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_net_assets0
 msgid "Net assets"
 msgstr "Aktywa netto"
@@ -4151,7 +4285,7 @@ msgstr "Marża netto (zysk netto / dochód)"
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_review_submit__new
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_tax_report__new
 msgid "New"
-msgstr ""
+msgstr "Nowe"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__activity_calendar_event_id
@@ -4387,7 +4521,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__audit_status__ongoing
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 msgid "Ongoing"
-msgstr ""
+msgstr "Na bieżąco"
 
 #. module: account_reports
 #. odoo-python
@@ -4434,7 +4568,7 @@ msgstr "Otwarte wyciągi klienta"
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_return_check_attachment_viewer.xml:0
 msgid "Open Document"
-msgstr ""
+msgstr "Otwórz dokument"
 
 #. module: account_reports
 #: model:ir.actions.server,name:account_reports.action_server_open_view_account_return
@@ -4481,7 +4615,7 @@ msgstr "Opcje:"
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__other
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__other
 msgid "Others"
-msgstr ""
+msgstr "Inne"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.outstanding
@@ -4630,7 +4764,7 @@ msgstr "Zaliczone"
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__audit_status__paused
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 msgid "Paused"
-msgstr ""
+msgstr "Wstrzymane"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_only_pay__paid
@@ -4684,13 +4818,13 @@ msgstr "Bank kontrahenta do płatności"
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__model__account_payment
 msgid "Payments"
-msgstr ""
+msgstr "Płatności"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__payroll
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__payroll
 msgid "Payroll"
-msgstr ""
+msgstr "Wynagrodzenie"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_performance0
@@ -4972,7 +5106,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__purchases
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__purchases
 msgid "Purchases"
-msgstr ""
+msgstr "Zakupy"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_qr_code_payment_wizard__qr_code
@@ -5055,7 +5189,7 @@ msgstr "Nazwa zapisów"
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/views/refresh_returns_cog_menu.xml:0
 msgid "Refresh"
-msgstr ""
+msgstr "Odśwież"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__refresh_result
@@ -5075,8 +5209,6 @@ msgstr ""
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_year_op__account_return_reminder_day
-#: model:ir.model.fields,field_description:account_reports.field_res_config_settings__account_return_reminder_day
-#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
 msgid "Reminder"
 msgstr "Przypomnienie"
 
@@ -5272,6 +5404,8 @@ msgid "Reverse charge mention"
 msgstr "Wzmianka o odwrotnym obciążeniu"
 
 #. module: account_reports
+#. odoo-javascript
+#: code:addons/account_reports/static/src/components/journal_report/line_name.xml:0
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_review__reviewed
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_review_submit__reviewed
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_tax_report__reviewed
@@ -5391,7 +5525,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__result__reviewed
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_search_view
 msgid "Reviewed"
-msgstr ""
+msgstr "Zrewidowany"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_report_search
@@ -5413,7 +5547,7 @@ msgstr "Błąd dostarczenia wiadomości SMS"
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__sales
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__sales
 msgid "Sales"
-msgstr ""
+msgstr "Sprzedaż"
 
 #. module: account_reports
 #. odoo-javascript
@@ -5430,7 +5564,7 @@ msgstr "Zeskanuj mnie za pomocą swojej aplikacji bankowej."
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_mail_scheduled_message
 msgid "Scheduled Message"
-msgstr ""
+msgstr "Zaplanowana Wiadomość"
 
 #. module: account_reports
 #. odoo-javascript
@@ -5700,13 +5834,13 @@ msgstr "Wyciągi są wysyłane w tle."
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__states_workflow
 msgid "States"
-msgstr ""
+msgstr "Stany"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__audit_status
 #: model:ir.model.fields,field_description:account_reports.field_account_audit_account_status__status
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__activity_state
@@ -5819,6 +5953,7 @@ msgstr "NIP"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.company_information
+#: model_terms:ir.ui.view,arch_db:account_reports.tax_information_customer_report
 msgid "Tax ID:"
 msgstr "NIP:"
 
@@ -5946,7 +6081,7 @@ msgstr "Model techniczny pobierania raportów księgowych"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__template_id
 msgid "Template"
-msgstr ""
+msgstr "Szablon"
 
 #. module: account_reports
 #. odoo-javascript
@@ -6246,7 +6381,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__name
 msgid "Title"
-msgstr ""
+msgstr "Tytuł"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
@@ -6254,12 +6389,13 @@ msgid "To Do"
 msgstr "Do zrobienia"
 
 #. module: account_reports
+#: model:account.report.column,name:account_reports.journal_report_to_review
 #: model:ir.model.fields.selection,name:account_reports.selection__account_account__audit_status__todo
 #: model:ir.model.fields.selection,name:account_reports.selection__account_audit_account_status__status__todo
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__result__todo
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_search_view
 msgid "To Review"
-msgstr ""
+msgstr "Do sprawdzenia"
 
 #. module: account_reports
 #. odoo-javascript
@@ -6403,7 +6539,7 @@ msgstr "Próba rozszerzenia wyników groupby w wierszach bez wartości groupby."
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_list_view
 msgid "Type"
-msgstr ""
+msgstr "Rodzaj"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__type_external_id
@@ -6424,13 +6560,19 @@ msgstr "Nieprzydzielone zarobki"
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_kanban_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 msgid "Unarchive"
-msgstr ""
+msgstr "Przywróć"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "Undefined"
 msgstr "Niezdefiniowane"
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_report.py:0
+msgid "Undistributed Profits/Losses"
+msgstr ""
 
 #. module: account_reports
 #. odoo-javascript
@@ -6464,6 +6606,11 @@ msgid "Unknown date scope: %s"
 msgstr "Nieznany zakres dat: %s"
 
 #. module: account_reports
+#: model:ir.ui.menu,name:account_reports.menu_action_account_report_multicurrency_revaluation
+msgid "Unrealized Currencies"
+msgstr ""
+
+#. module: account_reports
 #: model:account.report,name:account_reports.multicurrency_revaluation_report
 #: model:ir.actions.client,name:account_reports.action_account_report_multicurrency_revaluation
 msgid "Unrealized Currency Gains/Losses"
@@ -6482,13 +6629,13 @@ msgstr "Nieuzgodnione wpisy"
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__type__file
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__type__file
 msgid "Upload Document"
-msgstr ""
+msgstr "Prześlij dokument"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_return_check_file_uploader.xml:0
 msgid "Upload File"
-msgstr ""
+msgstr "Prześlij plik"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_financial_year_op__vat_label
@@ -6828,6 +6975,7 @@ msgstr ""
 #: code:addons/account_reports/models/account_report.py:0
 msgid "You cannot update this value as it's locked by: %s"
 msgstr ""
+"Nie możesz zaktualizować tej wartości, ponieważ jest zablokowana przez: %s"
 
 #. module: account_reports
 #. odoo-python
@@ -6857,6 +7005,7 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.journal_report_pdf_export_main
 #: model_terms:ir.ui.view,arch_db:account_reports.pdf_export_main
+#: model_terms:ir.ui.view,arch_db:account_reports.pdf_export_main_customer_report
 msgid "[Draft]"
 msgstr "[Projekt]"
 
@@ -6884,14 +7033,9 @@ msgid "days after period"
 msgstr "dni po okresie"
 
 #. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_form_view
-msgid "days after tax period"
-msgstr ""
-
-#. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_kanban_view
 msgid "delete"
-msgstr ""
+msgstr "Usuń"
 
 #. module: account_reports
 #. odoo-javascript
@@ -7080,6 +7224,16 @@ msgstr ""
 #: code:addons/account_reports/static/src/components/multicurrency_revaluation_report/warnings.xml:0
 msgid "⇒ Reset to Odoo’s Rate"
 msgstr "⇒ Zresetuj do stawki Odoo"
+
+#~ msgid "Currencies"
+#~ msgstr "Waluty"
+
+#~ msgid ""
+#~ "'Open General Ledger' caret option is only available form report lines "
+#~ "targetting accounts."
+#~ msgstr ""
+#~ "Opcja znacznika \"Otwórz księgę główną\" jest dostępna tylko w wierszach "
+#~ "raportów dotyczących kont."
 
 #~ msgid "Account Chart Template"
 #~ msgstr "Szablon planów kont"

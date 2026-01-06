@@ -1,20 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* hr_expense_stripe
+# * hr_expense_stripe
 #
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:44+0000\n"
-"PO-Revision-Date: 2025-09-11 14:33+0000\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: \n"
+"POT-Creation-Date: 2025-12-30 18:43+0000\n"
+"PO-Revision-Date: 2025-11-08 20:10+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Croatian <https://translate.odoo.com/projects/odoo-19/"
+"hr_expense_stripe/hr/>\n"
+"Language: hr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: \n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -23,12 +27,11 @@ msgid "(Fetching...)"
 msgstr ""
 
 #. module: hr_expense_stripe
-#: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_kanban
+#: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
 msgid ""
-"<span class=\"card_cvc w-50 text-end stripe_card_text_sm\" invisible=\"state "
-"in ('draft', 'pending')\">\n"
-"                                                        ****\n"
-"                                                    </span>"
+"<i class=\"fa fa-warning ms-1 text-warning\"/>\n"
+"                                <span class=\"text-warning\"> Stripe issuing "
+"is not yet supported for your localization.</span>"
 msgstr ""
 
 #. module: hr_expense_stripe
@@ -39,7 +42,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "<span class=\"o_stat_text\">Employee</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">Djelatnik</span>"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_view_form_inherits_stripe
@@ -79,6 +82,118 @@ msgstr ""
 msgid ""
 "<strong>Top up your Stripe Issuing account to ensure your balance covers "
 "upcoming expenses.</strong>"
+msgstr ""
+
+#. module: hr_expense_stripe
+#: model:mail.template,body_html:hr_expense_stripe.email_template_hr_expense_stripe_card_assigned
+msgid ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"padding: 16px; background-color: white; color: "
+"#454748; border-collapse:separate;\">\n"
+"            <tbody>\n"
+"            <!-- HEADER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\">\n"
+"                    <t t-set=\"company\" t-value=\"object.company_id\"/>\n"
+"                    <span style=\"font-size: 10px;\">Card Shipment "
+"Notification</span><br/>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\">Your "
+"Card Has Been Assigned</span>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"right\" t-if=\"not "
+"company.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?company={{ company.id }}\" "
+"style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-"
+"alt=\"company.name\"/>\n"
+"                    </td></tr>\n"
+"                    <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- CONTENT -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    Hi <t t-out=\"ctx.get('recipient_name', "
+"object.user_id.name)\">[Recipient Name]</t>,<br/><br/>\n"
+"                    We have assigned a company expense card to you.\n"
+"                    You can view and manage it anytime by going to My "
+"Profile and selecting the Cards section.<br/><br/>\n"
+"                    If you have any questions, feel free to reach out.<br/"
+"><br/>\n"
+"                    Best regards,<br/>\n"
+"                    <t t-out=\"object.ordered_by.name or ''\">[Expense "
+"Administrator]</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- FOOTER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\" align=\"left\">\n"
+"                        <t t-out=\"company.name or ''\">YourCompany</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"left\" "
+"style=\"opacity: 0.7;\">\n"
+"                    <t t-if=\"company.phone\">\n"
+"                        <t t-out=\"company.phone or ''\">+1 650-123-4567</t> "
+"|\n"
+"                    </t>\n"
+"                    <t t-if=\"company.email\">\n"
+"                        <a t-attf-href=\"'mailto:%s' % {{ company.email }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.email or "
+"''\">info@yourcompany.com</a> |\n"
+"                    </t>\n"
+"                    <t t-if=\"company.website\">\n"
+"                        <a t-attf-href=\"'%s' % {{ company.website }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.website or "
+"''\">http://www.example.com</a>\n"
+"                    </t>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            </tbody>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            <!-- POWERED BY -->\n"
+"            <tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: "
+"#454748; padding: 8px; border-collapse:separate;\">\n"
+"            <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"                Powered by <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{company.email_secondary_color or '#875A7B'}};\">Odoo</a>\n"
+"            </td></tr>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            </table>\n"
+"        "
 msgstr ""
 
 #. module: hr_expense_stripe
@@ -459,7 +574,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_account_chart_template
 msgid "Account Chart Template"
-msgstr ""
+msgstr "Predložak kontnog plana"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -481,19 +596,19 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_needaction
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_needaction
 msgid "Action Needed"
-msgstr ""
+msgstr "Potrebna dodatna radnja"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_receive_wizard_form
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Activate"
-msgstr ""
+msgstr "Aktiviraj"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__state__active
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 msgid "Active"
-msgstr ""
+msgstr "Aktivan"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.advertising_services
@@ -518,12 +633,12 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__spending_policy_interval__all_time
 msgid "All Time"
-msgstr ""
+msgstr "Cijelo vrijeme"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_list
 msgid "All countries"
-msgstr ""
+msgstr "Sve države"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_list
@@ -554,7 +669,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__amount
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.amusement_parks_carnivals
@@ -607,7 +722,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_attachment_count
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_attachment_count
 msgid "Attachment Count"
-msgstr ""
+msgstr "Broj priloga"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.auto_body_repair_shops
@@ -672,7 +787,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_account_bank_statement_line
 msgid "Bank Statement Line"
-msgstr ""
+msgstr "Redak bankovnog izvoda"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__statement_description
@@ -713,7 +828,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_block_wizard_form
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Block"
-msgstr ""
+msgstr "Blokiraj"
 
 #. module: hr_expense_stripe
 #. odoo-python
@@ -726,7 +841,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_kanban
 msgid "Blocked"
-msgstr ""
+msgstr "Blokirano"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.boat_dealers
@@ -793,12 +908,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_block_wizard_form
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_cardholder_wizard_form
 msgid "Cancel"
-msgstr ""
+msgstr "Odustani"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__shipping_status__canceled
 msgid "Canceled"
-msgstr ""
+msgstr "Otkazano"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__cancellation_reason
@@ -861,7 +976,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__card_number_public
 msgid "Card Number"
-msgstr ""
+msgstr "Broj kartice"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -927,7 +1042,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/private_card_view_action.js:0
 msgid "Cardholder Name"
-msgstr ""
+msgstr "Ime vlasnika kartice"
 
 #. module: hr_expense_stripe
 #: model:mail.message.subtype,name:hr_expense_stripe.mt_stripe_card_received
@@ -971,7 +1086,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Categories"
-msgstr ""
+msgstr "Kategorije"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.caterers
@@ -1021,7 +1136,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__billing_city
 msgid "City"
-msgstr ""
+msgstr "Grad"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.civic_social_fraternal_associations
@@ -1040,7 +1155,7 @@ msgstr ""
 #: code:addons/hr_expense_stripe/static/src/components/private_card_view_action.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_topup_wizard_form
 msgid "Close"
-msgstr ""
+msgstr "Zatvori"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.clothing_rental
@@ -1056,7 +1171,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_mcc_stripe_tag__code
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_search
 msgid "Code"
-msgstr ""
+msgstr "Kod"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.colleges_universities
@@ -1066,7 +1181,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_mcc_stripe_tag__color
 msgid "Color Index"
-msgstr ""
+msgstr "Indeks boje"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.commercial_equipment
@@ -1091,7 +1206,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_res_company
 msgid "Companies"
-msgstr ""
+msgstr "Tvrtke"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__company_id
@@ -1099,12 +1214,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__company_id
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 msgid "Company"
-msgstr ""
+msgstr "Tvrtka"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__company_country_id
 msgid "Company Country"
-msgstr ""
+msgstr "Država tvrtke"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__company_partner_id
@@ -1150,23 +1265,23 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_res_config_settings
 msgid "Config Settings"
-msgstr ""
+msgstr "Postavke"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
 msgid "Configure"
-msgstr ""
+msgstr "Postavi"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/open_card_receive_terms.xml:0
 msgid "Confirmation"
-msgstr ""
+msgstr "Potvrda"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
 msgid "Connect"
-msgstr ""
+msgstr "Poveži"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.construction_materials
@@ -1201,12 +1316,12 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__spending_policy_country_tag_ids
 msgid "Countries"
-msgstr ""
+msgstr "Države"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__billing_country_id
 msgid "Country"
-msgstr ""
+msgstr "Država"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.country_clubs
@@ -1251,7 +1366,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__create_uid
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_mcc_stripe_tag__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "Kreirao"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__create_date
@@ -1261,7 +1376,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__create_date
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_mcc_stripe_tag__create_date
 msgid "Created on"
-msgstr ""
+msgstr "Kreirano"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.credit_reporting_agencies
@@ -1276,7 +1391,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__currency_id
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. module: hr_expense_stripe
 #. odoo-python
@@ -1297,17 +1412,17 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__spending_policy_interval__daily
 msgid "Day"
-msgstr ""
+msgstr "Dan"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__shipping_status__delivered
 msgid "Delivered"
-msgstr ""
+msgstr "Isporučeno"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__delivery_address_id
 msgid "Delivery Address"
-msgstr ""
+msgstr "Adresa dostave"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.dentists_orthodontists
@@ -1322,7 +1437,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card_block_wizard__other_reason_text
 msgid "Description"
-msgstr ""
+msgstr "Opis"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__cancellation_reason__design_rejected
@@ -1409,7 +1524,7 @@ msgstr ""
 #: code:addons/hr_expense_stripe/static/src/components/pause_card_warning_action.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_receive_wizard_form
 msgid "Discard"
-msgstr ""
+msgstr "Odbaci"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.discount_stores
@@ -1437,7 +1552,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_config_settings__display_name
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_users__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "Naziv"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.doctors
@@ -1447,7 +1562,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_topup_wizard_form
 msgid "Done"
-msgstr ""
+msgstr "Riješeno"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.door_to_door_sales
@@ -1460,7 +1575,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_kanban
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.drapery_window_covering_and_upholstery_stores
@@ -1545,7 +1660,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__email
 msgid "Email"
-msgstr ""
+msgstr "E-pošta"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.emergency_services_gcas_visa_use_only
@@ -1556,7 +1671,7 @@ msgstr ""
 #: model:ir.model,name:hr_expense_stripe.model_hr_employee
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__employee_id
 msgid "Employee"
-msgstr ""
+msgstr "Zaposlenik"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_hr_expense_stripe_card
@@ -1566,7 +1681,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__employee_name
 msgid "Employee Name"
-msgstr ""
+msgstr "Naziv zaposlenika"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.employment_temp_agencies
@@ -1588,7 +1703,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/private_card_view_action.js:0
 msgid "Error"
-msgstr ""
+msgstr "Greška"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__shipping_estimated_delivery
@@ -1600,7 +1715,7 @@ msgstr ""
 #: code:addons/hr_expense_stripe/models/hr_expense_stripe_card.py:0
 #: model:ir.model,name:hr_expense_stripe.model_hr_expense
 msgid "Expense"
-msgstr ""
+msgstr "Trošak"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_account_payment_method_line__card_id
@@ -1627,7 +1742,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_hr_expense_split
 msgid "Expense Split"
-msgstr ""
+msgstr "Dijeli trošak"
 
 #. module: hr_expense_stripe
 #: model:ir.actions.server,name:hr_expense_stripe.hr_expense_stripe_issuing_status_cron_ir_actions_server
@@ -1652,12 +1767,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__expense_ids
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Expenses"
-msgstr ""
+msgstr "Troškovi"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__expenses_count
 msgid "Expenses Count"
-msgstr ""
+msgstr "Izračun troškova"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
@@ -1667,7 +1782,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__expiration
 msgid "Expiration Date"
-msgstr ""
+msgstr "Datum isteka"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.exterminating_services
@@ -1690,7 +1805,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__shipping_status__failure
 msgid "Failure"
-msgstr ""
+msgstr "Greška"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.family_clothing_stores
@@ -1720,7 +1835,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__firstname
 msgid "First Name"
-msgstr ""
+msgstr "Ime"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.floor_covering_stores
@@ -1741,13 +1856,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_follower_ids
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_follower_ids
 msgid "Followers"
-msgstr ""
+msgstr "Pratitelji"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_partner_ids
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_partner_ids
 msgid "Followers (Partners)"
-msgstr ""
+msgstr "Pratitelji (Partneri)"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_product_product__stripe_mcc_ids
@@ -1860,6 +1975,11 @@ msgid "Grocery Stores Supermarkets"
 msgstr ""
 
 #. module: hr_expense_stripe
+#: model:mail.template,name:hr_expense_stripe.email_template_hr_expense_stripe_card_assigned
+msgid "HR Expense Stripe Card Assigned"
+msgstr ""
+
+#. module: hr_expense_stripe
 #: model:mail.template,name:hr_expense_stripe.email_template_hr_expense_stripe_card_ordered
 msgid "HR Expense Stripe Card Ordered"
 msgstr ""
@@ -1893,7 +2013,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__has_message
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__has_message
 msgid "Has Message"
-msgstr ""
+msgstr "Ima poruku"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.health_and_beauty_spas
@@ -1950,7 +2070,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__partner_bank_id
 msgid "IBAN"
-msgstr ""
+msgstr "IBAN"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_account_bank_statement_line__id
@@ -1973,13 +2093,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_config_settings__id
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_users__id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card__message_needaction
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr ""
+msgstr "Ako je označeno, nove poruke zahtijevaju Vašu pažnju."
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card__message_has_error
@@ -1987,7 +2107,7 @@ msgstr ""
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_has_error
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "Ako je označeno neke poruke mogu imati grešku u dostavi."
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_topup_wizard_form
@@ -2017,7 +2137,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__state__inactive
 msgid "Inactive"
-msgstr ""
+msgstr "Neaktivan"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -2054,7 +2174,8 @@ msgstr ""
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/models/hr_expense_stripe_card.py:0
-msgid "Invalid email type, must be 'canceled', 'ordered' or 'shipped'."
+msgid ""
+"Invalid email type, must be 'canceled', 'ordered', 'assigned' or 'shipped'."
 msgstr ""
 
 #. module: hr_expense_stripe
@@ -2091,7 +2212,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_is_follower
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_is_follower
 msgid "Is Follower"
-msgstr ""
+msgstr "Je pratitelj"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.jewelry_stores_watches_clocks_and_silverware_stores
@@ -2102,7 +2223,7 @@ msgstr ""
 #: model:ir.model,name:hr_expense_stripe.model_account_journal
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
 msgid "Journal"
-msgstr ""
+msgstr "Dnevnik"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
@@ -2128,7 +2249,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__lastname
 msgid "Last Name"
-msgstr ""
+msgstr "Prezime"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__write_uid
@@ -2138,7 +2259,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__write_uid
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_mcc_stripe_tag__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "Promijenio"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__write_date
@@ -2148,7 +2269,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__write_date
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_mcc_stripe_tag__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "Vrijeme promjene"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.laundries
@@ -2168,7 +2289,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Limit"
-msgstr ""
+msgstr "Ograničenje"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__spending_policy_interval
@@ -2190,7 +2311,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__cancellation_reason__lost
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card_block_wizard__cancellation_reason__lost
 msgid "Lost"
-msgstr ""
+msgstr "Izgubljen"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -2303,13 +2424,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_has_error
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_has_error
 msgid "Message Delivery error"
-msgstr ""
+msgstr "Greška pri isporuci poruke"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_ids
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_ids
 msgid "Messages"
-msgstr ""
+msgstr "Poruke"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.metal_service_centers
@@ -2385,7 +2506,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__spending_policy_interval__monthly
 msgid "Month"
-msgstr ""
+msgstr "Mjesec"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.motion_picture_theaters_cinema
@@ -2436,7 +2557,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 msgid "My Team"
-msgstr ""
+msgstr "Moj tim"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
@@ -2449,7 +2570,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_search
 msgid "Name"
-msgstr ""
+msgstr "Naziv"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_account_journal__nb_stripe_card
@@ -2529,25 +2650,25 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_needaction_counter
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_needaction_counter
 msgid "Number of Actions"
-msgstr ""
+msgstr "Broj akcija"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_has_error_counter
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_has_error_counter
 msgid "Number of errors"
-msgstr ""
+msgstr "Broj grešaka"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card__message_needaction_counter
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "Broj poruka koje zahtijevaju radnju"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card__message_has_error_counter
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr ""
+msgstr "Broj poruka sa greškama pri isporuci"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.nurseries_lawn_and_garden_supply_stores
@@ -2625,7 +2746,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Order"
-msgstr ""
+msgstr "Narudžba"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__ordered_by
@@ -2651,7 +2772,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__cancellation_reason__none
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card_block_wizard__cancellation_reason__none
 msgid "Other"
-msgstr ""
+msgstr "Ostalo"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -2684,7 +2805,7 @@ msgstr ""
 #: code:addons/hr_expense_stripe/static/src/components/pause_card_warning_action.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Pause"
-msgstr ""
+msgstr "Pauza"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -2696,13 +2817,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_kanban
 msgid "Paused"
-msgstr ""
+msgstr "Pauzirano"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/pause_card_warning_action.xml:0
 msgid ""
-"Pausing your card will make it unactive. Only Expense Administrators can "
+"Pausing your card will disable it. Only Expense Administrators can "
 "reactivate it."
 msgstr ""
 
@@ -2714,29 +2835,29 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_account_payment_register
 msgid "Pay"
-msgstr ""
+msgstr "Plati"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__payment_method_line_id
 msgid "Payment Method Line"
-msgstr ""
+msgstr "Stavka metode plaćanja"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_account_payment_method_line
 msgid "Payment Methods"
-msgstr ""
+msgstr "Načini plaćanja"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_account_payment
 msgid "Payments"
-msgstr ""
+msgstr "Plaćanja"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__shipping_status__pending
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__state__pending
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_kanban
 msgid "Pending"
-msgstr ""
+msgstr "Na čekanju"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.pet_shops_pet_food_and_supplies
@@ -2751,7 +2872,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__phone_number
 msgid "Phone Number"
-msgstr ""
+msgstr "Broj telefona"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.photo_developing
@@ -2826,12 +2947,12 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_mcc_stripe_tag__product_name
 msgid "Product Name"
-msgstr ""
+msgstr "Naziv proizvoda"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_product_product
 msgid "Product Variant"
-msgstr ""
+msgstr "Varijanta proizvoda"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.professional_services
@@ -2861,7 +2982,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__qr_code
 msgid "QR Code URL"
-msgstr ""
+msgstr "URL QR koda"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.quick_copy_repro_and_blueprint
@@ -2877,7 +2998,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__rating_ids
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__rating_ids
 msgid "Ratings"
-msgstr ""
+msgstr "Ocjene"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.real_estate_agents_and_managers_rentals
@@ -2887,7 +3008,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card_block_wizard__cancellation_reason
 msgid "Reason"
-msgstr ""
+msgstr "Razlog"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.record_stores
@@ -2902,12 +3023,12 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
 msgid "Refresh"
-msgstr ""
+msgstr "Osvježi"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card__user_id
 msgid "Related user name for the resource to manage its access."
-msgstr ""
+msgstr "Korisničko ime povezano je s pristupom i upravljanjem modulima"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.religious_goods_stores
@@ -2938,6 +3059,11 @@ msgid "Resend"
 msgstr ""
 
 #. module: hr_expense_stripe
+#: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_view_form_inherits_stripe
+msgid "Reserved"
+msgstr ""
+
+#. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__res_company__stripe_account_issuing_status__restricted
 msgid "Restricted"
 msgstr ""
@@ -2950,7 +3076,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__shipping_status__returned
 msgid "Returned"
-msgstr ""
+msgstr "Vraćeno"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_kanban
@@ -2966,18 +3092,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_has_sms_error
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr ""
+msgstr "Greška u slanju SMSa"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_cardholder_wizard_form
 msgid "Save"
-msgstr ""
+msgstr "Spremi"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/wizard/hr_expense_stripe_topup_wizard.py:0
 msgid "Scan me with your banking app."
-msgstr ""
+msgstr "Skeniraj me svojom bankovnom aplikacijom."
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.secretarial_support_services
@@ -2994,6 +3120,11 @@ msgstr ""
 #: model:mail.template,description:hr_expense_stripe.email_template_hr_expense_stripe_card_ordered
 #: model:mail.template,description:hr_expense_stripe.email_template_hr_expense_stripe_card_shipped
 msgid "Sent to the person that will handle the reception of the card"
+msgstr ""
+
+#. module: hr_expense_stripe
+#: model:mail.template,description:hr_expense_stripe.email_template_hr_expense_stripe_card_assigned
+msgid "Sent to the person that will use the card"
 msgstr ""
 
 #. module: hr_expense_stripe
@@ -3044,7 +3175,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__bic
 msgid "Sometimes called BIC or Swift."
-msgstr ""
+msgstr "Ponekad se naziva BIC ili SWIFT"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.special_trade_services
@@ -3089,7 +3220,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__billing_state_id
 msgid "State"
-msgstr ""
+msgstr "Županija/fed.država"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.stationery_stores_office_and_school_supply_stores
@@ -3102,7 +3233,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_config_settings__stripe_account_issuing_status
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__cancellation_reason__stolen
@@ -3113,12 +3244,12 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__billing_street
 msgid "Street"
-msgstr ""
+msgstr "Ulica"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__billing_street2
 msgid "Street 2"
-msgstr ""
+msgstr "Ulica 2"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_company__stripe_id
@@ -3318,6 +3449,12 @@ msgstr ""
 
 #. module: hr_expense_stripe
 #. odoo-python
+#: code:addons/hr_expense_stripe/models/account_journal.py:0
+msgid "Stripe issuing is not supported for your localization"
+msgstr ""
+
+#. module: hr_expense_stripe
+#. odoo-python
 #: code:addons/hr_expense_stripe/utils.py:0
 msgid ""
 "Stripe timed-out or encountered an error when communicating with the card "
@@ -3332,7 +3469,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__shipping_status__submitted
 msgid "Submitted"
-msgstr ""
+msgstr "Poslao"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.swimming_pools_sales
@@ -3861,7 +3998,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__card_type
 msgid "Type"
-msgstr ""
+msgstr "Vrsta"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.typesetting_plate_making_and_related_services
@@ -3894,12 +4031,18 @@ msgstr ""
 #: code:addons/hr_expense_stripe/controllers/main.py:0
 #: code:addons/hr_expense_stripe/wizard/hr_expense_stripe_topup_wizard.py:0
 msgid "Unknown"
-msgstr ""
+msgstr "Nepoznato"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/utils.py:0
 msgid "Unknown Error Code"
+msgstr ""
+
+#. module: hr_expense_stripe
+#. odoo-javascript
+#: code:addons/hr_expense_stripe/static/src/fields/monetary_blank_if_zero.xml:0
+msgid "Unlimited"
 msgstr ""
 
 #. module: hr_expense_stripe
@@ -3916,7 +4059,7 @@ msgstr ""
 #: model:ir.model,name:hr_expense_stripe.model_res_users
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__user_id
 msgid "User"
-msgstr ""
+msgstr "Korisnik"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.utilities
@@ -3936,7 +4079,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__res_company__stripe_account_issuing_status__verified
 msgid "Verified"
-msgstr ""
+msgstr "Potvrđeno"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.veterinary_services
@@ -3961,7 +4104,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "View Details"
-msgstr ""
+msgstr "Prikaži detalje"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card_receive_wizard__phone_number
@@ -3975,7 +4118,7 @@ msgstr ""
 #: code:addons/hr_expense_stripe/static/src/components/private_card_view_action.js:0
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__card_type__virtual
 msgid "Virtual"
-msgstr ""
+msgstr "Virtualno"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.vocational_trade_schools
@@ -3985,7 +4128,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__has_limit_higher_than_stripe_warning
 msgid "Warning"
-msgstr ""
+msgstr "Upozorenje"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card__has_limit_higher_than_stripe_warning
@@ -4037,18 +4180,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__website_message_ids
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__website_message_ids
 msgid "Website Messages"
-msgstr ""
+msgstr "Poruke webstranica"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card__website_message_ids
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__website_message_ids
 msgid "Website communication history"
-msgstr ""
+msgstr "Povijest komunikacije Web stranice"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__spending_policy_interval__weekly
 msgid "Week"
-msgstr ""
+msgstr "Tjedan"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.welding_repair
@@ -4111,7 +4254,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__spending_policy_interval__yearly
 msgid "Year"
-msgstr ""
+msgstr "Godina"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -4212,6 +4355,22 @@ msgstr ""
 
 #. module: hr_expense_stripe
 #. odoo-python
+#: code:addons/hr_expense_stripe/models/hr_expense.py:0
+msgid ""
+"You cannot split an expense that is reserved. Please wait for the "
+"transaction to be captured."
+msgstr ""
+
+#. module: hr_expense_stripe
+#. odoo-python
+#: code:addons/hr_expense_stripe/models/hr_expense.py:0
+msgid ""
+"You cannot submit an expense that is reserved. Please wait for the "
+"transaction to be captured."
+msgstr ""
+
+#. module: hr_expense_stripe
+#. odoo-python
 #: code:addons/hr_expense_stripe/__init__.py:0
 msgid ""
 "You cannot uninstall the 'Expense cards' module while there are active or "
@@ -4273,6 +4432,11 @@ msgid "Your Expense Card Has Been Shipped"
 msgstr ""
 
 #. module: hr_expense_stripe
+#: model:mail.template,subject:hr_expense_stripe.email_template_hr_expense_stripe_card_assigned
+msgid "Your Expense Card has been Assigned"
+msgstr ""
+
+#. module: hr_expense_stripe
 #: model:mail.template,subject:hr_expense_stripe.email_template_hr_expense_stripe_card_ordered
 msgid "Your Expense Card has been Ordered"
 msgstr ""
@@ -4302,7 +4466,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__billing_zip
 msgid "Zip"
-msgstr ""
+msgstr "Poštanski br."
 
 #. module: hr_expense_stripe
 #. odoo-python

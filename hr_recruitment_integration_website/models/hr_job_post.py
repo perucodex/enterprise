@@ -13,10 +13,12 @@ class HrJobPost(models.Model):
 
     @api.depends('job_id.full_url')
     def _compute_apply_vector(self):
-        if self.apply_method == 'redirect':
-            self.apply_vector = self.job_id.full_url if self.job_id else False
-        else:
-            super()._compute_apply_vector()
+        redirect_records = self.filtered(lambda r: r.apply_method == 'redirect')
+        for record in redirect_records:
+            record.apply_vector = record.job_id.full_url if record.job_id else False
+
+        self -= redirect_records
+        super()._compute_apply_vector()
 
     def _contact_point_to_vector(self):
         self.ensure_one()

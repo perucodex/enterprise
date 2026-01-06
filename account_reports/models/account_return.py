@@ -179,12 +179,15 @@ class AccountReturnType(models.Model):
         """ Returns whether a return can exist for this type with the provided company and tax units. This is used to know which returns need
         to be deleted when a change of configuration has occured.
         """
-        is_not_multivat = not self.report_id or company.account_fiscal_country_id.code == self.report_id.country_id.code
-        is_not_tax_unit_main_comp = tax_unit and tax_unit.main_company_id != company
+        is_foreign_vat = self.report_id and company.account_fiscal_country_id.code != self.report_id.country_id.code
+
+        is_tax_unit_main_comp = not tax_unit or tax_unit.main_company_id == company
+
         all_branch_companies_with_same_vat = company._get_branches_with_same_vat()
         sorted_branch_companies_with_same_vat = sorted(all_branch_companies_with_same_vat, key=lambda comp: len(comp.parent_path.split('/')))
-        is_not_main_branch = company.parent_id and company != sorted_branch_companies_with_same_vat[0]
-        return not (is_not_multivat and (is_not_tax_unit_main_comp or is_not_main_branch))
+        is_main_branch = not company.parent_id or company == sorted_branch_companies_with_same_vat[0]
+
+        return is_foreign_vat or (is_tax_unit_main_comp and is_main_branch)
 
     @api.model
     def _cron_generate_or_refresh_all_returns(self):
@@ -246,9 +249,14 @@ class AccountReturnType(models.Model):
             ('manually_created', '=', False),
             *return_root_company_domain,
         ])
+        returns_to_unlink = self.env['account.return']
         for return_to_check in all_return_that_might_be_deleted:
-            if not return_to_check.type_id._can_return_exist(return_to_check.company_id, return_to_check.tax_unit_id):
-                return_to_check.unlink()
+            if (
+                not return_to_check.type_id._can_return_exist(return_to_check.company_id, return_to_check.tax_unit_id)
+                or return_to_check.date_deadline < return_to_check.company_id.account_opening_date
+            ):
+                returns_to_unlink |= return_to_check
+        returns_to_unlink.unlink()
 
     @api.model
     def _generate_all_returns(self, country_code, main_company, tax_unit=None):
@@ -286,7 +294,7 @@ class AccountReturnType(models.Model):
             if return_type.category == 'audit':
                 return_type.with_company(self.env.company).deadline_periodicity = 'year'
 
-    def _try_create_returns_for_fiscal_year(self, main_company, tax_unit, allow_duplicates=False):
+    def _try_create_returns_for_fiscal_year(self, main_company, tax_unit, allow_duplicates=False, bypass_period_check=False):
         """
         Creates or updates the tax returns (possibly deleting the 'new' ones, if needed) for the provided main_company and tax_unit, so that all the
         returns are created from the start of the current fiscal year, up to one year after the current date.
@@ -309,11 +317,8 @@ class AccountReturnType(models.Model):
             date_from = fields.Date.from_string(self.env.context['forced_date_from'])
             date_to = fields.Date.from_string(self.env.context['forced_date_to'])
         else:
-            fy_dates_dict = main_company.compute_fiscalyear_dates(today)
-            date_from = fy_dates_dict['date_from']
-            date_to = fy_dates_dict['date_to']
-            if date_to < next_year:
-                date_to = next_year
+            date_from = today - relativedelta(years=1)
+            date_to = next_year
 
         if not self._can_return_exist(main_company, tax_unit):
             returns_to_unlink = self.env['account.return'].sudo().search([
@@ -323,6 +328,7 @@ class AccountReturnType(models.Model):
                 ('type_id', '=', self.id),
                 ('date_to', '>=', date_from),
                 ('date_from', '<=', date_to),
+                ('manually_created', '=', False),
             ])
             returns_to_unlink.unlink()
             return
@@ -349,10 +355,19 @@ class AccountReturnType(models.Model):
         periods = []
         deadline_date = date_pointer
         type_xml_id = self.get_external_id()[self.id]
-        while date_pointer < date_to and (deadline_date <= next_year or has_forced_dates):
-            period_date_from, period_date_to = self._get_period_boundaries(main_company, date_pointer)
+        while date_pointer < date_to and (deadline_date <= next_year or bypass_period_check):
+            if type_xml_id == 'account_reports.annual_corporate_tax_return_type':
+                # Exception for this particular report
+                # When the fiscal year is not following the typical Jan - Dec,
+                # the code in the else is not working.
+                # By doing this, we are using the right values to compute the
+                # date_from/date_to and date_deadline
+                fy_dates = main_company.compute_fiscalyear_dates(date_pointer)
+                period_date_from, period_date_to = fy_dates['date_from'], fy_dates['date_to']
+            else:
+                period_date_from, period_date_to = self._get_period_boundaries(main_company, date_pointer)
             deadline_date = self.env['account.return']._evaluate_deadline(main_company, self, type_xml_id, period_date_from, period_date_to)
-            if (main_company.account_opening_date or date.min) <= deadline_date <= next_year or has_forced_dates:
+            if (main_company.account_opening_date or date.min) <= deadline_date <= next_year or bypass_period_check:
                 periods.append((period_date_from, period_date_to))
             date_pointer = period_date_to + relativedelta(days=1)
 
@@ -393,7 +408,7 @@ class AccountReturnType(models.Model):
                     unmatched_existing_periods_posted_returns |= existing_periods[period]
 
             # We can safely unlink these as they are not posted. We will create new returns for these periods
-            unmatched_existing_periods_unposted_returns.unlink()
+            unmatched_existing_periods_unposted_returns.filtered(lambda r: not r.manually_created).unlink()
 
             # So now we are only left with existing one that cannot be unlinked
             # We should create new returns for periods after the last posted return
@@ -497,12 +512,12 @@ class AccountReturnType(models.Model):
 
     def _get_periodicity(self, company):
         self.ensure_one()
-        return self.with_company(company).deadline_periodicity or company.account_return_periodicity
+        return self.with_company(company).sudo().deadline_periodicity or company.sudo().account_return_periodicity
 
     def _get_start_date(self):
         self.ensure_one()
 
-        return self.deadline_start_date or fields.Date.from_string('2025-01-01')
+        return self.sudo().deadline_start_date or fields.Date.from_string('2025-01-01')
 
     def _get_periodicity_months_delay(self, company):
         """ Returns the number of months separating two returns
@@ -757,7 +772,7 @@ class AccountReturn(models.Model):
         delay = return_type_delay if return_type_delay else company.account_return_reminder_day
         return date_to + relativedelta(days=delay)
 
-    @api.depends('date_to', 'company_id.account_return_reminder_day', 'type_id.deadline_days_delay')
+    @api.depends('date_to', 'company_id.account_return_reminder_day', 'type_id.deadline_days_delay', 'is_completed')
     def _compute_deadline(self):
         for account_return in self:
             if account_return.is_completed:
@@ -773,25 +788,39 @@ class AccountReturn(models.Model):
 
     @api.model
     def _get_company_ids(self, main_company, tax_unit, report):
-        companies = tax_unit.company_ids if tax_unit else self.env['res.company'].search([('id', 'child_of', main_company.id)])
+        companies = tax_unit.company_ids if tax_unit else self.env['res.company'].sudo().search([('id', 'child_of', main_company.id)])
 
         if report:
             previous_options = {'tax_unit': tax_unit.id if tax_unit else 'company_only'}
-            options = report.sudo().with_context(allowed_company_ids=companies.ids).get_options(previous_options=previous_options)
+            options = report.sudo().with_context(allowed_company_ids=companies.ids).with_company(main_company.id).get_options(previous_options=previous_options)
             return self.env['res.company'].browse(report.get_report_company_ids(options))
 
-        return companies
+        return self.env['res.company'].browse(companies.ids)  # Drop sudo and avoid leaking elevated permissions
 
     @api.depends('company_id', 'tax_unit_id', 'type_id')
     def _compute_company_ids(self):
+        company_ids_map = defaultdict(lambda: self.env['account.return'])
         for record in self:
-            record.company_ids = record._get_company_ids(record.company_id, record.tax_unit_id, record.type_id.report_id)
+            company_ids_map[record.company_id, record.tax_unit_id, record.type_id.report_id] |= record
+
+        for (company, tax_unit, report), returns in company_ids_map.items():
+            returns.company_ids = self._get_company_ids(company, tax_unit, report)
 
     @api.depends_context('allowed_company_ids')
     @api.depends('company_ids')
     def _compute_show_companies(self):
         for record in self:
-            record.show_companies = len(self.env.companies) > 1 or len(record.company_ids) > 1
+            # We use _get_company_ids() instead of company_ids to avoid cache pollution issues (the ORM team is working on it).
+            # ir.rule filters records out during cache insertion, so cached values may differ from those in the database.
+            # As a result, users with branch-only access might see company_ids without the parent company.
+            record.show_companies = (len(self.env.companies) > 1 or
+                                     len(record._get_company_ids(record.company_id, record.tax_unit_id, record.type_id.report_id)) > 1)
+
+    def _check_all_branches_allowed(self):
+        for account_return in self:
+            report = account_return.type_id.report_id
+            if account_return._get_company_ids(account_return.company_id, False, report) - self.env.user.company_ids:
+                report.show_error_branch_allowed()
 
     @api.depends_context('allowed_company_ids')
     @api.depends('company_ids')
@@ -885,7 +914,7 @@ class AccountReturn(models.Model):
     def _compute_days_to_deadline(self):
         today = fields.Date.context_today(self)
         for record in self:
-            record.days_to_deadline = (record.date_deadline - today).days
+            record.days_to_deadline = (record.date_deadline - today).days if record.date_deadline else 0
 
     @api.depends('audit_account_status_ids')
     def _compute_audit_balances_count(self):
@@ -946,7 +975,7 @@ class AccountReturn(models.Model):
     @api.model
     def get_next_return_for_dashboard(self, journal_id=False):
         additional_domain = [
-            ('date_deadline', '<=', fields.Date.today() + relativedelta(months=1)),
+            ('date_to', '<', fields.Date.context_today(self)),
             ('return_type_category', '=', 'account_return'),
         ]
         return_ids = self.get_next_returns_ids(journal_id=journal_id, additional_domain=additional_domain, allow_multiple_by_types=True)
@@ -967,6 +996,7 @@ class AccountReturn(models.Model):
                     'date_deadline': returns[0].date_deadline,
                     'name': return_type.name,
                     'type_id': return_type.id,
+                    'matched_returns_count': len(returns),
                 })
         return dashboard_return_dicts
 
@@ -983,22 +1013,18 @@ class AccountReturn(models.Model):
             if not self.env.user.has_group('account.group_account_manager'):
                 raise UserError(_("You first need to define an opening date for your accounting. Please contact your administrator."))
 
-            # We are not giving the res_id to the wizard as it would be considered as
-            # not a new record and the input field for the opening_date would be red.
+            new_wizard = self.env['account.financial.year.op'].create({'company_id': company.id})
             return {
                 'type': 'ir.actions.act_window',
                 'name': _('Accounting Periods'),
                 'view_mode': 'form',
                 'res_model': 'account.financial.year.op',
+                'res_id': new_wizard.id,
                 'target': 'new',
                 'views': [[self.env.ref('account.setup_financial_year_opening_form').id, 'form']],
                 'context': {
                     'dialog_size': 'medium',
                     'open_account_return_on_save': True,
-                    'default_company_id': company.id,
-                    'default_fiscalyear_last_month': company.fiscalyear_last_month,
-                    'default_fiscalyear_last_day': company.fiscalyear_last_day,
-                    'default_account_return_periodicity': company.account_return_periodicity,
                 },
             }
 
@@ -1112,7 +1138,7 @@ class AccountReturn(models.Model):
         self._check_failing_checks_in_current_stage()
 
         if report := self.type_id.report_id:
-            options = {**self._get_closing_report_options(), **(options_to_inject or {})}
+            options = {**self._get_closing_report_options(), **(options_to_inject or {}), 'export_mode': 'file'}
 
             report.with_context(allowed_company_ids=self.company_ids.ids)._generate_carryover_external_values(options)
             self._generate_locking_attachments(options)
@@ -1138,8 +1164,8 @@ class AccountReturn(models.Model):
 
                 # Generate the carryover values.
                 payable_accounts, receivable_accounts = self._get_tax_closing_payable_and_receivable_accounts()
-                self.total_amount_to_pay = self._evaluate_total_amount_to_pay_from_tax_closing_accounts(payable_accounts, receivable_accounts)
                 self.period_amount_to_pay = self._evaluate_period_amount_to_pay_from_tax_closing_accounts(payable_accounts, receivable_accounts)
+                self.total_amount_to_pay = self._evaluate_total_amount_to_pay_from_tax_closing_accounts(payable_accounts, receivable_accounts)
 
         self.date_lock = fields.Date.context_today(self)
 
@@ -1181,12 +1207,17 @@ class AccountReturn(models.Model):
         return self.amount_to_pay_currency_id.round(amount)
 
     def _evaluate_total_amount_to_pay_from_tax_closing_accounts(self, payable_accounts, receivable_accounts):
-        amount = -sum(
-            aml.balance
-            for aml in self.closing_move_ids.line_ids
-            if (aml.account_id in payable_accounts and aml.credit) or (aml.account_id in receivable_accounts and aml.debit)
-        )
-        return self.amount_to_pay_currency_id.round(amount)
+        recoverable_amount_to_pay = self.env['account.move.line'].sudo()._read_group(
+            [
+                ('date', '<=', self.date_to),
+                ('account_id', 'in', receivable_accounts.ids),
+                ('company_id', 'in', self.company_ids.ids),
+                ('move_id.state', '=', 'posted'),
+                ('id', 'not in', self.closing_move_ids.line_ids.ids),
+            ],
+            aggregates=['balance:sum'],
+        )[0][0]
+        return self.amount_to_pay_currency_id.round(-recoverable_amount_to_pay + self.period_amount_to_pay)
 
     def _get_amount_to_pay_additional_tax_domain(self):
         return []
@@ -1211,6 +1242,7 @@ class AccountReturn(models.Model):
 
     def action_submit(self):
         self.ensure_one()
+        self._check_all_branches_allowed()
         return self._proceed_with_submission()
 
     def _proceed_with_submission(self):
@@ -1269,93 +1301,71 @@ class AccountReturn(models.Model):
         if not self.env.user.has_group('account.group_account_manager'):
             raise UserError(_("Only an Accounting Administrator can reset a tax return"))
 
-        if self.state == 'paid':
-            self._reset_checks_for_states([self.state, 'submitted'])
-            self.state = 'submitted'
+        # Check if it is the last return locked
+        domain = [
+            ('company_id', '=', self.company_id.id),
+            ('type_id', '=', self.type_id.id),
+            ('date_lock', '!=', False),
+            ('date_deadline', '>', self.date_deadline),
+        ]
+        if self.env['account.return'].search_count(domain, limit=1):
+            raise UserError(_("You cannot reset this return to new, as another return has been locked at a later date."))
 
-        if self.state == 'submitted':
-            self._reset_checks_for_states([self.state, 'reviewed'])
-            self.date_submission = False
-            self.state = 'reviewed'
+        # delete carryover if possible
+        if report := self.type_id.report_id:
 
-        if self.state == 'reviewed':
-            # Check if it is the last return locked
-            domain = [
-                ('company_id', '=', self.company_id.id),
-                ('type_id', '=', self.type_id.id),
-                ('date_lock', '!=', False),
-                ('date_deadline', '>', self.date_deadline),
-            ]
-            if self.env['account.return'].search_count(domain, limit=1):
-                raise UserError(_("You cannot reset this return to new, as another return has been locked at a later date."))
+            if not report.country_id or report.country_id == self.company_id.account_fiscal_country_id:
+                # Check for locked return
+                violated_lock_dates = []
+                for company in self.company_ids:
+                    violated_lock_dates = company._get_lock_date_violations(
+                        self.date_to,
+                        fiscalyear=False,
+                        sale=False,
+                        purchase=False,
+                        tax=True,
+                        hard=True,
+                    )
+                    if violated_lock_dates:
+                        raise UserError(_("The operation is refused as it would impact an already issued tax statement. "
+                                        "Please change the following lock dates to proceed: %(lock_date_info)s.",
+                                        lock_date_info=self.env['res.company']._format_lock_dates(violated_lock_dates)))
 
-            # delete carryover if possible
-            if report := self.type_id.report_id:
+            carryover_values = self.env['account.report.external.value'].search(
+                [
+                    ('carryover_origin_report_line_id', 'in', report.line_ids.ids),
+                    ('date', '=', self.date_to),
+                    ('company_id', 'in', self.company_ids.ids),
+                ]
+            )
 
-                if not report.country_id or report.country_id == self.company_id.account_fiscal_country_id:
-                    # Check for locked return
-                    violated_lock_dates = []
-                    for company in self.company_ids:
-                        violated_lock_dates = company._get_lock_date_violations(
-                            self.date_to,
-                            fiscalyear=False,
-                            sale=False,
-                            purchase=False,
-                            tax=True,
-                            hard=True,
-                        )
-                        if violated_lock_dates:
-                            raise UserError(_("The operation is refused as it would impact an already issued tax statement. "
-                                            "Please change the following lock dates to proceed: %(lock_date_info)s.",
-                                            lock_date_info=self.env['res.company']._format_lock_dates(violated_lock_dates)))
+            carryover_impacted_period = self.type_id._get_period_boundaries(self.company_id, self.date_to + relativedelta(days=1))
 
-                carryover_values = self.env['account.report.external.value'].search(
-                    [
-                        ('carryover_origin_report_line_id', 'in', report.line_ids.ids),
-                        ('date', '=', self.date_to),
-                        ('company_id', 'in', self.company_ids.ids),
-                    ]
-                )
+            violated_lock_dates = self.company_id._get_lock_date_violations(
+                carryover_impacted_period[1], fiscalyear=False, sale=False, purchase=False, tax=True, hard=True,
+            ) if carryover_values else None
 
-                carryover_impacted_period = self.type_id._get_period_boundaries(self.company_id, self.date_to + relativedelta(days=1))
+            if violated_lock_dates:
+                raise UserError(_("You cannot reset this closing entry to draft, as it would delete carryover values impacting the tax report of a locked period. "
+                                "Please change the following lock dates to proceed: %(lock_date_info)s.",
+                                lock_date_info=self.env['res.company']._format_lock_dates(violated_lock_dates)))
 
-                violated_lock_dates = self.company_id._get_lock_date_violations(
-                    carryover_impacted_period[1], fiscalyear=False, sale=False, purchase=False, tax=True, hard=True,
-                ) if carryover_values else None
+            carryover_values.unlink()
 
-                if violated_lock_dates:
-                    raise UserError(_("You cannot reset this closing entry to draft, as it would delete carryover values impacting the tax report of a locked period. "
-                                    "Please change the following lock dates to proceed: %(lock_date_info)s.",
-                                    lock_date_info=self.env['res.company']._format_lock_dates(violated_lock_dates)))
+            main_company = self.tax_unit_id.main_company_id or self.company_id
+            if report.country_id == main_company.account_fiscal_country_id and main_company.tax_lock_date and self.date_to <= main_company.tax_lock_date:
+                for company in self.company_ids:
+                    company.sudo().tax_lock_date = self.date_from + relativedelta(days=-1)
 
-                carryover_values.unlink()
+            self.total_amount_to_pay = 0
+            self.period_amount_to_pay = 0
 
-                main_company = self.tax_unit_id.main_company_id or self.company_id
-                if report.country_id == main_company.account_fiscal_country_id and main_company.tax_lock_date and self.date_to <= main_company.tax_lock_date:
-                    for company in self.company_ids:
-                        company.sudo().tax_lock_date = self.date_from + relativedelta(days=-1)
-
-                self.total_amount_to_pay = 0
-                self.period_amount_to_pay = 0
-
-            self.closing_move_ids.button_draft()
-            self.closing_move_ids.unlink()
-            self.attachment_ids.unlink()
-
-            self.date_lock = False
-            self.report_opened_once = False
-            self._reset_checks_for_states([self.state, 'new'])
-            self.state = 'new'
-
-        self._mark_uncompleted()
+        self.date_lock = False
+        self._reset_common()
         return True
 
     def action_reset_custom_return(self):
-        if self.state == 'reviewed':
-            self._reset_checks_for_states([self.state, 'new'])
-            self.state = 'new'
-
-        self._mark_uncompleted()
+        self._reset_common()
         return True
 
     def action_reset_annual_closing(self):
@@ -1364,16 +1374,7 @@ class AccountReturn(models.Model):
         if not self.env.user.has_group('account.group_account_manager'):
             raise UserError(_("Only an Accounting Administrator can reset an annual closing"))
 
-        if self.state == 'submitted':
-            self._reset_checks_for_states([self.state, 'reviewed'])
-            self.state = 'reviewed'
-            self.date_submission = False
-
-        if self.state == 'reviewed':
-            self._reset_checks_for_states([self.state, 'new'])
-            self.state = 'new'
-
-        self._mark_uncompleted()
+        self._reset_common()
         return True
 
     def action_reset_2_states(self):
@@ -1382,18 +1383,20 @@ class AccountReturn(models.Model):
         if not self.env.user.has_group('account.group_account_manager'):
             raise UserError(_("Only an Accounting Administrator can reset a return"))
 
-        if self.state == 'submitted':
-            self._reset_checks_for_states([self.state, 'reviewed'])
-            self.state = 'reviewed'
-            self.date_submission = False
+        self._reset_common()
+        return True
 
-        if self.state == 'reviewed':
-            self._reset_checks_for_states([self.state, 'new'])
-            self.state = 'new'
-
+    def _reset_common(self):
+        self._reset_checks_for_states([state for state, _label in self._fields[self.type_id.states_workflow].selection])
+        self.state = 'new'
         self._mark_uncompleted()
         self.report_opened_once = False
-        return True
+        self.attachment_ids.unlink()
+        self.date_submission = False
+
+        if self.closing_move_ids:
+            self.closing_move_ids.button_draft()
+            self.closing_move_ids.unlink()
 
     ####################################################################################################
     ####  Other Actions
@@ -1476,7 +1479,7 @@ class AccountReturn(models.Model):
 
     def action_open_report(self):
         self.ensure_one()
-        if self.state == 'reviewed':
+        if self.has_access('write') and self.state == 'reviewed':
             self.report_opened_once = True
         options = self._get_closing_report_options()
         return {
@@ -1508,10 +1511,9 @@ class AccountReturn(models.Model):
                 'report_id': report.id,
             },
         }
-
-        company_ids = self.company_ids.ids
         current_company = self.env.company
-        return report.with_context(allowed_company_ids=company_ids).with_company(current_company).get_options(previous_options=options)
+        company_ids = self.company_ids.ids
+        return report.sudo().with_context(allowed_company_ids=company_ids).with_company(current_company).get_options(previous_options=options)
 
     def action_send_email_instructions(self, wizard, template):
         self.ensure_one()
@@ -1667,7 +1669,7 @@ class AccountReturn(models.Model):
         # (if 2 tax groups share the same 3 accounts, they should consolidate in the vat closing entry)
         move_vals_lines = []
         tax_group_subtotal = defaultdict(float)
-        currency = self.env.company.currency_id
+        currency = company.currency_id
         for tg, values in tax_groups.items():
             total = 0
             # ignore line that have no property defined on tax group
@@ -1862,6 +1864,7 @@ class AccountReturn(models.Model):
             return
 
         to_create = []
+        to_unlink = self.env['account.return.check']
         for record in self:
             if record.company_id not in self.env.companies:  # We do not run checks if the main company is not selected
                 continue
@@ -1872,7 +1875,9 @@ class AccountReturn(models.Model):
                 rslt += record._execute_template_checks(check_codes_to_ignore)
 
                 checks_by_code = record.check_ids.grouped(lambda x: x.code)
+                codes_refreshed = set()
                 for vals in rslt:
+                    codes_refreshed.add(vals['code'])
                     if existing_check := checks_by_code.get(vals['code']):
                         # If a user has updated `result`, we no longer updates its value automatically.
                         if not existing_check.refresh_result:
@@ -1881,8 +1886,12 @@ class AccountReturn(models.Model):
                     else:
                         to_create.append({**vals, 'state': record.state, 'return_id': record.id})
 
+                obsolete_check_codes = checks_by_code.keys() - (codes_refreshed | check_codes_to_ignore)
+                if obsolete_check_codes:
+                    to_unlink |= record.check_ids.filtered(lambda c: c.code in obsolete_check_codes)
         if to_create:
             self.env['account.return.check'].with_user(SUPERUSER_ID).create(to_create)
+        to_unlink.unlink()
 
     def _should_run_checks(self):
         # To override in order to run checks in other custom-made states

@@ -39,6 +39,7 @@ test("Search for an article", async () => {
             root_article_id: [articleId, "À la mâison"],
         },
     ]);
+    onRpc("has_access", () => true);
     await mountView({
         arch: /* xml */ `
             <form js_class="knowledge_article_view_form"/>

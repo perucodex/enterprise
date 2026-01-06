@@ -31,7 +31,12 @@ class ResPartner(models.Model):
         }
 
     def write(self, vals):
-        partners_email_changed = self.filtered(lambda r: r.email != vals['email']) if 'email' in vals else None
+        partners_email_changed = False
+        if vals.get('email'):
+            # Email is changed by removing it or changing characters (not casing).
+            partners_email_changed = self.filtered(
+                lambda r: not r.email or r.email.lower() != vals['email'].lower()
+            )
         res = super().write(vals)
         if partners_email_changed:
             request_items = self.env['sign.request.item'].sudo().search([

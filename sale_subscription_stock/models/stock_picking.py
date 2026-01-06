@@ -10,6 +10,27 @@ from odoo import models
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
+    def copy_data(self, default=None):
+        # override picking linked to subscriptions to make sure the date are copied
+        default = dict(default or {})
+        vals_list = super().copy_data(default=default)
+        for old_picking, vals in zip(self, vals_list):
+            order = old_picking.sale_id
+            if order.is_subscription:
+                if not 'scheduled_date' in vals:
+                    vals['scheduled_date'] = old_picking.scheduled_date
+                if 'move_ids' in vals:
+                    old_picking._update_move_copy_vals(vals['move_ids'])
+        return vals_list
+
+    def _update_move_copy_vals(self, move_vals_list):
+        self.ensure_one()
+        for move, move_vals in zip(self.move_ids, move_vals_list):
+            move_dict = len(move_vals) == 3 and move_vals[2]
+            if move_dict:
+                move_dict['date'] = move.date
+        return move_vals_list
+
     def _action_done(self):
         res = super()._action_done()
         picking_per_so = defaultdict(lambda: self.env['stock.picking'])

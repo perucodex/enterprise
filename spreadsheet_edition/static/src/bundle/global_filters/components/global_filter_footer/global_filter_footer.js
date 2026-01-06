@@ -7,8 +7,8 @@ export class GlobalFilterFooter extends Component {
     static template = "spreadsheet_edition.GlobalFilterFooter";
     static components = { Section };
     static props = {
-        onClickDelete: { type: Function, optional: true },
         onClickCancel: Function,
-        onClickSave: Function,
+        onClickDelete: { type: Function, optional: true },
+        onClickSave: { type: Function, optional: true },
     };
 }

@@ -1,5 +1,4 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import fields, models, _
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -75,3 +74,12 @@ class AccountBankStatementLineTransient(models.TransientModel):
         transactions_to_import = self.read(fields=fields_to_read, load=None)
         self.env['account.bank.statement.line']._online_sync_bank_statement(transactions_to_import, self.online_account_id)
         return self.env["ir.actions.act_window"]._for_xml_id('account.open_account_journal_dashboard_kanban')
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        # When iso20022 module is installed, the _format_transaction will keep the end_to_end_uuid in the transaction
+        # but the field is not present in this transient model
+        for vals in vals_list:
+            vals.pop('end_to_end_uuid', None)
+
+        return super().create(vals_list)

@@ -35,6 +35,7 @@ export const FDM_MESSAGES = {
     299: _t("Unspecified error."),
     300: _t("Blackbox responded with invalid response. Please check the cable connection and the power supply, then retry. Restart if necessary"),
     301: _t("Blackbox did not respond to your request. This usually means it has disconnected. Please check its cable connection and its power supply. Restart if necessary."),
+    426: _t("Blackbox driver update required. Please restart your IoT Box to update the blackbox driver."),
 };
 
 /**
@@ -45,6 +46,7 @@ export const FDM_MESSAGES = {
  */
 export class IotHttpService {
     longpollingFailedTimestamp = null;
+    webRtcFailedTimestamp = null;
     connectionStatus = "webrtc"; // webrtc, longpolling, websocket, offline
     connectionTypes = [
         this._webRtc.bind(this),
@@ -53,16 +55,15 @@ export class IotHttpService {
     ];
     cachedIotBoxes = {};
 
+    constructor() {
+        this.setup(...arguments);
+    }
+
     /**
-     *
-     * @param {import("@iot_base/network_utils/longpolling").IotLongpolling} longpolling Longpolling service
-     * @param {import("@iot/network_utils/iot_websocket").IotWebsocket} websocket Websocket service
-     * @param {import("@iot/network_utils/iot_webrtc").IotWebRtc} webRtc WebRTC service
-     * @param notification Notification service
-     * @param orm ORM service
+     * @param {import("services").ServiceFactories & { websocket: IotWebsocket } & { webRtc: IotWebRtc } }} services
      */
-    constructor(longpolling, websocket, webRtc, notification, orm) {
-        this.longpolling = longpolling;
+    setup({ iot_longpolling, websocket, webRtc, notification, orm }) {
+        this.longpolling = iot_longpolling;
         this.websocket = websocket;
         this.webRtc = webRtc;
         this.notification = notification;
@@ -73,8 +74,14 @@ export class IotHttpService {
         this.notification.add(_t("Failed to reach the IoT Box for device: %s", deviceIdentifier), { type: "danger" });
     }
 
+    cacheIotBoxRecords(boxes) {
+        for (const box of boxes) {
+            this.cachedIotBoxes[box.id] = { ip: box.ip, identifier: box.identifier, version: box.version };
+        }
+    }
+
     async getIotBoxData(iotBoxId) {
-        const record = await this.orm.searchRead("iot.box", [["id", "=", iotBoxId]], ["id", "ip", "identifier"]);
+        const record = await this.orm.searchRead("iot.box", [["id", "=", iotBoxId]], ["id", "ip", "identifier", "version"]);
         if (!record) {
             throw new Error(`No IoT Box found`);
         }
@@ -84,16 +91,37 @@ export class IotHttpService {
     _ensureLongpollingEnabled() {
         if (
             this.longpollingFailedTimestamp &&
-            Date.now() - this.longpollingFailedTimestamp < 20 * 60 * 1000
+            Date.now() - this.longpollingFailedTimestamp < 5 * 60 * 1000
         ) {
             throw new Error("Longpolling is temporarily disabled due to a recent failure.");
         }
     }
 
-    async _webRtc({ identifier, deviceIdentifier, data, messageId, onSuccess, onFailure }) {
-        await this.webRtc.onMessage(identifier, deviceIdentifier, messageId, onSuccess, onFailure);
-        if (data) {
-            await this.webRtc.sendMessage(identifier, { device_identifier: deviceIdentifier, data }, messageId);
+    _ensureWebRtcEnabled() {
+        if (
+            this.webRtcFailedTimestamp &&
+            Date.now() - this.webRtcFailedTimestamp < 20 * 60 * 1000
+        ) {
+            throw new Error("WebRTC is temporarily disabled due to a recent failure.");
+        }
+    }
+
+    async _webRtc({ identifier, version, deviceIdentifier, data, messageId, onSuccess, onFailure, messageType }) {
+        if (/\d{4}\.\d{2}\.\d{2}/.test(version)) {
+            throw new Error("IoT box does not support WebRTC, skipping.");
+        }
+        this._ensureWebRtcEnabled();
+        try {
+            await this.webRtc.onMessage(identifier, deviceIdentifier, messageId, onSuccess, onFailure);
+            if (data) {
+                await this.webRtc.sendMessage(identifier, {
+                    device_identifier: deviceIdentifier,
+                    data,
+                }, messageId, messageType);
+            }
+        } catch (error) {
+            this.webRtcFailedTimestamp = Date.now();
+            throw error;
         }
         this.connectionStatus = "webrtc";
     }
@@ -116,29 +144,40 @@ export class IotHttpService {
         this.connectionStatus = "longpolling";
     }
 
-    async _websocket({ identifier, deviceIdentifier, data, messageId, onSuccess, onFailure }) {
+    async _websocket({ identifier, deviceIdentifier, data, messageId, onSuccess, onFailure, messageType }) {
         const onFailureWithTimeout = (...args) => {
             onFailure(...args);
             this.connectionStatus = "offline";
         };
         this.websocket.onMessage(identifier, deviceIdentifier, onSuccess, onFailureWithTimeout, "operation_confirmation", messageId);
         if (data) {
-            this.websocket.sendMessage(identifier, { device_identifiers: [deviceIdentifier], ...data }, messageId);
+            this.websocket.sendMessage(
+                identifier,
+                {
+                    device_identifiers: [deviceIdentifier],
+                    device_identifier: deviceIdentifier, // compatibility with v19.1+ IoT Boxes
+                    ...data
+                },
+                messageId,
+                messageType,
+            );
         }
         this.connectionStatus = "websocket";
     }
 
-    async _attemptFallbacks({ iotBoxId, deviceIdentifier, onFailure }) {
+    async _attemptFallbacks({ iotBoxId, deviceIdentifier, data, onFailure }) {
         if (!["number", "string"].includes(typeof iotBoxId)) {
             iotBoxId = iotBoxId[0]; // iotBoxId is the ``Many2one`` field, we need the actual ID
         }
 
         if (!this.cachedIotBoxes[iotBoxId]) {
-            const [box] = await this.getIotBoxData(iotBoxId);
-            this.cachedIotBoxes[iotBoxId] = { ip: box.ip, identifier: box.identifier };
+            this.cacheIotBoxRecords(await this.getIotBoxData(iotBoxId))
         }
-        const { ip, identifier } = this.cachedIotBoxes[iotBoxId];
-        const params = { ip, identifier, ...arguments[0] };
+        const { ip, identifier, version } = this.cachedIotBoxes[iotBoxId];
+
+        // if we target the box instead of a device, we want longpolling to handle action as messageType
+        const messageType = deviceIdentifier === identifier ? data.action : undefined;
+        const params = { ip, identifier, version, data, messageType, ...arguments[0] };
 
         for (const connectionType of this.connectionTypes) {
             try {
@@ -220,8 +259,9 @@ export class IotHttpService {
 export const iotHttpService = {
     dependencies: ["notification", "orm", "bus_service", "iot_longpolling", "lazy_session"],
 
-    start(env, { notification, orm, bus_service, iot_longpolling, lazy_session }) {
-        const iotWebsocket = new IotWebsocket({ bus_service, orm, lazy_session });
+    start(env, services) {
+        const { iot_longpolling, bus_service } = services;
+        const iotWebsocket = new IotWebsocket(services);
         const iotWebRtc = new IotWebRtc(bus_service, iotWebsocket);
 
         const webRtc = {
@@ -239,20 +279,15 @@ export const iotHttpService = {
             onMessage: iotWebsocket.onMessage.bind(iotWebsocket),
         };
 
-        const iot = new IotHttpService(
-            iot_longpolling,
-            iotWebsocket,
-            iotWebRtc,
-            notification,
-            orm
-        );
+        const iot = new IotHttpService({ ...services, websocket: iotWebsocket, webRtc: iotWebRtc });
+        const cacheIotBoxRecords = iot.cacheIotBoxRecords.bind(iot);
         const action = iot.action.bind(iot);
         const onMessage = iot.onMessage.bind(iot);
 
         // Expose only those functions to the environment
         // status is a getter to have a reactive value
         return {
-            post, action, webRtc, longpolling, websocket, onMessage, get status() {
+            post, action, webRtc, longpolling, websocket, onMessage, cacheIotBoxRecords, get status() {
                 return iot.connectionStatus;
             }
         };

@@ -6,6 +6,7 @@ from unittest.mock import patch
 import requests
 
 from odoo import Command
+from odoo.exceptions import ValidationError
 from odoo.tests import TransactionCase, tagged
 
 
@@ -167,6 +168,32 @@ class TestDeliveryEnvia(TransactionCase):
         with _mock_envia_call():
             choose_delivery_carrier.update_price()
             self.assertEqual(choose_delivery_carrier.delivery_price, 4.60)
+
+    def test_rate_order_without_address(self):
+        """ Set up a sale order without address and ensure that the rate computation fails. """
+        partner = self.env['res.partner'].create({
+            'name': 'Test Partner',
+            'email': 'test@example.com',
+            'phone': '(870)-931-0505',
+        })
+
+        sale_order = self.env['sale.order'].create({
+            'partner_id': partner.id,
+            'order_line': [
+                Command.create({
+                    'product_id': self.product_to_ship1.id
+                })
+            ]
+        })
+        wiz_action = sale_order.action_open_delivery_wizard()
+        choose_delivery_carrier = self.env[wiz_action['res_model']].with_context(wiz_action['context']).create({
+            'carrier_id': self.envia.id,
+            'order_id': sale_order.id
+        })
+
+        with _mock_envia_call():
+            with self.assertRaises(ValidationError):
+                choose_delivery_carrier.update_price()
 
     def test_shipping_order(self):
         """ Ensure that the shipping of an order works properly. """

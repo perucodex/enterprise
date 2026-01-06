@@ -27,7 +27,6 @@ export class EmbeddedClipboardPlugin extends Plugin {
                     !closestElement(selection.anchorNode, "[data-embedded='clipboard']"),
             },
         ],
-        mount_component_handlers: this.setupNewClipboard.bind(this),
     };
 
     insertClipboard() {
@@ -46,15 +45,5 @@ export class EmbeddedClipboardPlugin extends Plugin {
             clipboardBlock.querySelector(baseContainerSelector)
         );
         this.dependencies.history.addStep();
-    }
-
-    setupNewClipboard({ name, env }) {
-        if (name === "clipboard") {
-            Object.assign(env, {
-                editorShared: {
-                    preserveSelection: this.dependencies.selection.preserveSelection,
-                },
-            });
-        }
     }
 }

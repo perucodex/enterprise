@@ -11,7 +11,7 @@ class HrApplicant(models.Model):
         vals = super()._get_offer_values()
         contract_template = self._get_contract_template()
         if contract_template:
-            monthly_wage = contract_template._get_gross_from_employer_costs(contract_template.final_yearly_costs)
+            monthly_wage = contract_template.sudo()._get_gross_from_employer_costs(vals['final_yearly_costs'])
             vals.update({
                 'monthly_wage': monthly_wage
             })

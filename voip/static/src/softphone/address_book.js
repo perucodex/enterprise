@@ -1,7 +1,7 @@
 import { Component, onMounted, useState } from "@odoo/owl";
 
 import { tabComponents } from "@voip/softphone/tab";
-import { isSubstring } from "@voip/utils/utils";
+import { isSubstring, matchPhoneNumber } from "@voip/utils/utils";
 
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
@@ -29,7 +29,7 @@ export class AddressBook extends Component {
         this.voip = useService("voip");
         this.ui = useService("ui");
         this.state = useState(this.voip.softphone.addressBook);
-        onMounted(() => this.voip.fetchContacts());
+        onMounted(() => this.voip.fetchContacts(this.state.searchInputValue));
         this.onInputSearch = useDebounced(
             () => this.voip.fetchContacts(this.state.searchInputValue),
             300
@@ -64,7 +64,7 @@ export class AddressBook extends Component {
         }
         return contacts.filter(
             ({ voipName, phone }) =>
-                isSubstring(voipName, searchTerms) || isSubstring(phone, searchTerms)
+                isSubstring(voipName, searchTerms) || matchPhoneNumber(phone, searchTerms)
         );
     }
 

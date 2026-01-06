@@ -12,7 +12,7 @@ class AccountChartTemplate(models.AbstractModel):
         account_codes = [
             '221001',   # MPF Accrued (Employer)
             '221002',   # MPF Witheld (Employee)
-            '2216',     # Other Payable
+            '2217',     # Salaries & Wages Payable
             '52',       # Expenses
             '5215',     # Sales Commission
             '5217',     # MPF (Employer) Contribution
@@ -52,11 +52,18 @@ class AccountChartTemplate(models.AbstractModel):
         rules_mapping[rule]['debit'] = '221001'
         rules_mapping[rule]['credit'] = '5217'
 
-        net_rule = self.env['hr.salary.rule'].search([
-            ('struct_id', '=', self.env.ref('l10n_hk_hr_payroll.hr_payroll_structure_cap57_employee_salary').id),
+        struct_ids = (
+            self.env.ref('l10n_hk_hr_payroll.hr_payroll_structure_cap57_employee_salary').id,
+            self.env.ref('l10n_hk_hr_payroll.hr_payroll_structure_cap57_payment_in_lieu_of_notice').id,
+            self.env.ref('l10n_hk_hr_payroll.hr_payroll_structure_cap57_long_service_payment').id,
+            self.env.ref('l10n_hk_hr_payroll.hr_payroll_structure_cap57_severance_payment').id,
+        )
+        net_rules = self.env['hr.salary.rule'].search([
+            ('struct_id', 'in', struct_ids),
             ('code', '=', 'NET')
         ])
-        rules_mapping[net_rule]['credit'] = '2216'
+        for net_rule in net_rules:
+            rules_mapping[net_rule]['credit'] = '2217'
 
         self._configure_payroll_account(
             companies,

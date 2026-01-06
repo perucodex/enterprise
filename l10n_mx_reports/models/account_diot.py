@@ -168,7 +168,7 @@ class L10n_MxReportHandler(models.AbstractModel):
                 continue
 
             data = [0] * 54
-            if values['operation_type_code'] != '87':
+            if values.get('operation_type_code') != '87':
                 self.l10n_mx_diot_get_values(values, data, partner)
                 for i in range(7, 53):
                     if not data[i]:
@@ -313,6 +313,8 @@ class L10n_MxReportHandler(models.AbstractModel):
         partner_to_label_val = {}
         for label, partner_to_value_list in label_dict.items():
             for partner_id, value in partner_to_value_list:
+                if not partner_id:
+                    raise UserError(_("The report cannot be generated because there are entries with tax amounts but no partner assigned."))
                 partner_to_label_val.setdefault(self.env['res.partner'].browse(partner_id), {})[label] = value
         return dict(sorted(partner_to_label_val.items(), key=lambda item: item[0].name))
 

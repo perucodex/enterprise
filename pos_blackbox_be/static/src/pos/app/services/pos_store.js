@@ -1,15 +1,27 @@
-import { PosStore } from "@point_of_sale/app/services/pos_store";
+import { PosStore, posService } from "@point_of_sale/app/services/pos_store";
 import { patch } from "@web/core/utils/patch";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
-import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/number_popup";
 import { BlackboxError } from "@pos_blackbox_be/pos/app/utils/blackbox_error";
 
+export const EMPTY_SIGNATURE = "                                        ";
+
+patch(posService, {
+    dependencies: [...posService.dependencies, "blackbox_queue_service"],
+});
+
 patch(PosStore.prototype, {
-    async setup() {
+    async setup(env, { blackbox_queue_service }) {
         await super.setup(...arguments);
         this.waitBeforePayment = false;
+        this.blackbox_queue = blackbox_queue_service;
         this.multiple_discount = false;
+        this.blackbox_queue.addCallback(this.deleteOrderCallback.bind(this), "delete_order_token");
+        this.blackbox_queue.addCallback(
+            this.proFormaRefundCallback.bind(this),
+            "pro_forma_refund_token"
+        );
+        this.blackbox_queue.addCallback(this.pushOrderCallback.bind(this), "push_order_token");
     },
     async initServerData() {
         await super.initServerData();
@@ -189,17 +201,20 @@ patch(PosStore.prototype, {
         if (this.useBlackBoxBe() && orders.length > 0) {
             for (const order of orders) {
                 const serialized = order.serializeForORM({ keepCommands: true });
-                if (serialized.lines.length === 0 && serialized.state === "draft") {
+                if (
+                    (serialized.lines.length === 0 && serialized.state === "draft") ||
+                    (serialized.blackbox_signature &&
+                        serialized.blackbox_signature != EMPTY_SIGNATURE)
+                ) {
                     continue;
                 }
                 order.uiState.receipt_type = false;
-                const result = await this.pushOrderToBlackbox(order);
-                if (!result) {
+                try {
+                    await this.pushOrderToBlackbox(order);
+                } catch (err) {
                     order.state = "draft";
-                    throw new Error(_t("Error pushing order to blackbox"));
+                    throw err;
                 }
-                order.setDataForPushOrderFromBlackbox(result);
-                await this.createLog(order);
             }
         }
         return super.preSyncAllOrders(orders);
@@ -275,20 +290,49 @@ patch(PosStore.prototype, {
                     receipt_total: 0,
                     plu: order.getPlu([]),
                 });
-                const blackbox_response = await this.pushToBlackbox(dataToSend);
-                order.uiState.receipt_type = "NS";
-                order.blackbox_tax_category_a = 0;
-                order.blackbox_tax_category_b = 0;
-                order.blackbox_tax_category_c = 0;
-                order.blackbox_tax_category_d = 0;
-                order.setDataForPushOrderFromBlackbox(blackbox_response);
-                await this.createLog(order, {}, false, false, false, true);
-                await this.increaseCorrectionCounter(order.priceIncl);
+                const logInfo = this.getLogFields(order, false, false, false, true);
+                await this.blackbox_queue.enqueue(
+                    dataToSend,
+                    "registerReceipt",
+                    "delete_order_token",
+                    [order.uuid, logInfo],
+                    true
+                );
             } finally {
                 this.ui.unblock();
             }
         }
         return super._onBeforeDeleteOrder(...arguments);
+    },
+    async deleteOrderCallback(blackbox_response, orderUuid, logInfo) {
+        const order = this.models["pos.order"].getBy("uuid", orderUuid);
+        if (blackbox_response) {
+            order.uiState.receipt_type = "NS";
+            order.blackbox_tax_category_a = 0;
+            order.blackbox_tax_category_b = 0;
+            order.blackbox_tax_category_c = 0;
+            order.blackbox_tax_category_d = 0;
+            order.setDataForPushOrderFromBlackbox(blackbox_response);
+            await this.createLog(logInfo, blackbox_response);
+            await this.increaseCorrectionCounter(order.priceIncl);
+        }
+    },
+    async reloadData(fullReload = false) {
+        this.blackbox_queue.clearQueue();
+        await super.reloadData(...arguments);
+    },
+    async _fetchUrbanpiperOrderCount(order_id) {
+        await super._fetchUrbanpiperOrderCount(...arguments);
+        const order = this.models["pos.order"].get(order_id);
+        if (this.useBlackBoxBe() && order) {
+            if (
+                (!order.blackbox_signature || order.blackbox_signature === EMPTY_SIGNATURE) &&
+                order.state === "paid" &&
+                ["food_ready", "dispatched", "completed"].includes(order.delivery_status)
+            ) {
+                await this.pushOrderToBlackbox(order, true);
+            }
+        }
     },
     //#region Blackbox
     useBlackBoxBe() {
@@ -297,12 +341,7 @@ patch(PosStore.prototype, {
     //#region Push Pro Forma
     async pushProFormaOrderLog(order) {
         order.updateReceiptType();
-        const result = await this.pushOrderToBlackbox(order);
-        if (result) {
-            order.setDataForPushOrderFromBlackbox(result);
-            await this.createLog(order);
-        }
-        return result;
+        await this.pushOrderToBlackbox(order);
     },
     async pushProFormaRefundOrder(order, lines = false) {
         const serializedOrder = order.serializeForORM({ keepCommands: true });
@@ -338,17 +377,21 @@ patch(PosStore.prototype, {
 
         //add bb fields too
         const dataToSend = this.createOrderDataForBlackbox(serializedOrder);
-        const blackbox_response = await this.pushToBlackbox(dataToSend);
-        if (!blackbox_response) {
-            return;
-        }
-        await this.createLog(
+        const logInfo = this.getLogFields(
             order,
-            blackbox_response,
             serializedOrder.blackbox_order_sequence,
             serializedOrder.receipt_type,
             lines
         );
+        this.blackbox_queue.enqueue(dataToSend, "registerReceipt", "pro_forma_refund_token", [
+            logInfo,
+        ]);
+    },
+    proFormaRefundCallback(blackbox_response, logInfo) {
+        if (!blackbox_response) {
+            return;
+        }
+        this.createLog(logInfo, blackbox_response);
     },
     async pushCorrection(order, lines = []) {
         if (lines.length == 0) {
@@ -370,18 +413,18 @@ patch(PosStore.prototype, {
             session_id: this.session.id,
             lines: [],
             blackbox_order_sequence: order.blackbox_order_sequence,
-            plu_hash: order.plu_hash,
+            plu_hash: "afd80709", // PLU hash for empty order
             pos_version: this.config._server_version.server_version,
             blackbox_ticket_counters: order.blackbox_ticket_counters,
             blackbox_unique_fdm_production_number: order.blackbox_unique_fdm_production_number,
             certified_blackbox_identifier: this.config.certified_blackbox_identifier,
             blackbox_signature: order.blackbox_signature,
             change: 0,
+            receipt_type: "NS",
         };
     },
     getLogFields(
         order,
-        blackboxResponse = {},
         blackboxOrderSequence = false,
         receiptType = false,
         lines = false,
@@ -410,26 +453,29 @@ patch(PosStore.prototype, {
             session_id: this.session.id,
             lines: this.getLineLogFields(order, receiptType, lines),
             blackbox_order_sequence: blackboxOrderSequence || order.blackbox_order_sequence,
-            plu_hash: order.plu_hash,
+            plu_hash: order.plu_hash || order.getPlu(),
             pos_version: this.config._server_version.server_version,
             blackbox_ticket_counters: order.blackbox_ticket_counters,
             blackbox_unique_fdm_production_number: order.blackbox_unique_fdm_production_number,
             certified_blackbox_identifier: this.config.certified_blackbox_identifier,
             blackbox_signature: order.blackbox_signature,
             change: order.change,
+            receipt_type: receiptType,
         };
+
+        return response;
+    },
+    updateLog(logInfo, blackboxResponse = {}) {
         if (Object.keys(blackboxResponse).length > 0) {
-            response.blackbox_signature = blackboxResponse.signature;
-            response.plu_hash = order.getPlu();
-            response.blackbox_unique_fdm_production_number = blackboxResponse.fdm_number;
-            response.blackbox_ticket_counters =
-                receiptType +
+            logInfo.blackbox_signature = blackboxResponse.signature;
+            logInfo.blackbox_unique_fdm_production_number = blackboxResponse.fdm_number;
+            logInfo.blackbox_ticket_counters =
+                logInfo.receipt_type +
                 " " +
                 blackboxResponse.ticket_counter +
                 "/" +
                 blackboxResponse.total_ticket_counter;
         }
-        return response;
     },
     getLineLogFields(order, receipt_type, lines = false) {
         if (!lines) {
@@ -448,71 +494,13 @@ patch(PosStore.prototype, {
             };
         });
     },
-    async createLog(
-        order,
-        blackboxResponse = {},
-        blackboxOrderSequence = false,
-        receiptType = false,
-        lines = false,
-        emptyNS = false
-    ) {
-        await this.data.call("pos.order", "create_log", [
-            [
-                this.getLogFields(
-                    order,
-                    blackboxResponse,
-                    blackboxOrderSequence,
-                    receiptType,
-                    lines,
-                    emptyNS
-                ),
-            ],
-        ]);
+    async createLog(logInfo, blackboxResponse = {}) {
+        this.updateLog(logInfo, blackboxResponse);
+        await this.data.call("pos.order", "create_log", [[logInfo]]);
     },
-    /**
-     * #region Push to Blackbox
-     * Push data to the blackbox using either longpolling or websocket.
-     *
-     * @param {Object} data The data to send to the blackbox.
-     * @param {string} action The action to perform on the blackbox, e.g. "registerReceipt", "registerPIN", etc.
-     * @return {Promise<Object>} The data returned from the blackbox, should look like this:
-     * ```
-     * {
-     *      result: {
-     *          signature: "123456789",
-     *          vsc: "123456789",
-     *          fdm_number: "123456789",
-     *          ticket_counter: 12,
-     *          total_ticket_counter: 99,
-     *          time: "123456",
-     *          date: "20240101",
-     *          // error: {
-     *          //     errorCode: "209000",
-     *          //     errorMessage: "Fiscal Data Module real time clock corrupt.",
-     *          // },
-     *          error: {
-     *              errorCode: "000000",
-     *              errorMessage: "No error.",
-     *          },
-     *      },
-     * };
-     * ```
-     */
-    async pushDataToBlackbox(data, action) {
-        const fdm = this.hardwareProxy.deviceControllers.fiscal_data_module;
-
-        return new Promise((resolve, reject) => {
-            this.iotHttp.action(
-                fdm.iotId,
-                fdm.identifier,
-                { action, high_level_message: data },
-                (message) => resolve(message),
-                (message) => reject(message)
-            );
-        });
-    },
-    async pushOrderToBlackbox(order) {
+    async pushOrderToBlackbox(order, ticketCallback = false) {
         await this.updateBlackboxFields(order);
+        const logInfo = this.getLogFields(order);
         const insz = order.uiState.insz?.[1];
         const dataToSend = this.createOrderDataForBlackbox({
             ...order.serializeForORM({ keepCommands: true }),
@@ -522,42 +510,29 @@ patch(PosStore.prototype, {
             receipt_total: order.priceIncl,
             plu: order.getPlu(),
         });
-        return this.pushToBlackbox(dataToSend);
+        return this.blackbox_queue.enqueue(
+            dataToSend,
+            "registerReceipt",
+            "push_order_token",
+            [order.uuid, logInfo, ticketCallback],
+            dataToSend.type[0] === "N"
+        );
     },
-    async pushToBlackbox(dataToSend) {
-        try {
-            const data = await this.pushDataToBlackbox(dataToSend, "registerReceipt");
-            const result = this.extractResult(data);
-            if (!result?.error?.errorCode.startsWith("000")) {
-                throw result.error;
+    async pushOrderCallback(blackboxResponse, orderUuid, logInfo, ticketCallback) {
+        if (blackboxResponse) {
+            const updatedOrder = this.models["pos.order"].getBy("uuid", orderUuid);
+            if (!updatedOrder) {
+                return;
             }
-            return result;
-        } catch (err) {
-            //the catch might actually not be an error
-            const result = this.extractResult(err);
-            if (result?.error?.errorCode.startsWith("000")) {
-                return result;
+            updatedOrder.setDataForPushOrderFromBlackbox(blackboxResponse);
+            if (ticketCallback && updatedOrder.isSynced) {
+                await this.data.write(
+                    "pos.order",
+                    [updatedOrder.id],
+                    updatedOrder.getBlackboxData()
+                );
             }
-            if (err.errorCode?.startsWith("202")) {
-                this.dialog.add(NumberPopup, {
-                    title: _t("Enter Pin Code"),
-                    getPayload: (num) => {
-                        this.pushDataToBlackbox(num, "registerPIN");
-                    },
-                });
-                throw new Error(_t("Pin code required"));
-            } else if (err.status === "disconnected") {
-                throw new BlackboxError(err.status);
-            } else {
-                throw new BlackboxError(err.errorCode, err.errorMessage);
-            }
-        }
-    },
-    extractResult(data) {
-        if (Array.isArray(data.result)) {
-            return data.result[0];
-        } else {
-            return data.result;
+            await this.createLog(logInfo, blackboxResponse);
         }
     },
     async getBlackboxFields(order, receiptType = false) {
@@ -578,14 +553,25 @@ patch(PosStore.prototype, {
         }
     },
     createOrderDataForBlackbox(order) {
+        const insz_or_bis_number =
+            order.insz ||
+            (this.config.module_pos_hr
+                ? this.session._employee_insz_or_bis_number[this.getCashier().id]
+                : this.user.insz_or_bis_number);
+        if (!insz_or_bis_number) {
+            throw new BlackboxError(
+                "Missing National Register Number",
+                _t(
+                    "No National Register Number found for the current user.\n" +
+                        "Ensure it's correctly set in the user or employee form view and reload PoS data."
+                ),
+                this.reloadData.bind(this, false)
+            );
+        }
         return {
             date: luxon.DateTime.now().toFormat("yyyyMMdd"),
             ticket_time: luxon.DateTime.now().toFormat("HHmmss"),
-            insz_or_bis_number:
-                order.insz ||
-                (this.config.module_pos_hr
-                    ? this.session._employee_insz_or_bis_number[this.getCashier().id]
-                    : this.user.insz_or_bis_number),
+            insz_or_bis_number,
             ticket_number: order.blackbox_order_sequence.toString(),
             type: order.receipt_type,
             receipt_total: Math.abs(order.receipt_total).toFixed(2).toString().replace(".", ""),

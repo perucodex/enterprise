@@ -13,11 +13,9 @@
         </t>
         <t t-set-slot="entry" t-slot-scope="slot">
             <t t-set="contact" t-value="slot.item"/>
-            <t t-set="countryCode" t-value="contact.country_code_from_phone"/>
             <t t-set="isFolded" t-value="!contact.eq(voip.softphone.activeRecord)"/>
             <TabEntry
                 avatarUrl="contact.avatarUrl"
-                countryCode="countryCode"
                 title="contact.voipName"
                 subtitle="getSubtitle(contact)"
                 subtitleIcon="'fa fa-fw fa-building-o'"
@@ -40,12 +38,12 @@
                 </t>
                 <t t-set-slot="info">
                     <p class="mb-0 opacity-75 text-truncate">
-                        <span t-if="countryCode" class="o-voip-countryFlag-wrapper d-inline-block me-1 align-middle">
-                            <img class="o-voip-countryFlag mx-auto" t-attf-src="/base/static/img/country_flags/{{ countryCode }}.png"
+                        <span t-if="contact.phone_country_id?.image_url" class="o-voip-countryFlag-wrapper d-inline-block me-1 align-middle">
+                            <img class="o-voip-countryFlag mx-auto" t-att-src="contact.phone_country_id.image_url"
                             t-att-alt="flagAlt"/>
                         </span>
                         <i t-else="" class="fa fa-phone fa-fw me-1"/>
-                        <span t-att-class="{ 'align-middle': countryCode }" t-esc="contact.phone"/>
+                        <span t-att-class="{ 'align-middle': contact.phone_country_id?.image_url }" t-esc="contact.phone"/>
                     </p>
                 </t>
                 <t t-set-slot="actions">

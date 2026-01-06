@@ -84,6 +84,7 @@ Accounting Reports
         'web.assets_backend': [
             'account_reports/static/src/components/**/*',
             'account_reports/static/src/js/**/*',
+            'account_reports/static/src/views/**/*',
             'account_reports/static/src/widgets/**/*',
             'account_reports/static/src/scss/account_return.scss',
         ],

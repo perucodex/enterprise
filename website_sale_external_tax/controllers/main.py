@@ -28,5 +28,9 @@ class WebsiteSaleExternalTaxCalculation(main.WebsiteSale):
 class WebsiteSaleDelivery(delivery.Delivery):
 
     def _order_summary_values(self, order, **post):
-        order._get_and_set_external_taxes_on_eligible_records()
-        return super()._order_summary_values(order, **post)
+        res = super()._order_summary_values(order, **post)
+        try:
+            order._get_and_set_external_taxes_on_eligible_records()
+        except UserError as e:
+            res['external_tax_error'] = str(e)
+        return res

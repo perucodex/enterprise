@@ -88,23 +88,31 @@ class SocialAccount(models.Model):
         about the endpoint used.
         e.g of data structure returned by the endpoint:
         [{
-            'name':  'follower_count',
+            'name':  'page_post_engagements',
             'values': [{
                 'value': 10,
+                'end_time': '2025-08-20T07:00:00+0000'
             }, {
                 'value': 20,
+                'end_time': '2025-08-21T07:00:00+0000'
             }]
         }{
-            'name':  'reach',
+            'name':  'page_follows',
             'values': [{
                 'value': 15,
+                'end_time': '2025-08-20T07:00:00+0000'
             }, {
                 'value': 25,
+                'end_time': '2025-08-21T07:00:00+0000'
             }]
-        }] """
+        }]
+
+        That method returns the delta of the statistics in the given
+        period of time (not the total value for the lifetime of the page).
+        """
 
         params = {
-            'metric': 'page_post_engagements,page_fan_adds,page_fan_removes',
+            'metric': 'page_post_engagements,page_follows',
             'period': 'day',
             'access_token': self.facebook_access_token
         }
@@ -117,26 +125,28 @@ class SocialAccount(models.Model):
 
         response = requests.get(endpoint_url, params=params, timeout=5)
 
-        statistics = {'page_fans': 0}
+        statistics = {'page_fans': 0, 'page_post_engagements': 0}
         if not response.json().get('data'):
             _logger.warning("Social Facebook: Failed to retrieve page statistics: %s.", response.text)
-            statistics.update({'page_post_engagements': 0})
             return statistics
 
         json_data = response.json().get('data')
+        page_follows = {}
         for metric in json_data:
-            total_value = 0
-            metric_values = metric.get('values')
-            for value in metric_values:
-                total_value += value.get('value')
-
             metric_name = metric.get('name')
+            values = metric.get('values') or []
             if metric_name == 'page_post_engagements':
-                statistics['page_post_engagements'] = total_value
-            elif metric_name == 'page_fan_adds':
-                statistics['page_fans'] += total_value
-            elif metric_name == 'page_fan_removes':
-                statistics['page_fans'] -= total_value
+                statistics['page_post_engagements'] += sum(v.get('value', 0) for v in values)
+            elif metric_name == 'page_follows':
+                page_follows.update({
+                    datetime.fromisoformat(v['end_time']): v['value']
+                    for v in values
+                    if 'end_time' in v and 'value' in v
+                })
+
+        if page_follows:
+            # "Newest - Oldest"
+            statistics['page_fans'] = page_follows[max(page_follows)] - page_follows[min(page_follows)]
 
         return statistics
 

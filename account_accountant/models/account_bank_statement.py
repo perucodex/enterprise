@@ -2,16 +2,19 @@ import logging
 import re
 import string
 
+from dateutil.relativedelta import relativedelta
 from markupsafe import Markup
-from itertools import takewhile
 
 from odoo import Command, SUPERUSER_ID, _, api, fields, models, modules, tools
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
-from odoo.tools import SQL, float_is_zero
+from odoo.tools import SQL, float_is_zero, format_date
 from odoo.addons.account.tools.structured_reference import is_valid_structured_reference
 
 _logger = logging.getLogger(__name__)
+
+AUTO_STATEMENT_PROCESSING_NUMBER = 80
+AUTO_STATEMENT_PROCESSING_BATCH_SIZE = 100
 
 
 class AccountBankStatement(models.Model):
@@ -124,7 +127,11 @@ class AccountBankStatementLine(models.Model):
 
         action.update({
             'name': name or _("Bank Matching"),
-            'context': {**default_context, 'bank_statements_source': default_journal.exists().bank_statements_source},
+            'context': {
+                **default_context,
+                'bank_statements_source': default_journal.exists().bank_statements_source,
+                'auto_statement_processing': True,
+            },
             'domain': [('state', '!=', 'cancel')] + (extra_domain or []),
         })
 
@@ -173,6 +180,7 @@ class AccountBankStatementLine(models.Model):
             if company_id is not None:
                 domain &= Domain(self.env['account.reconcile.model']._check_company_domain(company_id))
             st_lines = self.search(domain, limit=limit, order="cron_last_check ASC NULLS FIRST, id")
+            _logger.info("_cron_try_auto_reconcile_statement_lines found %s statement lines", len(st_lines))
             if batch_size and len(st_lines) > batch_size:
                 remaining_line_id = st_lines[batch_size].id
                 st_lines = st_lines[:batch_size]
@@ -198,16 +206,19 @@ class AccountBankStatementLine(models.Model):
 
                 st_lines._try_auto_reconcile_statement_lines(company_id=company_id)
             except Exception as e:  # noqa: BLE001
-                if not modules.module.current_test:
-                    self.env.cr.rollback()
-                st_lines.cron_last_check = fields.Datetime.now()
                 _logger.warning("Error while processing statement lines: %s", e)
+                if not isinstance(e, UserError) and not modules.module.current_test:
+                    _logger.warning("_cron_try_auto_reconcile_statement_lines will rollback the cursor")
+                    self.env.cr.rollback()
+                if st_lines.exists():
+                    st_lines.cron_last_check = fields.Datetime.now()
 
             # Commit if we can, in case an issue arises later.
             if not modules.module.current_test:
                 self.env.cr.commit()
 
         if remaining_line_id:
+            _logger.info("_cron_try_auto_reconcile_statement_lines remaining line found (%s), the cron will be triggered again", remaining_line_id)
             # If some statement lines couldn't be processed because of the cron limits, manually re-trigger the cron
             self.env.ref('account_accountant.auto_reconcile_bank_statement_line')._trigger()
 
@@ -239,9 +250,14 @@ class AccountBankStatementLine(models.Model):
                 ):
                 candidate_amls += aml
 
-        # if there's more than 1 possible match, we don't reconcile
+        # if we have a unique match, we reconcile that move line
         if len(candidate_amls) == 1:
             return candidate_amls
+
+        # if we have multiple candidates we take the invoice with the closer prior or equal date
+        if prior_amls := candidate_amls.filtered(lambda aml: aml.invoice_date and aml.invoice_date <= st_line.date):
+            return max(prior_amls, key=lambda aml: aml.invoice_date)
+        return None
 
     def _try_auto_reconcile_statement_lines(self, company_id=None):
         st_move_ids = self.mapped('move_id').ids
@@ -279,20 +295,20 @@ class AccountBankStatementLine(models.Model):
                               (
                                   reco_model.match_label = 'contains'
                                   AND (
-                                      st_line.payment_ref ILIKE '%%' || reco_model.match_label_param || '%%'
-                                      OR st_line.transaction_details::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
+                                      st_line.payment_ref IS NOT NULL AND st_line.payment_ref ILIKE '%%' || reco_model.match_label_param || '%%'
+                                      OR st_line.transaction_details IS NOT NULL AND st_line.transaction_details::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
                                    )
                               ) OR (
                                   reco_model.match_label = 'not_contains'
                                   AND NOT (
-                                      st_line.payment_ref ILIKE '%%' || reco_model.match_label_param || '%%'
-                                      OR st_line.transaction_details::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
+                                      st_line.payment_ref IS NOT NULL AND st_line.payment_ref ILIKE '%%' || reco_model.match_label_param || '%%'
+                                      OR st_line.transaction_details IS NOT NULL AND st_line.transaction_details::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
                                   )
                               ) OR (
                                   reco_model.match_label = 'match_regex'
                                   AND (
-                                      st_line.payment_ref ~* reco_model.match_label_param
-                                      OR st_line.transaction_details::TEXT ~* reco_model.match_label_param
+                                      st_line.payment_ref IS NOT NULL AND st_line.payment_ref ~* reco_model.match_label_param
+                                      OR st_line.transaction_details IS NOT NULL AND st_line.transaction_details::TEXT ~* reco_model.match_label_param
                                   )
                               )
                           )
@@ -309,6 +325,7 @@ class AccountBankStatementLine(models.Model):
         for st_line_id, mapped_partner_id in self.env.cr.fetchall():
             st_line = self.browse(st_line_id).with_prefetch(self._prefetch_ids)  # guarantees batch prefetching if needed
             st_line.partner_id = mapped_partner_id
+            _logger.info("try_auto_reconcile - partner mapping done for st_line: %s and partner %s", st_line.id, mapped_partner_id)
 
         # global flushing of tables that should not be updated between the different SQL queries
         self.env['account.account'].flush_model(['account_type', 'active'])
@@ -448,18 +465,20 @@ class AccountBankStatementLine(models.Model):
             for st_line_id, aml_id in self.env.cr.fetchall():
                 st_line = self.browse(st_line_id).with_prefetch(self._prefetch_ids)  # guarantees batch prefetching if needed
                 st_line.set_line_bank_statement_line(aml_id)
+                _logger.info("try_auto_reconcile - outstanding - st_line: %s set line %s", st_line.id, aml_id)
                 if st_line.currency_id.is_zero(st_line.amount_residual):
                     processed_st_line_ids.add(st_line.id)
         remaining_st_line_ids = set(self.ids) - processed_st_line_ids
 
-        # early return if we already processed everything
-        if not remaining_st_line_ids:
-            self.write({'cron_last_check': fields.Datetime.now()})
-            return
-
         # Then try to match invoices and payments where we can't be wrong, using the statement lines payment_ref
         # At this point, we're not trying to search for outstanding payments anymore
         account_ids = list(set(account_ids) - set(outstanding_accounts.ids))
+
+        # early return if we already processed everything
+        if not (remaining_st_line_ids and account_ids):
+            self.write({'cron_last_check': fields.Datetime.now()})
+            return
+
         query = SQL("""
                 SELECT st_line.id,
                        ARRAY_AGG(word_aml.id) aml_ids,
@@ -537,6 +556,7 @@ class AccountBankStatementLine(models.Model):
                 else:
                     ref_amls_sum[st_line_id] = st_line.amount - aml_amount_residual
                 st_line.with_user(SUPERUSER_ID).set_line_bank_statement_line(aml_id)
+                _logger.info("try_auto_reconcile - payment ref - st_line: %s set line %s", st_line.id, aml_id)
                 if st_line.currency_id.is_zero(st_line.amount_residual):
                     processed_st_line_ids.add(st_line.id)
         remaining_st_line_ids -= processed_st_line_ids
@@ -573,11 +593,13 @@ class AccountBankStatementLine(models.Model):
             if total_residual == st_line.amount:
                 # the total open amount for the partner equals the paid amount
                 st_line.with_user(SUPERUSER_ID).set_line_bank_statement_line(all_aml_ids)
+                _logger.info("try_auto_reconcile - match amount - st_line: %s set lines %s", st_line.id, all_aml_ids)
             elif all_aml_ids:
                 amls = self.env['account.move.line'].browse(all_aml_ids)
                 candidate_amls = self._invoice_matching_post_process(st_line, amls)
                 if candidate_amls:
                     st_line.with_user(SUPERUSER_ID).set_line_bank_statement_line(candidate_amls.ids)
+                    _logger.info("try_auto_reconcile - _invoice_matching_post_process - st_line: %s set lines %s", st_line.id, candidate_amls.ids)
 
             if st_line.currency_id.is_zero(st_line.amount_residual):
                 processed_st_line_ids.add(st_line.id)
@@ -592,6 +614,7 @@ class AccountBankStatementLine(models.Model):
         # try to apply reco models on the remaining statement lines
         remaining_st_lines = self.browse(list(remaining_st_line_ids)).with_prefetch(self._prefetch_ids)
         reco_models._apply_reconcile_models(remaining_st_lines)
+        _logger.info("try_auto_reconcile - apply reco models - st_lines: %s - reco models %s", remaining_st_lines.ids, reco_models.ids)
 
         self.write({'cron_last_check': self.env.cr.now()})
 
@@ -795,17 +818,20 @@ class AccountBankStatementLine(models.Model):
             ))
         move = self.move_id.with_context(force_delete=True, skip_readonly_check=True)
         move.line_ids = lines_commands
-        partner_id = self._get_partner_id({line['partner_id'] for line in lines_to_add if line.get('partner_id')})
-        partner = self.env['res.partner'].browse(partner_id)
-        if partner:
-            # To avoid "Incompatible companies on records" error, make sure the user is linked to a main company.
-            allowed_companies = partner.company_id.root_id
-            if len(lines_to_set.company_id) == 1:
-                # Or the user is linked to the st_line's company.
-                allowed_companies |= lines_to_set.company_id
-            # Or the user is not linked to any company.
-            if not partner.company_id or partner.company_id in allowed_companies:
-                move.line_ids.filtered(lambda line: not line.partner_id).partner_id = partner
+
+        # We only want to recompute the partner when it's using the reconcile button, not when deleting or editing lines
+        if self.env.context.get('recompute_partner'):
+            partner_id = self._get_partner_id({line['partner_id'] for line in lines_to_add if line.get('partner_id')})
+            partner = self.env['res.partner'].browse(partner_id)
+            if partner:
+                # To avoid "Incompatible companies on records" error, make sure the user is linked to a main company.
+                allowed_companies = partner.company_id.root_id
+                if len(lines_to_set.company_id) == 1:
+                    # Or the user is linked to the st_line's company.
+                    allowed_companies |= lines_to_set.company_id
+                # Or the user is not linked to any company.
+                if not partner.company_id or partner.company_id in allowed_companies:
+                    move.line_ids.filtered(lambda line: not line.partner_id).partner_id = partner
 
         # Create missing partner bank if necessary.
         if self.account_number and self.partner_id:
@@ -813,6 +839,42 @@ class AccountBankStatementLine(models.Model):
                 skip_account_move_synchronization=True,
                 skip_readonly_check=True,
             ).partner_bank_id = self._find_or_create_bank_account()
+
+        self._post_matching_done_confirmation()
+
+    def _get_last_5_minutes_messages(self, body):
+        self.ensure_one()
+        return self.move_id.message_ids.filtered_domain([
+            ('author_id', '=', self.env.user.partner_id.id),
+            ('create_date', '>=', fields.Datetime.now() - relativedelta(minutes=5)),
+            ('body', 'ilike', body),
+        ])
+
+    def _post_matching_done_confirmation(self):
+        self.ensure_one()
+        if not self.is_reconciled:
+            return
+        if self._get_last_5_minutes_messages(body='Matching done'):
+            return
+
+        body = _("Matching done")
+        if reconcile_model := self.move_id.line_ids.reconcile_model_id:
+            body += _(" - %(reconcile_model_name)s", reconcile_model_name=reconcile_model.name)
+        self.move_id.message_post(
+            body=body,
+            author_id=self.env.user.partner_id.id,
+        )
+
+    def _post_matching_unreconciled(self):
+        self.ensure_one()
+        if not self.is_reconciled:
+            return
+        if self._get_last_5_minutes_messages(body='Matching unreconciled'):
+            return
+        self.move_id.message_post(
+            body=_('Matching unreconciled'),
+            author_id=self.env.user.partner_id.id,
+        )
 
     def _add_move_line_to_statement_line_move(self, lines_to_add):
         """ Adds move lines to the bank statement line and updates the reconciliation.
@@ -849,18 +911,30 @@ class AccountBankStatementLine(models.Model):
         """
         self.ensure_one()
         self._create_account_model_fee(account_id)
-        account_move_line = self.line_ids.filtered(lambda line: line.id == aml_id)
-        account_move_line.account_id = account_id
-        account_move_line.move_id._compute_checked()  # to add to compute dependencies
+        account = self.env['account.account'].browse(account_id)
+        # Get the original base lines and tax lines before the modification of the line
+        if account.tax_ids:
+            original_base_lines, original_tax_lines = self._prepare_for_tax_lines_recomputation()
 
-        if account_move_line.account_id.account_type in {'asset_receivable', 'liability_payable'}:
+        base_line = self.env['account.move.line'].browse(aml_id)
+        base_line.account_id = account
+        base_line.move_id._compute_checked()
+
+        # Now that the line has been modified, we can recompute the taxes
+        if account.tax_ids:
+            self._create_tax_lines(original_base_lines, original_tax_lines, base_line)
+            # The function above will add a tax line below, so we get the last set account line
+            base_line = self.line_ids.filtered(lambda line: line.tax_ids)[-1:]
+
+        suspense_account_id = self.journal_id.suspense_account_id.id
+        liquidity_account_id = self.journal_id.default_account_id.id
+
+        if account.account_type in {'asset_receivable', 'liability_payable'} or account in {suspense_account_id, liquidity_account_id}:
+            self._post_matching_done_confirmation()
             return self.env['account.bank.statement.line']
 
-        self._handle_reconciliation_rule(account_move_line, account_id)
-        new_rule = self._check_and_create_reconciliation_rule(account_id, self.company_id.id)
-
-        if self.env.context.get('account_default_taxes') and self.env['account.account'].browse(account_id).tax_ids:
-            self._recompute_tax_lines()
+        self._handle_reconciliation_rule(base_line, account.id)
+        new_rule = self._check_and_create_reconciliation_rule(account.id, self.company_id.id)
 
         if new_rule:
             return self.env['account.bank.statement.line'].search([
@@ -868,6 +942,8 @@ class AccountBankStatementLine(models.Model):
                 ('is_reconciled', '=', False),
                 ('move_id.line_ids.reconcile_model_id', '=', new_rule.id),
             ])
+
+        self._post_matching_done_confirmation()
         return self.env['account.bank.statement.line']
 
     def _handle_reconciliation_rule(self, aml, account_id):
@@ -931,7 +1007,7 @@ class AccountBankStatementLine(models.Model):
         account = self.env['account.account'].browse(account_id)
 
         return {
-            'name': account.display_name,
+            'name': account.name,
             'common_substring': common_substring,
             'account': account,
             'partner_ids': statement_lines.partner_id.ids if len(statement_lines.partner_id.ids) == 1 else [],
@@ -1085,6 +1161,90 @@ class AccountBankStatementLine(models.Model):
         return (self._is_company_amount_exceeded(company_currency, cumulated_balance, company_amount)
                 and company_currency.compare_amounts(abs(cumulated_balance + next_balance), abs(company_amount)) > 0)
 
+    def _create_payment_with_move_from_invoice(self, move_id):
+        """ Creates a payment for the given move and forces a move on it.
+            Can be useful for simplifying operations like computing exchange differences
+            for invoice with an early payment discount.
+
+            :param move_id: the account move for which a payment should be created
+            :return: the line from the payment move that can be reconciled in the bank reconciliation widget
+        """
+        return self.env['account.payment.register']\
+        .with_context(
+            active_model='account.move',
+            active_ids=move_id.ids,
+            force_payment_move=True,
+        ).create({
+            'payment_date': self.date,
+        })._create_payments()
+
+    def _convert_amount_to_transaction_currency(self, currency_id, amount_currency, balance):
+        transaction_amount, transaction_currency, journal_amount, journal_currency, company_amount, _company_currency = self._get_accounting_amounts_and_currencies()
+
+        if currency_id == transaction_currency:
+            return amount_currency
+        if currency_id == journal_currency:
+            journal_transaction_rate = abs(transaction_amount / journal_amount) if journal_amount else 0.0
+            return transaction_currency.round(amount_currency * journal_transaction_rate)
+        company_transaction_rate = abs(transaction_amount / company_amount) if company_amount else 0.0
+        return transaction_currency.round(balance * company_transaction_rate)
+
+    def _apply_early_payment_discount(self, move_line, open_amount_currency, transaction_currency, exchange_diff_balance):
+        """ Apply the early payment discount if possible.
+            In the case when a exchange difference has to be applied along an early payment discount,
+            a payment with move is created to properly handle the exchange difference on the EPD.
+
+            :param move_line: the account move line for which the EPD should be computed/added
+            :param open_amount_currency: the open amount in currency of the statement line at the time of computing the move line values dict
+            :param transaction_currency: the currency in which the amount currency is expressed
+            :param exchange_diff_balance: the exchange difference amount computed for the base move_line to add
+
+            :return: epd_lines_vals: the list of dictionnaries for all the EPD computed values,
+                                    the first one being the discounted move line values dict. Can be empty if no EPD could be applied.
+                     total_amount: in company currency, the total amount the base line amount minus the EPD represents
+                     total_amount_currency: in transaction currency, the total amount the base line amount minus the EPD represents
+            If a payment with move had to be created, the epd_lines_vals list will only contain the dict of the reconcilable line of that move
+        """
+        epd_lines_vals = []
+        epd_amount_currency = move_line.amount_currency - move_line.discount_amount_currency
+        total_amount = total_amount_currency = 0.0
+        if (
+            move_line.move_id._is_eligible_for_early_payment_discount(transaction_currency, self.date)
+            and self._qualifies_for_early_payment(transaction_currency, open_amount_currency, epd_amount_currency)
+        ):
+            if not move_line.currency_id.is_zero(exchange_diff_balance):
+                # In the case the base aml has an exhange diff, the EPD will have one too.
+                # And exchange diffs on EPD are hard to handle as an EPD has no counterpart lines to reconcile it with,
+                # unlike basic amls, where the exch diff is computed when reconciling the invoice line with the statement_line line.
+                # To counter that, we'll create a new payment with a journal entry to correctly compute all necessary diffs.
+                payment_with_move = self._create_payment_with_move_from_invoice(move_line.move_id)
+                payment_line_to_add = payment_with_move.move_id.line_ids.filtered_domain(self._get_default_amls_matching_domain())
+                epd_lines_vals = [payment_line_to_add._get_aml_values(
+                    balance=-payment_line_to_add.balance,
+                    amount_currency=-payment_line_to_add.amount_currency,
+                    reconciled_lines_ids=[Command.set(payment_line_to_add.ids)],
+                )]
+                total_amount = payment_line_to_add.balance
+                total_amount_currency = self._convert_amount_to_transaction_currency(payment_line_to_add.currency_id, payment_line_to_add.amount_currency, payment_line_to_add.balance)
+            else:
+                early_pay_aml_values_list = [{
+                    'aml': move_line,
+                    'amount_currency': -move_line.amount_currency,
+                    'balance': -move_line.amount_residual,
+                }]
+                epd_lines_vals = [
+                    move_line._get_aml_values(
+                        balance=-move_line.amount_residual,
+                        amount_currency=-move_line.amount_residual_currency,
+                        reconciled_lines_ids=[Command.set(move_line.ids)],
+                    ),
+                    *self._set_early_payment_discount_lines(early_pay_aml_values_list, 0),
+                ]
+                for vals in epd_lines_vals:
+                    total_amount -= vals['balance']
+                    total_amount_currency -= self._convert_amount_to_transaction_currency(move_line.currency_id, vals['amount_currency'], vals['balance'])
+        return epd_lines_vals, total_amount, total_amount_currency
+
     def set_line_bank_statement_line(self, move_lines_ids):
         """ Sets the specified move lines to the bank statement line and performs reconciliation.
 
@@ -1102,117 +1262,82 @@ class AccountBankStatementLine(models.Model):
 
         _liquidity_line, _suspense_lines, other_lines = self._seek_for_lines()
 
-        transaction_amount, transaction_currency, journal_amount, journal_currency, company_amount, company_currency = self._get_accounting_amounts_and_currencies()
-        journal_transaction_rate = abs(transaction_amount / journal_amount) if journal_amount else 0.0
-        company_transaction_rate = abs(transaction_amount / company_amount) if company_amount else 0.0
+        transaction_amount, transaction_currency, _journal_amount, _journal_currency, company_amount, company_currency = self._get_accounting_amounts_and_currencies()
 
         open_balance = company_amount
         open_amount_currency = transaction_amount
-        total_early_payment_discount = 0.0
-        early_pay_aml_values_list = []
-        early_pay_amls = self.env['account.move.line']
 
-        for line in other_lines + move_lines:
+        for line in other_lines:
             # move_lines are the lines coming from the reconcile button and other_lines are the lines from the bank
             # statement move (so they are reconciled). We need to invert the sign of move_lines since a positive
             # move_line need to be put as negative in the bank statement move.
             # For the other lines, we can use the balance and amount currency since they are the line on the bank move
-            if line in move_lines:
-                sign = -1
-                amount = line.amount_residual
-                amount_currency = line.amount_residual_currency
-            else:
-                sign = 1
-                amount = line.balance
-                amount_currency = line.amount_currency
-
-            # Early payment Discount
-            if line.move_id._is_eligible_for_early_payment_discount(transaction_currency, self.date):
-                total_early_payment_discount += line.amount_currency - line.discount_amount_currency
-                early_pay_aml_values_list.append({
-                    'aml': line,
-                    'amount_currency': -line.amount_currency,
-                    'balance': -amount,
-                })
-                early_pay_amls += line
-
-            exchange_diff_balance = self._lines_get_account_balance_exchange_diff(line.currency_id, amount, amount_currency)
-            line_balance = amount + exchange_diff_balance
-            open_balance += (line_balance * sign)
-
-            if line.currency_id == transaction_currency:
-                open_amount_currency += amount_currency * sign
-            elif line.currency_id == journal_currency:
-                open_amount_currency += transaction_currency.round(amount_currency * journal_transaction_rate) * sign
-            else:
-                open_amount_currency += transaction_currency.round(line_balance * company_transaction_rate) * sign
+            open_balance += line.balance
+            open_amount_currency += self._convert_amount_to_transaction_currency(line.currency_id, line.amount_currency, line.balance)
 
         new_lines = []
-        is_early_payment_discount = self._qualifies_for_early_payment(transaction_currency, open_amount_currency, total_early_payment_discount)
         has_exchange_diff = False
-        residual_amount = company_amount + sum(line.balance for line in other_lines)
-        cumulated_balance = 0
-        next_balance = 0
-        exchange_diffs = {}
+        stop_reco_at_first_partial = self.env.context.get('stop_reco_at_first_partial')
+        partial_applied = False
+        for move_line in move_lines:
+            exchange_diff_balance = self._lines_get_account_balance_exchange_diff(move_line.currency_id, move_line.amount_residual, move_line.amount_residual_currency)
+            current_balance = -(move_line.amount_residual + exchange_diff_balance)
+            current_amount_currency = self._convert_amount_to_transaction_currency(move_line.currency_id, move_line.amount_residual_currency, move_line.amount_residual)
 
-        move_lines_to_process = takewhile(lambda x: not self._will_company_amount_exceed(company_currency, cumulated_balance, next_balance, company_amount), move_lines)
-        for index, move_line in enumerate(move_lines_to_process):
-            if move_line not in exchange_diffs:
-                exchange_diffs[move_line] = self._lines_get_account_balance_exchange_diff(move_line.currency_id, move_line.amount_residual, move_line.amount_residual_currency)
-            has_exchange_diff = not move_line.currency_id.is_zero(exchange_diffs[move_line])
-            current_balance = -(move_line.amount_residual + exchange_diffs[move_line])
-            residual_amount += current_balance
-            cumulated_balance += current_balance
-            # We need to calculate the balance of the next line as we want to calculate partial amount and stop iterating
-            # as soon as we know that the transaction amount will be exceeded
-            if index < len(move_lines) - 1:
-                next_line = move_lines[index + 1]
-                exchange_diffs[next_line] = self._lines_get_account_balance_exchange_diff(next_line.currency_id, next_line.amount_residual, next_line.amount_residual_currency)
-                next_balance = -(next_line.amount_residual + exchange_diffs[next_line])
+            has_exchange_diff = has_exchange_diff or not move_line.currency_id.is_zero(exchange_diff_balance)
+            open_balance += current_balance
+            open_amount_currency -= current_amount_currency
 
             new_line_balance = current_balance
             new_amount_currency = -move_line.amount_residual_currency
 
-            # Since we look at the next line to be added, we need a special case when the first line already exceed the amount
-            if index == 0 and len(move_lines) > 1 and self._is_company_amount_exceeded(company_currency, cumulated_balance, company_amount):
-                new_line_balance = -company_amount
-                new_amount_currency = -transaction_amount
-            # Partial amount will be calculated either on the last invoice of the one selected by the user
-            # or on the one that will make exceed the transaction amount
-            elif index == len(move_lines) - 1 or self._will_company_amount_exceed(company_currency, cumulated_balance, next_balance, company_amount):
+            # Partial amount will be calculated only on the last invoice of the one selected by the user unless stop_reco_at_first_partial is present in context.
+            if move_line == move_lines[-1] or stop_reco_at_first_partial:
                 partial_amounts = (
                     self._get_partial_amounts(current_balance, move_line, open_amount_currency, open_balance)
-                    if (company_currency.compare_amounts(residual_amount, 0) < 0 if company_currency.compare_amounts(company_amount, 0) > 0 else company_currency.compare_amounts(residual_amount, 0) > 0)
+                    if (company_currency.compare_amounts(open_balance, 0) < 0 if company_currency.compare_amounts(company_amount, 0) > 0 else company_currency.compare_amounts(open_balance, 0) > 0)
                     else None
                 )
                 if partial_amounts and not company_currency.is_zero(partial_amounts['partial_balance']):
                     new_line_balance = partial_amounts['partial_balance']
                     new_amount_currency = partial_amounts['partial_amount_currency']
+                    partial_applied = True
 
-            if is_early_payment_discount and move_line in early_pay_amls:
-                new_line_balance = -move_line.amount_residual
-                new_amount_currency = -move_line.amount_residual_currency
-
-            new_lines.append(move_line._get_aml_values(
+            new_lines_to_add = [move_line._get_aml_values(
                 balance=new_line_balance,
                 amount_currency=new_amount_currency,
                 currency_id=move_line.currency_id.id,
                 reconciled_lines_ids=[Command.set(move_line.ids)],
-            ))
+            )]
             self.move_id._compute_checked()  # to add to compute dependencies
 
-        if is_early_payment_discount:
-            new_lines.extend(self._set_early_payment_discount_lines(early_pay_aml_values_list, open_balance))
+            lines_with_epd, total_amount, total_amount_currency = self._apply_early_payment_discount(
+                move_line,
+                open_amount_currency,
+                transaction_currency,
+                exchange_diff_balance,
+            )
+            if lines_with_epd:
+                open_balance -= total_amount + current_balance
+                open_amount_currency += current_amount_currency - total_amount_currency
 
-        self.with_context(no_exchange_difference_no_recursive=not has_exchange_diff)._add_move_line_to_statement_line_move(new_lines)
+            new_lines.extend(lines_with_epd or new_lines_to_add)
+            if stop_reco_at_first_partial and (partial_applied or company_currency.is_zero(open_balance)):
+                break
+
+        self.with_context(
+            no_exchange_difference_no_recursive=not has_exchange_diff,
+            recompute_partner=True,
+        )._add_move_line_to_statement_line_move(new_lines)
 
     def _get_partial_amounts(self, current_balance, move_line, open_amount_currency, open_balance):
         def has_enough(currency, open_amount, current_amount):
             return (
                 currency.compare_amounts(open_amount, 0) > 0
                 and currency.compare_amounts(current_amount, 0) > 0
+                and currency.compare_amounts(current_amount, open_amount) > 0
             )
-        transaction_amount, transaction_currency, journal_amount, _journal_currency, company_amount, company_currency = self._get_accounting_amounts_and_currencies()
+        transaction_amount, transaction_currency, _journal_amount, _journal_currency, company_amount, company_currency = self._get_accounting_amounts_and_currencies()
         has_enough_comp_debit = has_enough(company_currency, open_balance, current_balance)
         has_enough_comp_credit = has_enough(company_currency, -open_balance, -current_balance)
         current_amount_currency = -move_line.amount_residual_currency
@@ -1221,15 +1346,11 @@ class AccountBankStatementLine(models.Model):
 
         tolerance = self._get_payment_tolerance()
         if move_line.currency_id == transaction_currency and (has_enough_curr_debit or has_enough_curr_credit):
-            new_amount_currency = current_amount_currency - open_amount_currency
-            if has_enough_curr_debit and move_line.currency_id.compare_amounts(current_amount_currency, open_amount_currency) < 0 \
-                or has_enough_curr_credit and move_line.currency_id.compare_amounts(-current_amount_currency, -open_amount_currency) < 0:
-                new_amount_currency = -(current_amount_currency + journal_amount)
             new_amount_currency = (
                 current_amount_currency
                 # If the open amount is small, fully reconcile the move_line and not the transaction
                 if not float_is_zero(tolerance, 6) and move_line.currency_id.compare_amounts(abs(open_amount_currency), tolerance * abs(current_amount_currency)) < 0
-                else new_amount_currency
+                else current_amount_currency - open_amount_currency
             )
             rate = abs(company_amount / transaction_amount) if transaction_amount else 0.0
 
@@ -1241,15 +1362,11 @@ class AccountBankStatementLine(models.Model):
             }
         elif has_enough_comp_debit or has_enough_comp_credit:
             # Compute the new value for balance.
-            balance_after_partial = current_balance - open_balance
-            if has_enough_comp_debit and move_line.currency_id.compare_amounts(current_balance, open_balance) < 0 \
-                or has_enough_comp_credit and move_line.currency_id.compare_amounts(-current_balance, -open_balance) < 0:
-                balance_after_partial = -(current_balance + company_amount)
             balance_after_partial = (
                 current_balance
                 # If the open amount is small, fully reconcile the move_line and not the transaction
                 if not float_is_zero(tolerance, 6) and move_line.currency_id.compare_amounts(abs(open_balance), tolerance * abs(current_balance)) < 0
-                else balance_after_partial
+                else current_balance - open_balance
             )
             # Get the rate of the original journal item.
             rate = move_line.currency_rate
@@ -1305,7 +1422,11 @@ class AccountBankStatementLine(models.Model):
 
     @api.model
     def _qualifies_for_early_payment(self, transaction_currency, open_amount_currency, total_early_payment_discount):
-        return open_amount_currency and total_early_payment_discount and transaction_currency.is_zero(open_amount_currency + total_early_payment_discount)
+        # In the case of in_invoices, the move(_line) amounts will be negative and added to a negative statement
+        remaining = open_amount_currency + total_early_payment_discount
+        if total_early_payment_discount < 0:
+            return transaction_currency.compare_amounts(remaining, 0.0) <= 0
+        return transaction_currency.compare_amounts(remaining, 0.0) >= 0
 
     def _set_early_payment_discount_lines(self, early_pay_aml_values_list, open_balance):
         early_payment_values = self.env['account.move']._get_invoice_counterpart_amls_for_early_payment_discount(
@@ -1313,6 +1434,11 @@ class AccountBankStatementLine(models.Model):
             -open_balance,
         )
         new_lines = []
+        # We want to be able to apply an EPD at any stage in the reconciliation,
+        # so open_balance can be more than just the EPD amount.
+        # As the EPD computation method uses the remaining of the open_balance to compute the exchange diff,
+        # we just remove it from the information to add.
+        early_payment_values.pop('exchange_lines')
 
         for vals_list in early_payment_values.values():
             for vals in vals_list:
@@ -1342,16 +1468,28 @@ class AccountBankStatementLine(models.Model):
             raise ValidationError(_("Validated entries can only be changed by your accountant."))
 
         move_lines_to_remove = self.env['account.move.line'].browse(move_line_ids)
+        # We cannot delete a tax line
+        if move_lines_to_remove.tax_line_id:
+            return
+
         liquidity_line, _suspense_lines, other_lines = self._seek_for_lines()
         reco_model_id = move_lines_to_remove.reconcile_model_id[:1]
+        # Get the original base lines and tax lines before the deletion of the line
+        if move_lines_to_remove_has_tax := move_lines_to_remove.tax_ids:
+            original_base_lines, original_tax_lines = self._prepare_for_tax_lines_recomputation()
 
         move_lines_to_remove.remove_move_reconcile()
         self._set_move_line_to_statement_line_move(
             liquidity_line + other_lines - move_lines_to_remove,
             [],
         )
+        self._post_matching_unreconciled()
         if reco_model_id:
             self._action_manual_reco_model(reco_model_id)
+
+        # Now that the line has been removed, we can recompute the taxes
+        if move_lines_to_remove_has_tax:
+            self._delete_tax_lines(original_base_lines, original_tax_lines, move_lines_to_remove)
 
     def edit_reconcile_line(self, move_line_id, record_data):
         """ Edits the specified move line from the bank statement line with the given data.
@@ -1365,9 +1503,26 @@ class AccountBankStatementLine(models.Model):
             raise ValidationError(_("Validated entries can only be changed by your accountant."))
 
         move_line_to_edit = self.env['account.move.line'].browse(move_line_id)
+
+        # Since we are doing the change in stable, some field are editable for tax line. Which shouldn't be possible.
+        # This solution is not perfect since depending on the record in record_data the edit will do stuff or not.
+        if move_line_to_edit.tax_line_id and any(record_data.get(key) for key in ['tax_ids', 'partner_id', 'account_id']):
+            return
+
+        # When the currency rate decrease between the account.move and the statement line date, we have a reconciled exchange_move line
+        # linked to the move_line_to_edit, but this will raise an error during the _check_amls_exigibility_for_reconciliation.
+        # We need to filter this line out as it has been reverted and reconciled, so it shouldn't interfere with the line we're trying to reconcile.
+        exchange_line = self.env['account.move.line']
+        if (exchange_move := move_line_to_edit._get_matched_move_ids().exchange_move_id) and any(record_data.get(key) for key in ['balance', 'amount_currency']):
+            exchange_line |= exchange_move.line_ids.filtered(lambda line: line in move_line_to_edit.reconciled_lines_ids)
+
         liquidity_lines, _suspense_lines, other_lines = self._seek_for_lines()
 
-        edited_move_reconciled_line_ids = move_line_to_edit.reconciled_lines_ids.ids
+        # Get the original base lines and tax lines before the edit of the line
+        if any(record_data.get(key) for key in ['tax_ids', 'balance', 'amount_currency']) and not move_line_to_edit.tax_line_id and not exchange_move:
+            original_base_lines, original_tax_lines = self._prepare_for_tax_lines_recomputation()
+
+        edited_move_reconciled_line_ids = (move_line_to_edit.reconciled_lines_ids - exchange_line).ids
         move_line_to_edit.remove_move_reconcile()
         move_line_to_edit_vals = move_line_to_edit._get_aml_values(**record_data)
         if edited_move_reconciled_line_ids:
@@ -1377,29 +1532,104 @@ class AccountBankStatementLine(models.Model):
             (liquidity_lines + other_lines) - move_line_to_edit,
             [move_line_to_edit_vals],
         )
+        _new_liquidity_lines, new_suspense_lines, _new_other_lines = self._seek_for_lines()
+        edited_line = self.line_ids - (liquidity_lines + other_lines + new_suspense_lines)
 
-        if record_data.get('tax_ids'):
-            self._recompute_tax_lines()
+        # Now that the new line has been added, we can recompute the taxes
+        if any(record_data.get(key) for key in ['tax_ids', 'balance', 'amount_currency']) and not edited_line.tax_line_id and not exchange_move:
+            self._edit_tax_lines(original_base_lines, original_tax_lines, edited_line, move_line_to_edit)
 
-        edited_line = self.line_ids - (liquidity_lines + other_lines)
         # Means that we tried to remove the partner
         if 'partner_id' in record_data and not record_data['partner_id']:
             edited_line.partner_id = False
 
-    def _recompute_tax_lines(self):
-        self.ensure_one()
+    def _prepare_for_tax_lines_recomputation(self):
         liquidity_lines, _suspense_lines, other_lines = self._seek_for_lines()
         other_lines.filtered(lambda line: not line.reconciled_lines_ids)  # We do not recompute tax on lines that come from invoice
 
-        AccountTax = self.env['account.tax']
         base_amls = other_lines.filtered(lambda line: not line.tax_repartition_line_id)
         base_lines = [self._prepare_base_line_for_taxes_computation(line) for line in base_amls]
         tax_amls = other_lines - base_amls
         tax_lines = [self._prepare_tax_line_for_taxes_computation(line) for line in tax_amls]
+        return base_lines, tax_lines
+
+    def _create_tax_lines(self, original_base_lines, original_tax_lines, new_lines):
+        self.ensure_one()
+        liquidity_lines, _suspense_lines, other_lines = self._seek_for_lines()
+        other_lines = other_lines.filtered(lambda line: not line.reconciled_lines_ids)  # We do not recompute tax on lines that come from invoice
+
+        original_base_lines, original_tax_lines = self._recompute_tax_lines(original_base_lines, original_tax_lines)
+        original_base_lines += [self._prepare_base_line_for_taxes_computation(move_line) for move_line in new_lines]
+
+        self._post_recompute_tax_lines(original_base_lines, liquidity_lines, original_tax_lines, other_lines)
+
+    def _edit_tax_lines(self, original_base_lines, original_tax_lines, edited_line, old_move_line):
+        self.ensure_one()
+        liquidity_lines, _suspense_lines, other_lines = self._seek_for_lines()
+        other_lines = other_lines.filtered(lambda line: not line.reconciled_lines_ids)  # We do not recompute tax on lines that come from invoice
+
+        original_base_lines, original_tax_lines = self._recompute_tax_lines(original_base_lines, original_tax_lines)
+
+        # In the context of an edit the move_lines parameter contains only one line
+        edit_base_line = self._prepare_base_line_for_taxes_computation(edited_line)
+        base_lines = []
+        for base_line in original_base_lines:
+            original_price_unit = base_line['price_unit']
+            base_line['price_unit'] += sum(
+                tax_data['tax_amount_currency']
+                for tax_data in base_line['tax_details']['taxes_data']
+            )
+            if base_line['record'] != old_move_line:
+                base_lines.append(base_line)
+                continue
+
+            price_unit_modified = self.currency_id.compare_amounts(edit_base_line['price_unit'], original_price_unit) != 0
+            if base_line['tax_ids'] and not price_unit_modified:
+                edit_base_line['price_unit'] = base_line['price_unit']
+
+            base_lines.append(edit_base_line)
+
+        self._post_recompute_tax_lines(base_lines, liquidity_lines, original_tax_lines, other_lines)
+
+    def _delete_tax_lines(self, original_base_lines, original_tax_lines, move_line_to_remove):
+        self.ensure_one()
+        liquidity_lines, _suspense_lines, other_lines = self._seek_for_lines()
+        other_lines = other_lines.filtered(lambda line: not line.reconciled_lines_ids)  # We do not recompute tax on lines that come from invoice
+
+        original_base_lines, original_tax_lines = self._recompute_tax_lines(original_base_lines, original_tax_lines)
+        base_lines = []
+        for base_line in original_base_lines:
+            if base_line['record'] == move_line_to_remove:
+                continue
+
+            base_line['price_unit'] += sum(
+                tax_data['tax_amount_currency']
+                for tax_data in base_line['tax_details']['taxes_data']
+            )
+            base_lines.append(base_line)
+
+        self._post_recompute_tax_lines(base_lines, liquidity_lines, original_tax_lines, other_lines)
+
+    def _recompute_tax_lines(self, original_base_lines=None, original_tax_lines=None):
+        self.ensure_one()
+        # To be stable friendly we had a fallback
+        if original_base_lines is None and original_tax_lines is None:
+            original_base_lines, original_tax_lines = self._prepare_for_tax_lines_recomputation()
+
+        AccountTax = self.env['account.tax']
+        # Restore original price unit.
+        AccountTax._add_tax_details_in_base_lines(original_base_lines, self.company_id)
+        AccountTax._round_base_lines_tax_details(original_base_lines, self.company_id, tax_lines=original_tax_lines)
+
+        return original_base_lines, original_tax_lines
+
+    def _post_recompute_tax_lines(self, base_lines, liquidity_lines, original_tax_lines, other_lines):
+        self.ensure_one()
+        AccountTax = self.env['account.tax']
         AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
         AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
         AccountTax._add_accounting_data_in_base_lines_tax_details(base_lines, self.company_id, include_caba_tags=True)
-        tax_results = AccountTax._prepare_tax_lines(base_lines, self.company_id, tax_lines=tax_lines)
+        tax_results = AccountTax._prepare_tax_lines(base_lines, self.company_id, tax_lines=original_tax_lines)
 
         lines_to_delete = self.env['account.move.line']
         lines_to_add_or_update = []
@@ -1468,8 +1698,12 @@ class AccountBankStatementLine(models.Model):
         self.ensure_one()
         if not line_vals:
             return {}
-
-        tax_type = line_vals.tax_ids[0].type_tax_use if line_vals.tax_ids else None
+        tax_type = line_vals.tax_ids.mapped('type_tax_use')
+        if 'sale' in tax_type and 'purchase' in tax_type:
+            # When we have sale and purchase tax on the same line, we take the sale type as default
+            tax_type = 'sale'
+        else:
+            tax_type = line_vals.tax_ids[0].type_tax_use if line_vals.tax_ids else None
         is_refund = (tax_type == 'sale' and line_vals.balance > 0.0) or (tax_type == 'purchase' and line_vals.balance < 0.0)
 
         return self.env['account.tax']._prepare_base_line_for_taxes_computation(
@@ -1536,49 +1770,22 @@ class AccountBankStatementLine(models.Model):
         if not self.env.context.get('no_retrieve_partner'):
             statement_lines._retrieve_partner()
         for statement_line in statement_lines:
-            if statement_line.transaction_details:
-                statement_line.move_id.message_post(body=statement_line._format_transaction_details())
+            statement_line.move_id.message_post(body=statement_line._format_statement_line_data())
 
         # process automatically the new lines in case we pass some context key (i.e coming from the bank reconciliation widget)
         if self.env.context.get('auto_statement_processing', False) and statement_lines:
-            statement_lines._try_auto_reconcile_statement_lines()
+            if len(statement_lines) <= AUTO_STATEMENT_PROCESSING_NUMBER:
+                statement_lines._try_auto_reconcile_statement_lines()
+            else:
+                statement_lines._cron_try_auto_reconcile_statement_lines(batch_size=AUTO_STATEMENT_PROCESSING_BATCH_SIZE)
         return statement_lines
 
+    @api.deprecated("Use _format_statement_line_data instead")
     def _format_transaction_details(self):
-        """ Format the 'transaction_details' field of the statement line to be more readable for the end user.
+        return self._format_statement_line_data()
 
-        Example:
-            {
-                "debtor": {
-                    "name": None,
-                    "private_id": None,
-                },
-                "debtor_account": {
-                    "iban": "BE84103080286059",
-                    "bank_transaction_code": None,
-                    "credit_debit_indicator": "DBIT",
-                    "status": "BOOK",
-                    "value_date": "2022-12-29",
-                    "transaction_date": None,
-                    "balance_after_transaction": None,
-                },
-            }
-
-        Becomes:
-            debtor_account:
-                iban: BE84103080286059
-                credit_debit_indicator: DBIT
-                status: BOOK
-                value_date: 2022-12-29
-
-        :returns: An html representation of the transaction details.
-        """
-        self.ensure_one()
-        details = self.transaction_details
-        if not details:
-            return
-
-        def _get_formatted_data(data, prefix=""):
+    def _format_statement_line_data(self):
+        def _get_formatted_transaction_details(data, prefix=""):
             keys = data.keys() if isinstance(data, dict) else [i for i, _ in enumerate(data)]
             result = Markup()
             for key in keys:
@@ -1586,10 +1793,33 @@ class AccountBankStatementLine(models.Model):
                 result += prefix + Markup("<b>%s:</b> ") % str(key)
                 if isinstance(value, (list, dict)):
                     result += "\n"
-                    result += _get_formatted_data(value, prefix + "  ")
+                    result += _get_formatted_transaction_details(value, prefix + "  ")
                     continue
                 result += str(value) + "\n"
             return result
 
-        res = _get_formatted_data(details)
-        return Markup("<div><pre>%s</pre></div>") % res
+        def _get_formatted_statement_line_data():
+            result = Markup()
+            if self.partner_name or self.partner_id or self.account_number:
+                result += Markup('<h4 class="d-inline">{name}</h4> <span class="text-secondary">―</span> ').format(
+                    name=self.partner_name or self.partner_id.name or self.account_number,
+                )
+            result += Markup('<h4 class="d-inline text-info">{amount}</h4><br/>').format(amount=self.currency_id.format(self.amount))
+            if self.account_number and (self.partner_name or self.partner_id):
+                # Make sure to include the account number if we didn't use it instead of the partner name
+                result += Markup('<b>{account_number}</b> <span class="text-secondary">-</span> ').format(account_number=self.account_number)
+            result += Markup('{date}<br/>').format(date=format_date(self.env, self.date, date_format='dd MMM yyyy'))
+            result += Markup('<br/>{remittance_information}<br/>').format(remittance_information=self.payment_ref)
+            return result
+
+        self.ensure_one()
+
+        formatted_statement_line_data = _get_formatted_statement_line_data()
+        if self.transaction_details:
+            formatted_statement_line_data = Markup(
+                '%s<div data-o-mail-quote="1"><pre>%s</pre></div>'
+            ) % (
+                formatted_statement_line_data,
+                _get_formatted_transaction_details(self.transaction_details),
+            )
+        return formatted_statement_line_data

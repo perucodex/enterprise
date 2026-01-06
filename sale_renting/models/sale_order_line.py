@@ -42,7 +42,6 @@ class SaleOrderLine(models.Model):
         search='_search_rental_status',
     )
     rental_color = fields.Integer(compute='_compute_rental_color')
-    categ_id = fields.Many2one(related='product_id.categ_id')
 
     def _domain_product_id(self):
         super_part = ','.join(str(leaf) for leaf in super()._domain_product_id())

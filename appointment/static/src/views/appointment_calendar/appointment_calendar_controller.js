@@ -35,10 +35,13 @@ patch(AttendeeCalendarController.prototype, {
         });
 
         onWillStart(async () => {
-            this.appointmentState.data = await rpc(
-                "/appointment/appointment_type/get_staff_user_appointment_types"
-            );
-            this.isAppointmentUser = await user.hasGroup("appointment.group_appointment_user");
+            [this.appointmentState.data, this.isAppointmentManager, this.isAppointmentUser] = await Promise.all([
+                rpc("/appointment/appointment_type/get_staff_user_appointment_types"),
+                user.hasGroup("appointment.group_appointment_manager"),
+                user.hasGroup("appointment.group_appointment_user"),
+            ]);
+            // Using this context key is a stable workaround, to be improved in master
+            this.isResourceView = this.props.context.appointment_default_assign_user_attendees === false;
         });
     },
 
@@ -90,6 +93,18 @@ patch(AttendeeCalendarController.prototype, {
             return;
         }
         setTimeout(async () => await navigator.clipboard.writeText(this.appointmentState.lastAppointment.url));
+    },
+
+    async onClickAddLeave() {
+        this.env.services.action.doAction({
+            name: _t("Add Closing Day(s)"),
+            type: "ir.actions.act_window",
+            res_model: "appointment.manage.leaves",
+            view_mode: "form",
+            views: [[false, "form"]],
+            target: "new",
+            context: {},
+        });
     },
 
     onClickCustomLink() {

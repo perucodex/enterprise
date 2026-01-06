@@ -7,4 +7,4 @@ class TestVoipMailActivity(common.TransactionCase):
         """Tests that "country_code_from_phone" is properly computed based on a phone field"""
         some_partner = self.env["res.partner"].create({"name": "Some partner", "phone": "+493023125513"})
         activity = some_partner.activity_schedule("mail.mail_activity_data_call")
-        self.assertEqual(activity.country_code_from_phone, "de")
+        self.assertEqual(activity.phone_country_id.code.lower(), "de")

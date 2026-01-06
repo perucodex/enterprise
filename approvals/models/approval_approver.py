@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, fields, api
+from odoo import _, models, fields, api
+from odoo.exceptions import AccessError
 
 
 class ApprovalApprover(models.Model):
@@ -40,7 +41,10 @@ class ApprovalApprover(models.Model):
 
     def write(self, vals):
         if 'request_id' in vals:
-            self.env['approval.request'].browse(vals['request_id']).check_access('write')
+            request = self.env['approval.request'].browse(vals['request_id'])
+            request.check_access('write')
+            if self.request_id and self.request_id != request:
+                raise AccessError(_("You cannot change approval request."))
         return super().write(vals)
 
     def action_approve(self):

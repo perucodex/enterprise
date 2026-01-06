@@ -6,6 +6,7 @@ import { useBankReconciliation } from "../bank_reconciliation_service";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { BankRecFormDialog } from "../bankrec_form_dialog/bankrec_form_dialog";
 import { BankRecLineInfoPopOver } from "../line_info_pop_over/line_info_pop_over";
+import { x2ManyCommands } from "@web/core/orm_service";
 
 export class BankRecLineToReconcile extends Component {
     static template = "account_accountant.BankRecLineToReconcile";
@@ -128,6 +129,17 @@ export class BankRecLineToReconcile extends Component {
         }
     }
 
+    async deleteTax(taxIndex) {
+        const taxChanged = this.lineDataTaxIds[taxIndex];
+        await this.orm.call("account.bank.statement.line", "edit_reconcile_line", [
+            this.statementLineData.id,
+            this.lineData.id,
+            { tax_ids: [[x2ManyCommands.UNLINK, taxChanged.data.id]] },
+        ]);
+        this.props.statementLine.load();
+        this.bankReconciliation.reloadChatter();
+    }
+
     // -----------------------------------------------------------------------------
     // GETTER
     // -----------------------------------------------------------------------------
@@ -191,5 +203,13 @@ export class BankRecLineToReconcile extends Component {
 
     get showLineInfo() {
         return this.isPartiallyReconciled || this.exchangeMove?.id;
+    }
+
+    get isTaxLine() {
+        return this.lineData.tax_line_id;
+    }
+
+    get lineDataTaxIds() {
+        return this.lineData.tax_ids.records;
     }
 }

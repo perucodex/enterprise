@@ -293,7 +293,7 @@ class AccountMove(models.Model):
         trans_details = content['TranDtls']
         buyer_details = content['BuyerDtls']
 
-        if self.company_id.l10n_in_edi_production_env and buyer_details.get('Gstin'):
+        if self.company_id.sudo().l10n_in_edi_production_env and buyer_details.get('Gstin'):
             if buyer_details['Gstin'] != self.company_id.vat:
                 self.message_post(
                     body=_(

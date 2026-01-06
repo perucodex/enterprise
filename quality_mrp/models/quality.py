@@ -17,7 +17,7 @@ class QualityPoint(models.Model):
         # to remove in Master
         pass
 
-    @api.constrains('measure_on', 'picking_type_ids', 'operation_id')
+    @api.constrains('measure_on', 'picking_type_ids')
     def _check_measure_on(self):
         for point in self:
             if point.measure_on == 'move_line' and any(pt.code == 'mrp_operation' for pt in point.picking_type_ids):

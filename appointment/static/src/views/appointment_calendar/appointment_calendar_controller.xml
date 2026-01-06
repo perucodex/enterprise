@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
     <t t-name="appointment.CalendarController" t-inherit="calendar.AttendeeCalendarController" t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('o_calendar_button_today')]" position="before">
+            <button
+            t-if="isAppointmentManager and isResourceView"
+            class="btn btn-primary"
+            t-att-class="{'btn-sm btn-link p-1': env.isSmall}"
+            t-on-click="onClickAddLeave">Add Closing Day(s)</button>
+        </xpath>
         <xpath expr="//div[hasclass('o_calendar_header')]" position="inside">
             <div class="o_appointment_scheduling_box position-fixed position-md-static start-0 bottom-0 d-flex align-items-center justify-content-center gap-2 order-last order-lg-0"
                  t-att-class="{ 'flex-lg-row flex-column' : this.appointmentState.lastAppointment.id || this.hasSlotEvents() }">

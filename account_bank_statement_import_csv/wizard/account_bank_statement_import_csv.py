@@ -15,7 +15,7 @@ class Base_ImportImport(models.TransientModel):
     @api.model
     def get_fields_tree(self, model, depth=FIELDS_RECURSION_LIMIT):
         fields_list = super().get_fields_tree(model, depth=depth)
-        if self.env.context.get('bank_stmt_import', False):
+        if model == 'account.bank.statement.line' and self.env.context.get('bank_stmt_import', False):
             add_fields = [{
                 'id': 'balance',
                 'name': 'balance',
@@ -24,23 +24,28 @@ class Base_ImportImport(models.TransientModel):
                 'fields': [],
                 'type': 'monetary',
                 'model_name': model,
-            }, {
-                'id': 'debit',
-                'name': 'debit',
-                'string': 'Debit',
-                'required': False,
-                'fields': [],
-                'type': 'monetary',
-                'model_name': model,
-            }, {
-                'id': 'credit',
-                'name': 'credit',
-                'string': 'Credit',
-                'required': False,
-                'fields': [],
-                'type': 'monetary',
-                'model_name': model,
             }]
+            if not 'debit' in self.env['account.bank.statement.line'].fields_get():
+                add_fields.extend([
+                    {
+                        'id': 'debit',
+                        'name': 'debit',
+                        'string': 'Debit',
+                        'required': False,
+                        'fields': [],
+                        'type': 'monetary',
+                        'model_name': model,
+                    },
+                    {
+                        'id': 'credit',
+                        'name': 'credit',
+                        'string': 'Credit',
+                        'required': False,
+                        'fields': [],
+                        'type': 'monetary',
+                        'model_name': model,
+                    },
+                ])
             fields_list.extend(add_fields)
         return fields_list
 
@@ -133,16 +138,13 @@ class Base_ImportImport(models.TransientModel):
             savepoint = self.env.cr.savepoint()
             res = super().execute_import(fields, columns, options, dryrun=dryrun)
             if not 'statement_id' in fields:
-                statement = self.env['account.bank.statement'].create({
+                self.env['account.bank.statement'].with_context(
+                    auto_statement_processing=not dryrun and res.get('ids')
+                ).create({
                     'reference': self.file_name,
                     'line_ids': [Command.set(res.get('ids', []))],
                     **options.get('statement_vals', {}),
                 })
-                if not dryrun and statement.line_ids:
-                    if len(statement.line_ids) <= 80:
-                        statement.line_ids._try_auto_reconcile_statement_lines()
-                    else:
-                        statement.line_ids._cron_try_auto_reconcile_statement_lines(batch_size=100)
 
             with contextlib.suppress(psycopg2.InternalError):
                 savepoint.close(rollback=dryrun)

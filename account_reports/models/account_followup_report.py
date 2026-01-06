@@ -30,11 +30,6 @@ class AccountFollowupCustomHandler(models.AbstractModel):
 
         if options['report_id'] != previous_options.get('report_id'):
             options['unreconciled'] = True
-            # by default, select only the 'sales' journals
-            for journal in options.get('journals', []):
-                journal['selected'] = journal.get('type') != 'general'  # dividers don't get a type
-            # Since we forced the selection of some journal, we need to recompute the filter label
-            report._init_options_journals_names(options, previous_options=previous_options)
 
         if options['export_mode'] == 'print':
             # When printing the report, we don't want to include `no_followup` lines.

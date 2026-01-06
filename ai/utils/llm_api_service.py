@@ -475,9 +475,9 @@ class LLMApiService:
         llm_response = self._request(
             method="post",
             base_url="https://generativelanguage.googleapis.com/v1beta",
-            headers={},
+            headers={"x-goog-api-key": self._get_api_token()},
             endpoint=f"/models/{llm_model}:generateContent",
-            params={"key": self._get_api_token()},
+            params={},
             body=body,
         )
 

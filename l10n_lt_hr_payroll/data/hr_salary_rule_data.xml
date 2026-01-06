@@ -146,10 +146,7 @@ result_rate = -payslip._rule_parameter('l10n_lt_pit_rate_high')
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
 result = max(result_rules["TAXABLEAMOUNT"]['total'] - result_rules["SICKAMOUNT"]['total'], 0)
-if version.l10n_lt_pension:
-    result_rate = -payslip._rule_parameter('l10n_lt_ssc_rate_high')
-else:
-    result_rate = -payslip._rule_parameter('l10n_lt_ssc_rate')
+result_rate = -payslip._rule_parameter('l10n_lt_ssc_rate')
         </field>
         <field name="struct_id" ref="l10n_lt_hr_payroll.hr_payroll_structure_lt_employee_salary"/>
     </record>

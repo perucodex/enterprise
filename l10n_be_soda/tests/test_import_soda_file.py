@@ -47,6 +47,24 @@ class TestSodaFile(AccountTestInvoicingCommon, MailCommon):
             self.assertRecordValues(result_move.line_ids.account_id, [{'code': '453000'}, {'code': '455000'}, {'code': '618000'}])
             self.assertEqual(result_move.date.strftime("%Y-%m-%d"), '2021-10-23')
 
+    def test_soda_file_import_multicompany(self):
+        expected_ref = 'social_secretariat-8908749-2021/10'
+        company2 = self._create_company(name='company2')
+        self.env['account.move'].create({
+            'move_type': 'entry',
+            'ref': expected_ref,  # An existing move with the same ref in another company
+            'company_id': company2.id,
+        })
+        with file_open(self.soda_file_path, 'rb') as soda_file:
+            wizard_action = self.misc_journal.create_document_from_attachment(self.env['ir.attachment'].create({
+                'mimetype': 'application/xml',
+                'name': 'soda_testing_file.xml',
+                'raw': soda_file.read(),
+            }).ids)
+        wizard = self.env['soda.import.wizard'].search([('id', '=', wizard_action['res_id'])])
+        result = wizard.action_save_and_import()
+        self.assertEqual(self.env['account.move'].browse(result['res_id']).ref, expected_ref)
+
     def test_soda_file_import_map_accounts(self):
         with file_open(self.soda_file_path, 'rb') as soda_file:
             wizard_action = self.misc_journal.create_document_from_attachment(self.env['ir.attachment'].create({

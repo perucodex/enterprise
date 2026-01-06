@@ -7,7 +7,12 @@ from . import utils
 from . import wizard
 from . import PYPDF2_MonkeyPatch
 
-ITSME_AVAILABLE_COUNTRIES = ['BE', 'NL']
+ITSME_AVAILABLE_COUNTRIES = [
+    'BE', 'NL', 'AT', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE',
+    'FR', 'DE', 'GR', 'HU', 'IS', 'IE', 'IT', 'LV', 'LT',
+    'LU', 'MT', 'NO', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES',
+    'SE', 'GB', 'FI'
+]
 EMSIGNER_AVAILABLE_COUNTRIES = 'IN'
 
 

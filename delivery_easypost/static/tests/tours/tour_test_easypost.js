@@ -36,4 +36,19 @@ registry.category("web_tour.tours").add('test_carrier_type_selection_field', { s
             })
         }
     },
+        {
+            trigger: ".o-dropdown-item:contains(FedEx)",
+            run: "click",
+        },
+        {
+            content: "Check that the selected value is visible",
+            trigger: ".o_field_carrier_type_selection input:value(Fedex)",
+        },
+        {
+            trigger: ".btn:contains(Cancel)",
+            run: "click",
+        },
+        {
+            trigger: "body:not(:has(.modal-header:contains('Select a carrier')))",
+        },
 ]});

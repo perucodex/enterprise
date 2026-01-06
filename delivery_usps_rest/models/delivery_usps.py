@@ -208,7 +208,7 @@ class ProviderUSPS(models.Model):
                 'width': self._usps_convert_length(package['dimension']['width']),
                 'height': self._usps_convert_length(package['dimension']['height']),
                 'accountType': 'EPS',
-                'accountNumber': self.usps_eps_account_number,
+                'accountNumber': self.sudo().usps_eps_account_number,
                 'mailingDate': order.date_order.strftime('%Y-%m-%d'),
             }
             if self.usps_delivery_nature == 'domestic':

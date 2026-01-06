@@ -592,7 +592,7 @@ class AccountFecImportWizard(models.TransientModel):
         # Retrieve all the data from the database
         accounts = self.env["account.account"].search(self.env['account.account']._check_company_domain(self.company_id))
         journals = self.env["account.journal"].search(self.env['account.journal']._check_company_domain(self.company_id))
-        partners = self.env["res.partner"].search(self.env['res.partner']._check_company_domain(self.company_id))
+        partners = self.env["res.partner"].search_fetch(domain=self.env['res.partner']._check_company_domain(self.company_id), field_names=['name', 'ref'])
         currencies = self.env["res.currency"].search([])
 
         # Build the cache dictionary

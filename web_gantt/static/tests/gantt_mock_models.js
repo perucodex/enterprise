@@ -174,6 +174,47 @@ export class Tasks extends models.Model {
     ];
 }
 
+export class WorkOrders extends models.Model {
+    _name = "workorders";
+    name = fields.Char({ string: "name", readonly: false });
+    color = fields.Integer({ string: "color", readonly: false });
+    cost = fields.Integer({ string: "cost", readonly: true });
+    employee = fields.Char({ string: "employee", readonly: false });
+    size = fields.Integer({ tring: "size", readonly: false });
+    start = fields.Datetime({ string: "Start Date" });
+    stop = fields.Datetime({ string: "Stop Date" });
+
+    _records = [
+        {
+            name: "Work Order 1",
+            color: 1,
+            cost: 86,
+            employee: "Jordan",
+            size: 198,
+            start: "2018-12-16 05:00:00",
+            stop: "2018-12-16 07:00:00",
+        },
+        {
+            name: "Work Order 2",
+            color: 2,
+            cost: 420,
+            employee: "Jordan",
+            size: 183,
+            start: "2018-12-17 11:30:00",
+            stop: "2018-12-17 13:00:00",
+        },
+        {
+            name: "Work Order 3",
+            color: 1,
+            cost: 86,
+            employee: "Michael",
+            size: 198,
+            start: "2018-12-19 05:00:00",
+            stop: "2018-12-19 07:00:00",
+        },
+    ];
+}
+
 export function defineGanttModels() {
-    defineModels([Stage, Project, ResUsers, Tasks]);
+    defineModels([Stage, Project, ResUsers, Tasks, WorkOrders]);
 }

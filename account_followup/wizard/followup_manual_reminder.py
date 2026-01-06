@@ -130,6 +130,7 @@ class Account_FollowupManual_Reminder(models.TransientModel):
             'print': self.print,
             'join_invoices': self.join_invoices,
             'manual_followup': True,
+            'template_id': self.template_id,
         }
 
     def process_followup(self):

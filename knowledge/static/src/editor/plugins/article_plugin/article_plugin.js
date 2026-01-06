@@ -94,7 +94,7 @@ export class KnowledgeArticlePlugin extends Plugin {
             },
             searchEmptyQuery: true,
             select: (article) => renderArticleLink(article.id, article.displayName),
-        });
+        }, { onClose: () => { this.dependencies.selection.focusEditable(); }});
     }
 
     scanForArticleLinks(element) {

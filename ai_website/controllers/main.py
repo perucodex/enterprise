@@ -21,7 +21,7 @@ class AIWebsiteController(http.Controller):
             ai_generated_html = request.env['website.page']._generate_ai_website_page_html(templateId, sectionsArch, context, **post)
             result = {'html': ai_generated_html}
         except UserError as e:
-            _logger.error("Error generating website page content: %s", e)
+            _logger.warning("Failed to generate page content, returning an empty page. Cause: %s", str(e))
             result = {'error': str(e), 'html': sectionsArch}
 
         return result

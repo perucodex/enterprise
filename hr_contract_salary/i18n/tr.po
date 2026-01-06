@@ -18,13 +18,16 @@
 # Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2023
 # Halil, 2023
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# DeepL <noreply-mt-deepl@weblate.org>, 2025.
+# Odoo Turkish Import <dyki+tr@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:46+0000\n"
-"PO-Revision-Date: 2025-09-15 21:09+0000\n"
-"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:45+0000\n"
+"PO-Revision-Date: 2025-11-21 14:20+0000\n"
+"Last-Translator: Odoo Turkish Import <dyki+tr@odoo.com>\n"
 "Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/"
 "hr_contract_salary/tr/>\n"
 "Language: tr\n"
@@ -65,7 +68,7 @@ msgstr "(Soyad Ad)"
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_view_employee_form
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_template_form_view
 msgid "/ month"
-msgstr ""
+msgstr "ayda"
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info,placeholder:hr_contract_salary.hr_contract_salary_personal_info_identification_id
@@ -98,6 +101,33 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <h2>Tebrikler!</h2>\n"
+"                Maaş paketinizi aşağıdaki linke tıklayarak "
+"yapılandırabilirsiniz.<br/>\n"
+"                <t t-if=\"ctx.get('validity_end')\">\n"
+"                    Bağlantı <t t-out=\"ctx.get('validity_end')\"/> "
+"tarihinde geçerliliğini kaybedecektir.\n"
+"               </t>\n"
+"                <div style=\"padding: 16px 0px 16px 0px;\">\n"
+"                   <a t-att-href=\"'/salary_package/simulation/offer/%s%s' % "
+"(                             ctx.get('offer_id'),                             "
+"('?token=' + ctx.get('access_token')) if ctx.get('access_token') else "
+"''                         )\" target=\"_blank\" t-attf-style=\"background-"
+"color: {{object.company_id.email_secondary_color or '#875A7B'}}; text-"
+"decoration: none; color: {{object.company_id.email_primary_color or "
+"'#FFFFFF'}}; padding: 8px 16px 8px 16px; border-radius: 5px;\">%s' % "
+"( ctx.get('offer_id'), ('?token=' + ctx.get('access_token')) if "
+"ctx.get('access_token') else '' )\" target=\"_blank\" t-attf-"
+"style=\"background-color: {{object.company_id.email_secondary_color or "
+"'#875A7B'}}; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; padding: 8px 16px "
+"8px 16px; border-radius: 5px;\">\n"
+"                        Paketinizi yapılandırın\n"
+"                   </a>\n"
+"                </div>\n"
+"           </div>\n"
+"        "
 
 #. module: hr_contract_salary
 #: model:mail.template,body_html:hr_contract_salary.mail_template_send_offer_applicant
@@ -122,6 +152,29 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <h2>Tebrikler!</h2>\n"
+"                Maaş paketinizi aşağıdaki linke tıklayarak "
+"yapılandırabilirsiniz.<br/>\n"
+"                <t t-if=\"ctx.get('validity_end')\">\n"
+"                    Bağlantı <t t-out=\"ctx.get('validity_end')\"/> "
+"tarihinde geçerliliğini kaybedecektir.\n"
+"               </t>\n"
+"                <div style=\"padding: 16px 0px 16px 0px;\">\n"
+"                   <a t-attf-href=\"/salary_package/simulation/offer/"
+"{{ctx.get('offer_id')}}?token={{ctx.get('access_token')}}\" "
+"target=\"_blank\" t-attf-style=\"background-color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}}; text-decoration: "
+"none; color: {{object.company_id.email_primary_color or '#FFFFFF'}}; "
+"padding: 8px 16px 8px 16px; border-radius: 5px;\">{{ctx.get('access_token')}}"
+"\" target=\"_blank\" t-attf-style=\"background-color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}}; text-decoration: "
+"none; color: {{object.company_id.email_primary_color or '#FFFFFF'}}; "
+"padding: 8px 16px 8px 16px; border-radius: 5px;\">Paketinizi yapılandırın</"
+"a>\n"
+"                </div>\n"
+"           </div>\n"
+"        "
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.salary_package_sidebar
@@ -144,16 +197,18 @@ msgid ""
 "<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
 "title=\"Arrow\"/>"
 msgstr ""
+"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
+"title=\"Arrow\"/>"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_view_employee_form
 msgid "<span class=\"mb-3 text-muted\">/ month</span>"
-msgstr ""
+msgstr "<span class=\"mb-3 text-muted\">/ ay</span>"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "<span class=\"o_stat_text\">Contract Details</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">Sözleşme Detayları</span>"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_applicant_view_form
@@ -187,6 +242,8 @@ msgid ""
 "<span class=\"o_stat_value\">New</span>\n"
 "                        <span class=\"o_stat_text\">Offers</span>"
 msgstr ""
+"<span class=\"o_stat_value\">Yeni</span>\n"
+"                        <span class=\"o_stat_text\">Teklifleri</span>"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.salary_package_thank_you
@@ -196,7 +253,7 @@ msgstr "<span class=\"text-muted mr4 ml4\">|</span>"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_template_form_view
 msgid "<span class=\"text-muted\">/ month</span>"
-msgstr ""
+msgstr "<span class=\"text-muted\">/ ay</span>"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_benefit_view_form
@@ -237,7 +294,7 @@ msgstr "<span>/ ay</span>"
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_view_employee_form
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_template_form_view
 msgid "<span>/ year</span>"
-msgstr ""
+msgstr "<span>/ yıl</span>"
 
 #. module: hr_contract_salary
 #: model:ir.model.constraint,message:hr_contract_salary.constraint_hr_contract_salary_benefit_required_fold_res_field_id
@@ -258,13 +315,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_contract_salary/controllers/main.py:0
 msgid "Access Denied: Invalid Token"
-msgstr ""
+msgstr "Erişim Reddedildi: Geçersiz Ana"
 
 #. module: hr_contract_salary
 #. odoo-python
 #: code:addons/hr_contract_salary/controllers/main.py:0
 msgid "Access Denied: Missing Token"
-msgstr ""
+msgstr "Erişim Reddedildi: Eksik Belirteç"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_offer__access_token
@@ -340,7 +397,7 @@ msgstr "Bir Bölüm Ekle"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info.type,name:hr_contract_salary.hr_contract_salary_personal_info_type_address
 msgid "Address"
-msgstr ""
+msgstr "Adres"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_salary_benefit__benefit_type_id
@@ -361,7 +418,7 @@ msgstr "Açıklamayı Her Zaman Göster"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "Always valid"
-msgstr ""
+msgstr "Her zaman geçerli"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -370,6 +427,7 @@ msgid ""
 "An %(offer)s for the applicant %(applicant_name)s has been created by %"
 "(user)s."
 msgstr ""
+"%(applicant_name)s  için bir %(offer)s %(user)s tarafından oluşturulmuştur."
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -384,6 +442,7 @@ msgstr ""
 #: code:addons/hr_contract_salary/models/hr_contract_salary_offer.py:0
 msgid "An offer must be linked to either an applicant or an employee."
 msgstr ""
+"Bir teklif ya bir başvuru sahibi ya da bir çalışanla bağlantılı olmalıdır."
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -405,7 +464,7 @@ msgstr "Aday"
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_offer__applicant_name
 msgid "Applicant's Name"
-msgstr ""
+msgstr "Adayın İsmi"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -428,7 +487,7 @@ msgstr "Şimdi Başvur"
 #. module: hr_contract_salary
 #: model:ir.model,website_form_label:hr_contract_salary.model_hr_applicant
 msgid "Apply for a Job"
-msgstr ""
+msgstr "İş Başvurusu Yapın"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_resume_view_search
@@ -485,7 +544,7 @@ msgstr "Yan Hak Alanı"
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_benefit__source
 msgid "Benefit Source"
-msgstr ""
+msgstr "Fayda Kaynağı"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_benefit__benefit_type_id
@@ -506,6 +565,8 @@ msgid ""
 "Benefits that are not linked to a field or salary rule should always be "
 "displayed."
 msgstr ""
+"Bir alan veya maaş kuralına bağlı olmayan yan haklar her zaman "
+"görüntülenmelidir."
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info,name:hr_contract_salary.hr_contract_salary_personal_info_birthdate
@@ -519,7 +580,7 @@ msgstr "DoğumGünü"
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.contract_recruitment_report_view_search
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal Edildi"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_resume__category_id
@@ -597,7 +658,7 @@ msgstr "Onayla"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info.type,name:hr_contract_salary.hr_contract_salary_personal_info_type_contact
 msgid "Contact Information"
-msgstr ""
+msgstr "Kontak Bilgisi"
 
 #. module: hr_contract_salary
 #: model:ir.model,name:hr_contract_salary.model_hr_contract_salary_benefit_type
@@ -612,22 +673,22 @@ msgstr "Sözleşme Ek Kazanç Değeri"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "Contract Date"
-msgstr ""
+msgstr "Sözleşme Tarihi"
 
 #. module: hr_contract_salary
 #: model:ir.actions.act_window,name:hr_contract_salary.action_view_contract_statbutton
 msgid "Contract Details"
-msgstr ""
+msgstr "Sözleşme Detayları"
 
 #. module: hr_contract_salary
 #: model:ir.actions.act_window,name:hr_contract_salary.action_view_partially_signed_contract_statbutton
 msgid "Contract Details (Read Only) "
-msgstr ""
+msgstr "Sözleşme Detayları (Salt Okunur) "
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_offer__contract_end_date
 msgid "Contract End Date"
-msgstr ""
+msgstr "Sözleşme Bitiş Tarihi"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -638,7 +699,7 @@ msgstr "Sözleşme Bilgileri:"
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_employee_public__contract_reviews_count
 msgid "Contract Reviews Count"
-msgstr ""
+msgstr "Sözleşme İncelemeleri Sayısı"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_signatory__sign_role_id
@@ -687,7 +748,7 @@ msgstr "Sözleşme Güncelleme İmza Sahipleri"
 #. module: hr_contract_salary
 #: model:ir.model,name:hr_contract_salary.model_hr_contract_recruitment_report
 msgid "Contract and Recruitment Analysis Report"
-msgstr ""
+msgstr "Sözleşme ve İşe Alım Analiz Raporu"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_salary_benefit__manual_res_field_id
@@ -712,7 +773,7 @@ msgstr "Sözleşme İncelemeleri"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "Copy link"
-msgstr ""
+msgstr "Bağlantıyı kopyala"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_benefit__cost_res_field_id
@@ -747,7 +808,7 @@ msgstr "Doğduğu Ülke"
 
 #. module: hr_contract_salary
 #: model_terms:ir.actions.act_window,help:hr_contract_salary.hr_contract_salary_offer_action
-msgid "Create a Offer"
+msgid "Create an Offer"
 msgstr ""
 
 #. module: hr_contract_salary
@@ -947,6 +1008,7 @@ msgstr "Sil"
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_version__display_name
 #: model:ir.model.fields,field_description:hr_contract_salary.field_refuse_offer_wizard__display_name
 #: model:ir.model.fields,field_description:hr_contract_salary.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:hr_contract_salary.field_sign_item__display_name
 #: model:ir.model.fields,field_description:hr_contract_salary.field_sign_request__display_name
 msgid "Display Name"
 msgstr "İsim Göster"
@@ -992,7 +1054,7 @@ msgstr "Net maaşı etkilemez"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_view_employee_form_readonly
 msgid "Draft"
-msgstr ""
+msgstr "Taslak"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_benefit__display_type__dropdown
@@ -1008,12 +1070,12 @@ msgstr "Açılır Liste Grubu"
 #. odoo-python
 #: code:addons/hr_contract_salary/models/hr_contract_salary_offer.py:0
 msgid "Edit PDF Template Signatories"
-msgstr ""
+msgstr "PDF Şablonu İmzacılarını Düzenle"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "Edit Signatories"
-msgstr ""
+msgstr "İmza Yetkililerini Düzenle"
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info,name:hr_contract_salary.hr_contract_salary_personal_info_email
@@ -1059,17 +1121,17 @@ msgstr "Personel Fotoğrafı"
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_benefit__res_field_id
 msgid "Employee Record Related Field"
-msgstr ""
+msgstr "Çalışan Kaydı İlgili Alan"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_resume__value_type__version
 msgid "Employee Record Value"
-msgstr ""
+msgstr "Çalışan Kayıt Değeri"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_offer__employee_version_id
 msgid "Employee Version"
-msgstr ""
+msgstr "Çalışan Versiyonu"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_benefit__activity_creation__running
@@ -1094,13 +1156,13 @@ msgstr "İşveren Bütçesi"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume,name:hr_contract_salary.hr_contract_salary_resume_final_yearly_costs
 msgid "Employer Cost"
-msgstr ""
+msgstr "İş Veren Maliyeti"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_view_employee_form
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_template_form_view
 msgid "Employer Costs"
-msgstr ""
+msgstr "İşveren Maliyetleri"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -1144,7 +1206,7 @@ msgstr "Bayan"
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_benefit__field
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_benefit__source__field
 msgid "Field"
-msgstr ""
+msgstr "Alan"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_personal_info__field
@@ -1155,6 +1217,11 @@ msgstr "Alan Adı"
 #: model:hr.contract.salary.personal.info,name:hr_contract_salary.hr_contract_salary_personal_info_study_field
 msgid "Field of Study"
 msgstr "Çalışma Alanı"
+
+#. module: hr_contract_salary
+#: model:ir.model,name:hr_contract_salary.model_sign_item
+msgid "Fields to be sign on Document"
+msgstr "Belge üzerinde imzalanacak alanlar"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_resume__fixed_value
@@ -1214,7 +1281,7 @@ msgstr "Teklif Oluştur"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume,name:hr_contract_salary.hr_contract_salary_resume_gross
 msgid "Gross"
-msgstr ""
+msgstr "Brüt"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_signatory__signatory__hr
@@ -1293,6 +1360,7 @@ msgstr "İşaretlendiğinde çocukların kişisel bilgisini gizle."
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_version__id
 #: model:ir.model.fields,field_description:hr_contract_salary.field_refuse_offer_wizard__id
 #: model:ir.model.fields,field_description:hr_contract_salary.field_res_config_settings__id
+#: model:ir.model.fields,field_description:hr_contract_salary.field_sign_item__id
 #: model:ir.model.fields,field_description:hr_contract_salary.field_sign_request__id
 msgid "ID"
 msgstr "ID"
@@ -1382,7 +1450,7 @@ msgstr ""
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info.type,name:hr_contract_salary.hr_contract_salary_personal_info_type_emergency
 msgid "In case of emergency"
-msgstr ""
+msgstr "Acil durumlarda"
 
 #. module: hr_contract_salary
 #. odoo-javascript
@@ -1430,7 +1498,7 @@ msgstr "Kaynak sözleşmesi bir sözleşme şablonu mu?"
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_recruitment_report__job_id
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.contract_recruitment_report_view_search
 msgid "Job"
-msgstr ""
+msgstr "İş"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -1455,7 +1523,7 @@ msgstr "Diller"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.contract_recruitment_report_view_search
 msgid "Last 365 Days Offers"
-msgstr ""
+msgstr "Son 365 Gün Teklifleri"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_benefit__write_uid
@@ -1507,7 +1575,7 @@ msgstr "Bay"
 #. module: hr_contract_salary
 #: model_terms:ir.actions.act_window,help:hr_contract_salary.hr_contract_salary_offer_action
 msgid "Manage your Offers"
-msgstr ""
+msgstr "Tekliflerinizi Yönetin"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_benefit__benefit_ids
@@ -1563,22 +1631,22 @@ msgstr "Aylık"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.benefit.type,name:hr_contract_salary.l10n_be_monthly_cash
 msgid "Monthly Benefit in Cash"
-msgstr ""
+msgstr "Aylık Nakdi Menfaat"
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.benefit.type,name:hr_contract_salary.l10n_be_monthly_benefit
 msgid "Monthly Benefit in Kind"
-msgstr ""
+msgstr "Aylık Menfaat"
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.benefit.type,name:hr_contract_salary.l10n_be_monthly_net
 msgid "Monthly Benefit in Net"
-msgstr ""
+msgstr "Net Aylık Menfaat"
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume.category,name:hr_contract_salary.hr_contract_salary_resume_category_monthly_benefits
 msgid "Monthly Benefits"
-msgstr ""
+msgstr "Aylık Menfaatler"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_employee__monthly_yearly_costs
@@ -1589,7 +1657,7 @@ msgstr "Aylık Maliyet"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume,name:hr_contract_salary.hr_contract_salary_resume_monthly_total
 msgid "Monthly Equivalent"
-msgstr ""
+msgstr "Aylık Eşdeğer"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -1600,7 +1668,7 @@ msgstr "Aylık Brüt Maaş"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume.category,name:hr_contract_salary.hr_contract_salary_resume_category_monthly_salary
 msgid "Monthly Salary"
-msgstr ""
+msgstr "Aylık Maaş"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_resume__value_type__monthly_total
@@ -1701,12 +1769,12 @@ msgstr ""
 #. module: hr_contract_salary
 #: model_terms:ir.actions.act_window,help:hr_contract_salary.contract_recruitment_report_action
 msgid "No data to display"
-msgstr ""
+msgstr "Gösterilecek veri yok"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "No limit"
-msgstr ""
+msgstr "Limit yok"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -1721,17 +1789,19 @@ msgid ""
 "No signature template defined on the version. Please contact the HR "
 "responsible."
 msgstr ""
+"Sürümde tanımlanmış imza şablonu yok. Lütfen İK sorumlusu ile iletişime "
+"geçin."
 
 #. module: hr_contract_salary
 #. odoo-python
 #: code:addons/hr_contract_salary/models/hr_version.py:0
 msgid "No templates are configured yet. Do you want to set up first one?"
-msgstr ""
+msgstr "Henüz hiçbir şablon yapılandırılmadı. İlkini kurmak ister misiniz?"
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.benefit.type,name:hr_contract_salary.l10n_be_non_financial_benefits
 msgid "Non Financial Benefits"
-msgstr ""
+msgstr "Mali Olmayan Menfaatler"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_benefit_value__selector_highlight__none
@@ -1782,7 +1852,7 @@ msgstr "Teslimat hatası olan mesaj adedi"
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_signatory__offer_id
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.contract_recruitment_report_view_search
 msgid "Offer"
-msgstr ""
+msgstr "Teklif"
 
 #. module: hr_contract_salary
 #: model:ir.actions.act_window,name:hr_contract_salary.contract_recruitment_report_action
@@ -1792,7 +1862,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.contract_recruitment_report_view_pivot
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.contract_recruitment_report_view_search
 msgid "Offer Analysis"
-msgstr ""
+msgstr "Teklif Analizi"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_recruitment_report__offer_create_date
@@ -1804,7 +1874,7 @@ msgstr "Teklif Oluşturulma Tarihi"
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_offer__offer_end_date
 msgid "Offer Expiration"
-msgstr ""
+msgstr "Teklifin Sona Ermesi"
 
 #. module: hr_contract_salary
 #: model:ir.actions.act_window,name:hr_contract_salary.hr_contract_salary_offer_refusal_reasons
@@ -1816,7 +1886,7 @@ msgstr "Teklif Red Sebepleri"
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_recruitment_report__offer_state
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.contract_recruitment_report_view_search
 msgid "Offer State"
-msgstr ""
+msgstr "Teklif Durumu"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -1829,7 +1899,7 @@ msgstr "%(recipient)s için teklif"
 #. odoo-python
 #: code:addons/hr_contract_salary/models/hr_applicant.py:0
 msgid "Offer link can not be sent without an applicant name."
-msgstr ""
+msgstr "Başvuru sahibi adı olmadan teklif linki gönderilemez."
 
 #. module: hr_contract_salary
 #: model:ir.actions.act_window,name:hr_contract_salary.hr_contract_salary_offer_action
@@ -1847,6 +1917,8 @@ msgid ""
 "                It allows to reflect on the proposition and discuss it."
 "<br><br>"
 msgstr ""
+"Teklifler, önceden tanımlanmış bir veri seçimi ile çalışana gönderilir.\n"
+"                Teklif üzerinde düşünmeye ve tartışmaya izin verir.<br><br>"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -1881,7 +1953,7 @@ msgstr "Diğer"
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_offer__sign_template_id
 msgid "PDF Sign Template"
-msgstr ""
+msgstr "PDF İşaret Şablonu"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
@@ -1893,7 +1965,7 @@ msgstr "PDF Şablonu"
 #. odoo-python
 #: code:addons/hr_contract_salary/controllers/main.py:0
 msgid "Package Simulation"
-msgstr ""
+msgstr "Paket Simülasyonu"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_personal_info__parent_id
@@ -1975,6 +2047,15 @@ msgid ""
 "Monthly Total: The information will be a total of all the information in the "
 "category Monthly Benefits"
 msgstr ""
+"Bilginin değerinin nasıl hesaplanacağını seçin:\n"
+"Sabit değer: Tüm bağlantılar için belirlenmiş bir değeri statik olarak "
+"ayarlayın\n"
+"Çalışan Kaydı değeri: Çalışan Kaydındaki bir alandan değeri alın\n"
+"Maaş bordrosu değeri: Maaş bordrosu kaydındaki bir alandan değeri alın\n"
+"Faydaların Toplamı değeri: Tüm faydaları toplama yaparak "
+"hesaplayabilirsiniz\n"
+"Aylık Toplam: Bilgiler, Aylık Faydalar kategorisindeki tüm bilgilerin "
+"toplamı olacaktır."
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info,name:hr_contract_salary.hr_contract_salary_personal_info_place_of_birth
@@ -1992,6 +2073,8 @@ msgid ""
 "Please define a signature template on the contract before generating the "
 "offer."
 msgstr ""
+"Lütfen teklifi oluşturmadan önce sözleşme üzerinde bir imza şablonu "
+"tanımlayın."
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info,name:hr_contract_salary.hr_contract_salary_personal_info_private_license_plate
@@ -2016,7 +2099,7 @@ msgstr "Önerilen Sözleşme Sayısı"
 #. module: hr_contract_salary
 #: model:ir.model,name:hr_contract_salary.model_hr_employee_public
 msgid "Public Employee"
-msgstr ""
+msgstr "Herkese Açık Personel"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_personal_info__display_type__radio
@@ -2291,21 +2374,25 @@ msgid ""
 "Select a contract template to auto-fill the contract form with predefined "
 "values. You can still edit the fields as needed after applying the template."
 msgstr ""
+"Sözleşme formunu önceden tanımlanmış değerlerle otomatik olarak doldurmak "
+"için bir sözleşme şablonu seçin. Şablonu uyguladıktan sonra alanları "
+"gerektiği gibi düzenlemeye devam edebilirsiniz."
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "Select a contract template to load its predefined values"
 msgstr ""
+"Önceden tanımlanmış değerlerini yüklemek için bir sözleşme şablonu seçin"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "Select an applicant..."
-msgstr ""
+msgstr "Bir başvuru sahibi seçin..."
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "Select an employee..."
-msgstr ""
+msgstr "Bir çalışan seçin..."
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_sign_document_wizard__sign_template_ids
@@ -2316,6 +2403,11 @@ msgid ""
 "the HR responsible.\n"
 "        "
 msgstr ""
+"Yalnızca 1 veya 2 farklı imza sahibi olan belgeleri seçin.\n"
+"        1 imza sahibi olan belgelerde yalnızca çalışanın imzası gerekirken, "
+"2 imza sahibi olan belgelerde hem çalışanın hem de İK sorumlusunun imzası "
+"gerekir.\n"
+"        "
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_salary_benefit__benefit_ids
@@ -2326,7 +2418,7 @@ msgstr "Bu Yan Hakkı kullanmak için seçilmesi gereken diğer Yan Hakları se�
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "Select the PDF that the employee will sign"
-msgstr ""
+msgstr "Çalışanın imzalayacağı PDF'yi seçin"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_salary_benefit__cost_res_field_id
@@ -2405,7 +2497,7 @@ msgstr "Sıralama"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info,name:hr_contract_salary.hr_contract_salary_personal_info_sex
 msgid "Sex"
-msgstr ""
+msgstr "Cinsiyet"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.salary_package_personal_information
@@ -2457,7 +2549,7 @@ msgstr "İmza sahibi"
 #. module: hr_contract_salary
 #: model:ir.model,name:hr_contract_salary.model_sign_request
 msgid "Signature Request"
-msgstr ""
+msgstr "İmza Talebi"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -2468,7 +2560,7 @@ msgstr "İmza İsteği - %s"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.personal.info.type,name:hr_contract_salary.hr_contract_salary_personal_info_type_family
 msgid "Situation"
-msgstr ""
+msgstr "Durum"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_benefit__display_type__slider
@@ -2556,7 +2648,7 @@ msgstr "Yan Hak Değerlerinin Toplamı"
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_employee__template_warning
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_version__template_warning
 msgid "Template Warning"
-msgstr ""
+msgstr "Şablon Uyarısı"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_contract_salary_benefit__sign_template_id
@@ -2584,7 +2676,7 @@ msgstr "Bu sözleşmenin kopyalandığı sözleşme."
 #. odoo-python
 #: code:addons/hr_contract_salary/models/hr_job.py:0
 msgid "The contract template's company must match the job's company."
-msgstr ""
+msgstr "Sözleşme şablonunun şirketi, işin şirketiyle eşleşmelidir."
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_benefit_view_form
@@ -2598,6 +2690,8 @@ msgid ""
 "The display type of a benefit linked to a salary rule must be one of the "
 "following: %s"
 msgstr ""
+"Maaş kuralına bağlı bir avantajın görüntüleme türü aşağıdakilerden biri "
+"olmalıdır: %s"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_salary_benefit__fold_res_field_id
@@ -2624,7 +2718,7 @@ msgstr "En çok imza ile pdf sözleşmesinde imza sayısı."
 #. odoo-python
 #: code:addons/hr_contract_salary/models/sign_request.py:0
 msgid "The offer has been cancelled due to the signature request cancellation."
-msgstr ""
+msgstr "İmza talebi iptali nedeniyle teklif iptal edilmiştir."
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -2672,7 +2766,7 @@ msgstr ""
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_view_employee_form_readonly
 msgid "This is a partially-signed contract."
-msgstr ""
+msgstr "Bu kısmi imzalanmış bir sözleşmedir."
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -2689,6 +2783,8 @@ msgid ""
 "This offer has been fully signed and can no longer be edited. However, you "
 "can still make changes to the Signed Contract if needed."
 msgstr ""
+"Bu teklif tamamen imzalanmıştır ve artık düzenlenemez. Ancak, gerekirse "
+"imzalanan sözleşmede hala değişiklik yapabilirsiniz."
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -2715,7 +2811,7 @@ msgstr "Token"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume.category,name:hr_contract_salary.hr_contract_salary_resume_category_total
 msgid "Total"
-msgstr ""
+msgstr "Toplam"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,help:hr_contract_salary.field_hr_contract_salary_offer__activity_exception_decoration
@@ -2765,7 +2861,7 @@ msgstr "Değer Türü"
 #. module: hr_contract_salary
 #: model:ir.model.fields.selection,name:hr_contract_salary.selection__hr_contract_salary_personal_info__applies_on__version_personal
 msgid "Version"
-msgstr ""
+msgstr "Sürüm"
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -2777,7 +2873,7 @@ msgstr "Ücret"
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_employee__wage_on_signature
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_version__wage_on_signature
 msgid "Wage on Signature"
-msgstr ""
+msgstr "İmza Ücreti"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_employee__wage_with_holidays
@@ -2826,12 +2922,12 @@ msgstr "Yıllık"
 #. module: hr_contract_salary
 #: model:hr.contract.salary.resume.category,name:hr_contract_salary.hr_contract_salary_resume_category_yearly_benefits
 msgid "Yearly Benefits"
-msgstr ""
+msgstr "Yıllık Menfaatler"
 
 #. module: hr_contract_salary
 #: model:hr.contract.salary.benefit.type,name:hr_contract_salary.l10n_be_yearly_cash
 msgid "Yearly Benefits in Cash"
-msgstr ""
+msgstr "Nakit Yıllık Menfaatler"
 
 #. module: hr_contract_salary
 #: model:ir.model.fields,field_description:hr_contract_salary.field_hr_employee__final_yearly_costs
@@ -2851,7 +2947,7 @@ msgstr "Evet"
 msgid ""
 "You cannot have multiple person responsible for the same role on contract "
 "signature template."
-msgstr ""
+msgstr "Sözleşme imza şablonunda aynı rolden sorumlu birden fazla kişi olamaz."
 
 #. module: hr_contract_salary
 #. odoo-python
@@ -2860,6 +2956,8 @@ msgid ""
 "You cannot have multiple person responsible for the same role on contract "
 "update signature template."
 msgstr ""
+"Sözleşme güncelleme imza şablonunda aynı rolden sorumlu birden fazla kişi "
+"olamaz."
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.salary_package_personal_information
@@ -2890,17 +2988,17 @@ msgstr "örn. Doğum tarihi"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "e.g. Developer, Sales, Consultant"
-msgstr ""
+msgstr "Örn. Geliştirici, Satış, Danışman"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "e.g. Human Resources, Research & Development, Marketing"
-msgstr ""
+msgstr "Örneğin İnsan Kaynakları, Araştırma ve Geliştirme, Pazarlama"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "e.g. Lead Dev, Junior Consultant"
-msgstr ""
+msgstr "Örn. Lider Geliştirici, Genç Danışman"
 
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_benefit_view_form
@@ -2910,7 +3008,7 @@ msgstr "örn. Yemek Fişleri"
 #. module: hr_contract_salary
 #: model_terms:ir.ui.view,arch_db:hr_contract_salary.hr_contract_salary_offer_view_form
 msgid "e.g. Offer 70k Employer Cost"
-msgstr ""
+msgstr "Örn. 70 bin İşveren Maliyeti Teklifi"
 
 #. module: hr_contract_salary
 #: model_terms:ir.actions.act_window,help:hr_contract_salary.hr_contract_salary_offer_recruitment_action
@@ -2921,7 +3019,7 @@ msgstr "burya"
 #. odoo-python
 #: code:addons/hr_contract_salary/models/hr_contract_salary_offer.py:0
 msgid "id"
-msgstr ""
+msgstr "kimlik"
 
 #. module: hr_contract_salary
 #: model:mail.template,subject:hr_contract_salary.mail_template_send_offer_applicant
@@ -2938,6 +3036,11 @@ msgid ""
 "{{ object.company_id.name }}: Job Offer - "
 "{{ object.employee_version_id.name }}"
 msgstr ""
+"{{ object.company_id.name }}: İş Teklifi - "
+"{{ object.employee_version_id.name }}"
+
+#~ msgid "Create a Offer"
+#~ msgstr "Bir Teklif Oluşturun"
 
 #~ msgid "<span class=\"o_stat_text ml4\">Previous Contract</span>"
 #~ msgstr "<span class=\"o_stat_text ml4\">Önceki Sözleşme</span>"

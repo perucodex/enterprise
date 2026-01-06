@@ -217,7 +217,7 @@ class HrContractSalaryBenefit(models.Model):
                 raise ValidationError(_('The minimum value for the slider should be inferior to the maximum value.'))
 
     @api.constrains('display_type', 'res_field_id', 'source')
-    def _check_min_inferior_to_max(self):
+    def _check_benefits_field(self):
         white_list = ['radio', 'slider', 'manual', 'always']
         for record in self:
             if record.source == 'rule' and record.display_type not in white_list:

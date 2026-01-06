@@ -1032,6 +1032,37 @@ test("sort second pivot measure (descending)", async () => {
     });
 });
 
+test("sorting on a date column works", async () => {
+    patchWithCleanup(user, { tz: "UTC" });
+    const { model, pivotId } = await createSpreadsheetFromPivotView({
+        actions: async (target) => {
+            await contains("thead .o_pivot_measure_row").click();
+        },
+        serverData: {
+            models: getBasicData(),
+            views: {
+                "partner,false,pivot": /* xml */ `
+                    <pivot default_order="probability desc">
+                        <field name="create_date" interval="year" type="col"/>
+                        <field name="create_date" interval="quarter" type="col"/>
+                        <field name="create_date" interval="month" type="col"/>
+                        <field name="create_date" interval="week" type="col"/>
+                        <field name="create_date" interval="day" type="col"/>
+                        <field name="product_id" type="row"/>
+                        <field name="foo" type="measure"/>
+                    </pivot>`,
+            },
+        },
+    });
+    expect(model.getters.getPivotCoreDefinition(pivotId).sortedColumn.domain).toMatchObject([
+        { field: "create_date:year", value: 2006 },
+        { field: "create_date:quarter", value: "4/2005" },
+        { field: "create_date:month", value: "12/2005" },
+        { field: "create_date:week", value: "1/2006" },
+        { field: "create_date:day", value: 38719 },
+    ]);
+});
+
 test("remove sorting if measure is removed", async () => {
     const { model, pivotId } = await createSpreadsheetFromPivotView({
         serverData: {

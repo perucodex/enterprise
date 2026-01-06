@@ -36,6 +36,7 @@ and more.
             'databases/static/tests/tours/**/*',
         ],
     },
+    'uninstall_hook': 'uninstall_hook',
     'author': 'Odoo S.A.',
     'license': 'OEEL-1',
 }

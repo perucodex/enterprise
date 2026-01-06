@@ -1,12 +1,12 @@
 import { test, expect, describe } from "@odoo/hoot";
-import { setupPosEnv } from "@point_of_sale/../tests/unit/utils";
+import { setupPosEnvForPrepDisplay } from "@pos_enterprise/../tests/unit/utils";
 import { definePosModels } from "@point_of_sale/../tests/unit/data/generate_model_definitions";
 
 definePosModels();
 
 describe("pos_store", () => {
     test("onDeleteOrder", async () => {
-        const store = await setupPosEnv();
+        const store = await setupPosEnvForPrepDisplay();
         const order = store.addNewOrder();
 
         order.delivery_identifier = "UP-123";

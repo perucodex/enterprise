@@ -542,6 +542,27 @@ test("Cannot download spreadsheets", async () => {
     await waitFor(".o_control_panel_actions:contains('Download')");
 });
 
+test("Share button is hidden for spreadsheet in Trash", async () => {
+    const serverData = getTestServerData();
+    serverData.models["documents.document"].records[1].active = false;
+
+    await makeDocumentsSpreadsheetMockEnv({ serverData });
+    await mountView({
+        type: "kanban",
+        resModel: "documents.document",
+        arch: basicDocumentKanbanArch,
+        searchViewArch: getEnrichedSearchArch(),
+    });
+
+    await contains(".o_search_panel_label_title:contains('Trash')").click();
+    await contains(".o_kanban_record:contains('My spreadsheet') .o_record_selector").click({
+        ctrlKey: true,
+    });
+    await animationFrame();
+    await waitForNone(".o_control_panel_actions:contains('Share')");
+    await waitForNone(".o_control_panel_actions:contains('Freeze and share')");
+});
+
 test("Restoring trashed XLSX without folder should not set localStorage variable to undefined", async () => {
     const spreadsheetId = 77;
     const serverData = getTestServerData();

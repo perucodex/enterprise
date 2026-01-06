@@ -632,10 +632,13 @@ class MainComponent extends Component {
     async _onRefreshState(paramsRefresh) {
         const { recordId, lineId } = paramsRefresh || {};
         const { route, params } = this.env.model.getActionRefresh(recordId);
-        const result = await rpc(route, params);
-        await this.env.model.refreshCache(result.data.records);
-        await this.toggleBarcodeLines(lineId);
-        this.render();
+
+        await this.actionMutex.exec(async () => {
+            const result = await rpc(route, params);
+            await this.env.model.refreshCache(result.data.records);
+            await this.toggleBarcodeLines(lineId);
+            this.render();
+        });
     }
 
     /**

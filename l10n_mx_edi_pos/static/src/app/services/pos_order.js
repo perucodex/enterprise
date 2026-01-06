@@ -10,4 +10,12 @@ patch(PosOrder.prototype, {
             super.setToInvoice(to_invoice);
         }
     },
+    // @Override
+    serializeForORM() {
+        const data = super.serializeForORM(...arguments);
+        if (this.company.country_id?.code === "MX") {
+            data.l10n_mx_edi_cfdi_to_public = this.l10n_mx_edi_cfdi_to_public;
+        }
+        return data;
+    },
 });

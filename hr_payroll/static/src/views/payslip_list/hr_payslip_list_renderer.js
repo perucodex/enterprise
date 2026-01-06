@@ -16,29 +16,6 @@ export class PayslipListRenderer extends ListRenderer {
 
     setup() {
         super.setup();
-        const renderer = this;
-        this.rawOptionalActiveFields = {
-            payrun: {},
-            base: this.optionalActiveFields,
-        }
-        this.optionalFieldsHandler = {
-            targetProp(field) {
-                return (renderer.inPayrun && renderer.isPayrunOptional(field)) ? 'payrun' : 'base';
-            },
-            get(target, field, receiver) {
-                if (field in target) {  // categories (base, payrun...)
-                    return Reflect.get(target, field, receiver);
-                }
-                return Reflect.get(target[this.targetProp(field)], field, receiver);
-            },
-            set(target, field, value) {
-                if (field in target) {  // categories (base, payrun...)
-                    return Reflect.set(target, field, value);
-                }
-                return Reflect.set(target[this.targetProp(field)], field, value);
-            },
-        };
-        this.optionalActiveFields = new Proxy(this.rawOptionalActiveFields, this.optionalFieldsHandler)
         this.keyPayrunOptionalFields = `payrun_${this.keyOptionalFields}`;
     }
 
@@ -58,13 +35,6 @@ export class PayslipListRenderer extends ListRenderer {
         return this.props?.payRunInfo?.id;
     }
 
-    isPayrunOptional(fieldName) {
-        return this.allColumns
-            .filter((col) => col?.options?.payrun_optional)
-            .map(col => col.name)
-            .includes(fieldName)
-    }
-
     /** overrides **/
     /**
      * @override
@@ -81,36 +51,39 @@ export class PayslipListRenderer extends ListRenderer {
     }
 
     saveOptionalActiveFields() {
-        for (const [storageKey, optionalFieldType] of [
-            [this.keyOptionalFields, 'base'],
-            [this.keyPayrunOptionalFields, 'payrun']
-        ]) {
-            let activeFields = this.rawOptionalActiveFields[optionalFieldType]
-            browser.localStorage.setItem(
-                storageKey,
-                Object.keys(activeFields).filter(field => (activeFields[field])),
-            );
-        }
+        const storageKey = this.inPayrun ? this.keyPayrunOptionalFields : this.keyOptionalFields;
+        browser.localStorage.setItem(
+            storageKey,
+            Object.keys(this.optionalActiveFields).filter(
+                (fieldName) => this.optionalActiveFields[fieldName]
+            )
+        );
     }
 
     computeOptionalActiveFields() {
-        const getOptional = (col => col.optional);
-        const getPayrunOptional = (col => col.options?.payrun_optional);
-        const rawOptionalActiveFields = {};
-        for (const [storageKey, optionalCheck, optionalFieldType] of [
-            [this.keyOptionalFields, getOptional, 'base'],
-            [this.keyPayrunOptionalFields, getPayrunOptional, 'payrun'],
-        ]) {
-            let storage = browser.localStorage.getItem(storageKey)?.split(",");
-            rawOptionalActiveFields[optionalFieldType] = Object.fromEntries(
-                this.allColumns.filter(
-                    col => col.type === 'field' && optionalCheck(col)
-                ).map(col => [
-                    col.name,
-                    storage ? storage.includes(col.name) : optionalCheck(col) === 'show'
-                ])
-            );
+        const storageKey = this.inPayrun ? this.keyPayrunOptionalFields : this.keyOptionalFields;
+        const localStorageValue = browser.localStorage.getItem(storageKey);
+        const optionalColumn = this.allColumns.filter(
+            (col) => col.type === "field" && (col.optional || this.inPayrun && col.options?.payrun_optional)
+        );
+        const optionalActiveFields = {};
+        if (localStorageValue !== null) {
+            const localStorageOptionalActiveFields = localStorageValue.split(",");
+            for (const col of optionalColumn) {
+                optionalActiveFields[col.name] = localStorageOptionalActiveFields.includes(
+                    col.name
+                );
+            }
+        } else {
+            for (const col of optionalColumn) {
+                if (this.inPayrun && col.options?.payrun_optional) {
+                    optionalActiveFields[col.name] = col.options?.payrun_optional === "show";
+                }
+                else {
+                    optionalActiveFields[col.name] = col.optional === "show";
+                }
+            }
         }
-        return new Proxy(rawOptionalActiveFields, this.optionalFieldsHandler);
+        return optionalActiveFields;
     }
 }

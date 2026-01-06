@@ -36,8 +36,10 @@ class AccountBankStatementLine(models.Model):
             'journal_id': journal.id,
             'payment_ref': _("Stripe Top-up"),
             'amount': amount,
-            'counterpart_account_id': transfer_account.id,  # Hack "field"
         }
+        if transfer_account.active:
+            create_vals['counterpart_account_id'] = transfer_account.id  # Hack 'field'
+
         if topup_currency != journal_currency:
             create_vals.update({
                 'foreign_currency_id': topup_currency.id,

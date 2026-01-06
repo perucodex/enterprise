@@ -79,6 +79,10 @@ class TestAccountFollowupReports(TestAccountFollowupCommon, MailCommon):
         (invoice1 + invoice2).action_post()
         # Should pick invoice_user_id of the most delayed move, with highest residual amount in case of tie (invoice1)
         self.assertEqual(self.partner_a._get_followup_responsible(), user1)
+        # If user1 is archived, it shouldn't be selected as responsible
+        user1.active = False
+        self.assertEqual(self.partner_a._get_followup_responsible(), self.env.user)
+        user1.active = True
 
         self.partner_a.followup_line_id = self.first_followup_line
 

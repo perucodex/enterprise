@@ -105,7 +105,7 @@ def get_account_reports_pdfs(root):
         account_report = all_account_reports.filtered(
             lambda account_report: account_report.id == account_report_id)
         if account_report:
-            result = account_report.export_to_pdf(account_report_options)
+            result = account_report.dispatch_report_action(account_report_options, 'export_to_pdf')
             yield PdfFileReader(BytesIO(result.get('file_content')))
 
 

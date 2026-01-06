@@ -138,8 +138,8 @@ class TestSubscriptionPayments(PaymentCommon, TestSubscriptionCommon, MockEmail)
                 # Two products are invoiced
                 self.assertEqual(len(invoice.invoice_line_ids), 2, 'Two lines are invoiced')
                 self.assertEqual(self.subscription.next_invoice_date, datetime.date(2021, 2, 3), 'the next invoice date should be updated')
-                self.assertEqual(invoice.invoice_line_ids[0].name, 'BaseTestProduct month cheap\n1 Month 01/03/2021 to 02/02/2021', 'Invoice line description must be based on order line description')
-                self.assertEqual(invoice.invoice_line_ids[1].name, 'TestProduct2 month expensive\n1 Month 01/03/2021 to 02/02/2021', 'Invoice line description must be based on order line description')
+                self.assertEqual(invoice.invoice_line_ids[0].name, 'BaseTestProduct\nmonth cheap\n1 Month 01/03/2021 to 02/02/2021', 'Invoice line description must be based on order line description')
+                self.assertEqual(invoice.invoice_line_ids[1].name, 'TestProduct2\nmonth expensive\n1 Month 01/03/2021 to 02/02/2021', 'Invoice line description must be based on order line description')
 
             with freeze_time("2021-02-03"):
                 self.env.invalidate_all()

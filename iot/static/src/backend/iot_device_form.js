@@ -9,8 +9,8 @@ import { printReport } from "@iot/iot_report_action";
 class IoTDeviceController extends formView.Controller {
     setup() {
         super.setup();
-        this.iotHttpService = useService("iot_http");
-        this.notificationService = useService("notification");
+        this.iotHttp = useService("iot_http");
+        this.notification = useService("notification");
         this.orm = useService("orm");
 
         useSubEnv({ onClickViewButton: this.onClickButtonTest.bind(this) });
@@ -18,22 +18,9 @@ class IoTDeviceController extends formView.Controller {
 
     async onWillSaveRecord(record) {
         if (["keyboard", "scanner"].includes(record.data.type)) {
-            const data = await this.updateKeyboardLayout(record.data);
-            if (data.result !== true) {
-                this.notificationService.add(
-                    _t("Check if the device is still connected"),
-                    {
-                        title: _t("Connection to device failed"),
-                        type: "warning",
-                    }
-                );
-                // Original logic doesn't call super when reaching this branch.
-                return false;
-            }
+            await this.updateKeyboardLayout(record.data);
         } else if (record.data.type === "display") {
-            this.updateDisplayUrl(record.data).catch((e) => {
-                console.error(e);
-            })
+            await this.updateDisplayUrl(record.data);
         }
     }
     /**
@@ -42,24 +29,43 @@ class IoTDeviceController extends formView.Controller {
     async updateKeyboardLayout(data) {
         const { iot_id, identifier, keyboard_layout, is_scanner } = data;
         // IMPROVEMENT: Perhaps combine the call to update_is_scanner and update_layout in just one remote call to the iotbox.
-        this.iotHttpService.action(iot_id.id, identifier, { action: "update_is_scanner", is_scanner });
+        this.iotHttp.action(
+            iot_id.id,
+            identifier,
+            {
+                action: "update_is_scanner",
+                is_scanner
+            },
+            () => {},
+            () => {
+                this.notification.add(_t("Failed to update scanner mode on the device."), {
+                    type: "danger"
+                });
+            }
+        );
         if (keyboard_layout) {
             const [keyboard] = await this.model.orm.read(
                 "iot.keyboard.layout",
                 [keyboard_layout[0]],
                 ["layout", "variant"]
             );
-            return this.iotHttpService.action(
+            return this.iotHttp.action(
                 iot_id.id,
                 identifier,
                 {
                     action: "update_layout",
                     layout: keyboard.layout,
                     variant: keyboard.variant,
+                },
+                () => {},
+                () => {
+                    this.notification.add(_t("Failed to update keyboard layout on the device."), {
+                        type: "danger"
+                    });
                 }
             );
         } else {
-            return this.iotHttpService.action(iot_id.id, identifier, { action: "update_layout" });
+            return this.iotHttp.action(iot_id.id, identifier, { action: "update_layout" });
         }
     }
     /**
@@ -67,13 +73,13 @@ class IoTDeviceController extends formView.Controller {
      */
     async updateDisplayUrl(data) {
         const { iot_id, identifier, display_url } = data;
-        return this.iotHttpService.action(iot_id.id, identifier, { action: "update_url", url: display_url });
+        return this.iotHttp.action(iot_id.id, identifier, { action: "update_url", url: display_url });
     }
 
     onDeviceEvent(event, type) {
         const errorMessages = type === "printer" ? PRINTER_MESSAGES : FDM_MESSAGES;
         // Parse blackbonse response
-        if (type == "fiscal_data_module") {
+        if (type === "fiscal_data_module") {
             const errorCode = event.message ? event.message.substring(0, 3) : event.result?.error?.errorCode;
             if (FDM_MESSAGES[errorCode] && !["000", "102"].includes(errorCode)) {
                 event.message = errorCode
@@ -84,16 +90,16 @@ class IoTDeviceController extends formView.Controller {
         const defaultMessage = type === "printer" ? _t("Test page printed") : _t('Fiscal Data Module is connected and operational');
         switch (event.status) {
             case "error":
-                this.notificationService.add(errorMessage, { type: "danger" });
+                this.notification.add(errorMessage, { type: "danger" });
                 return;
             case "warning":
-                this.notificationService.add(errorMessage, { type: "warning" });
+                this.notification.add(errorMessage, { type: "warning" });
                 return;
             case "disconnected":
-                this.notificationService.add(_t("Device is disconnected"), { type: "danger" });
+                this.notification.add(_t("Device is disconnected"), { type: "danger" });
                 return;
             default:
-                this.notificationService.add(defaultMessage, { type: "info" });
+                this.notification.add(defaultMessage, { type: "info" });
                 return;
         }
     }
@@ -114,7 +120,7 @@ class IoTDeviceController extends formView.Controller {
                 return printReport(this.env, [reportId, [deviceId], null], [deviceId]);
             }
 
-            return this.iotHttpService.action(
+            return this.iotHttp.action(
                 iot_id.id,
                 identifier,
                 { action: "status" },

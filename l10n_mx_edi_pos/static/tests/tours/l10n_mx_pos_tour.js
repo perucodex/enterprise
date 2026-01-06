@@ -32,3 +32,24 @@ registry.category("web_tour.tours").add("test_refund_with_gift_card_mx", {
             ReceiptScreen.isShown(),
         ].flat(),
 });
+
+registry.category("web_tour.tours").add("test_refund_with_discount", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Whiteboard Pen"),
+            ProductScreen.clickControlButton("Discount"),
+            Dialog.confirm(),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Cash"),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.clickNextOrder(),
+            ProductScreen.clickRefund(),
+            TicketScreen.selectOrder("-000001"),
+            ProductScreen.clickNumpad("1"),
+            TicketScreen.confirmRefund(),
+            Dialog.is({ title: "Refund Amount Exceeds Original Order" }),
+            Dialog.confirm(),
+        ].flat(),
+});

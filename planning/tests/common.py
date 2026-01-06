@@ -5,6 +5,8 @@ from dateutil.rrule import MO
 
 from odoo.tests.common import TransactionCase, HttpCase
 
+from odoo.addons.mail.tests.common import mail_new_test_user
+
 
 class TestCommonPlanning(TransactionCase):
     def get_by_employee(self, employee):
@@ -37,6 +39,9 @@ class TestCommonPlanning(TransactionCase):
             'create_date': '2015-01-01 00:00:00',
         })
         cls.resource_janice = cls.employee_janice.resource_id
+        cls.planning_manager_user = mail_new_test_user(
+            cls.env, login='planning_manager_user', groups='planning.group_planning_manager', name='Planning Manager User'
+        )
 
     @classmethod
     def setUpDates(cls):

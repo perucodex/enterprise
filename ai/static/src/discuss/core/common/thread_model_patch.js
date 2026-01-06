@@ -1,7 +1,6 @@
 import { Thread } from "@mail/core/common/thread_model";
 import { patch } from "@web/core/utils/patch";
-import { rpc, RPCError } from "@web/core/network/rpc";
-import { _t } from "@web/core/l10n/translation";
+import { rpc } from "@web/core/network/rpc";
 import { getCurrentViewInfo } from "@ai/discuss/core/common/view_details";
 import { session } from "@web/session";
 
@@ -23,17 +22,6 @@ patch(Thread.prototype, {
                     current_view_info: await getCurrentViewInfo(this.store.env.bus),
                     ai_session_identifier: session.ai_session_identifier,
                 });
-            } catch (error) {
-                if (error instanceof RPCError) {
-                    await rpc("/ai/post_error_message", {
-                        error_message:
-                            error.data?.message ||
-                            _t("An error occurred while generating the AI response."),
-                        channel_id: this.id,
-                    });
-                } else {
-                    throw error;
-                }
             } finally {
                 if (aiMember) {
                     aiMember.isTyping = false;

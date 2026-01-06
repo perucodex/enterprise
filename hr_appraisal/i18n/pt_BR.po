@@ -9,12 +9,14 @@
 # Kevilyn Rosa, 2023
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # "Maitê Dietze (madi)" <madi@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Odoo Translation Bot <c3p@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2025-10-07 02:40+0000\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-12-31 10:16+0000\n"
 "Last-Translator: \"Maitê Dietze (madi)\" <madi@odoo.com>\n"
 "Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/"
 "odoo-19/hr_appraisal/pt_BR/>\n"
@@ -24,7 +26,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
 "1000000 == 0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: hr_appraisal
 #. odoo-python
@@ -37,13 +39,13 @@ msgstr "%(user)s decidiu, como %(role)s, publicar o feedback do funcionário"
 #: code:addons/hr_appraisal/models/hr_appraisal_goal.py:0
 #: code:addons/hr_appraisal/models/hr_appraisal_template.py:0
 msgid "%s (copy)"
-msgstr ""
+msgstr "%s (cópia)"
 
 #. module: hr_appraisal
 #. odoo-python
 #: code:addons/hr_appraisal/models/hr_appraisal.py:0
 msgid "%s's Goals"
-msgstr ""
+msgstr "%s dos objetivos"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,help:hr_appraisal.field_hr_appraisal_campaign_wizard__manager
@@ -53,16 +55,20 @@ msgid ""
 "'Specific Person': All appraisals will be conducted by the specified "
 "employees"
 msgstr ""
+"“Gerente do funcionário”: as avaliações serão realizadas pelo gerente direto "
+"do funcionário\n"
+"“Pessoa específica”: todas as avaliações serão realizadas pelos funcionários "
+"especificados"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
 msgid ". Then, schedule a meeting to discuss it."
-msgstr ""
+msgstr ". Em seguida, marque uma reunião para discutir o assunto."
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
 msgid ". Then, share it with appraisers."
-msgstr ""
+msgstr "Em seguida, compartilhe com os avaliadores."
 
 #. module: hr_appraisal
 #: model:ir.model.fields.selection,name:hr_appraisal.selection__hr_appraisal_goal__progression__100
@@ -117,6 +123,29 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
+"\">\n"
+"                        A avaliação do <t t-out=\"ctx.get('employee_to_name')"
+"\">funcionário</t> foi confirmada.\n"
+"                        <br/><br/>\n"
+"                        Agendem uma data de avaliação juntos.\n"
+"                        <br/><br/>\n"
+"                        <t t-if=\"ctx.get('recipient_users')\">\n"
+"                            <p style=\"margin: 16px 0px 16px 0px; text-"
+"align: center;\">\n"
+"                                <a t-att-href=\"ctx.get('url')\" t-attf-"
+"style=\"background-color: {{object.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;"
+"\">\n"
+"                                    Ver avaliação\n"
+"                                </a>\n"
+"                            </p>\n"
+"                        </t>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: hr_appraisal
 #: model:mail.template,body_html:hr_appraisal.mail_template_appraisal_request_from_employee
@@ -154,6 +183,38 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
+"\">\n"
+"                        Prezado(a) <t t-out=\"ctx.get('employee_to_name')"
+"\">funcionário(a)</t>,\n"
+"                        <br/>\n"
+"                        <t t-out=\"ctx.get('author_name', '')\">Addison "
+"Olson</t> (<t t-out=\"ctx.get('author_mail', '')"
+"\">addison.olson28@example.com</t>) gostaria de solicitar uma avaliação.\n"
+"                        <t t-if=\"ctx.get('user_body')\">\n"
+"                            <div style=\"margin: 16px 0px 16px 0px; padding: "
+"8px 16px 8px 16px; background-color: #F1F1F1;\">\n"
+"                                <t t-out=\"ctx.get('user_body')\">Avaliação "
+"anual.</t>\n"
+"                            </div>\n"
+"                        </t>\n"
+"                        <t t-if=\"ctx.get('recipient_users')\">\n"
+"                            <p style=\"margin: 16px 0px 16px 0px; padding: "
+"8px 16px 8px 16px; text-align: center;\">\n"
+"                                <a t-att-href=\"ctx.get('url')\" t-attf-"
+"style=\" margin: auto; background-color: "
+"{{object.employee_id.company_id.email_secondary_color or '#875A7B'}}; "
+"padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{object.employee_id.company_id.email_primary_color or '#FFFFFF'}}; border-"
+"radius: 5px;\">\n"
+"                                    Ver Avaliação\n"
+"                                </a>\n"
+"                            </p>\n"
+"                        </t>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: hr_appraisal
 #: model:mail.template,body_html:hr_appraisal.mail_template_appraisal_reminder
@@ -198,6 +259,46 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;"
+"\">\n"
+"                        Olá <t t-out=\"ctx.get('employee_to_name')"
+"\">[funcionário]</t>,\n"
+"                        <br/>\n"
+"                        Isso só um lembrete rápido de que sua próxima "
+"avaliação, com <t t-out=\"ctx.get('manager_names')\"> [Avaliadores]</t>,\n"
+"                        está programada para <t t-out=\"ctx.get('date_close')"
+"\">[prazo final]</t>.\n"
+"                        <br/>\n"
+"                        <t t-if=\"ctx.get('user_body')\">\n"
+"                            <div class=\"my-3 py-2 px-3 bg-secondary\">\n"
+"                                <t t-out=\"ctx.get('user_body')"
+"\">[Comentário opcional]</t>\n"
+"                            </div>\n"
+"                        </t>\n"
+"                        <t t-if=\"ctx.get('recipient_users')\">\n"
+"                            Você pode acessar seu formulário de avaliação "
+"aqui:\n"
+"                            <p class=\"text-center my-3 py-2 px-3\">\n"
+"                                <a t-att-href=\"ctx.get('url')\" t-attf-"
+"style=\" margin: auto; background-color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
+"8px 16px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px;"
+"\">\n"
+"                                    Ver avaliação\n"
+"                                </a>\n"
+"                            </p>\n"
+"                        </t>\n"
+"                        Se tiver alguma dúvida ou precisar remarcar, fique à "
+"vontade para entrar em contato.\n"
+"                        <br/>\n"
+"                        <br/>\n"
+"                        <t t-out=\"ctx.get('author_signature')\"/>\n"
+"                        <br/>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -208,6 +309,11 @@ msgid ""
 "                        the company.\n"
 "                    </em>"
 msgstr ""
+"<em>\n"
+"                        Descreva algo de que você tem orgulho — um trabalho "
+"que teve um impacto positivo na\n"
+"empresa.\n"
+"                    </em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -217,6 +323,10 @@ msgid ""
 "obstacles?\n"
 "                    </em>"
 msgstr ""
+"<em>\n"
+"                      Você encontrou dificuldades ou obstáculos "
+"inesperados?\n"
+"                    </em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -227,6 +337,11 @@ msgid ""
 "                        enjoy the most and which the least?\n"
 "                    </em>"
 msgstr ""
+"<em>\n"
+"                        Todo trabalho tem seus pontos fortes. Para você, "
+"quais são as tarefas\n"
+"                        mais e menos prazerosas?\n"
+"                    </em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -236,6 +351,10 @@ msgid ""
 "them overcome their weaknesses?\n"
 "                    </em>"
 msgstr ""
+"<em>\n"
+"                        Como gerente, de que modo você poderia ajudar a "
+"melhorar nesses pontos fracos?\n"
+"                   </em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -246,6 +365,11 @@ msgid ""
 "                        reach your goals and foster better collaboration?\n"
 "                    </em>"
 msgstr ""
+"<em>\n"
+"                        Como a empresa poderia colaborar com suas "
+"necessidades e objetivos para você \n"
+"                        atingir suas metas e uma melhor colaboração?\n"
+"                   </em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -256,6 +380,11 @@ msgid ""
 "                        the employee’s goals?\n"
 "                    </em>"
 msgstr ""
+"<em>\n"
+"                        Como você vê o funcionário no futuro? Sua visão está "
+"alinhada com \n"
+"                        os objetivos do funcionário?\n"
+"                    </em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -266,6 +395,11 @@ msgid ""
 "                        handling work-related challenges.\n"
 "                    </em>"
 msgstr ""
+"<em>\n"
+"                        Mencione conquistas que representem seus pontos "
+"fortes ao\n"
+"                        lidar com desafios do trabalho.\n"
+"                    </em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -275,47 +409,48 @@ msgstr "<em>Autonomia</em>"
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
 msgid "<em>Company culture and values</em>"
-msgstr ""
+msgstr "<em>Cultura e valores da empresa</em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
 msgid "<em>Compensation</em>"
-msgstr ""
+msgstr "<em>Compensação</em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_default_template
 msgid "<em>Do you need a rapid response to address the current situation?</em>"
 msgstr ""
+"<em>Precisa de uma resposta rápida para lidar com a situação atual?</em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
 msgid "<em>Internal Communication</em>"
-msgstr ""
+msgstr "<em>Comunicação interna</em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
 msgid "<em>Job content</em>"
-msgstr ""
+msgstr "<em>Conteúdo da cargo</em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_default_template
 msgid "<em>Proactivity</em>"
-msgstr ""
+msgstr "<em>Proatividade</em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
 msgid "<em>Provide a long-term objective (beyond 6 months).</em>"
-msgstr ""
+msgstr "<em>Forneça um objetivo de longo prazo (além de 6 meses).</em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
 msgid "<em>Provide a short-term objective (within the next 6 months).</em>"
-msgstr ""
+msgstr "<em>Forneça um objetivo de curto prazo (nos próximos 6 meses).</em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_default_template
 msgid "<em>Stress Management</em>"
-msgstr ""
+msgstr "<em>Gerenciamento do estresse</em>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -330,7 +465,7 @@ msgstr "<em>Gerenciamento do tempo</em>"
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
 msgid "<em>Work organization</em>"
-msgstr ""
+msgstr "<em>Organização do trabalho</em>"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_employee_public_view_form
@@ -358,7 +493,7 @@ msgstr "<span class=\"o_stat_text\">Metas</span>"
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_template_view_hierarchy
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_view_hierarchy
 msgid "<span id=\"span_tag\" invisible=\"not tag_ids\">Tags:</span>"
-msgstr ""
+msgstr "<span id=\"span_tag\" invisible=\"not tag_ids\">Marcadores:</span>"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
@@ -367,6 +502,11 @@ msgid ""
 "                                            <strong class=\"text-success\" "
 "invisible=\"not employee_feedback_published\">Shared to Appraisers</strong>"
 msgstr ""
+"<span invisible=\"employee_feedback_published\">Compartilhado com "
+"avaliadores</span>\n"
+"                                            <strong class=\"text-success\" "
+"invisible=\"not employee_feedback_published\">Compartilhado com avaliadores</"
+"strong>"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
@@ -375,6 +515,11 @@ msgid ""
 "                                            <strong class=\"text-success\" "
 "invisible=\"not manager_feedback_published\">Shared to Employee</strong>"
 msgstr ""
+"<span invisible=\"manager_feedback_published\">Compartilhado com o "
+"funcionário</span>\n"
+"                                            <strong class=\"text-success\" "
+"invisible=\"not manager_feedback_published\">Compartilhado com o "
+"funcionário</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -383,6 +528,9 @@ msgid ""
 "                        Evaluation\n"
 "                    </span>"
 msgstr ""
+"<span style=\"font-weight: bolder;\">\n"
+"                Avaliação\n"
+"            </span>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -391,6 +539,9 @@ msgid ""
 "                        Feedback\n"
 "                    </span>"
 msgstr ""
+"<span style=\"font-weight: bolder;\">\n"
+"                        Feedback\n"
+"                    </span>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -399,6 +550,9 @@ msgid ""
 "                        Improvements\n"
 "                    </span>"
 msgstr ""
+"<span style=\"font-weight: bolder;\">\n"
+"                Aprimoramentos\n"
+"            </span>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -407,6 +561,9 @@ msgid ""
 "                        My feelings\n"
 "                    </span>"
 msgstr ""
+"<span style=\"font-weight: bolder;\">\n"
+"                        Minhas impressões\n"
+"                    </span>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -415,6 +572,9 @@ msgid ""
 "                        My future\n"
 "                    </span>"
 msgstr ""
+"<span style=\"font-weight: bolder;\">\n"
+"                        Meu futuro\n"
+"                    </span>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -423,22 +583,25 @@ msgid ""
 "                        My work\n"
 "                    </span>"
 msgstr ""
+"<span style=\"font-weight: bolder;\">\n"
+"                        Meu trabalho\n"
+"                    </span>"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_view_hierarchy
 msgid "<span>Deadline:</span>"
-msgstr ""
+msgstr "<span>Prazo final:</span>"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_template_view_hierarchy
 msgid "<span>Expected Time:</span>"
-msgstr ""
+msgstr "<span>Tempo previsto:</span>"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_template_view_form
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_template_view_hierarchy
 msgid "<span>months</span>"
-msgstr ""
+msgstr "<span>meses</span>"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
@@ -448,6 +611,10 @@ msgid ""
 "                                            <span invisible=\"not "
 "employee_feedback_published\">Private</span>"
 msgstr ""
+"<strong class=\"text-info\" "
+"invisible=\"employee_feedback_published\">Privado</strong>\n"
+"                                            <span invisible=\"not "
+"employee_feedback_published\">Privado</span>"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
@@ -457,6 +624,10 @@ msgid ""
 "                                            <span invisible=\"not "
 "manager_feedback_published\">Private</span>"
 msgstr ""
+"<strong class=\"text-info\" invisible=\"manager_feedback_published\"></"
+"strong>\n"
+"                                            <span invisible=\"not "
+"manager_feedback_published\">Particular</span>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
@@ -466,6 +637,10 @@ msgid ""
 "                                    <br>\n"
 "                                </strong>"
 msgstr ""
+"<strong class=\"text-o-color-4\">\n"
+"                                    MÍNIMO\n"
+"                                    <br>\n"
+"                                </strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
@@ -475,21 +650,25 @@ msgid ""
 "                                    <br>\n"
 "                                </strong>"
 msgstr ""
+"<strong class=\"text-o-color-4\">\n"
+"                                    MÁXIMO\n"
+"                                    <br>\n"
+"                                </strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>360 feedback :</strong>"
-msgstr ""
+msgstr "<strong>Feedback 360:</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_post_training_template
 msgid "<strong>Any particular remark on the training ?</strong>"
-msgstr ""
+msgstr "<strong>Alguma observação especial sobre o treinamento?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>Are you happy with your current role ?</strong>"
-msgstr ""
+msgstr "<strong>Você está satisfeito com sua função atual?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_post_training_template
@@ -497,31 +676,33 @@ msgid ""
 "<strong>Can the employee accurately recall and explain the key concepts from "
 "the training ?</strong>"
 msgstr ""
+"<strong>O funcionário consegue se lembrar e explicar com precisão os "
+"principais conceitos do treinamento?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>Career objective</strong>"
-msgstr ""
+msgstr "<strong>Objetivo de carreira</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
 msgid "<strong>Career opportunities</strong>"
-msgstr ""
+msgstr "<strong>Oportunidades de carreira</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
 msgid "<strong>Company Feedback</strong>"
-msgstr ""
+msgstr "<strong>Feedback da empresa</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_exit_interview_template
 msgid "<strong>Could you provide examples ?</strong>"
-msgstr ""
+msgstr "<strong>Você poderia fornecer exemplos?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>Create your SWOT</strong>"
-msgstr ""
+msgstr "<strong>Criar seu SWOT</strong>"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_view_gantt
@@ -531,22 +712,22 @@ msgstr "<strong>Data — </strong>"
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>Do you seek any particular career path ?</strong>"
-msgstr ""
+msgstr "<strong>Você busca alguma carreira específica?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_exit_interview_template
 msgid "<strong>Feedback on management</strong>"
-msgstr ""
+msgstr "<strong>Feedback sobre gerência</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>GOALS :</strong>"
-msgstr ""
+msgstr "<strong>METAS:</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_exit_interview_template
 msgid "<strong>Handover to manage inside the team</strong>"
-msgstr ""
+msgstr "<strong>Transferência para gerenciar dentro da equipe</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_post_training_template
@@ -554,6 +735,8 @@ msgid ""
 "<strong>Has the employee effectively integrated the new skills or knowledge "
 "into their daily work tasks ?</strong>"
 msgstr ""
+"<strong>O funcionário integrou efetivamente as novas habilidades ou "
+"conhecimentos em suas tarefas diárias de trabalho?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_post_training_template
@@ -561,6 +744,9 @@ msgid ""
 "<strong>How actively did the employee participate during the training "
 "sessions (e.g., asking questions, contributing to discussions) ?</strong>"
 msgstr ""
+"<strong>Quão ativamente o funcionário participou durante as sessões de "
+"treinamento (por exemplo, fazendo perguntas, contribuindo para as "
+"discussões)?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_post_training_template
@@ -568,6 +754,8 @@ msgid ""
 "<strong>How confident do you feel in using the skills and knowledge gained "
 "from the training in your work ?</strong>"
 msgstr ""
+"<strong>Até que ponto você se sente confiante em usar as habilidades e os "
+"conhecimentos adquiridos com o treinamento em seu trabalho?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
@@ -575,21 +763,23 @@ msgid ""
 "<strong>How do you feel about the support and resources provided to you "
 "during this period ?</strong>"
 msgstr ""
+"<strong>Como você se sente em relação ao apoio e aos recursos fornecidos a "
+"você durante esse período?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_post_training_template
 msgid "<strong>How helpful were the provided materials ?</strong>"
-msgstr ""
+msgstr "<strong>Quão úteis foram os materiais fornecidos?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_post_training_template
 msgid "<strong>How would you asses your level before the training ?</strong>"
-msgstr ""
+msgstr "<strong>Como você avaliaria seu nível antes do treinamento?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_post_training_template
 msgid "<strong>How would you assess your level post training ?</strong>"
-msgstr ""
+msgstr "<strong>Como você avaliaria seu nível pós-treinamento?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_post_training_template
@@ -597,17 +787,19 @@ msgid ""
 "<strong>How would you rate the employee's proficiency in the skill on a "
 "scale from 1 to 10 ?</strong>"
 msgstr ""
+"<strong>Como você classificaria a proficiência do funcionário na habilidade "
+"em uma escala de 1 a 10?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_post_training_template
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>Management feedback and assessment</strong>"
-msgstr ""
+msgstr "<strong>Feedback e avaliação da gerência</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
 msgid "<strong>Motivations</strong>"
-msgstr ""
+msgstr "<strong>Motivações</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_post_training_template
@@ -615,16 +807,18 @@ msgid ""
 "<strong>On a scale of 1 to 10, how would you rate the employee’s overall "
 "improvement since the training ?</strong>"
 msgstr ""
+"<strong>Em uma escala de 1 a 10, como você classificaria a melhoria geral do "
+"funcionário desde o treinamento?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
 msgid "<strong>Opportunity</strong>"
-msgstr ""
+msgstr "<strong>Oportunidade</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
 msgid "<strong>Overall experience feedback</strong>"
-msgstr ""
+msgstr "<strong>Feedback da experiência geral</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_exit_interview_template
@@ -632,62 +826,62 @@ msgstr ""
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>Overall personal experience</strong>"
-msgstr ""
+msgstr "<strong>Experiência pessoal geral</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_exit_interview_template
 msgid "<strong>Position succession and candidate suggestion</strong>"
-msgstr ""
+msgstr "<strong>Sucessão de cargos e sugestão de candidatos</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>SWOT results</strong>"
-msgstr ""
+msgstr "<strong>Resultados de SWOT</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
 msgid "<strong>SWOT</strong>"
-msgstr ""
+msgstr "<strong>SWOT</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_post_training_template
 msgid "<strong>Skills at stakes :</strong>"
-msgstr ""
+msgstr "<strong>Habilidades em jogo:</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
 msgid "<strong>Strength</strong>"
-msgstr ""
+msgstr "<strong>Ponto forte</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>Things to keep doing ?</strong>"
-msgstr ""
+msgstr "<strong>O que continuar fazendo?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>Things to start doing ?</strong>"
-msgstr ""
+msgstr "<strong>O que começar a fazer?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>Things to stop doing ?</strong>"
-msgstr ""
+msgstr "<strong>O que parar de fazer?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
 msgid "<strong>Threats</strong>"
-msgstr ""
+msgstr "<strong>Pontos de atenção</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>Time to assess the leadership team:</strong>"
-msgstr ""
+msgstr "<strong>É hora de avaliar a equipe de liderança:</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_post_training_template
 msgid "<strong>Training assessment</strong>"
-msgstr ""
+msgstr "<strong>Avaliação do treinamento</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_exit_interview_template
@@ -695,11 +889,13 @@ msgid ""
 "<strong>We wish you the best of success and sincerely thank you for your "
 "invaluable contribution to the company's achievements.</strong>"
 msgstr ""
+"<strong>Desejamos o maior sucesso para você e agradecemos por sua "
+"inestimável contribuição para as conquistas da empresa.</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
 msgid "<strong>Weakness</strong>"
-msgstr ""
+msgstr "<strong>Ponto fraco</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_exit_interview_template
@@ -707,11 +903,13 @@ msgid ""
 "<strong>What advice do you have for improving management's leadership and "
 "support for future employees ?</strong>"
 msgstr ""
+"<strong>Que conselho você daria para melhorar a liderança e o apoio da "
+"gerência aos futuros funcionários?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_exit_interview_template
 msgid "<strong>What advice would you give to the successor ?</strong>"
-msgstr ""
+msgstr "<strong>Que conselho você daria ao sucessor?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
@@ -719,6 +917,8 @@ msgid ""
 "<strong>What are your thoughts on the company culture and work environment ?"
 "</strong>"
 msgstr ""
+"<strong>O que você acha da cultura da empresa e do ambiente de trabalho?</"
+"strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
@@ -726,11 +926,13 @@ msgid ""
 "<strong>What are your thoughts on the recent changes in the company ? Were "
 "you able to adapt ?</strong>"
 msgstr ""
+"<strong>O que você acha das recentes mudanças na empresa? Você foi capaz de "
+"se adaptar?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>What are your thoughts on working with your team ?</strong>"
-msgstr ""
+msgstr "<strong>O que você pensa de trabalhar com sua equipe?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
@@ -738,6 +940,8 @@ msgid ""
 "<strong>What are your thoughts on your overall experience during the "
 "probationary period ?</strong>"
 msgstr ""
+"<strong>O que você acha da sua experiência geral durante o período de "
+"experiência?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_exit_interview_template
@@ -745,17 +949,21 @@ msgid ""
 "<strong>What aspects of management and leadership at the company were most "
 "effective in helping you succeed ?</strong>"
 msgstr ""
+"<strong>Quais aspectos da gerência e da liderança da empresa foram mais "
+"eficazes para ajudá-lo a ter sucesso?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
 msgid ""
 "<strong>What aspects of your role have you enjoyed the most/least ?</strong>"
 msgstr ""
+"<strong>De quais aspectos de sua função você mais gostou ou menos gostou?</"
+"strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
 msgid "<strong>What change would you see in the company ?</strong>"
-msgstr ""
+msgstr "<strong>Que mudanças você gostaria de ver na empresa?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_post_training_template
@@ -763,11 +971,13 @@ msgid ""
 "<strong>What further actions (e.g., additional training, mentoring) do you "
 "recommend to support the employee’s continued development ?</strong>"
 msgstr ""
+"<strong>Que outras ações (ex.: treinamento adicional, orientação) você "
+"recomenda para apoiar o desenvolvimento contínuo do funcionário?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>What is your overall feeling about the previous year ?</strong>"
-msgstr ""
+msgstr "<strong>Qual é o seu sentimento geral sobre o ano anterior?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_exit_interview_template
@@ -775,6 +985,8 @@ msgid ""
 "<strong>What key skills should the management team focus on for a smooth "
 "transition ?</strong>"
 msgstr ""
+"<strong>Em quais habilidades-chave a equipe de gerenciamento deve se "
+"concentrar para uma transição tranquila?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_probationary_period_template
@@ -782,16 +994,18 @@ msgid ""
 "<strong>What motivates you to continue working with us, and what are your "
 "career aspirations here ?</strong>"
 msgstr ""
+"<strong>O que o motiva a continuar trabalhando conosco e quais são suas "
+"aspirações de carreira aqui?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_exit_interview_template
 msgid "<strong>What were the key challenges in your position ?</strong>"
-msgstr ""
+msgstr "<strong>Quais foram os principais desafios em seu cargo?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "<strong>Which emotions were prevalent ?</strong>"
-msgstr ""
+msgstr "<strong>Quais emoções foram predominantes?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
@@ -799,6 +1013,8 @@ msgid ""
 "<strong>Which skills do you possess that you feel the company is not "
 "utilizing ?</strong>"
 msgstr ""
+"<strong>Quais habilidades suas você considera que a empresa não está "
+"utilizando?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
@@ -806,37 +1022,40 @@ msgid ""
 "<strong>Which skills would you like to prioritize for training, and why ?</"
 "strong>"
 msgstr ""
+"<strong>Quais habilidades você gostaria de priorizar para treinamento e por "
+"quê?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_exit_interview_template
 msgid "<strong>Who would you see as your successor ?</strong>"
-msgstr ""
+msgstr "<strong>Quem você veria como seu sucessor?</strong>"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_post_training_template
 msgid "<strong>Would you need extra help from the management team ?</strong>"
 msgstr ""
+"<strong>Você precisaria de ajuda extra da equipe de gerenciamento?</strong>"
 
 #. module: hr_appraisal
 #. odoo-python
 #: code:addons/hr_appraisal/models/hr_appraisal_goal.py:0
 msgid "A goal template already exist for this goal."
-msgstr ""
+msgstr "Já existe um modelo de meta aqui."
 
 #. module: hr_appraisal
 #: model:ir.model.constraint,message:hr_appraisal.constraint_hr_appraisal_goal_tag_name_uniq
 msgid "A tag with the same name already exists."
-msgstr ""
+msgstr "Já existe um marcador com o mesmo nome."
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__accessible_employee_feedback
 msgid "Accessible Employee Feedback"
-msgstr ""
+msgstr "Feedback acessível dos funcionários"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__accessible_manager_feedback
 msgid "Accessible Manager Feedback"
-msgstr ""
+msgstr "Feedback acessível do gerente"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__message_needaction
@@ -859,7 +1078,7 @@ msgstr "Atividades"
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_search
 msgid "Activities of"
-msgstr ""
+msgstr "Atividades de"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__activity_exception_decoration
@@ -882,18 +1101,18 @@ msgstr "Ícone do tipo de atividade"
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_search
 msgid "Activity type"
-msgstr ""
+msgstr "Tipo de atividade"
 
 #. module: hr_appraisal
 #. odoo-javascript
 #: code:addons/hr_appraisal/static/src/views/list/hr_employee_selection_list/hr_employee_selection_list_view.xml:0
 msgid "Add Goals to Employees"
-msgstr ""
+msgstr "Adicionar metas aos funcionários"
 
 #. module: hr_appraisal
 #: model_terms:ir.actions.act_window,help:hr_appraisal.hr_appraisal_config_templates_action
 msgid "Add a new template"
-msgstr ""
+msgstr "Adicionar um novo modelo"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.request_appraisal_view_form
@@ -908,12 +1127,12 @@ msgstr "Administrador"
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_campaign_wizard_view_form
 msgid "All Employees"
-msgstr ""
+msgstr "Todos os funcionários"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_note_view_tree
 msgid "All companies"
-msgstr ""
+msgstr "Todas as empresas"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,help:hr_appraisal.field_hr_appraisal_campaign_wizard__mode
@@ -924,16 +1143,23 @@ msgid ""
 "- By Department: all employees of the specified department\n"
 "- By Employee Tag: all employees of the specific employee group category"
 msgstr ""
+"Permitir a criação de avaliações em lotes:\n"
+"- Por funcionário: funcionários específicos\n"
+"- Por empresa: todos os funcionários da empresa especificada\n"
+"- Por departamento: todos os funcionários do departamento especificado\n"
+"- Por marcador de funcionário: todos os funcionários da categoria específica "
+"do grupo de funcionários"
 
 #. module: hr_appraisal
 #: model:mail.template,description:hr_appraisal.mail_template_appraisal_reminder
 msgid "An appraisal reminder sent manually to the employee by the manager"
 msgstr ""
+"Um lembrete de avaliação enviado manualmente ao funcionário pelo gerente"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
 msgid "Another appraisal with the same people is already ongoing."
-msgstr ""
+msgstr "Outra avaliação com as mesmas pessoas já está em andamento."
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_employee__appraisal_ids
@@ -964,12 +1190,12 @@ msgstr "Avaliação: Nota avaliativa"
 #: code:addons/hr_appraisal/static/src/views/helper/appraisal_helper_view/appraisal_helper_view.js:0
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_campaign_wizard_view_form
 msgid "Appraisal Campaign"
-msgstr ""
+msgstr "Campanha de avaliação"
 
 #. module: hr_appraisal
 #: model:ir.model,name:hr_appraisal.model_hr_appraisal_campaign_wizard
 msgid "Appraisal Campaign Wizard"
-msgstr ""
+msgstr "Assistente de campanha de avaliação"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_res_company__appraisal_confirm_mail_template
@@ -1009,7 +1235,7 @@ msgstr "Meta da avaliação"
 #. module: hr_appraisal
 #: model:ir.model,name:hr_appraisal.model_hr_appraisal_goal_tag
 msgid "Appraisal Goal Tags"
-msgstr ""
+msgstr "Marcadores das metas de avaliação"
 
 #. module: hr_appraisal
 #. odoo-python
@@ -1025,12 +1251,12 @@ msgstr "Publicação do planejamento de avaliações"
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_department__appraisal_properties_definition
 msgid "Appraisal Properties"
-msgstr ""
+msgstr "Propriedades de avaliação"
 
 #. module: hr_appraisal
 #: model:mail.template,subject:hr_appraisal.mail_template_appraisal_reminder
 msgid "Appraisal Reminder"
-msgstr ""
+msgstr "Lembrete de avaliação"
 
 #. module: hr_appraisal
 #. odoo-python
@@ -1045,7 +1271,7 @@ msgstr "Solicitação de avaliação"
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_template_view_tree
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_template_form
 msgid "Appraisal Template"
-msgstr ""
+msgstr "Modelos de avaliação"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_department__appraisal_template_ids
@@ -1060,18 +1286,20 @@ msgid ""
 "Appraisal for %(appraisal_title)s should be using template \"%"
 "(template_name)s\" instead of \"%(wrong_template_name)s\""
 msgstr ""
+"A avaliação de %(appraisal_title)s deveria estar usando o modelo \"%"
+"(template_name)s\" em vez de \"%(wrong_template_name)s\""
 
 #. module: hr_appraisal
 #. odoo-python
 #: code:addons/hr_appraisal/models/hr_appraisal.py:0
 msgid "Appraisal for %(employee)s on %(date)s"
-msgstr ""
+msgstr "Avaliação de %(employee)s em %(date)s"
 
 #. module: hr_appraisal
 #. odoo-python
 #: code:addons/hr_appraisal/models/hr_appraisal.py:0
 msgid "Appraisal for %s to fill"
-msgstr ""
+msgstr "Avaliação para %s preencher"
 
 #. module: hr_appraisal
 #. odoo-python
@@ -1083,7 +1311,7 @@ msgstr "Avaliação de %s"
 #. odoo-python
 #: code:addons/hr_appraisal/models/hr_appraisal.py:0
 msgid "Appraisal to fill"
-msgstr ""
+msgstr "Avaliação a preencher"
 
 #. module: hr_appraisal
 #: model:ir.actions.act_window,name:hr_appraisal.hr_appraisal_action_from_department
@@ -1114,7 +1342,7 @@ msgstr "Avaliações"
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.res_config_settings_view_employee_form
 msgid "Appraisals Automation"
-msgstr ""
+msgstr "Automação de avaliações"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.res_config_settings_view_employee_form
@@ -1133,11 +1361,13 @@ msgid ""
 "Appraisals won't be created for the following employees because they don't "
 "have a manager: %(employees)s"
 msgstr ""
+"Não serão criadas avaliações para os seguintes funcionários, porque eles não "
+"têm um gerente: %(employees)s"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
 msgid "Appraisers"
-msgstr ""
+msgstr "Avaliadores"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_search
@@ -1163,6 +1393,8 @@ msgid ""
 "Assign Goals to motivate your Employees and keep track of their objectives "
 "between Appraisals."
 msgstr ""
+"Atribua metas para motivar seus funcionários a acompanhar seus objetivos "
+"entre as avaliações."
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__message_attachment_count
@@ -1187,6 +1419,8 @@ msgid ""
 "Automatically creates the confirmed appraisals when Next Appraisal Date is "
 "reached"
 msgstr ""
+"Cria automaticamente as avaliações confirmadas quando a Data da próxima "
+"avaliação é atingida"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__avatar_1920
@@ -1201,33 +1435,33 @@ msgstr "Avatar 128"
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_request_appraisal__body_has_template_value
 msgid "Body content is the same as the template"
-msgstr ""
+msgstr "O conteúdo do corpo do texto é igual ao do modelo"
 
 #. module: hr_appraisal
 #: model:ir.model.fields.selection,name:hr_appraisal.selection__hr_appraisal_campaign_wizard__mode__company
 msgid "By Company"
-msgstr ""
+msgstr "Por empresa"
 
 #. module: hr_appraisal
 #: model:ir.model.fields.selection,name:hr_appraisal.selection__hr_appraisal_campaign_wizard__mode__department
 msgid "By Department"
-msgstr ""
+msgstr "Por departamento"
 
 #. module: hr_appraisal
 #: model:ir.model.fields.selection,name:hr_appraisal.selection__hr_appraisal_campaign_wizard__mode__employee
 msgid "By Employee"
-msgstr ""
+msgstr "Por funcionário"
 
 #. module: hr_appraisal
 #: model:ir.model.fields.selection,name:hr_appraisal.selection__hr_appraisal_campaign_wizard__mode__category
 msgid "By Employee Tag"
-msgstr ""
+msgstr "Por marcador de funcionário"
 
 #. module: hr_appraisal
 #. odoo-javascript
 #: code:addons/hr_appraisal/static/src/components/goal_template_delete_confirmation_dialog/goal_template_delete_confirmation_dialog.js:0
 msgid "Bye-bye, record!"
-msgstr ""
+msgstr "Tchau, registro!"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_request_appraisal__can_edit_body
@@ -1238,7 +1472,7 @@ msgstr "Pode editar o corpo do texto"
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_employee__can_request_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_employee_public__can_request_appraisal
 msgid "Can Request Appraisal"
-msgstr ""
+msgstr "Pode solicitar uma avaliação"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__can_see_employee_publish
@@ -1260,13 +1494,13 @@ msgstr "Cancelar"
 #: code:addons/hr_appraisal/static/src/views/list/goal_template_library_list/goal_template_library_list_view.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
 msgid "Close"
-msgstr ""
+msgstr "Fechar"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,help:hr_appraisal.field_hr_appraisal__date_close
 #: model:ir.model.fields,help:hr_appraisal.field_hr_employee_public__last_appraisal_date
 msgid "Closing date of the current appraisal"
-msgstr ""
+msgstr "Data de encerramento da avaliação atual"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_goal_tag__color
@@ -1324,7 +1558,7 @@ msgstr "Conteúdo"
 #. odoo-javascript
 #: code:addons/hr_appraisal/static/src/views/list/goal_template_library_list/goal_template_library_list_view.xml:0
 msgid "Continue"
-msgstr ""
+msgstr "Continuar"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_res_company__duration_first_appraisal
@@ -1335,7 +1569,7 @@ msgstr "Criar primeira avaliação após"
 #. module: hr_appraisal
 #: model_terms:ir.actions.act_window,help:hr_appraisal.hr_appraisal_goal_tag_action
 msgid "Create a new tag"
-msgstr ""
+msgstr "Criar um novo marcador"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_res_company__duration_next_appraisal
@@ -1358,12 +1592,12 @@ msgstr "Criar novos objetivos"
 #: model_terms:ir.actions.act_window,help:hr_appraisal.action_hr_appraisal_goal_template
 #: model_terms:ir.actions.act_window,help:hr_appraisal.action_hr_appraisal_goal_template_library
 msgid "Create new goals Template"
-msgstr ""
+msgstr "Criar novos objetivos Modelo"
 
 #. module: hr_appraisal
 #: model_terms:ir.actions.act_window,help:hr_appraisal.hr_appraisal_goal_tag_action
 msgid "Create new tags to use on Employee's goals"
-msgstr ""
+msgstr "Criar novos marcadores para usar nas metas dos funcionários"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__create_uid
@@ -1395,7 +1629,7 @@ msgstr "Data de criação"
 #. module: hr_appraisal
 #: model:ir.model.fields,help:hr_appraisal.field_hr_appraisal__next_appraisal_date
 msgid "Date where the new appraisal will be automatically created"
-msgstr ""
+msgstr "Data em que a nova avaliação será criada automaticamente"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_goal__deadline
@@ -1419,6 +1653,8 @@ msgstr "Prazo: %s"
 msgid ""
 "Define the next appraisal date automatically based on Appraisal's History"
 msgstr ""
+"Definir a próxima data de avaliação automaticamente com base no histórico de "
+"avaliações"
 
 #. module: hr_appraisal
 #. odoo-javascript
@@ -1429,12 +1665,12 @@ msgstr "Excluir"
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_departure_wizard__delete_appraisal
 msgid "Delete Future Appraisals"
-msgstr ""
+msgstr "Excluir avaliações futuras"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,help:hr_appraisal.field_hr_departure_wizard__delete_appraisal
 msgid "Delete all appraisal after contract end date."
-msgstr ""
+msgstr "Excluir todas as avaliações após a data de término do contrato."
 
 #. module: hr_appraisal
 #. odoo-javascript
@@ -1455,12 +1691,12 @@ msgstr "Departamento"
 #. module: hr_appraisal
 #: model:ir.actions.act_window,name:hr_appraisal.open_view_hr_appraisal_graph_department
 msgid "Department Appraisals"
-msgstr ""
+msgstr "Avaliações do departamento"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_template__department_ids
 msgid "Departments"
-msgstr ""
+msgstr "Departamentos"
 
 #. module: hr_appraisal
 #: model:ir.model,name:hr_appraisal.model_hr_departure_wizard
@@ -1479,7 +1715,7 @@ msgstr "Descrição"
 #: code:addons/hr_appraisal/static/src/views/list/hr_employee_selection_list/hr_employee_selection_list_view.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_campaign_wizard_view_form
 msgid "Discard"
-msgstr ""
+msgstr "Descartar"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__display_name
@@ -1514,12 +1750,12 @@ msgstr "Concluído"
 #. module: hr_appraisal
 #: model:ir.model.fields.selection,name:hr_appraisal.selection__hr_appraisal__state__1_new
 msgid "Draft"
-msgstr ""
+msgstr "Rascunho"
 
 #. module: hr_appraisal
 #: model:ir.model,name:hr_appraisal.model_mail_template
 msgid "Email Templates"
-msgstr ""
+msgstr "Modelos de e-mail"
 
 #. module: hr_appraisal
 #: model:ir.model,name:hr_appraisal.model_hr_employee
@@ -1538,7 +1774,7 @@ msgstr "Avaliação de funcionário"
 #. module: hr_appraisal
 #: model:ir.model,name:hr_appraisal.model_hr_appraisal_template
 msgid "Employee Appraisal Template"
-msgstr ""
+msgstr "Modelo de avaliação de funcionários"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__employee_autocomplete_ids
@@ -1566,7 +1802,7 @@ msgstr "Modelo de feedback de funcionário"
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_campaign_wizard__category_id
 msgid "Employee Tag"
-msgstr ""
+msgstr "Marcador de funcionário"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__employee_user_id
@@ -1576,7 +1812,7 @@ msgstr "Usuário do funcionáio"
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
 msgid "Employee to review"
-msgstr ""
+msgstr "Funcionário para revisão"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
@@ -1586,14 +1822,14 @@ msgstr "Feedback do funcionário"
 #. module: hr_appraisal
 #: model:ir.model.fields.selection,name:hr_appraisal.selection__hr_appraisal_campaign_wizard__manager__employee_manager
 msgid "Employee's Manager"
-msgstr ""
+msgstr "Gerente do funcionário"
 
 #. module: hr_appraisal
 #. odoo-javascript
 #: code:addons/hr_appraisal/static/src/views/helper/appraisal_helper_view/appraisal_helper_view.js:0
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_campaign_wizard__employee_ids
 msgid "Employees"
-msgstr ""
+msgstr "Funcionários"
 
 #. module: hr_appraisal
 #: model:ir.actions.act_window,name:hr_appraisal.action_hr_appraisal_note
@@ -1611,7 +1847,7 @@ msgstr "Acima das expectativas"
 #. module: hr_appraisal
 #: model:hr.appraisal.goal.tag,name:hr_appraisal.hr_appraisal_goal_tag_external
 msgid "External"
-msgstr ""
+msgstr "Externo"
 
 #. module: hr_appraisal
 #. odoo-python
@@ -1664,11 +1900,13 @@ msgid ""
 "Give one positive achievement that convinced you of the employee's\n"
 "                    value."
 msgstr ""
+"Cite uma conquista positiva que o tenha convencido do valor do funcionário\n"
+"."
 
 #. module: hr_appraisal
 #: model:ir.actions.act_window,name:hr_appraisal.hr_appraisal_goal_tag_action
 msgid "Goal Tags"
-msgstr ""
+msgstr "Marcadores de meta"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_goal__template_goal_id
@@ -1694,7 +1932,7 @@ msgstr "Metas"
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_employee__goals_count
 msgid "Goals Count"
-msgstr ""
+msgstr "Total de metas"
 
 #. module: hr_appraisal
 #: model:ir.actions.act_window,name:hr_appraisal.action_hr_appraisal_goal_template
@@ -1724,7 +1962,7 @@ msgstr ""
 #. module: hr_appraisal
 #: model:hr.appraisal.goal.tag,name:hr_appraisal.hr_appraisal_goal_tag_hardskills
 msgid "Hard Skills"
-msgstr ""
+msgstr "Habilidades técnicas"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_goal__has_edit_right
@@ -1803,6 +2041,8 @@ msgid ""
 "If greened, the employee will be able to see your feedback. Otherwise, your "
 "feedback is blurred and visible only to you."
 msgstr ""
+"Se estiver verde, o funcionário poderá ver o feedback. Caso contrário, seu "
+"feedback ficará embaçado e visível apenas para você."
 
 #. module: hr_appraisal
 #: model:ir.model.fields,help:hr_appraisal.field_hr_appraisal__employee_feedback_published
@@ -1810,6 +2050,8 @@ msgid ""
 "If greened, the manager will be able to see and edit your feedback. "
 "Otherwise, your feedback is blurred and visible only to you."
 msgstr ""
+"Se estiver verde, o gerente poderá ver e editar o feedback. Caso contrário, "
+"seu feedback ficará embaçado e visível apenas para você."
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
@@ -1829,12 +2071,12 @@ msgstr "Imagem 128"
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_view_search
 msgid "In Progress"
-msgstr ""
+msgstr "Em andamento"
 
 #. module: hr_appraisal
 #: model:hr.appraisal.goal.tag,name:hr_appraisal.hr_appraisal_goal_tag_internal
 msgid "Internal"
-msgstr ""
+msgstr "Interno"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_request_appraisal__is_mail_template_editor
@@ -1863,18 +2105,18 @@ msgstr "É gerente"
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_goal__job_ids
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_search
 msgid "Job"
-msgstr ""
+msgstr "Vaga de emprego"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_view_search
 msgid "Job Position"
-msgstr ""
+msgstr "Cargo"
 
 #. module: hr_appraisal
 #. odoo-javascript
 #: code:addons/hr_appraisal/static/src/views/helper/appraisal_helper_view/appraisal_helper_view.xml:0
 msgid "Keep track of how your employees are doing..."
-msgstr ""
+msgstr "Acompanhe o desempenho dos seus funcionários..."
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_request_appraisal__lang
@@ -1896,7 +2138,7 @@ msgstr "Última avaliação"
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_employee_public__last_appraisal_state
 msgid "Last Appraisal State"
-msgstr ""
+msgstr "Estado da última avaliação"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_employee__last_ongoing_appraisal_date
@@ -1942,23 +2184,23 @@ msgstr "Atividades atrasadas"
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_employee_tree
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_tree
 msgid "Launch Campaign"
-msgstr ""
+msgstr "Lançar campanha"
 
 #. module: hr_appraisal
 #: model:ir.ui.menu,name:hr_appraisal.menu_config_goal_template
 msgid "Library"
-msgstr ""
+msgstr "Biblioteca"
 
 #. module: hr_appraisal
 #: model:ir.actions.server,name:hr_appraisal.action_load_appraisal_demo_data
 msgid "Load appraisal scenario"
-msgstr ""
+msgstr "Carregar cenário de avaliação"
 
 #. module: hr_appraisal
 #. odoo-javascript
 #: code:addons/hr_appraisal/static/src/views/helper/appraisal_helper_view/appraisal_helper_view.xml:0
 msgid "Load sample data"
-msgstr ""
+msgstr "Carregar amostras de dados"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -2013,7 +2255,7 @@ msgstr "Feedback de gerentes"
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_campaign_wizard__manager_ids
 msgid "Managers"
-msgstr ""
+msgstr "Gerentes"
 
 #. module: hr_appraisal
 #. odoo-javascript
@@ -2044,18 +2286,18 @@ msgstr "Mensagens"
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_campaign_wizard__mode
 msgid "Mode"
-msgstr ""
+msgstr "Modo"
 
 #. module: hr_appraisal
 #. odoo-javascript
 #: code:addons/hr_appraisal/static/src/components/cog_menu/multiple_appraisals_cog_menu.xml:0
 msgid "Multiple Appraisals"
-msgstr ""
+msgstr "Múltiplas avaliações"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_search
 msgid "My Activities"
-msgstr ""
+msgstr "Minhas atividades"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__my_activity_date_deadline
@@ -2076,7 +2318,7 @@ msgstr "Minhas metas"
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_view_search
 msgid "My Team"
-msgstr ""
+msgstr "Minha equipe"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_search
@@ -2107,7 +2349,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_appraisal/models/hr_employee.py:0
 msgid "New and Pending Appraisals"
-msgstr ""
+msgstr "Avaliações novas e pendentes"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__activity_calendar_event_id
@@ -2136,7 +2378,7 @@ msgstr "Tipo da próxima atividade"
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_employee_view_search
 msgid "Next Appraisal"
-msgstr ""
+msgstr "Próxima avaliação"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__next_appraisal_date
@@ -2149,13 +2391,13 @@ msgstr "Data da próxima avaliação"
 #. odoo-javascript
 #: code:addons/hr_appraisal/static/src/views/helper/appraisal_helper_view/appraisal_helper_view.xml:0
 msgid "No Appraisals found!"
-msgstr ""
+msgstr "Nenhuma avaliação encontrada."
 
 #. module: hr_appraisal
 #. odoo-python
 #: code:addons/hr_appraisal/wizard/hr_appraisal_campaign_wizard.py:0
 msgid "No employees have the tag %(category_name)s"
-msgstr ""
+msgstr "Nenhum funcionário com o marcador %(category_name)s"
 
 #. module: hr_appraisal
 #. odoo-javascript
@@ -2167,7 +2409,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_appraisal/static/src/components/goal_template_delete_confirmation_dialog/goal_template_delete_confirmation_dialog.js:0
 msgid "No, keep it"
-msgstr ""
+msgstr "Não, manter"
 
 #. module: hr_appraisal
 #. odoo-python
@@ -2201,7 +2443,7 @@ msgstr "Número de erros"
 #: model:ir.model.fields,help:hr_appraisal.field_hr_appraisal__message_needaction_counter
 #: model:ir.model.fields,help:hr_appraisal.field_hr_appraisal_goal__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "Número de mensagens que requerem ação"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,help:hr_appraisal.field_hr_appraisal__message_has_error_counter
@@ -2223,7 +2465,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:hr_appraisal.selection__hr_appraisal__state__2_pending
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_employee_view_form
 msgid "Ongoing"
-msgstr ""
+msgstr "Em andamento"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_employee__ongoing_appraisal_count
@@ -2235,7 +2477,7 @@ msgstr "Total de avaliações em curso"
 #. odoo-python
 #: code:addons/hr_appraisal/models/hr_appraisal.py:0
 msgid "Oops! You can only delete draft appraisals."
-msgstr ""
+msgstr "Ops! Só é possível eliminar avaliações de rascunho."
 
 #. module: hr_appraisal
 #. odoo-javascript
@@ -2248,7 +2490,7 @@ msgstr ""
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "Opportunities"
-msgstr ""
+msgstr "Oportunidades"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.request_appraisal_view_form
@@ -2268,12 +2510,12 @@ msgstr ""
 #: model:ir.model.fields.selection,name:hr_appraisal.selection__hr_appraisal_campaign_wizard__manager__person
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_campaign_wizard_view_form
 msgid "Other"
-msgstr ""
+msgstr "Outro"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_exit_interview_template
 msgid "Overall experience feedback"
-msgstr ""
+msgstr "Feedback da experiência geral"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_goal__parent_id
@@ -2283,7 +2525,7 @@ msgstr ""
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_goal__parent_path
 msgid "Parent Path"
-msgstr ""
+msgstr "Caminho primário"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_employee__parent_user_id
@@ -2314,7 +2556,7 @@ msgstr "Avaliações anteriores"
 #. odoo-javascript
 #: code:addons/hr_appraisal/static/src/component/print_menu.xml:0
 msgid "Print"
-msgstr ""
+msgstr "Imprimir"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__note
@@ -2331,7 +2573,7 @@ msgstr ""
 #. module: hr_appraisal
 #: model:hr.appraisal.goal.tag,name:hr_appraisal.hr_appraisal_goal_tag_programming
 msgid "Programming"
-msgstr ""
+msgstr "Programação"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_goal__progression
@@ -2341,13 +2583,13 @@ msgstr "Progresso"
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_view_kanban
 msgid "Progress:"
-msgstr ""
+msgstr "Progresso:"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__appraisal_properties
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_search
 msgid "Properties"
-msgstr ""
+msgstr "Propriedades"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_template_view_form
@@ -2364,6 +2606,9 @@ msgid ""
 "Which benefit he will get from it.                             Maybe some "
 "process or steps to help her/him along the way."
 msgstr ""
+"Forneça informações visíveis sobre a meta, como o funcionário pode alcançá-"
+"la. Que benefícios ele obterá com isso. Talvez algum processo ou etapas para "
+"ajudá-la ao longo do caminho."
 
 #. module: hr_appraisal
 #: model:ir.model,name:hr_appraisal.model_hr_employee_public
@@ -2396,7 +2641,7 @@ msgstr "Usuário relacionado para o gerente controlar seus acessos."
 #. odoo-javascript
 #: code:addons/hr_appraisal/static/src/fields/appraisal_remaining_days.js:0
 msgid "Remaining Days"
-msgstr ""
+msgstr "Dias restantes"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_request_appraisal__render_model
@@ -2432,7 +2677,7 @@ msgstr "Solicitar uma avaliação"
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
 msgid "Reset"
-msgstr ""
+msgstr "Redefinir"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__activity_user_id
@@ -2444,29 +2689,29 @@ msgstr "Usuário responsável"
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__message_has_sms_error
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_goal__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr ""
+msgstr "Erro no envio de SMS"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_view_form
 msgid "Save as Template"
-msgstr ""
+msgstr "Salvar como modelo"
 
 #. module: hr_appraisal
 #. odoo-javascript
 #: code:addons/hr_appraisal/static/src/views/helper/goal_helper_static_actions/goal_helper_static_actions.js:0
 msgid "Save as template"
-msgstr ""
+msgstr "Salvar como modelo"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_campaign_wizard_view_form
 msgid "Schedule"
-msgstr ""
+msgstr "Agendar"
 
 #. module: hr_appraisal
 #. odoo-javascript
 #: code:addons/hr_appraisal/static/src/views/helper/appraisal_helper_view/appraisal_helper_view.xml:0
 msgid "Schedule Appraisals"
-msgstr ""
+msgstr "Agendar avaliações"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
@@ -2487,13 +2732,13 @@ msgstr "Procurar avaliação"
 #. odoo-javascript
 #: code:addons/hr_appraisal/static/src/views/list/goal_template_library_list/goal_template_library_list_view.xml:0
 msgid "Select"
-msgstr ""
+msgstr "Selecionar"
 
 #. module: hr_appraisal
 #. odoo-python
 #: code:addons/hr_appraisal/models/hr_appraisal_goal.py:0
 msgid "Select Employees"
-msgstr ""
+msgstr "Selecionar funcionários"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
@@ -2539,7 +2784,7 @@ msgstr "Definições"
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_template__description
 msgid "Short Name"
-msgstr ""
+msgstr "Nome abreviado"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -2564,7 +2809,7 @@ msgstr ""
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_search
 msgid "Show all records whose next activity date is past"
-msgstr ""
+msgstr "Mostrar todos os registros cuja data da próxima atividade já passou"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_goal__sibling_goals_ratio
@@ -2574,7 +2819,7 @@ msgstr ""
 #. module: hr_appraisal
 #: model:hr.appraisal.goal.tag,name:hr_appraisal.hr_appraisal_goal_tag_softskills
 msgid "Soft Skills"
-msgstr ""
+msgstr "Habilidades interpessoais"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__state
@@ -2600,7 +2845,7 @@ msgstr ""
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "Strengths"
-msgstr ""
+msgstr "Pontos fortes"
 
 #. module: hr_appraisal
 #. odoo-python
@@ -2640,12 +2885,12 @@ msgstr "Assunto…"
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_template_view_list
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_view_search
 msgid "Tags"
-msgstr ""
+msgstr "Marcadores"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
 msgid "Template"
-msgstr ""
+msgstr "Modelo"
 
 #. module: hr_appraisal
 #. odoo-python
@@ -2654,6 +2899,8 @@ msgid ""
 "Template %(template_name)s is necessary for appraisal requests and may not "
 "be removed."
 msgstr ""
+"O modelo %(template_name)s é necessário para solicitações de avaliação e não "
+"pode ser removido."
 
 #. module: hr_appraisal
 #. odoo-python
@@ -2670,6 +2917,7 @@ msgstr ""
 #: code:addons/hr_appraisal/models/hr_appraisal.py:0
 msgid "The \"Manager Feedback Published\" cannot be changed by an employee."
 msgstr ""
+"O \"Feedback publicado do gerente\" não pode ser alterado por funcionários."
 
 #. module: hr_appraisal
 #. odoo-python
@@ -2688,7 +2936,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_appraisal/wizard/hr_appraisal_campaign_wizard.py:0
 msgid "The company %(company_name)s doesn't have employees"
-msgstr ""
+msgstr "A empresa %(company_name)s não tem funcionários"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,help:hr_appraisal.field_hr_employee__next_appraisal_date
@@ -2703,7 +2951,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_appraisal/wizard/hr_appraisal_campaign_wizard.py:0
 msgid "The department %(department_name)s doesn't have employees"
-msgstr ""
+msgstr "O departamento %(department_name)s não tem funcionários"
 
 #. module: hr_appraisal
 #: model:ir.model.constraint,message:hr_appraisal.constraint_res_company_positif_number_months
@@ -2717,6 +2965,8 @@ msgid ""
 "The employee %(employee)s arrived %(months)s months ago. The appraisal is "
 "created and you can fill it here."
 msgstr ""
+"O funcionário %(employee)s chegou há %(months)s meses. A avaliação foi "
+"criada e você pode preenchê-la aqui."
 
 #. module: hr_appraisal
 #. odoo-python
@@ -2742,6 +2992,9 @@ msgid ""
 "(employees)s. The existing appraisals will be used instead of creating new "
 "ones."
 msgstr ""
+"Os seguintes funcionários já têm avaliações em andamento %(appraisal_date)s: "
+"%(employees)s. Serão usadas as avaliações existentes, em vez de criar novas "
+"avaliações."
 
 #. module: hr_appraisal
 #. odoo-python
@@ -2750,6 +3003,8 @@ msgid ""
 "The last appraisal of %(employee)s was %(months)s months ago. The appraisal "
 "is created and you can fill it here."
 msgstr ""
+"A última avaliação de %(employee)s foi há %(months)s meses. A avaliação foi "
+"criada e você pode preenchê-la aqui."
 
 #. module: hr_appraisal
 #. odoo-python
@@ -2766,7 +3021,7 @@ msgstr "Este campo não é visível para o funcionário."
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "Threats"
-msgstr ""
+msgstr "Pontos de atenção"
 
 #. module: hr_appraisal
 #: model:ir.model.fields.selection,name:hr_appraisal.selection__hr_employee_public__last_appraisal_state__1_new
@@ -2782,12 +3037,12 @@ msgstr "Atividades de hoje"
 #. module: hr_appraisal
 #: model:hr.appraisal.goal.tag,name:hr_appraisal.hr_appraisal_goal_tag_training
 msgid "Training"
-msgstr ""
+msgstr "Treinamento"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_campaign_wizard_view_form
 msgid "Type Employee's Name"
-msgstr ""
+msgstr "Digite o nome do funcionário"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,help:hr_appraisal.field_hr_appraisal__activity_exception_decoration
@@ -2810,7 +3065,7 @@ msgstr "Não publicado"
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_employee_view_search
 msgid "Upcoming Appraisals"
-msgstr ""
+msgstr "Próximas avaliações"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_template_form
@@ -2819,6 +3074,9 @@ msgid ""
 "Employee.                                         You can use a lot of "
 "options with the html editor, accessible by pressing / on the keyboard."
 msgstr ""
+"Use essa área para escrever o conteúdo que será exibido para o Manager. Você "
+"pode usar várias opções com o editor de html, que pode ser acessado "
+"pressionando / no teclado."
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_template_form
@@ -2827,6 +3085,9 @@ msgid ""
 "Manager.                                         You can use a lot of "
 "options with the html editor, accessible by pressing / on the keyboard."
 msgstr ""
+"Use essa área para escrever o conteúdo que será exibido para o Manager. Você "
+"pode usar várias opções com o editor de html, que pode ser acessado "
+"pressionando / no teclado."
 
 #. module: hr_appraisal
 #: model:ir.model,name:hr_appraisal.model_res_users
@@ -2846,7 +3107,7 @@ msgstr ""
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_template_form
 msgid "Visible to all"
-msgstr ""
+msgstr "Visível para todos"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__waiting_feedback
@@ -2856,25 +3117,25 @@ msgstr "Esperando feedback de funcionários/gerentes"
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_campaign_wizard__warning
 msgid "Warning"
-msgstr ""
+msgstr "Aviso"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 #: model_terms:hr.appraisal.template,appraisal_manager_feedback_template:hr_appraisal.hr_appraisal_yearly_template
 msgid "Weaknesses"
-msgstr ""
+msgstr "Pontos fracos"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal__website_message_ids
 #: model:ir.model.fields,field_description:hr_appraisal.field_hr_appraisal_goal__website_message_ids
 msgid "Website Messages"
-msgstr ""
+msgstr "Mensagens do site"
 
 #. module: hr_appraisal
 #: model:ir.model.fields,help:hr_appraisal.field_hr_appraisal__website_message_ids
 #: model:ir.model.fields,help:hr_appraisal.field_hr_appraisal_goal__website_message_ids
 msgid "Website communication history"
-msgstr ""
+msgstr "Histórico de comunicação do site"
 
 #. module: hr_appraisal
 #: model_terms:hr.appraisal.template,appraisal_employee_feedback_template:hr_appraisal.hr_appraisal_default_template
@@ -2918,6 +3179,8 @@ msgid ""
 "You arrived %s months ago. Your appraisal is created and you can fill it "
 "here."
 msgstr ""
+"Você chegou há %s meses. Sua avaliação foi criada e você pode preenchê-la "
+"aqui."
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_template_view_form
@@ -2930,6 +3193,8 @@ msgstr ""
 msgid ""
 "You cannot delete an employee who is a goal's manager, archive it instead."
 msgstr ""
+"Não é possível excluir um funcionário que seja gerente de uma meta; em vez "
+"disso, arquive-o."
 
 #. module: hr_appraisal
 #. odoo-python
@@ -2943,7 +3208,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_appraisal/models/hr_employee.py:0
 msgid "You cannot set 'Next Appraisal Date' in the past."
-msgstr ""
+msgstr "Você não pode definir a \"Data da próxima avaliação\" no passado."
 
 #. module: hr_appraisal
 #. odoo-python
@@ -2958,11 +3223,13 @@ msgid ""
 "Your last appraisal was %s months ago. Your appraisal is created and you can "
 "fill it here."
 msgstr ""
+"A sua última avaliação foi há %s meses. A sua avaliação foi criada e você "
+"pode preenchê-la aqui."
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_template_form
 msgid "e.g. Annual Appraisal"
-msgstr ""
+msgstr "ex.: Avaliação anual"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_template_view_form
@@ -2972,7 +3239,7 @@ msgstr ""
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_view_form
 msgid "e.g. Improve your English level"
-msgstr ""
+msgstr "ex.: Melhorar seu nível de inglês"
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.view_hr_appraisal_form
@@ -2983,6 +3250,7 @@ msgstr "ex.: João da Silva"
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.hr_appraisal_goal_tag_view_tree
 msgid "e.g. Remediation, Team, Improvement plan, Career change, ..."
 msgstr ""
+"ex.: Remediação, equipe, plano de aprimoramento, mudança de carreira, ..."
 
 #. module: hr_appraisal
 #: model_terms:ir.ui.view,arch_db:hr_appraisal.res_config_settings_view_employee_form

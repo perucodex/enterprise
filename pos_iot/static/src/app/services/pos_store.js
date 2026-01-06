@@ -13,12 +13,14 @@ patch(PosStore.prototype, {
     async setup(env, { iot_http }) {
         this.iotHttp = iot_http;
         await super.setup(...arguments);
+        this.env.services.iot_longpolling.setLna(odoo.use_lna);
     },
     async processServerData(loadedData) {
         await super.processServerData(...arguments);
 
         this._loadIotDevice(this.models["iot.device"].getAll());
         this.hardwareProxy.iotBoxes = this.models["iot.box"].getAll();
+        this.iotHttp.cacheIotBoxRecords(this.hardwareProxy.iotBoxes);
     },
     _loadIotDevice(devices) {
         const iotLongpolling = this.env.services.iot_longpolling;
@@ -82,7 +84,7 @@ patch(PosStore.prototype, {
         if (this.config.iface_scan_via_proxy) {
             this.barcodeReader?.connectToProxy();
         }
-        if (this.config.iface_print_via_proxy) {
+        if (!this.hardwareProxy.printer && this.config.iface_print_via_proxy) {
             this.hardwareProxy.connectToPrinter();
         }
         return Promise.resolve();

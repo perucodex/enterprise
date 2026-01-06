@@ -1,4 +1,4 @@
-from odoo import SUPERUSER_ID, _, api, fields, models
+from odoo import SUPERUSER_ID, api, fields, models
 from odoo.tools import SQL
 
 
@@ -91,26 +91,27 @@ class AccountReconcileModel(models.Model):
                               OR (
                                   reco_model.match_label = 'contains'
                                    AND (
-                                      st_line.payment_ref ILIKE '%%' || reco_model.match_label_param || '%%'
-                                      OR st_line.transaction_details::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
+                                      st_line.payment_ref IS NOT NULL AND st_line.payment_ref ILIKE '%%' || reco_model.match_label_param || '%%'
+                                      OR st_line.transaction_details IS NOT NULL AND st_line.transaction_details::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
                                    )
                               ) OR (
                                   reco_model.match_label = 'not_contains'
                                   AND NOT (
-                                      st_line.payment_ref ILIKE '%%' || reco_model.match_label_param || '%%'
-                                      OR st_line.transaction_details::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
+                                      st_line.payment_ref IS NOT NULL AND st_line.payment_ref ILIKE '%%' || reco_model.match_label_param || '%%'
+                                      OR st_line.transaction_details IS NOT NULL AND st_line.transaction_details::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
                                   )
                               ) OR (
                                   reco_model.match_label = 'match_regex'
                                   AND (
-                                      st_line.payment_ref ~* reco_model.match_label_param
-                                      OR st_line.transaction_details::TEXT ~* reco_model.match_label_param
+                                      st_line.payment_ref IS NOT NULL AND st_line.payment_ref ~* reco_model.match_label_param
+                                      OR st_line.transaction_details IS NOT NULL AND st_line.transaction_details::TEXT ~* reco_model.match_label_param
                                   )
                               )
                           )
                       AND reco_model.company_id = st_line.company_id
                       AND reco_model.trigger = 'manual'
                       AND reco_model_line.account_id IS NOT NULL
+                      AND reco_model.active IS TRUE
                  ) AS reco_model ON TRUE
            WHERE st_line.id IN %(statement_lines)s
              AND reco_model.id IS NOT NULL
@@ -190,23 +191,23 @@ class AccountReconcileModel(models.Model):
                               OR (
                                   reco_model.match_label = 'contains'
                                    AND (
-                                      st_line.payment_ref ILIKE '%%' || reco_model.match_label_param || '%%'
-                                      OR st_line.transaction_details::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
-                                      OR move.narration::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
+                                      st_line.payment_ref IS NOT NULL AND st_line.payment_ref ILIKE '%%' || reco_model.match_label_param || '%%'
+                                      OR st_line.transaction_details IS NOT NULL AND st_line.transaction_details::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
+                                      OR move.narration IS NOT NULL AND move.narration::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
                                    )
                               ) OR (
                                   reco_model.match_label = 'not_contains'
                                   AND NOT (
-                                      st_line.payment_ref ILIKE '%%' || reco_model.match_label_param || '%%'
-                                      OR st_line.transaction_details::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
-                                      OR move.narration::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
+                                      st_line.payment_ref IS NOT NULL AND st_line.payment_ref ILIKE '%%' || reco_model.match_label_param || '%%'
+                                      OR st_line.transaction_details IS NOT NULL AND st_line.transaction_details::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
+                                      OR move.narration IS NOT NULL AND move.narration::TEXT ILIKE '%%' || reco_model.match_label_param || '%%'
                                   )
                               ) OR (
                                   reco_model.match_label = 'match_regex'
                                   AND (
-                                      st_line.payment_ref ~* reco_model.match_label_param
-                                      OR st_line.transaction_details::TEXT ~* reco_model.match_label_param
-                                      OR move.narration::TEXT ~* reco_model.match_label_param
+                                      st_line.payment_ref IS NOT NULL AND st_line.payment_ref ~* reco_model.match_label_param
+                                      OR st_line.transaction_details IS NOT NULL AND st_line.transaction_details::TEXT ~* reco_model.match_label_param
+                                      OR move.narration IS NOT NULL AND move.narration::TEXT ~* reco_model.match_label_param
                                   )
                               )
                           )
@@ -243,7 +244,7 @@ class AccountReconcileModel(models.Model):
             if reco_model_trigger == 'manual':
                 st_line._action_manual_reco_model(reco_model_id)
             else:
-                reco_model.with_user(SUPERUSER_ID)._trigger_reconciliation_model(st_line)
+                reco_model.with_user(SUPERUSER_ID)._trigger_reconciliation_model(st_line.with_user(SUPERUSER_ID))
             processed_st_line_ids.add(st_line_id)
 
     def _trigger_reconciliation_model(self, statement_line):
@@ -258,17 +259,23 @@ class AccountReconcileModel(models.Model):
                 st_line=statement_line,
             )
         )
-
-        statement_line.with_user(SUPERUSER_ID)._set_move_line_to_statement_line_move(liquidity_line + other_lines, amls_to_create)
+        # Get the original base lines and tax lines before the creation of new lines
         if any(aml.get('tax_ids') for aml in amls_to_create):
-            statement_line._recompute_tax_lines()
+            original_base_lines, original_tax_lines = statement_line._prepare_for_tax_lines_recomputation()
+
+        statement_line._set_move_line_to_statement_line_move(liquidity_line + other_lines, amls_to_create)
+
+        # Now that the new lines have been added, we can recompute the taxes
+        if any(aml.get('tax_ids') for aml in amls_to_create):
+            _new_liquidity_line, new_suspense_line, _new_other_lines = statement_line._seek_for_lines()
+            new_lines = statement_line.line_ids - (liquidity_line + other_lines + new_suspense_line)
+            statement_line._create_tax_lines(original_base_lines, original_tax_lines, new_lines)
+
         if self.next_activity_type_id:
             statement_line.move_id.activity_schedule(
                 activity_type_id=self.next_activity_type_id.id,
                 user_id=self.env.user.id,
             )
-        statement_line.move_id._message_log(author_id=self.env.user.partner_id.id,
-            body=_("Reconciliation model %s applied", self.name))
 
     def trigger_reconciliation_model(self, statement_line_id):
         self.ensure_one()

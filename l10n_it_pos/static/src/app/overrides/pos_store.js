@@ -58,7 +58,9 @@ patch(PosStore.prototype, {
                 return true;
             }
         } else {
-            this.fiscalPrinter.printDuplicateReceipt();
+            this.fiscalPrinter.printContentByNumbers({
+                order: order,
+            });
         }
     },
 });

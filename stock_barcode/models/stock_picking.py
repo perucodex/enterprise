@@ -139,7 +139,7 @@ class StockPicking(models.Model):
             picking['note'] = False if is_html_empty(picking['note']) else html2plaintext(picking['note'])
 
         data['config'] = self.picking_type_id._get_barcode_config()
-        if self.return_id:
+        if self._should_ignore_backorders():
             data['config']['create_backorder'] = 'never'
         data['line_view_id'] = self.env.ref('stock_barcode.stock_move_line_product_selector').id
         data['form_view_id'] = self.env.ref('stock_barcode.stock_picking_barcode').id
@@ -208,8 +208,8 @@ class StockPicking(models.Model):
             if parsed_results:
                 # filter with the last feasible rule
                 for result in parsed_results[::-1]:
-                    if result['rule'].type in ('product', 'package', 'lot'):
-                        barcode_type = result['rule'].type
+                    if result['type'] in ('product', 'package', 'lot'):
+                        barcode_type = result['type']
                         break
 
         active_id = self.env.context.get('active_id')

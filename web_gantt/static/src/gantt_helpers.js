@@ -779,6 +779,18 @@ function getResult(current) {
     return { ...getBlockBounds(current), rowId: current.rowId };
 }
 
+/**
+ * @param {HTMLElement} refEl: gantt grid
+ * @param {string} rowId
+ * @param {string} additionalSelector
+ * @returns {cellEl[] | null}: cells found on the row that matched the selector
+ */
+export function getCellsOnRow(refEl, rowId, additionalSelector = "") {
+    return refEl.querySelectorAll(
+        `.o_gantt_cell${additionalSelector}[data-row-id='${CSS.escape(rowId)}']`
+    );
+}
+
 export const useGanttSelectable = makeDraggableHook({
     name: "useGanttSelectable",
     acceptedParams: {
@@ -805,8 +817,10 @@ export const useGanttSelectable = makeDraggableHook({
         addClass(cell, "pe-auto");
         return getResult(current);
     },
-    onDragStart({ ctx }) {
+    onDragStart({ ctx, removeClass }) {
         const { current } = ctx;
+        // Useless on cells, annoying on pills
+        removeClass(current.element, "o_dragged");
         return getResult(current);
     },
     onDrag({ ctx }) {

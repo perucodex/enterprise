@@ -130,8 +130,8 @@ class TestFsmFlow(TestIndustryFsmCommon):
         fsm_stage.action_unarchive()
 
     def test_plan_task_in_calendar(self):
-        self.env.user.write({'tz': 'Europe/Brussels'})
         self.task.user_ids = self.george_user
+        self.george_user.employee_id.resource_id.tz = 'UTC'
         self.task.with_context(task_calendar_plan_full_day=True).plan_task_in_calendar({
             'planned_date_begin': '2023-02-01 07:00:00',
             'date_deadline': '2023-02-01 19:00:00',
@@ -162,3 +162,38 @@ class TestFsmFlow(TestIndustryFsmCommon):
         wizard.action_save_timesheet()
         self.assertEqual(wizard.timesheet_id.task_id, task)
         self.assertEqual(wizard.timesheet_id.project_id, self.project)
+
+    def test_project_template_user_access(self):
+        """
+        test that checks that even if a user doesn't have enough rights to create a project from a template,
+        the view will still open
+        """
+        project_template = self.env['project.project'].create({
+            'name': 'Field Service',
+            'is_fsm': True,
+            'allow_timesheets': True,
+            'company_id': self.env.company.id,
+            'is_template': True,
+            'date_start': '2023-02-01 07:00:00',
+            'date': '2023-02-02 07:00:00',
+            'user_id': self.george_user.id,
+        })
+        self.env['project.task'].create({
+            'name': 'Task template',
+            'project_id': project_template.id,
+            'partner_id': self.partner.id,
+            'user_ids': [Command.set([self.george_user.id])],
+            'planned_date_begin': '2023-02-01 07:00:00',
+            'date_deadline': '2023-05-01 19:00:00',
+        })
+
+        wizard = self.env['project.template.create.wizard'].create({
+            'template_id': project_template.id,
+            'name': 'New Project from Template',
+            'date_start': '2023-02-01 07:00:00',
+            'date': '2023-02-02 07:00:00',
+        })
+        self.fsm_user.group_ids |= self.env.ref('project.group_project_manager')
+        env = self.env(user=self.fsm_user.id)
+        new_project_view = wizard.with_env(env).create_project_from_template()
+        self.assertEqual(new_project_view.get('type'), 'ir.actions.act_window')

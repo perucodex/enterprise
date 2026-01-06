@@ -28,13 +28,16 @@
 # Halil, 2023
 # Tugay Hatıl <tugayh@projetgrup.com>, 2023
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# DeepL <noreply-mt-deepl@weblate.org>, 2025.
+# Odoo Turkish Import <dyki+tr@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2025-09-15 21:09+0000\n"
-"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-11-21 14:20+0000\n"
+"Last-Translator: Odoo Turkish Import <dyki+tr@odoo.com>\n"
 "Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/helpdesk/"
 "tr/>\n"
 "Language: tr\n"
@@ -73,7 +76,7 @@ msgstr "Acil Biletlerin Sayısı"
 #. odoo-python
 #: code:addons/helpdesk/models/res_partner.py:0
 msgid "%(partner_name)s's Tickets"
-msgstr ""
+msgstr "%(partner_name)s'in Biletleri"
 
 #. module: helpdesk
 #. odoo-python
@@ -94,6 +97,8 @@ msgid ""
 ",\n"
 "    <br/><br/>"
 msgstr ""
+",\n"
+"    <br/><br/>"
 
 #. module: helpdesk
 #: model:helpdesk.sla,name:helpdesk.helpdesk_sla_1
@@ -130,6 +135,8 @@ msgstr ""
 msgid ""
 "<b>Log internal notes</b> and use @<b>mentions</b> to notify your colleagues."
 msgstr ""
+"<b>Dahili notlarınızı kaydedin</b> ve iş arkadaşlarınızı bilgilendirmek için "
+"@<b>mention'larını</b> kullanın."
 
 #. module: helpdesk
 #: model:mail.template,body_html:helpdesk.solved_ticket_request_email_template
@@ -153,6 +160,25 @@ msgid ""
 "    </div>\n"
 "        "
 msgstr ""
+"<div>\n"
+"        Sayın <t t-out=\"object.sudo().partner_id.name or 'Madam/"
+"Sir'\">Hanımefendi/Beyefendi</t>,<br/><br/>\n"
+"        Biletinizin (referans: <t t-out=\"object.id or ''\">15</t>) "
+"kapatıldığını bildirmek isteriz. \n"
+"        Sunulan hizmetlerin beklentilerinizi karşıladığını ve sorununuz için "
+"tatmin edici bir çözüm bulduğunuzu umuyoruz.<br/><br/>\n"
+"        Ancak başka sorularınız veya yorumlarınız olursa bileti yeniden "
+"açmak için lütfen bu e-postaya yanıt vermekten çekinmeyin. \n"
+"        Ekibimiz her zaman size yardımcı olmak için burada ve gelecekteki "
+"her türlü konuda destek vermekten memnuniyet duyarız.<br/><br/>\n"
+"        Hizmetlerimizi seçtiğiniz ve süreç boyunca iş birliğiniz için "
+"teşekkür ederiz. İşinizi gerçekten önemsiyoruz ve size hizmet etme fırsatı "
+"için müteşekkiriz.<br/><br/>\n"
+"        Saygılarımızla,<br/><br/>\n"
+"        <t t-out=\"object.team_id.name or 'Helpdesk'\"> Yardım Masası</t> "
+"Ekibi.\n"
+"    </div>\n"
+"        "
 
 #. module: helpdesk
 #: model:mail.template,body_html:helpdesk.rating_ticket_request_email_template
@@ -234,6 +260,83 @@ msgid ""
 "</div>\n"
 "        "
 msgstr ""
+"<div>\n"
+"    <t t-set=\"access_token\" t-value=\"object._rating_get_access_token()\"/"
+">\n"
+"   <t t-set=\"partner\" t-value=\"object._rating_get_partner()\"/>\n"
+"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"style=\"width:100%; margin:0;\">\n"
+"   <tbody>\n"
+"        <tr><td valign=\"top\" style=\"font-size: 14px;\">\n"
+"            <t t-if=\"partner.name\">\n"
+"                Merhaba <t t-out=\"partner.name or ''\">Brandon Freeman</t>,"
+"<br/><br/>\n"
+"           </t>\n"
+"            <t t-else=\"\">\n"
+"                Merhaba,<br/>\n"
+"            </t>\n"
+"            \"<strong t-out=\"object.name or ''\">Masa ayakları dengesiz</"
+"strong>\" bileti ile ilgili hizmetlerimizi değerlendirmek için lütfen bir "
+"dakikanızı ayırın.\n"
+"           <t t-if=\"object._rating_get_operator().name\">\n"
+"                <strong t-out=\"object._rating_get_operator().name or ''\"> "
+"Mitchell Admin</strong> kullanıcısına atanmıştır.<br/>\n"
+"            </t>\n"
+"           <t t-else=\"\">\n"
+"                .<br/><br/>\n"
+"           </t>\n"
+"        </td></tr>\n"
+"        <tr><td style=\"text-align: center;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"style=\"width:100%; margin: 32px 0px 32px 0px; display: inline-table;\">\n"
+"               <tr><td style=\"font-size: 14px; text-align:center;\">\n"
+"                   <strong>Hizmetlerimiz hakkında ne düşündüğünüzü bize "
+"söyleyin</strong><br/>\n"
+"                   <span style=\"text-color: #888888\">(bu ifadelerden "
+"birine tıklayın)</span>\n"
+"                </td></tr>\n"
+"                <tr><td style=\"font-size: 14px;\">\n"
+"                    <table style=\"width:100%;text-align:center;margin-"
+"top:2rem;\">\n"
+"                       <tr>\n"
+"                            <td>\n"
+"                               <a t-attf-href=\"/rate/{{ access_token }}/5\" "
+"t-att-class=\"'pe-none' if object._rating_get_operator() else ''\">\n"
+"                                    <img alt=\"Happy\" src=\"/rating/static/"
+"src/img/rating_5.png\" title=\"Happy\"/>\n"
+"                               </a>\n"
+"                            </td>\n"
+"                           <td>\n"
+"                                <a t-attf-href=\"/rate/{{ access_token }}/"
+"3\" t-att-class=\"'pe-none' if object._rating_get_operator() else ''\">\n"
+"                                   <img alt=\"Neutral\" src=\"/rating/static/"
+"src/img/rating_3.png\" title=\"Neutral\"/>\n"
+"                                </a>\n"
+"                           </td>\n"
+"                            <td>\n"
+"                               <a t-attf-href=\"/rate/{{ access_token }}/1\" "
+"t-att-class=\"'pe-none' if object._rating_get_operator() else ''\">\n"
+"                                    <img alt=\"Unhappy\" src=\"/rating/"
+"static/src/img/rating_1.png\" title=\"Unhappy\"/>\n"
+"                               </a>\n"
+"                            </td>\n"
+"                       </tr>\n"
+"                    </table>\n"
+"               </td></tr>\n"
+"           </table>\n"
+"        </td></tr>\n"
+"        <tr><td valign=\"top\" style=\"font-size: 14px;\">\n"
+"            Geri bildirimleriniz için teşekkür ederiz. Sürekli gelişmemize "
+"yardımcı oluyor.\n"
+"           <br/><br/><span style=\"margin: 0px 0px 0px 0px; font-size: 12px; "
+"opacity: 0.5; color: #454748;\">Bu müşteri anketi, biletiniz <b t-"
+"out=\"object.stage_id.name or ''\">In Progress</b> aşamasına taşındığı için "
+"gönderilmiştir.</span>\n"
+"        </td></tr>\n"
+"    </tbody>\n"
+"   </table>\n"
+"</div>\n"
+"        "
 
 #. module: helpdesk
 #: model:mail.template,body_html:helpdesk.new_ticket_request_email_template
@@ -319,6 +422,101 @@ msgid ""
 "</div>\n"
 "        "
 msgstr ""
+"<div>\n"
+"    Sayın <t t-out=\"object.sudo().partner_id.name or "
+"object.sudo().partner_name or 'Madam/Sir'\">Hanım/Bey</t>,<br/><br/>\n"
+"    Sizin isteğiniz\n"
+"   <t t-if=\"hasattr(object.team_id, 'website_id') and "
+"object.get_portal_url()\">\n"
+"        <a t-attf-href=\"{{ object.team_id.website_id.domain }}/my/ticket/"
+"{{ object.id }}/{{ object.access_token }}\" t-out=\"object.name or "
+"''\">{{ object.id }}/{{ object.access_token }}\" t-out=\"object.name or "
+"''\">Tablo ayakları dengesiz</a>\n"
+"    </t>\n"
+"    alındı ve <t t-out=\"object.team_id.name or ''\">VIP Destek</t> ekibimiz "
+"tarafından inceleniyor.<br/><br/>\n"
+"    Biletinizin referansı <strong><t t-out=\"object.ticket_ref or ''\">15</"
+"t></strong> tir.<br/><br/>\n"
+"\n"
+"    Ek bilgi vermek için bu e-postayı yanıtlamanız yeterlidir.<br/><br/>\n"
+"   <t t-if=\"object.team_id.show_knowledge_base\">\n"
+"        <a t-attf-href=\"{{ object.team_id.get_knowledge_base_url() }}\"> "
+"Yardım Merkezimizi</a> ziyaret etmekten çekinmeyin. Sorunuzun cevabını "
+"bulabilirsiniz.\n"
+"       <br/><br/>\n"
+"   </t>\n"
+"    <t t-if=\"object.team_id.allow_portal_ticket_closing\">\n"
+"        Yardımımıza artık ihtiyaç duyulmuyorsa biletinizi kapatmaktan "
+"çekinmeyin. İşbirliğiniz için teşekkür ederiz.<br/><br/>\n"
+"   </t>\n"
+"\n"
+"    <div style=\"text-align: center; padding: 16px 0px 16px 0px;\">\n"
+"       <t t-if=\"hasattr(object.team_id, 'website_id') and "
+"object.team_id.use_website_helpdesk_form\">\n"
+"            <a t-attf-style=\"background-color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
+"8px 16px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size: 13px;\" t-att-href=\"'%s%s' % (object.team_id.website_id.domain "
+"or '', object.get_portal_url())\" "
+"target=\"_blank\">{{object.company_id.email_primary_color or '#FFFFFF'}}; "
+"border-radius: 5px; font-size: 13px;\" t-att-href=\"'%s%s' % "
+"(object.team_id.website_id.domain or '', object.get_portal_url())\" "
+"target=\"_blank\">Bileti Görüntüle</a>\n"
+"        </t>\n"
+"       <t t-else=\"\">\n"
+"            <a t-attf-style=\"background-color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
+"8px 16px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size:13px;\" t-att-href=\"object.get_portal_url()\" "
+"target=\"_blank\">{{object.company_id.email_primary_color or '#FFFFFF'}}; "
+"border-radius: 5px; font-size:13px;\" t-att-href=\"object.get_portal_url()\" "
+"target=\"_blank\">Bileti Görüntüle</a>\n"
+"        </t>\n"
+"       <t t-if=\"hasattr(object.team_id, 'website_id') and "
+"object.team_id.allow_portal_ticket_closing\">\n"
+"            <a t-attf-style=\"background-color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
+"8px 16px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size:13px;\" t-att-href=\"'%s/my/ticket/close/%s/%s' % "
+"(object.team_id.website_id.domain or '', object.id, object.access_token)\" "
+"target=\"_blank\">{{object.company_id.email_primary_color or '#FFFFFF'}}; "
+"border-radius: 5px; font-size:13px;\" t-att-href=\"'%s/my/ticket/close/%s/"
+"%s' % (object.team_id.website_id.domain or '', object.id, "
+"object.access_token)\" target=\"_blank\">Bileti Kapat</a>\n"
+"        </t>\n"
+"       <t t-elif=\"object.team_id.allow_portal_ticket_closing\">\n"
+"            <a t-attf-style=\"background-color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
+"8px 16px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size:13px;\" t-att-href=\"'/my/ticket/close/%s/%s' % (object.id, "
+"object.access_token)\" "
+"target=\"_blank\">{{object.company_id.email_primary_color or '#FFFFFF'}}; "
+"border-radius: 5px; font-size:13px;\" t-att-href=\"'/my/ticket/close/%s/%s' "
+"% (object.id, object.access_token)\" target=\"_blank\">Bileti Kapat</a>\n"
+"        </t>\n"
+"       <t t-if=\"object.team_id.use_website_helpdesk_forum or "
+"object.team_id.use_website_helpdesk_knowledge or "
+"object.team_id.use_website_helpdesk_slides\">\n"
+"            <a t-attf-style=\"background-color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
+"8px 16px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size:13px;\" t-att-href=\"object.team_id.feature_form_url\" "
+"target=\"_blank\">{{object.company_id.email_primary_color or '#FFFFFF'}} "
+"border-radius: 5px; font-size:13px;\" t-att-"
+"href=\"object.team_id.feature_form_url\" target=\"_blank\">Yardım Merkezini "
+"Ziyaret Edin</a>\n"
+"        </t><br/><br/>\n"
+"   </div>\n"
+"\n"
+"    Saygılarımla,<br/><br/>\n"
+"   <t t-out=\"object.team_id.name or 'Helpdesk'\">Yardım Masası</t> Ekibi\n"
+"</div>\n"
+"        "
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
@@ -341,6 +539,13 @@ msgid ""
 "                            <i class=\"fa fa-fw o_button_icon fa-frown-o "
 "text-danger\" invisible=\"rating_avg &gt;= 2.33\" title=\"Unhappy\"/>"
 msgstr ""
+"<i class=\"fa fa-fw o_button_icon fa-smile-o text-success\" "
+"invisible=\"rating_avg &lt; 3.66\" title=\"Happy\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-meh-o text-"
+"warning\" invisible=\"rating_avg &lt; 2.33 or rating_avg &gt;= 3.66\" "
+"title=\"Neutral\"/>\n"
+"                            <i class=\"fa fa-fw o_button_icon fa-frown-o "
+"text-danger\" invisible=\"rating_avg &gt;= 2.33\" title=\"Unhappy\"/>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_form
@@ -359,6 +564,10 @@ msgid ""
 "this by navigating to the General Settings and configuring the corresponding "
 "field.</span>"
 msgstr ""
+"<i class=\"fa fa-lightbulb-o\" role=\"img\"/><span class=\"ms-2\">Bir e-"
+"posta takma adı kullanmak için ilk adım, bir Takma Ad Alanı "
+"yapılandırmaktır. Bunu Genel Ayarlar’a giderek ve ilgili alanı "
+"yapılandırarak yapabilirsiniz.</span>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -368,6 +577,10 @@ msgid ""
 "will automatically be sent by email to the customer when their ticket "
 "reaches the corresponding stage with the email template set.</span>"
 msgstr ""
+"<i class=\"fa fa-lightbulb-o\"/>\n"
+"                                    <span class=\"ms-2\">Bilet, e-posta "
+"şablonu ayarlanmış olan ilgili aşamaya ulaştığında, müşteriye otomatik "
+"olarak e-posta ile bir değerlendirme talebi gönderilir.</span>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -380,6 +593,13 @@ msgid ""
 "tickets<br/>\n"
 "                                </span>"
 msgstr ""
+"<i class=\"fa fa-lightbulb-o\"/>\n"
+"                                <span class=\"ms-2\">\n"
+"                                    Bilet oluşturmak için <b>/bilet</b> "
+"yazın<br/>\n"
+"                                    Biletleri bulmak için <b>/bilet_ara</b> "
+"yazın<br/>\n"
+"                                </span>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -394,17 +614,17 @@ msgstr "<i class=\"fa fa-warning\"/>&amp;nbsp;"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "<i class=\"oi oi-arrow-right\"/> Set an Alias Domain"
-msgstr ""
+msgstr "<i class=\"oi oi-arrow-right\"/> Bir Takma Ad Alanı Ayarla"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "<small class=\"text-muted\">Assigned to</small>"
-msgstr ""
+msgstr "<small class=\"text-muted\">Atanan:</small>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "<small class=\"text-muted\">Customer</small>"
-msgstr ""
+msgstr "<small class=\"text-muted\">Müşteri</small>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.portal_helpdesk_ticket
@@ -414,7 +634,7 @@ msgstr "<small>#</small>"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "<small>Stage:</small>"
-msgstr ""
+msgstr "<small>Aşama:</small>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_form
@@ -423,11 +643,14 @@ msgid ""
 "title=\"By saving this change, the customer phone number will also be "
 "updated.\" invisible=\"not is_partner_phone_update\"/>"
 msgstr ""
+"<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
+"title=\"Bu değişikliği kaydettiğinizde müşteri telefon numarası da "
+"güncellenecektir.\" invisible=\"not is_partner_phone_update\"/>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_activity
 msgid "<span class=\"m-1\"/>#"
-msgstr ""
+msgstr "<span class=\"m-1\"/>#"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_form
@@ -469,22 +692,22 @@ msgstr "<span class=\"o_stat_text\">Değerlendirme</span>"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 msgid "<span class=\"text-muted text-nowrap\">Failed</span>"
-msgstr ""
+msgstr "<span class=\"text-muted text-nowrap\">Başarısız</span>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 msgid "<span class=\"text-muted text-nowrap\">Open</span>"
-msgstr ""
+msgstr "<span class=\"text-muted text-nowrap\">Açık</span>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 msgid "<span class=\"text-muted text-nowrap\">Unassigned</span>"
-msgstr ""
+msgstr "<span class=\"text-muted text-nowrap\">Atanmamış</span>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 msgid "<span class=\"text-muted text-nowrap\">Urgent</span>"
-msgstr ""
+msgstr "<span class=\"text-muted text-nowrap\">Acil</span>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -533,13 +756,14 @@ msgstr "<span>gün süren hareketsizlik</span>"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "<strong class=\"col-lg-3\">Reported on</strong>"
-msgstr ""
+msgstr "<strong class=\"col-lg-3\">Bildirildiği Tarih</strong>"
 
 #. module: helpdesk
 #: model_terms:web_tour.tour,rainbow_man_message:helpdesk.helpdesk_tour
 msgid ""
 "<strong><b>Good job!</b> You walked through all steps of this tour.</strong>"
 msgstr ""
+"<strong><b>Tebrikler!</b> Bu turdaki tüm adımları tamamladınız.</strong>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -563,7 +787,7 @@ msgstr ""
 #. module: helpdesk
 #: model:ir.model.constraint,message:helpdesk.constraint_helpdesk_tag_assignment_tag_team_unique
 msgid "A tag can only be used once per team."
-msgstr ""
+msgstr "Bir etiket takım başına yalnızca bir kez kullanılabilir."
 
 #. module: helpdesk
 #: model:ir.model.constraint,message:helpdesk.constraint_helpdesk_tag_name_uniq
@@ -649,7 +873,7 @@ msgstr ""
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_form
 msgid "Add details about this ticket..."
-msgstr ""
+msgstr "Bu biletle ilgili ayrıntılar ekleyin..."
 
 #. module: helpdesk
 #. odoo-javascript
@@ -664,7 +888,7 @@ msgstr ""
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.action_edit_followers_helpdesk_ticket
 msgid "Add/remove followers"
-msgstr ""
+msgstr "Takipçi ekleme/kaldırma"
 
 #. module: helpdesk
 #: model:res.groups,name:helpdesk.group_helpdesk_manager
@@ -689,17 +913,17 @@ msgstr "Rumuz Kontak Güvenliği"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__alias_domain_id
 msgid "Alias Domain"
-msgstr ""
+msgstr "Alias Domain"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__alias_domain
 msgid "Alias Domain Name"
-msgstr ""
+msgstr "Takma Alan Adı"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__alias_full_name
 msgid "Alias Email"
-msgstr ""
+msgstr "Rumuz E-Posta"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__alias_name
@@ -744,6 +968,8 @@ msgid ""
 "Allow customers to help each other on a forum. Share answers from your "
 "tickets directly."
 msgstr ""
+"Müşterilerin birbirine forumda yardımcı olmasına izin verin. Biletlerinizden "
+"yanıtları doğrudan paylaşın."
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -785,6 +1011,8 @@ msgid ""
 "Assign tickets to the appropriate team members by defining who can work on "
 "tickets with certain tags."
 msgstr ""
+"Belirli etiketlere sahip destek talepleri üzerinde kimlerin çalışabileceğini "
+"tanımlayarak destek taleplerini uygun ekip üyelerine atayın."
 
 #. module: helpdesk
 #. odoo-python
@@ -830,6 +1058,9 @@ msgid ""
 "cannot be accessed by the customer, as it belongs to a helpdesk team that is "
 "not publicly available, or there is no customer associated with the ticket."
 msgstr ""
+"Şu anda gösterilebilecek bir önizleme yok. Mevcut bilet, herkese açık "
+"olmayan bir yardım masası ekibine ait olduğundan veya biletle ilişkili bir "
+"müşteri olmadığından müşteri tarafından erişilemez."
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__message_attachment_count
@@ -888,31 +1119,31 @@ msgstr "Ortalama puanı (%)"
 #. odoo-javascript
 #: code:addons/helpdesk/static/src/components/helpdesk_team_dashboard/helpdesk_team_dashboard.xml:0
 msgid "Average Rating for the Past 7 Days"
-msgstr ""
+msgstr "Son 7 Günün Ortalama Değerlendirmesi"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_kanban
 msgid "Average Rating: Happy"
-msgstr ""
+msgstr "Ortalama Puan: Mutlu"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_kanban
 msgid "Average Rating: Neutral"
-msgstr ""
+msgstr "Ortalama Değerlendirme: Nötr"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_kanban
 msgid "Average Rating: Unhappy"
-msgstr ""
+msgstr "Ortalama Değerlendirme: Mutsuz"
 
 #. module: helpdesk
 #. odoo-javascript
 #: code:addons/helpdesk/static/src/components/helpdesk_team_target/helpdesk_team_target.js:0
 msgid "Average rating daily target"
-msgstr ""
+msgstr "Günlük ortalama değerlendirme hedefi"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
@@ -962,12 +1193,12 @@ msgstr "Kampanya"
 #. module: helpdesk
 #: model:helpdesk.stage,name:helpdesk.stage_cancelled
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal Edildi"
 
 #. module: helpdesk
 #: model:ir.ui.menu,name:helpdesk.helpdesk_team_canned_response_menu
 msgid "Canned Responses"
-msgstr ""
+msgstr "Hazır Cevaplar"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -975,6 +1206,9 @@ msgid ""
 "Centralize, manage, share and grow your knowledge library. Allow customers "
 "to search your articles in the help center for answers to their questions."
 msgstr ""
+"Bilgi bankası kütüphanenizi merkezileştirin, yönetin, paylaşın ve "
+"geliştirin. Müşterilerin, yardım merkezindeki makalelerinizde sorularına "
+"yanıt aramasına izin verin."
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -985,7 +1219,7 @@ msgstr "Kanallar"
 #. odoo-javascript
 #: code:addons/helpdesk/static/src/components/helpdesk_team_target/helpdesk_team_target.js:0
 msgid "Click to Set Your Daily Rating Target"
-msgstr ""
+msgstr "Günlük Değerlendirme Hedefinizi Ayarlamak İçin Tıklayın"
 
 #. module: helpdesk
 #. odoo-javascript
@@ -1029,7 +1263,7 @@ msgstr "Kapanmış"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search_base
 msgid "Closed On"
-msgstr ""
+msgstr "Kapanış"
 
 #. module: helpdesk
 #. odoo-javascript
@@ -1085,7 +1319,7 @@ msgstr "Ticari Varlık"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
 msgid "Communication history"
-msgstr ""
+msgstr "İletişim Geçmişi"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_website_helpdesk_forum
@@ -1117,12 +1351,12 @@ msgstr "Ayarlar"
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.action_helpdesk_tag_assignment
 msgid "Configure Tags Handled by Team Members"
-msgstr ""
+msgstr "Ekip Üyeleri Tarafından İşlenen Etiketleri Yapılandırma"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Configure tags handled by team members"
-msgstr ""
+msgstr "Ekip üyeleri tarafından işlenen etiketleri yapılandırma"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.view_helpdesk_stage_delete_confirmation_wizard
@@ -1160,12 +1394,12 @@ msgstr "Oluşturma Tarihi"
 #. module: helpdesk
 #: model:ir.model,website_form_label:helpdesk.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Müşteri Oluşturma"
 
 #. module: helpdesk
 #: model:ir.model,website_form_label:helpdesk.model_helpdesk_ticket
 msgid "Create a Ticket"
-msgstr ""
+msgstr "Bilet Oluşturma"
 
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.email_template_action_helpdesk
@@ -1315,7 +1549,7 @@ msgstr "SLA aşamasına ilk kez ulaşılan tarih"
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__rotting_days
 msgid "Day count since this resource was last updated"
-msgstr ""
+msgstr "Bu kaynağın son güncellenmesinden bu yana geçen gün sayısı"
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_sla_report_analysis__sla_exceeded_hours
@@ -1327,12 +1561,12 @@ msgstr "Çalışma takvimini dikkate almadan SLA aşamasına ulaşmak için gün
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__rotting_days
 msgid "Days Rotting"
-msgstr ""
+msgstr "Çürüyen Günler"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__rotting_threshold_days
 msgid "Days to rot"
-msgstr ""
+msgstr "Çürümeye kalan günler"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__deadline
@@ -1343,7 +1577,7 @@ msgstr "Zaman Sınırı"
 #. odoo-python
 #: code:addons/helpdesk/models/helpdesk_ticket.py:0
 msgid "Deadline reached"
-msgstr ""
+msgstr "Son tarih doldu"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__alias_defaults
@@ -1368,7 +1602,7 @@ msgstr "Aşamayı Sil"
 #. module: helpdesk
 #: model:mail.message.subtype,name:helpdesk.mt_ticket_delivery_status
 msgid "Delivery Status"
-msgstr ""
+msgstr "Teslim Durumu"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -1405,7 +1639,7 @@ msgstr "Sil"
 #. module: helpdesk
 #: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_team__assign_method__tags
 msgid "Dispatch tickets based on tags"
-msgstr ""
+msgstr "Etiketlere göre bilet gönderme"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_digest_digest__display_name
@@ -1482,7 +1716,7 @@ msgstr "E-posta cc"
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_domain
 msgid "Email domain e.g. 'example.com' in 'odoo@example.com'"
-msgstr ""
+msgstr "E-posta alan adı, örneğin 'odoo@example.com' adresindeki 'example.com'"
 
 #. module: helpdesk
 #: model_terms:digest.tip,tip_description:helpdesk.digest_tip_helpdesk_0
@@ -1525,7 +1759,7 @@ msgstr "Hariç Tutulan Aşamalar"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_form
 msgid "Extra Info"
-msgstr ""
+msgstr "Diğer Bilgiler"
 
 #. module: helpdesk
 #: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla_status__status__failed
@@ -1568,7 +1802,7 @@ msgstr "İlk atama tarihi"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__fold
 msgid "Folded"
-msgstr ""
+msgstr "Katlanmış"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -1578,7 +1812,7 @@ msgstr "Ekibin Tüm Biletlerini Takip Edin"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.portal_my_home_helpdesk_ticket
 msgid "Follow all your helpdesk tickets"
-msgstr ""
+msgstr "Tüm yardım masası biletlerinizi takip edin"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search_base
@@ -1614,6 +1848,9 @@ msgid ""
 "Get in touch with your website visitors, and engage them with scripted "
 "chatbot conversations. Create and search tickets from your conversations."
 msgstr ""
+"Web sitenizin ziyaretçileriyle iletişim kurun ve onlarla önceden hazırlanmış "
+"sohbet botu konuşmaları yapın. Sohbetlerinizden biletler oluşturun ve "
+"içlerinde arayın."
 
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_analysis_action
@@ -1631,12 +1868,12 @@ msgstr "Biletleri çevrim içi bir form aracılığıyla alın"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_giftcards
 msgid "Gift Cards"
-msgstr ""
+msgstr "Hediye Kartları"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Grant discounts, free products or free shipping"
-msgstr ""
+msgstr "İndirimler, ücretsiz ürünler veya ücretsiz kargo tanımlayın"
 
 #. module: helpdesk
 #. odoo-python
@@ -1715,7 +1952,7 @@ msgstr "SLA geç ulaştı"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.ticket_invitation_follower
 msgid "Hello"
-msgstr ""
+msgstr "Merhaba"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -1752,7 +1989,7 @@ msgstr "Yardım Masası Aşama Silme Sihirbazı"
 #. module: helpdesk
 #: model:ir.model,name:helpdesk.model_helpdesk_tag_assignment
 msgid "Helpdesk Tag Assignment"
-msgstr ""
+msgstr "Yardım Masası Etiket Ataması"
 
 #. module: helpdesk
 #: model:ir.model,name:helpdesk.model_helpdesk_tag
@@ -1781,7 +2018,7 @@ msgstr "Destek Ekibi"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_search
 msgid "Helpdesk Team Search"
-msgstr ""
+msgstr "Yardım Masası Ekip Arama"
 
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_team_action
@@ -1789,7 +2026,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage_delete_wizard__team_ids
 #: model:ir.ui.menu,name:helpdesk.helpdesk_team_menu
 msgid "Helpdesk Teams"
-msgstr ""
+msgstr "Yardım Masası Ekipleri"
 
 #. module: helpdesk
 #: model:ir.model,name:helpdesk.model_helpdesk_ticket
@@ -1821,7 +2058,7 @@ msgstr "Yardım Masası: Bilet Değerlendirme Talebi"
 #. module: helpdesk
 #: model:mail.template,name:helpdesk.new_ticket_request_email_template
 msgid "Helpdesk: Ticket Received"
-msgstr ""
+msgstr "Yardım Masası: Bilet Alındı"
 
 #. module: helpdesk
 #. odoo-javascript
@@ -1841,7 +2078,7 @@ msgstr "Yüksek öncelik"
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_stage__rotting_threshold_days
 msgid "Highlight tickets that haven't been updated for this many days."
-msgstr ""
+msgstr "Şu kadar gündür güncellenmemiş biletleri vurgulayın."
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
@@ -1897,7 +2134,7 @@ msgstr ""
 #. module: helpdesk
 #: model:helpdesk.team,name:helpdesk.helpdesk_team2
 msgid "IT Support (Auto Assignment by Tags)"
-msgstr ""
+msgstr "BT Desteği (Etiketlere Göre Otomatik Atama)"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__activity_exception_icon
@@ -1953,7 +2190,7 @@ msgstr "Aşamalarda"
 #. module: helpdesk
 #: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_ticket__kanban_state__normal
 msgid "In progress"
-msgstr ""
+msgstr "Devam Eden"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__auto_close_day
@@ -1984,7 +2221,7 @@ msgstr "İade Faturası (İskonto Notu) Düzenle"
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__duration_tracking
 msgid "JSON that maps ids from a many2one field to seconds spent"
-msgstr ""
+msgstr "Bir many2one alanındaki kimlikleri harcanan saniyelerle eşleyen JSON"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__legend_blocked
@@ -2036,7 +2273,7 @@ msgstr "Son 30 gün"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search_base
 msgid "Last 365 Days"
-msgstr ""
+msgstr "Son 365 Gün"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search_base
@@ -2120,7 +2357,7 @@ msgstr "Canlı Sohbet"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__alias_incoming_local
 msgid "Local-part based incoming detection"
-msgstr ""
+msgstr "Yerel bölüm bazlı gelen algılama"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search_base
@@ -2239,7 +2476,7 @@ msgstr "Aşamaya Taşı"
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis_closed
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 msgid "My Activities"
-msgstr ""
+msgstr "Aktivitelerim"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__my_activity_date_deadline
@@ -2283,7 +2520,7 @@ msgstr "Adı"
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search_base
 #: model_terms:ir.ui.view,arch_db:helpdesk.team_rating_progress_data
 msgid "Neutral"
-msgstr ""
+msgstr "Nötr"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
@@ -2336,7 +2573,7 @@ msgstr "Sonraki Aktivitie Türü"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.portal_helpdesk_ticket
 msgid "No Customer"
-msgstr ""
+msgstr "Müşteri Yok"
 
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_sla_action
@@ -2379,7 +2616,7 @@ msgstr "Etiket bulunamadı. Hadi bir tane oluşturalım!"
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.action_helpdesk_tag_assignment
 msgid "No tags or team members found. Let's create them!"
-msgstr ""
+msgstr "Etiket veya ekip üyesi bulunamadı. Hadi onları yaratalım!"
 
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_team_dashboard_action_main
@@ -2419,7 +2656,7 @@ msgstr "Aksiyon Sayısı"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__sla_status_failed
 msgid "Number of SLAs Failed"
-msgstr ""
+msgstr "Başarısız SLA Sayısı"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage_delete_wizard__ticket_count
@@ -2436,7 +2673,7 @@ msgstr "Hata adedi"
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__message_needaction_counter
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "Eylem gerektiren mesajların sayısı"
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__message_has_error_counter
@@ -2497,7 +2734,7 @@ msgstr "Açık Süre (saat)"
 #. odoo-javascript
 #: code:addons/helpdesk/static/src/js/tours/helpdesk.js:0
 msgid "Open the ticket."
-msgstr ""
+msgstr "Bileti aç."
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_force_thread_id
@@ -2662,7 +2899,7 @@ msgstr "Lütfen pozitif bir değer girin."
 #. odoo-javascript
 #: code:addons/helpdesk/static/src/components/helpdesk_team_target/helpdesk_team_target.js:0
 msgid "Please enter a value less than or equal to 5."
-msgstr ""
+msgstr "Lütfen 5 veya daha küçük bir değer girin."
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_contact
@@ -2686,7 +2923,7 @@ msgstr "Portal Erişim URL"
 #. module: helpdesk
 #: model:ir.model,name:helpdesk.model_portal_share
 msgid "Portal Sharing"
-msgstr ""
+msgstr "Portal Paylaşımı"
 
 #. module: helpdesk
 #. odoo-python
@@ -2700,7 +2937,7 @@ msgstr ""
 #. module: helpdesk
 #: model:ir.actions.server,name:helpdesk.action_open_customer_preview
 msgid "Preview"
-msgstr ""
+msgstr "Önizle"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__priority
@@ -2729,7 +2966,7 @@ msgstr "Değerlendirme"
 #: model_terms:ir.ui.view,arch_db:helpdesk.rating_rating_pivot_inherit_helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.rating_rating_view_graph_inherit_helpdesk
 msgid "Rating (1-5)"
-msgstr ""
+msgstr "Değerlendirme (1-5)"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__rating_avg_text
@@ -2830,7 +3067,7 @@ msgstr "Kırmızı Kanban Etiketi"
 #. module: helpdesk
 #: model:mail.message.subtype,name:helpdesk.mt_ticket_refund_status
 msgid "Refund Status"
-msgstr ""
+msgstr "İade Durumu"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_credit_notes
@@ -2841,6 +3078,8 @@ msgstr "İadeler"
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Reimburse customers with a voucher code for future purchases"
 msgstr ""
+"Gelecekteki satın alımlar için müşterilere bir kupon kodu ile geri ödeme "
+"yapın"
 
 #. module: helpdesk
 #: model:helpdesk.tag,name:helpdesk.tag_repair
@@ -2850,7 +3089,7 @@ msgstr "Onarım"
 #. module: helpdesk
 #: model:mail.message.subtype,name:helpdesk.mt_ticket_repair_status
 msgid "Repair Status"
-msgstr ""
+msgstr "Onarım Durumu"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_product_repairs
@@ -2860,7 +3099,7 @@ msgstr "Onarımlar"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_product_replacements
 msgid "Replacements"
-msgstr ""
+msgstr "Değiştirmeler"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.portal_helpdesk_ticket
@@ -2885,7 +3124,7 @@ msgstr "Geriyükle"
 #. module: helpdesk
 #: model:mail.message.subtype,name:helpdesk.mt_ticket_return_status
 msgid "Return Status"
-msgstr ""
+msgstr "İade durumu"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -2901,7 +3140,7 @@ msgstr "İadeler"
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__is_rotting
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 msgid "Rotting"
-msgstr ""
+msgstr "Çürüme"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__sla_id
@@ -2966,6 +3205,7 @@ msgstr "SLA Aşaması"
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__sla_status_ids
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__sla_status_ids
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket_report_analysis__sla_status_ids
+#: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_report_analysis_view_search
 msgid "SLA Status"
 msgstr "SLA Durumu"
 
@@ -2990,7 +3230,7 @@ msgstr "SLA Durum Başarısız"
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__sla_success
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket_report_analysis__sla_success
 msgid "SLA Status Success"
-msgstr ""
+msgstr "SLA Durumu Başarılı"
 
 #. module: helpdesk
 #: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla_report_analysis__sla_status__reached
@@ -3059,13 +3299,13 @@ msgstr "\"Atanan Kişi\" içinde ara"
 #. odoo-python
 #: code:addons/helpdesk/controllers/portal.py:0
 msgid "Search in Customer"
-msgstr ""
+msgstr "Müşteri Ara"
 
 #. module: helpdesk
 #. odoo-python
 #: code:addons/helpdesk/controllers/portal.py:0
 msgid "Search in Helpdesk Team"
-msgstr ""
+msgstr "\"Yardım Masası Ekibi\" içinde ara"
 
 #. module: helpdesk
 #. odoo-python
@@ -3077,7 +3317,7 @@ msgstr "\"Aşama\" içinde ara"
 #. odoo-python
 #: code:addons/helpdesk/controllers/portal.py:0
 msgid "Search%(left)s Tickets%(right)s"
-msgstr ""
+msgstr "Ara:%(left)sBiletler%(right)s"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__access_token
@@ -3113,11 +3353,16 @@ msgid ""
 "team. Automatically send an email to customers when a ticket reaches a "
 "specific stage in a helpdesk team by setting this template on that stage."
 msgstr ""
+"Müşterilere yardım masası taleplerinin alındığını ve şu anda yardım masası "
+"ekibi tarafından incelendiğini bildiren bir onay e-postası gönderin. Ayrıca, "
+"belirli bir aşamaya ulaşan biletler için bu aşamaya e-posta şablonu "
+"ekleyerek müşterilere otomatik olarak e-posta gönderin."
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Send customers a replacement for a lost, damaged, or returned item"
 msgstr ""
+"Kayıp, hasarlı veya iade edilen bir ürün için müşterilere yenisini gönderin"
 
 #. module: helpdesk
 #: model:helpdesk.tag,name:helpdesk.tag_service
@@ -3146,7 +3391,7 @@ msgstr "Ayarlar"
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.portal_share_action
 msgid "Share Ticket"
-msgstr ""
+msgstr "Bileti Paylaş"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -3155,6 +3400,9 @@ msgid ""
 "customers to search your eLearning courses in the help center for answers to "
 "their questions."
 msgstr ""
+"Sunumları ve videoları paylaşın, bunları kurslara çevirin. Müşterilerin, "
+"yardım merkezinde eÖğrenme kurslarınızı arayarak sorularına yanıt "
+"bulmalarına izin verin."
 
 #. module: helpdesk
 #: model:res.groups,name:helpdesk.group_use_rating
@@ -3170,7 +3418,7 @@ msgstr "SLA Politikalarını Göster"
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis_closed
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 msgid "Show all records whose next activity date is past"
-msgstr ""
+msgstr "Bir sonraki etkinlik tarihi geçmiş olan tüm kayıtları göster"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__sla_id
@@ -3256,7 +3504,7 @@ msgstr ""
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__duration_tracking
 msgid "Status time"
-msgstr ""
+msgstr "Durum zamanı"
 
 #. module: helpdesk
 #. odoo-python
@@ -3324,7 +3572,7 @@ msgstr "Ekip"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.view_helpdesk_tag_assignment_search
 msgid "Team Member"
-msgstr ""
+msgstr "Ekip Üyesi"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_tag_assignment__user_ids
@@ -3335,7 +3583,7 @@ msgstr "Satış Ekip Üyeleri"
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.helpdesk_stage_team_action
 msgid "Team Stages"
-msgstr ""
+msgstr "Ekip Aşamaları"
 
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.email_template_action_helpdesk
@@ -3346,7 +3594,7 @@ msgstr "Şablonlar"
 #. odoo-python
 #: code:addons/helpdesk/models/helpdesk_ticket.py:0
 msgid "The customer cannot belong to a different company than the ticket."
-msgstr ""
+msgstr "Müşteri, biletten farklı bir şirkete ait olamaz."
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_model_id
@@ -3426,13 +3674,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/helpdesk/models/helpdesk_ticket.py:0
 msgid "This ticket was closed %s hours after its SLA deadline."
-msgstr ""
+msgstr "Bu bilet, SLA son tarihinden %s saat sonra kapatıldı."
 
 #. module: helpdesk
 #. odoo-python
 #: code:addons/helpdesk/models/helpdesk_ticket.py:0
 msgid "This ticket was successfully closed %s hours before its SLA deadline."
-msgstr ""
+msgstr "Bu bilet, SLA son tarihinden %s saat önce başarıyla kapatıldı."
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.view_helpdesk_stage_delete_confirmation_wizard
@@ -3490,7 +3738,7 @@ msgstr "Destek Talebi Kapalı"
 #. module: helpdesk
 #: model:mail.template,subject:helpdesk.solved_ticket_request_email_template
 msgid "Ticket Closed - Reference {{ object.id if object.id else 15 }}"
-msgstr ""
+msgstr "Bilet Kapandı - Referans {{ object.id if object.id else 15 }}"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__ticket_count
@@ -3507,7 +3755,7 @@ msgstr "Talep Oluşturuldu"
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__create_date
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket_report_analysis__create_date
 msgid "Ticket Creation Date"
-msgstr ""
+msgstr "Bilet Oluşturma Tarihi"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket_report_analysis__sla_deadline
@@ -3540,7 +3788,7 @@ msgstr "Destek Talebi SLA Durumu"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_tag_assignment__tag_id
 msgid "Ticket Tag"
-msgstr ""
+msgstr "Bilet Etiketi"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.quick_create_ticket_form
@@ -3673,7 +3921,7 @@ msgstr "Bugünkü Aktiviteler"
 #. odoo-javascript
 #: code:addons/helpdesk/static/src/components/helpdesk_team_dashboard/helpdesk_team_dashboard.xml:0
 msgid "Today's Average Rating"
-msgstr ""
+msgstr "Bugünün Ortalama Değerlendirmesi"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__total_response_hours
@@ -3741,13 +3989,13 @@ msgstr "Atanmamış"
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search_base
 #: model_terms:ir.ui.view,arch_db:helpdesk.team_rating_progress_data
 msgid "Unhappy"
-msgstr ""
+msgstr "Mutsuz"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_kanban
 msgid "Unhappy face"
-msgstr ""
+msgstr "Mutsuz yüz"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
@@ -3774,7 +4022,7 @@ msgstr "Günlük işlerinizi organize etmek için <b>aktiviteleri</b> kullanın.
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_alias
 msgid "Use Alias"
-msgstr ""
+msgstr "Takma Ad Kullan"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__use_coupons
@@ -3784,7 +4032,7 @@ msgstr "Kuponları Kullan"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__use_giftcards
 msgid "Use Gift Cards"
-msgstr ""
+msgstr "Hediye Kartları Kullanın"
 
 #. module: helpdesk
 #. odoo-javascript
@@ -3794,6 +4042,9 @@ msgid ""
 "customers. Add new people to the followers' list to make them aware of the "
 "progress of this ticket."
 msgstr ""
+"Yazışma özelliğini kullanarak <b>e-postalar gönderin</b> ve müşterilerinizle "
+"verimli iletişim kurun. Bu biletin ilerlemesinden haberdar olmaları için "
+"takipçiler listesine yeni kişiler ekleyin."
 
 #. module: helpdesk
 #: model:ir.model,name:helpdesk.model_res_users
@@ -3833,6 +4084,9 @@ msgid ""
 "Want to use the website form? Just adjust your team's visibility to "
 "\"Invited portal users and all internal users\" and watch the magic happen!"
 msgstr ""
+"Web sitesi formunu kullanmak mı istiyorsunuz? Ekibinizin görünürlüğünü "
+"\"Davet edilen portal kullanıcıları ve tüm dahili kullanıcılar\" olarak "
+"ayarlayın ve sihrin gerçekleşmesini izleyin!"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
@@ -3883,7 +4137,7 @@ msgstr "Websitesi iletişim geçmişi"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__time
 msgid "Within"
-msgstr ""
+msgstr "İçerisinde"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__resource_calendar_id
@@ -3911,7 +4165,7 @@ msgstr "Kapanacak Çalışma Saatleri"
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__sla_deadline_hours
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket_report_analysis__ticket_deadline_hours
 msgid "Working Hours until SLA Deadline"
-msgstr ""
+msgstr "Çalışma Saatleri (SLA Son Teslim Tarihine Kadar)"
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_sla_status__exceeded_hours
@@ -3968,6 +4222,8 @@ msgid ""
 "You cannot update the company of this partner because it would lead to "
 "inconsistency with some of its tickets."
 msgstr ""
+"Bu iş ortağının şirketini güncelleyemezsiniz çünkü bu, bazı biletlerle "
+"tutarsızlığa yol açacaktır."
 
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_sla
@@ -3978,23 +4234,23 @@ msgstr "Tüm taleplerinizi zamanında tamamladınız."
 #. odoo-python
 #: code:addons/helpdesk/models/helpdesk_ticket.py:0
 msgid "You have been invited to follow %s"
-msgstr ""
+msgstr "Takibe etmeye davet edildiniz %s"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.ticket_invitation_follower
 msgid "You have been invited to follow Ticket Document :"
-msgstr ""
+msgstr "Bilet Belgesini takip etmeye davet edildiniz:"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "alias"
-msgstr ""
+msgstr "rumuz"
 
 #. module: helpdesk
 #. odoo-python
 #: code:addons/helpdesk/controllers/portal.py:0
 msgid "close_date"
-msgstr ""
+msgstr "close_date"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_form
@@ -4009,7 +4265,7 @@ msgstr "örn. Müşteri Hizmetleri"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "e.g. My Company"
-msgstr ""
+msgstr "örn. Firmam"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_form
@@ -4020,12 +4276,12 @@ msgstr "örn. Ürün hasarlı ulaştı"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "e.g. mycompany.com"
-msgstr ""
+msgstr "örn. sirketim.com"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_website_helpdesk_slides
 msgid "eLearning"
-msgstr ""
+msgstr "e-Eğitim"
 
 #. module: helpdesk
 #: model_terms:digest.tip,tip_description:helpdesk.digest_tip_helpdesk_0
@@ -4046,7 +4302,7 @@ msgstr "ekip arama"
 #. odoo-python
 #: code:addons/helpdesk/models/helpdesk_team.py:0
 msgid "team_id"
-msgstr ""
+msgstr "team_id"
 
 #. module: helpdesk
 #. odoo-python
@@ -4058,7 +4314,7 @@ msgstr "biletler"
 #. odoo-python
 #: code:addons/helpdesk/controllers/portal.py:0
 msgid "user_id"
-msgstr ""
+msgstr "user_id"
 
 #. module: helpdesk
 #: model:mail.template,subject:helpdesk.rating_ticket_request_email_template
@@ -4072,13 +4328,13 @@ msgstr ""
 #. module: helpdesk
 #: model:mail.template,subject:helpdesk.new_ticket_request_email_template
 msgid "{{ object.name }}"
-msgstr ""
+msgstr "{{ object.name }}"
 
 #. module: helpdesk
 #. odoo-python
 #: code:addons/helpdesk/models/helpdesk_ticket.py:0
 msgid "👤 Unassigned"
-msgstr ""
+msgstr "👤 Atanmamış"
 
 #~ msgid ""
 #~ "<i class=\"fa fa-fw o_button_icon fa-smile-o text-success\" "

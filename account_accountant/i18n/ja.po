@@ -7,15 +7,16 @@
 # Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2023
 # Martin Trigaux, 2023
 # Andy Yiu, 2023
-# Ryoko Tsuda <ryoko@quartile.co>, 2023
+# Ryoko Tsuda <ryoko@quartile.co>, 2023, 2025.
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # "Junko Augias (juau)" <juau@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:44+0000\n"
-"PO-Revision-Date: 2025-10-21 06:29+0000\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-12-23 06:47+0000\n"
 "Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-19/"
 "account_accountant/ja/>\n"
@@ -24,7 +25,13 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
+
+#. module: account_accountant
+#. odoo-python
+#: code:addons/account_accountant/models/account_bank_statement.py:0
+msgid " - %(reconcile_model_name)s"
+msgstr " - %(reconcile_model_name)s"
 
 #. module: account_accountant
 #. odoo-python
@@ -45,6 +52,7 @@ msgid "%(display_name_html)s will be reduced by %(amount)s."
 msgstr "%(display_name_html)s から %(amount)s減額されます。"
 
 #. module: account_accountant
+#: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_create_statement_form_bank_rec_widget
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_form_bank_rec_widget
 msgid ") doesn't match the specified ending balance."
 msgstr ") は指定された期末残高と一致しません。"
@@ -254,6 +262,28 @@ msgid "<span>Exception</span>"
 msgstr "<span>例外</span>"
 
 #. module: account_accountant
+#. odoo-python
+#: code:addons/account_accountant/models/account_payment.py:0
+msgid ""
+"A payment with entry was created for an invoice previously linked to this "
+"payment: %(link)s.\n"
+"Its amount was deducted from this payment."
+msgstr ""
+"この支払いに以前リンクされていた請求書に対して、仕訳付きの支払いが作成されま"
+"した: %(link)s.\n"
+"その金額はこの支払いから差し引かれました。"
+
+#. module: account_accountant
+#. odoo-python
+#: code:addons/account_accountant/models/account_payment.py:0
+msgid ""
+"A payment with entry was created for the related invoice during its "
+"reconciliation, replacing this one: %(link)s."
+msgstr ""
+"関連する請求書の消込処理の際に仕訳付きの支払いが作成され、%(link)s がこの支払"
+"いの代わりとなりました。"
+
+#. module: account_accountant
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_account_change_lock_date
 msgid ""
 "A posted tax return closing entry exists after this tax lock date. You might "
@@ -396,6 +426,11 @@ msgid ""
 msgstr "%(amount)s を%(from_account)sから%(to_account)sへ送金する仕訳。"
 
 #. module: account_accountant
+#: model:ir.model,name:account_accountant.model_analytic_mixin
+msgid "Analytic Mixin"
+msgstr "分析Mixin"
+
+#. module: account_accountant
 #: model:ir.model.fields,field_description:account_accountant.field_res_config_settings__use_anglo_saxon
 msgid "Anglo-Saxon Accounting"
 msgstr "アングロサクソン会計"
@@ -428,8 +463,8 @@ msgid ""
 "automatically set when the tax closing entry is posted."
 msgstr ""
 "その日付まで(当日を含む)に発生した税を含むすべての仕訳は、仕訳帳のシーケンス"
-"に従って、後の時点に繰り延べされます。税ロック日は、税務申告の締め仕訳が記帳"
-"された時点で自動的に設定されます。"
+"に従って、後の時点に繰り延べされます。税ロック日は、税の締め仕訳が記帳された"
+"時点で自動的に設定されます。"
 
 #. module: account_accountant
 #: model:ir.model.fields,help:account_accountant.field_account_change_lock_date__purchase_lock_date
@@ -526,6 +561,7 @@ msgstr "銀行照合"
 
 #. module: account_accountant
 #: model:ir.model,name:account_accountant.model_account_bank_statement
+#: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_create_statement_form_bank_rec_widget
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_form_bank_rec_widget
 msgid "Bank Statement"
 msgstr "銀行取引明細書"
@@ -561,6 +597,12 @@ msgstr "基準"
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_line_form_bank_rec_widget
 msgid "Cancel"
 msgstr "キャンセル"
+
+#. module: account_accountant
+#. odoo-python
+#: code:addons/account_accountant/models/account_payment.py:0
+msgid "Canceled payment during reconciliation"
+msgstr "消込処理中に取り消された支払"
 
 #. module: account_accountant
 #. odoo-javascript
@@ -743,7 +785,6 @@ msgid "Cron Last Check"
 msgstr "定期処理の最終実行確認"
 
 #. module: account_accountant
-#: model:ir.model,name:account_accountant.model_res_currency
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_move_line_reconcile_tree
 msgid "Currency"
 msgstr "通貨"
@@ -794,17 +835,27 @@ msgid "Days"
 msgstr "日"
 
 #. module: account_accountant
+#: model_terms:ir.ui.view,arch_db:account_accountant.view_move_form_inherit
+msgid "Deferral Entries"
+msgstr ""
+
+#. module: account_accountant
 #. odoo-python
 #: code:addons/account_accountant/models/account_move.py:0
 msgid "Deferral of %s"
 msgstr "%sの繰延"
 
 #. module: account_accountant
+#: model_terms:ir.ui.view,arch_db:account_accountant.view_move_form_inherit
+#: model_terms:ir.ui.view,arch_db:account_accountant.view_move_line_tree
+msgid "Deferred Date"
+msgstr "繰延日"
+
+#. module: account_accountant
 #. odoo-python
 #: code:addons/account_accountant/models/account_move.py:0
 #: model:ir.model.fields,field_description:account_accountant.field_account_bank_statement_line__deferred_move_ids
 #: model:ir.model.fields,field_description:account_accountant.field_account_move__deferred_move_ids
-#: model_terms:ir.ui.view,arch_db:account_accountant.view_move_form_inherit
 msgid "Deferred Entries"
 msgstr "繰延仕訳"
 
@@ -836,6 +887,11 @@ msgstr "以下に基づく前払費用:"
 #: model:ir.model.fields,field_description:account_accountant.field_res_config_settings__deferred_expense_journal_id
 msgid "Deferred Expense Journal"
 msgstr "前払費用仕訳帳"
+
+#. module: account_accountant
+#: model:ir.model.fields.selection,name:account_accountant.selection__account_move__deferred_entry_type__misc
+msgid "Deferred Miscellaneous"
+msgstr ""
 
 #. module: account_accountant
 #: model:ir.model.fields.selection,name:account_accountant.selection__account_move__deferred_entry_type__revenue
@@ -894,7 +950,7 @@ msgstr "取引を削除"
 #. module: account_accountant
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_line_search_bank_rec_widget
 msgid "Deposits"
-msgstr "預入金"
+msgstr "入金"
 
 #. module: account_accountant
 #: model:ir.model,name:account_accountant.model_digest_digest
@@ -941,12 +997,11 @@ msgstr "部分消込を許可を表示"
 #: model:ir.model.fields,field_description:account_accountant.field_account_reconcile_model_line__display_name
 #: model:ir.model.fields,field_description:account_accountant.field_account_reconcile_wizard__display_name
 #: model:ir.model.fields,field_description:account_accountant.field_account_tax__display_name
+#: model:ir.model.fields,field_description:account_accountant.field_analytic_mixin__display_name
 #: model:ir.model.fields,field_description:account_accountant.field_digest_digest__display_name
-#: model:ir.model.fields,field_description:account_accountant.field_ir_model__display_name
 #: model:ir.model.fields,field_description:account_accountant.field_ir_ui_menu__display_name
 #: model:ir.model.fields,field_description:account_accountant.field_res_company__display_name
 #: model:ir.model.fields,field_description:account_accountant.field_res_config_settings__display_name
-#: model:ir.model.fields,field_description:account_accountant.field_res_currency__display_name
 msgid "Display Name"
 msgstr "表示名"
 
@@ -1019,7 +1074,7 @@ msgstr "終了日"
 #. module: account_accountant
 #: model:ir.model.fields,help:account_accountant.field_account_fiscal_year__date_to
 msgid "Ending Date, included in the fiscal year."
-msgstr "日付を終了し、当連結会計年度に含まれています。"
+msgstr "会計年度に含まれる終了日。"
 
 #. module: account_accountant
 #: model:ir.model.fields,help:account_accountant.field_res_company__invoicing_switch_threshold
@@ -1193,6 +1248,15 @@ msgid "Has Message"
 msgstr "メッセージあり"
 
 #. module: account_accountant
+#. odoo-python
+#: code:addons/account_accountant/models/account_move.py:0
+msgid ""
+"Having different deferred entries generation methods for expenses and "
+"revenues is not supported on journal entries involving both expense and "
+"revenue accounts. You can split this entry into two entries instead."
+msgstr ""
+
+#. module: account_accountant
 #: model:ir.model.fields,field_description:account_accountant.field_account_account__id
 #: model:ir.model.fields,field_description:account_accountant.field_account_auto_reconcile_wizard__id
 #: model:ir.model.fields,field_description:account_accountant.field_account_bank_statement__id
@@ -1208,12 +1272,11 @@ msgstr "メッセージあり"
 #: model:ir.model.fields,field_description:account_accountant.field_account_reconcile_model_line__id
 #: model:ir.model.fields,field_description:account_accountant.field_account_reconcile_wizard__id
 #: model:ir.model.fields,field_description:account_accountant.field_account_tax__id
+#: model:ir.model.fields,field_description:account_accountant.field_analytic_mixin__id
 #: model:ir.model.fields,field_description:account_accountant.field_digest_digest__id
-#: model:ir.model.fields,field_description:account_accountant.field_ir_model__id
 #: model:ir.model.fields,field_description:account_accountant.field_ir_ui_menu__id
 #: model:ir.model.fields,field_description:account_accountant.field_res_company__id
 #: model:ir.model.fields,field_description:account_accountant.field_res_config_settings__id
-#: model:ir.model.fields,field_description:account_accountant.field_res_currency__id
 msgid "ID"
 msgstr "ID"
 
@@ -1522,7 +1585,7 @@ msgstr "税務申告をロック 自分に適用"
 #: model:ir.model.fields,field_description:account_accountant.field_account_bank_statement__message_main_attachment_id
 #: model:ir.model.fields,field_description:account_accountant.field_account_bank_statement_line__message_main_attachment_id
 msgid "Main Attachment"
-msgstr "主な添付ファイル"
+msgstr "メイン添付ファイル"
 
 #. module: account_accountant
 #. odoo-javascript
@@ -1551,6 +1614,18 @@ msgstr "突合済取引"
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_move_line_reconcile_tree
 msgid "Matching"
 msgstr "突合"
+
+#. module: account_accountant
+#. odoo-python
+#: code:addons/account_accountant/models/account_bank_statement.py:0
+msgid "Matching done"
+msgstr "照合完了"
+
+#. module: account_accountant
+#. odoo-python
+#: code:addons/account_accountant/models/account_bank_statement.py:0
+msgid "Matching unreconciled"
+msgstr "未消込の照合"
 
 #. module: account_accountant
 #: model:ir.model,name:account_accountant.model_ir_ui_menu
@@ -1628,9 +1703,10 @@ msgid "Miscellaneous Journal"
 msgstr "その他仕訳帳"
 
 #. module: account_accountant
-#: model:ir.model,name:account_accountant.model_ir_model
-msgid "Models"
-msgstr "モデル"
+#. odoo-python
+#: code:addons/account_accountant/models/account_payment.py:0
+msgid "Modified amount during reconciliation"
+msgstr "消込中の修正金額"
 
 #. module: account_accountant
 #: model:ir.model.fields.selection,name:account_accountant.selection__res_company__deferred_expense_amount_computation_method__month
@@ -1691,7 +1767,7 @@ msgstr "フィルタに一致する取引が見つかりません。"
 #. module: account_accountant
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_line_search_bank_rec_widget
 msgid "Not Matched"
-msgstr "一致しない"
+msgstr "未突合"
 
 #. module: account_accountant
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_account_change_lock_date
@@ -1835,7 +1911,6 @@ msgstr "取引先"
 #. module: account_accountant
 #. odoo-javascript
 #: code:addons/account_accountant/static/src/components/bank_reconciliation/button_list/button_list.js:0
-#: code:addons/account_accountant/static/src/components/bank_reconciliation/button_list/button_list.xml:0
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_account_move_line_reconcile_search
 msgid "Payable"
 msgstr "買掛金"
@@ -1849,7 +1924,7 @@ msgstr "支払照合"
 #: model:ir.model.fields,field_description:account_accountant.field_account_bank_statement_line__payment_state_before_switch
 #: model:ir.model.fields,field_description:account_accountant.field_account_move__payment_state_before_switch
 msgid "Payment State Before Switch"
-msgstr "切り替え前の支払い状態"
+msgstr "切り替え前の支払いステータス"
 
 #. module: account_accountant
 #: model:ir.model,name:account_accountant.model_account_payment
@@ -1928,7 +2003,6 @@ msgstr "理由..."
 #. module: account_accountant
 #. odoo-javascript
 #: code:addons/account_accountant/static/src/components/bank_reconciliation/button_list/button_list.js:0
-#: code:addons/account_accountant/static/src/components/bank_reconciliation/button_list/button_list.xml:0
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_account_move_line_reconcile_search
 msgid "Receivable"
 msgstr "売掛金"
@@ -1941,7 +2015,6 @@ msgstr "売掛金"
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_account_auto_reconcile_wizard
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_account_list_bank_rec_widget
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_account_reconcile_wizard
-#: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_form_bank_rec_widget
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_move_line_payment_tree
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_move_line_reconcile_tree
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_move_line_tree
@@ -1983,16 +2056,15 @@ msgid "Reconciliation model"
 msgstr "消込モデル"
 
 #. module: account_accountant
-#. odoo-python
-#: code:addons/account_accountant/models/account_reconcile_model.py:0
-msgid "Reconciliation model %s applied"
-msgstr "消込モデル %s が適用されました"
-
-#. module: account_accountant
 #. odoo-javascript
 #: code:addons/account_accountant/static/src/components/journal_create_wizard/journal_create_wizard.js:0
 msgid "Record your cash movements and transfers"
 msgstr "現金移動と振替を記録します"
+
+#. module: account_accountant
+#: model_terms:ir.ui.view,arch_db:account_accountant.view_move_form_inherit
+msgid "Related Entries"
+msgstr ""
 
 #. module: account_accountant
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_move_form_inherit
@@ -2100,7 +2172,8 @@ msgstr "検索: 取引先"
 msgid ""
 "Select a user here to override every signature on invoice by this user's "
 "signature"
-msgstr "ここでユーザを選択すると、顧客請求書のすべての署名がそのユーザの署名で上書き"
+msgstr ""
+"ここでユーザを選択すると、顧客請求書のすべての署名がそのユーザの署名で上書き"
 "されます"
 
 #. module: account_accountant
@@ -2174,6 +2247,12 @@ msgstr "署名ユーザ"
 #: model:ir.model.fields,field_description:account_accountant.field_account_reconcile_wizard__single_currency_mode
 msgid "Single Currency Mode"
 msgstr "単一通貨モード"
+
+#. module: account_accountant
+#. odoo-javascript
+#: code:addons/account_accountant/static/src/components/bank_reconciliation/statement_line/statement_line.xml:0
+msgid "Some lines have invalid analytic distribution"
+msgstr "一部の行の分析配分が無効です"
 
 #. module: account_accountant
 #: model:ir.model.fields,field_description:account_accountant.field_account_fiscal_year__date_from
@@ -2289,9 +2368,9 @@ msgid ""
 "or *) or any value with no digit. For example: BRT: ([\\d,.]+)."
 msgstr ""
 "対応金額を抽出するための正規表現の形式が正しくないようです。\n"
-"金額をキャプチャする正規表現の部分(括弧内)が、空の値(? や * の誤用による)や数"
-"字を含まない値をキャプチャしないようにしてください。たとえば、BRT: ([\\d,.]"
-"+) のように記述します。"
+"金額を確定する正規表現の部分(括弧内)が、空の値(? や * の誤用による)や数字を含"
+"まない値を確定しないようにしてください。たとえば、BRT: ([\\d,.]+) のように記"
+"述します。"
 
 #. module: account_accountant
 #. odoo-python
@@ -2303,20 +2382,23 @@ msgid ""
 "first (or only) one in parentheses, for example: BRT: ([\\d,.]+)."
 msgstr ""
 "対応金額を抽出する正規表現の形式が正しくないようです。\n"
-"金額をキャプチャする部分は、正規表現内で最初（または唯一）の括弧内に含まれて"
-"いる必要があります。例: BRT: ([\\d,.]+)。"
+"金額を確定する部分は、正規表現内で最初（または唯一）の括弧内に含まれている必"
+"要があります。例: BRT: ([\\d,.]+)。"
 
 #. module: account_accountant
+#: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_create_statement_form_bank_rec_widget
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_form_bank_rec_widget
 msgid "The running balance ("
 msgstr "累積残高 ("
 
 #. module: account_accountant
+#: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_create_statement_form_bank_rec_widget
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_form_bank_rec_widget
 msgid ""
 "The starting balance doesn't match the ending balance of the previous "
 "statement, or an earlier statement is missing."
-msgstr "未消込金残高が以前の明細書の期末残高と一致しない、または以前の明細書が欠落し"
+msgstr ""
+"未消込金残高が以前の明細書の期末残高と一致しない、または以前の明細書が欠落し"
 "ています。"
 
 #. module: account_accountant
@@ -2329,6 +2411,7 @@ msgstr ""
 "します。"
 
 #. module: account_accountant
+#: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_create_statement_form_bank_rec_widget
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_form_bank_rec_widget
 msgid "There are one or more"
 msgstr "１つまたは1つ以上の"
@@ -2347,6 +2430,17 @@ msgstr ""
 #: code:addons/account_accountant/wizard/account_reconcile_wizard.py:0
 msgid "This can only be used on journal items"
 msgstr "これは仕訳明細のみに使用できます"
+
+#. module: account_accountant
+#. odoo-javascript
+#: code:addons/account_accountant/static/src/components/bank_reconciliation/line_to_reconcile/line_to_reconcile.xml:0
+msgid "This line has invalid analytic distribution"
+msgstr "この行の分析配分が無効です"
+
+#. module: account_accountant
+#: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_rec_edit_line
+msgid "This line requires analytic distribution."
+msgstr "この行には分析配分が必要です"
 
 #. module: account_accountant
 #. odoo-python
@@ -2420,10 +2514,11 @@ msgstr "合計外貨建未決済残高"
 #. module: account_accountant
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_line_search_bank_rec_widget
 msgid "Transaction"
-msgstr "取引明細書"
+msgstr "取引"
 
 #. module: account_accountant
 #: model_terms:ir.ui.view,arch_db:account_accountant.account_journal_dashboard_kanban_view
+#: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_create_statement_form_bank_rec_widget
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_form_bank_rec_widget
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_tree
 msgid "Transactions"
@@ -2582,7 +2677,7 @@ msgid ""
 "You cannot reset to draft an invoice that is grouped in deferral entry. You "
 "can create a credit note instead."
 msgstr ""
-"延期入力でグループ化された請求書をドラフトに戻すことはできません。代わりにク"
+"繰延仕訳でグループ化された請求書をドラフトに戻すことはできません。代わりにク"
 "レジットノートを作成することができます。"
 
 #. module: account_accountant
@@ -2673,6 +2768,7 @@ msgid "id"
 msgstr "id"
 
 #. module: account_accountant
+#: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_create_statement_form_bank_rec_widget
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_form_bank_rec_widget
 msgid "invalid statement(s)"
 msgstr "無効な取引明細"
@@ -2686,6 +2782,12 @@ msgstr "補助通貨"
 #: model_terms:ir.ui.view,arch_db:account_accountant.account_journal_dashboard_kanban_view
 msgid "to reconcile"
 msgstr "未消込"
+
+#~ msgid "Reconciliation model %s applied"
+#~ msgstr "消込モデル %s が適用されました"
+
+#~ msgid "Models"
+#~ msgstr "モデル"
 
 #~ msgid ""
 #~ "\n"

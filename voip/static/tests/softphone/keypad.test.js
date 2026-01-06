@@ -1,6 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { edit } from "@odoo/hoot-dom";
-import { mockUserAgent } from "@odoo/hoot-mock";
 import {
     click,
     contains,
@@ -231,12 +230,16 @@ test("T9 search does not match when contact has falsy t9_name", async () => {
     await contains(".o-voip-Keypad .d-flex.flex-column.mx-3", { count: 0 });
 });
 
-test("clicking a keypad key should not focus the input on mobile", async () => {
+test.tags("focus required");
+test("Selection starting at the beginning is removed when clicking Backspace.", async () => {
     await start();
-    mockUserAgent("Chrome/0.0.0 Android (OdooMobile; Linux; Android 13; Odoo TestSuite)");
     await click(".o_menu_systray [title='Show Softphone']");
     await click(".o-voip-Softphone nav button:contains(Keypad)");
-    await click(".o-voip-Keypad-digit:contains(2)");
+    await insertText(".o-voip-Keypad-searchBar input:focus", "0123456");
     const input = document.querySelector(".o-voip-Keypad-searchBar input");
-    expect(document.activeElement).not.toBe(input);
+    input.setSelectionRange(0, 2);
+    await click(".o-voip-Keypad-searchBar button[title=Backspace]");
+    expect(input.selectionStart).toBe(0);
+    expect(input.selectionEnd).toBe(0);
+    await contains(".o-voip-Keypad-searchBar input:value(23456)");
 });

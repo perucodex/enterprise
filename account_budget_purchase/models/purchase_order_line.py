@@ -24,6 +24,8 @@ class PurchaseOrderLine(models.Model):
     @api.depends('analytic_distribution')
     def _compute_budget_line_ids(self):
         def get_domain(line):
+            if not self.env['budget.analytic'].has_access('read'):
+                return False
             if line.analytic_json and line.product_qty - line.qty_received > 0:
                 project_plan, other_plans = self.env['account.analytic.plan']._get_all_plans()
                 domain_to_add = set()
@@ -48,7 +50,7 @@ class PurchaseOrderLine(models.Model):
                     return tuple(domain)
 
         for domain, lines in self.grouped(get_domain).items():
-            budget_lines = bool(domain) and self.sudo().env['budget.line'].search(list(domain))
+            budget_lines = bool(domain) and self.env['budget.line'].search(list(domain))
             for line in lines:
                 line.budget_line_ids = budget_lines
 

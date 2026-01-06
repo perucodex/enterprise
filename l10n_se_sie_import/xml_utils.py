@@ -53,7 +53,7 @@ DIGEST_METHODS = {
     "http://www.w3.org/2001/04/xmldsig-more#sha224": _hash_method_constructor(hashlib.sha224),
     "http://www.w3.org/2001/04/xmlenc#sha256": _hash_method_constructor(hashlib.sha256),
     "http://www.w3.org/2001/04/xmldsig-more#sha384": _hash_method_constructor(hashlib.sha384),
-    "http://www.w3.org/2001/04/xmlenc#sha512": _hash_method_constructor(hashlib.sha384),
+    "http://www.w3.org/2001/04/xmlenc#sha512": _hash_method_constructor(hashlib.sha512),
 }
 
 SIGNATURE_METHODS = {

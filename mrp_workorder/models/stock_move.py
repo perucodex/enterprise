@@ -105,13 +105,16 @@ class StockMove(models.Model):
                 move_line.picked = True
                 return
         remaining_qty = self.product_qty - sum(sml.quantity_product_uom for sml in self.move_line_ids if not hide_unpicked or sml.picked)
-        qty_to_take = 1 if self.product_id.tracking == 'serial' else max(min(remaining_qty, quant.available_quantity), 1)
+        if min(remaining_qty, quant.available_quantity) > 0 and self.product_id.tracking != 'serial':
+            qty_to_take = min(remaining_qty, quant.available_quantity)
+        else:
+            qty_to_take = 1
         move_line = next((sml for sml in self.move_line_ids if sml._takes_from_quant(quant)), False)
         if move_line:  # Quant already has visible sml -> increase existing sml's quantity
             move_line.quantity += self.product_id.uom_id._compute_quantity(qty_to_take, self.product_uom)
         else:  # No sml exists for quant -> make new sml
             move_line_vals = self._prepare_move_line_vals(
-                quantity=self.product_id.uom_id._compute_quantity(qty_to_take, self.product_uom),
+                quantity=qty_to_take,
                 reserved_quant=quant)
             self.env['stock.move.line'].create([{**move_line_vals, 'picked': True}])
 

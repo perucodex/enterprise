@@ -206,6 +206,7 @@ class TestBillsPrediction(AccountTestInvoicingCommon):
         default_account = self.company_data['default_journal_purchase'].default_account_id
         bill_1 = self.env['account.move'].create({
             'move_type': 'in_invoice',
+            'invoice_date': fields.Date.today(),
             'partner_id': self.test_partners[0].id,
             'line_ids': [
                 Command.create({'name': "Laptop", 'deductible_amount': 80.0, 'account_id': default_account.id, 'quantity': 1, 'price_unit': 100.0}),

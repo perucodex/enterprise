@@ -51,6 +51,20 @@
         </field>
     </record>
 
+    <record id="hr_version_search_view" model="ir.ui.view">
+        <field name="name">hr.version.search.fix</field>
+        <field name="model">hr.version</field>
+        <field name="inherit_id" ref="hr.hr_version_search_view"/>
+        <field name="arch" type="xml">
+            <filter name="contract_date_start" position="attributes">
+                <attribute name="groups">hr_payroll.group_hr_payroll_user</attribute>
+            </filter>
+            <filter name="contract_date_end" position="attributes">
+                <attribute name="groups">hr_payroll.group_hr_payroll_user</attribute>
+            </filter>
+        </field>
+    </record>
+
     <record id="action_payroll_hr_version_list_view_payrun" model="ir.actions.act_window">
         <field name="name">Select Employees</field>
         <field name="res_model">hr.version</field>
@@ -65,6 +79,20 @@
                 No record fit your period and salary structure type, please go back to select another period and/or
                 salary structure type.
             </p>
+        </field>
+    </record>
+
+    <record id="payroll_hr_version_view_search" model="ir.ui.view">
+        <field name="name">hr.version.search.inherit</field>
+        <field name="model">hr.version</field>
+        <field name="inherit_id" ref="hr.hr_version_search_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='contract_date_start']" position="attributes">
+                <attribute name="groups">hr_payroll.group_hr_payroll_user</attribute>
+            </xpath>
+            <xpath expr="//filter[@name='contract_date_end']" position="attributes">
+                <attribute name="groups">hr_payroll.group_hr_payroll_user</attribute>
+            </xpath>
         </field>
     </record>
 </odoo>

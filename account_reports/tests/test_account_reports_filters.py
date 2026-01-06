@@ -1886,3 +1886,103 @@ class TestAccountReportsFilters(TestAccountReportsCommon, odoo.tests.HttpCase):
             ],
             options,
         )
+
+    def test_available_variants_options(self):
+        # Ensure variants are visible in the variants selector if their availability condition is met
+        def assert_available_variants_match(options, reports):
+            expected_variants = [v['id'] for v in options.get('available_variants', [])]
+            actual_reports = reports.mapped('id')
+
+            self.assertEqual(
+                expected_variants,
+                actual_reports,
+                msg=f"Expected available variants {expected_variants} but got {actual_reports}"
+            )
+
+        root_report = self.env['account.report'].create({
+            'name': "Root Report",
+            'allow_foreign_vat': True,
+        })
+
+        report_always = self.env['account.report'].create({
+            'name': "Report Always available",
+            'root_report_id': root_report.id,
+        })
+
+        report_generic_coa = self.env['account.report'].create({
+            'name': "Report generic COA",
+            'root_report_id': root_report.id,
+            'availability_condition': 'coa',
+            'chart_template': 'generic_coa',
+        })
+
+        report_us_country = self.env['account.report'].create({
+            'name': "Report US country",
+            'root_report_id': root_report.id,
+            'availability_condition': 'country',
+            'country_id': self.env.ref('base.us').id,
+        })
+
+        report_be_country = self.env['account.report'].create({
+            'name': "Report BE country",
+            'root_report_id': root_report.id,
+            'availability_condition': 'country',
+            'country_id': self.env.ref('base.be').id,
+        })
+
+        report_us_coa = self.env['account.report'].create({
+            'name': "Report US COA",
+            'root_report_id': root_report.id,
+            'availability_condition': 'coa',
+            'chart_template': 'us',
+        })
+
+        # Selecting Root Report
+        options = self._generate_options(root_report, '2024-01-01', '2024-12-31')
+        expected_reports = root_report + report_always + report_generic_coa + report_us_country
+        assert_available_variants_match(options, expected_reports)
+
+        # Selecting a child shouldn't change the order
+        options = self._generate_options(report_always, '2024-01-01', '2024-12-31')
+        assert_available_variants_match(options, expected_reports)
+
+        self.env['account.fiscal.position'].create({
+            'name': 'Test Fiscal Position',
+            'auto_apply': True,
+            'foreign_vat': 'BE980737405',
+            'country_id': self.env.ref('base.be').id,
+        })
+
+        # Adding fiscal position should make BE-reports available since it allows foreign vat
+        options = self._generate_options(root_report, '2024-01-01', '2024-12-31')
+        assert_available_variants_match(options, expected_reports + report_be_country)
+
+        (expected_reports + report_be_country).allow_foreign_vat = False
+        options = self._generate_options(root_report, '2024-01-01', '2024-12-31')
+        assert_available_variants_match(options, expected_reports)
+
+        self.company_data['company'].chart_template = 'us'
+        options = self._generate_options(root_report, '2024-01-01', '2024-12-31')
+        # Multi-company environment with first company with US COA and second with generic COA
+        assert_available_variants_match(options, root_report + report_always + report_generic_coa + report_us_coa + report_us_country)
+
+        # only allow company 1 (US COA)
+        self.env.user.company_ids = self.company_data['company']
+        options = self._generate_options(root_report, '2024-01-01', '2024-12-31')
+        assert_available_variants_match(options, root_report + report_always + report_us_coa + report_us_country)
+
+    def test_send_customer_statement_without_template(self):
+        """Test sending the customer statement without an email template."""
+        report = self.env.ref('account_reports.customer_statement_report')
+        options = report.get_options({})
+        options['partner_ids'] = [self.partner.id]
+
+        wizard = self.env['account.report.send'].create({
+            'account_report_id': report.id,
+            'mail_subject': 'Customer Statement',
+            'report_options': options,
+        })
+        self.assertEqual(wizard.mode, 'single')
+        self.assertFalse(wizard.mail_template_id)
+
+        wizard.action_send_and_print()

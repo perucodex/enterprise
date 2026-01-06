@@ -368,7 +368,9 @@ export class FilterEditorStore extends SpreadsheetStore {
             await Promise.all(promises);
         } catch (e) {
             if (e instanceof ModelNotFoundError) {
-                console.error(e);
+                if (odoo.debug) {
+                    console.error(e);
+                }
                 return false;
             } else {
                 throw e;

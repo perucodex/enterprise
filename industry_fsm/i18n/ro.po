@@ -1,28 +1,31 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* industry_fsm
+# * industry_fsm
 #
 # Translators:
 # Martin Trigaux, 2022
 # Foldi Robert <foldirobert@nexterp.ro>, 2022
 # Hongu Cosmin <cosmin513@gmail.com>, 2022
 # Cozmin Candea <office@terrabit.ro>, 2023
-# Dorin Hongu <dhongu@gmail.com>, 2023
-#
+# Dorin Hongu <dhongu@gmail.com>, 2023, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Odoo Translation Bot <c3p@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2022-09-22 05:47+0000\n"
-"Last-Translator: Dorin Hongu <dhongu@gmail.com>, 2023\n"
-"Language-Team: Romanian (https://app.transifex.com/odoo/teams/41243/ro/)\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-11-27 14:13+0000\n"
+"Last-Translator: Odoo Translation Bot <c3p@odoo.com>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-19/"
+"industry_fsm/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?"
-"2:1));\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
+"20)) ? 1 : 2;\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__nbr
@@ -33,39 +36,40 @@ msgstr "# de Sarcini"
 #. odoo-python
 #: code:addons/industry_fsm/models/project_task.py:0
 msgid "%(partner)s has %(number)s tasks at the same time."
-msgstr ""
+msgstr "%(partner)s are %(number)s sarcini în același timp."
 
 #. module: industry_fsm
 #: model:ir.actions.report,print_report_name:industry_fsm.task_custom_report
 msgid ""
 "'Field Service Report - %s - %s' % (object.name, object.partner_id.name)"
 msgstr ""
+"'Raport de intervenție - %s - %s' % (object.name, object.partner_id.name)"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_sharing_inherit_project_task_view_form
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
 msgid "(incl."
-msgstr ""
+msgstr "(incl."
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "10 days"
-msgstr ""
+msgstr "10 zile"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "10:00"
-msgstr ""
+msgstr "10:00"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "2023-01-01"
-msgstr ""
+msgstr "2023-01-01"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "5 days"
-msgstr ""
+msgstr "5 zile"
 
 #. module: industry_fsm
 #: model:mail.template,body_html:industry_fsm.mail_template_data_intervention_details
@@ -100,11 +104,40 @@ msgid ""
 "</div>\n"
 "        "
 msgstr ""
+"<div>\n"
+"    <t t-set=\"date_begin\" t-"
+"value=\"format_datetime(object.planned_date_begin, tz=object.partner_id.tz, "
+"lang_code=object.partner_id.lang)\"/>\n"
+"\n"
+"    <t t-set=\"date_end\" t-value=\"format_datetime(object.date_deadline, "
+"tz=object.partner_id.tz, lang_code=object.partner_id.lang)\"/>\n"
+"\n"
+"    Stimate <t t-out=\"object.partner_id.name or 'client'\">client</t>,<br/"
+"><br/>\n"
+"    <t t-if=\"date_begin and date_end\">\n"
+"        Intervenția dvs. <t t-out=\"object.name or ''\">Mentenanță boiler</"
+"t> este programată de la <t t-out=\"date_begin or ''\">31.05.2021 12:30:00</"
+"t> până la <t t-out=\"date_end or ''\">31.05.2021 14:30:00</t>.\n"
+"    </t>\n"
+"    <t t-else=\"\">\n"
+"        Intervenția dvs. <t t-out=\"object.name or ''\">Mentenanță boiler</"
+"t> este programată.\n"
+"    </t>\n"
+"    <br/><br/>\n"
+"    Cu stimă,\n"
+"    <t t-if=\"user.signature\" data-o-mail-quote-container=\"1\">\n"
+"        <br/>\n"
+"        <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-"
+"out=\"user.signature or ''\" data-o-mail-quote=\"1\">Mitchell Admin</t></"
+"div>\n"
+"    </t>\n"
+"</div>\n"
+"        "
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.portal_task_sign_button
 msgid "<i class=\"fa fa-check me-1\"/>Sign Report"
-msgstr ""
+msgstr "<i class=\"fa fa-check me-1\"/>Semnează raportul"
 
 #. module: industry_fsm
 #: model:mail.template,body_html:industry_fsm.mail_template_data_task_report
@@ -120,6 +153,15 @@ msgid ""
 "            </p>\n"
 "        "
 msgstr ""
+"<p>\n"
+"                Stimate <t t-out=\"object.partner_id.name or "
+"'Client'\">Client</t>,<br/><br/>\n"
+"                Atașat găsiți raportul de servicii pe teren pentru "
+"operațiunea noastră la locația dvs.<br/><br/>\n"
+"                Nu ezitați să ne contactați dacă aveți întrebări.<br/><br/>\n"
+"                Cu stimă,<br/><br/>\n"
+"            </p>\n"
+"        "
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
@@ -128,11 +170,15 @@ msgid ""
 "title=\"By saving this change, the customer contact number will also be "
 "updated.\" invisible=\"not partner_id or not is_task_phone_update\"/>"
 msgstr ""
+"<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
+"title=\"Prin salvarea acestei modificări, numărul de contact al clientului "
+"va fi actualizat.\" invisible=\"not partner_id or not is_task_phone_update\"/"
+">"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
 msgid "<span class=\"o_stat_text text-wrap\">Customer Preview</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text text-wrap\">Previzualizare client</span>"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
@@ -150,36 +196,48 @@ msgid ""
 "                            Signed\n"
 "                        </span>"
 msgstr ""
+"<span style=\"                             font-size: "
+"10px;                             color: #fff;                             "
+"text-transform: uppercase;                             text-align: "
+"center;                             font-weight: bold; line-height: "
+"20px;                             transform: "
+"rotate(45deg);                             width: 100px; height: auto; "
+"display: block;                             background: "
+"green;                             position: "
+"absolute;                             top: 19px; right: -21px; left: "
+"auto;                             padding: 0;\">\n"
+"                            Semnat\n"
+"                        </span>"
 
 #. module: industry_fsm
 #: model_terms:web_tour.tour,rainbow_man_message:industry_fsm.industry_fsm_tour
 msgid "<span><b>Good job!</b> You went through all steps of this tour.</span>"
-msgstr ""
+msgstr "<span><b>Felicitări!</b> Ai parcurs toți pașii acestui tur.</span>"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "<strong class=\"me-2\">Total</strong>"
-msgstr ""
+msgstr "<strong class=\"me-2\">Total</strong>"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "<strong>Customer: </strong>"
-msgstr "Client"
+msgstr "<strong>Client: </strong>"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "<strong>Technician: </strong>"
-msgstr ""
+msgstr "<strong>Tehnician: </strong>"
 
 #. module: industry_fsm
 #: model:ir.model.constraint,message:industry_fsm.constraint_project_project_company_id_required_for_fsm_project
 msgid "A fsm project must be company restricted"
-msgstr ""
+msgstr "Un proiect FSM trebuie să fie restricționat la companie"
 
 #. module: industry_fsm
 #: model:ir.ui.menu,name:industry_fsm.mail_activity_plan_menu_config_task
 msgid "Activity Plans"
-msgstr ""
+msgstr "Planuri de activitate"
 
 #. module: industry_fsm
 #: model:ir.ui.menu,name:industry_fsm.fsm_menu_config_activity_type
@@ -202,29 +260,31 @@ msgstr "Sarcini"
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_all_fsm_server_action
 msgid "All Tasks Server Action"
-msgstr ""
+msgstr "Acțiune server Toate sarcinile"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/models/project_task.py:0
 msgid "All running timers should be linked to a timesheet and a task."
 msgstr ""
+"Toate cronometrele care rulează trebuie să fie legate de o fișă de pontaj și "
+"o sarcină."
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__allocated_hours
 msgid "Allocated Time"
-msgstr ""
+msgstr "Timp Alocat"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_account_analytic_line
 msgid "Analytic Line"
-msgstr ""
+msgstr "Linie analitică"
 
 #. module: industry_fsm
 #: model_terms:ir.actions.act_window,help:industry_fsm.project_task_user_action_report_fsm
 msgid ""
 "Analyze the progress of your tasks and the performance of your technicians."
-msgstr ""
+msgstr "Analizați progresul sarcinilor dvs. și performanța tehnicienilor dvs."
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__user_ids
@@ -239,17 +299,17 @@ msgstr "Dată Atribuire"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__rating_avg
 msgid "Average Rating (1-5)"
-msgstr ""
+msgstr "Evaluare medie (1-5)"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__dependent_ids
 msgid "Block"
-msgstr ""
+msgstr "Blochează"
 
 #. module: industry_fsm
 #: model:ir.ui.menu,name:industry_fsm.project_task_menu_planning_by_location_fsm
 msgid "By Location"
-msgstr ""
+msgstr "După locație"
 
 #. module: industry_fsm
 #: model:ir.ui.menu,name:industry_fsm.project_task_menu_planning_by_project_fsm
@@ -265,13 +325,13 @@ msgstr "Dupa Utilizator"
 #. odoo-python
 #: code:addons/industry_fsm/models/project_project.py:0
 msgid "Cancelled"
-msgstr ""
+msgstr "Anulat"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__partner_city
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__partner_city
 msgid "City"
-msgstr ""
+msgstr "Localitate"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.portal_task_sign_modal
@@ -281,7 +341,7 @@ msgstr "Închide"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__is_closed
 msgid "Closed state"
-msgstr ""
+msgstr "Stare închisă"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_res_company
@@ -296,7 +356,7 @@ msgstr "Companie"
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_base_document_layout
 msgid "Company Document Layout"
-msgstr ""
+msgstr "Aspect document companie"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_res_config_settings
@@ -320,11 +380,13 @@ msgid ""
 "Confirm the <b>time spent</b> on your task. <i>Tip: note that the duration "
 "has automatically been rounded to 15 minutes.</i>"
 msgstr ""
+"Confirmă <b>timpul petrecut</b> pe sarcină. <i>Sfat: durata a fost rotunjită "
+"automat la 15 minute.</i>"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_hr_timesheet_stop_timer_confirmation_wizard
 msgid "Confirm timesheet creation when stop timer"
-msgstr ""
+msgstr "Confirmă crearea fișei de pontaj la oprirea cronometrajului"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_res_partner
@@ -335,13 +397,13 @@ msgstr "Contact"
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_map_view_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_mobile_form
 msgid "Contact Number"
-msgstr ""
+msgstr "Număr de contact"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__partner_country_id
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__partner_country_id
 msgid "Country"
-msgstr ""
+msgstr "Țară"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_project_view_form_simplified_footer_fsm
@@ -356,22 +418,22 @@ msgstr "Data creării"
 #. module: industry_fsm
 #: model:ir.model,website_form_label:industry_fsm.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Creează un client"
 
 #. module: industry_fsm
 #: model:ir.actions.act_window,name:industry_fsm.open_create_project_fsm
 msgid "Create a Project"
-msgstr "- Creează un proiect"
+msgstr "Creează un proiect"
 
 #. module: industry_fsm
 #: model:ir.model,website_form_label:industry_fsm.model_project_task
 msgid "Create a Task"
-msgstr ""
+msgstr "Creează o sarcină"
 
 #. module: industry_fsm
 #: model:res.groups,name:industry_fsm.group_fsm_quotation_from_task
 msgid "Create new quotations directly from the tasks"
-msgstr "Creați citate noi direct din sarcini"
+msgstr "Creați oferte noi direct din sarcini"
 
 #. module: industry_fsm
 #: model_terms:ir.actions.act_window,help:industry_fsm.project_project_action_only_fsm
@@ -411,7 +473,7 @@ msgstr "Evaluări client"
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__partner_state_id
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__partner_state_id
 msgid "Customer State"
-msgstr ""
+msgstr "Stat clientului"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
@@ -440,6 +502,8 @@ msgid ""
 "Design tailored worksheet templates for various interventions, and analyze "
 "collected intervention data."
 msgstr ""
+"Proiectați șabloane de fișe de lucru personalizate pentru diverse "
+"intervenții și analizați datele colectate."
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_project_view_form_simplified_footer_fsm
@@ -476,23 +540,25 @@ msgid ""
 "Display tasks in the Field Service module and allow planning with start/end "
 "dates."
 msgstr ""
+"Afișează sarcinile în modulul Field Service și permite planificarea cu date "
+"de început și sfârșit."
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/models/project_task.py:0
 msgid "Do you want to stop the running timers?"
-msgstr ""
+msgstr "Vreți să opriți cronometrarea?"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/models/project_project.py:0
 msgid "Done"
-msgstr ""
+msgstr "Finalizat"
 
 #. module: industry_fsm
 #: model:mail.template,description:industry_fsm.mail_template_data_task_report
 msgid "Email sent when clicking on \"send report\" in a task"
-msgstr ""
+msgstr "Email trimis la apăsarea pe \"trimite raport\" într-o sarcină"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__date_end
@@ -502,7 +568,7 @@ msgstr "Dată sfârșit"
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_report_project_task_user_fsm
 msgid "FSM Tasks Analysis"
-msgstr ""
+msgstr "Analiza sarcinilor FSM"
 
 #. module: industry_fsm
 #. odoo-python
@@ -521,27 +587,27 @@ msgstr "Munca de teren"
 #. module: industry_fsm
 #: model:ir.actions.report,name:industry_fsm.task_custom_report
 msgid "Field Service Report"
-msgstr ""
+msgstr "Raport Servicii pe teren"
 
 #. module: industry_fsm
 #: model:mail.template,subject:industry_fsm.mail_template_data_task_report
 msgid "Field Service Report - {{ object.name }}"
-msgstr ""
+msgstr "Raport Servicii pe teren - {{ object.name }}"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "Field Service Report:"
-msgstr ""
+msgstr "Raport Servicii pe teren:"
 
 #. module: industry_fsm
 #: model:mail.template,name:industry_fsm.mail_template_data_task_report
 msgid "Field Service: Field Service Report"
-msgstr ""
+msgstr "Servicii pe teren: Raport Servicii pe teren"
 
 #. module: industry_fsm
 #: model:mail.template,name:industry_fsm.mail_template_data_intervention_details
 msgid "Field Service: Intervention Scheduled"
-msgstr ""
+msgstr "Intervenții pe teren: Intervenție Programată"
 
 #. module: industry_fsm
 #: model_terms:ir.actions.act_window,help:industry_fsm.project_task_action_fsm_map
@@ -553,7 +619,7 @@ msgstr "Găsiți aici itinerariul dvs. pentru sarcinile de astăzi."
 #: model_terms:ir.actions.act_window,help:industry_fsm.project_task_action_fsm
 #: model_terms:ir.actions.act_window,help:industry_fsm.project_task_action_fsm2
 msgid "Find here your upcoming tasks for the next few days."
-msgstr ""
+msgstr "Aici găsiți sarcinile dvs planificate pe următoarele zile."
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
@@ -563,26 +629,26 @@ msgstr "Viitor"
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
 msgid "Future Activities"
-msgstr ""
+msgstr "Activități viitoare"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/models/project_task.py:0
 msgid "GPS Coordinates: %(localisation_start)s (%(latitude)s, %(longitude)s)"
-msgstr ""
+msgstr "Coordonate GPS: %(localisation_start)s (%(latitude)s, %(longitude)s)"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/wizard/hr_timesheet_stop_timer_confirmation_wizard.py:0
 msgid "GPS Coordinates: %(localisation_stop)s (%(latitude)s, %(longitude)s)"
-msgstr ""
+msgstr "Coordonate GPS: %(localisation_stop)s (%(latitude)s, %(longitude)s)"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_hr_timesheet_stop_timer_confirmation_wizard__allow_geolocation
 #: model:ir.model.fields,field_description:industry_fsm.field_project_project__allow_geolocation
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__allow_geolocation
 msgid "Geolocation"
-msgstr ""
+msgstr "Geolocation"
 
 #. module: industry_fsm
 #. odoo-javascript
@@ -591,11 +657,13 @@ msgid ""
 "Give it a <b>title</b> <i>(e.g. Boiler maintenance, Air-conditioning "
 "installation, etc.).</i>"
 msgstr ""
+"Dați <b>un titlu</b> <i>(ex. Mentenanță boiler, Instalare aer condiționat, "
+"etc.).</i>"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__has_template_ancestor
 msgid "Has Template Ancestor"
-msgstr ""
+msgstr "Are strămoș șablon"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_account_analytic_line__id
@@ -623,7 +691,7 @@ msgstr "ID"
 #: code:addons/industry_fsm/models/project_project.py:0
 #: model:project.task.type,name:industry_fsm.planning_project_stage_2
 msgid "In Progress"
-msgstr ""
+msgstr "În desfășurare"
 
 #. module: industry_fsm
 #. odoo-python
@@ -640,22 +708,22 @@ msgstr "Date de semnătură nevalide."
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__message_is_follower
 msgid "Is Follower"
-msgstr ""
+msgstr "Este urmăritor"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__is_template
 msgid "Is Template"
-msgstr ""
+msgstr "Este șablon"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "Jane Technician"
-msgstr ""
+msgstr "Jane Tehnician"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "Jane smith"
-msgstr ""
+msgstr "Jane smith"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.res_config_settings_view_form
@@ -663,11 +731,13 @@ msgid ""
 "Keep track of the products used for your tasks, and invoice your time and "
 "material to your customers"
 msgstr ""
+"Țineți evidența produselor utilizate pentru sarcinile dvs. și facturați "
+"timpul și materialele clienților dvs."
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__rating_last_value
 msgid "Last Rating (1-5)"
-msgstr ""
+msgstr "Ultima evaluare (1-5)"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__date_last_stage_update
@@ -689,13 +759,14 @@ msgstr "Ultima actualizare pe"
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
 msgid "Late Activities"
-msgstr ""
+msgstr "Activități întârziate"
 
 #. module: industry_fsm
 #. odoo-javascript
 #: code:addons/industry_fsm/static/src/js/tours/industry_fsm_tour.js:0
 msgid "Launch the timer to <b>track the time spent</b> on your task."
 msgstr ""
+"Porniți cronometrul pentru a <b>contoriza timpul petrecut</b> pe sarcină."
 
 #. module: industry_fsm
 #. odoo-javascript
@@ -704,6 +775,8 @@ msgid ""
 "Let's <b>mark your task as done!</b> <i>Tip: when doing so, your stock will "
 "automatically be updated, and your task will be closed.</i>"
 msgstr ""
+"Bifați <b>sarcina terminată!</b> <i>Sfat: cand faceți asta, stocul se va "
+"actualiza automat, iar sarcina se va închide.</i>"
 
 #. module: industry_fsm
 #. odoo-javascript
@@ -715,7 +788,7 @@ msgstr "Să creăm prima ta <b>sarcină</b>."
 #. odoo-javascript
 #: code:addons/industry_fsm/static/src/js/tours/industry_fsm_tour.js:0
 msgid "Let's start from scratch."
-msgstr ""
+msgstr "Să începem de la zero."
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task_stop_timers_wizard__line_ids
@@ -727,18 +800,18 @@ msgstr "Linie"
 #: code:addons/industry_fsm/models/project_task.py:0
 #: code:addons/industry_fsm/wizard/hr_timesheet_stop_timer_confirmation_wizard.py:0
 msgid "Location error"
-msgstr ""
+msgstr "Eroare de locație"
 
 #. module: industry_fsm
 #. odoo-javascript
 #: code:addons/industry_fsm/static/src/services/timer_geolocation_service.js:0
 msgid "Location error: %s"
-msgstr ""
+msgstr "Eroare de locație: %s"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "Manage SME"
-msgstr ""
+msgstr "Gestionează IMM"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_view_form_inherit
@@ -755,12 +828,12 @@ msgstr "Hartă"
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_fsm_map_server_action
 msgid "Map Server Action"
-msgstr ""
+msgstr "Acțiune server Hartă"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "Marc Demo"
-msgstr ""
+msgstr "Marc Demo"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
@@ -773,6 +846,8 @@ msgid ""
 "Measure your customer satisfaction by sending rating requests when your "
 "tasks reach a certain stage."
 msgstr ""
+"Măsurați satisfacția clienților trimițând solicitări de evaluare atunci când "
+"sarcinile dvs. ajung într-o anumită etapă."
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_ir_ui_menu
@@ -782,18 +857,18 @@ msgstr "Meniu"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__milestone_id
 msgid "Milestone"
-msgstr ""
+msgstr "Etapa de referință"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
 msgid "My Activities"
-msgstr ""
+msgstr "Activitățile mele"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/controllers/webmanifest.py:0
 msgid "My Calendar"
-msgstr ""
+msgstr "Calendarul meu"
 
 #. module: industry_fsm
 #. odoo-python
@@ -807,17 +882,17 @@ msgstr "Sarcinile mele"
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_fsm_server_action
 msgid "My Tasks Server Action"
-msgstr ""
+msgstr "Acțiune server Sarcinile mele"
 
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_fsm_mobile_server_action
 msgid "My Tasks in mobile Server Action"
-msgstr ""
+msgstr "Acțiune server Sarcinile mele pe mobil"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_project_fsm
 msgid "Name"
-msgstr ""
+msgstr "Nume"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_partner_address_form_industry_fsm
@@ -828,18 +903,18 @@ msgstr "Navighează către"
 #. odoo-python
 #: code:addons/industry_fsm/models/project_project.py:0
 msgid "New"
-msgstr ""
+msgstr "Nou"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/controllers/webmanifest.py:0
 msgid "New task"
-msgstr ""
+msgstr "Sarcină nouă"
 
 #. module: industry_fsm
 #: model_terms:ir.actions.act_window,help:industry_fsm.rating_rating_action_fsm
 msgid "No customer ratings yet"
-msgstr ""
+msgstr "Nu există încă evaluări ale clienților"
 
 #. module: industry_fsm
 #: model_terms:ir.actions.act_window,help:industry_fsm.project_task_user_action_report_fsm
@@ -902,7 +977,7 @@ msgstr "Planificată"
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_list_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
 msgid "Planned Date"
-msgstr ""
+msgstr "Dată planificată"
 
 #. module: industry_fsm
 #: model:ir.ui.menu,name:industry_fsm.fsm_menu_planning
@@ -913,12 +988,12 @@ msgstr "Planificare"
 #: model:ir.actions.act_window,name:industry_fsm.project_task_action_fsm_planning_groupby_location
 #: model:ir.actions.act_window,name:industry_fsm.project_task_action_fsm_planning_groupby_location2
 msgid "Planning by Location"
-msgstr ""
+msgstr "Planificare după locație"
 
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_fsm_planning_groupby_location_server_action
 msgid "Planning by Location Server Action"
-msgstr ""
+msgstr "Acțiune server Planificare după locație"
 
 #. module: industry_fsm
 #: model:ir.actions.act_window,name:industry_fsm.project_task_action_fsm_planning_groupby_project
@@ -929,7 +1004,7 @@ msgstr "Planificare după proiect"
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_fsm_planning_groupby_project_server_action
 msgid "Planning by Project Server Action"
-msgstr ""
+msgstr "Acțiune server Planificare după proiect"
 
 #. module: industry_fsm
 #: model:ir.actions.act_window,name:industry_fsm.project_task_action_fsm_planning_groupby_user
@@ -940,12 +1015,12 @@ msgstr "Planificare de către utilizator"
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_fsm_planning_groupby_user_server_action
 msgid "Planning by User Action"
-msgstr ""
+msgstr "Acțiune Planificare după utilizator"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
 msgid "Preview"
-msgstr ""
+msgstr "Previzualizare"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__priority
@@ -973,12 +1048,12 @@ msgstr "Proiecte"
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
 msgid "Properties"
-msgstr ""
+msgstr "Proprietăți"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_rating_rating
 msgid "Rating"
-msgstr ""
+msgstr "Evaluare"
 
 #. module: industry_fsm
 #. odoo-javascript
@@ -987,11 +1062,13 @@ msgid ""
 "Ready to <b>manage your onsite interventions</b>? <i>Click Field Service to "
 "start.</i>"
 msgstr ""
+"Pregatit/ă să <b>gestionați intervențiile onsite</b>? <i>Click pe "
+"Intervenții ca să începeți.</i>"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_ir_actions_report
 msgid "Report Action"
-msgstr ""
+msgstr "Acțiune raport"
 
 #. module: industry_fsm
 #: model:ir.ui.menu,name:industry_fsm.fsm_menu_reporting
@@ -1008,24 +1085,24 @@ msgstr "Raportare"
 #: model_terms:ir.actions.act_window,help:industry_fsm.project_task_action_to_schedule_fsm
 #: model_terms:ir.actions.act_window,help:industry_fsm.project_task_action_to_schedule_fsm2
 msgid "Schedule your tasks and assign them to your technicians."
-msgstr ""
+msgstr "Programați-vă sarcinile și alocați-le tehnicienilor dvs."
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.report_project_task_user_fsm_view_search
 msgid "Search Planning"
-msgstr ""
+msgstr "Căutare planificare"
 
 #. module: industry_fsm
 #. odoo-javascript
 #: code:addons/industry_fsm/static/src/js/tours/industry_fsm_tour.js:0
 msgid "Select the <b>customer</b> for your task."
-msgstr ""
+msgstr "Selectează <b>clientul</b> pentru sarcina ta."
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/models/project_task.py:0
 msgid "Send Field Service Report"
-msgstr ""
+msgstr "Trimite raport Servicii pe teren"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
@@ -1051,17 +1128,18 @@ msgstr "Setări"
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
 msgid "Show all records whose next activity date is past"
 msgstr ""
+"Afișează toate înregistrările a căror dată a următoarei activități a trecut"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.portal_task_sign_modal
 msgid "Sign Field Service Report"
-msgstr ""
+msgstr "Semnează raportul Servicii pe teren"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.portal_task_sign_modal
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
 msgid "Sign Report"
-msgstr ""
+msgstr "Semnează raportul"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__worksheet_signature
@@ -1084,7 +1162,7 @@ msgstr "Semnat de"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__user_skill_ids
 msgid "Skills"
-msgstr ""
+msgstr "Aptitudini"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_stop_timer_wizard_form
@@ -1092,6 +1170,8 @@ msgid ""
 "Some employees are still running their timer for this task. Are you sure you "
 "want to continue?"
 msgstr ""
+"Unii dintre angajați încă au cronometrul deschis pentru această sarcină. "
+"Sunteți sigur/ă că vreți să continuați?"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__stage_id
@@ -1107,7 +1187,7 @@ msgstr "Etape"
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
 msgid "Start Date"
-msgstr ""
+msgstr "Data de început"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__planned_date_begin
@@ -1117,25 +1197,25 @@ msgstr "Dată început"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__state
 msgid "State"
-msgstr ""
+msgstr "Județ"
 
 #. module: industry_fsm
 #. odoo-javascript
 #: code:addons/industry_fsm/static/src/js/tours/industry_fsm_tour.js:0
 msgid "Stop the <b>timer</b> when you are done."
-msgstr ""
+msgstr "Opriți <b>cronometrul</b> când ați terminat."
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__partner_street
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__partner_street
 msgid "Street"
-msgstr ""
+msgstr "Stradă"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__partner_street2
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__partner_street2
 msgid "Street2"
-msgstr ""
+msgstr "Strada2"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.report_project_task_user_fsm_view_tree
@@ -1163,32 +1243,32 @@ msgstr "Sarcină Efectuată"
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_project_task_recurrence
 msgid "Task Recurrence"
-msgstr ""
+msgstr "Repetarea sarcinilor"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_project_task_type
 msgid "Task Stage"
-msgstr ""
+msgstr "Etapa sarcinii"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__name
 msgid "Task Title"
-msgstr ""
+msgstr "Nume sarcină"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_report_industry_fsm_worksheet_custom
 msgid "Task Worksheet Custom Report"
-msgstr ""
+msgstr "Raport personalizat fișă de lucru sarcină"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_project_task_stop_timers_wizard
 msgid "Task stop running timers confirmation wizard"
-msgstr ""
+msgstr "Asistent confirmare oprire cronometre sarcină"
 
 #. module: industry_fsm
 #: model:ir.model,name:industry_fsm.model_project_task_stop_timers_wizard_line
 msgid "Task stop running timers confirmation wizard line"
-msgstr ""
+msgstr "Linie asistent confirmare oprire cronometre sarcină"
 
 #. module: industry_fsm
 #: model:ir.actions.act_window,name:industry_fsm.project_tasks_action_fsm
@@ -1208,13 +1288,13 @@ msgstr "Analiza Sarcinilor"
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.worksheet_custom_page
 msgid "Technician"
-msgstr ""
+msgstr "Tehnician"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/controllers/portal.py:0
 msgid "The field service report has been signed by the customer."
-msgstr ""
+msgstr "Raportul de servicii pe teren a fost semnat de client."
 
 #. module: industry_fsm
 #. odoo-python
@@ -1223,6 +1303,8 @@ msgid ""
 "The field service report is unavailable for the selected tasks as they do "
 "not contain any timesheets, products, or worksheets."
 msgstr ""
+"Raportul de servicii pe teren nu este disponibil pentru sarcinile selectate "
+"deoarece nu conțin fișe de pontaj, produse sau fișe de lucru."
 
 #. module: industry_fsm
 #. odoo-python
@@ -1235,7 +1317,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/industry_fsm/models/project_task.py:0
 msgid "There are no reports to send."
-msgstr ""
+msgstr "Nu există rapoarte de trimis."
 
 #. module: industry_fsm
 #. odoo-python
@@ -1246,12 +1328,12 @@ msgstr "Data"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__remaining_hours
 msgid "Time Remaining"
-msgstr ""
+msgstr "Timp rămas"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__remaining_hours_percentage
 msgid "Time Remaining Percentage"
-msgstr ""
+msgstr "Procent timp rămas"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__effective_hours
@@ -1263,21 +1345,21 @@ msgstr "Timp petrecut"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_res_config_settings__module_industry_fsm_sale
 msgid "Time and Material Invoicing"
-msgstr ""
+msgstr "Facturare timp și materiale"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/models/account_analytic_line.py:0
 #: code:addons/industry_fsm/models/project_task.py:0
 msgid "Timer started at: %(date)s %(time)s"
-msgstr ""
+msgstr "Cronometrul a pornit la: %(date)s %(time)s"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/models/account_analytic_line.py:0
 #: code:addons/industry_fsm/wizard/hr_timesheet_stop_timer_confirmation_wizard.py:0
 msgid "Timer stopped at: %(date)s %(time)s"
-msgstr ""
+msgstr "Cronometrul s-a oprit la: %(date)s %(time)s"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.timesheet_view_form
@@ -1299,12 +1381,12 @@ msgstr "Pentru Programare"
 #. module: industry_fsm
 #: model:ir.actions.server,name:industry_fsm.project_task_to_schedule_fsm_server_action
 msgid "To Schedule Server Action"
-msgstr ""
+msgstr "Acțiune server De programat"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
 msgid "To Schedule/Assign"
-msgstr ""
+msgstr "De programat/atribuit"
 
 #. module: industry_fsm
 #: model_terms:ir.actions.act_window,help:industry_fsm.project_task_action_all_fsm
@@ -1314,6 +1396,9 @@ msgid ""
 "                Collaborate efficiently by chatting in real-time or via "
 "email."
 msgstr ""
+"Pentru a finaliza sarcinile, planificați activități și folosiți statusul "
+"sarcinii.<br>\n"
+"                Colaborați eficient discutând în timp real sau prin email."
 
 #. module: industry_fsm
 #: model_terms:ir.actions.act_window,help:industry_fsm.project_tasks_action_fsm
@@ -1321,6 +1406,8 @@ msgid ""
 "To get things done, use activities and status on tasks.<br>\n"
 "                Chat in real-time or by email to collaborate efficiently."
 msgstr ""
+"Pentru a finaliza sarcinile, folosiți activități și status pe sarcini.<br>\n"
+"                Colaborați eficient discutând în timp real sau prin email."
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
@@ -1330,24 +1417,24 @@ msgstr "Astăzi"
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
 msgid "Today Activities"
-msgstr ""
+msgstr "Activitățile de astăzi"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_view_form_inherit
 msgid "Track technician location when running the timer"
-msgstr ""
+msgstr "Urmăriți locația tehnicianului când rulează cronometrul"
 
 #. module: industry_fsm
 #: model:ir.model.fields,help:industry_fsm.field_hr_timesheet_stop_timer_confirmation_wizard__allow_geolocation
 #: model:ir.model.fields,help:industry_fsm.field_project_project__allow_geolocation
 #: model:ir.model.fields,help:industry_fsm.field_project_task__allow_geolocation
 msgid "Track technician location when running the timer."
-msgstr ""
+msgstr "Urmăriți locația tehnicianului când rulează cronometrul."
 
 #. module: industry_fsm
 #: model_terms:ir.actions.act_window,help:industry_fsm.project_task_type_action_fsm
 msgid "Track the progress of your tasks from their creation to their closing."
-msgstr ""
+msgstr "Urmăriți progresul sarcinilor de la creare până la închidere."
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_task_view_search_fsm
@@ -1369,6 +1456,17 @@ msgid ""
 "        Make sure to use the right format and order e.g. Improve the "
 "configuration screen 5h #feature #v16 @Mitchell !"
 msgstr ""
+"Utilizați aceste cuvinte cheie în titlu pentru a seta sarcini noi:\n"
+"\n"
+"        30h Alocați 30 de ore sarcinii\n"
+"        #etichete Setează etichete pe sarcină\n"
+"        @utilizator Atribuie sarcina unui utilizator\n"
+"        ! Setează sarcina o prioritate medie\n"
+"        !! Setează sarcina o prioritate mare\n"
+"        !!! Setează sarcina o prioritate urgentă\n"
+"\n"
+"        Asigurați-vă că utilizați formatul și ordinea corectă ex. "
+"Îmbunătățiți ecranul de configurare 5h #funcționalitate #v16 @Mitchell !"
 
 #. module: industry_fsm
 #: model:res.groups,name:industry_fsm.group_fsm_user
@@ -1378,14 +1476,14 @@ msgstr "Operator"
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
 msgid "View Itinerary"
-msgstr ""
+msgstr "Vezi itinerariu"
 
 #. module: industry_fsm
 #. odoo-python
 #: code:addons/industry_fsm/models/project_task.py:0
 #: code:addons/industry_fsm/wizard/hr_timesheet_stop_timer_confirmation_wizard.py:0
 msgid "View on Map"
-msgstr ""
+msgstr "Vezi pe hartă"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task_stop_timers_wizard_line__wizard_id
@@ -1395,12 +1493,12 @@ msgstr "Asistent"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__working_days_open
 msgid "Working Days to Assign"
-msgstr ""
+msgstr "Zile lucrătoare de atribuit"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__working_days_close
 msgid "Working Days to Close"
-msgstr ""
+msgstr "Zile lucrătoare până la închidere"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__working_hours_open
@@ -1415,7 +1513,7 @@ msgstr "Ore de lucru de închis"
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_res_config_settings__module_industry_fsm_report
 msgid "Worksheet Templates"
-msgstr ""
+msgstr "Șablone Foaie de lucru"
 
 #. module: industry_fsm
 #: model:mail.template,subject:industry_fsm.mail_template_data_intervention_details
@@ -1427,22 +1525,28 @@ msgid ""
 "format_datetime(object.date_deadline, tz=object.partner_id.tz, "
 "lang_code=object.partner_id.lang) or '' }}"
 msgstr ""
+"Intervenția dumneavoastră este programată {{ object.planned_date_begin and "
+"object.date_deadline and 'from the ' + "
+"format_datetime(object.planned_date_begin, tz=object.partner_id.tz, "
+"lang_code=object.partner_id.lang) + ' to the ' + "
+"format_datetime(object.date_deadline, tz=object.partner_id.tz, "
+"lang_code=object.partner_id.lang) or '' }}"
 
 #. module: industry_fsm
 #: model:ir.model.fields,field_description:industry_fsm.field_project_task__partner_zip
 #: model:ir.model.fields,field_description:industry_fsm.field_report_project_task_user_fsm__partner_zip
 msgid "ZIP"
-msgstr ""
+msgstr "Cod poștal"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.quick_create_task_form_fsm_inherited
 msgid "e.g. Boiler replacement"
-msgstr ""
+msgstr "ex: Înlocuire boiler"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.view_task_form2_inherit
 msgid "is FSM?"
-msgstr ""
+msgstr "este FSM?"
 
 #. module: industry_fsm
 #: model_terms:ir.ui.view,arch_db:industry_fsm.project_sharing_inherit_project_task_view_form
@@ -1451,6 +1555,9 @@ msgid ""
 "on\n"
 "                        <span class=\"fw-bold text-dark\"> Sub-tasks</span>)"
 msgstr ""
+"pe\n"
+"                        <span class=\"fw-bold text-dark\"> sub-sarcini</"
+"span>)"
 
 #~ msgid "Active"
 #~ msgstr "Activ"

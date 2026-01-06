@@ -252,7 +252,10 @@
 
     <template id="cart_summary_total" inherit_id="website_sale.total">
         <xpath expr="//div[contains(@t-attf-class, 'o_cart_total')]" position="before">
-            <div t-if="website_sale_order and website_sale_order.has_rented_products and not show_shorter_cart_summary" class="py-3 mx-n3 mx-lg-0 px-3 px-lg-0 border-top">
+            <div
+                t-if="website_sale_order and website_sale_order.has_rented_products and not show_shorter_cart_summary and website_sale_order._is_valid_renting_dates()"
+                class="py-3 mx-n3 mx-lg-0 px-3 px-lg-0 border-top"
+            >
                 <h6 class="attribute_name">Rental Period</h6>
                 <div class="oe_unremovable d-flex gap-1 align-items-center w-100 text-muted">
                     <span t-out="website_sale_order.convert_to_website_tz(website_sale_order.rental_start_date)"

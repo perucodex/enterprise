@@ -153,7 +153,7 @@ class ProjectProject(models.Model):
 
         action_id = self.env.ref('sale_subscription.sale_subscription_action').id
         new_items = []
-        for subscription_line in subscriptions_lines.with_context(with_price_unit=True)._read_format(['name', 'product_uom_qty', 'qty_delivered', 'qty_invoiced', 'product_uom_id', 'product_id', 'order_id']):
+        for subscription_line in subscriptions_lines.with_context(with_price_unit=True)._read_format(['display_name', 'product_uom_qty', 'qty_delivered', 'qty_invoiced', 'product_uom_id', 'product_id', 'order_id']):
             action_dict = {}
             if self.env.user.has_group('sales_team.group_sale_salesman'):
                 action_dict = {'action': {'name': action_id, 'resId': subscription_line['order_id'][0]}}
@@ -176,4 +176,10 @@ class ProjectProject(models.Model):
         return Domain.AND([
             super()._get_items_from_invoices_domain(domain),
             [('subscription_id', '=', False)],
+        ])
+
+    def _get_sale_items_domain(self, additional_domain=None):
+        return Domain.AND([
+            super()._get_sale_items_domain(additional_domain),
+            [('order_id.is_subscription', '=', False)],
         ])

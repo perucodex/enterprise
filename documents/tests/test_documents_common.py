@@ -88,6 +88,29 @@ class TransactionCaseDocuments(TransactionCase):
         })
         cls.document_txt.access_via_link = "view"
 
+        cls.company_root_folder, cls.company_sub_folder, cls.company_root_document = cls.env['documents.document'].create([
+            {
+                'type': 'folder',
+                'name': 'Company Root Folder',
+                'owner_id': False,
+                'folder_id': False,
+                'access_internal': 'view',
+            }, {
+                'type': 'folder',
+                'name': 'Company Sub Folder',
+                'owner_id': False,
+                'folder_id': False,
+                'access_internal': 'view',
+            }, {
+                'type': 'binary',
+                'name': 'Company Root Document',
+                'owner_id': False,
+                'folder_id': False,
+                'access_internal': 'view',
+            },
+        ])
+        cls.company_sub_folder.folder_id = cls.company_root_folder.id
+
         cls.server_action = cls.env['ir.actions.server'].create({
             'name': 'Add tag_a',
             'model_id': cls.env.ref('documents.model_documents_document').id,

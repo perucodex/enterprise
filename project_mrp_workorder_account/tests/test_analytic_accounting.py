@@ -80,6 +80,21 @@ class TestMrpAnalyticAccountHr(TestMrpAnalyticAccount):
         self.assertEqual(employee2_aa_line[self.analytic_plan._column_name()], new_account)
         self.assertEqual(employee1_aa_line[self.analytic_plan._column_name()], new_account)
 
+        # Test the same thing but when the wo is marked as done from the widget
+        mo_2 = self.env['mrp.production'].create({
+            'product_id': self.product.id,
+            'bom_id': self.bom.id,
+            'product_qty': 1,
+            'project_id': self.project.id,
+        })
+        self.env.user.employee_id = self.employee1
+        mo_2.action_confirm()
+        mo_2.workorder_ids.set_state('done')
+        mo_2.workorder_ids.invalidate_recordset(['duration'])
+        employee_aa_line = mo_2.workorder_ids.employee_analytic_account_line_ids.filtered(lambda l: l.employee_id == self.env.user.employee_id)
+        self.assertEqual(employee_aa_line.amount, -100.0)
+        self.assertEqual(mo_2.workorder_ids.mo_analytic_account_line_ids.amount, -10.0)
+
     def test_mrp_analytic_account_without_workorder(self):
         """
         Test adding a project with an analytic account to a confirmed manufacturing order without a work order.
@@ -241,13 +256,13 @@ class TestMrpAnalyticAccountHr(TestMrpAnalyticAccount):
 
         mo.button_mark_done()
         # check that the aal is created with the right values
-        first_amount = self.env["account.analytic.line"].search([('employee_id', '=', self.employee1.id)]).amount
+        first_amount = mo.workorder_ids.employee_analytic_account_line_ids.filtered(lambda l: l.employee_id == self.employee1).amount
         self.assertEqual(first_amount, -50, "the workcenter productivity has a duration of 30 min so the aal should be half of the employee's hourly cost")
         # check that changing the date of a line without saving it does not create a new aal or modify the value of an existing one
         with Form(mo.workorder_ids) as form:
             with form.time_ids.edit(0) as line:
                 line.date_end = "2025-05-15 14:16:46"
-                self.assertEqual(self.env["account.analytic.line"].search([('employee_id', '=', self.employee1.id)]).amount, first_amount,
+                self.assertEqual(mo.workorder_ids.employee_analytic_account_line_ids.filtered(lambda l: l.employee_id == self.employee1).amount, first_amount,
                 "changing the date_end and triggering the compute_duration method should not modify the aal amount")
 
     def test_mrp_aa_employee_without_account_rights(self):
@@ -278,3 +293,35 @@ class TestMrpAnalyticAccountHr(TestMrpAnalyticAccount):
         employee1_aa_line = mo.workorder_ids.employee_analytic_account_line_ids.filtered(lambda l: l.employee_id == self.employee1)
         self.assertEqual(employee1_aa_line.amount, -200.0)
         self.assertEqual(employee1_aa_line[self.analytic_plan._column_name()], self.analytic_account)
+
+    def test_user_can_complete_workorder_despite_project_restrictions(self):
+        """Ensure that a user who has Manufacturing and Timesheet rights but no access
+        to the project linked to the MO can still start and finish the work order.
+        """
+        user = new_test_user(
+            self.env,
+            'mo_manager',
+            'hr_timesheet.group_hr_timesheet_user,'
+            'mrp.group_mrp_manager,'
+            'project.group_project_user'
+        )
+
+        self.env['hr.employee'].create({
+            'user_id': user.id,
+            'image_1920': False,
+            'hourly_cost': 10
+        })
+        self.bom.operation_ids.workcenter_id.employee_ids = False
+        mo = self.env['mrp.production'].create({
+            'product_id': self.product.id,
+            'product_qty': 1,
+            'bom_id': self.bom.id,
+            'project_id': self.project.id,
+        })
+        mo.action_confirm()
+        wo = mo.workorder_ids
+        wo.with_user(user).button_start()
+        wo.with_user(user).button_finish()
+        self.assertEqual(wo.state, 'done')
+        mo.with_user(user).button_mark_done()
+        self.assertEqual(mo.state, 'done')

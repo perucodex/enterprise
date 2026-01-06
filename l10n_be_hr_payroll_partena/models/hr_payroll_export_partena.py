@@ -40,7 +40,7 @@ class L10nBeHrPayrollExportPartena(models.Model):
             partena_code = work_entry_collection.work_entries[0].work_entry_type_id.partena_code
             duration = ceil(work_entry_collection.duration / 60)  # in minutes
         return '%(pc_company)s;%(pc_employee)s;%(date)s;D;%(pc_we)s;%(duration)s' % {
-            'pc_company': self.env.company.partena_code,
+            'pc_company': self.company_id.partena_code,
             'pc_employee': employee.partena_code,
             'date': date.strftime('%Y%m%d'),
             'pc_we': partena_code,
@@ -63,8 +63,8 @@ class L10nBeHrPayrollExportPartena(models.Model):
 
     def _generate_export_filename(self):
         return 'CLOCK_ODOO_%(pc_company)s_%(company_id)06d_%(datetime)s.csv' % {
-            'pc_company': self.env.company.partena_code,
-            'company_id': self.env.company.id,
+            'pc_company': self.company_id.partena_code,
+            'company_id': self.company_id.id,
             'datetime': datetime.now().strftime('%Y%m%d%H%M%S'),
         }
 

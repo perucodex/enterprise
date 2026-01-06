@@ -10,13 +10,14 @@
 # Martin Trigaux, 2022
 # Manuela Silva <mmsrs@sky.com>, 2023
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2025-09-16 21:26+0000\n"
-"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:41+0000\n"
+"PO-Revision-Date: 2025-11-13 13:13+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Portuguese <https://translate.odoo.com/projects/odoo-19/"
 "timesheet_grid/pt/>\n"
 "Language: pt\n"
@@ -169,6 +170,134 @@ msgid ""
 "</table>\n"
 "            "
 msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"padding: 16px; background-color: white; color: #454748; border-"
+"collapse:separate;\">\n"
+"<tbody>\n"
+"    <!-- CABEÇALHO -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\">\n"
+"                    <span style=\"font-size: 10px;\">Suas planilhas de "
+"horas</span><br/>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\" t-"
+"out=\"object.name or ''\">Abigail Peterson</span>\n"
+"                </td><td valign=\"middle\" align=\"right\" t-if=\"not "
+"object.company_id.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?"
+"company={{ object.company_id.id }}\" style=\"padding: 0px; margin: 0px; "
+"height: auto; width: 80px;\" t-att-alt=\"object.company_id.name\"/>\n"
+"                </td></tr>\n"
+"                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                  <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- CONTEÚDO -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    <t t-set=\"timesheet_hours\" t-"
+"value=\"ctx.get('timesheet_hours', 0)\"/>\n"
+"                    <t t-set=\"working_hours\" t-"
+"value=\"ctx.get('working_hours', 0)\"/>\n"
+"                    <div>\n"
+"                        Olá <t t-out=\"object.name or ''\">Abigail Peterson</"
+"t>,<br/><br/>\n"
+"                        Este é um lembrete para registrar suas horas para o "
+"seguinte período: <t t-out=\"ctx.get('date_start') or ''\">05/05/2021</t> <i "
+"class=\"fa fa-long-arrow-right\"/> <t t-out=\"ctx.get('date_stop') or "
+"''\">05/06/2021</t>.\n"
+"                        Até o momento, você registrou <t t-"
+"if=\"timesheet_hours != 0\">somente</t> <t t-out=\"'%d' %int(timesheet_hours)"
+"\">2</t><t t-if=\"timesheet_hours % 1 != 0\" t-out=\"':%02d' % "
+"(round(timesheet_hours % 1 * 60))\">:30</t> horas das <t t-out=\"'%d' "
+"%int(working_hours)\">8</t><t t-if=\"working_hours % 1 != 0\" t-out=\"':"
+"%02d' % (round(working_hours % 1 * 60))\">:30</t> necessárias.<br/>\n"
+"                        <div t-if=\"ctx.get('action_url')\" style=\"margin: "
+"16px 0px 16px 0px;\">\n"
+"                            <a t-att-href=\"ctx.get('action_url')\" t-attf-"
+"style=\"background-color: {{object.company_id.email_secondary_color or "
+"'#875A7B'}};; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size: 13px;\">Preencher sua planilha de horas</a>\n"
+"                        </div>\n"
+"                        <br/>Obrigado,<br/>\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-"
+"quote=\"1\">Mitchell Admin</t></div>\n"
+"                        </t>\n"
+"                    </div>\n"
+"                </td></tr>\n"
+"                <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- RODAPÉ -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\" align=\"left\">\n"
+"                    <t t-out=\"object.company_id.name or ''\">YourCompany</"
+"t>\n"
+"                </td></tr>\n"
+"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: "
+"0.7;\">\n"
+"                    <t t-out=\"object.company_id.phone or ''\">+1 "
+"650-123-4567</t>\n"
+"                    <t t-if=\"object.company_id.email\">\n"
+"                        | <a t-attf-href=\"'mailto:%s' % "
+"{{ object.company_id.email }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.company_id.email or ''\">info@yourcompany.com</a>\n"
+"                    </t>\n"
+"                    <t t-if=\"object.company_id.website\">\n"
+"                        | <a t-attf-href=\"'%s' % "
+"{{ object.company_id.website }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.company_id.website or ''\">http://www.example.com</"
+"a>\n"
+"                    </t>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"</tbody>\n"
+"</table>\n"
+"</td></tr>\n"
+"<!-- DESENVOLVIDO POR -->\n"
+"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; "
+"padding: 8px; border-collapse:separate;\">\n"
+"      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"        Desenvolvido por <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}};\">Odoo</a>\n"
+"      </td></tr>\n"
+"    </table>\n"
+"</td></tr>\n"
+"</table>\n"
+"            "
 
 #. module: timesheet_grid
 #: model:mail.template,body_html:timesheet_grid.mail_template_timesheet_reminder
@@ -292,6 +421,124 @@ msgid ""
 "</table>\n"
 "            "
 msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"padding: 16px; background-color: white; color: #454748; border-"
+"collapse:separate;\">\n"
+"<tbody>\n"
+"    <!-- CABEÇALHO -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\">\n"
+"                    <span style=\"font-size: 10px;\">Suas planilhas de "
+"horas</span><br/>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\" t-"
+"out=\"object.name or ''\">Abigail Peterson</span>\n"
+"                </td><td valign=\"middle\" align=\"right\" t-if=\"not "
+"object.company_id.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?"
+"company={{ object.company_id.id }}\" style=\"padding: 0px; margin: 0px; "
+"height: auto; width: 80px;\" t-att-alt=\"object.company_id.name\"/>\n"
+"                </td></tr>\n"
+"                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- CONTEÚDO -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    <div>\n"
+"                        Olá <t t-out=\"object.name or ''\">Abigail Peterson</"
+"t>,<br/><br/>\n"
+"                        Este é um lembrete para que você aprove as planilhas "
+"de horas da sua equipe para o seguinte período: <t t-"
+"out=\"ctx.get('date_start') or ''\">05/05/2021</t> - <t t-"
+"out=\"ctx.get('date_stop') or ''\">06/05/2021</t>.<br/>\n"
+"                        <div t-if=\"ctx.get('action_url')\" style=\"margin: "
+"16px 0px 16px 0px;\">\n"
+"                            <a t-att-href=\"ctx.get('action_url')\" t-attf-"
+"style=\"background-color: {{object.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size: 13px;\">Validar planilhas de horas</a>\n"
+"                        </div>\n"
+"                        <br/>Obrigado,<br/>\n"
+"                        <t t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
+"                            <div data-o-mail-quote=\"1\">--<br data-o-mail-"
+"quote=\"1\"/><t t-out=\"user.signature or ''\" data-o-mail-"
+"quote=\"1\">Mitchell Admin</t></div>\n"
+"                        </t>\n"
+"                    </div>\n"
+"                </td></tr>\n"
+"                <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- RODAPÉ -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\" align=\"left\">\n"
+"                    <t t-out=\"object.company_id.name or ''\">YourCompany</"
+"t>\n"
+"                </td></tr>\n"
+"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: "
+"0.7;\">\n"
+"                    <t t-out=\"object.company_id.phone or ''\">+1 "
+"650-123-4567</t>\n"
+"                    <t t-if=\"object.company_id.email\">\n"
+"                        | <a t-attf-href=\"'mailto:%s' % "
+"{{ object.company_id.email }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.company_id.email or ''\">info@yourcompany.com</a>\n"
+"                    </t>\n"
+"                    <t t-if=\"object.company_id.website\">\n"
+"                        | <a t-attf-href=\"'%s' % "
+"{{ object.company_id.website }}\" style=\"text-decoration:none; color: "
+"#454748;\" t-out=\"object.company_id.website or ''\">http://www.example.com</"
+"a>\n"
+"                    </t>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"</tbody>\n"
+"</table>\n"
+"</td></tr>\n"
+"<!-- DESENVOLVIDO POR -->\n"
+"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; "
+"padding: 8px; border-collapse:separate;\">\n"
+"      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"        Desenvolvido por <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}};\">Odoo</a>\n"
+"      </td></tr>\n"
+"    </table>\n"
+"</td></tr>\n"
+"</table>\n"
+"            "
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -319,7 +566,7 @@ msgstr ""
 #. module: timesheet_grid
 #: model:ir.model,name:timesheet_grid.model_account_analytic_line
 msgid "Analytic Line"
-msgstr ""
+msgstr "Linha Analítica"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_config_settings__reminder_allow
@@ -377,7 +624,7 @@ msgstr "Confirmar o tempo gasto"
 #. module: timesheet_grid
 #: model:ir.model,name:timesheet_grid.model_hr_timesheet_stop_timer_confirmation_wizard
 msgid "Confirm timesheet creation when stop timer"
-msgstr ""
+msgstr "Confirmar a criação da planilha de horas ao parar o cronômetro"
 
 #. module: timesheet_grid
 #: model_terms:web_tour.tour,rainbow_man_message:timesheet_grid.timesheet_tour
@@ -387,7 +634,7 @@ msgstr "Parabéns, agora você é um mestre em planilhas de horas!"
 #. module: timesheet_grid
 #: model:ir.model,website_form_label:timesheet_grid.model_project_task
 msgid "Create a Task"
-msgstr ""
+msgstr "Criar uma tarefa"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_hr_timesheet_merge_wizard__create_uid
@@ -468,6 +715,8 @@ msgid ""
 "Difference between the allocated %(uom)s (%(allocated_hours)s) and the %"
 "(uom)s spent (%(worked_hours)s) on the project"
 msgstr ""
+"Diferença entre as horas alocadas %(uom)s (%(allocated_hours)s) e as %(uom)s "
+"(%(worked_hours)s) gastas no projeto"
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -476,6 +725,8 @@ msgid ""
 "Difference between the allocated %(uom)s (%(allocated_hours)s) and the %"
 "(uom)s spent (%(worked_hours)s) on the task"
 msgstr ""
+"Diferença entre as horas alocadas %(uom)s (%(allocated_hours)s) e as %(uom)s "
+"(%(worked_hours)s) gastas na tarefa"
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -579,11 +830,13 @@ msgid ""
 "Keep track of your working hours by project every day and bill your "
 "customers for that time."
 msgstr ""
+"Mantenha o controle de suas horas de trabalho por projeto todos os dias e "
+"fature este tempo de seus clientes."
 
 #. module: timesheet_grid
 #: model:ir.ui.menu,name:timesheet_grid.menu_timesheet_grid_validate_previous_week
 msgid "Last Period"
-msgstr ""
+msgstr "Período anterior"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_hr_timesheet_merge_wizard__write_uid
@@ -626,12 +879,12 @@ msgstr "Inicie o <b>cronômetro</b> para começar uma nova atividade."
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/views/timesheet_calendar_my_timesheets/timesheet_calendar_my_timesheets_side_panel.xml:0
 msgid "Legend"
-msgstr ""
+msgstr "Legenda"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.hr_timesheet_stop_timer_confirmation_wizard_view_form
 msgid "Log Time"
-msgstr ""
+msgstr "Registrar tempo"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.timesheet_merge_wizard_view_form
@@ -676,6 +929,10 @@ msgid ""
 "timesheet drafts in the original project. Although they won't be visible "
 "here, you can still edit them using the Timesheets app."
 msgstr ""
+"Mover essa tarefa para um projeto sem suporte a planilhas de horas manterá "
+"os rascunhos de planilhas de horas no projeto original. Embora eles não "
+"estejam visíveis aqui, você ainda pode editá-los usando o aplicativo "
+"Planilha de horas."
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.timesheet_view_search
@@ -700,13 +957,13 @@ msgstr "Minha Equipa"
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_hr_timesheet_stop_timer_confirmation_wizard__timesheet_name
 msgid "Name"
-msgstr ""
+msgstr "Nome"
 
 #. module: timesheet_grid
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/views/timesheet_grid/timesheet_grid_renderer.js:0
 msgid "No timesheets found. Let's create one!"
-msgstr ""
+msgstr "Nenhuma planilha de horas encontrada. Vamos criar uma!"
 
 #. module: timesheet_grid
 #: model_terms:ir.actions.act_window,help:timesheet_grid.timesheet_grid_to_validate_action
@@ -749,7 +1006,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/timesheet_grid/models/account_analytic_line.py:0
 msgid "Open Form"
-msgstr ""
+msgstr "Abrir formulário"
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -799,7 +1056,7 @@ msgstr "Voltar para provisório"
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.hr_timesheet_stop_timer_confirmation_wizard_view_form
 msgid "Resume Timer"
-msgstr ""
+msgstr "Continuar cronômetro"
 
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_res_config_settings__timesheet_rounding
@@ -855,7 +1112,7 @@ msgstr ""
 #: code:addons/timesheet_grid/static/src/components/grid_timesheet_timer_header/grid_timesheet_timer_header.xml:0
 #: code:addons/timesheet_grid/static/src/components/timesheet_timer_header/timesheet_timer_header.xml:0
 msgid "Shift"
-msgstr ""
+msgstr "Turno"
 
 #. module: timesheet_grid
 #. odoo-python
@@ -961,13 +1218,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/timesheet_grid/models/project_project.py:0
 msgid "This Progress Bar is not implemented."
-msgstr ""
+msgstr "Esta barra de progresso não foi implementada."
 
 #. module: timesheet_grid
 #. odoo-python
 #: code:addons/timesheet_grid/models/project_task.py:0
 msgid "This project isn't expected to have task during this period."
-msgstr ""
+msgstr "Não é esperado que esse projeto tenha tarefas durante esse período."
 
 #. module: timesheet_grid
 #. odoo-python
@@ -976,6 +1233,8 @@ msgid ""
 "This user isn't expected to have any projects assigned during this period "
 "because they don't have any running contract."
 msgstr ""
+"Não é esperado que esse usuário tenha projetos atribuídos a ele durante esse "
+"período, porque ele não tem nenhum contrato em andamento."
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.res_config_settings_view_form
@@ -1013,7 +1272,7 @@ msgstr "Mixin da grade da planilha de horas"
 #. module: timesheet_grid
 #: model:ir.model.fields,field_description:timesheet_grid.field_project_task__timesheet_unit_amount
 msgid "Timesheet Unit Amount"
-msgstr ""
+msgstr "Valor da unidade da planilha de horas"
 
 #. module: timesheet_grid
 #: model:ir.actions.server,name:timesheet_grid.timesheet_reminder_ir_actions_server
@@ -1044,6 +1303,8 @@ msgid ""
 "Timesheets before the %(date)s (included) have been validated, and can no "
 "longer be deleted."
 msgstr ""
+"As planilhas de horas antes de %(date)s (incluso) foram validadas e não "
+"podem mais ser excluídas."
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1052,6 +1313,8 @@ msgid ""
 "Timesheets before the %(date)s (included) have been validated, and can no "
 "longer be modified."
 msgstr ""
+"As planilhas de horas antes de %(date)s (incluso) foram validadas e não "
+"podem mais ser modificadas."
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.res_config_settings_view_form
@@ -1172,7 +1435,7 @@ msgstr "Linha validada"
 #. odoo-python
 #: code:addons/timesheet_grid/models/project_task.py:0
 msgid "Warning"
-msgstr ""
+msgstr "Aviso"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.timesheet_view_grid
@@ -1199,7 +1462,7 @@ msgstr ""
 #: code:addons/timesheet_grid/models/hr_employee.py:0
 #: code:addons/timesheet_grid/models/res_users.py:0
 msgid "You are not allowed to see timesheets."
-msgstr ""
+msgstr "Você não tem permissão para ver planilhas de horas."
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1225,7 +1488,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/timesheet_grid/models/account_analytic_line.py:0
 msgid "You can't encode numbers with more than six digits."
-msgstr ""
+msgstr "Não é possível codificar números com mais de seis dígitos."
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1250,6 +1513,8 @@ msgid ""
 "You cannot delete a validated entry. Please contact your manager or your "
 "timesheet approver."
 msgstr ""
+"Não é possível excluir um registro validado. Entre em contato com o seu "
+"gerente ou com o responsável pela aprovação da planilha de horas."
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1275,6 +1540,10 @@ msgid ""
 "employees who are not part of your team or are not in a state that can be "
 "validated. This may be due to the fact that they are dated in the future."
 msgstr ""
+"Não é possível validar as planilhas de horas selecionadas porque elas "
+"pertencem a funcionários que não fazem parte da sua equipe ou não estão em "
+"um estado que possa ser validado. Isso pode ser devido ao fato de que elas "
+"estão datadas no futuro."
 
 #. module: timesheet_grid
 #. odoo-python
@@ -1283,6 +1552,9 @@ msgid ""
 "Your timesheet entry is missing a project. Please either group the Grid view "
 "by project or enter your timesheets by adding a line via the Form view."
 msgstr ""
+"Há um projeto faltando em sua entrada na planilha de horas. Agrupe a "
+"visualização de grade por projeto ou insira suas planilhas de horas "
+"adicionando uma linha pela visualização de formulário."
 
 #. module: timesheet_grid
 #: model:ir.model.fields.selection,name:timesheet_grid.selection__res_company__timesheet_mail_employee_interval__months
@@ -1300,7 +1572,7 @@ msgstr "após o final da semana"
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/components/timesheet_timer_header/timesheet_timer_header.xml:0
 msgid "and click on"
-msgstr ""
+msgstr "e clique em"
 
 #. module: timesheet_grid
 #: model_terms:ir.ui.view,arch_db:timesheet_grid.res_config_settings_view_form
@@ -1318,13 +1590,13 @@ msgstr "mínimo"
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/components/grid_timesheet_timer_header/grid_timesheet_timer_header.xml:0
 msgid "or"
-msgstr ""
+msgstr "ou"
 
 #. module: timesheet_grid
 #. odoo-javascript
 #: code:addons/timesheet_grid/static/src/components/timesheet_timer_header/timesheet_timer_header.xml:0
 msgid "or click on"
-msgstr ""
+msgstr "ou clique em"
 
 #. module: timesheet_grid
 #. odoo-javascript
@@ -1338,7 +1610,7 @@ msgstr "para adicionar"
 #: code:addons/timesheet_grid/static/src/components/grid_timesheet_timer_header/grid_timesheet_timer_header.xml:0
 #: code:addons/timesheet_grid/static/src/components/timesheet_timer_header/timesheet_timer_header.xml:0
 msgid "to launch the timer"
-msgstr ""
+msgstr "para iniciar o cronômetro"
 
 #~ msgid "Analytic Account"
 #~ msgstr "Conta Analítica"

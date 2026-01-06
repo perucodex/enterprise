@@ -6,6 +6,7 @@ from odoo.exceptions import UserError
 
 class HrReferralCampaignWizard(models.TransientModel):
     _name = 'hr.referral.campaign.wizard'
+    _inherit = ['hr.mixin']
     _description = 'Referral Campaign Wizard'
 
     @api.model

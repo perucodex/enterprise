@@ -46,9 +46,10 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
         :return: False if no account type needed, otherwise a string with the account type"""
         return False
 
-    def _get_report_values(self, report, options):
+    def _get_report_values(self, report, options, values=None):
         """
-        Get the report values based on lines
+        Get the report values based on lines. While parsing the lines, check for the existence of the
+        undistributed earnings line, which should be added to values['errors'].
         :return dict:    Keys are account_ids pointing to a dict of values
             - account_id:
                 - sum                               {'debit': float, 'credit': float, 'balance': float}
@@ -70,9 +71,16 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                     'credit': line['columns'][colname_to_idx['credit']]['no_format'],
                     'balance': line['columns'][colname_to_idx['balance']]['no_format'],
                 }
-            if (isinstance(res_id, str) and 'balance_line' in res_id) or (model == 'account.account' and not line['unfoldable']):  # balance_line or unaffected earnings account line
+            elif values and report._get_markup(line['id']) == 'undistributed_profits_losses':
+                balance_index = [c['expression_label'] for c in options['columns']].index('balance')
+                currency_id = self.env.company.currency_id
+                if not currency_id.is_zero(line['columns'][balance_index]['no_format']):
+                    values['errors']['undistributed_earnings'] = {
+                        'message': _('Undistributed profits or losses may cause export rejection.'),
+                        'level': 'info',
+                    }
+            if (isinstance(res_id, str) and 'balance_line' in res_id):
                 report_values[current_account_id]['initial_balance'] = line['columns'][colname_to_idx['balance']]['no_format']
-
         return report_values
 
     @api.model
@@ -80,8 +88,7 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
         res = {
             'account_vals_list': [],
         }
-        report = self.env['account.report'].browse(options['report_id'])
-        report_values = self._get_report_values(report, options)
+        report_values = self._get_report_values(report, options, values)
         accounts = self.env['account.account'].browse(report_values.keys())
 
         for account in accounts:
@@ -288,6 +295,7 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
         # Fill 'customer_vals_list' and 'supplier_vals_list'
         query = report._get_report_query(options, 'from_beginning', domain=[
             ('account_id.account_type', 'in', ('asset_receivable', 'liability_payable')),
+            ('partner_id', '!=', False)
         ])
         query.groupby = SQL.identifier(query.table, "partner_id")
         query.having = SQL(

@@ -20,7 +20,7 @@ class HrPayslipLine(models.Model):
             tags_list = record.salary_rule_id.debit_tag_ids if debit_credit == 'debit' else record.salary_rule_id.credit_tag_ids
             for tag in tags_list:
                 if tag == w2_tag:
-                    tag_ids += w3_tag.id
+                    tag_ids += [w3_tag.id]
                 elif tag == w1_tag:
                     continue
                 else:

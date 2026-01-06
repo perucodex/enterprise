@@ -669,21 +669,19 @@ class AppointmentTest(AppointmentCommon, HttpCaseWithUserDemo):
 
     @users('apt_manager')
     def test_customer_event_description(self):
-        """Check calendar file description and summary generation."""
+        """
+        Check calendar description and summary generation.
+
+        This test verifies that the `_get_customer_description` method
+        correctly appends the appointment type's `message_confirmation`
+        and the reschedule link to the event's base description.
+
+        It also validates the `_get_customer_summary` method for both
+        user-based and resource-based appointments.
+        """
         appointment_type = self.apt_type_bxls_2days
-        host_partner = self.apt_manager.partner_id
         appointment_type.message_confirmation = '<p>Please try to be there <strong>5 minutes</strong> before the time.<p><br>Thank you.'
-        appointment_question = self.env['appointment.question'].create({
-            'appointment_type_ids': [(6, 0, appointment_type.ids)],
-            'name': 'How are you ?',
-            'question_type': 'char',
-        })
-        appointment_answer_input_values = {
-            'appointment_type_id': appointment_type.id,
-            'question_id': appointment_question.id,
-            'value_text_box': 'I am Good',
-        }
-        attendee = self.env['res.partner'].sudo().create({
+        booker = self.env['res.partner'].sudo().create({
             'name': '<p>John Doe</p>',
             'email': 'john@example.com',
             'phone': '123456789',
@@ -693,44 +691,47 @@ class AppointmentTest(AppointmentCommon, HttpCaseWithUserDemo):
             'email': 'jean@example.com',
             'phone': '888888888',
         })
-        host_partner.phone = '+32456111111'
-        appointment = self.env['calendar.event'].create({
-            'name': '%s with %s' % (appointment_type.name, attendee.name),
-            'start': datetime.now(),
-            'start_date': datetime.now(),
-            'stop': datetime.now() + timedelta(hours=1),
-            'allday': False,
-            'duration': appointment_type.appointment_duration,
-            'location': appointment_type.location,
-            'partner_ids': [odoo.Command.link(partner.id) for partner in [attendee, host_partner, extra_attendee]],
-            'appointment_booker_id': attendee.id,
-            'appointment_type_id': appointment_type.id,
-            'appointment_answer_input_ids': [(0, 0, appointment_answer_input_values)],
-            'user_id': self.apt_manager.id,
-        })
+
+        start_dt = datetime.now()
+        appointment = (
+            self.env["calendar.event"]
+            .with_context(skip_contact_description=True)
+            .create({
+                **appointment_type._prepare_calendar_event_values(
+                    asked_capacity=1,
+                    booking_line_values=[{'capacity_reserved': 1, 'capacity_used': 1}],
+                    description="A beautiful description written for external calendar",
+                    duration=appointment_type.appointment_duration,
+                    allday=False,
+                    appointment_invite=self.env['appointment.invite'],
+                    guests=extra_attendee,
+                    name=booker.name,
+                    customer=booker,
+                    staff_user=self.staff_user_bxls,
+                    start=start_dt,
+                    stop=start_dt + timedelta(hours=appointment_type.appointment_duration),
+                ),
+            })
+        )
+
         url = f"{appointment_type.get_base_url()}/calendar/view/{appointment.access_token}"
-        description = (
-            '<div><strong>Organized by</strong><br>Appointment Manager<br>'
-            '<a href="mailto:apt_manager@test.example.com">apt_manager@test.example.com</a><br>'
-            '<a href="tel:+32456111111">+32456111111</a><br><br>'
-            '<strong>Contact Details</strong><br>&lt;p&gt;John Doe&lt;/p&gt;<br>'
-            '<a href="mailto:john@example.com">john@example.com</a><br>'
-            '<a href="tel:123456789">123456789</a></div><br>'
+        customer_description = (
+            '<p>A beautiful description written for external calendar</p><br>'
             '<p>Please try to be there <strong>5 minutes</strong> before the time.</p>'
             '<p><br>Thank you.</p><span>Need to reschedule? <a href=%s>Click here</a></span>'
         ) % (url)
-        self.assertEqual(appointment._get_customer_description(), description)
+        self.assertEqual(appointment._get_customer_description(), customer_description)
 
         # Test summary for all appointment types
         resource_appointment = self.apt_type_resource
         resource_event = self.env['calendar.event'].create({
-            'name': '%s - %s' % (resource_appointment.name, attendee.name),
+            'name': '%s - %s' % (resource_appointment.name, booker.name),
             'start': datetime.now(),
             'stop': datetime.now() + timedelta(hours=1),
             'appointment_type_id': resource_appointment.id,
             'user_id': self.apt_manager.id,
         })
-        user_summary = f'{appointment_type.name} with {host_partner.name or "somebody"}'
+        user_summary = f'{appointment_type.name} with {self.staff_user_bxls.name or "somebody"}'
         for event, summary in ((appointment, user_summary), (resource_event, resource_event.name)):
             with self.subTest(summary=summary):
                 self.assertEqual(event._get_customer_summary(), summary)

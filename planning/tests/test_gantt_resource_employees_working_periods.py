@@ -111,3 +111,34 @@ class TestPlanningGanttResourceEmployeeWorkingPeriods(TestPlanningContractCommon
             {'start': self.contract_start_date, 'end': False},
             "The working period for that resource should be the whole gantt periods displayed since it is inside the contract period."
         )
+
+    def test_new_employee_with_no_contract(self):
+        """ Test the working period of a new employee with no contract """
+
+        # Create a new employee with no contract
+        employee_hope = self.env['hr.employee'].create({'name': 'Hope'})
+        self.assertTrue(employee_hope.version_id, "A default version should be created for a new employee.")
+        self.assertFalse(employee_hope.version_id.contract_date_start, "The default version should not yet have a contract start date.")
+
+        # The employee should be considered available for the entire Gantt period.
+        context_period = self.context_dates_inside_contracts
+        gantt_rows_default = self.gantt_resource_employees_working_periods(context_period, employee_hope.resource_id)
+
+        self.assertDictEqual(
+            gantt_rows_default[employee_hope.resource_id.id][0],
+            {
+                'start': context_period['default_start_datetime'],
+                'end': context_period['default_end_datetime']
+            },
+            "A new employee should be considered available for the full default period."
+        )
+
+        # After setting a contract start date, the working period should adjust accordingly.
+        employee_hope.version_id.write({'contract_date_start': fields.Date.to_date(self.contract_start_date)})
+        gantt_rows_with_start = self.gantt_resource_employees_working_periods(context_period, employee_hope.resource_id)
+
+        self.assertEqual(
+            gantt_rows_with_start[employee_hope.resource_id.id][0]['start'],
+            self.contract_start_date,
+            "The working period's start should now match the contract_date_start."
+        )

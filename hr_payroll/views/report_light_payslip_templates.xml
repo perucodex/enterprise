@@ -81,8 +81,11 @@
                         To pay on 
                         <span class="fw-bold" t-esc="bank.acc_number or 'N/A'"/> 
                         of <span class="fst-italic" t-field="o.employee_id.legal_name"/>: 
-                        <span t-esc="alloc[1]" class="fw-bold"/>
+                        <span t-esc="alloc[1]" class="fw-bold" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
                     </p>
+                    <t t-if="not allocations">
+                        Amount to be paid to <span class="fst-italic" t-field="o.employee_id.legal_name"/>: <span t-esc="o.net_wage" t-options='{"widget": "monetary", "display_currency": o.currency_id}' class="fw-bold"/>
+                    </t>
                 </t>
                 <p t-if="o.net_wage &lt; 0">
                     The net amount will be recovered from the first positive remuneration established after this.

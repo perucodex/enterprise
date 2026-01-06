@@ -44,7 +44,32 @@ class TestPayslipValidation(TestPayslipValidationCommon):
         })
 
         payslip = self._generate_payslip(date(2024, 1, 1), date(2024, 1, 31))
-        payslip_results = {'BASIC': 16000.0, 'HRA': 8000.0, 'STD': 4167.0, 'P_BONUS': 1332.8, 'LTA': 1332.8, 'SPL': 1167.4, 'MOB': 500.0, 'INT': 300.0, 'MEAL': 1000.0, 'CAR': 200.0, 'GROSS': 34000.0, 'PT': -200.0, 'PF': -1800.0, 'PFE': -1800.0, 'MED': -2940.0, 'ESICS': -340.0, 'ESICF': -1360.0, 'NET': 25560.0}
+        payslip_results = {'BASIC': 16000.0, 'HRA': 8000.0, 'STD': 4167.0, 'P_BONUS': 1332.8, 'LTA': 1332.8, 'SPL': 1167.4, 'MOB': 500.0, 'INT': 300.0, 'MEAL': 1000.0, 'CAR': 200.0, 'GROSS': 34000.0, 'PT': -200.0, 'PF': -1800.0, 'PFE': -1800.0, 'MED': -2940.0, 'NET': 27260.0}
+        self._validate_payslip(payslip, payslip_results)
+
+    def test_regular_payslip_esic_threshold(self):
+        self.contract.write({
+            'wage': 20000,
+            'l10n_in_basic_percentage': 1.0,
+            'l10n_in_hra_percentage': 0.0,
+            'l10n_in_standard_allowance': 0.0,
+            'l10n_in_performance_bonus_percentage': 0.0,
+            'l10n_in_leave_travel_percentage': 0.0,
+            'l10n_in_fixed_allowance_percentage': 0.0,
+            'l10n_in_phone_subscription': 0.0,
+            'l10n_in_internet_subscription': 0.0,
+            'l10n_in_meal_voucher_amount': 0.0,
+            'l10n_in_company_transport': 0.0,
+            'l10n_in_medical_insurance': 0.0,
+            'l10n_in_insured_spouse': False,
+            'l10n_in_insured_first_children': False,
+            'l10n_in_esic': True,
+            'l10n_in_esic_employee_percentage': 0.01,
+            'l10n_in_esic_employer_percentage': 0.04,
+        })
+
+        payslip = self._generate_payslip(date(2024, 1, 1), date(2024, 1, 31))
+        payslip_results = {'BASIC': 20000.0, 'GROSS': 20000.0, 'ESICS': -200.0, 'ESICF': -800.0, 'NET': 19000.0}
         self._validate_payslip(payslip, payslip_results)
 
     def test_regular_payslip_2(self):
@@ -131,10 +156,10 @@ class TestPayslipValidation(TestPayslipValidationCommon):
         payslip = self._generate_payslip(date(2024, 1, 1), date(2024, 1, 31))
         self.assertEqual(len(payslip.worked_days_line_ids), 2)
         self.assertEqual(len(payslip.input_line_ids), 0)
-        self.assertEqual(len(payslip.line_ids), 18)
+        self.assertEqual(len(payslip.line_ids), 16)
         self._validate_worked_days(payslip, {
             'LEAVE90': (1.0, 11.0, 0.0),
             'WORK100': (22.0, 173.0, 30086.96),
         })
-        payslip_results = {'BASIC': 15043.48, 'HRA': 7521.74, 'STD': 3917.89, 'P_BONUS': 1253.12, 'LTA': 1253.12, 'SPL': 1097.61, 'MOB': 500.0, 'INT': 300.0, 'MEAL': 1000.0, 'CAR': 200.0, 'GROSS': 32086.96, 'PT': -200.0, 'PF': -1692.39, 'PFE': -1692.39, 'MED': -2940.0, 'ESICS': -320.87, 'ESICF': -1283.48, 'NET': 23957.83}
+        payslip_results = {'BASIC': 15043.48, 'HRA': 7521.74, 'STD': 3917.89, 'P_BONUS': 1253.12, 'LTA': 1253.12, 'SPL': 1097.61, 'MOB': 500.0, 'INT': 300.0, 'MEAL': 1000.0, 'CAR': 200.0, 'GROSS': 32086.96, 'PT': -200.0, 'PF': -1692.39, 'PFE': -1692.39, 'MED': -2940.0, 'NET': 25562.18}
         self._validate_payslip(payslip, payslip_results)

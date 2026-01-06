@@ -5,7 +5,6 @@ import logging
 import subprocess
 
 from odoo.addons.iot_drivers.driver import Driver
-from odoo.addons.iot_drivers.event_manager import event_manager
 
 _logger = logging.getLogger(__name__)
 
@@ -37,9 +36,9 @@ class CameraDriver(Driver):
             ["fswebcam", "-d", self.interface, "-r", "1920x1080", "-"], capture_output=True, check=False
         )
         if image.returncode == 0:
-            self.data['image'] = base64.b64encode(image.stdout).decode()
-            self.data['message'] = 'Image captured'
+            return {
+                'image': base64.b64encode(image.stdout).decode(),
+            }
         else:
             _logger.error('Failed to capture image: %s', image.stderr.decode())
-            self.data['message'] = 'Failed to capture image'
-        event_manager.device_changed(self)
+            raise Exception('Failed to capture image from camera.')

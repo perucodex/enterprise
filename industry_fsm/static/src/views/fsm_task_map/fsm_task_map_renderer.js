@@ -1,9 +1,8 @@
 import { MapRenderer } from "@web_map/map_view/map_renderer";
 
-import { formatDateTime } from "@web/core/l10n/dates";
-import { localization } from "@web/core/l10n/localization";
-
-const { DateTime } = luxon;
+import { formatDateTime } from "@web/views/fields/formatters";
+import { parseDateTime } from "@web/core/l10n/dates";
+import { Time } from "@web/core/l10n/time";
 
 export class FsmTaskMapRenderer extends MapRenderer {
     static subTemplates = {
@@ -16,13 +15,11 @@ export class FsmTaskMapRenderer extends MapRenderer {
         if (!planned_date_begin) {
             return "";
         }
-        const format = localization.timeFormat.search("HH") === 0 ? "HH:mm" : "hh:mm A";
-        return formatDateTime(
-            DateTime.fromSQL(
-                record.planned_date_begin,
-                { numberingSystem: "latn", zone: "default" }
-            ),
-            { format: format }
-        );
+        const datetime = parseDateTime(record.planned_date_begin);
+        const time = Time.from(datetime.toObject());
+        if (time) {
+            return time.toString(false);
+        }
+        return formatDateTime(datetime, { showDate: false, showSeconds: false });
     }
 }

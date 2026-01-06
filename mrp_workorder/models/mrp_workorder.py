@@ -731,7 +731,7 @@ class MrpWorkorder(models.Model):
 
     def get_duration(self):
         self.ensure_one()
-        now = fields.Datetime.now()
+        now = self.env.cr.now()
         loss_type_times = defaultdict(lambda: self.env['mrp.workcenter.productivity'])
         for time in self.time_ids:
             loss_type_times[time.loss_id.loss_type] |= time
@@ -742,7 +742,7 @@ class MrpWorkorder(models.Model):
 
     def get_working_duration(self):
         self.ensure_one()
-        now = fields.Datetime.now()
+        now = self.env.cr.now()
         return self._intervals_duration([(t.date_start, now, t) for t in self.time_ids if not t.date_end])
 
     def get_productive_duration(self):
@@ -800,7 +800,7 @@ class MrpWorkorder(models.Model):
                 now = fields.Datetime.now()
                 date_start = datetime.fromtimestamp(now.timestamp() - ((wo.duration_expected * 60) // 1))
                 date_end = now
-                connected_employee = self._get_connected_employee()
+                connected_employee = wo._get_connected_employee()
                 productivity.append({
                     'workorder_id': wo.id,
                     'workcenter_id': wo.workcenter_id.id,
@@ -849,11 +849,7 @@ class MrpWorkorder(models.Model):
 
     def _prepare_timeline_vals(self, duration, date_start, date_end=False):
         time_data = super()._prepare_timeline_vals(duration=duration, date_start=date_start, date_end=date_end)
-        if self.employee_assigned_ids:
-            employee = self.employee_assigned_ids[0]
-        else:
-            employee = self._get_connected_employee()
-
+        employee = self._get_connected_employee()
         time_data['employee_id'] = employee.id
         time_data['description'] = _('Time Tracking: %(user)s', user=employee.name)
         return time_data
@@ -899,6 +895,9 @@ class MrpWorkorder(models.Model):
                 connected_employee_id = self.env['hr.employee'].get_session_owner()
             connected_employee = self.env['hr.employee'].browse(connected_employee_id)
         else:
-            connected_employee = self.env.user.employee_id
+            if self.employee_assigned_ids:
+                connected_employee = self.employee_assigned_ids[0]
+            else:
+                connected_employee = self.env.user.employee_id
 
         return connected_employee

@@ -1,4 +1,12 @@
-import { Component, onWillUnmount, useState } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillUnmount,
+    onWillUpdateProps,
+    useExternalListener,
+    useRef,
+    useState,
+} from "@odoo/owl";
 import { components, helpers } from "@odoo/o-spreadsheet";
 import { ModelFieldSelector } from "@web/core/model_field_selector/model_field_selector";
 import { browser } from "@web/core/browser/browser";
@@ -18,13 +26,46 @@ export class FieldSyncSidePanel extends Component {
         isNewlyCreate: false,
     };
 
+    inputRef = useRef("positionInput");
+
     setup() {
         this.state = useState({
             newPosition: undefined,
             updateSuccessful: false,
         });
         this.showSaved(this.props.isNewlyCreate);
-        onWillUnmount(() => browser.clearTimeout(this.timeoutId));
+        useExternalListener(
+            window,
+            "click",
+            (ev) => {
+                if (
+                    ev.target !== this.inputRef.el &&
+                    this.inputRef.el.value !== (this.fieldSync.indexInList + 1).toString()
+                ) {
+                    this.updateRecordPosition();
+                }
+            },
+            { capture: true }
+        );
+        onWillUpdateProps(() => {
+            if (document.activeElement !== this.inputRef.el && this.inputRef.el) {
+                this.inputRef.el.value = (this.fieldSync.indexInList + 1).toString();
+            }
+        });
+        onMounted(() => {
+            if (this.inputRef.el) {
+                this.inputRef.el.value = (this.fieldSync.indexInList + 1).toString();
+            }
+        });
+        onWillUnmount(() => {
+            browser.clearTimeout(this.timeoutId);
+            if (
+                this.fieldSync &&
+                this.inputRef.el.value !== (this.fieldSync.indexInList + 1).toString()
+            ) {
+                this.updateRecordPosition();
+            }
+        });
     }
 
     getSaleOrderLineList() {
@@ -56,8 +97,8 @@ export class FieldSyncSidePanel extends Component {
         );
     }
 
-    updateRecordPosition(event) {
-        this.updateFieldSync({ indexInList: parseInt(event.target.value) - 1 });
+    updateRecordPosition() {
+        this.updateFieldSync({ indexInList: parseInt(this.inputRef.el.value) - 1 });
     }
 
     updateField(fieldName) {

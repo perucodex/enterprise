@@ -31,18 +31,28 @@ class AccountFiscalReportHandler(models.AbstractModel):
     def _custom_options_initializer(self, report, options, previous_options):
         # Check if there are multiple rates
         super()._custom_options_initializer(report, options, previous_options=previous_options)
-        period_domain = [('date_from', '>=', options['date']['date_from']), ('date_from', '<=', options['date']['date_to'])]
+        period_domain = [
+            ('date_from', '>=', options['date']['date_from']),
+            ('date_from', '<=', options['date']['date_to']),
+            ('related_account_id', 'in', self.env['account.move.line']._search(
+                [
+                    ('date', '>=', options['date']['date_from']),
+                    ('date', '<=', options['date']['date_to']),
+                    ('parent_state', '=', 'posted'),
+                ]
+            ).subselect('account_id')),
+        ]
         rg = self.env['account.account.fiscal.rate']._read_group(
             period_domain,
             ['related_account_id'],
             having=[('__count', '>', 1)],
-            limit=1,
         )
         options['multi_rate_in_period'] = bool(rg)
+        options['multi_rate_accounts'] = [account[0].id for account in rg]
 
     def _customize_warnings(self, report, options, all_column_groups_expression_totals, warnings):
-        if options['multi_rate_in_period']:
-            warnings['account_fiscal_categories.warning_multi_rate'] = {}
+        if options['multi_rate_accounts']:
+            warnings['account_fiscal_categories.warning_multi_rate'] = {'ids': options['multi_rate_accounts']}
 
     def _caret_options_initializer(self):
         return {
@@ -99,6 +109,15 @@ class AccountFiscalReportHandler(models.AbstractModel):
             'type': 'ir.actions.act_window',
             'domain': domain,
             'context': ctx,
+        }
+
+    def open_multi_rate_accounts(self, options, params):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': self.env._('Account(s) with Multiple Fiscal Rates'),
+            'res_model': 'account.account',
+            'views': [(False, 'list')],
+            'domain': [('id', 'in', params['ids'])],
         }
 
     def _get_query(self, options, line_dict_id=None) -> tuple[SQL, SQL, SQL, SQL, SQL, SQL]:

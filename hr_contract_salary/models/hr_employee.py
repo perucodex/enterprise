@@ -1,8 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import uuid
-
-from odoo import fields, models, _
+from odoo import api, fields, models, _
 
 
 class HrEmployee(models.Model):
@@ -13,12 +11,21 @@ class HrEmployee(models.Model):
     final_yearly_costs = fields.Monetary(readonly=False, related="version_id.final_yearly_costs", inherited=True, groups="hr.group_hr_manager")
     monthly_yearly_costs = fields.Monetary(related="version_id.monthly_yearly_costs", inherited=True, groups="hr.group_hr_manager")
 
+    @api.onchange("wage_with_holidays")
+    def _onchange_wage_with_holidays(self):
+        self.version_id._onchange_wage_with_holidays()
+
+    @api.onchange('final_yearly_costs')
+    def _onchange_final_yearly_costs(self):
+        self.version_id._onchange_final_yearly_costs()
+
     def action_show_contract_reviews(self):
         return {
             "type": "ir.actions.act_window",
             "res_model": "hr.version",
             "views": [[False, "list"], [False, "form"]],
             "domain": [["origin_version_id", "=", self.version_id.id]],
+            "context": {"active_test": False},
             "name": "Contracts Reviews",
         }
 
@@ -39,18 +46,15 @@ class HrEmployee(models.Model):
         offer_values = self._get_offer_values()
         offer_values['default_validity_days_count'] = offer_validity_period
 
-        return {
-            'type': 'ir.actions.act_window',
-            'view_mode': 'form',
-            'res_model': 'hr.contract.salary.offer',
-            'views': [(False, 'form')],
-            'context': {
-                'active_model': 'hr.version',
-                'default_employee_version_id': self.version_id.id,
-                'default_employee_id': self.id,
-                **offer_values
-            }
+        action = self.env['ir.actions.act_window']._for_xml_id('hr_contract_salary.action_hr_offer_new')
+        action['domain'] = [('employee_id', 'in', self.id)]
+        action['context'] = {
+            'active_model': 'hr.version',
+            'default_employee_id': self.id,
+            'is_simulation_offer': True,
+            **offer_values
         }
+        return action
 
     def _get_offer_values(self):
         self.ensure_one()
@@ -63,5 +67,4 @@ class HrEmployee(models.Model):
             'default_employee_job_id':  self.job_id.id,
             'default_department_id': self.department_id.id,
             'default_display_name': _("Offer for %(recipient)s", recipient=self.name),
-            'default_access_token': uuid.uuid4().hex if not self.employee_id.user_id else False
         }

@@ -21,6 +21,7 @@ class TestSeverancePay(TestL10NHkHrPayrollAccountCommon):
             'date_version': date_start,
             'contract_date_start': date_start,
             'contract_date_end': date_end,
+            "l10n_hk_member_class_id": self.member_class.id,
         })
 
         for dt in rrule(MONTHLY, dtstart=date_start, until=date_end + relativedelta(day=31)):
@@ -47,6 +48,7 @@ class TestSeverancePay(TestL10NHkHrPayrollAccountCommon):
             'date_version': date_start,
             'contract_date_start': date_start,
             'contract_date_end': date_end,
+            "l10n_hk_member_class_id": self.member_class.id,
         })
 
         for dt in rrule(MONTHLY, dtstart=date_start, until=date_end):
@@ -75,9 +77,9 @@ class TestSeverancePay(TestL10NHkHrPayrollAccountCommon):
             'date_version': date_start,
             'contract_date_start': date_start,
             'contract_date_end': date_end,
-            'l10n_hk_mpf_vc_option': 'custom',
-            'l10n_hk_mpf_vc_percentage': 0.05,
+            "l10n_hk_member_class_id": self.member_class.id,
         })
+        self.employee.l10n_hk_member_class_ct_eevc_id.contribution_option = 'percentage'
 
         for dt in rrule(MONTHLY, dtstart=date_start, until=date_end):
             payslip = self._generate_payslip(dt.date(), dt.date() + relativedelta(day=31))
@@ -107,9 +109,9 @@ class TestSeverancePay(TestL10NHkHrPayrollAccountCommon):
             'date_version': date_start,
             'contract_date_start': date_start,
             'contract_date_end': date_end,
-            'l10n_hk_mpf_vc_option': 'custom',
-            'l10n_hk_mpf_vc_percentage': 0.05,
+            "l10n_hk_member_class_id": self.member_class.id,
         })
+        self.employee.l10n_hk_member_class_ct_eevc_id.contribution_option = 'percentage'
 
         for dt in rrule(MONTHLY, dtstart=date_start, until=date_end):
             payslip = self._generate_payslip(dt.date(), dt.date() + relativedelta(day=31))

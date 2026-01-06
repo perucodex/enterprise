@@ -7,21 +7,10 @@ export class AccountImportAction extends ImportAction {
     setup() {
         super.setup();
 
-        // this.props.action.params.model is there for retro-compatiblity issues
-        this.resModel = this.props.action.params.model || this.props.action.params.active_model;
-        if (this.resModel) {
-            this.props.updateActionState({ active_model: this.resModel });
-        }
-
         this.model = useAccountMoveLineImportModel({
             env: this.env,
             context: this.props.action.params.context || {},
         });
-    }
-
-    onWillStart() {
-        this.model.setResModel(this.resModel);
-        return this.model.init();
     }
 
     openRecords(resIds) {

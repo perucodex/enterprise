@@ -500,16 +500,19 @@ class HrAppraisal(models.Model):
 
     def action_back(self):
         self.state = '1_new'
+        self.assessment_note = False
+
+    def action_reopen(self):
+        self.state = '2_pending'
 
     def action_open_employee_appraisals(self):
-        self.ensure_one()
         view_id = self.env.ref('hr_appraisal.hr_appraisal_view_tree_orderby_create_date').id
         return {
             'name': self.env._('Previous Appraisals'),
             'res_model': 'hr.appraisal',
             'view_mode': 'list,kanban,form,gantt,calendar,activity',
             'views': [(view_id, 'list'), (False, 'kanban'), (False, 'form'), (False, 'gantt'), (False, 'calendar'), (False, 'activity')],
-            'domain': [('employee_id', '=', self.employee_id.id)],
+            'domain': [('employee_id', '=', self.employee_id.ids)],
             'type': 'ir.actions.act_window',
             'target': 'current',
             'context': {

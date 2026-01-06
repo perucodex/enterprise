@@ -84,12 +84,6 @@ class AccountJournal(models.Model):
                 errors[attachment.name].append(e.args[0])
 
         statements = self.env['account.bank.statement'].browse(statement_ids_all)
-        line_to_reconcile = statements.line_ids
-        if line_to_reconcile:
-            if len(line_to_reconcile) <= 80:
-                line_to_reconcile._try_auto_reconcile_statement_lines()
-            else:
-                line_to_reconcile._cron_try_auto_reconcile_statement_lines(batch_size=100)
 
         result = self.env['account.bank.statement.line']._action_open_bank_reconciliation_widget(
             extra_domain=[('statement_id', 'in', statements.ids)],
@@ -287,7 +281,10 @@ class AccountJournal(models.Model):
                 st_vals.pop('transactions', None)
                 # Create the statement
                 st_vals['line_ids'] = [Command.create(line) for line in filtered_st_lines]
-                statement = BankStatement.with_context(default_journal_id=self.id).create(st_vals)
+                statement = BankStatement.with_context(
+                    default_journal_id=self.id,
+                    auto_statement_processing=True,
+                ).create(st_vals)
                 if not statement.name:
                     statement.name = st_vals['reference']
                 statement_ids.append(statement.id)

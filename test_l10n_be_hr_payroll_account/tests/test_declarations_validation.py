@@ -492,11 +492,11 @@ class TestDeclarationsValidation(AccountTestInvoicingCommon):
             'month': '12',
         })
         declaration_results = {
-            'pp_amount': 7686.88,
+            'pp_amount': 7684.78,
             'pp_amount_32': 0.0,
             'pp_amount_33': 1747.78,
             'pp_amount_34': 0.0,
-            'taxable_amount': 23095.95,
+            'taxable_amount': 23091.0,
             'taxable_amount_32': 0.0,
             'taxable_amount_33': 10268.800000000001,
             'taxable_amount_34': 0.0,

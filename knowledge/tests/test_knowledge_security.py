@@ -69,6 +69,25 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
                         "ACLs: should be accessible due to explicit 'read' member permission")
         self.assertTrue(article_accessible.is_user_favorite)
 
+        new_article = self.env["knowledge.article"].create({
+            "article_member_ids": [
+                (0, 0, {
+                    "partner_id": self.env.user.partner_id.id,
+                    "permission": "write",
+                }),
+            ],
+            "name": "New Article",
+            "internal_permission": "none",
+        })
+        self.assertTrue(new_article)
+
+        self.env.ref("knowledge.access_knowledge_article_portal").sudo().write({"perm_create": False})
+        with self.assertRaises(exceptions.AccessError):
+            self.env["knowledge.article"].create({
+                "name": "New Article",
+                "internal_permission": "none",
+            })
+
         # FAVORITES
         favs = self.env['knowledge.article.favorite'].search([])
         self.assertEqual(len(favs), 1)
@@ -81,12 +100,13 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
 
         # MEMBERS
         my_members = self.env['knowledge.article.member'].search([])
-        self.assertEqual(len(my_members), 4)
+        self.assertEqual(len(my_members), 5)
         self.assertEqual(
             my_members, (
                 self.article_read_contents[0] |
                 self.article_read_contents[1] |
-                self.article_write_contents[2]
+                self.article_write_contents[2] |
+                new_article
             ).article_member_ids,
             msg="Portal can read all members from articles he has access to"
         )
@@ -221,6 +241,23 @@ class TestKnowledgeSecurity(KnowledgeArticlePermissionsCase):
         with self.assertRaises(exceptions.AccessError,
                                msg="ACLs: 'none' internal permission"):
             article_hidden.body  # access body should trigger acls
+
+        new_article = self.env["knowledge.article"].create({
+            "article_member_ids": [
+                (0, 0, {
+                    "partner_id": self.env.user.partner_id.id,
+                    "permission": "write",
+                }),
+            ],
+            "name": "New Article",
+        })
+        self.assertTrue(new_article)
+
+        self.env.ref("knowledge.access_knowledge_article_user").sudo().write({"perm_create": False})
+        with self.assertRaises(exceptions.AccessError):
+            self.env["knowledge.article"].create({
+                "name": "New Article",
+            })
 
         # FAVORITES
         my_favs = self.env['knowledge.article.favorite'].search([])

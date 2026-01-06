@@ -6,7 +6,13 @@ import { BuilderAction } from "@html_builder/core/builder_action";
 
 class OnlineAppointmentOptionPlugin extends Plugin {
     static id = "OnlineAppointmentOption";
-    static shared = ["setDatasetProperty", "getDatasetProperty", "getAllAppointmentTypesById"];
+    static shared = [
+        "setDatasetProperty",
+        "getDatasetProperty",
+        "getAllAppointmentTypesById",
+        "fetchAppointmentTypes",
+    ];
+
     setup() {
         this.fetchAppointmentTypesProm = null;
         this.allAppointmentTypesById = null;
@@ -17,23 +23,11 @@ class OnlineAppointmentOptionPlugin extends Plugin {
             SetAppTypesAction,
             SetStaffUsersAction,
         },
-        builder_options: {
-            OptionComponent: OnlineAppointmentOption,
-            selector: ".s_online_appointment",
-            props: this.getComponentProps(),
-        },
+        builder_options: [OnlineAppointmentOption],
         so_content_addition_selector: [".s_online_appointment"],
     };
 
-    getComponentProps() {
-        return {
-            setDatasetProperty: this.setDatasetProperty.bind(this),
-            getDatasetProperty: this.getDatasetProperty.bind(this),
-            fetchAppointmentTypes: this._fetchAppointmentTypes.bind(this),
-        };
-    }
-
-    async _fetchAppointmentTypes() {
+    async fetchAppointmentTypes() {
         if (!this.fetchAppointmentTypesProm) {
             this.fetchAppointmentTypesProm = rpc("/appointment/get_snippet_data");
             this.allAppointmentTypesById = await this.fetchAppointmentTypesProm;

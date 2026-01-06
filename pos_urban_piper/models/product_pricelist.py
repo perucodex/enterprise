@@ -13,8 +13,5 @@ class ProductPricelist(models.Model):
                 ('urbanpiper_pricelist_id', '=', pricelist.id),
             ])
             if urban_piper_configs:
-                linked_urban_piper_status = self.env['product.template'].sudo().search([('urbanpiper_pos_config_ids', 'in', urban_piper_configs.ids)])\
-                    .mapped('urban_piper_status_ids')\
-                    .filtered(lambda s: s.is_product_linked)
-                linked_urban_piper_status.write({'is_product_linked': False})
+                urban_piper_configs._reset_urbanpiper_product_linkages()
         return res

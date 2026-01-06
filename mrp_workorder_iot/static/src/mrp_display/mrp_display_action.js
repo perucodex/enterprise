@@ -6,6 +6,7 @@ patch(MrpDisplayAction.prototype, {
         let result = super.fieldsStructure;
         result["quality.check"].push('ip');
         result["quality.check"].push('identifier');
+        result["quality.check"].push('iot_box_id');
         result["quality.check"].push('boxes');
         return (result);
     }

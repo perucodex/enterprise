@@ -31,6 +31,17 @@
                     >
                         Audit
                     </button>
+                    <button
+                        class="btn btn_action"
+                        t-if="props.line.to_review"
+                        t-on-click="(ev) => controller.reportAction(ev, 'journal_report_open_aml_by_move', {
+                            journal_id: props.line.journal_id,
+                            line_id: props.line.id,
+                            review: true,
+                        })"
+                    >
+                        Review
+                    </button>
                 </t>
             </t>
         </xpath>

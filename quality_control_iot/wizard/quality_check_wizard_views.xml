@@ -8,16 +8,14 @@
             <field name="test_type" position="after">
                 <field name="ip" invisible="1"/>
                 <field name="identifier" invisible="1"/>
+                <field name="iot_box_id" invisible="1"/>
             </field>
-            <field name="measure" position="attributes">
-                <attribute name="widget">iot_measure</attribute>
-                <attribute name="options">{'ip_field': 'ip', 'identifier': 'identifier'}</attribute>
-            </field>
-            <field name="picture" position="replace">
-                <div class="quality_picture">
-                    <field name="picture" widget="iot_picture" options="{'ip_field': 'ip', 'identifier': 'identifier'}" readonly="quality_state != 'none'"/>
-                </div>
-            </field>
+            <xpath expr="//footer/button[@name='do_pass']" position="before">
+                <widget name="iot_picture" btn_name="Take Picture" invisible="test_type != 'picture'"/>
+            </xpath>
+            <xpath expr="//footer/button[@name='do_measure']" position="before">
+                <widget name="iot_measure" btn_name="Get Measurement" invisible="test_type != 'measure'"/>
+            </xpath>
         </field>
     </record>
 </odoo>

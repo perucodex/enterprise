@@ -1083,7 +1083,11 @@
         <field name="res_model">project.task</field>
         <field name="view_mode">kanban,list,gantt,calendar,map,pivot,graph,form,activity</field>
         <field name="search_view_id" ref="project_task_view_search_fsm"/>
-        <field name="domain">[('is_fsm', '=', True), ('project_id', '=', active_id)]</field>
+        <field name="domain">[
+            ('is_fsm', '=', True),
+            ('project_id', '=', active_id),
+            ('has_template_ancestor', '=', False),
+        ]</field>
         <field name="context">{
             'pivot_row_groupby': ['user_ids'],
             'default_project_id': active_id,

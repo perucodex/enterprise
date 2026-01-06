@@ -174,16 +174,17 @@ class IoTController(http.Controller):
         :return: IoT websocket channel
         """
         # Update or create box
-        iot_identifier = iot_box['identifier']  # IoT Mac Address
+        iot_identifier = iot_box['identifier']
         new_iot_ip = iot_box['ip']
         new_iot_version = iot_box['version']
-        box = self._search_box(iot_identifier)
+        box = self._search_box(iot_identifier) or self._search_box(iot_box.get('mac'))
         create_update_value = {
+            "identifier": iot_identifier,  # Ensure upgrade from MAC to serial number
             'ip': new_iot_ip,
             'version': new_iot_version,
         }
         if box:
-            if (box.ip, box.version) != (new_iot_ip, new_iot_version):
+            if (box.identifier, box.ip, box.version) != (iot_identifier, new_iot_ip, new_iot_version):
                 _logger.info('Updating IoT %s with data: %s', box, create_update_value)
                 box.write(create_update_value)
         else:

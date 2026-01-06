@@ -149,17 +149,4 @@ class HrEmployee(models.Model):
 
     def action_configure_employee_inputs(self):
         self.ensure_one()
-        current_structure = self.env.context.get('structure_id')
-        return {
-            'type': 'ir.actions.act_window',
-            'view_mode': 'list',
-            'view_id': self.env.ref("hr_payroll.hr_salary_rule_benefit_selector_list", False).id,
-            'res_model': 'hr.salary.rule',
-            'target': 'new',
-            'domain': [
-                ('struct_id', '=', current_structure),
-                ('condition_select', '=', 'property_input'),
-                ('input_usage_employee', '=', True),
-                ('dependent_input_id', '=', False),
-            ]
-        }
+        return self.structure_id.action_get_structure_inputs()

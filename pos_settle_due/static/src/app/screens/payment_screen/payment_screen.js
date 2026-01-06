@@ -65,7 +65,7 @@ patch(PaymentScreen.prototype, {
     },
     async validateOrder(isForceValidate) {
         const order = this.currentOrder;
-        const change = order.change;
+        const change = -order.change;
         const settleLines = order.lines.filter(
             (line) => line.isSettleDueLine() || line.isSettleInvoiceLine()
         );

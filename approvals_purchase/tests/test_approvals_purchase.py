@@ -300,9 +300,10 @@ class TestApprovalsPurchase(TestApprovalsCommon):
         self.assertEqual(purchase_order_2.order_line.product_qty, 10)
         self.assertEqual(purchase_order_2.order_line.price_unit, 230)
 
-    def test_purchase_05_convert_price_currency(self):
-        """ Checks the price is correclty set when create a purchase order line
-        for a product (currency conversion). """
+    def test_purchase_05_create_purchase_using_vendor_currency(self):
+        """ Checks that the created purchase order uses the currency
+        set on the vendor of the product, rather than the currency of
+        the company. """
         date_now = datetime.datetime.now()
         currency_a = self.env['res.currency'].create({
             'name': 'ZEN',
@@ -368,14 +369,35 @@ class TestApprovalsPurchase(TestApprovalsCommon):
         request_purchase.action_confirm()
         request_purchase.with_user(user_approver_2).action_approve()
         request_purchase.action_create_purchase_orders()
-        # Compare prices.
+        # Ensure that purchase order uses currency of vendor (currency_b).
         purchase_order = self.get_purchase_order(request_purchase, 0)
         self.assertEqual(
-            purchase_order.order_line[0].price_unit, 2, "Price must be adapted."
+            purchase_order.currency_id, currency_b, "Must use the vendor's currency."
+        )
+        self.assertEqual(
+            purchase_order.order_line[0].price_unit, 5, "Price must match vendor price."
         )
         # Resets the company.
         self.env.user.company_id = current_company
         self.env.user.company_ids -= new_company
+
+    def test_purchase_06_prevent_multiple_create_purchase(self):
+        """ Check that creating RFQs can't be performed more than once. """
+        request_form = self.create_request_form(approver=self.user_approver)
+        with request_form.product_line_ids.new() as line:
+            line.product_id = self.product_computer
+            line.quantity = 30
+        request_purchase = request_form.save()
+        request_purchase.action_confirm()
+        request_purchase.with_user(self.user_approver).action_approve()
+        request_purchase.action_create_purchase_orders()
+        request_purchase.action_create_purchase_orders()
+
+        purchase_order = self.get_purchase_order(request_purchase, 0)
+        self.assertEqual(
+            purchase_order.order_line[0].product_qty, 30,
+            "Must have 30 units."
+        )
 
     def test_uom_01_create_purchase(self):
         """ Check the amount of product is correctly set, regarding the UoM of

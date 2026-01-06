@@ -20,7 +20,7 @@ export const AiDocumentsControllerMixin = () => ({
             ...menuItems,
             aiAutoSort: {
                 isAvailable: () =>
-                    this.env.searchModel.getSelectedFolder()?.ai_sort_prompt &&
+                    this.env.searchModel.getSelectedFolder()?.ai_has_sort_prompt &&
                     this.aiSortableDocuments().length,
                 sequence: 55,
                 description: _t("Sort With AI"),

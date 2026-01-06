@@ -118,7 +118,8 @@
                     <record id="account_financial_report_depreciation0_balance" model="account.report.expression">
                         <field name="label">balance</field>
                         <field name="engine">domain</field>
-                        <field name="formula" eval="[('account_id.account_type', '=', 'expense_depreciation')]"/>
+                        <field name="formula" eval="[('account_id.account_type', 'in', ('expense_other', 'expense_depreciation'))]"/>
+                        <field name="formula" eval="[('account_id.account_type', 'in', ('expense_depreciation', 'expense_other'))]"/>
                         <field name="subformula">sum</field>
                         <field name="green_on_positive" eval="False"/>
                     </record>
@@ -133,6 +134,33 @@
                         <field name="label">balance</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">REV.balance + OIN.balance - COS.balance - EXP.balance - OEXP.balance</field>
+                    </record>
+                </field>
+            </record>
+            <record id="account_financial_report_allocations_withdrawals0" model="account.report.line">
+                <field name="name">Less Allocations and Plus Withdrawals</field>
+                <field name="code">ALLOC</field>
+                <field name="hierarchy_level">1</field>
+                <field name="groupby">account_id</field>
+                <field name="foldable" eval="True"/>
+                <field name="expression_ids">
+                    <record id="account_financial_report_allocations_withdrawals0_balance" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">domain</field>
+                        <field name="formula" eval="[('account_id.account_type', '=', 'equity_unaffected')]"/>
+                        <field name="subformula">sum</field>
+                    </record>
+                </field>
+            </record>
+            <record id="account_financial_report_net_profit_after_allocations0" model="account.report.line">
+                <field name="name">Net Profit Left After Allocations and Withdrawals</field>
+                <field name="hierarchy_level">0</field>
+                <field name="code">NEPAL</field>
+                <field name="expression_ids">
+                    <record id="account_financial_report_net_profit_after_allocations0_balance" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">NEP.balance - ALLOC.balance</field>
                     </record>
                 </field>
             </record>

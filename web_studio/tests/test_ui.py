@@ -1109,16 +1109,27 @@ class TestStudioUIUnit(odoo.tests.HttpCase):
                 </kanban>
             '''
         })
+        self.testViewCalendar = self.env["ir.ui.view"].create({
+            "name": "simple partner",
+            "model": "res.partner",
+            "type": "calendar",
+            "arch": '''
+                <calendar date_start="create_date">
+                    <field name="function" />
+                    <field name="name" required="True" />
+                </calendar>
+            '''
+        })
         self.testAction.write({
             "view_ids": [
                 Command.clear(),
                 Command.create({"view_id": self.testViewForm.id, "view_mode": "form"}),
                 Command.create({"view_id": self.testViewList.id, "view_mode": "list"}),
                 Command.create({"view_id": self.testViewKanban.id, "view_mode": "kanban"}),
+                Command.create({"view_id": self.testViewCalendar.id, "view_mode": "calendar"}),
             ]
         })
         self.start_tour("/odoo?debug=tests", 'web_studio_field_group_studio_no_fetch', login="admin", timeout=200)
-
 
     def test_monetary_create(self):
         self.create_empty_app()

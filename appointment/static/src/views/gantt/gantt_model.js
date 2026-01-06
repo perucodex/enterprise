@@ -1,5 +1,6 @@
 import { Domain } from "@web/core/domain";
 import { GanttModel } from "@web_gantt/gantt_model";
+import { localStartOf } from "@web_gantt/gantt_helpers";
 
 export class AppointmentBookingGanttModel extends GanttModel {
     /**
@@ -110,5 +111,11 @@ export class AppointmentBookingGanttModel extends GanttModel {
             return Domain.and([domainList, ganttDomain]).toList();
         }
         return domainList;
+    }
+
+    getRangeFromDate(rangeId, date) {
+        const startDate = localStartOf(date, rangeId);
+        const stopDate = startDate.plus({ [rangeId]: 1 }).minus({ day: 1 });
+        return { focusDate: date, startDate, stopDate, rangeId };
     }
 }

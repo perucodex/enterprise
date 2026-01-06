@@ -52,8 +52,8 @@ export class TestIotBox extends Component {
         // Check longpolling (no onMessage as we only check if the endpoint is reachable)
         try {
             await this.iotHttpService.longpolling.sendMessage(ip, {
-                device_identifier: "test_protocol",
-                data: ""
+                device_identifier: identifier,
+                data: {}
             }, requestId, true);
         } catch {
             failureCallback("Longpolling");

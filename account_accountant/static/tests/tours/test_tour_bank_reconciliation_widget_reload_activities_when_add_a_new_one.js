@@ -19,13 +19,9 @@ registry
                 trigger: "div.o_bank_reconciliation_kanban_renderer",
             },
             {
-                content: "Unfold statement line",
+                content: "Select statement line",
                 trigger: "div[name='bank_statement_line']",
                 run: "click",
-            },
-            {
-                content: "line is unfolded",
-                trigger: "div.o_button_line",
             },
             {
                 content: "Open chatter",

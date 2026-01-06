@@ -77,7 +77,10 @@ class AccountAnalyticLine(models.Model):
             return list(set(unavailable_days))
 
         def get_company_unavailable_dates():
-            return get_unavailable_dates(self.env.company.resource_calendar_id._work_intervals_batch(from_datetime, to_datetime)[False])
+            company_calendar = self.env.company.resource_calendar_id
+            if company_calendar.flexible_hours:
+                return []
+            return get_unavailable_dates(company_calendar._work_intervals_batch(from_datetime, to_datetime)[False])
 
         if groupby == 'employee_id':
             employees = self.env['hr.employee'].browse(set(res_ids))
@@ -87,7 +90,7 @@ class AccountAnalyticLine(models.Model):
                 unavailability_intervals_per_employee_id[False] = get_company_unavailable_dates()
                 return unavailability_intervals_per_employee_id
             if self.env.company.resource_calendar_id.id in calendar_work_intervals:
-                company_unavailable_days = get_unavailable_dates(calendar_work_intervals[self.env.company.resource_calendar_id.id])
+                company_unavailable_days = [] if self.env.company.resource_calendar_id.flexible_hours else get_unavailable_dates(calendar_work_intervals[self.env.company.resource_calendar_id.id])
             else:
                 company_unavailable_days = get_company_unavailable_dates()
             unavailability_intervals_per_employee_id = {

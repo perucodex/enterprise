@@ -7,6 +7,7 @@ import {
     unload,
     queryFirst,
     waitForNone,
+    waitFor,
 } from "@odoo/hoot-dom";
 import { animationFrame, runAllTimers } from "@odoo/hoot-mock";
 import { Component, onMounted, xml } from "@odoo/owl";
@@ -4326,4 +4327,54 @@ test("Change color on many2many tags", async () => {
     await contains(".dropdown-item:contains('Partner Color')").click();
     expect("input[name='color_field']").toHaveValue("Partner Color");
     expect.verifySteps(["fields_get"]);
+});
+
+test("New button is active after adding it", async () => {
+    onRpc("/web_studio/edit_view", (request) => {
+        expect.step("edit_view");
+        const newArch = `<form>
+                <header>
+                    <button name="1" type="action" invisible="1" string="First"/>
+                    <button name="1" type="action" invisible="1" string="Second"/>
+                    <t groups="some.group">
+                        <button name="1" type="action" string="Third"/>
+                    </t>
+                    <button string="New button from studio" type="action"/>
+                </header>
+                <sheet>
+                    <field name='display_name'/>
+                </sheet>
+            </form>
+        `;
+        return editView(request, "form", newArch);
+    });
+    await mountViewEditor({
+        type: "form",
+        resModel: "coucou",
+        arch: `<form>
+                <header>
+                    <button name="1" type="action" invisible="1" string="First"/>
+                    <button name="1" type="action" invisible="1" string="Second"/>
+                    <t groups="some.group">
+                        <button name="1" type="action" string="Third"/>
+                    </t>
+                </header>
+                <sheet>
+                    <field name='display_name'/>
+                </sheet>
+            </form>
+        `,
+    });
+
+    expect(".o_web_studio_view_renderer .o_statusbar_buttons button").toHaveCount(2);
+    await contains(
+        ".o_web_studio_view_renderer .o_statusbar_buttons button.o-web-studio-editor--add-button-action"
+    ).click();
+    await waitFor(
+        ".o_web_studio_sidebar:has(.o_web_studio_field_button) input[name=string]:value(New button from studio)"
+    );
+    expect.verifySteps(["edit_view"]);
+    expect(".o_web_studio_view_renderer button:contains(New button from studio)").toHaveClass(
+        "o-web-studio-editor--element-clicked"
+    );
 });

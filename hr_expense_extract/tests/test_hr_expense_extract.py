@@ -1,13 +1,16 @@
-from freezegun import freeze_time
 import datetime
+from unittest.mock import patch
+
+from freezegun import freeze_time
 
 from odoo import fields
-from odoo.addons.hr_expense.tests.common import TestExpenseCommon
-from odoo.addons.iap_extract.tests.test_extract_mixin import TestExtractMixin
-from odoo.tests import tagged, Form
+from odoo.tests import Form, tagged
 from odoo.tools import file_open, float_compare
 
-from ..models.hr_expense import OCR_VERSION
+from odoo.addons.hr_expense.tests.common import TestExpenseCommon
+from odoo.addons.hr_expense_extract.models.hr_expense import OCR_VERSION
+from odoo.addons.hr_expense_predict_product.models.hr_expense import HrExpense
+from odoo.addons.iap_extract.tests.test_extract_mixin import TestExtractMixin
 
 
 @tagged('post_install', '-at_install')
@@ -17,8 +20,6 @@ class TestExpenseExtractProcess(TestExpenseCommon, TestExtractMixin):
     def setUpClass(cls):
         super().setUpClass()
 
-        # Set the standard price to 0 to take the price from extract
-        cls.product_a.write({'standard_price': 0})
         cls.expense = cls.env['hr.expense'].create({
             'employee_id': cls.expense_employee.id,
             'product_id': cls.product_c.id,
@@ -224,7 +225,6 @@ class TestExpenseExtractProcess(TestExpenseCommon, TestExtractMixin):
         Test that the price unit does not change when the quantity changes after uploading an attachment
         when there is no digitisation
         """
-        self.product_a.write({'standard_price': 800})
         expense = self.env['hr.expense'].create({
             'name': 'expense',
             'employee_id': self.expense_employee.id,
@@ -308,6 +308,45 @@ class TestExpenseExtractProcess(TestExpenseCommon, TestExtractMixin):
         self.assertAlmostEqual(self.expense.total_amount, 99.99, 2)
         self.assertEqual(self.expense.currency_id.name, 'USD')
         self.assertEqual(self.expense.date, fields.Date.to_date('2022-02-22'))
+
+    def test_expense_extract_product_with_cost_only_company_currency(self):
+        """
+        Test that when an expense having a product whith a standard_price set up, we never change the currency
+        from the default company currency
+        """
+        eur_currency = self.env.ref('base.EUR')
+        eur_currency.active = True
+        company_currency = self.env.company.currency_id
+
+        self.env['res.currency.rate'].sudo().create({
+            'name': '2022-01-01',
+            'rate': 10,
+            'currency_id': eur_currency.id,
+            'company_id': self.env.company.id,
+        })
+
+        attachment = self.env['ir.attachment'].with_user(self.expense_user_employee).create({
+            'name': 'test_attachment.png',
+            'res_model': 'hr.expense',
+            'raw': b"R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs=",
+        })
+        extract_response = self.get_result_success_response()
+        extract_response['document_token'] = 'some_token'
+        extract_response['results'][0]['total']['selected_value']['content'] = 100
+        extract_response['results'][0]['currency']['selected_value']['content'] = '€'
+        with (
+            self._mock_iap_extract(extract_response=extract_response),
+            patch.object(HrExpense, '_predict_product', side_effect=lambda *args, **kwargs: self.product_a.id)
+        ):
+            self.env['hr.expense'].with_user(self.expense_user_employee).create_expense_from_attachments(attachment.ids)
+            expense = self.env['hr.expense'].search([('attachment_ids', '=', attachment.id)]).ensure_one()
+            expense._fill_document_with_results(ocr_results=extract_response['results'][0])
+
+        self.assertNotEqual(company_currency.id, eur_currency.id)
+        self.assertRecordValues(
+            expense,
+            [{'total_amount_currency': 800.0, 'total_amount': 800.0, 'currency_id': company_currency.id, 'product_id': self.product_a.id}],
+        )
 
     @freeze_time('2024-01-01')
     def test_extract_no_date(self):

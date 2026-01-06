@@ -306,19 +306,19 @@
 
             <tr t-att-class="o_line_level + o_bold + o_overflow" name="pdf_export_main_table_body_lines_tr">
                 <td t-att-colspan="line.get('colspan', '1')" class="o_line_name_level">
-                    <t t-out="line.get('name')"/>
-                    <t t-if="line.get('account_status')">
-                        <t t-set="status" t-value="line['account_status'].get('status')"/>
-                        <span t-attf-class="o_status_badge o_status_badge_#{status}">
-                            <t t-out="status_selection.get(status)"/>
-                        </span>
-                    </t>
+                    <span t-out="line.get('name')" class="o_line_name"/>
                     <t t-if="line.get('annotations') and not show_last_annotations">
                         <t t-foreach="annotations" t-as="annotation">
                             <t t-if="annotation.get('number') and annotation['number'] in (line.get('annotations') or [])">
                                 <sup t-out="annotation['number']"/>
                             </t>
                         </t>
+                    </t>
+                    <t t-if="line.get('account_status')">
+                        <t t-set="status" t-value="line['account_status'].get('status')"/>
+                        <span t-attf-class="o_status_badge o_status_badge_#{status}">
+                            <t t-out="status_selection.get(status)"/>
+                        </span>
                     </t>
                 </td>
 

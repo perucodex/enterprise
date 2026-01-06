@@ -8,9 +8,9 @@ from .sendcloud_locations_request import SendcloudLocationsRequest
 # As Sendcloud API's schemas may evolve, hardcoded values are defined as static const to ease futur updates.
 # _T stands for sendcloud technical names while _H define 'humanized' name
 LAST_MILE_T = 'last_mile'
-SERVICE_POINT_T = 'service_point'
+LAST_MILE_SERVICES_T = ['service_point', 'locker', 'locker_or_service_point']
 LAST_MILE_H = 'Last mile'
-SERVICE_POINT_H = 'Service point'
+LAST_MILE_SERVICES_H = ['Service point', 'Locker', 'Locker or service point']
 
 
 class DeliveryCarrier(models.Model):
@@ -37,7 +37,7 @@ class DeliveryCarrier(models.Model):
                 continue
             last_mile_custo = product_func.get('customizable', {}).get(LAST_MILE_T)
             # N.B. if last_mile is set, then it has at least a length of 2 as it appears in 'customizable'
-            if last_mile_custo and SERVICE_POINT_T in last_mile_custo:
+            if last_mile_custo and any(service in last_mile_custo for service in LAST_MILE_SERVICES_T):
                 # service point is available but not mandatory, let the user choose
                 sc_carrier.sendcloud_can_customize_use_locations = True
 
@@ -48,8 +48,7 @@ class DeliveryCarrier(models.Model):
             if not product_func:
                 sc_carrier.sendcloud_use_locations = False
                 continue
-            if not sc_carrier.sendcloud_can_customize_use_locations and SERVICE_POINT_H in product_func.get('detail_func', {}).get(LAST_MILE_H, {}):
-                # the only available option is service point
+            if not sc_carrier.sendcloud_can_customize_use_locations and any(service in product_func.get('detail_func', {}).get(LAST_MILE_H, {}) for service in LAST_MILE_SERVICES_H):
                 sc_carrier.sendcloud_use_locations = True
             else:
                 sc_carrier.sendcloud_use_locations = False

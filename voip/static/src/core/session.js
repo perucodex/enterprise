@@ -140,7 +140,7 @@ export class Session {
         if (this.voip.mode === "demo") {
             return _t("Demo call");
         }
-        return _t("In call");
+        return _t("Calling…");
     }
 
     /**

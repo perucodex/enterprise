@@ -18,8 +18,8 @@ class MrpWorkorder(models.Model):
     employee_analytic_account_line_ids = fields.Many2many('account.analytic.line', copy=False)
 
     def _compute_duration(self):
-        self._create_or_update_analytic_entry()
         super()._compute_duration()
+        self._create_or_update_analytic_entry()
 
     def action_cancel(self):
         self.employee_analytic_account_line_ids.unlink()

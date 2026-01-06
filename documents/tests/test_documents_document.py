@@ -574,6 +574,50 @@ class TestCaseDocuments(TransactionCaseDocuments):
         self.assertEqual(copied_document.attachment_id.res_id, copied_document.id)
         self.assertEqual(copied_document.attachment_id.res_model, "documents.document")
 
+    def test_copy_document_company_to_company(self):
+        """ Manager can copy both the company-root folder and doc to company-root. """
+        copied_folder = self.company_root_folder.with_user(self.document_manager).copy(default={'user_folder_id': 'COMPANY'})
+        self.assertTrue(copied_folder)
+        self.assertFalse(copied_folder.owner_id, "Copied folder should not have owner_id set")
+
+        copied_doc = self.company_root_document.with_user(self.document_manager).copy(default={'user_folder_id': 'COMPANY'})
+        self.assertTrue(copied_doc)
+        self.assertFalse(copied_doc.owner_id, "Copied document should not have owner_id set")
+
+    def test_copy_document_company_to_my_drive(self):
+        """
+        Manager can copy from company-root folder/doc to My drive.
+        Internal user can copy from company-root folder/doc to MY sets owner to that user.
+        """
+        copied_folder = self.company_root_folder.with_user(self.document_manager).copy(default={'user_folder_id': 'MY'})
+        self.assertTrue(copied_folder.owner_id, "Copied folder should have owner_id set")
+        self.assertEqual(copied_folder.owner_id.id, self.document_manager.id, "Copied folder owner should be the manager")
+
+        copied_doc = self.company_root_document.with_user(self.document_manager).copy(default={'user_folder_id': 'MY'})
+        self.assertTrue(copied_doc.owner_id, "Copied document should have owner_id set")
+        self.assertEqual(copied_doc.owner_id.id, self.document_manager.id, "Copied document owner should be the manager")
+
+        copied_folder = self.company_root_folder.with_user(self.doc_user).copy(default={'user_folder_id': 'MY'})
+        self.assertTrue(copied_folder.owner_id, "Copied folder should have owner_id set")
+        self.assertEqual(copied_folder.owner_id.id, self.doc_user.id, "Copied folder owner should be the internal user")
+
+        copied_doc = self.company_root_document.with_user(self.doc_user).copy(default={'user_folder_id': 'MY'})
+        self.assertTrue(copied_doc.owner_id, "Copied document should have owner_id set")
+        self.assertEqual(copied_doc.owner_id.id, self.doc_user.id, "Copied document owner should be the internal user")
+
+    def test_copy_document_to_itself(self):
+        """ Copying a folder into itself or one of its own descendants raises an UserError. """
+        folder = self.company_root_folder
+        sub_folder = self.company_sub_folder
+        with self.assertRaisesRegex(UserError, "cannot copy a folder into itself"):
+            folder.with_user(self.document_manager).copy(default={'user_folder_id': str(folder.id)})
+
+        with self.assertRaisesRegex(UserError, "cannot copy a folder into itself"):
+            sub_folder.with_user(self.document_manager).copy(default={'user_folder_id': str(sub_folder.id)})
+
+        with self.assertRaisesRegex(UserError, "cannot copy a folder into itself"):
+            folder.with_user(self.document_manager).copy(default={'user_folder_id': str(sub_folder.id)})
+
     def test_copy_shortcut(self):
         """Check that copying shortcuts works as intended."""
         manager_shortcut = self.document_txt.with_user(self.document_manager).action_create_shortcut()
@@ -810,3 +854,14 @@ class TestCaseDocuments(TransactionCaseDocuments):
         self.document_txt.access_internal = 'edit'
         self.document_txt.with_user(self.doc_user).toggle_lock()
         self.assertFalse(self.document_txt.lock_uid, 'editor should have unlocked')
+
+    def test_res_name_recompute_with_deleted_record(self):
+        partner = self.env['res.partner'].create({'name': 'Test Partner'})
+        doc = self.env['documents.document'].create({
+            'name': 'Test',
+            'res_id': partner.id,
+            'res_model': 'res.partner',
+        })
+        self.assertEqual(doc.res_name, "Test Partner")
+        partner.unlink()
+        self.assertFalse(doc.res_name)

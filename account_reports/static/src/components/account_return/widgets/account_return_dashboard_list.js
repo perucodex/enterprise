@@ -51,6 +51,7 @@ export class AccountReturnDashboardList extends Component {
             id: accountReturn.id,
             name: accountReturn.name,
             type_id: accountReturn.type_id,
+            matchedReturnsCount: accountReturn.matched_returns_count,
             deadline: formatDate(deadlineDate),
             deadlineDisplay,
             deadlineClass,
@@ -75,24 +76,31 @@ export class AccountReturnDashboardList extends Component {
         const returnTypeId = accountReturn?.type_id || '';
         const [viewId, searchViewId] = await this.orm.call("account.return", "get_kanban_view_and_search_view_id", [[accountReturn.id]]);
 
-        // Open the filtered Tax Return view
-        this.action.doAction({
-            name: _t("Tax Return"),
-            type: 'ir.actions.act_window',
-            res_model: 'account.return',
-            views: [
-                [viewId || false, 'kanban'],
-                [false, 'calendar'],
-            ],
-            search_view_id: [searchViewId || false],
-            context: {
-                'search_default_groupby_deadline': 1,
-                'search_default_todo_returns': 1,
-                // Apply name filter using return type
-                'search_default_type_id': returnTypeId,
-            },
-            domain: [['return_type_category', '=', 'account_return']],
-        });
+        let action;
+        if (accountReturn.matchedReturnsCount === 1) {
+            action = await this.orm.call("account.return", "action_open_account_return", [[accountReturn.id]]);
+        }
+        else {
+            // Open the filtered Tax Return view
+            action = {
+                name: _t("Tax Return"),
+                type: 'ir.actions.act_window',
+                res_model: 'account.return',
+                views: [
+                    [viewId || false, 'kanban'],
+                    [false, 'calendar'],
+                ],
+                search_view_id: [searchViewId || false],
+                context: {
+                    'search_default_groupby_deadline': 1,
+                    'search_default_todo_returns': 1,
+                    // Apply name filter using return type
+                    'search_default_type_id': returnTypeId,
+                },
+                domain: [['return_type_category', '=', 'account_return']],
+            };
+        }
+        this.action.doAction(action);
     }
 }
 

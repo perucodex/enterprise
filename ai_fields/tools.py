@@ -301,7 +301,13 @@ def parse_ai_prompt_values(env, prompt, comodel, replace_prompt=True):
             allowed_records_by_id = env[comodel].browse(inserted_record_ids).exists().grouped("id")
             for inserted_record_element in inserted_record_elements:
                 if allowed_record := allowed_records_by_id.get(int(inserted_record_element.attrib.get('data-ai-record-id'))):
-                    inserted_record_element.text = allowed_record._ai_truncate(allowed_record.display_name)
+                    record_name_field = (
+                        allowed_record._ai_rec_name
+                        if hasattr(allowed_record, '_ai_rec_name')
+                        else 'display_name'
+                    )
+                    inserted_record_element.text = allowed_record._ai_truncate(
+                        allowed_record[record_name_field])
                 else:
                     inserted_record_element.drop_tree()
             formatted_allowed_records = env[comodel].browse(allowed_records_by_id.keys())._ai_format_records()

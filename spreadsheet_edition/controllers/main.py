@@ -23,6 +23,7 @@ class SpreadsheetController(Controller):
         body = spreadsheet._get_serialized_spreadsheet_data_body(access_token)
         headers = [
             ('Content-Length', len(body)),
+            ('Cache-Control', 'no-store'),
             ('Content-Type', 'application/json; charset=utf-8'),
         ]
         return request.make_response(body, headers)

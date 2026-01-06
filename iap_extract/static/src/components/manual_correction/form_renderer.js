@@ -299,6 +299,9 @@ export const ExtractMixinFormRenderer = (T) => class extends T {
     }
 
     getBoxType(fullFieldName) {
+        if (!fullFieldName) {
+            return false;
+        }
         let modelFieldType;
         if (fullFieldName.includes('.')) {
             const [parentField, fieldName] = fullFieldName.split('.');

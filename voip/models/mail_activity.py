@@ -112,6 +112,7 @@ class MailActivity(models.Model):
                     "date_deadline",
                     "mail_template_ids",
                     "activity_category",
+                    Store.One("phone_country_id", activity.phone_country_id._voip_get_store_fields()),
                     Store.One("user_id", Store.One("partner_id")),
                     Store.Attr("partner", Store.One(partners[:1], partners._voip_get_store_fields()))
                 ])
@@ -137,4 +138,4 @@ class MailActivity(models.Model):
         return phone_numbers_by_activity
 
     def _to_store_defaults(self, target):
-        return [*super()._to_store_defaults(target), "country_code_from_phone", "phone"]
+        return [*super()._to_store_defaults(target), "phone"]

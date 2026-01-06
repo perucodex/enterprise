@@ -30,6 +30,7 @@ Accounting reports for Poland
         'data/profit_loss_micro.xml',
         'data/balance_sheet_small.xml',
         'data/balance_sheet_micro.xml',
+        'data/account_report_ec_sales_list_report.xml',
     ],
     'auto_install': True,
     'installable': True,

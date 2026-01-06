@@ -167,3 +167,32 @@ class TestMrpWorkorderPlm(TestPlmCommon):
             add_step_form = Form(self.env[action['res_model']].with_context(action['context']), view=action['views'][0][0])
             add_step = add_step_form.save()
             add_step.with_user(self.env.user).add_check_in_chain()
+
+    def test_adding_suggestion_after_delete_suggestion(self):
+        """ Adding a delete suggestion should not prevent the user
+            from adding suggestions after the one they suggested deleting. """
+        mo = self.env['mrp.production'].create({
+            'product_id': self.table.id,
+            'bom_id': self.bom_table.id,
+            'product_qty': 1,
+        })
+        mo.action_confirm()
+        wo = mo.workorder_ids[0]
+
+        # Add two suggestion steps one after another
+        for i in range(2):
+            action = wo.action_add_step()
+            add_step_form = Form(self.env[action['res_model']].with_context(action['context']), view=action['views'][0][0])
+            last_step = add_step_form.save()
+            last_step.add_check_in_chain()
+            wo.write({'current_quality_check_id': last_step.id})  # JS popup "Indicate after which step you would like to add this one"
+
+        action = wo.action_propose_change(change_type="remove_step", check_id=last_step.id)
+        delete_suggestion_form = Form(self.env[action['res_model']].with_context(action['context']), view=action['views'][0][0])
+        delete_suggestion_form.comment = "I declare this step useless"
+        delete_suggestion_form.save().process()
+
+        wo.write({'current_quality_check_id': last_step.id})  # Select to add a new suggestion after the one we just suggested deleting
+        action = wo.action_add_step()
+        add_step_form = Form(self.env[action['res_model']].with_context(action['context']), view=action['views'][0][0])
+        add_step_form.save().add_check_in_chain()

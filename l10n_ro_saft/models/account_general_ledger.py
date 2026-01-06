@@ -90,7 +90,11 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
 
     @api.model
     def _l10n_ro_saft_check_report_values(self, values, options):
+        # Overwrites the values['errors'], but we still want to keep 'undistributed_earnings' warning if it exists
         values['errors'] = {
+            'undistributed_earnings': values['errors']['undistributed_earnings']
+        } if 'undistributed_earnings' in values['errors'] else {}
+        values['errors'] |= {
             **self._l10n_ro_saft_check_header_values(options, values),
             **self._l10n_ro_saft_check_partner_values(values),
             **self._l10n_ro_saft_check_tax_values(options, values),

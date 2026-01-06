@@ -38,7 +38,7 @@ class L10nBeHrPayrollExportAcerta(models.Model):
         work_entry = we_dotdict.work_entries[0]
         duration = we_dotdict.duration
         return 'KLX1' + self.company_id.acerta_code + contract.acerta_code.zfill(20) \
-            + work_entry.date_start.strftime('%d/%m/%Y') + '  '  \
+            + work_entry.date.strftime('%d/%m/%Y') + '  '  \
             + work_entry.work_entry_type_id.acerta_code.ljust(6) \
             + str(int(duration // 3600)).zfill(2) \
             + str(int(ceil(duration % 3600 // 100))).zfill(2) + '\n'

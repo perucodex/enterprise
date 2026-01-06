@@ -13,3 +13,4 @@ from . import calendar_event
 from . import ir_http
 from . import res_partner
 from . import templates
+from . import ir_ui_view

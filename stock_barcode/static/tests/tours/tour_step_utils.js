@@ -49,6 +49,30 @@ export const stepUtils = {
             },
         ];
     },
+    /**
+     * Check notification's message. Assume the tested message is the first one (more recent)
+     * and also close the notification by default (see `close` parameter.)
+     * @param {string} message The exact notification's message
+     * @param {boolean} [close=true]
+     * @returns {Array}
+     */
+    checkNotificationMessage(message, close = true) {
+        const baseSelector = ".o_notification_manager .o_notification:first-child";
+        const steps = [
+            {
+                content: "Check notification's message",
+                trigger: `${baseSelector} .o_notification_content:text('${message}')`,
+            },
+        ];
+        if (close) {
+            steps.push({
+                content: "Close the notification",
+                trigger: `${baseSelector} button.o_notification_close`,
+                run: "click",
+            });
+        }
+        return steps;
+    },
     // RFID utils.
     countUniqRFID(count) {
         return [{ trigger: `.o_barcode_count_rfid .o_rfid_unique_tags:contains(${count})` }];

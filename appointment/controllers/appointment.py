@@ -365,6 +365,7 @@ class AppointmentController(http.Controller):
                 )
         else:
             max_capacity_possible = 1
+        allowed_max_capacity = int(request.env['ir.config_parameter'].sudo().get_param('appointment.resource_max_capacity_allowed', default=12))
 
         return {
             'asked_capacity': int(kwargs['asked_capacity']) if kwargs.get('asked_capacity') else False,
@@ -374,7 +375,7 @@ class AppointmentController(http.Controller):
             'filter_resource_ids': kwargs.get('filter_resource_ids'),
             'hide_select_dropdown': len(users_possible if appointment_type.schedule_based_on == 'users' else resources_possible) <= 1,
             'invite_token': kwargs.get('invite_token'),
-            'max_capacity': min(12, max_capacity_possible),
+            'max_capacity': min(allowed_max_capacity, max_capacity_possible),
             'resource_default': resource_default,
             'resource_selected': resource_selected,
             'resources_possible': resources_possible,

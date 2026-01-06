@@ -7,7 +7,7 @@ from io import BytesIO, TextIOWrapper, StringIO
 from freezegun import freeze_time
 
 from odoo import Command, fields
-from odoo.tests import tagged
+from odoo.tests import tagged, Form
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
@@ -765,7 +765,8 @@ class TestDatevCSV(AccountTestInvoicingCommon):
         f = StringIO(self.env[report.custom_handler_model_name]._l10n_de_datev_get_csv(options, payment_move))
         reader = csv.reader(f, delimiter=';', quotechar='"', quoting=2)
         data = [[x[0], x[1], x[2], x[6], x[7], x[8], x[9], x[10], x[13]] for x in reader][2:]
-        self.assertIn(['5,67', 'H', 'EUR', '26700000', '12010000', self.tax_19.l10n_de_datev_code, '212', payment_move.name, "Early Payment Discount"], data)
+        self.assertIn(['3,83', 'H', 'EUR', '26700000', '12010000', self.tax_19.l10n_de_datev_code, '212', payment_move.name, "Early Payment Discount"], data)
+        self.assertIn(['1,84', 'H', 'EUR', '26700000', '12010000', self.tax_19.l10n_de_datev_code, '212', payment_move.name, "Early Payment Discount"], data)
 
     @freeze_time('2021-01-02 18:00')
     def test_datev_out_invoice_with_attch(self):
@@ -1012,3 +1013,73 @@ class TestDatevCSV(AccountTestInvoicingCommon):
             ]
         })
         self.assertEqual(move.l10n_de_datev_main_account_id, self.company_data['default_account_receivable'])
+
+    @freeze_time('2021-01-02 18:00')
+    def test_datev_company_name(self):
+        """
+        Test that DATEV report is exported succesfully even with complex company name
+        """
+        self.company_data['company'].name = 'Test Company GmbH & Co. AB'
+        report = self.env.ref('account_reports.general_ledger_report')
+        options = report.get_options({})
+        vals = self.env[report.custom_handler_model_name].l10n_de_datev_export_to_zip(options)
+        self.assertEqual(vals['file_name'], 'general_ledger_jan_2021_test_company_gmbh_&_co._ab_data.ZIP')
+
+    def test_datev_in_invoice_total_tax_edited(self):
+        """ Test that the correct amount is computed when the total of a tax group is edited manually """
+        report = self.env.ref('account_reports.general_ledger_report')
+        options = report.get_options(previous_options={'date': {
+            'date_from': '2020-12-01',
+            'date_to': '2020-12-31'
+        }})
+        move = self.env['account.move'].create([{
+            'move_type': 'in_invoice',
+            'partner_id': self.env['res.partner'].create({'name': 'Partner XYZ'}).id,
+            'invoice_date': '2020-12-01',
+            'date': '2020-12-01',
+            'ref': 'Brocken123',
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'Line 19% #1',
+                    'price_unit': 100,
+                    'account_id': self.account_3400.id,
+                    'tax_ids': [Command.set(self.tax_19.ids)],
+                }),
+                Command.create({
+                    'name': 'Line 19% #2',
+                    'price_unit': 200,
+                    'account_id': self.account_3400.id,
+                    'tax_ids': [Command.set(self.tax_19.ids)],
+                }),
+                Command.create({
+                    'name': 'Line 7%',
+                    'price_unit': 100,
+                    'account_id': self.account_3400.id,
+                    'tax_ids': [Command.set(self.tax_7.ids)],
+                }),
+            ]
+        }])
+        with Form(move) as move_form:
+            tax_totals = move.tax_totals
+            tax_groups = tax_totals['subtotals'][0]['tax_groups']
+            index = next(
+                (i for i, data in enumerate(tax_groups)
+                if data['id'] == self.tax_19.tax_group_id.id)
+            )
+            self.assertEqual(tax_totals['subtotals'][0]['tax_groups'][index]['tax_amount_currency'], 57.0)
+            # remove 0.05 from Tax 19% group
+            tax_totals['subtotals'][0]['tax_groups'][index]['tax_amount_currency'] = 56.95
+            move_form.tax_totals = tax_totals
+        move.action_post()
+        move.line_ids.flush_recordset()
+
+        f = StringIO(self.env[report.custom_handler_model_name]._l10n_de_datev_get_csv(options, move))
+        reader = csv.reader(f, delimiter=';', quotechar='"', quoting=2)
+        data = [[x[0], x[8]] for x in reader][2:]
+        self.assertEqual([
+            # 0.03 should be dispatched to the first line using Tax 19%
+            ['118,97', self.tax_19.l10n_de_datev_code],
+            # 0.02 should be dispatched to the second line using Tax 19%
+            ['237,98', self.tax_19.l10n_de_datev_code],
+            ['107,00', self.tax_7.l10n_de_datev_code],
+        ], data)

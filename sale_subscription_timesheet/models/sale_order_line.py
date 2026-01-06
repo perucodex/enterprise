@@ -17,8 +17,11 @@ class SaleOrderLine(models.Model):
 
     @api.depends('timesheet_ids', 'next_invoice_date')
     def _compute_qty_delivered(self):
+        super()._compute_qty_delivered()
+
+    def _prepare_qty_delivered(self):
         timesheet_lines = self._get_timesheet_subscription_lines()
-        res = super(SaleOrderLine, self - timesheet_lines)._compute_qty_delivered()
+        delivered_qties = super(SaleOrderLine, self - timesheet_lines)._prepare_qty_delivered()
 
         for so, lines in groupby(timesheet_lines, lambda sol: (sol.order_id)):
             lines_by_timesheet = sum(lines, self.env['sale.order.line'])
@@ -39,5 +42,5 @@ class SaleOrderLine(models.Model):
             ])
             mapping = lines_by_timesheet.sudo()._get_delivered_quantity_by_analytic(domain)
             for line in lines:
-                line.qty_delivered = mapping[line.id]
-        return res
+                delivered_qties[line] = mapping[line.id]
+        return delivered_qties

@@ -1,7 +1,7 @@
 import { CONSOLE_COLOR, PosStore } from "@point_of_sale/app/services/pos_store";
 import { logPosMessage } from "@point_of_sale/app/utils/pretty_console_log";
 import { patch } from "@web/core/utils/patch";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { AlertDialog, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { ask } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { uuidv4 } from "@point_of_sale/utils";
@@ -83,43 +83,16 @@ patch(PosStore.prototype, {
             });
     },
     async createTransaction(order) {
-        if (!this.getApiToken()) {
-            await this._authenticate(); //  If there's an error, a promise is created with a rejected value
-        }
-
         const transactionUuid = uuidv4();
         const data = {
             state: "ACTIVE",
             client_id: this.getClientId(),
         };
-
-        return fetch(
-            `${this.getApiUrl()}/tss/${this.getTssId()}/tx/${transactionUuid}${
-                this.isUsingApiV2() ? "?tx_revision=1" : ""
-            }`,
-            {
-                method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${this.getApiToken()}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-            }
-        )
-            .then((response) => response.json())
-            .then((data) => {
-                order.l10n_de_fiskaly_transaction_uuid = transactionUuid;
-                order.transactionStarted();
-            })
-            .catch(async (error) => {
-                if (error.status === 401) {
-                    // Need to update the token
-                    await this._authenticate();
-                    return this.createTransaction(order);
-                }
-                // Return a Promise with rejected value for errors that are not handled here
-                return Promise.reject(error);
-            });
+        const payload = `${transactionUuid}${this.isUsingApiV2() ? "?tx_revision=1" : ""}`;
+        await this.transactionCall(payload, data, order);
+        // Success
+        order.l10n_de_fiskaly_transaction_uuid = transactionUuid;
+        order.transactionStarted();
     },
     _createAmountPerVatRateArray(order) {
         const vatRateMap = {
@@ -162,10 +135,6 @@ patch(PosStore.prototype, {
         return result;
     },
     async finishShortTransaction(order) {
-        if (!this.getApiToken()) {
-            await this._authenticate();
-        }
-
         const amountPerVatRateArray = this._createAmountPerVatRateArray(order);
         const amountPerPaymentTypeArray = order._createAmountPerPaymentTypeArray();
         const data = {
@@ -181,39 +150,16 @@ patch(PosStore.prototype, {
                 },
             },
         };
-        return fetch(
-            `${this.getApiUrl()}/tss/${this.getTssId()}/tx/${
-                order.l10n_de_fiskaly_transaction_uuid
-            }?${this.isUsingApiV2() ? "tx_revision=2" : "last_revision=1"}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${this.getApiToken()}`,
-                    "Content-Type": "application/json",
-                },
-                method: "PUT",
-                body: JSON.stringify(data),
-            }
-        )
-            .then((response) => response.json())
-            .then((data) => {
-                order._updateTssInfo(data);
-            })
-
-            .catch(async (error) => {
-                if (error.status === 401) {
-                    // Need to update the token
-                    await this._authenticate();
-                    return this.finishShortTransaction(order);
-                }
-                // Return a Promise with rejected value for errors that are not handled here
-                return Promise.reject(error);
-            });
+        const payload = `${order.l10n_de_fiskaly_transaction_uuid}?${
+            this.isUsingApiV2() ? "tx_revision=2" : "last_revision=1"
+        }`;
+        const result = await this.transactionCall(payload, data, order);
+        // Success
+        if (!order.uiState.fiskalyServerError) {
+            order._updateTssInfo(result);
+        }
     },
     async cancelTransaction(order) {
-        if (!this.getApiToken()) {
-            await this._authenticate();
-        }
-
         const data = {
             state: "CANCELLED",
             client_id: this.getClientId(),
@@ -226,28 +172,61 @@ patch(PosStore.prototype, {
                 },
             },
         };
-
-        return fetch(
-            `${this.getApiUrl()}/tss/${this.getTssId()}/tx/${
-                order.l10n_de_fiskaly_transaction_uuid
-            }?${this.isUsingApiV2() ? "tx_revision=2" : "last_revision=1"}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${this.getApiToken()}`,
-                    "Content-Type": "application/json",
-                },
-                method: "PUT",
-                body: JSON.stringify(data),
-            }
-        ).catch(async (error) => {
-            if (error.status === 401) {
-                // Need to update the token
+        const payload = `${order.l10n_de_fiskaly_transaction_uuid}?${
+            this.isUsingApiV2() ? "tx_revision=2" : "last_revision=1"
+        }`;
+        return await this.transactionCall(payload, data, order);
+    },
+    async transactionCall(payload, data, order, retryCount = 0) {
+        const token = this.getApiToken();
+        try {
+            if (!token) {
                 await this._authenticate();
-                return this.cancelTransaction(order);
             }
-            // Return a Promise with rejected value for errors that are not handled here
+            const response = await fetch(
+                `${this.getApiUrl()}/tss/${this.getTssId()}/tx/${payload}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    method: "PUT",
+                    body: JSON.stringify(data),
+                }
+            );
+            const result = await response.json();
+            if (!response.ok) {
+                const errorCode = await this.handleRequestError(result, order, retryCount);
+                if (errorCode === "retry") {
+                    return await this.transactionCall(payload, data, order, retryCount + 1);
+                }
+            }
+            return result;
+        } catch (error) {
+            // Need to reject to keep track of rejected orders in syncAllOrders
+            // don't show popup for single order failures, it should be handled later in syncAllOrders
+            logPosMessage("Store", "transactionCall", "Error", CONSOLE_COLOR, [error]);
             return Promise.reject(error);
-        });
+        }
+    },
+    async handleRequestError(result, order, retryCount) {
+        if (result.status_code === 401) {
+            if (!retryCount) {
+                await this._authenticate();
+                return "retry";
+            }
+        } else if (result.status_code >= 500 && result.status_code <= 599) {
+            if (retryCount < 2) {
+                const delay = (retryCount + 1) * 1000;
+                await new Promise((resolve) => setTimeout(resolve, delay));
+                return "retry";
+            } else {
+                order.uiState.fiskalyServerError = true; // server unreachable after retries
+                return;
+            }
+        }
+        // Need for keeping track of rejected orders in syncAllOrders
+        return Promise.reject(result);
     },
     getApiToken() {
         return this.token;
@@ -339,15 +318,17 @@ patch(PosStore.prototype, {
      * - Failure to send to Odoo => the order is already sent to Fiskaly, we store them locally with the TSS info
      */
     async syncAllOrders(options = {}) {
-        if (!this.isCountryGermanyAndFiskaly() || this.data.network.offline) {
+        if (!this.isCountryGermanyAndFiskaly()) {
             return super.syncAllOrders(options);
         }
 
         const { orderToCreate, orderToUpdate } = this.getPendingOrder();
         const orders = [...orderToCreate, ...orderToUpdate];
-        this.clearPendingOrder();
 
-        if (orders.length === 0) {
+        if (orders.length === 0 || this.data.network.offline) {
+            orders.forEach((order) => {
+                order.uiState.networkError = true;
+            });
             return super.syncAllOrders({ ...options, orders });
         }
 
@@ -363,17 +344,26 @@ patch(PosStore.prototype, {
         for (const order of orders) {
             try {
                 const orderObject = orderObjectMap[order.id];
-                if (!fiskalyError) {
+                if (
+                    !fiskalyError &&
+                    !orderObject.uiState.fiskalyServerError &&
+                    !orderObject.uiState.networkError
+                ) {
                     if (orderObject.isTransactionInactive()) {
                         await this.createTransaction(orderObject);
                         ordersToUpdate[order.id] = true;
                     }
-                    if (orderObject.isTransactionStarted()) {
+                    if (orderObject.isTransactionStarted() && !this.config.module_pos_restaurant) {
+                        // In restaurant only finish the transaction at validation not every time we order
                         await this.finishShortTransaction(order);
                         ordersToUpdate[order.id] = true;
                     }
                 }
-                if (orderObject.isTransactionFinished()) {
+                if (
+                    !orderObject.isTransactionInactive() ||
+                    orderObject.uiState.fiskalyServerError ||
+                    orderObject.uiState.networkError
+                ) {
                     sentToFiskaly.push(order);
                 } else {
                     fiskalyFailure.push(order);
@@ -412,26 +402,26 @@ patch(PosStore.prototype, {
         }
     },
     async fiskalyError(error, message) {
-        if (error.status === 0) {
+        if (error.status === 0 || this.data.network.offline) {
             const title = _t("No internet");
             const body = message.noInternet;
             this.dialog.add(AlertDialog, { title, body });
-        } else if (error.status === 401 && error.source === "authenticate") {
+        } else if (error.status_code === 401) {
             await this._showUnauthorizedPopup();
         } else if (
-            (error.status === 400 && error.responseJSON.message.includes("tss_id")) ||
-            (error.status === 404 && error.responseJSON.code === "E_TSS_NOT_FOUND")
+            (error.status_code === 400 && error.message?.includes("tss_id")) ||
+            (error.status_code === 404 && error.code === "E_TSS_NOT_FOUND")
         ) {
             await this._showBadRequestPopup("TSS ID");
         } else if (
-            (error.status === 400 && error.responseJSON.message.includes("client_id")) ||
-            (error.status === 400 && error.responseJSON.code === "E_CLIENT_NOT_FOUND")
+            (error.status_code === 400 && error.message?.includes("client_id")) ||
+            (error.status_code === 400 && error.code === "E_CLIENT_NOT_FOUND")
         ) {
             // the api is actually sending an 400 error for a "Not found" error
             await this._showBadRequestPopup("Client ID");
         } else {
-            const title = _t("Unknown error");
-            const body = message.unknown;
+            const title = error.error || _t("Unknown error");
+            const body = error.message || message.unknown;
             this.dialog.add(AlertDialog, { title, body });
         }
     },
@@ -458,5 +448,20 @@ patch(PosStore.prototype, {
             "It seems that your Fiskaly API key and/or secret are incorrect. Update them in your company settings."
         );
         this.dialog.add(AlertDialog, { title, body });
+    },
+    async _processSaleOrder(sale_order) {
+        if (
+            sale_order.partner_id &&
+            this.isCountryGermanyAndFiskaly() &&
+            (!sale_order.partner_id.street || !sale_order.partner_id.zip)
+        ) {
+            return this.dialog.add(ConfirmationDialog, {
+                title: _t("Invalid or missing customer information"),
+                body: _t(
+                    "The customer of the selected sale order must have a street and ZIP code.\nUpdate the customer's details to continue."
+                ),
+            });
+        }
+        return super._processSaleOrder(sale_order);
     },
 });

@@ -803,6 +803,7 @@ class TestEcEdiXmls(TestEcEdiCommon):
             'amount': 12,
             'tax_group_id': tax_group_12.id,
             'active': True,
+            'type_tax_use': 'purchase',
         })
         file_content = file_open('l10n_ec_edi/tests/expected_files/vendor_bill.xml', 'rb').read()
         attachment = self.env['ir.attachment'].create({
@@ -831,6 +832,7 @@ class TestEcEdiXmls(TestEcEdiCommon):
             'amount': 12,
             'tax_group_id': tax_group_12.id,
             'active': True,
+            'type_tax_use': 'purchase',
         })
         file_content = file_open('l10n_ec_edi/tests/expected_files/authorization_vendor_bill.xml', 'rb').read()
         attachment = self.env['ir.attachment'].create({
@@ -847,6 +849,35 @@ class TestEcEdiXmls(TestEcEdiCommon):
         self.assertEqual(move.amount_tax, 228.0)
         self.assertEqual(len(move.invoice_line_ids), 2)
         self.assertEqual(move.partner_id.name, 'EMPRESA PRUEBA S.A.')
+
+    def test_import_xml_vendor_bill_tax_type(self):
+        tax_group_12 = self.env['account.tax.group'].create({
+            'name': "VAT 12% TEST",
+            'l10n_ec_type': 'vat12',
+            'country_id': self.env.ref('base.ec').id,
+        })
+        self.env['account.tax'].create({
+            'name': "Tax 12 sale",
+            'amount': 12,
+            'tax_group_id': tax_group_12.id,
+            'active': True,
+            'type_tax_use': 'sale',
+        })
+        tax_p = self.env['account.tax'].create({
+            'name': "Tax 12 Purchase",
+            'amount': 12,
+            'tax_group_id': tax_group_12.id,
+            'active': True,
+            'type_tax_use': 'purchase',
+        })
+        file_content = file_open('l10n_ec_edi/tests/expected_files/vendor_bill.xml', 'rb').read()
+        attachment = self.env['ir.attachment'].create({
+            'mimetype': 'application/xml',
+            'raw': file_content,
+            'name': 'test_vendor_bill',
+        })
+        move = self.company_data['default_journal_purchase'].with_context(default_move_type='in_invoice')._create_document_from_attachment(attachment.ids)
+        self.assertEqual(move.line_ids[0].tax_ids, tax_p)
 
     # ===== HELPERS =====
 

@@ -92,7 +92,7 @@ class TimerMixin(models.AbstractModel):
         Otherwise, resume or start it
         """
         self.ensure_one()
-        self._stop_timer_in_progress()
+        self.sudo()._stop_timer_in_progress()
         timer = self.user_timer_id
         if not timer:
             timer = self._create_timer()

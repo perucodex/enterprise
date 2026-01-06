@@ -684,6 +684,7 @@ export default class BarcodePickingModel extends BarcodeModel {
             location_id: line.location_id.id,
             location_dest_id: line.location_dest_id.id,
             package_id: line.package_id?.id,
+            picking_id: line.picking_id,
         };
         const newLine = await this._createNewLine({ copyOf: line, fieldsParams });
         delete newLine.parentLine;
@@ -1591,8 +1592,12 @@ export default class BarcodePickingModel extends BarcodeModel {
     _lineIsNotComplete(line) {
         const currentLine =
             (line.product_id.tracking !== "none" && this._getParentLine(line)) || line;
-        const isNotComplete =
+        let isNotComplete =
             currentLine.reserved_uom_qty && currentLine.qty_done < currentLine.reserved_uom_qty;
+        // if we're using the parent line we don't want to return true if the parent line is incomplete but not the line
+        if (isNotComplete && line != currentLine) {
+            isNotComplete = line.reserved_uom_qty && line.qty_done < line.reserved_uom_qty;
+        }
         if (!isNotComplete && currentLine.lines) {
             // Grouped lines/package lines have multiple sublines.
             for (const subline of currentLine.lines) {
@@ -1855,6 +1860,18 @@ export default class BarcodePickingModel extends BarcodeModel {
         ]);
         this.cache.setCache(res.records);
         const quants = res.records["stock.quant"];
+        // Do not allow extra products if they are not allowed
+        if (!this.config.barcode_allow_extra_product) {
+            const allowedProductIds = new Set(
+                this.currentState.lines.map((line) => line.product_id.id)
+            );
+            if (quants.some((quant) => !allowedProductIds.has(quant.product_id))) {
+                barcodeData.error = _t(
+                    "This package contains extra products and extra products are not allowed on this operation."
+                );
+                return;
+            }
+        }
         // If the package is empty or is already at the destination location,
         // assign it to the last scanned line.
         const currentLine = this.selectedLine || this.lastScannedLine;
@@ -2014,7 +2031,7 @@ export default class BarcodePickingModel extends BarcodeModel {
             if (barcodeData.packageName) {
                 additionalParams.default_name = barcodeData.packageName;
             }
-            await this._putInPack(additionalParams);
+            return await this._putInPack(additionalParams);
         } else if (!resultPackage.package_type_id) {
             // Changes the package type for the scanned one.
             await this.save();
@@ -2026,7 +2043,7 @@ export default class BarcodePickingModel extends BarcodeModel {
                 package: resultPackage.name,
             });
             this.notification(message, { type: "success" });
-            this.trigger("refresh");
+            return this.trigger("refresh");
         } else {
             // Put package(s) inside a new one of the scanned package type.
             const packageToPackIds = this.getPackageToPackIds();
@@ -2210,6 +2227,16 @@ export default class BarcodePickingModel extends BarcodeModel {
 
     _updateLotName(line, lotName) {
         line.lot_name = lotName;
+    }
+
+    _canOverrideTrackingNumber(line, newLotName) {
+        return (
+            super._canOverrideTrackingNumber(...arguments) ||
+            (this.location.id === line.location_id.id &&
+                !line.package_id &&
+                !line.owner_id &&
+                this.getQtyDone(line) === 0)
+        );
     }
 
     async _processGs1Data(data) {

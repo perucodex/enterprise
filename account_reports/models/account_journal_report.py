@@ -2,6 +2,7 @@
 import io
 import datetime
 from collections import defaultdict
+from itertools import chain
 
 from markupsafe import Markup
 from PIL import ImageFont
@@ -21,6 +22,10 @@ class AccountJournalReportHandler(models.AbstractModel):
     _inherit = ["account.report.custom.handler"]
     _description = "Journal Report Custom Handler"
 
+    def _customize_warnings(self, report, options, all_column_groups_expression_totals, warnings):
+        if 'account_reports.common_warning_draft_in_period' in warnings:
+            warnings.pop('account_reports.common_warning_draft_in_period')
+
     def _custom_options_initializer(self, report, options, previous_options):
         """ Initialize the options for the journal report. """
 
@@ -36,7 +41,10 @@ class AccountJournalReportHandler(models.AbstractModel):
             },
             'templates': {
                 'AccountReportLineName': 'account_reports.JournalReportLineName',
-            }
+            },
+            'pdf_export': {
+                'pdf_export_main': 'account_reports.journal_report_pdf_export_main',
+            },
         }
 
     ##########################################################################
@@ -57,6 +65,8 @@ class AccountJournalReportHandler(models.AbstractModel):
                 code = None
 
             result_line_dict = {
+                'count': query_line['count'] if current_groupby == 'journal_id' else None,
+                'to_review': query_line['to_review'] if current_groupby == 'journal_id' else None,
                 'code': code,
                 'credit': query_line['credit'],
                 'debit': query_line['debit'],
@@ -72,6 +82,8 @@ class AccountJournalReportHandler(models.AbstractModel):
         # Since we don't use the one from the base report
         if not current_groupby:
             return {
+                'count': None,
+                'to_review': None,
                 'code': None,
                 'debit': None,
                 'credit': None,
@@ -95,6 +107,8 @@ class AccountJournalReportHandler(models.AbstractModel):
             """
                 SELECT
                     %(select_from_groupby)s,
+                    COUNT(DISTINCT move_id) AS count,
+                    COUNT(DISTINCT move_id) FILTER (WHERE am.state = 'draft' OR NOT am.checked) AS to_review,
                     ARRAY_AGG(DISTINCT %(account_code)s) AS account_code,
                     ARRAY_AGG(DISTINCT j.code) AS journal_code,
                     SUM("account_move_line".debit) AS debit,
@@ -133,11 +147,15 @@ class AccountJournalReportHandler(models.AbstractModel):
         if not lines:
             return new_lines
 
+        colname_to_idx = {col['expression_label']: idx for idx, col in enumerate(options.get('columns', []))}
+        to_review_index = colname_to_idx.get('to_review')
         for i, line in enumerate(lines):
             new_lines.append(line)
             line_id = line['id']
 
             line_model, res_id = report._get_model_info_from_id(line_id)
+            if to_review_index is not None:
+                line['to_review'] = line['columns'][to_review_index]['no_format']
             if line_model == 'account.journal':
                 line['journal_id'] = res_id
             elif line_model == 'account.account':
@@ -192,6 +210,44 @@ class AccountJournalReportHandler(models.AbstractModel):
 
         return new_lines
 
+    def format_column_values_from_client(self, options, lines):
+        """
+        Format column values for journal reports, including tax summary sections.
+        Called via dispatch_report_action when rounding unit changes on client side.
+        """
+        report = self.env['account.report'].browse(options['report_id'])
+        for line_dict in lines:
+            if line_dict.get('is_tax_section_line'):
+                self._format_tax_summary_line(report, options, line_dict)
+
+        return report.format_column_values_from_client(options, lines)
+
+    def _format_tax_summary_line(self, report, options, line_dict):
+        """ Apply formatting to tax summary monetary values based on current options. """
+        # Format tax_report_lines (individual tax details)
+        tax_report_lines = line_dict.get('tax_report_lines')
+        if tax_report_lines:
+            monetary_fields = ['base_amount', 'tax_amount', 'tax_non_deductible', 'tax_deductible', 'tax_due']
+            for tax_line in chain.from_iterable(tax_report_lines.values()):
+                for field in monetary_fields:
+                    no_format_field = f'{field}_no_format'
+                    no_format_value = tax_line.get(no_format_field)
+                    if no_format_value is not None:
+                        tax_line[field] = report.format_value(options, no_format_value, figure_type='monetary')
+
+        # Format tax_grid_summary_lines (tax grid summaries)
+        tax_grid_lines = line_dict.get('tax_grid_summary_lines')
+        if tax_grid_lines:
+            for country_grids in tax_grid_lines.values():
+                for grid_line in country_grids.values():
+                    debit = grid_line.get('+_no_format', 0)
+                    credit = grid_line.get('-_no_format', 0)
+                    balance = grid_line.get('balance_no_format', 0)
+                    grid_line['+'] = report.format_value(options, debit, figure_type='monetary')
+                    grid_line['-'] = report.format_value(options, credit, figure_type='monetary')
+                    grid_line['balance'] = report.format_value(options, balance, figure_type='monetary')
+                    grid_line['impact'] = report.format_value(options, balance, figure_type='monetary')
+
     ##########################################################################
     # PDF Export
     ##########################################################################
@@ -222,7 +278,7 @@ class AccountJournalReportHandler(models.AbstractModel):
             'base_url': base_url,
             'document_data': document_data
         }
-        body = self.env['ir.qweb']._render('account_reports.journal_report_pdf_export_main', render_values)
+        body = self.env['ir.qweb']._render(options['custom_display_config']['pdf_export']['pdf_export_main'], render_values)
 
         action_report = self.env['ir.actions.report']
         pdf_file_stream = io.BytesIO(action_report._run_wkhtmltopdf(
@@ -1118,39 +1174,39 @@ class AccountJournalReportHandler(models.AbstractModel):
         country_name = self.env['res.country']._field_to_sql('country', 'name')
         tag_name = self.env['account.account.tag']._field_to_sql('tag', 'name')
         query = SQL("""
-            WITH tag_info (country_name, tag_id, tag_name, balance) AS (
                 SELECT
                     %(country_name)s AS country_name,
                     tag.id,
                     %(tag_name)s AS name,
-                    -SUM(COALESCE("account_move_line".balance, 0)) AS balance
+                    SUM(COALESCE("account_move_line".debit, 0)) AS debit,
+                    SUM(COALESCE("account_move_line".credit, 0)) AS credit
                 FROM %(table_references)s
                 JOIN account_account_tag_account_move_line_rel rel ON "account_move_line".id = rel.account_move_line_id
                 JOIN account_account_tag tag ON tag.id = rel.account_account_tag_id
                 JOIN res_country country ON country.id = tag.country_id
                 WHERE %(search_condition)s
                   AND applicability = 'taxes'
-                GROUP BY country_name, tag.id
-            )
-            SELECT
-                country_name,
-                tag_id,
-                tag_name AS name,
-                balance
-            FROM tag_info
-            ORDER BY country_name, name
+             GROUP BY country_name, tag.id
+             ORDER BY country_name, %(tag_name)s
         """, country_name=country_name, tag_name=tag_name, table_references=query.from_clause, search_condition=query.where_clause)
         self.env.cr.execute(query)
         query_res = self.env.cr.fetchall()
 
         res = {}
-        for country_name, tag_id, name, balance in query_res:
+        id2tag = self.env['account.account.tag'].browse([tag_id for _country_name, tag_id, *__ in query_res]).grouped('id')  # for prefetching
+        for country_name, tag_id, name, debit, credit in query_res:
+            if id2tag[tag_id].balance_negate:
+                debit, credit = credit, debit
+            balance = debit - credit
             res.setdefault(country_name, {}).setdefault(name, {})
             res[country_name][name].setdefault('tag_ids', []).append(tag_id)
             res[country_name][name]['balance'] = report._format_value(options, balance, 'monetary')
-
             res[country_name][name]['balance_no_format'] = balance
-            res[country_name][name]['impact'] = report._format_value(options, res[country_name][name].get('balance_no_format', 0), 'monetary')
+            res[country_name][name]['+'] = report._format_value(options, debit, 'monetary')
+            res[country_name][name]['+_no_format'] = debit
+            res[country_name][name]['-'] = report._format_value(options, credit, 'monetary')
+            res[country_name][name]['-_no_format'] = credit
+            res[country_name][name]['impact'] = report._format_value(options, balance, 'monetary')
 
         return res
 
@@ -1162,15 +1218,15 @@ class AccountJournalReportHandler(models.AbstractModel):
         Returns a dictionary with the following structure:
         {
             Country : [
-                {name, base_amount, tax_amount, tax_non_deductible{_no_format}, tax_deductible{_no_format}, tax_due{_no_format}},
-                {name, base_amount, tax_amount, tax_non_deductible{_no_format}, tax_deductible{_no_format}, tax_due{_no_format}},
-                {name, base_amount, tax_amount, tax_non_deductible{_no_format}, tax_deductible{_no_format}, tax_due{_no_format}},
+                {name, base_amount{_no_format}, tax_amount{_no_format}, tax_non_deductible{_no_format}, tax_deductible{_no_format}, tax_due{_no_format}},
+                {name, base_amount{_no_format}, tax_amount{_no_format}, tax_non_deductible{_no_format}, tax_deductible{_no_format}, tax_due{_no_format}},
+                {name, base_amount{_no_format}, tax_amount{_no_format}, tax_non_deductible{_no_format}, tax_deductible{_no_format}, tax_due{_no_format}},
                 ...
             ],
             Country : [
-                {name, base_amount, tax_amount, tax_non_deductible{_no_format}, tax_deductible{_no_format}, tax_due{_no_format}},
-                {name, base_amount, tax_amount, tax_non_deductible{_no_format}, tax_deductible{_no_format}, tax_due{_no_format}},
-                {name, base_amount, tax_amount, tax_non_deductible{_no_format}, tax_deductible{_no_format}, tax_due{_no_format}},
+                {name, base_amount{_no_format}, tax_amount{_no_format}, tax_non_deductible{_no_format}, tax_deductible{_no_format}, tax_due{_no_format}},
+                {name, base_amount{_no_format}, tax_amount{_no_format}, tax_non_deductible{_no_format}, tax_deductible{_no_format}, tax_due{_no_format}},
+                {name, base_amount{_no_format}, tax_amount{_no_format}, tax_non_deductible{_no_format}, tax_deductible{_no_format}, tax_due{_no_format}},
                 ...
             ],
             ...
@@ -1200,7 +1256,9 @@ class AccountJournalReportHandler(models.AbstractModel):
         for tax in taxes:
             res.setdefault(tax.country_id.name, []).append({
                 'base_amount': report._format_value(options, tax_values[tax.id]['base_amount'], 'monetary'),
+                'base_amount_no_format': tax_values[tax.id]['base_amount'],
                 'tax_amount': report._format_value(options, tax_values[tax.id]['tax_amount'], 'monetary'),
+                'tax_amount_no_format': tax_values[tax.id]['tax_amount'],
                 'tax_non_deductible': report._format_value(options, tax_values[tax.id]['tax_non_deductible'], 'monetary'),
                 'tax_non_deductible_no_format': tax_values[tax.id]['tax_non_deductible'],
                 'tax_deductible': report._format_value(options, tax_values[tax.id]['tax_deductible'], 'monetary'),
@@ -1315,11 +1373,17 @@ class AccountJournalReportHandler(models.AbstractModel):
     def journal_report_open_aml_by_move(self, options, params):
         report = self.env['account.report'].browse(options['report_id'])
         journal = self.env['account.journal'].browse(params['journal_id'])
+        review = params.get('review')
 
         context_update = {
             'search_default_group_by_account': 0,
             'show_more_partner_info': 1,
         }
+
+        if review:
+            context_update['search_default_to_check'] = 1
+            if options['all_entries']:
+                context_update['search_default_to_check_draft'] = 1
 
         if journal.type in ('bank', 'credit'):
             params['view_ref'] = 'account_reports.view_journal_report_audit_bank_move_line_tree'
@@ -1327,11 +1391,8 @@ class AccountJournalReportHandler(models.AbstractModel):
         else:
             params['view_ref'] = 'account_reports.view_journal_report_audit_move_line_tree'
             context_update.update({
-                'search_default_group_by_partner': 1,
-                'search_default_group_by_move': 2,
+                'search_default_group_by_move': 1,
             })
-            if journal.type in ('sale', 'purchase'):
-                context_update['search_default_invoices_lines'] = 1
 
         action = report.open_journal_items(options=options, params=params)
         action.get('context', {}).update(context_update)

@@ -21,6 +21,7 @@ Mexican Payroll Rules.
     """,
     'data': [
         'security/ir.model.access.csv',
+        'data/resource_calendar_data.xml',
         'data/hr_salary_rule_category_data.xml',
         'data/hr_payroll_structure_type_data.xml',
         'views/hr_payroll_report.xml',
@@ -37,7 +38,6 @@ Mexican Payroll Rules.
     'demo': [
         'data/l10n_mx_hr_payroll_demo.xml',
     ],
-    'post_init_hook': '_generate_payslips',
     'author': 'Odoo S.A.',
     'license': 'OEEL-1',
 }

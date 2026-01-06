@@ -1,4 +1,4 @@
-from odoo import fields, models, tools
+from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
 
 
@@ -21,14 +21,26 @@ class EsgCarbonEmissionReport(models.Model):
     partner_id = fields.Many2one(related='move_id.partner_id')
     source_id = fields.Many2one(related='esg_emission_factor_id.source_id')
     scope = fields.Selection(related='source_id.scope')
-    uom_id = fields.Many2one('uom.uom', string='UoM')
-    currency_id = fields.Many2one('res.currency')
+    uom_id = fields.Many2one('uom.uom', string='UoM', compute='_compute_uom_id', store=True)
+    currency_id = fields.Many2one('res.currency', compute='_compute_currency_id', store=True)
     compute_method = fields.Selection(related='esg_emission_factor_id.compute_method')
     price_subtotal = fields.Monetary(string='Amount', currency_field='currency_id')
     database_id = fields.Many2one(string='Source Database', related='esg_emission_factor_id.database_id')
     company_id = fields.Many2one('res.company')
     account_id = fields.Many2one('account.account')
     activity_type_ids = fields.Many2many('esg.activity.type', related='esg_emission_factor_id.activity_type_ids')
+
+    @api.depends('esg_emission_factor_id')
+    def _compute_uom_id(self):
+        for emission in self:
+            if not emission._origin.id or emission._origin.id > 0:
+                emission.uom_id = emission.esg_emission_factor_id.uom_id
+
+    @api.depends('esg_emission_factor_id')
+    def _compute_currency_id(self):
+        for emission in self:
+            if not emission._origin.id or emission._origin.id > 0:
+                emission.currency_id = emission.esg_emission_factor_id.currency_id
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)

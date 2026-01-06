@@ -114,13 +114,14 @@ class CzechVIESSummaryReportCustomHandler(models.AbstractModel):
         query = SQL(
             """
                 SELECT %(select_from_groupby)s
-                    country.code                                AS country_code,
-                    partner.vat                                 AS vat_number,
-                    l10n_cz_transaction_code                    AS transaction_code,
-                    l10n_cz_transaction_code                    AS supplies_code,
-                    COUNT(DISTINCT account_move_line.move_id)   AS supplies_number,
-                    CEIL(SUM(account_move_line.price_total))    AS total_value
+                    country.code                                                                                                            AS country_code,
+                    partner.vat                                                                                                             AS vat_number,
+                    l10n_cz_transaction_code                                                                                                AS transaction_code,
+                    l10n_cz_transaction_code                                                                                                AS supplies_code,
+                    COUNT(DISTINCT account_move_line.move_id * (CASE WHEN am.move_type IN ('out_refund', 'in_refund') THEN -1 ELSE 1 END))  AS supplies_number,
+                    CEIL(SUM(ABS(account_move_line.balance) * (CASE WHEN am.move_type IN ('out_refund', 'in_refund') THEN -1 ELSE 1 END)))  AS total_value
                 FROM %(table_references)s
+                JOIN account_move am ON am.id = account_move_line.move_id
                 JOIN res_partner                partner         ON account_move_line.partner_id                 = partner.id
                 JOIN res_country                country         ON partner.country_id                           = country.id
                 LEFT JOIN account_move          move            ON account_move_line.move_id                    = move.id

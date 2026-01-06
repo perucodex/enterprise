@@ -1,24 +1,17 @@
-import { BankRecBatchPaymentButton } from "../batch_payment_button/batch_payment_button";
 import { BankRecButtonList } from "@account_accountant/components/bank_reconciliation/button_list/button_list";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
 
-patch(BankRecButtonList, {
-    components: {
-        ...BankRecButtonList.components,
-        BankRecBatchPaymentButton,
-    },
-});
-
 patch(BankRecButtonList.prototype, {
     selectBatchPayment() {
-        // todo flg: add domain
         this.addDialog(SelectCreateDialog, {
             title: _t("Search: Batch Payment"),
             noCreate: true,
             multiSelect: false,
             resModel: "account.batch.payment",
+            context: { search_default_journal_id: this.statementLineData.journal_id.id },
+            domain: [["state", "!=", "reconciled"]],
             onSelected: async (batch) => {
                 await this.onSelectBatchPayment(batch[0]);
             },
@@ -31,26 +24,26 @@ patch(BankRecButtonList.prototype, {
             "set_batch_payment_bank_statement_line",
             [this.statementLineData.id, batchPaymentId]
         );
-        // delete the selected batch from availableBatchPayments to remove the button
-        await this.bankReconciliation.updateAvailableBatchPayments(
+        await this.bankReconciliation.updateHasAvailableBatchPayments(
             this.statementLineData.journal_id.id
         );
         this.props.statementLine.load();
         this.bankReconciliation.reloadChatter();
     },
 
-    get mobileButtonsToDisplay() {
-        const buttons = super.mobileButtonsToDisplay;
-        if (this.ui.isSmall) {
-            buttons.push({
+    get buttons() {
+        const buttonsToDisplay = super.buttons;
+        if (this.isBatchPaymentsButtonShown) {
+            buttonsToDisplay.batch = {
                 label: _t("Batches"),
                 action: this.selectBatchPayment.bind(this),
-            });
+                classes: "batches-btn",
+            };
         }
-        return buttons;
+        return buttonsToDisplay;
     },
 
     get isBatchPaymentsButtonShown() {
-        return !!this.bankReconciliation.availableBatchPayments?.length;
+        return this.bankReconciliation.hasAvailableBatchPayments.value;
     },
 });

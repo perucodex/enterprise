@@ -28,6 +28,42 @@ XML_NAMESPACES = {
     'ns1': 'http://www.w3.org/2000/09/xmldsig#',
     'xml_schema': 'http://www.sii.cl/XMLSchema'
 }
+CURRENCY_CODES = {
+    '001': 'ARS',
+    '036': 'AUD',
+    '004': 'BOB',
+    '005': 'BRL',
+    '006': 'CAD',
+    '999': 'CLP',
+    '048': 'CNY',
+    '129': 'COP',
+    '051': 'DKK',
+    '139': 'AED',
+    '013': 'USD',
+    '127': 'HKD',
+    '137': 'INR',
+    '135': 'IQD',
+    '072': 'JPY',
+    '132': 'MXN',
+    '096': 'NOK',
+    '097': 'NZD',
+    '023': 'PYG',
+    '024': 'PEN',
+    '102': 'GBP',
+    '136': 'SGD',
+    '128': 'ZAR',
+    '113': 'SEK',
+    '082': 'CHF',
+    '143': 'THB',
+    '138': 'TWD',
+    '026': 'UYU',
+    '134': 'VEF',
+    '142': 'EUR',
+    '146': 'CZK',
+    '166': 'ILS',
+    '144': 'KRW',
+    '682': 'SAR',
+}
 
 try:
     import pdf417gen
@@ -619,6 +655,24 @@ services reception has been received as well.
         self._l10n_cl_action_response('claimed')
 
     # DTE creation
+    def _get_last_sequence(self, relaxed=False, with_prefix=None):
+        """
+        This method extends the base sequence retrieval to handle Chilean electronic documents.
+        It checks if there's an available CAF (Código de Autorización de Folios)
+        for the current folio number and adjusts the sequence accordingly.
+        """
+        res = super()._get_last_sequence(relaxed=relaxed, with_prefix=with_prefix)
+        if res and self.country_code == "CL" and self.is_sale_document() and self.l10n_latam_document_type_id:
+            match = re.search(r'(\d+)$', res)
+            if match:
+                folio = int(match.group(1))
+                available_caf = self.env['l10n_cl.dte.caf'].sudo().search([
+                ('final_nb', '>=', folio), ('start_nb', '<=', folio), ('l10n_latam_document_type_id', '=', self.l10n_latam_document_type_id.id),
+                ('status', '=', 'in_use'), ('company_id', '=', self.company_id.id)], limit=1)
+                if not available_caf:
+                    start_nb = self.l10n_latam_document_type_id._get_start_number()
+                    res = f"{self.l10n_latam_document_type_id.doc_code_prefix} {start_nb - 1:06d}"
+        return res
 
     def _l10n_cl_create_dte(self):
         folio = int(self.l10n_latam_document_number)
@@ -1125,8 +1179,12 @@ services reception has been received as well.
             vals['invoice_date_due'] = fields.Date.from_string(invoice_date_due)
 
         currency_name = xml_tree.findtext('.//ns0:Moneda', namespaces=XML_NAMESPACES) or 'CLP'
+        if currency_name.isnumeric():
+            currency_name = CURRENCY_CODES.get(currency_name)
         if currency := self.env['res.currency'].with_context(active_test=False).search([('name', '=', currency_name)]):
             vals['currency_id'] = currency
+        else:
+            vals['currency_id'] = self.env.ref('base.CLP')
 
     def _l10n_cl_fill_lines_vals_from_xml(self, xml_tree, vals, messages):
         vals['invoice_line_ids'] = [
@@ -1141,7 +1199,7 @@ services reception has been received as well.
         """
         gross_amount = xml_tree.findtext('.//ns0:MntBruto', namespaces=XML_NAMESPACES) is not None
         use_default_tax = xml_tree.findtext('.//ns0:TasaIVA', namespaces=XML_NAMESPACES) is not None
-        default_purchase_tax = self.env['account.chart.template'].ref('OTAX_19')
+        default_purchase_tax = self.company_id.account_purchase_tax_id or self.env['account.chart.template'].ref('OTAX_19')
         currency = vals['currency_id']
         lines_vals_list = []
         for dte_line in xml_tree.findall('.//ns0:Detalle', namespaces=XML_NAMESPACES):

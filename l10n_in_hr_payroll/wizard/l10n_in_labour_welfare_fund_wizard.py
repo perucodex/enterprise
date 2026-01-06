@@ -1,6 +1,6 @@
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, fields, models, _
+from odoo import api, Command, fields, models
 
 
 class L10nInLabourWelfareFundWizard(models.TransientModel):
@@ -24,6 +24,7 @@ class L10nInLabourWelfareFundWizard(models.TransientModel):
             else:
                 member_ids = wizard.department_id.member_ids
 
+            wizard.line_ids = [Command.clear()]
             for employee in member_ids:
                 wizard.line_ids = [(0, 0, {
                     'employee_id': employee.id,

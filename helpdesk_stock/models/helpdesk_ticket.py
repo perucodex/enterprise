@@ -11,6 +11,7 @@ class HelpdeskTicket(models.Model):
 
     product_id = fields.Many2one('product.product', string='Product', tracking=True,
         check_company=True,
+        groups="stock.group_stock_user",
         domain="[('sale_ok', '=', True), ('id', 'in', suitable_product_ids)]",
         help="Product this ticket is about. If selected, only the sales orders, deliveries and invoices including this product will be visible.")
     suitable_product_ids = fields.Many2many(

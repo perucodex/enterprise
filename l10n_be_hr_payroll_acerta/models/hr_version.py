@@ -7,7 +7,7 @@ from odoo.tools import format_list
 class HrVersion(models.Model):
     _inherit = 'hr.version'
 
-    acerta_code = fields.Char("Acerta code", groups="hr_payroll.group_hr_payroll_user", copy=False)
+    acerta_code = fields.Char("Acerta code", groups="hr_payroll.group_hr_payroll_user")
 
     @api.constrains('acerta_code')
     def _check_acerta_code(self):

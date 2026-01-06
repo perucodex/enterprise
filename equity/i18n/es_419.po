@@ -4,13 +4,14 @@
 #
 # "Fernanda Alvarez (mfar)" <mfar@odoo.com>, 2025.
 # "Patricia Gutiérrez (pagc)" <pagc@odoo.com>, 2025.
+# Odoo Translation Bot <c3p@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2025-10-09 21:12+0000\n"
-"Last-Translator: \"Patricia Gutiérrez (pagc)\" <pagc@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:41+0000\n"
+"PO-Revision-Date: 2025-12-06 10:11+0000\n"
+"Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
 "odoo-19/equity/es_419/>\n"
 "Language: es_419\n"
@@ -18,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: equity
 #: model:ir.model.fields,field_description:equity.field_equity_transaction__securities
@@ -34,6 +35,18 @@ msgstr "# Acciones"
 
 #. module: equity
 #. odoo-python
+#: code:addons/equity/models/equity_valuation.py:0
+msgid "%(partner_name)s %(amount)s"
+msgstr "%(partner_name)s %(amount)s"
+
+#. module: equity
+#. odoo-python
+#: code:addons/equity/models/equity_ubo.py:0
+msgid "%(partner_name)s (%(holder_name)s)"
+msgstr "%(partner_name)s (%(holder_name)s)"
+
+#. module: equity
+#. odoo-python
 #: code:addons/equity/models/res_partner.py:0
 msgid "%(partner_name)s's Transactions"
 msgstr "Transacciones de %(partner_name)s"
@@ -43,6 +56,12 @@ msgstr "Transacciones de %(partner_name)s"
 #: code:addons/equity/models/res_partner.py:0
 msgid "%(partner_name)s's Valuations"
 msgstr "Valuaciones de %(partner_name)s"
+
+#. module: equity
+#. odoo-python
+#: code:addons/equity/models/equity_transaction.py:0
+msgid "%(transaction_type)s %(securities).2f %(class_name)s"
+msgstr "%(transaction_type)s %(securities).2f %(class_name)s"
 
 #. module: equity
 #. odoo-python
@@ -163,12 +182,12 @@ msgstr ""
 "identificar clientes, necesitamos reportar a las personas naturales que de "
 "forma directa o indirecta\n"
 "                        tienen una participación de o contronal al menos el "
-"25% del capital o los derechos a voto de <b><t t-out="
-"\"user_id.company_id.name\"/></b>. <br/> <br/>\n"
+"25% del capital o los derechos a voto de <b><t t-"
+"out=\"user_id.company_id.name\"/></b>. <br/> <br/>\n"
 "                        Te pedimos que llenes la solicitud UBO:<br/>\n"
-"                        <a t-attf-href="
-"\"/my/ubo?{{object._get_equity_url_params()}}\" class=\"btn btn-primary\""
-">Llenar UBO</a> <br/> <br/>\n"
+"                        <a t-attf-href=\"/my/ubo?"
+"{{object._get_equity_url_params()}}\" class=\"btn btn-primary\">Llenar UBO</"
+"a> <br/> <br/>\n"
 "                        Saludos cordiales,\n"
 "                        <t t-if=\"user_id.signature\">\n"
 "                            <br/>--<br/>\n"
@@ -194,8 +213,8 @@ msgid ""
 "<i class=\"fa fa-phone ms-2 mt-1\" aria-label=\"Phone Number\" title=\"Phone "
 "Number\"/>"
 msgstr ""
-"<i class=\"fa fa-phone ms-2 mt-1\" aria-label=\"Número telefónico\" title="
-"\"Número telefónico\"/>"
+"<i class=\"fa fa-phone ms-2 mt-1\" aria-label=\"Número telefónico\" "
+"title=\"Número telefónico\"/>"
 
 #. module: equity
 #: model_terms:ir.ui.view,arch_db:equity.view_equity_transaction_kanban
@@ -491,6 +510,7 @@ msgstr "Limpiar"
 #: model:ir.model.fields,field_description:equity.field_equity_ubo__partner_id
 #: model:ir.model.fields,field_description:equity.field_equity_valuation__partner_id
 #: model_terms:ir.ui.view,arch_db:equity.view_equity_transaction_search
+#: model_terms:ir.ui.view,arch_db:equity.view_equity_ubo_form
 #: model_terms:ir.ui.view,arch_db:equity.view_equity_ubo_search
 msgid "Company"
 msgstr "Empresa"
@@ -928,6 +948,7 @@ msgstr ""
 #. module: equity
 #: model:ir.model.fields,field_description:equity.field_equity_cap_table__holder_id
 #: model:ir.model.fields,field_description:equity.field_equity_ubo__holder_id
+#: model_terms:ir.ui.view,arch_db:equity.view_equity_ubo_form
 msgid "Holder"
 msgstr "Accionista"
 
@@ -1261,6 +1282,7 @@ msgstr "Todavía no hay valuaciones."
 
 #. module: equity
 #: model:ir.model.fields,field_description:equity.field_equity_transaction__notes
+#: model_terms:ir.ui.view,arch_db:equity.view_equity_transaction_form
 msgid "Notes"
 msgstr "Notas"
 
@@ -1444,8 +1466,8 @@ msgstr "Valoraciones"
 
 #. module: equity
 #: model:ir.model.fields,help:equity.field_equity_transaction__subscriber_id
-msgid "Recipient of the shares/options of the transaction."
-msgstr "Destinatario de las acciones/opciones de la transacción."
+msgid "Recipient of the securities of the transaction."
+msgstr "Destinatario de los títulos de la transacción."
 
 #. module: equity
 #. odoo-javascript
@@ -1467,7 +1489,7 @@ msgstr "Reporte"
 #. module: equity
 #: model:ir.actions.act_window,name:equity.action_equity_request_ubo_form
 msgid "Request UBO Form"
-msgstr "Formulario para solicitar UBO"
+msgstr "Solicitar formulario con información del UBO"
 
 #. module: equity
 #: model:ir.model.fields,field_description:equity.field_equity_ubo__auth_rep_role
@@ -1852,6 +1874,11 @@ msgid "Upload"
 msgstr "Subir"
 
 #. module: equity
+#: model_terms:ir.ui.view,arch_db:equity.view_equity_transaction_form
+msgid "Upload Files"
+msgstr "Subir archivos"
+
+#. module: equity
 #. odoo-python
 #: code:addons/equity/models/res_partner.py:0
 msgid "Upload UBO Form"
@@ -1967,7 +1994,8 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/equity/static/src/components/ubo_form/holder_edit_dialog.js:0
 msgid "You must provide either the date of birth, or the ID number"
-msgstr "Debes proporcionar la fecha de nacimiento o el número de identificación"
+msgstr ""
+"Debes proporcionar la fecha de nacimiento o el número de identificación"
 
 #. module: equity
 #. odoo-javascript
@@ -2135,6 +2163,9 @@ msgstr "año"
 #: code:addons/equity/models/equity_transaction.py:0
 msgid "years"
 msgstr "años"
+
+#~ msgid "Recipient of the shares/options of the transaction."
+#~ msgstr "Destinatario de las acciones/opciones de la transacción."
 
 #~ msgid "*Control Start Date is mandatory"
 #~ msgstr "*La fecha de inicio del control es obligatoria"

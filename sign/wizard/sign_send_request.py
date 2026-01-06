@@ -36,7 +36,7 @@ class SignSendRequest(models.TransientModel):
     cc_partner_ids = fields.Many2many('res.partner', string="Copy to", help="Contacts in copy will be notified by email once the document is either fully signed or refused.")
     is_user_signer = fields.Boolean(compute='_compute_is_user_signer')
 
-    subject = fields.Char(string="Subject", compute='_compute_subject', store=True)
+    subject = fields.Char(string="Subject", compute='_compute_subject', store=True, readonly=False)
     body = fields.Html('body', compute='_compute_mail_message_body', readonly=False, help="Message to be sent to signers of the specified document", store=True)
     message_cc = fields.Html("CC Message", help="Message to be sent to contacts in copy of the signed document")
     attachment_ids = fields.Many2many('ir.attachment', string='Attachments', bypass_search_access=True)
@@ -227,6 +227,7 @@ class SignSendRequest(models.TransientModel):
         self.activity_id._action_done(feedback=feedback)
 
     def create_request(self):
+        send_channel = self.env.context.get('send_channel', 'email')
         template_id = self.template_id.id
         if self.signers_count:
             signers = [{'partner_id': signer.partner_id.id, 'role_id': signer.role_id.id, 'mail_sent_order': signer.mail_sent_order} for signer in self.signer_ids]
@@ -259,6 +260,7 @@ class SignSendRequest(models.TransientModel):
             'reminder_enabled': self.reminder_enabled,
             'reference_doc': reference_doc,
             'certificate_reference': self.certificate_reference,
+            'send_channel': send_channel,
         })
         sign_request.message_subscribe(partner_ids=cc_partner_ids)
         return sign_request
@@ -268,10 +270,6 @@ class SignSendRequest(models.TransientModel):
         if self.activity_id:
             self._activity_done()
 
-        current_partner_id = self.env.user.partner_id.id
-        # Check if the current user's partner is one of the signers
-        if any(signer.partner_id.id == current_partner_id for signer in self.signer_ids):
-            return request.go_to_document()
         if not self.reference_doc:
             return self.env['ir.actions.actions']._for_xml_id('sign.sign_request_action')
 
@@ -319,7 +317,7 @@ class SignSendRequest(models.TransientModel):
         :param signature_type: can be 'sign_signature' or 'sign_initials' and inticates what we want to obtain.
         :return: returns the signature/initials if present or False if not or if signature_type is an invalid value.
         """
-        if user and signature_type in ['sign_signature', 'sign_initials']:
+        if all(self.mapped('is_user_signer')) and signature_type in ['sign_signature', 'sign_initials']:
             return user[signature_type]
         return False
 
@@ -330,18 +328,25 @@ class SignSendRequest(models.TransientModel):
 
         :return: nothing, sets the value in the only_autofill_readonly field.
         """
+        # TODO master: clean this as it is only needed for download button (invisible for more than one signer)
+        item_type_to_field = {
+            'signature': 'sign_signature',
+            'initial': 'sign_initials',
+        }
         for request in self:
-            role_to_user_map = {signer.role_id.id: signer.partner_id.user_id for signer in self.signer_ids}
-            only_autofill_readonly = True
+            role_to_user_map = {signer.role_id.id: signer.partner_id.main_user_id for signer in self.signer_ids}
+            item_auto_fill_values = []
             for item in request.template_id.sign_item_ids:
                 user = role_to_user_map.get(item.responsible_id.id)
-                if (not item.constant and
-                        not item.type_id.sudo().auto_field and
-                        item.type_id.name != 'Date' and
-                        not (item.type_id.name == 'Signature' and request._get_user_signature(user, 'sign_signature')) and
-                        not (item.type_id.name == 'Initials' and request._get_user_signature(user, 'sign_initials'))):
-                    only_autofill_readonly = False
-            request.only_autofill_readonly = only_autofill_readonly
+                res = False
+                constant_item = item.constant or item.type_id.sudo().auto_field or item.type_id.name == 'Date'
+                if constant_item:
+                    res = True
+                elif item.type_id.item_type in item_type_to_field and user == self.env.user:
+                    sign_field = item_type_to_field[item.type_id.item_type]
+                    res = bool(user[sign_field])
+                item_auto_fill_values.append(res)
+            request.only_autofill_readonly = all(item_auto_fill_values)
 
     @api.depends("only_autofill_readonly", "signers_count", "is_user_signer")
     def _compute_display_download_button(self):

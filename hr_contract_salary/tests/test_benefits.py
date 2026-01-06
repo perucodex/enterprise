@@ -85,6 +85,9 @@ class TestInformationUpdate(HttpCase):
             'job_id': job.id,
             'wage': 1000,
         })
+        internal_user = self.env['res.users'].create({'name': 'Cool User', 'login': 'cool_user'})
+        employee.user_id = internal_user
+
         contract_employee = employee.version_id
         contract_template = self.env['hr.version'].create({
             'job_id': job.id,
@@ -122,8 +125,8 @@ class TestInformationUpdate(HttpCase):
             },
         }
 
-        # Public user cannot update information via an offer linked to an existing employee
+        # Public user cannot update information via an offer linked to an existing employee with user
         res = self.url_open("/salary_package/submit", json=data)
         content = json.loads(res.content)
         self.assertIn('error', content)
-        self.assertEqual(404, content['error']['code'])
+        self.assertIn('AccessError', content['error']['data']['name'])

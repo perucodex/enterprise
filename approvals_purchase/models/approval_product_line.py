@@ -93,6 +93,7 @@ class ApprovalProductLine(models.Model):
             ('company_id', '=', self.company_id.id),
             ('partner_id', '=', vendor.id),
             ('state', '=', 'draft'),
+            ('currency_id', '=', self.seller_id.currency_id.id),
         ])
 
     def _get_purchase_order_values(self, vendor):
@@ -109,5 +110,6 @@ class ApprovalProductLine(models.Model):
             'company_id': self.company_id.id,
             'payment_term_id': vendor.property_supplier_payment_term_id.id,
             'fiscal_position_id':self.env['account.fiscal.position']._get_fiscal_position(vendor).id,
+            'currency_id': self.seller_id.currency_id.id,
         }
         return vals

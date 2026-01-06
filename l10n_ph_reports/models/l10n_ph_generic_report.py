@@ -4,7 +4,6 @@ from collections import defaultdict
 
 from odoo import _, api, fields, models
 from odoo.fields import Domain
-from odoo.tools import date_utils
 from odoo.tools.sql import SQL
 
 
@@ -98,18 +97,11 @@ class L10n_PhGenericReportHandler(models.AbstractModel):
 
         return query
 
-    def _get_custom_display_config(self):
-        return {
-            **super()._get_custom_display_config(),
-            'components': {
-                'AccountReportFilters': 'L10nPHReportFilters',
-            }
-        }
-
     def _custom_options_initializer(self, report, options, previous_options):
         super()._custom_options_initializer(report, options, previous_options=previous_options)
         # Initialise the custom options for this report.
         options['include_no_tin'] = previous_options.get('include_no_tin', True)
+        options.setdefault('custom_display_config', {}).setdefault('components', {})['AccountReportFilters'] = 'L10nPHReportFilters'
 
     def _dynamic_lines_generator(self, report, options, all_column_groups_expression_totals, warnings=None):
         report_lines = self._build_month_lines(report, options)
@@ -511,15 +503,7 @@ class L10n_PhGenericReportHandler(models.AbstractModel):
     @api.model
     def _get_report_date_to(self, options):
         """
-        Helper to get the report date_to from the options, based on the periodicity.
-        We need it quite a lot during the export.
+        Return date_to directly from options, previously used date_to to determine end date based on export periodicity.
+        Kept the method for stable versions, otherwise safe to remove.
         """
-        date_to = fields.Date.from_string(options["date"]["date_to"])
-        periodicity = options['periodicity']
-
-        if periodicity == 'quarterly':
-            _q_date_from, q_date_to = date_utils.get_quarter(date_to)
-            return q_date_to
-        else:
-            _y_date_from, y_date_to = date_utils.get_fiscal_year(date_to)
-            return y_date_to
+        return fields.Date.from_string(options['date']['date_to'])

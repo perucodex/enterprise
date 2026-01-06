@@ -2,3 +2,5 @@
 
 from . import model
 from . import report
+
+from odoo import tools

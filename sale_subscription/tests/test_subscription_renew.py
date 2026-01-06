@@ -716,3 +716,14 @@ class TestSubscriptionRenew(TestSubscriptionCommon):
         action = subscription.with_user(user_sales_salesman).prepare_renewal_order()
         renewal_so = self.env['sale.order'].browse(action['res_id'])
         renewal_so.with_user(user_sales_salesman).action_confirm()
+
+    def test_renewal_duplicate_warrning(self):
+        self.subscription.write({
+            'partner_id': self.user_portal.partner_id.id,
+            'client_order_ref': 'co_ref'
+        })
+        self.subscription.action_confirm()
+        self.subscription._create_recurring_invoice()
+        action = self.subscription.with_context(tracking_disable=False).prepare_renewal_order()
+        renewal_so = self.env['sale.order'].browse(action['res_id'])
+        self.assertFalse(renewal_so.duplicated_order_ids, "Renewal qutation should not marked as duplicate order and not show warning")

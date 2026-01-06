@@ -99,7 +99,7 @@ class PosOrder(models.Model):
                     continue  # Skip 'Keine' for settlement orders as already adjusted to make total null in the order.
 
             payment_data.append({
-                "name": str(payment["name"]),
+                "name": str(payment["name"])[:60],
                 "type": payment_type,
                 "currency_code": self.currency_id.name or "EUR",
                 "amount": float_repr(payment["amount"], self.currency_id.decimal_places),

@@ -442,7 +442,7 @@ class PlanningSlot(models.Model):
 
     def _different_than_template(self, check_empty=True):
         self.ensure_one()
-        if not self.start_datetime:
+        if not (self.start_datetime and self.end_datetime):
             return True
         template_fields = self._get_template_fields().items()
         for template_field, slot_field in template_fields:
@@ -839,6 +839,31 @@ class PlanningSlot(models.Model):
                     vals['state'] = 'published'
             if not vals.get('company_id'):
                 vals['company_id'] = self.env.company.id
+        if self.env.context.get("multi_create"):
+            vals_list_updated = []
+            resource_per_id = {}
+            user_tz = pytz.timezone(self._get_tz())
+            min_datetime = fields.Datetime.from_string(vals_list[0]['start_datetime']).astimezone(user_tz)
+            max_datetime = fields.Datetime.from_string(vals_list[-1]['end_datetime']).astimezone(user_tz)
+            for vals in vals_list:
+                if resource_id := vals.get('resource_id'):
+                    resource = resource_per_id.get(resource_id)
+                    if not resource:
+                        resource = Resource.browse(resource_id)
+                        resource_per_id[resource_id] = resource
+                        Resource |= resource
+            schedule, _ = Resource._get_valid_work_intervals(min_datetime, max_datetime)
+            for vals in vals_list:
+                if resource_id := vals.get('resource_id'):
+                    shift_interval = Intervals([(
+                        fields.Datetime.from_string(vals.get('start_datetime')).astimezone(user_tz),
+                        fields.Datetime.from_string(vals.get('end_datetime')).astimezone(user_tz),
+                        self.env['resource.calendar.attendance'],
+                    )])
+                    if shift_interval & schedule[resource_id]:
+                        vals_list_updated.append(vals)
+            if vals_list_updated:
+                vals_list = vals_list_updated
         return super().create(vals_list)
 
     def create_batch_from_calendar(self, vals_list):
@@ -1080,7 +1105,14 @@ class PlanningSlot(models.Model):
             if self.request_to_switch:
                 self.sudo().write({'request_to_switch': False})
             raise UserError(self.env._("You cannot assign yourself to a shift in the past."))
-        return self.sudo().write({'resource_id': self.env.user.employee_id.resource_id.id if self.env.user.employee_id else False})
+        if self.company_id in self.env.user.employee_ids.mapped('company_id'):
+            resource_id = self.env.user.employee_ids.filtered(lambda e: e.company_id == self.company_id)[
+                0].resource_id.id
+        elif len(self.env.user.employee_ids) == 1:
+            resource_id = self.env.user.employee_ids.resource_id.id
+        else:
+            raise UserError(self.env._("You cannot assign yourself to a shift belonging to another company."))
+        return self.sudo().write({'resource_id': resource_id})
 
     def action_self_unassign(self):
         """ Allow planning user to self unassign from a shift, if the feature is activated """
@@ -1091,7 +1123,7 @@ class PlanningSlot(models.Model):
             raise UserError(self.env._("The company does not allow you to unassign yourself from shifts."))
         if self.is_unassign_deadline_passed:
             raise UserError(self.env._("The deadline for unassignment has passed."))
-        if self.employee_id != self.env.user.employee_id:
+        if self.employee_id not in self.env.user.employee_ids:
             raise UserError(self.env._("You can not unassign another employee than yourself."))
         if self.is_past:
             raise UserError(self.env._("You cannot unassign yourself from a shift in the past."))
@@ -2704,6 +2736,7 @@ class PlanningSlot(models.Model):
                 self.env["hr.version"].sudo()._read_group(
                     domain=[
                         ("employee_id", "in", employees_sudo.ids),
+                        ('contract_date_start', '!=', False),
                     ],
                     groupby=["employee_id"],
                     aggregates=["__count"],
@@ -2713,14 +2746,14 @@ class PlanningSlot(models.Model):
             employees_with_contract_in_current_scale = []
             for contract in contracts:
                 employee_id = contract.employee_id.id
-                end_datetime = contract.date_end and contract.date_end + relativedelta(hour=23, minute=59, second=59)
+                end_datetime = contract.contract_date_end and contract.contract_date_end + relativedelta(hour=23, minute=59, second=59)
                 if end_datetime:
                     user_tz = pytz.timezone(self.env.user.tz or self.env.context.get('tz') or 'UTC')
                     end_datetime = user_tz.localize(end_datetime).astimezone(pytz.utc).replace(tzinfo=None)
                     end_datetime = fields.Datetime.to_string(end_datetime)
                 employees_with_contract_in_current_scale.append(employee_id)
                 working_periods[employee_id_to_ressource_id[employee_id]].append({
-                    "start": fields.Datetime.to_string(contract.date_start),
+                    "start": fields.Datetime.to_string(contract.contract_date_start),
                     "end": end_datetime,
                 })
             for employee in employees_sudo - self.env["hr.employee"].browse(employees_with_contract_in_current_scale):

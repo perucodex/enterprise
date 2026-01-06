@@ -70,6 +70,9 @@ class UrbanPiperClient:
             )
             _logger.warning('HTTPError: %r', message or error)
             return {'errors': {'HTTPError': message or str(error)}}
+        except requests.exceptions.JSONDecodeError as error:
+            _logger.warning('JSONDecodeError: %r', error)
+            return {'errors': {'JSONDecodeError': 'Failed to parse server response.'}}
         except json.decoder.JSONDecodeError as error:
             _logger.warning('JSONDecodeError: %r', error)
             pos_config.log_xml(
@@ -143,7 +146,8 @@ class UrbanPiperClient:
         full_sync_required_providers = ['justeat', 'grubhub', 'doordash', 'ubereats']
         products = self.config.env['product.template'].search(product_domain)
         pos_products = products
-        if not any(provider.technical_name in full_sync_required_providers for provider in self.config.urbanpiper_delivery_provider_ids):
+        flush = self.config.env.context.get('flush')
+        if not flush and not any(provider.technical_name in full_sync_required_providers for provider in self.config.urbanpiper_delivery_provider_ids):
             pos_products = products.filtered(lambda product: (
                 not product.urban_piper_status_ids or
                 self.config.id not in product.urban_piper_status_ids.config_id.ids or
@@ -157,19 +161,21 @@ class UrbanPiperClient:
             })
         pos_products_without_pos_categ_ids.pos_categ_ids = pos_other_categ_id
         pos_categories = pos_products.pos_categ_ids
+        # The UrbanPiper platform only supports a single level of sub-categories.
+        pos_categories |= pos_categories.parent_id
         pos_attribute_products = pos_products.filtered(lambda p: p.attribute_line_ids)
         payload = {
-            'flush_categories': False,
+            'flush_categories': flush,
             'categories': self._prepare_categories_data(pos_categories),                      # pos categories
-            'flush_items': False,
+            'flush_items': flush,
             'items': self._prepare_items_data(pos_products),                                  # pos products
-            'flush_option_groups': False,
+            'flush_option_groups': flush,
             'option_groups': self._prepare_option_groups_data(pos_attribute_products),        # pos attributes
-            'flush_options': False,
+            'flush_options': flush,
             'options': self._prepare_option_data(pos_attribute_products),                     # pos attribute values
-            'flush_taxes': False,
+            'flush_taxes': flush,
             'taxes': self.config.prepare_taxes_data(pos_products),                            # pos taxes
-            'flush_charges': False,
+            'flush_charges': flush,
             'charges': self._prepare_charges_data()                                           # pos charges
         }
         # If we have multiple products, we should increase the timeout to 90 seconds.
@@ -220,6 +226,8 @@ class UrbanPiperClient:
                 'active': True,
                 'img_url': self._get_public_image_url(category),
             }
+            if category.parent_id:
+                categ_dict['parent_ref_id'] = str(category.parent_id.id)
             name_translations = category.get_field_translations('name')
             categ_dict['translations'] = self._get_translations(name_translations, 'name')
             category_lst.append(categ_dict)

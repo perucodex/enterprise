@@ -63,6 +63,24 @@ class TestDianMoves(TestCoDianCommon):
             default_code='BEER1',
         )
 
+        # Plastic Bag Taxes (INC Bolsas)
+        cls.plastic_bag_tax = cls.env['account.tax'].create({
+            'name': "INC Plastic Bags",
+            'amount_type': 'fixed',
+            'amount': 70,  # Fixed rate per bag
+            'type_tax_use': 'sale',
+            'invoice_label': 'INC Plastic Bags',
+            'description': 'INC Plastic Bags',
+            'tax_group_id': cls.env['account.chart.template'].ref('l10n_co_tax_group_inc_bolsas').id,  # INC Bolsas
+            'l10n_co_edi_type': cls.env.ref('l10n_co_edi.tax_type_9').id,  # INC Bolsas
+        })
+
+        # Plastic Bag Product
+        cls.product_plastic_bag = cls._create_product(
+            name="Bolsa Plastica",
+            default_code='BOLSA1',
+        )
+
         # 1 USD ~= 3919 COP
         usd = cls.env.ref('base.USD')
         cls.env['res.currency.rate'].create({
@@ -171,6 +189,28 @@ class TestDianMoves(TestCoDianCommon):
 
         xml = self.env['account.edi.xml.ubl_dian']._export_invoice(invoice)[0]
         self._assert_document_dian(xml, "l10n_co_dian/tests/attachments/invoice_aiu.xml")
+
+    def test_invoice_plastic_bags(self):
+        invoice = self._create_move(invoice_line_ids=[
+            Command.create({
+                'product_id': self.product_plastic_bag.id,
+                'quantity': 2,
+                'price_unit': 100,
+                'tax_ids': [Command.set([self.tax_iva_19.id, self.plastic_bag_tax.id])],
+            }),
+            Command.create({
+                'product_id': self.product_a.id,
+                'quantity': 5,
+                'price_unit': 100,
+                'tax_ids': [Command.set([self.plastic_bag_tax.id])],
+            }),
+        ])
+        xml = self._generate_xml(invoice)
+        self._assert_document_dian(xml, "l10n_co_dian/tests/attachments/invoice_plastic_bags.xml")
+
+    def test_invoice_plastic_bags_new(self):
+        self.env['ir.config_parameter'].sudo().set_param('account_edi_ubl_cii.use_new_dict_to_xml_helpers', True)
+        self.test_invoice_plastic_bags()
 
     def test_multicurrency(self):
         """
@@ -560,3 +600,51 @@ class TestDianMoves(TestCoDianCommon):
 
         with self.assertRaisesRegex(UserError, "There is no original debited invoice but the operation type is '30'."):
             self._mock_send_and_print(move=invoice, response_file='SendTestSetAsync.xml')
+
+    def test_support_documents_report_name(self):
+        """ Test that we get the right report for support documents """
+        bill = self._create_move(
+            move_type='in_invoice',
+            invoice_date=datetime.today(),
+            journal_id=self.support_document_journal.id,
+        )
+        self.assertEqual(bill._get_name_invoice_report(), 'l10n_co_dian.report_vendor_document')
+        xml = self._generate_xml(bill)
+        self.env['l10n_co_dian.document']._create_document(xml, bill, state='invoice_accepted')
+        self.assertEqual(bill._get_name_invoice_report(), 'l10n_co_dian.report_vendor_document')
+
+        credit_note = self._create_move(
+            move_type='in_refund',
+            invoice_date=datetime.today(),
+            journal_id=self.support_document_journal.id,
+            reversed_entry_id=bill.id,
+            l10n_co_edi_operation_type='10',  # "Estandar"
+            l10n_co_edi_description_code_credit='1',  # "Devolución parcial de los bienes"
+        )
+        self.assertEqual(credit_note._get_name_invoice_report(), 'l10n_co_dian.report_vendor_document')
+        xml = self._generate_xml(credit_note)
+        self.env['l10n_co_dian.document']._create_document(xml, credit_note, state='invoice_accepted')
+        self.assertEqual(credit_note._get_name_invoice_report(), 'l10n_co_dian.report_vendor_document')
+
+        invoice = self._create_move(
+            move_type='out_invoice',
+            invoice_date=datetime.today(),
+            journal_id=self.company_data['default_journal_sale'].id,
+        )
+        self.assertEqual(invoice._get_name_invoice_report(), 'account.report_invoice_document')
+        xml = self._generate_xml(invoice)
+        self.env['l10n_co_dian.document']._create_document(xml, invoice, state='invoice_accepted')
+        self.assertEqual(invoice._get_name_invoice_report(), 'l10n_co_dian.report_invoice_document')
+
+        credit_note = self._create_move(
+            move_type='out_refund',
+            invoice_date=datetime.today(),
+            journal_id=self.company_data['default_journal_sale'].id,
+            reversed_entry_id=invoice.id,
+            l10n_co_edi_operation_type='10',  # "Estandar"
+            l10n_co_edi_description_code_credit='1',  # "Devolución parcial de los bienes"
+        )
+        self.assertEqual(credit_note._get_name_invoice_report(), 'account.report_invoice_document')
+        xml = self._generate_xml(credit_note)
+        self.env['l10n_co_dian.document']._create_document(xml, credit_note, state='invoice_accepted')
+        self.assertEqual(credit_note._get_name_invoice_report(), 'l10n_co_dian.report_invoice_document')

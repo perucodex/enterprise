@@ -66,7 +66,7 @@ class TestSubscriptionInvoice(TestSubscriptionCommon):
             self.assertEqual(datetime.date(2021, 2, 3), sub.next_invoice_date, 'next invoice date should be updated')
             inv = sub.invoice_ids.sorted('date')[-1]
             inv_line = inv.invoice_line_ids[0].sorted('id')[0]
-            invoice_periods = inv_line.name.split('\n')[1]
+            invoice_periods = inv_line.name.split('\n')[2]
             self.assertEqual(invoice_periods, "1 Month 01/03/2021 to 02/02/2021")
             self.assertEqual(inv_line.date, datetime.date(2021, 1, 3))
 
@@ -77,7 +77,7 @@ class TestSubscriptionInvoice(TestSubscriptionCommon):
             self.assertEqual(datetime.date(2021, 1, 3), sub.start_date, 'start date should not changed')
             self.assertEqual(datetime.date(2021, 3, 3), sub.next_invoice_date, 'next invoice date should be in 1 month')
             inv = sub.invoice_ids.sorted('date')[-1]
-            invoice_periods = inv.invoice_line_ids[1].name.split('\n')[1]
+            invoice_periods = inv.invoice_line_ids[1].name.split('\n')[2]
             self.assertEqual(invoice_periods, "1 Month 02/03/2021 to 03/02/2021")
             self.assertEqual(inv.invoice_line_ids[1].date, datetime.date(2021, 2, 3))
 
@@ -85,7 +85,7 @@ class TestSubscriptionInvoice(TestSubscriptionCommon):
             self.env['sale.order']._cron_recurring_create_invoice()
             self.assertEqual(datetime.date(2021, 4, 3), sub.next_invoice_date, 'next invoice date should be in 1 month')
             inv = sub.invoice_ids.sorted('date')[-1]
-            invoice_periods = inv.invoice_line_ids[0].name.split('\n')[1]
+            invoice_periods = inv.invoice_line_ids[0].name.split('\n')[2]
             self.assertEqual(invoice_periods, "1 Month 03/03/2021 to 04/02/2021")
             self.assertEqual(inv.invoice_line_ids[0].date, datetime.date(2021, 3, 3))
 
@@ -275,7 +275,7 @@ class TestSubscriptionInvoice(TestSubscriptionCommon):
             # Next invoice date should not be bumped up because it is the first period
             self.assertEqual("2021-02-03", sub.next_invoice_date.strftime("%Y-%m-%d"))
 
-            invoice_periods = sub.invoice_ids.invoice_line_ids.name.split('\n')[1]
+            invoice_periods = sub.invoice_ids.invoice_line_ids.name.split('\n')[2]
             self.assertEqual(invoice_periods, "1 Month 01/03/2021 to 02/02/2021")
             self.assertEqual(sub.invoice_ids.invoice_line_ids.date, datetime.date(2021, 1, 3))
         with freeze_time("2021-02-03"):
@@ -284,7 +284,7 @@ class TestSubscriptionInvoice(TestSubscriptionCommon):
             self.assertEqual("2021-02-03", sub.last_invoice_date.strftime("%Y-%m-%d"))
             self.assertEqual("2021-03-03", sub.next_invoice_date.strftime("%Y-%m-%d"))
             inv = sub.invoice_ids.sorted('date')[-1]
-            invoice_periods = inv.invoice_line_ids.name.split('\n')[1]
+            invoice_periods = inv.invoice_line_ids.name.split('\n')[2]
             self.assertEqual(invoice_periods, "1 Month 02/03/2021 to 03/02/2021")
             self.assertEqual(inv.invoice_line_ids.date, datetime.date(2021, 2, 3))
         with freeze_time("2021-03-03"):
@@ -293,7 +293,7 @@ class TestSubscriptionInvoice(TestSubscriptionCommon):
             self.assertEqual("2021-03-03", sub.last_invoice_date.strftime("%Y-%m-%d"))
             self.assertEqual("2021-04-03", sub.next_invoice_date.strftime("%Y-%m-%d"))
             inv = sub.invoice_ids.sorted('date')[-1]
-            invoice_periods = inv.invoice_line_ids.name.split('\n')[1]
+            invoice_periods = inv.invoice_line_ids.name.split('\n')[2]
             self.assertEqual(invoice_periods, "1 Month 03/03/2021 to 04/02/2021")
             self.assertEqual(inv.invoice_line_ids.date, datetime.date(2021, 3, 3))
 
@@ -900,3 +900,21 @@ class TestSubscriptionInvoice(TestSubscriptionCommon):
         # Make sure next time it's running it reset all is_invoice_cron
         self.env['sale.order']._create_recurring_invoice()
         self.assertEqual(subs.mapped('is_invoice_cron'), [False, False, False])
+
+    def test_invoice_delivery_free(self):
+        # Ensure free subscription are not processed endlessly by cron
+        with freeze_time('2025-11-11'):
+            sub = self.subscription
+            sub.order_line[0].unlink()
+            sub.order_line.product_id.invoice_policy = "delivery"
+            # ensure at confirmation the next invoice date will be today
+            sub.start_date = datetime.date.today() - datetime.timedelta(days=31)
+            sub.action_confirm()
+            self.assertEqual(sub.next_invoice_date, datetime.date(2025, 11, 11))
+            self.assertFalse(sub.order_line.qty_delivered, "We don't deliver the product for the first period")
+            sub._create_recurring_invoice()
+            self.assertEqual(sub.next_invoice_date, datetime.date(2025, 12, 11))
+        with freeze_time('2025-12-11'):
+            sub._create_recurring_invoice()
+            self.assertEqual(sub.next_invoice_date, datetime.date(2026, 1, 11))
+            self.assertFalse(sub.invoice_ids, "No invoice should be created")

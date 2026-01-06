@@ -9,6 +9,7 @@ class TestISO20022ChargeBearer(TestISO20022CommonCreditTransfer):
     def setUpClass(cls):
         super().setUpClass()
         cls.env.ref('base.EUR').active = True
+        cls.env.user.group_ids |= cls.env.ref('account.group_validate_bank_account')
         cls.payment_method = cls.env.ref('account_iso20022.account_payment_method_iso20022')
         cls.bank_journal = cls.company_data['default_journal_bank']
         cls.bank_ing = cls.env['res.bank'].create({

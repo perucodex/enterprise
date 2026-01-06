@@ -4,13 +4,15 @@
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # "Thi Huong Nguyen (thng)" <thng@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Odoo Translation Bot <c3p@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:45+0000\n"
-"PO-Revision-Date: 2025-10-23 09:21+0000\n"
-"Last-Translator: \"Thi Huong Nguyen (thng)\" <thng@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:43+0000\n"
+"PO-Revision-Date: 2025-12-06 10:09+0000\n"
+"Last-Translator: Odoo Translation Bot <c3p@odoo.com>\n"
 "Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-19/ai/vi/"
 ">\n"
 "Language: vi\n"
@@ -18,7 +20,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_read_group
@@ -30,6 +32,12 @@ msgid ""
 "must be in valid JSON format.\n"
 "        "
 msgstr ""
+"\n"
+"            **Tên công cụ: Đọc nhóm**  \n"
+"\n"
+"Tìm kiếm một mô hình cụ thể bằng cách sử dụng bộ lọc điều kiện. Bộ lọc điều "
+"kiện được cung cấp phải ở định dạng JSON hợp lệ.\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_search
@@ -41,6 +49,12 @@ msgid ""
 "must be in valid JSON format.\n"
 "        "
 msgstr ""
+"\n"
+"            **Tên công cụ: tìm kiếm**  \n"
+"\n"
+"Tìm kiếm một mô hình cụ thể bằng cách sử dụng bộ lọc điều kiện. Bộ lọc điều "
+"kiện được cung cấp phải ở định dạng JSON hợp lệ.\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_get_fields
@@ -83,6 +97,43 @@ msgid ""
 "Make 3 parallel calls.\n"
 "        "
 msgstr ""
+"\n"
+"            CHỈ lệt kê các trường có thể tìm kiếm của một mô hình, dùng được "
+"trong bộ lọc điều kiện và nhóm dữ liệu.\n"
+"            Phần này rất quan trọng để tạo bộ lọc điều kiện hợp lệ – nếu một "
+"trường không nằm trong danh sách này, thì KHÔNG THỂ sử dụng được.\n"
+"\n"
+"            Định dạng trả về:\n"
+"            ```\n"
+"            field_name|display_name|type|sortable|groupable|description\n"
+"            partner_id|Customer|many2one(res.partner)|true|true|Customer for "
+"this order\n"
+"            date_order|Order Date|datetime|true|true|Date when order was "
+"placed\n"
+"            order_line|Order Lines|one2many(sale.order.line)|false|false|"
+"Lines in this order\n"
+"            state|Status|selection|true|true|Order status\n"
+"            ```\n"
+"\n"
+"            Điểm chính:\n"
+"            - ⚠️ Chỉ trả về các trường CÓ THỂ TÌM KIẾM – những trường khác sẽ "
+"không dùng được trong bộ lọc điều kiện\n"
+"            - Với các trường quan hệ: hiển thị mô hình liên quan trong ngoặc "
+"(many2one, one2many, many2many)\n"
+"            - Chỉ các trường dạng quan hệ mới có thể dùng để liên kết sang "
+"mô hình khác\n"
+"            - Các trường kiểu ký tự, văn bản, số thực... KHÔNG THỂ dùng để "
+"liên kết\n"
+"            - 'sortable' cho biết trường có thể dùng trong tham số order_by "
+"hay không\n"
+"            - 'groupable' cho biết trường có thể dùng để nhóm dữ liệu khi "
+"không có trong giao diện tìm kiếm\n"
+"\n"
+"            💡 Gợi ý hiệu năng: Khi cần khám phá nhiều mô hình, hãy gọi công "
+"cụ này nhiều lần trong cùng MỘT yêu cầu.\n"
+"            Ví dụ: Nếu muốn xem thông tin của sale.order, product.product và "
+"res.partner, hãy gọi 3 lần song song.\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_compute_report_measures
@@ -111,6 +162,29 @@ msgid ""
 "            - Call multiple times in parallel if comparing different menus\n"
 "        "
 msgstr ""
+"\n"
+"            Liệt kê các trường số (chỉ số) có thể dùng để tổng hợp trong chế "
+"độ xem pivot/biểu đồ.\n"
+"PHẢI được gọi trước khi sử dụng các chỉ số trong open_menu_pivot() hoặc "
+"open_menu_graph().\n"
+"\n"
+"Trả về CSV, phân tách bằng dấu gạch đứng (|):\n"
+"```\n"
+"field_name|display_name|type|aggregator|sortable\n"
+"__count|Count|integer||true\n"
+"amount_total|Total|monetary|sum|true\n"
+"margin|Margin|float|sum|true\n"
+"quantity|Quantity|float|sum|true\n"
+"```\n"
+"\n"
+"Các điểm chính:\n"
+"- __count luôn có sẵn (đếm số bản ghi)\n"
+"- Chỉ trả về các trường số có bộ tổng hợp\n"
+"- Sử dụng field_name trong tham số chỉ số\n"
+"- Với xếp hạng trong pivot: Thêm thứ tự sắp xếp (ví dụ: \"amount_total "
+"desc\")\n"
+"- Gọi nhiều lần song song nếu muốn so sánh các menu khác nhau\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_graph
@@ -139,6 +213,31 @@ msgid ""
 "            ⚠️ Order must be exactly 'ASC' or 'DESC'\n"
 "        "
 msgstr ""
+"\n"
+"            Mở chế độ xem biểu đồ sử dụng các thành phần từ giao diện tìm "
+"kiếm.\n"
+"Phù hợp nhất để hiển thị xu hướng, so sánh, phân bố dữ liệu hoặc các KPI "
+"trực quan.\n"
+"\n"
+"Các loại biểu đồ được hỗ trợ:\n"
+"- 'bar': So sánh giá trị giữa các nhóm\n"
+"- 'line': Thể hiện xu hướng theo thời gian\n"
+"- 'pie': Hiển thị tỷ lệ trong tổng thể\n"
+"\n"
+"Tính năng:\n"
+"- Áp dụng các bộ lọc từ menu có sẵn\n"
+"- Hiển thị một chỉ số đo lường duy nhất\n"
+"- Nhóm dữ liệu theo một trường để làm trục biểu đồ\n"
+"- Tìm kiếm trong các trường cụ thể\n"
+"- Hỗ trợ tùy chọn chồng dữ liệu hoặc tích lũy\n"
+"- Kiểm soát thứ tự hiển thị (ASC/DESC)\n"
+"\n"
+"💡 Hãy gọi compute_report_measures() trước để lấy các chỉ số hợp lệ\n"
+"⚠️ Mỗi chuỗi tìm kiếm phải có định dạng 'field=text'. Mảng có thể chứa nhiều "
+"chuỗi hoặc để trống []\n"
+"⚠️ Chế độ phải chính xác là 'bar', 'line' hoặc 'pie'\n"
+"⚠️ Thứ tự sắp xếp phải chính xác là 'ASC' hoặc 'DESC'\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_kanban
@@ -160,6 +259,23 @@ msgid ""
 "contain multiple search strings or be empty []\n"
 "        "
 msgstr ""
+"\n"
+"            Mở chế độ xem kanban (dạng thẻ) sử dụng các thành phần từ chế độ "
+"xem tìm kiếm.\n"
+"Phù hợp nhất cho việc trực quan hóa giai đoạn/trạng thái, quản lý quy trình "
+"và chu trình làm việc.\n"
+"\n"
+"Tính năng chính:\n"
+"- Hiển thị các bản ghi dưới dạng thẻ trong các cột\n"
+"- Áp dụng các bộ lọc từ menu có sẵn\n"
+"- Nhóm theo giai đoạn quy trình hoặc các trường khác\n"
+"- Tìm kiếm trong các trường cụ thể\n"
+"- Phù hợp cho quy trình CRM, bảng nhiệm vụ, quy trình dự án\n"
+"\n"
+"⚠️ Chỉ sử dụng tên bộ lọc và các trường nhóm dữ liệu từ dữ liệu của menu\n"
+"⚠️ Mỗi chuỗi tìm kiếm phải có định dạng 'field=text'. Mảng có thể chứa nhiều "
+"chuỗi tìm kiếm hoặc để trống []\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_list
@@ -183,6 +299,25 @@ msgid ""
 "contain multiple search strings or be empty []\n"
 "        "
 msgstr ""
+"\n"
+"            Mở chế độ xem danh sách (bảng) sử dụng các thành phần từ giao "
+"diện tìm kiếm.\n"
+"Phù hợp nhất cho các yêu cầu như “Hiển thị cho tôi”, “Liệt kê tất cả”, xem "
+"chi tiết bản ghi hoặc sắp xếp dữ liệu.\n"
+"\n"
+"Tính năng chính:\n"
+"- Áp dụng nhiều bộ lọc theo tên (lấy từ giao diện tìm kiếm trong menu)\n"
+"- Nhóm các bản ghi theo các trường có sẵn\n"
+"- Tìm kiếm văn bản trong các trường cụ thể\n"
+"- Hiển thị bản ghi dưới dạng bảng có thể sắp xếp\n"
+"- Phù hợp để xem xét, lọc và xuất dữ liệu\n"
+"\n"
+"💡 Sử dụng tham số tìm kiếm để lọc theo bất kỳ trường có thể tìm kiếm nào "
+"trước khi áp dụng bộ lọc tùy chỉnh\n"
+"⚠️ Chỉ sử dụng tên bộ lọc và trường nhóm dữ liệu từ dữ liệu của menu\n"
+"⚠️ Mỗi chuỗi tìm kiếm phải có định dạng 'field=text'. Mảng có thể chứa nhiều "
+"chuỗi tìm kiếm hoặc để trống []\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_pivot
@@ -218,6 +353,35 @@ msgid ""
 "needs\n"
 "        "
 msgstr ""
+"\n"
+"            Mở bảng pivot với khả năng tìm kiếm và lọc nâng cao.\n"
+"Phù hợp nhất cho các truy vấn “Top N”, xếp hạng, bảng đối chiếu và các chỉ "
+"số hiệu suất.\n"
+"\n"
+"Tính năng chính:\n"
+"- Hỗ trợ các bộ lọc từ giao diện tìm kiếm\n"
+"- Nhóm dữ liệu theo hàng VÀ cột cùng lúc\n"
+"- Tổng hợp các chỉ số (tổng, trung bình, đếm)\n"
+"- Hỗ trợ tìm kiếm văn bản trên các trường có thể tìm kiếm\n"
+"- Chức năng bảng pivot tương tự Excel\n"
+"\n"
+"💡 LUÔN gọi compute_report_measures() trước để lấy các chỉ số hợp lệ\n"
+"💡 Với các truy vấn xếp hạng: thêm thứ tự sắp xếp trong chỉ số (ví dụ: "
+"[\"amount_total desc\"])\n"
+"💡 Dùng tham số tìm kiếm để lọc theo bất kỳ trường có thể tìm kiếm nào TRƯỚC "
+"KHI áp dụng bộ lọc tùy chỉnh\n"
+"⚠️ Nên truy cập từ các menu trong ứng dụng “Báo cáo” để có trải nghiệm bảng "
+"tổng hợp tốt nhất\n"
+"⚠️ Mỗi chuỗi tìm kiếm phải có định dạng 'field=text'. Mảng có thể chứa nhiều "
+"chuỗi tìm kiếm hoặc để trống []\n"
+"⚠️ Lưu ý: Sử dụng row_groupbys/col_groupbys (mảng) thay vì selected_groupbys\n"
+"\n"
+"Ví dụ: với yêu cầu “xếp hạng nhân viên sales có doanh số cao nhất trong nhóm "
+"sản phẩm văn phòng”:\n"
+"\n"
+"- Dùng search=[\"categ_id\", \"office\"] nếu categ_id có thể tìm kiếm\n"
+"- Chỉ dùng custom_domain khi không có trường nào phù hợp để tìm kiếm\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_get_menu_details
@@ -248,6 +412,31 @@ msgid ""
 "            ⚠️ Always validate the returned model matches your expectations\n"
 "        "
 msgstr ""
+"\n"
+"            Truy xuất thông tin chi tiết (context, domain, search_view) cho "
+"các menu cụ thể.\n"
+"PHẢI được gọi trước khi sử dụng bất kỳ công cụ open_menu_* nào để lấy thông "
+"tin chi tiết của menu.\n"
+"\n"
+"Trả về dữ liệu CSV, phân tách bằng dấu gạch đứng (|):\n"
+"```\n"
+"menu_id|model_name|context|domain|search_view  \n"
+"389|sale.order|{\"search_default_my_quotation\": 1}|[]|<search><fields>...</"
+"fields></search>  \n"
+"172|account.move|{\"search_default_draft\": 1}|[[\"type\", \"=\", "
+"\"out_invoice\"]]|<search>...</search>  \n"
+"```\n"
+"\n"
+"Thông tin chính:\n"
+"- Context: Bộ lọc hoặc nhóm mặc định được áp dụng khi menu mở.\n"
+"- Domain: Bộ lọc cố định, người dùng không thể xóa.\n"
+"- Search_view: Cấu trúc XML đầy đủ, chứa các bộ lọc, nhóm và trường có thể "
+"tìm kiếm.\n"
+"\n"
+"💡 Mẹo hiệu suất: Yêu cầu thông tin của nhiều menu trong một lần gọi khi cần "
+"so sánh.\n"
+"⚠️ Luôn xác minh rằng mô hình trả về đúng ý bạn.\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_adjust_search
@@ -318,8 +507,8 @@ msgstr ""
 "\"name=John OR name=Jane\".\n"
 "- `measures` – Chỉ định các chỉ số sẽ được kích hoạt trong chế độ xem hiện "
 "tại nếu là dạng bảng pivot hoặc biểu đồ.\n"
-"- `mode` – Chỉ áp dụng cho biểu đồ: Đây là loại biểu đồ. Có thể chọn \"line\""
-", \"bar\" hoặc \"pie\" để thay đổi kiểu biểu đồ.\n"
+"- `mode` – Chỉ áp dụng cho biểu đồ: Đây là loại biểu đồ. Có thể chọn "
+"\"line\", \"bar\" hoặc \"pie\" để thay đổi kiểu biểu đồ.\n"
 "- `order` – Chỉ áp dụng cho biểu đồ: Thay đổi thứ tự sắp xếp kết quả trong "
 "biểu đồ hiện tại.\n"
 "- `stacked` – Chỉ áp dụng cho biểu đồ: Bật hoặc tắt chế độ chồng các dữ liệu "
@@ -337,7 +526,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0 code:addons/ai/models/ai_composer.py:0
 msgid "%s (copy)"
-msgstr ""
+msgstr "%s (sao chép)"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
@@ -353,6 +542,9 @@ msgid ""
 "ai_tool_show_warning\" aria-hidden=\"true\" title=\"The AI will not be "
 "limited by the groups defined on tools\"/>"
 msgstr ""
+"<i class=\"fa fa-warning text-warning me-2\" invisible=\"not "
+"ai_tool_show_warning\" aria-hidden=\"true\" title=\"AI sẽ không bị giới hạn "
+"bởi các nhóm được xác định trên công cụ\"/>"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
@@ -411,13 +603,13 @@ msgstr "AI nhúng: Tạo nhúng dữ liệu."
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_prompt_button__name
 msgid "AI Prompt"
-msgstr ""
+msgstr "Yêu cầu AI"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "AI Prompt Tools"
-msgstr ""
+msgstr "Công cụ yêu cầu AI"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_schema
@@ -533,7 +725,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ai_composer__interface_key
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
 msgid "Action"
-msgstr ""
+msgstr "Tác vụ"
 
 #. module: ai
 #. odoo-python
@@ -545,7 +737,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ai_agent__active
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__is_active
 msgid "Active"
-msgstr ""
+msgstr "Đang hoạt động"
 
 #. module: ai
 #. odoo-python
@@ -557,7 +749,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Add"
-msgstr ""
+msgstr "Thêm"
 
 #. module: ai
 #. odoo-javascript
@@ -575,7 +767,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid "Add a Link"
-msgstr ""
+msgstr "Add a Link"
 
 #. module: ai
 #. odoo-javascript
@@ -644,12 +836,6 @@ msgid "An error occured"
 msgstr ""
 
 #. module: ai
-#. odoo-javascript
-#: code:addons/ai/static/src/discuss/core/common/thread_model_patch.js:0
-msgid "An error occurred while generating the AI response."
-msgstr ""
-
-#. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent__response_style__analytical
 msgid "Analytical"
 msgstr "Phân tích"
@@ -688,7 +874,7 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__avatar_128
 msgid "Avatar"
-msgstr ""
+msgstr "Ảnh đại diện"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent__response_style__balanced
@@ -722,7 +908,7 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__checksum
 msgid "Checksum/SHA1"
-msgstr ""
+msgstr "Checksum/SHA1"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__content
@@ -734,7 +920,7 @@ msgstr "Nội dung phân đoạn"
 #: code:addons/ai/static/src/ai_natural_language_service.js:0
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Close"
-msgstr ""
+msgstr "Đóng"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_prompt_button__composer_id
@@ -840,7 +1026,7 @@ msgstr ""
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
 msgid "Discard"
-msgstr ""
+msgstr "Huỷ bỏ"
 
 #. module: ai
 #: model:ir.model,name:ai.model_discuss_channel
@@ -871,13 +1057,13 @@ msgstr "Tên hiển thị"
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Edit"
-msgstr ""
+msgstr "Chỉnh sửa"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_prompt.xml:0
 msgid "Edit Field Prompt"
-msgstr ""
+msgstr "Chỉnh sửa yêu cầu trường"
 
 #. module: ai
 #. odoo-javascript
@@ -893,7 +1079,7 @@ msgstr "Mẫu email"
 #. module: ai
 #: model:ir.model,name:ai.model_mail_thread
 msgid "Email Thread"
-msgstr ""
+msgstr "Luồng email"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__embedding_model
@@ -929,6 +1115,12 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__failed
 msgid "Failed"
+msgstr "Không đạt"
+
+#. module: ai
+#. odoo-python
+#: code:addons/ai/models/ai_agent_source.py:0
+msgid "Failed to fetch the content of the source."
 msgstr ""
 
 #. module: ai
@@ -941,17 +1133,17 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "Field Selector"
-msgstr ""
+msgstr "Bộ chọn trường"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__type__binary
 msgid "File"
-msgstr ""
+msgstr "Tệp"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__file_size
 msgid "File Size"
-msgstr ""
+msgstr "Dung lượng Tệp"
 
 #. module: ai
 #. odoo-javascript
@@ -977,7 +1169,7 @@ msgstr "Khóa API của Google AI"
 #. module: ai
 #: model:ir.model,name:ai.model_ir_http
 msgid "HTTP Routing"
-msgstr ""
+msgstr "Định tuyến HTTP"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__has_embedding_generation_failed
@@ -1029,20 +1221,20 @@ msgstr "Hình ảnh"
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__indexed
 msgid "Indexed"
-msgstr ""
+msgstr "Được lập chỉ mục"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_model_field_selector/ai_model_field_selector_popover.xml:0
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
 msgid "Insert"
-msgstr ""
+msgstr "Chèn"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "Insert a field"
-msgstr ""
+msgstr "Chèn một trường"
 
 #. module: ai
 #. odoo-javascript
@@ -1054,7 +1246,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_records_selector_plugin.js:0
 msgid "Insert records"
-msgstr ""
+msgstr "Chèn bản ghi"
 
 #. module: ai
 #. odoo-javascript
@@ -1109,6 +1301,8 @@ msgid ""
 "JSON containing the values that can be returned by the LLM along with their "
 "properties (type, length, ...)"
 msgstr ""
+"JSON chứa các giá trị có thể được LLM trả về cùng với các thuộc tính của "
+"chúng (loại, độ dài,...)"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
@@ -1120,7 +1314,7 @@ msgstr ""
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.res_config_settings_view_form
 msgid "Key"
-msgstr ""
+msgstr "Khoá"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__llm_model
@@ -1149,7 +1343,7 @@ msgstr "Cập nhật lần cuối vào"
 
 #. module: ai
 #. odoo-javascript
-#: code:addons/ai/static/src/web/systray_action.js:0
+#: code:addons/ai/static/src/ai_chat_launcher_service.js:0
 msgid "Log Note"
 msgstr "Ghi chú nhật ký"
 
@@ -1178,7 +1372,7 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__mimetype
 msgid "Mime Type"
-msgstr ""
+msgstr "Loại Mime"
 
 #. module: ai
 #. odoo-python
@@ -1189,7 +1383,7 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__focused_models
 msgid "Models"
-msgstr ""
+msgstr "Mô hình"
 
 #. module: ai
 #. odoo-javascript
@@ -1208,6 +1402,12 @@ msgstr "Chưa thiết lập khóa API cho nhà cung cấp '%s'"
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
 msgid "No configured Ask AI agent. Please contact your administrator."
+msgstr ""
+
+#. module: ai
+#. odoo-python
+#: code:addons/ai/utils/llm_providers.py:0
+msgid "No embedding configuration found for the provider"
 msgstr ""
 
 #. module: ai
@@ -1243,16 +1443,18 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid ""
-"No valid files to upload. Only PDF, Word, PowerPoint, Excel, Text, and "
+"No valid files to upload. Only PDF, Word, PowerPoint, Excel, Text, CSV, and "
 "OpenDocument files are allowed."
 msgstr ""
+"Không có tệp hợp lệ để tải lên. Chỉ các tệp PDF, Word, PowerPoint, Excel, "
+"Text, CSV và OpenDocument mới được phép."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Notes"
-msgstr ""
+msgstr "Ghi chú"
 
 #. module: ai
 #. odoo-javascript
@@ -1264,6 +1466,12 @@ msgstr "Online"
 #. odoo-python
 #: code:addons/ai/models/ai_agent_source.py:0
 msgid "Only administrators can create sources from URLs."
+msgstr ""
+
+#. module: ai
+#. odoo-python
+#: code:addons/ai/models/ai_agent.py:0
+msgid "Oops, it looks like our AI is unreachable"
 msgstr ""
 
 #. module: ai
@@ -1296,13 +1504,13 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__processing
 msgid "Processing"
-msgstr ""
+msgstr "Đang xử lý"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Processing..."
-msgstr ""
+msgstr "Đang xử lý..."
 
 #. module: ai
 #. odoo-javascript
@@ -1333,19 +1541,19 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
 msgid "Record"
-msgstr ""
+msgstr "Bản ghi"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_records_selector_plugin.js:0
 msgid "Records Selector"
-msgstr ""
+msgstr "Bộ chọn bản ghi"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Required"
-msgstr ""
+msgstr "Bắt buộc"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__response_style
@@ -1365,19 +1573,19 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__name
 msgid "Rule Name"
-msgstr ""
+msgstr "Tên quy tắc"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Save"
-msgstr ""
+msgstr "Lưu"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_prompt.xml:0
 msgid "Save & Generate"
-msgstr ""
+msgstr "Lưu & tạo"
 
 #. module: ai
 #. odoo-javascript
@@ -1387,7 +1595,7 @@ msgstr ""
 
 #. module: ai
 #. odoo-javascript
-#: code:addons/ai/static/src/web/systray_action.js:0
+#: code:addons/ai/static/src/ai_chat_launcher_service.js:0
 msgid "Send Message"
 msgstr "Gửi tin nhắn"
 
@@ -1438,8 +1646,10 @@ msgstr ""
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid ""
 "Some files have invalid formats and were skipped: %s. Only PDF, Word, "
-"PowerPoint, Excel, Text, and OpenDocument files are allowed."
+"PowerPoint, Excel, Text, CSV, and OpenDocument files are allowed."
 msgstr ""
+"Một số tệp có định dạng không hợp lệ và đã bị bỏ qua: %s. Chỉ cho phép các "
+"tệp PDF, Word, PowerPoint, Excel, Text, CSV và OpenDocument."
 
 #. module: ai
 #. odoo-javascript
@@ -1472,20 +1682,20 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__status
 msgid "Status"
-msgstr ""
+msgstr "Trạng thái"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Stop Recording"
-msgstr ""
+msgstr "Ngừng ghi âm"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Summary"
-msgstr ""
+msgstr "Tóm tắt"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__voice_transcription_component
@@ -1583,6 +1793,9 @@ msgid ""
 "This tool is automatically provided with `__end_message` param which when "
 "provided, the LLM processing loop is terminated."
 msgstr ""
+"Công cụ này được cung cấp tự động với tham số `__end_message`. Khi tham số "
+"này được cung cấp, vòng lặp xử lý của mô hình ngôn ngữ lớn (LLM) sẽ được kết "
+"thúc."
 
 #. module: ai
 #. odoo-javascript
@@ -1611,7 +1824,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_ids
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_ids
 msgid "Tools"
-msgstr ""
+msgstr "Công cụ"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__topic_ids
@@ -1638,7 +1851,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__state
 #: model:ir.model.fields,field_description:ai.field_ir_cron__state
 msgid "Type"
-msgstr ""
+msgstr "Loại"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ir_actions_server__state
@@ -1657,18 +1870,24 @@ msgid ""
 "- 'Multi Actions': define an action that triggers several other server "
 "actions\n"
 msgstr ""
+"Loại tác vụ phía máy chủ. Các giá trị sau đây khả dụng:\n"
+"- 'Cập nhật bản ghi': cập nhật giá trị của bản ghi\n"
+"- 'Tạo hoạt động': tạo một hoạt động (Thảo luận)\n"
+"- 'Gửi email': gửi tin nhắn, ghi chú hoặc email (Thảo luận)\n"
+"- 'Gửi SMS': gửi SMS, thêm chúng vào tài liệu (SMS)- 'Thêm/Xóa người theo "
+"dõi': thêm hoặc xóa người theo dõi vào/khỏi một bản ghi (Thảo luận)\n"
+"- 'Tạo bản ghi': tạo một bản ghi mới với các giá trị mới\n"
+"- 'Thực thi mã': một khối mã Python sẽ được thực thi\n"
+"- 'Gửi thông báo Webhook': gửi yêu cầu POST tới hệ thống bên ngoài, hay còn "
+"gọi là Webhook\n"
+"- 'Nhiều tác vụ': xác định một tác vụ kích hoạt một số tác vụ phía máy chủ "
+"khác\n"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__url
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__type__url
 msgid "URL"
-msgstr ""
-
-#. module: ai
-#. odoo-python
-#: code:addons/ai/models/ai_agent_source.py:0
-msgid "URL content cannot be extracted."
-msgstr ""
+msgstr "URL"
 
 #. module: ai
 #. odoo-javascript
@@ -1725,7 +1944,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 msgid "User error"
-msgstr ""
+msgstr "Lỗi người dùng"
 
 #. module: ai
 #. odoo-javascript
@@ -1769,6 +1988,8 @@ msgid ""
 "You must allow the access to your microphone to start the recording. Try "
 "refreshing the page and start again."
 msgstr ""
+"Bạn phải cho phép truy cập micro để bắt đầu ghi âm. Hãy thử làm mới trang và "
+"thử lại."
 
 #. module: ai
 #. odoo-javascript
@@ -1803,4 +2024,4 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "fa-hashtag"
-msgstr ""
+msgstr "fa-hashtag"

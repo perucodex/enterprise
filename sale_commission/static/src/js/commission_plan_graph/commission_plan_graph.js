@@ -41,7 +41,15 @@ export class CommissionGraphField extends Component {
         this.chart = new Chart(this.canvasRef.el, this.getLineChartConfig());
     }
 
+    /**
+     * Find the greatest common divisor of two number (Euclidean algorithm)
+     * @param {*} a integer, first number
+     * @param {*} b integer, second one
+     * @returns the greatest common divisor
+     */
     GCD(a, b) {
+        a = Math.abs(a);
+        b = Math.abs(b);
         if (a < b) return this.GCD(b, a);
         if (b == 0) return a;
         return this.GCD(b, a % b);

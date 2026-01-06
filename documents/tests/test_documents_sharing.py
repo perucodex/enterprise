@@ -255,7 +255,10 @@ class TestDocumentsSharing(TransactionCaseDocuments, MockEmail):
                           self.form_get_access_edit(form, self.partner_without_user) as access_part_without_user_form):
                         self.assertFalse(access_internal_form.has_warning_no_access)
                         self.assertTrue(access_part_without_user_form.has_warning_no_access)
-                    form.access_via_link = 'view'
+                    form.save()
+                    form.record.action_allow_link_access()
+
+                with Form(self.create_documents_sharing(documents)) as form:
                     self.assertFalse(form.has_warning_partners_without_access)
                     with (self.form_get_access_edit(form, self.internal_user.partner_id) as access_internal_form,
                           self.form_get_access_edit(form, self.partner_without_user) as access_part_without_user_form):

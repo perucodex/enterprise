@@ -93,7 +93,7 @@ class ProposeChange(models.TransientModel):
             # remove additionmal step
             self.step_id.workorder_id._change_quality_check('next')
             self.step_id.unlink()
-        self.step_id.is_deleted = True
+        self.step_id.is_deleted = True  # TODO remove in master with field definition
         bom = self.step_id.workorder_id.production_id.bom_id
         if notify_bom and bom:
             body = _('BoM feedback %(step)s (%(production)s - %(operation)s)', step=self.step_id.title, production=self.workorder_id.production_id.name, operation=self.workorder_id.operation_id.name)

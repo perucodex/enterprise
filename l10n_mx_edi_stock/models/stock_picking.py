@@ -166,9 +166,12 @@ class StockPicking(models.Model):
     def _l10n_mx_edi_get_cartaporte_pdf_values(self):
         self.ensure_one()
 
+        existing_cfdi_values = self.env['l10n_mx_edi.document']._decode_cfdi_attachment(self.l10n_mx_edi_cfdi_attachment_id.raw)
         cfdi_values = self.env['l10n_mx_edi.document']._get_company_cfdi_values(self.company_id)
         self.env['l10n_mx_edi.document']._add_certificate_cfdi_values(cfdi_values)
         self._l10n_mx_edi_add_picking_cfdi_values(cfdi_values)
+        if existing_cfdi_values.get('carta_porte_idccp'):
+            cfdi_values['idccp'] = existing_cfdi_values['carta_porte_idccp']
 
         warehouse_partner = self.picking_type_id.warehouse_id.partner_id
 
@@ -736,7 +739,10 @@ class StockPicking(models.Model):
     def l10n_mx_edi_cfdi_try_sat(self):
         self.ensure_one()
         documents = self.l10n_mx_edi_document_ids
-        for document in documents.filtered_domain(documents._get_update_sat_status_domain(from_cron=False)):
+
+        # sudo: pos_order_ids might appear in the domain and the user might not have access to PoS
+        documents = documents.sudo().filtered_domain(documents._get_update_sat_status_domain(from_cron=False)).sudo(flag=False)
+        for document in documents:
             document._update_sat_state()
 
     # -------------------------------------------------------------------------

@@ -139,13 +139,25 @@ class HrLeave(models.Model):
                 raise UserError(_('The next month work entries are not generated yet or are validated already for time off %s', leave.display_name))
             if not leave_work_entries:
                 raise UserError(_('There is no work entries linked to this time off to report'))
+            current_leave_hours_to_defer = leave.number_of_hours
             for work_entry in leave_work_entries:
                 found = False
                 for next_work_entry in next_month_work_entries:
                     if next_work_entry.work_entry_type_id.code != "WORK100":
                         continue
                     if not float_compare(next_work_entry.duration, work_entry.duration, 2):
-                        next_work_entry.work_entry_type_id = leave.holiday_status_id.work_entry_type_id
+                        if next_work_entry.duration > current_leave_hours_to_defer:
+                            # This is required for half-day or hourly leaves.
+                            # The work entry must be split according to the exact leave duration.
+                            next_work_entry.action_split({
+                                "duration": current_leave_hours_to_defer,
+                                "work_entry_type_id": leave.holiday_status_id.work_entry_type_id,
+                                "name": "random",
+                            })
+                            current_leave_hours_to_defer = 0
+                        else:
+                            next_work_entry.work_entry_type_id = leave.holiday_status_id.work_entry_type_id
+                            current_leave_hours_to_defer -= next_work_entry.duration
                         found = True
                         break
                 if not found:

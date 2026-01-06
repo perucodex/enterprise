@@ -207,7 +207,7 @@ class FedexRequest:
         else:
             # For other countries, keep the part after the hyphen
             split_code = state_code.split('-')
-            if split_code[0] == country_code:
+            if split_code[0] == country_code and len(split_code) > 1:
                 return split_code[1]
             else:
                 return state_code
@@ -266,6 +266,8 @@ class FedexRequest:
             res['personName'] = partner.name[:70]
             if partner.parent_id:
                 res['companyName'] = partner.parent_id.name[:35]
+            elif partner.company_name:
+                res['companyName'] = partner.company_name[:35]
         if partner.email:
             res['emailAddress'] = partner.email
         elif company_partner and company_partner.email:

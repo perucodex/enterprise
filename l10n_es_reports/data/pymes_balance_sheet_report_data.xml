@@ -9,7 +9,6 @@
         <field name="filter_unfold_all" eval="True"/>
         <field name="country_id" ref="base.es"/>
         <field name="filter_multi_company">selector</field>
-        <field name="allow_account_audit_status_on_lines" eval="True"/>
         <field name="column_ids">
             <record id="financial_report_balance_sheet_pymes_column" model="account.report.column">
                 <field name="name">Balance</field>
@@ -429,7 +428,7 @@
                                 <field name="code">l10n_es_pymes_line_31600</field>
                                 <field name="groupby">account_id</field>
                                 <field name="foldable" eval="True"/>
-                                <field name="domain_formula">-sum([('account_id.tag_ids', '=', '%(balance_sheet_31600_account)d')])</field>
+                                <field name="domain_formula">-sum([('account_id.tag_ids', '=', ref('l10n_es_reports.balance_sheet_31600_account'))])</field>
                             </record>
                             <record id="balance_pymes_line_31700" model="account.report.line">
                                 <field name="name">VII. Non-current debt with special characteristics</field>

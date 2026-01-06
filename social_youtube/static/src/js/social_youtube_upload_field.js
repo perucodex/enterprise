@@ -106,43 +106,36 @@ export class YoutubeUploadField extends CharField {
      * @private
      */
     async _openUploadSession(fileSize, fileType) {
-        return new Promise((resolve, reject) => {
-            const data = this.props.record.data;
-            const title = data.youtube_title;
-            const description = data.youtube_description;
+        const data = this.props.record.data;
+        const title = data.youtube_title;
+        const description = data.youtube_description;
 
-            $.ajax({
-                url: 'https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=status%2Csnippet',
-                type: 'POST',
-                beforeSend: (request) => {
-                    request.setRequestHeader("Authorization", "Bearer " + this.props.record.data.youtube_access_token);
-                    request.setRequestHeader('Content-Type', 'application/json');
-                    request.setRequestHeader("X-Upload-Content-Length", fileSize);
-                    request.setRequestHeader("x-Upload-Content-Type", fileType);
-                },
-                data: JSON.stringify({
-                    status: {privacyStatus: "private"},
-                    snippet: {
-                        title: title,
-                        description: description
+        try {
+            const response = await fetch(
+                'https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=status%2Csnippet',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${this.props.record.data.youtube_access_token}`,
+                        'Content-Type': 'application/json',
+                        'X-Upload-Content-Length': fileSize.toString(),
+                        'X-Upload-Content-Type': fileType,
                     },
-                }),
-                dataType: 'text',
-                processData: false,
-                cache: false,
-                success: (data, textStatus, request) => {
-                    resolve(request.getResponseHeader('location'));
-                },
-                error: (e) => {
-                    if (e.responseText) {
-                        const errorReason = JSON.parse(e.responseText).error?.errors[0]?.reason;
-                        console.error(errorReason);
-                    }
-                    this._uploadFailed();
-                    reject();
-                },
-            });
-        });
+                    body: JSON.stringify({
+                        status: { privacyStatus: "private" },
+                        snippet: { title, description },
+                    }),
+                }
+            );
+
+            if (response.ok) {
+                return response.headers.get('location');
+            }
+            throw new Error('Failed to open upload session');
+        } catch (error) {
+            this._uploadFailed();
+            throw error;
+        }
     }
 
     /**
@@ -150,35 +143,42 @@ export class YoutubeUploadField extends CharField {
      *
      * @private
      */
-    _updateProcessingInfo() {
-        $.ajax({
-            url: 'https://www.googleapis.com/youtube/v3/videos',
-            type: 'GET',
-            beforeSend: (request) => {
-                request.setRequestHeader("Authorization", "Bearer " + this.props.record.data.youtube_access_token);
-            },
-            data: {
+    async _updateProcessingInfo() {
+        try {
+            const params = new URLSearchParams({
                 part: 'processingDetails',
                 id: this.uploadedVideoId
-            },
-            success: (response) => {
-                if ('items' in response && response.items.length === 1 && 'processingDetails' in response.items[0]) {
-                    var processingDetails = response.items[0].processingDetails;
-                    // Youtube is supposed to send a "partsProcessed / partsTotal"
-                    // but from my tests it doesn't work (it either doesn't send it or sends 1000 / 1000)
+            });
+
+            const response = await fetch(
+                `https://www.googleapis.com/youtube/v3/videos?${params}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${this.props.record.data.youtube_access_token}`,
+                    },
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                if ('items' in data && data.items.length === 1 && 'processingDetails' in data.items[0]) {
+                    const processingDetails = data.items[0].processingDetails;
                     this.state.socialYoutubeText = _t('Processing...');
 
                     if (processingDetails.processingStatus === 'succeeded') {
                         clearInterval(this.processingInfoInterval);
                         this.videoProcessedResolve();
                     }
-                } else {
-                    this._uploadFailed();
-                    this._resetYoutubeVideoValues();
+                    return;
                 }
-            },
-        });
+            } else {
+                this._uploadFailed();
+                this._resetYoutubeVideoValues();
+            }
+        } catch {}
     }
+
     /**
      * Notify that the upload failed and clear the value of the file input.
      *
@@ -190,6 +190,7 @@ export class YoutubeUploadField extends CharField {
         });
         this.fileInputRef.el.value = '';
     }
+
     /**
      * See #_openUploadSession for more information about the upload process.
      *
@@ -198,30 +199,37 @@ export class YoutubeUploadField extends CharField {
      * @private
      */
     async _uploadFile(location, file) {
-        return new Promise((resolve, reject) => {
-            $.ajax({
-                url: location,
-                type: 'PUT',
-                beforeSend: (request) => {
-                    request.setRequestHeader("Authorization", "Bearer " + this.props.record.data.youtube_access_token);
-                    request.setRequestHeader("Content-Type", 'application/octet-stream');
-                },
-                success: (response) => {
-                    resolve({
-                        videoId: response.id,
-                        categoryId: response.snippet.categoryId
-                    })
-                },
-                error: () => {
-                    this._uploadFailed();
-                    reject();
-                },
-                data: file,
-                cache: false,
-                contentType: false,
-                processData: false,
-                xhr: this._listenUploadProgress.bind(this)
-            });
+        const promise = new Promise((resolve, reject) => {
+            const xhr = this._listenUploadProgress();
+            xhr.open('PUT', location);
+            xhr.setRequestHeader('Authorization', `Bearer ${this.props.record.data.youtube_access_token}`);
+            xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+            xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        resolve({
+                            videoId: response.id,
+                            categoryId: response.snippet.categoryId
+                        });
+                    } catch (error) {
+                        reject(error);
+                    }
+                } else {
+                    reject(new Error(`Upload failed with status: ${xhr.status}`));
+                }
+            };
+
+            xhr.onerror = () => {
+                reject(new Error('Upload failed due to network error'));
+            };
+
+            xhr.send(file);
+        });
+
+        return promise.catch(error => {
+            this._uploadFailed();
+            throw error;
         });
     }
 
@@ -242,19 +250,25 @@ export class YoutubeUploadField extends CharField {
             title: _t("Confirmation"),
 
             body: _t("Do you also want to remove the video from your YouTube account?"),
-            confirm: () => {
-                $.ajax({
-                        url: 'https://www.googleapis.com/youtube/v3/videos',
-                        type: 'DELETE',
-                        beforeSend: (request) => {
-                            request.setRequestHeader("Authorization", "Bearer " + this.props.record.data.youtube_access_token);
-                        },
-                        data: {
-                            id: this.props.record.data.youtube_video_id
-                        },
+            confirm: async () => {
+                try {
+                    const params = new URLSearchParams({
+                        id: this.props.record.data.youtube_video_id
                     });
+                    await fetch(
+                        `https://www.googleapis.com/youtube/v3/videos?${params}`,
+                        {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${this.props.record.data.youtube_access_token}`,
+                            },
+                        }
+                    );
+                } catch {}
+                finally {
                     this.uploadedVideoId = null;
                     this._resetYoutubeVideoValues();
+                }
             },
             cancel: () => {
                 this._resetYoutubeVideoValues();

@@ -40,7 +40,10 @@ class PosSession(models.Model):
                     and l.parent_state == 'posted'
                 )
                 invoice_move_lines = all_invoice_move_lines.filtered(
-                    lambda l: l.account_id.id == account_id and not l.reconciled and l.parent_state == 'posted'
+                    lambda l: l.partner_id.id == partner_id
+                    and l.account_id.id == account_id
+                    and not l.reconciled
+                    and l.parent_state == 'posted'
                 )
                 (self.env['account.move.line'].browse([l.id for l in move_lines]) | session_move_lines | invoice_move_lines).reconcile()
         return data

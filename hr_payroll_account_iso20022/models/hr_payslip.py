@@ -27,6 +27,8 @@ class HrPayslip(models.Model):
         allocations = self.compute_salary_allocations()
         for ba in self.employee_id.bank_account_ids:
             amount = allocations[str(ba.id)]
+            if not amount:
+                continue
             payment = {
                 'id': self.id,
                 'name': str(self.id),

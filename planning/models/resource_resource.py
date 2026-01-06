@@ -83,6 +83,8 @@ class ResourceResource(models.Model):
         if self.env.user.has_group('hr.group_hr_user'):
             fields.append('default_role_id')
         result = super().get_avatar_card_data(fields)
+        if not result:
+            return []
         roles_ids = result[0].get('role_ids')
         if roles_ids:
             result[0]['role_ids'] = self.env['planning.role'].search_read(

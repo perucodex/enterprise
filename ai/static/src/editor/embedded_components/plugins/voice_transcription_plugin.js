@@ -72,7 +72,8 @@ export class TranscriptionPlugin extends Plugin {
                 firstRecordingDate: (id) => this.getFirstRecordingDate(id),
                 getTabContent: (id, tabName) => this.getTabContent(id, tabName),
                 getTranscriptContent: (id) => this.getTranscriptContent(id),
-                onTranscriptionStarted: (id) => this.startTranscription(id),
+                onTranscriptionStarted: (id, currentLanguage) =>
+                    this.startTranscription(id, currentLanguage),
                 onTranscriptionUpdated: (state, componentId, chunkId, textContent) =>
                     this.updateTranscription(state, componentId, chunkId, textContent),
                 onRecorderStopped: (id, transcript) => this.updateSummary(id, transcript),
@@ -118,9 +119,9 @@ export class TranscriptionPlugin extends Plugin {
         return firstDateElement?.textContent;
     }
 
-    startTranscription(id) {
+    startTranscription(id, currentLanguage) {
         const today = new Date();
-        const timeString = today.toLocaleTimeString([], {
+        const timeString = today.toLocaleTimeString([currentLanguage], {
             hour: "2-digit",
             minute: "2-digit",
         });

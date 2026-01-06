@@ -1,6 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import math
 from dateutil.relativedelta import relativedelta
 from datetime import date
 import calendar
@@ -71,24 +70,3 @@ class HrPayslip(models.Model):
                 return relativedelta(day=31, month=12)
 
         return super()._get_schedule_timedelta()
-
-    def _get_schedule_period_start(self):
-        if self.country_code == 'MX':
-            today = date.today()
-
-            if self.struct_id.code == "MX_REGULAR":
-                schedule = self.version_id.schedule_pay
-                if schedule == '14_days':
-                    week_day = today.weekday()
-                    return today + relativedelta(days=-week_day)
-                elif schedule == 'bi-weekly':
-                    is_second_half = math.floor((today.day - 1) / 15)
-                    return today.replace(day=16) if is_second_half else today.replace(day=1)
-                elif schedule == 'bi-monthly':
-                    current_year_slice = math.ceil(today.month / 2)
-                    return today.replace(day=1, month=(current_year_slice - 1) * 2 + 1)
-
-            elif self.struct_id.code in ["MX_CHRISTMAS", "MX_PTU"]:
-                return today.replace(day=1, month=1)
-
-        return super()._get_schedule_period_start()

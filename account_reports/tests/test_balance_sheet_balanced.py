@@ -117,6 +117,10 @@ REPORT_CONFIG = {
         'asset_line_ref': 'l10n_dk_reports.account_balance_report_minimal_l10n_dk_active',
         'liability_line_ref': 'l10n_dk_reports.account_balance_report_minimal_l10n_dk_passive',
     },
+    'l10n_dk_reports.account_balance_report_2026_l10n_dk_balance': {
+        'asset_line_ref': 'l10n_dk_reports.account_balance_report_2026_l10n_dk_active',
+        'liability_line_ref': 'l10n_dk_reports.account_balance_report_2026_l10n_dk_passiv',
+    },
     'l10n_do_reports.l10n_do_bs': {
         'asset_line_ref': 'l10n_do_reports.l10n_do_bs_assets',
         'liability_line_ref': 'l10n_do_reports.l10n_do_bs_liabilities_plus_equity',
@@ -177,6 +181,10 @@ REPORT_CONFIG = {
         'asset_line_ref': 'l10n_ie_reports.l10n_ie_bs_assets_total',
         'liability_line_ref': 'l10n_ie_reports.l10n_ie_bs_liabilities_total',
     },
+    'l10n_ie_reports.l10n_ie_bs_tags': {
+        'asset_line_ref': 'l10n_ie_reports.l10n_ie_bs_tags_assets_total',
+        'liability_line_ref': 'l10n_ie_reports.l10n_ie_bs_tags_liabilities_total',
+    },
     'l10n_it_reports.account_financial_report_it_sp': {
         'asset_line_ref': 'l10n_it_reports.account_financial_report_line_it_sp_assets_total',
         'liability_line_ref': 'l10n_it_reports.account_financial_report_line_it_sp_passif_total',
@@ -196,6 +204,10 @@ REPORT_CONFIG = {
     'l10n_kz_reports.l10n_kz_bl_report': {
         'asset_line_ref': 'l10n_kz_reports.l10n_kz_bl_assets',
         'liability_line_ref': 'l10n_kz_reports.l10n_kz_bl_equity_liabilities',
+    },
+    'l10n_lk_reports.l10n_lk_bs': {
+        'asset_line_ref': 'l10n_lk_reports.l10n_lk_bs_lk_sfp_a',
+        'liability_line_ref': 'l10n_lk_reports.l10n_lk_bs_lk_sfp_eql',
     },
     'l10n_lt_reports.account_financial_report_balancesheet_lt': {
         'asset_line_ref': 'l10n_lt_reports.account_financial_html_report_line_bs_lt_debit',
@@ -221,6 +233,10 @@ REPORT_CONFIG = {
     'l10n_mn_reports.account_report_balancesheet': {
         'asset_line_ref': 'l10n_mn_reports.report_line_balanceta',
         'liability_line_ref': 'l10n_mn_reports.report_line_balancele',
+    },
+    'l10n_mr_reports.l10n_mr_balance_sheet': {
+        'asset_line_ref': 'l10n_mr_reports.account_financial_report_mr_active_title',
+        'liability_line_ref': 'l10n_mr_reports.account_financial_report_mr_passive_title',
     },
     'l10n_mt_reports.l10n_mt_balance_sheet': {
         'asset_line_ref': 'l10n_mt_reports.account_financial_report_mt_active_title',

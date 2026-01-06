@@ -17,7 +17,7 @@ class L10n_AuSuperFund(models.Model):
         if au_company := self.env["res.company"].search([("partner_id.country_code", "=", "AU")], limit=1):
             results = au_company._l10n_au_make_public_request("/superchoice/active_funds", timeout=60)
             if "error" in results:
-                raise _l10n_au_raise_user_error(results["error"])
+                _l10n_au_raise_user_error(results["error"])
             existing_funds = self.search_fetch([("fund_type", "=", "APRA")], ["usi", "scfi", "abn"])
             existing_funds.write({"is_valid": False})
             grouped_scfi_funds = existing_funds.grouped("scfi")

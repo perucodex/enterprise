@@ -37,12 +37,16 @@ class TestSawtQapGeneration(TestAccountReportsCommon, TestPhCommon):
         invoice_data = [
             # Sales
             ('out_invoice', cls.partner_a, '2024-07-15', [(250, tax_sale_wi011), (200, tax_sale_wi011)]),
-            ('out_invoice', cls.partner_b, '2024-07-15', [(500, tax_sale_wi011)]),
+            ('out_invoice', cls.partner_b, '2024-08-15', [(500, tax_sale_wi011)]),
             ('out_invoice', cls.partner_c, '2024-07-15', [(300, tax_sale_12)]),     # No ATC code so ignored in the report
+            ('out_invoice', cls.partner_a, '2024-10-10', [(250, tax_sale_wi011)]),
+            ('out_invoice', cls.partner_b, '2024-11-25', [(225, tax_sale_wi011)]),
             # Purchases
             ('in_invoice', cls.partner_a, '2024-07-15', [(250, tax_purchase_wi011), (200, tax_purchase_wi011_ex)]),
-            ('in_invoice', cls.partner_b, '2024-07-15', [(500, tax_purchase_wi011)]),
+            ('in_invoice', cls.partner_b, '2024-09-15', [(500, tax_purchase_wi011)]),
             ('in_invoice', cls.partner_c, '2024-07-15', [(300, tax_purchase_12)]),  # No ATC code so ignored in the report
+            ('in_invoice', cls.partner_a, '2024-10-18', [(300, tax_purchase_wi011)]),
+            ('in_invoice', cls.partner_b, '2024-12-02', [(250, tax_purchase_wi011_ex)]),
         ]
 
         invoice_vals = []
@@ -72,19 +76,19 @@ class TestSawtQapGeneration(TestAccountReportsCommon, TestPhCommon):
 
     def test_export_1701Q(self):
         report = self.env.ref('l10n_ph_reports.sawt_report')
-        options = self._generate_options(report, fields.Date.from_string('2024-07-01'), fields.Date.from_string('2024-07-31'))
+        options = self._generate_options(report, fields.Date.from_string('2024-07-01'), fields.Date.from_string('2024-09-30'))
         report_handler = self.env['l10n_ph.sawt.report.handler']
 
         # Adds in the data that the wizard would add
         options.update({
            'alpha_type': 'SAWT',
            'form_type_code': '1701Q',
-           'periodicity': 'annually',
+           'periodicity': 'quarterly',
            'filename_date_format': '%m%Y',
         })
 
         file_data = report_handler.export_report_to_dat(options)
-        self.assertEqual(file_data['file_name'], "12345678901231220241701Q.dat")
+        self.assertEqual(file_data['file_name'], "12345678901230920241701Q.dat")
         self.assertEqual(file_data['file_type'], "dat")
 
         file_content = file_data['file_content']
@@ -94,18 +98,18 @@ class TestSawtQapGeneration(TestAccountReportsCommon, TestPhCommon):
             file_data,
             [
                 # Header
-                ['HSAWT', 'H1701Q', '123456789', '0123', '"Test Company"', '""', '""', '""', '12/2024', ''],
+                ['HSAWT', 'H1701Q', '123456789', '0123', '"Test Company"', '""', '""', '""', '09/2024', ''],
                 # Details
-                ['DSAWT', 'D1701Q', '0', '789456123', '0789', '"Test Partner"', '"Smith"', '"John"', '"Doe"', '12/2024', '"WI011 - Prof Fees"', 'WI011', '10.00', '450.00', '45.00'],
-                ['DSAWT', 'D1701Q', '1', '789456123', '0456', '"Test Partner Company"', '""', '""', '""', '12/2024', '"WI011 - Prof Fees"', 'WI011', '10.00', '500.00', '50.00'],
+                ['DSAWT', 'D1701Q', '0', '789456123', '0789', '"Test Partner"', '"Smith"', '"John"', '"Doe"', '09/2024', '"Prof Fees"', 'WI011', '10.00', '450.00', '45.00'],
+                ['DSAWT', 'D1701Q', '1', '789456123', '0456', '"Test Partner Company"', '""', '""', '""', '09/2024', '"Prof Fees"', 'WI011', '10.00', '500.00', '50.00'],
                 # Control
-                ['CSAWT', 'C1701Q', '123456789', '0123', '12/2024', '950.00', '95.00'],
+                ['CSAWT', 'C1701Q', '123456789', '0123', '09/2024', '950.00', '95.00'],
             ]
         )
 
     def test_export_1701(self):
         report = self.env.ref('l10n_ph_reports.sawt_report')
-        options = self._generate_options(report, fields.Date.from_string('2024-07-01'), fields.Date.from_string('2024-07-31'))
+        options = self._generate_options(report, fields.Date.from_string('2024-01-01'), fields.Date.from_string('2024-12-31'))
         report_handler = self.env['l10n_ph.sawt.report.handler']
 
         # Adds in the data that the wizard would add
@@ -129,23 +133,23 @@ class TestSawtQapGeneration(TestAccountReportsCommon, TestPhCommon):
                 # Header
                 ['HSAWT', 'H1701', '123456789', '0123', '"Test Company"', '""', '""', '""', '12/2024', ''],
                 # Details
-                ['DSAWT', 'D1701', '0', '789456123', '0789', '"Test Partner"', '"Smith"', '"John"', '"Doe"', '12/2024', '"WI011 - Prof Fees"', 'WI011', '10.00', '450.00', '45.00'],
-                ['DSAWT', 'D1701', '1', '789456123', '0456', '"Test Partner Company"', '""', '""', '""', '12/2024', '"WI011 - Prof Fees"', 'WI011', '10.00', '500.00', '50.00'],
+                ['DSAWT', 'D1701', '0', '789456123', '0789', '"Test Partner"', '"Smith"', '"John"', '"Doe"', '12/2024', '"Prof Fees"', 'WI011', '10.00', '700.00', '70.00'],
+                ['DSAWT', 'D1701', '1', '789456123', '0456', '"Test Partner Company"', '""', '""', '""', '12/2024', '"Prof Fees"', 'WI011', '10.00', '725.00', '72.50'],
                 # Control
-                ['CSAWT', 'C1701', '123456789', '0123', '12/2024', '950.00', '95.00'],
+                ['CSAWT', 'C1701', '123456789', '0123', '12/2024', '1425.00', '142.50'],
             ]
         )
 
     def test_export_1702Q(self):
         report = self.env.ref('l10n_ph_reports.sawt_report')
-        options = self._generate_options(report, fields.Date.from_string('2024-07-01'), fields.Date.from_string('2024-07-31'))
+        options = self._generate_options(report, fields.Date.from_string('2024-10-01'), fields.Date.from_string('2024-12-31'))
         report_handler = self.env['l10n_ph.sawt.report.handler']
 
         # Adds in the data that the wizard would add
         options.update({
            'alpha_type': 'SAWT',
            'form_type_code': '1702Q',
-           'periodicity': 'annually',
+           'periodicity': 'quarterly',
            'filename_date_format': '%m%Y',
         })
 
@@ -162,16 +166,16 @@ class TestSawtQapGeneration(TestAccountReportsCommon, TestPhCommon):
                 # Header
                 ['HSAWT', 'H1702Q', '123456789', '0123', '"Test Company"', '""', '""', '""', '12/2024', ''],
                 # Details
-                ['DSAWT', 'D1702Q', '0', '789456123', '0789', '"Test Partner"', '"Smith"', '"John"', '"Doe"', '12/2024', '"WI011 - Prof Fees"', 'WI011', '10.00', '450.00', '45.00'],
-                ['DSAWT', 'D1702Q', '1', '789456123', '0456', '"Test Partner Company"', '""', '""', '""', '12/2024', '"WI011 - Prof Fees"', 'WI011', '10.00', '500.00', '50.00'],
+                ['DSAWT', 'D1702Q', '0', '789456123', '0789', '"Test Partner"', '"Smith"', '"John"', '"Doe"', '12/2024', '"Prof Fees"', 'WI011', '10.00', '250.00', '25.00'],
+                ['DSAWT', 'D1702Q', '1', '789456123', '0456', '"Test Partner Company"', '""', '""', '""', '12/2024', '"Prof Fees"', 'WI011', '10.00', '225.00', '22.50'],
                 # Control
-                ['CSAWT', 'C1702Q', '123456789', '0123', '12/2024', '950.00', '95.00'],
+                ['CSAWT', 'C1702Q', '123456789', '0123', '12/2024', '475.00', '47.50'],
             ]
         )
 
     def test_export_1702(self):
         report = self.env.ref('l10n_ph_reports.sawt_report')
-        options = self._generate_options(report, fields.Date.from_string('2024-07-01'), fields.Date.from_string('2024-07-31'))
+        options = self._generate_options(report, fields.Date.from_string('2024-01-01'), fields.Date.from_string('2024-12-31'))
         report_handler = self.env['l10n_ph.sawt.report.handler']
 
         # Adds in the data that the wizard would add
@@ -195,16 +199,16 @@ class TestSawtQapGeneration(TestAccountReportsCommon, TestPhCommon):
                 # Header
                 ['HSAWT', 'H1702', '123456789', '0123', '"Test Company"', '""', '""', '""', '12/2024', ''],
                 # Details
-                ['DSAWT', 'D1702', '0', '789456123', '0789', '"Test Partner"', '"Smith"', '"John"', '"Doe"', '12/2024', '"WI011 - Prof Fees"', 'WI011', '10.00', '450.00', '45.00'],
-                ['DSAWT', 'D1702', '1', '789456123', '0456', '"Test Partner Company"', '""', '""', '""', '12/2024', '"WI011 - Prof Fees"', 'WI011', '10.00', '500.00', '50.00'],
+                ['DSAWT', 'D1702', '0', '789456123', '0789', '"Test Partner"', '"Smith"', '"John"', '"Doe"', '12/2024', '"Prof Fees"', 'WI011', '10.00', '700.00', '70.00'],
+                ['DSAWT', 'D1702', '1', '789456123', '0456', '"Test Partner Company"', '""', '""', '""', '12/2024', '"Prof Fees"', 'WI011', '10.00', '725.00', '72.50'],
                 # Control
-                ['CSAWT', 'C1702', '123456789', '0123', '12/2024', '950.00', '95.00'],
+                ['CSAWT', 'C1702', '123456789', '0123', '12/2024', '1425.00', '142.50'],
             ]
         )
 
     def test_export_1601EQ(self):
         report = self.env.ref('l10n_ph_reports.qap_report')
-        options = self._generate_options(report, fields.Date.from_string('2024-07-01'), fields.Date.from_string('2024-07-31'))
+        options = self._generate_options(report, fields.Date.from_string('2024-07-01'), fields.Date.from_string('2024-09-30'))
         report_handler = self.env['l10n_ph.qap.report.handler']
 
         # Adds in the data that the wizard would add
@@ -241,7 +245,7 @@ class TestSawtQapGeneration(TestAccountReportsCommon, TestPhCommon):
 
     def test_export_1604E(self):
         report = self.env.ref('l10n_ph_reports.qap_report')
-        options = self._generate_options(report, fields.Date.from_string('2024-07-01'), fields.Date.from_string('2024-07-31'))
+        options = self._generate_options(report, fields.Date.from_string('2024-07-01'), fields.Date.from_string('2024-12-31'))
         report_handler = self.env['l10n_ph.qap.report.handler']
 
         # Adds in the data that the wizard would add
@@ -265,13 +269,34 @@ class TestSawtQapGeneration(TestAccountReportsCommon, TestPhCommon):
                 # Header
                 ['H1604E', '123456789', '0123', '12/31/2024'],
                 # Details schedule 3
-                ['D3', '1604E', '123456789', '0123', '12/31/2024', '0', '789456123', '0789', '"Test Partner"', '"Smith"', '"John"', '"Doe"', 'WI011', '250.00', '10.00', '25.00'],
+                ['D3', '1604E', '123456789', '0123', '12/31/2024', '0', '789456123', '0789', '"Test Partner"', '"Smith"', '"John"', '"Doe"', 'WI011', '550.00', '10.00', '55.00'],
                 ['D3', '1604E', '123456789', '0123', '12/31/2024', '1', '789456123', '0456', '"Test Partner Company"', '""', '""', '""', 'WI011', '500.00', '10.00', '50.00'],
                 # Control schedule 3
-                ['C3', '1604E', '123456789', '0123', '12/31/2024', '75.00'],
+                ['C3', '1604E', '123456789', '0123', '12/31/2024', '105.00'],
                 # Details schedule 4
                 ['D4', '1604E', '123456789', '0123', '12/31/2024', '0', '789456123', '0789', '"Test Partner"', '"Smith"', '"John"', '"Doe"', 'WI011', '200.00'],
+                ['D4', '1604E', '123456789', '0123', '12/31/2024', '1', '789456123', '0456', '"Test Partner Company"', '""', '""', '""', 'WI011', '250.00'],
                 # Control schedule 4
-                ['C4', '1604E', '123456789', '0123', '12/31/2024', '200.00'],
+                ['C4', '1604E', '123456789', '0123', '12/31/2024', '450.00'],
             ]
         )
+
+    def test_registered_name_display_sawt(self):
+        report = self.env.ref('l10n_ph_reports.sawt_report')
+        options = self._generate_options(report, '2024-01-01', '2024-12-31', {'unfold_all': True})
+        lines = report._get_lines(options)
+
+        # Find lines for partners
+        partner_lines = {}
+        for line in lines:
+            if line.get('caret_options') == 'res.partner':
+                partner_id = report._get_res_id_from_line_id(line['id'], 'res.partner')
+                partner_lines[partner_id] = line
+
+        line_a = partner_lines[self.partner_a.id]
+        self.assertEqual(line_a['name'], 'John Doe Smith')  # check partner_name
+        self.assertEqual(line_a['columns'][1]['name'], 'Smith John Doe')  # check register_name
+
+        line_b = partner_lines[self.partner_b.id]
+        self.assertEqual(line_b['name'], 'Test Partner Company')  # check partner_name
+        self.assertEqual(line_b['columns'][1]['name'], 'Test Partner Company')  # check register_name

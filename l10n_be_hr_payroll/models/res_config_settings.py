@@ -79,6 +79,8 @@ class ResConfigSettings(models.TransientModel):
         related="company_id.onss_sftp_private_key",
         readonly=False,
         groups="hr_payroll.group_hr_payroll_user")
+
+    # Deprecated
     l10n_be_legal_time_off_type = fields.Many2one(
         related='company_id.l10n_be_legal_time_off_type',
         readonly=False,

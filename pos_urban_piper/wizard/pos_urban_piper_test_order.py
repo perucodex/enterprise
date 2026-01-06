@@ -88,7 +88,8 @@ class UrbanPiperTestOrderWizard(models.TransientModel):
                     "image_url": None,
                     "total_charge": 0.0,
                     "is_recommended": False,
-                    "quantity": data['quantity']
+                    "quantity": data['quantity'],
+                    "options_to_add": data['options_to_add']
                 }],
                 "details": {
                     "coupon": "",
@@ -218,7 +219,8 @@ class UrbanPiperTestOrderWizard(models.TransientModel):
             'delivery_charge': self.delivery_charge,
             'delivery_instruction': self.delivery_instruction,
             'delivery_provider_id': self.delivery_provider_id,
-            'delivery_identifier': delivery_identifier or str(uuid.uuid4())
+            'delivery_identifier': delivery_identifier or str(uuid.uuid4()),
+            'options_to_add': self.env.context.get('options_to_add', [])
         }
         order_json = self.test_order_json(data)
         UpController = PosUrbanPiperController()

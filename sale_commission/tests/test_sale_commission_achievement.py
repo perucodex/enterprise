@@ -2,7 +2,6 @@
 
 from odoo.fields import Command
 from odoo.tests import freeze_time, tagged
-
 from odoo.addons.sale_commission.tests.test_sale_commission_common import TestSaleCommissionCommon
 
 
@@ -48,8 +47,7 @@ class TestSaleSubCommissionUser(TestSaleCommissionCommon):
         am = so._create_invoices()
         am._post()
         self.commission_plan_manager.action_approve()
-        self.env.flush_all()
-        self.env.invalidate_all()
+        self.env['sale.commission.achievement.report']._pre_achievement_operation()
         achievements = self.env['sale.commission.achievement.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
         commissions = self.env['sale.commission.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
         manager_achievement = achievements.filtered(lambda a: a.user_id == self.commission_manager)
@@ -93,9 +91,7 @@ class TestSaleSubCommissionUser(TestSaleCommissionCommon):
 
         invoice = so._create_invoices()
         invoice._post()
-
-        self.env.invalidate_all()
-
+        self.env['sale.commission.achievement.report']._pre_achievement_operation()
         achievements = self.env['sale.commission.achievement.report'].search([
             ('plan_id', '=', self.commission_plan_user.id),
             ('related_res_model', '=', 'account.move'),

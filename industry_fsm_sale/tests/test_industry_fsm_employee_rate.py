@@ -260,3 +260,33 @@ class TestIndustryFsmEmployeeRate(TestFsmFlowSaleCommon):
         task.action_fsm_validate()
         so = task.sale_order_id
         self.assertAlmostEqual(so.order_line.price_unit, 18.18, 2)
+
+    def test_fsm_employee_with_duplicate_sol_same_product_same_price(self):
+        """ Test when sale order has duplicate lines with same product and same price."""
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.partner_1.id,
+            'order_line': [
+                Command.create({'product_id': self.product_order_timesheet1.id, 'product_uom_qty': 1.0}),
+                Command.create({'product_id': self.product_order_timesheet1.id, 'product_uom_qty': 1.0})
+            ]
+        })
+        sale_order.action_confirm()
+        task = self.Task.create({
+            'name': 'Fsm Task',
+            'sale_order_id': sale_order.id,
+            'sale_line_id': sale_order.order_line[1].id,
+            'timesheet_ids': [
+                Command.create({
+                    'name': '/',
+                    'employee_id': self.employee_user.id,
+                    'unit_amount': 2.0,
+                    'project_id': self.fsm_project_employee_rate.id,
+                }),
+            ]
+        })
+        # Validate task
+        task.action_fsm_validate()
+        self.assertTrue(task.timesheet_ids.so_line, 'Timesheet should be linked to a sale order line')
+        # the first SOL of the matching product and employee is linked as it was set on the so_line on the timesheet.
+        # which we have to take on priority
+        self.assertEqual(task.timesheet_ids.so_line, sale_order.order_line[0])

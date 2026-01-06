@@ -3,13 +3,16 @@
 # * appointment
 #
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# DeepL <noreply-mt-deepl@weblate.org>, 2025.
+# Odoo Turkish Import <dyki+tr@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:44+0000\n"
-"PO-Revision-Date: 2025-09-18 02:43+0000\n"
-"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-11-21 14:20+0000\n"
+"Last-Translator: Odoo Turkish Import <dyki+tr@odoo.com>\n"
 "Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/"
 "appointment/tr/>\n"
 "Language: tr\n"
@@ -22,19 +25,19 @@ msgstr ""
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_invite_view_form
 msgid "\" is already in use. Please pick another one."
-msgstr ""
+msgstr "\" zaten kullanımda. Lütfen başka bir tane toplayın."
 
 #. module: appointment
 #. odoo-javascript
 #: code:addons/appointment/static/src/xml/appointment_no_slot.xml:0
 msgid "\" on"
-msgstr ""
+msgstr "\" üzerine"
 
 #. module: appointment
 #. odoo-python
 #: code:addons/appointment/models/appointment_booking_line.py:0
 msgid "\"%(name_list)s\" cannot be used for \"%(appointment_type_name)s\""
-msgstr ""
+msgstr "\"%(name_list)s\", \"%(appointment_type_name)s\" için kullanılamaz"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_question__appointment_count
@@ -93,6 +96,8 @@ msgid ""
 "%(capacity)d seats are missing to be able to book the %(appointment_name)s: %"
 "(event_name)s (%(event_id)s)"
 msgstr ""
+"%(capacity)d %(appointment_name)s adresinden rezervasyon yapabilmek için "
+"koltuklar eksik : %(event_name)s (%(event_id)s)"
 
 #. module: appointment
 #. odoo-python
@@ -116,7 +121,7 @@ msgstr "%s - Tanışalım"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form_gantt_booking
 msgid "'e.g. \"John Doe - Tennis Court Booking\""
-msgstr ""
+msgstr "'örneğin \"John Doe - Tenis Kortu Rezervasyonu\""
 
 #. module: appointment
 #. odoo-javascript
@@ -134,6 +139,8 @@ msgid ""
 "<br/>\n"
 "                                    <span class=\"fw-light\">Duration</span>"
 msgstr ""
+"<br/>\n"
+"                                    <span class=\"fw-light\">Süre</span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_kanban
@@ -141,6 +148,9 @@ msgid ""
 "<br/>\n"
 "                                <span class=\"fw-light\">To Confirm</span>"
 msgstr ""
+"<br/>\n"
+"                                <span class=\"fw-light\">Onaylamak için</"
+"span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_kanban
@@ -148,6 +158,8 @@ msgid ""
 "<br/>\n"
 "                                <span class=\"fw-light\">Total</span>"
 msgstr ""
+"<br/>\n"
+"                                <span class=\"fw-light\">Toplam</span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_kanban
@@ -155,6 +167,8 @@ msgid ""
 "<br/>\n"
 "                                <span class=\"fw-light\">Upcoming</span>"
 msgstr ""
+"<br/>\n"
+"                                <span class=\"fw-light\">Yaklaşan</span>"
 
 #. module: appointment
 #: model:mail.template,body_html:appointment.attendee_invitation_mail_template
@@ -430,6 +444,291 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"font-size: 13px; color: #374151;\">\n"
+"    <t t-set=\"customer\" t-value=\" object.event_id.find_partner_customer()"
+"\"/>\n"
+"   <t t-set=\"target_responsible\" t-value=\"object.partner_id == "
+"object.event_id.partner_id\"/>\n"
+"    <t t-set=\"target_customer\" t-value=\"object.partner_id == customer\"/"
+">\n"
+"   <t t-set=\"recurrent\" t-value=\"object.recurrence_id and not "
+"ctx.get('calendar_template_ignore_recurrence')\"/>\n"
+"\n"
+"    <h1 style=\"font-size: 18px; font-weight: bold; color: #374151; margin-"
+"bottom: 28px;\">\n"
+"        Davetiye\n"
+"   </h1>\n"
+"    <p style=\"margin: 0;\">\n"
+"       <span style=\"display: block; margin-bottom: 8px;\">Merhaba <t t-"
+"out=\"object.common_name or ''\">Ahşap Köşe</t>,</span>\n"
+"\n"
+"        <t t-if=\"target_customer\">\n"
+"           <t t-if=\"not "
+"object.event_id.appointment_type_id.is_always_confirm\">\n"
+"                <t t-if=\"object.event_id.appointment_status == 'booked'\">\n"
+"                    Rezervasyonunuzun <strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\">Schedule a Demo</"
+"strong><t t-if=\"object.event_id.appointment_type_id.category not in "
+"['custom', 'anytime'] and "
+"object.event_id.appointment_type_id.schedule_based_on == 'users'\"> with <t "
+"t-out=\"object.event_id.user_id.name or ''\">Ready Mat</t></t> onaylandığını "
+"bildirmekten mutluluk duyarız.<br/>\n"
+"                </t>\n"
+"               <t t-elif=\"object.event_id.appointment_status == "
+"'request'\">\n"
+"                    Rezervasyonunuzu aldık <strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\"> <t t-"
+"out=\"object.event_id.user_id.name or ''\"> Ready Mat</t></t> ile bir Demo</"
+"strong><t t-if=\"object.event_id.appointment_type_id.category not in "
+"['custom', 'anytime'] and "
+"object.event_id.appointment_type_id.schedule_based_on == 'users'\"> "
+"planlayın.<br/>\n"
+"                    Onaylandığında sizi bilgilendireceğiz.\n"
+"               </t>\n"
+"            </t>\n"
+"           <t t-else=\"\">\n"
+"                Randevunuz <strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\">Schedule a Demo</"
+"strong> <t t-if=\"object.event_id.appointment_type_id.category not in "
+"['custom', 'anytime'] and "
+"object.event_id.appointment_type_id.schedule_based_on == 'users'\"> with <t "
+"t-out=\"object.event_id.user_id.name or ''\">Ready Mat</t></t> rezerve "
+"edilmiştir.\n"
+"           </t>\n"
+"        </t>\n"
+"       <t t-elif=\"target_responsible\">\n"
+"            <t t-if=\"customer\">\n"
+"                <t t-out=\"customer.name or ''\"/> aşağıdaki randevuyu "
+"planlayın <strong t-out=\"object.event_id.appointment_type_id.name or "
+"''\">Sizinle bir Demo</strong> planlayın.\n"
+"               <t t-if=\"object.event_id.appointment_type_id and "
+"object.event_id.appointment_status == 'request'\">\n"
+"                    Onaylanması beklenmektedir.\n"
+"               </t>\n"
+"            </t>\n"
+"           <t t-else=\"\">\n"
+"                Randevunuz <strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\">Schedule a Demo</"
+"strong> alınmıştır.\n"
+"           </t>\n"
+"        </t>\n"
+"       <t t-else=\"\">\n"
+"            Aşağıdaki randevuya davet edildiniz <strong t-"
+"out=\"object.event_id.appointment_type_id.name or ''\">Bir Demo Planlayın</"
+"strong>.\n"
+"       </t>\n"
+"    </p>\n"
+"   <div style=\"text-align: center; padding: 16px 0px 16px 0px;\">\n"
+"        <t t-if=\"object.state != 'accepted'\">\n"
+"           <a t-attf-href=\"/calendar/meeting/accept?"
+"token={{object.access_token}}&amp;id={{object.event_id.id}}\" t-attf-"
+"style=\"display: inline-block; padding: 7px 14px; color: "
+"{{user.company_id.email_primary_color or '#FFFFFF'}}; text-decoration: none; "
+"background-color: {{user.company_id.email_secondary_color or '#875A7B'}}; "
+"border-radius: 3px\">{{object.event_id.id}}\" t-attf-style=\"display: inline-"
+"block; padding: 7px 14px; color: {{user.company_id.email_primary_color or "
+"'#FFFFFF'}}; text-decoration: none; background-color: "
+"{{user.company_id.email_secondary_color or '#875A7B'}}; border-radius: "
+"3px\">\n"
+"                Accept</a>\n"
+"            <a t-attf-href=\"/calendar/meeting/decline?"
+"token={{object.access_token}}&amp;id={{object.event_id.id}}\" t-attf-"
+"style=\"display: inline-block; margin-left: 6px; padding: 7px 14px; color: "
+"{{user.company_id.email_primary_color or '#FFFFFF'}}; text-decoration: none; "
+"background-color: {{user.company_id.email_secondary_color or '#875A7B'}}; "
+"border-radius: 3px\">{{object.event_id.id}} \" t-attf-style=\"display: "
+"inline-block; margin-left: 6px; padding: 7px 14px; color: "
+"{{user.company_id.email_primary_color or '#FFFFFF'}}; text-decoration: none; "
+"background-color: {{user.company_id.email_secondary_color or '#875A7B'}}; "
+"border-radius: 3px\">\n"
+"                Düşüş</a>\n"
+"        </t>\n"
+"       <a t-if=\"not target_responsible and not target_customer\" t-attf-"
+"href=\"/calendar/meeting/view?token={{object.access_token}}"
+"&amp;id={{object.event_id.id}}\" style=\"display: inline-block; margin-left: "
+"12px; padding: 5px 10px; color: #111827; text-decoration: none; background-"
+"color: #E7E9ED; border-radius: 3px; border-radius: "
+"3px\">{{object.event_id.id}}\" style=\"display: inline-block; margin-left: "
+"12px; padding: 5px 10px; color: #111827; text-decoration: none; background-"
+"color: #E7E9ED; border-radius: 3px; border-radius: 3px\">Görünüm</a>\n"
+"        <a t-elif=\"not target_customer\" t-attf-href=\"/mail/view?"
+"model=calendar.event&amp;res_id={{object.event_id.id}}\" t-attf-"
+"style=\"display: inline-block; margin-left: 12px; padding: 5px 10px; color: "
+"#111827; text-decoration: none; background-color: #E7E9ED; border-radius: "
+"3px; border-radius: 3px\">Görünüm</a>\n"
+"    </div>\n"
+"   <div style=\"margin: 16px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">Detaylar</h2>\n"
+"        <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"font-"
+"size: 13px; color: #374151;\">\n"
+"           <tr>\n"
+"                <td style=\"width: 100px; color: #676F7B;\">Tarih &amp; "
+"Saat</td>\n"
+"                <td style=\"font-weight: bold;\">\n"
+"                   <t t-out=\"format_datetime(dt=object.event_id.start, "
+"tz=object.mail_tz if not object.event_id.allday else None, dt_format='EEEE', "
+"lang_code=object.env.lang) or ''\">Salı</t>\n"
+"                    <t t-out=\"format_datetime(dt=object.event_id.start, "
+"tz=object.mail_tz if not object.event_id.allday else None, dt_format='d', "
+"lang_code=object.env.lang) or ''\">4</t>\n"
+"                    <t t-out=\"format_datetime(dt=object.event_id.start, "
+"tz=object.mail_tz if not object.event_id.allday else None, dt_format='MMMM "
+"y', lang_code=object.env.lang) or ''\">Mayıs 2021</t>\n"
+"                    <t t-if=\"not object.event_id.allday\">\n"
+"                       <t t-out=\"format_time(time=object.event_id.start, "
+"tz=object.mail_tz, time_format='short', lang_code=object.env.lang) or "
+"''\">11:00 AM</t>\n"
+"                        <t t-if=\"not "
+"object.event_id.appointment_type_id.hide_timezone and object.mail_tz\">\n"
+"                           <span style=\"font-size: 11px; font-weight: "
+"normal;\">\n"
+"                                (<t t-out=\"object.mail_tz or ''\">Avrupa/"
+"Brüksel</t>)\n"
+"                           </span>\n"
+"                        </t>\n"
+"                   </t>\n"
+"                </td>\n"
+"           </tr>\n"
+"            <tr t-if=\"recurrent\">\n"
+"               <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">Ne zaman</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-"
+"out=\"object.recurrence_id.name or ''\"> Her 1 Haftada Bir, 3 etkinlik için</"
+"t></td>\n"
+"           </tr>\n"
+"            <tr t-if=\"not object.event_id.appointment_type_id.hide_duration "
+"and not object.event_id.allday and object.event_id.duration\">\n"
+"               <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">Süre</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-out=\"('%dH%02d' % "
+"(object.event_id.duration,round(object.event_id.duration*60)%60)) or "
+"''\">%02d ' % "
+"(object.event_id.duration,round(object.event_id.duration*60)%60)) veya "
+"''\">0H30</t></td>\n"
+"           </tr>\n"
+"            <tr t-if=\"object.event_id.location\">\n"
+"               <td style=\"width: 100px; padding-top: 6px; color: #676F7B; "
+"vertical-align: top;\">Konum</td>\n"
+"                <td style=\"padding-top: 6px;\">\n"
+"                   <t t-out=\"object.event_id.location or ''\">Bruxelles</"
+"t>\n"
+"                    <a target=\"_blank\" t-if=\"object.event_id.location != "
+"object.event_id.appointment_type_id.location_id.name\" t-attf-href=\"http://"
+"maps.google.com/maps?oi=map&amp;q={{object.event_id.location}}\" "
+"style=\"margin-left: 12px; font-size: 12px; color: #008f8c; text-decoration: "
+"underline;\">Haritada görüntüle</a>\n"
+"                </td>\n"
+"           </tr>\n"
+"            <tr t-"
+"if=\"object.event_id.appointment_type_id.manage_capacity\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\"></td>\n"
+"                <td style=\"padding-top: 6px;\"> <t t-"
+"out=\"object.event_id.total_capacity_reserved\"/> çalışanları için</td>\n"
+"            </tr>\n"
+"           <tr t-if=\"not object.event_id.appointment_type_id.is_auto_assign "
+"and object.event_id.appointment_resource_ids\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B; "
+"vertical-align: top;\">Kaynaklar</td>\n"
+"                <td style=\"padding-top: 6px;\">\n"
+"                   <ul style=\"padding: 0 15px;\">\n"
+"                        <li t-"
+"foreach=\"object.event_id.appointment_resource_ids\" t-as=\"resource\">\n"
+"                           <span style=\"margin-left:5px\" t-"
+"out=\"resource.name or ''\">Tablo 1</span>\n"
+"                        </li>\n"
+"                   </ul>\n"
+"                </td>\n"
+"           </tr>\n"
+"            <tr t-if=\"object.event_id.videocall_redirection\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">\n"
+"                    <t t-if=\"object.event_id.videocall_source == "
+"'discuss'\"></t>\n"
+"                    <t t-else=\"\"> ile katılın Katıl</t>\n"
+"                </td>\n"
+"               <td style=\"padding-top: 6px;\">\n"
+"                    <a t-attf-"
+"href=\"{{ object.event_id.videocall_redirection }}\" target=\"_blank\" "
+"style=\"color: #008f8c;\">\n"
+"                       <t t-if=\"object.event_id.videocall_source == "
+"'discuss'\">Odoo Discuss</t>\n"
+"                        <t t-else=\"\">Görüntülü toplantı</t>\n"
+"                    </a>\n"
+"               </td>\n"
+"            </tr>\n"
+"       </table>\n"
+"    </div>\n"
+"   <div style=\"margin: 32px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">Katılımcılar</h2>\n"
+"        <div t-foreach=\"object.event_id.attendee_ids\" t-as=\"attendee\" "
+"style=\"margin-bottom: 5px;\">\n"
+"           <img t-if=\"attendee.state\" t-attf-src=\"/calendar/static/src/"
+"img/state_{{ attendee.state }}.png\" style=\"border:0; width: 15px; height: "
+"15px; vertical-align: text-bottom;\"/>\n"
+"            <t t-if=\"attendee != object\">\n"
+"               <span style=\"margin-left: 5px\" t-out=\"attendee.common_name "
+"or ''\">Mitchell Yönetici</span>\n"
+"            </t>\n"
+"           <t t-else=\"\">\n"
+"                <span style=\"margin-left:5px\">Sen</span>\n"
+"            </t>\n"
+"       </div>\n"
+"    </div>\n"
+"   <div t-if=\"not is_html_empty(object.event_id.description)\" "
+"style=\"margin: 32px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">Etkinliğin açıklaması</h2>\n"
+"        <div t-out=\"object.event_id.description\"/>\n"
+"   </div>\n"
+"    <div t-if=\"target_customer\" style=\"margin: 32px 0 0;\">\n"
+"       <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-weight: "
+"bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};\">Bu "
+"etkinlikte değişiklik yapın</h2>\n"
+"        <a t-attf-href=\"/calendar/meeting/view?token={{object.access_token}}"
+"&amp;id={{object.event_id.id}}\" style=\"color: color: #008f8c; text-"
+"decoration: underline;\">{{object.event_id.id}} \" style=\"color: color: "
+"#008f8c; text-decoration: underline;\">Reschedule</a>\n"
+"    </div>\n"
+"   <t t-set=\"upcoming_appointments\" t-"
+"value=\"(object.event_id.appointment_booker_id.upcoming_appointment_ids - "
+"object.event_id).sorted('start')\"/>\n"
+"    <div t-if=\"upcoming_appointments\" style=\"margin: 32px 0 0;\">\n"
+"       <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-weight: "
+"bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">Yaklaşan Diğer Randevu(lar)ınız</h2>\n"
+"        <ul style=\"margin: 6px 0 0; padding: 0 18px;\">\n"
+"           <li style=\"margin-top: 6px;\" t-"
+"foreach=\"upcoming_appointments\" t-as=\"upcoming_appointment\">\n"
+"                <span t-out=\"upcoming_appointment.appointment_type_id.name "
+"or ''\">Teknik Demo</span>\n"
+"                <span style=\"margin: 0 10px;\">-</span>\n"
+"                <span t-out=\"upcoming_appointment.start or ''\" t-"
+"options=\"{&quot;widget&quot;: &quot;datetime&quot;, &quot;format&quot;: "
+"&quot;medium&quot;, &quot;tz_name&quot;: object.mail_tz}\" style=\"font-"
+"weight: bold;\">20 Haziran, 15:00</span>\n"
+"                <a t-attf-href=\"/calendar/view/"
+"#{upcoming_appointment.access_token}?partner_id=#{appointment_booker_id}\" "
+"target=\"_blank\" style=\"margin-left: 10px; font-size: 12px; color: "
+"#008f8c; text-decoration: underline;\">Detayları Görüntüle</a>\n"
+"            </li>\n"
+"       </ul>\n"
+"    </div>\n"
+"   <p style=\"margin: 32px 0 0;\">\n"
+"        Teşekkür ederiz!\n"
+"       <t t-if=\"object.event_id.user_id.signature\">\n"
+"            <span style=\"display: block; margin-top: 8px;\"><t t-"
+"out=\"object.event_id.user_id.signature or ''\">Mitchell Yönetici</t></"
+"span>\n"
+"       </t>\n"
+"    </p>\n"
+"</div>\n"
+"            "
 
 #. module: appointment
 #: model:mail.template,body_html:appointment.appointment_canceled_mail_template
@@ -552,6 +851,123 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"font-size: 13px; color: #374151;\">\n"
+"    <t t-set=\"recurrent\" t-value=\"object.recurrence_id and not "
+"ctx.get('calendar_template_ignore_recurrence')\"/>\n"
+"   <t t-set=\"mail_tz\" t-value=\"object._get_mail_tz() or ctx.get('mail_tz')"
+"\"/>\n"
+"    <t t-set=\"appointment_booker_name\" t-"
+"value=\"object.appointment_booker_id.display_name\"/>\n"
+"   <h1 style=\"font-size: 18px; font-weight: bold; color: #374151; margin-"
+"bottom: 28px;\">\n"
+"        Randevu iptal edildi\n"
+"       <img src=\"/calendar/static/src/img/times-circle.png\" "
+"style=\"border:0; width: 24px; height: 24px; margin-left: 10px; text-"
+"decoration:none; vertical-align: bottom;\"/>\n"
+"    </h1>\n"
+"   <p style=\"margin: 0;\">\n"
+"        <t t-if=\"appointment_booker_name\">\n"
+"            Merhaba <t t-out=\"appointment_booker_name\"/>,\n"
+"       </t>\n"
+"        <t t-else=\"\">\n"
+"            Merhaba,\n"
+"       </t>\n"
+"        <br/>\n"
+"        <span style=\"display: block; margin-top: 8px;\"> <t t-"
+"out=\"object.partner_id.name or ''\"> Brandon Freeman ile <t t-"
+"out=\"object.appointment_type_id.name or ''\">Teknik Demo</t> <t t-"
+"if=\"object.appointment_type_id.category not in ['custom', 'anytime'] and "
+"object.appointment_type_id.schedule_based_on == 'users' and "
+"object.partner_id\"> için randevunuz</t></t> iptal edilmiştir.</span>\n"
+"    </p>\n"
+"   <div style=\"margin: 32px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">Detaylar</h2>\n"
+"        <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"font-"
+"size: 13px; color: #374151;\">\n"
+"           <tr>\n"
+"                <td style=\"width: 100px; color: #676F7B;\">Tarih &amp; "
+"Saat</td>\n"
+"                <td style=\"font-weight: bold;\">\n"
+"                   <t t-out=\"format_datetime(dt=object.start, tz=mail_tz if "
+"not object.allday else None, dt_format='EEEE', lang_code=object.env.lang) or "
+"''\">Çarşamba</t>\n"
+"                    <t t-out=\"format_datetime(dt=object.start, tz=mail_tz "
+"if not object.allday else None, dt_format='d', lang_code=object.env.lang) or "
+"''\">1</t>\n"
+"                    <t t-out=\"format_datetime(dt=object.start, tz=mail_tz "
+"if not object.allday else None, dt_format='MMMM y', "
+"lang_code=object.env.lang) or ''\">Ocak 2020</t>\n"
+"                    <t t-if=\"not object.allday\">\n"
+"                       <t t-out=\"format_time(time=object.start, tz=mail_tz, "
+"time_format='short', lang_code=object.env.lang) or ''\">8:00</t>\n"
+"                        <t t-if=\"not "
+"object.appointment_type_id.hide_timezone and mail_tz\">\n"
+"                           <span style=\"font-size: 11px; font-weight: "
+"normal;\">\n"
+"                                (<t t-out=\"mail_tz\"/>)\n"
+"                           </span>\n"
+"                        </t>\n"
+"                   </t>\n"
+"                </td>\n"
+"           </tr>\n"
+"            <tr t-if=\"recurrent\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\"></td>\n"
+"                <td style=\"padding-top: 6px;\"> <t t-"
+"out=\"object.recurrence_id.name or ''\"> Her 1 Haftada Bir, 3 etkinlik için</"
+"t></td>\n"
+"           </tr>\n"
+"            <tr t-if=\"not object.appointment_type_id.hide_duration and not "
+"object.allday and object.duration\" style=\"padding-top: 6px;\">\n"
+"               <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">Süre</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-out=\"('%dH%02d' % "
+"(object.duration,round(object.duration*60)%60)) or ''\">%02d ' % "
+"(object.duration,round(object.duration*60)%60)) veya ''\">0H30</t></td>\n"
+"           </tr>\n"
+"            <tr t-if=\"object.location\">\n"
+"               <td style=\"width: 100px; padding-top: 6px; color: #676F7B; "
+"vertical-align: top;\">Konum</td>\n"
+"                <td style=\"padding-top: 6px;\">\n"
+"                   <t t-out=\"object.location or ''\">Bruxelles</t>\n"
+"                    <a target=\"_blank\" t-if=\"object.location != "
+"object.appointment_type_id.location_id.name\" t-attf-href=\"http://"
+"maps.google.com/maps?oi=map&amp;q={{ object.location }}\" style=\"margin-"
+"left: 12px; font-size: 12px; color: #008f8c; text-decoration: underline;"
+"\">Haritada görüntüle</a>\n"
+"                </td>\n"
+"           </tr>\n"
+"        </table>\n"
+"   </div>\n"
+"    <div style=\"margin: 32px 0 0;\">\n"
+"       <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-weight: "
+"bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">Katılımcılar</h2>\n"
+"        <div t-foreach=\"object.attendee_ids\" t-as=\"attendee\" "
+"style=\"margin-bottom: 5px;\">\n"
+"           <img t-if=\"attendee.state\" t-attf-src=\"/calendar/static/src/"
+"img/state_{{ attendee.state }}.png\" style=\"border:0; width: 15px; height: "
+"15px; vertical-align: text-bottom;\"/>\n"
+"            <t t-if=\"attendee.common_name\">\n"
+"               <span style=\"margin-left: 5px\" t-out=\"attendee.common_name "
+"or ''\">Mitchell Yönetici</span>\n"
+"            </t>\n"
+"           <t t-else=\"\">\n"
+"                <span style=\"margin-left:5px\">Sen</span>\n"
+"            </t>\n"
+"       </div>\n"
+"    </div>\n"
+"   <div t-if=\"not is_html_empty(object.description)\" style=\"margin: 32px "
+"0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">Etkinliğin açıklaması</h2>\n"
+"        <div t-out=\"object.description\"/>\n"
+"   </div>\n"
+"</div>\n"
+"            "
 
 #. module: appointment
 #: model:mail.template,body_html:appointment.appointment_booked_mail_template
@@ -755,6 +1171,205 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"font-size: 13px; color: #374151;\">\n"
+"    <t t-set=\"recurrent\" t-value=\"object.recurrence_id and not "
+"ctx.get('calendar_template_ignore_recurrence')\"/>\n"
+"   <t t-set=\"mail_tz\" t-value=\"object._get_mail_tz() or ctx.get('mail_tz')"
+"\"/>\n"
+"    <t t-set=\"appointment_booker_name\" t-"
+"value=\"object.appointment_booker_id.display_name\"/>\n"
+"   <h1 style=\"font-size: 18px; font-weight: bold; color: #374151;\">\n"
+"        <t t-if=\"not object.appointment_type_id.is_always_confirm and "
+"object.appointment_status == 'request'\">Randevu talep edildi</t>\n"
+"        <t t-else=\"\">\n"
+"            Rezervasyon onaylandı\n"
+"           <img src=\"/calendar/static/src/img/check-circle.png\" "
+"style=\"border:0; width: 24px; height: 24px; margin-left: 10px; text-"
+"decoration:none; vertical-align: bottom;\"/>\n"
+"        </t>\n"
+"   </h1>\n"
+"    <p style=\"margin: 0;\">\n"
+"       <span style=\"display: block; margin-top: 8px;\">\n"
+"            <t t-out=\"appointment_booker_name or ''\">John Booker</t>\n"
+"            <t t-if=\"not object.appointment_type_id.is_always_confirm and "
+"object.appointment_status == 'request'\"> talep etti </t>\n"
+"            <t t-else=\"\"> rezervasyon yaptı </t>\n"
+"            bir randevu: <t t-out=\"object.appointment_type_id.name or "
+"''\">Teknik Demo</t>\n"
+"            <t t-if=\"object.appointment_type_id.category not in ['custom', "
+"'anytime'] and object.appointment_type_id.schedule_based_on == 'users' and "
+"object.partner_id\">\n"
+"                <t t-out=\"object.partner_id.name or ''\"> Brandon Freeman "
+"ile</t>\n"
+"            </t>.\n"
+"       </span>\n"
+"    </p>\n"
+"   <div style=\"text-align: center; padding: 16px 0px 16px 0px; margin-top: "
+"16px;\">\n"
+"        <a t-attf-href=\"/calendar/meeting/join?"
+"token={{ object.access_token }}\" t-attf-style=\"display: inline-block; "
+"padding: 7px 14px; color: {{user.company_id.email_primary_color or "
+"'#FFFFFF'}}; text-decoration: none; background-color: "
+"{{user.company_id.email_secondary_color or '#875A7B'}}; border-radius: "
+"3px\">{{user.company_id.email_primary_color or '#FFFFFF'}}; text-decoration: "
+"none; background-color: {{user.company_id.email_secondary_color or "
+"'#875A7B'}}; border-radius: 3px\">\n"
+"            Katılın</a>\n"
+"        <a t-attf-href=\"/odoo/calendar.event/{{ object.id }}\" t-attf-"
+"style=\"display: inline-block; margin-left: 12px; padding: 7px 14px; color: "
+"#111827; text-decoration: none; background-color: #E7E9ED; border-radius: "
+"3px;\">\n"
+"            Görünüm</a>\n"
+"    </div>\n"
+"   <div style=\"margin: 16px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">Detaylar</h2>\n"
+"        <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"font-"
+"size: 13px; color: #374151;\">\n"
+"           <tr>\n"
+"                <td style=\"width: 100px; color: #676F7B;\">Tarih &amp; "
+"Saat</td>\n"
+"                <td style=\"font-weight: bold;\">\n"
+"                   <t t-out=\"format_datetime(dt=object.start, tz=mail_tz if "
+"not object.allday else None, dt_format='EEEE', lang_code=object.env.lang) or "
+"''\">Çarşamba</t>\n"
+"                    <t t-out=\"format_datetime(dt=object.start, tz=mail_tz "
+"if not object.allday else None, dt_format='d', lang_code=object.env.lang) or "
+"''\">1</t>\n"
+"                    <t t-out=\"format_datetime(dt=object.start, tz=mail_tz "
+"if not object.allday else None, dt_format='MMMM y', "
+"lang_code=object.env.lang) or ''\">Ocak 2020</t>\n"
+"                    <t t-if=\"not object.allday\">\n"
+"                       <t t-out=\"format_time(time=object.start, tz=mail_tz, "
+"time_format='short', lang_code=object.env.lang) or ''\">8:00</t>\n"
+"                        <t t-if=\"not "
+"object.appointment_type_id.hide_timezone and mail_tz\">\n"
+"                           <span style=\"font-size: 11px; font-weight: "
+"normal;\">\n"
+"                                (<t t-out=\"mail_tz\"/>)\n"
+"                           </span>\n"
+"                        </t>\n"
+"                   </t>\n"
+"                </td>\n"
+"           </tr>\n"
+"            <tr t-if=\"recurrent\">\n"
+"               <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">Ne zaman</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-"
+"out=\"object.recurrence_id.name or ''\"> Her 1 Haftada Bir, 3 etkinlik için</"
+"t></td>\n"
+"           </tr>\n"
+"            <tr t-if=\"not object.appointment_type_id.hide_duration and not "
+"object.allday and object.duration\">\n"
+"               <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">Süre</td>\n"
+"                <td style=\"padding-top: 6px;\"><t t-out=\"('%dH%02d' % "
+"(object.duration,round(object.duration*60)%60)) or ''\">%02d ' % "
+"(object.duration,round(object.duration*60)%60)) veya ''\">0H30</t></td>\n"
+"           </tr>\n"
+"            <tr t-if=\"object.location\">\n"
+"               <td style=\"width: 100px; padding-top: 6px; color: #676F7B; "
+"vertical-align: top;\">Konum</td>\n"
+"                <td style=\"padding-top: 6px;\">\n"
+"                   <t t-out=\"object.location or ''\">Bruxelles</t>\n"
+"                    <a target=\"_blank\" t-if=\"object.location != "
+"object.appointment_type_id.location_id.name\" t-attf-href=\"http://"
+"maps.google.com/maps?oi=map&amp;q={{ object.location }}\" style=\"margin-"
+"left: 12px; font-size: 12px; color: #008f8c; text-decoration: underline;"
+"\">Haritada görüntüle</a>\n"
+"                </td>\n"
+"           </tr>\n"
+"            <tr t-if=\"object.appointment_type_id.manage_capacity\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\"></td>\n"
+"                <td style=\"padding-top: 6px;\"> <t t-"
+"out=\"object.total_capacity_reserved\"/> çalışanları için</td>\n"
+"            </tr>\n"
+"           <tr t-if=\"not object.appointment_type_id.is_auto_assign and "
+"object.appointment_resource_ids\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B; "
+"vertical-align: top;\">Kaynaklar</td>\n"
+"                <td style=\"padding-top: 6px;\">\n"
+"                   <ul style=\"padding: 0 15px;\">\n"
+"                        <li t-foreach=\"object.appointment_resource_ids\" t-"
+"as=\"resource\">\n"
+"                           <span style=\"margin-left:5px\" t-"
+"out=\"resource.name or ''\">Tablo 1</span>\n"
+"                        </li>\n"
+"                   </ul>\n"
+"                </td>\n"
+"           </tr>\n"
+"            <tr t-if=\"object.videocall_redirection\">\n"
+"                <td style=\"width: 100px; padding-top: 6px; color: #676F7B;"
+"\">\n"
+"                    <t t-if=\"object.videocall_source == 'discuss'\"></t>\n"
+"                    <t t-else=\"\"> ile katılın Katıl</t>\n"
+"                </td>\n"
+"               <td style=\"padding-top: 6px;\">\n"
+"                    <a t-attf-href=\"{{ object.videocall_redirection }}\" "
+"target=\"_blank\" style=\"color: #008f8c;\">\n"
+"                       <t t-if=\"object.videocall_source == 'discuss'\">Odoo "
+"Discuss</t>\n"
+"                        <t t-else=\"\">Görüntülü toplantı</t>\n"
+"                    </a>\n"
+"               </td>\n"
+"            </tr>\n"
+"       </table>\n"
+"    </div>\n"
+"   <div style=\"margin: 32px 0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">Katılımcılar</h2>\n"
+"        <div t-foreach=\"object.attendee_ids\" t-as=\"attendee\" "
+"style=\"margin-bottom: 5px;\">\n"
+"           <img t-if=\"attendee.state\" t-attf-src=\"/calendar/static/src/"
+"img/state_{{ attendee.state }}.png\" style=\"border:0; width: 15px; height: "
+"15px; vertical-align: text-bottom;\"/>\n"
+"            <t t-if=\"attendee.common_name\">\n"
+"               <span style=\"margin-left: 5px\" t-out=\"attendee.common_name "
+"or ''\">Mitchell Yönetici</span>\n"
+"            </t>\n"
+"           <t t-else=\"\">\n"
+"                <span style=\"margin-left:5px\">Sen</span>\n"
+"            </t>\n"
+"       </div>\n"
+"    </div>\n"
+"   <div t-if=\"not is_html_empty(object.description)\" style=\"margin: 32px "
+"0 0;\">\n"
+"        <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-"
+"weight: bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">Etkinliğin açıklaması</h2>\n"
+"        <div t-out=\"object.description\"/>\n"
+"   </div>\n"
+"    <t t-set=\"upcoming_appointments\" t-"
+"value=\"(object.appointment_booker_id.upcoming_appointment_ids - "
+"object).sorted('start')\"/>\n"
+"   <div t-if=\"upcoming_appointments\" style=\"margin: 32px 0 0;\">\n"
+"        <t t-set=\"appointment_booker_id\" t-"
+"value=\"object.appointment_booker_id.id\"/>\n"
+"       <h2 t-attf-style=\"margin-bottom: 12px; font-size: 14px; font-weight: "
+"bold; color: {{user.company_id.email_secondary_color or '#875A7B'}};"
+"\">Yaklaşan Diğer Randevu(lar)ınız</h2>\n"
+"        <ul style=\"margin: 6px 0 0; padding: 0 18px;\">\n"
+"           <li style=\"margin-top: 6px;\" t-"
+"foreach=\"upcoming_appointments\" t-as=\"upcoming_appointment\">\n"
+"                <span t-out=\"upcoming_appointment.appointment_type_id.name "
+"or ''\">Teknik Demo</span>\n"
+"                <span style=\"margin: 0 10px;\">-</span>\n"
+"                <span t-out=\"upcoming_appointment.start or ''\" t-"
+"options=\"{&quot;widget&quot;: &quot;datetime&quot;, &quot;format&quot;: "
+"&quot;medium&quot;, &quot;tz_name&quot;: mail_tz}\" style=\"font-weight: "
+"bold;\">20 Haziran, 15:00</span>\n"
+"                <a t-attf-href=\"/calendar/view/"
+"#{upcoming_appointment.access_token}?partner_id=#{appointment_booker_id}\" "
+"target=\"_blank\" style=\"margin-left: 10px; font-size: 12px; color: "
+"#008f8c; text-decoration: underline;\">Detayları Görüntüle</a>\n"
+"            </li>\n"
+"       </ul>\n"
+"    </div>\n"
+"</div>\n"
+"            "
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -765,22 +1380,22 @@ msgstr "Randevu Planlandı!"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_gantt_kanban_popover
 msgid "<i class=\"fa fa-circle text-400 me-1\" title=\"Appointment Status\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-circle text-400 me-1\" title=\"Appointment Status\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form_gantt_booking
 msgid "<i class=\"fa fa-circle\" title=\"Status\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-circle\" title=\"Status\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_gantt_kanban_popover
 msgid "<i class=\"fa fa-clock-o text-400 me-1\" title=\"Date and time\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-clock-o text-400 me-1\" title=\"Date and time\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form_gantt_booking
 msgid "<i class=\"fa fa-cubes text-600\" title=\"Resources\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-cubes text-600\" title=\"Resources\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_invite_view_form
@@ -799,13 +1414,14 @@ msgstr ""
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_gantt_kanban_popover
 msgid "<i class=\"fa fa-map-marker text-400 me-1\" title=\"Location\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-map-marker text-400 me-1\" title=\"Location\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_gantt_kanban_popover
 msgid ""
 "<i class=\"fa fa-sticky-note text-400 mt-1 me-1\" title=\"Description\"/>"
 msgstr ""
+"<i class=\"fa fa-sticky-note text-400 mt-1 me-1\" title=\"Description\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -820,12 +1436,12 @@ msgstr "<i class=\"fa fa-times text-danger me-3\"/>Randevu İptal Edildi"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_gantt_kanban_popover
 msgid "<i class=\"fa fa-user text-400 me-1\" title=\"Guests\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-user text-400 me-1\" title=\"Guests\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form_gantt_booking
 msgid "<i class=\"fa fa-user-plus text-600\" title=\"Reserved Capacity\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-user-plus text-600\" title=\"Reserved Capacity\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_meeting_details
@@ -841,6 +1457,7 @@ msgstr ""
 msgid ""
 "<i class=\"fa fa-video-camera text-400 me-1\" title=\"Video Call URL\"/>"
 msgstr ""
+"<i class=\"fa fa-video-camera text-400 me-1\" title=\"Video Call URL\"/>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_invite_view_form
@@ -883,22 +1500,22 @@ msgstr ""
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "<i class=\"oi oi-fw o_button_icon oi-arrow-right\"/> Create Resources"
-msgstr ""
+msgstr "<i class=\"oi oi-fw o_button_icon oi-arrow-right\"/> Kaynak Oluşturun"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_form
 msgid "<i class=\"oi oi-plus me-1\"/> Add Guests"
-msgstr ""
+msgstr "<i class=\"oi oi-plus me-1\"/> Misafir Ekleme"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
 msgid "<i class=\"oi oi-plus me-1\"/>Add Guests"
-msgstr ""
+msgstr "<i class=\"oi oi-plus me-1\"/>Misafir Ekleme"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "<i class=\"oi oi-plus o_button_icon\"/> Add Video"
-msgstr ""
+msgstr "<i class=\"oi oi-plus o_button_icon\"/> Video Ekle"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_meeting_date
@@ -928,6 +1545,15 @@ msgid ""
 "selected time\n"
 "                    </span>"
 msgstr ""
+"<span class=\"me-1\">Aşağıdakiler\n"
+"                        <span invisible=\"not unavailable_partner_ids\"></"
+"span>\n"
+"                        <span invisible=\"not unavailable_partner_ids or not "
+"unavailable_resource_ids\"> /</span>\n"
+"                        <span invisible=\"not "
+"unavailable_resource_ids\">katılımcıları</span> kaynakları seçilen zamanda "
+"mevcut değildir\n"
+"                   </span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_form
@@ -940,6 +1566,8 @@ msgid ""
 "<span class=\"text-muted\" invisible=\"category != 'custom'\">Depending on "
 "the Slots</span>"
 msgstr ""
+"<span class=\"text-muted\" invisible=\"category != 'custom'\">Zaman "
+"Dilimlerine Bağlı Olarak</span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -1004,17 +1632,17 @@ msgstr "<span>Online</span>"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "<span>by visitor</span>"
-msgstr ""
+msgstr "<span>ziyaretçi tarafından</span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "<span>hours</span>"
-msgstr ""
+msgstr "<span>saatler</span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "<span>seats max</span>"
-msgstr ""
+msgstr "<span>maksimum koltuk</span>"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_info
@@ -1023,6 +1651,9 @@ msgid ""
 "                                        You can now choose a different "
 "schedule that suits you better."
 msgstr ""
+"<strong>Randevu iptal edildi!</strong>\n"
+"                                        Artık size daha uygun farklı bir "
+"program seçebilirsiniz."
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_info
@@ -1062,7 +1693,7 @@ msgstr "Bir %s randevu türü, tarih ve saatlerle sınırlı olmamalıdır."
 #. module: appointment
 #: model:ir.model.constraint,message:appointment.constraint_appointment_question_check_default_question_is_reusable
 msgid "A default question must be reusable."
-msgstr ""
+msgstr "Varsayılan bir soru yeniden kullanılabilir olmalıdır."
 
 #. module: appointment
 #. odoo-python
@@ -1132,6 +1763,8 @@ msgstr "Aktivite Türü İmgesi"
 
 #. module: appointment
 #. odoo-javascript
+#: code:addons/appointment/static/src/views/appointment_calendar/appointment_calendar_controller.js:0
+#: code:addons/appointment/static/src/views/appointment_calendar/appointment_calendar_controller.xml:0
 #: code:addons/appointment/static/src/views/gantt/gantt_renderer.js:0
 #: code:addons/appointment/static/src/views/gantt/gantt_renderer_controls.xml:0
 #: code:addons/appointment/static/src/views/list/list_renderer.js:0
@@ -1153,7 +1786,7 @@ msgstr "Buraya bir fonksiyon ekleyin..."
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form
 msgid "Add a line"
-msgstr ""
+msgstr "Satır Ekle"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_meeting_user
@@ -1203,17 +1836,17 @@ msgstr "Tüm gün"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Allow"
-msgstr ""
+msgstr "İzin Ver"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Allow Bookings"
-msgstr ""
+msgstr "Rezervasyonlara İzin Ver"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__allow_guests
 msgid "Allow invitations"
-msgstr ""
+msgstr "Davetlere izin verin"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__country_ids
@@ -1276,12 +1909,12 @@ msgstr "Yanıtlar"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_invite__resources_resource_choice__all_assigned_resources
 msgid "Any Resource"
-msgstr ""
+msgstr "Herhangi Bir Kaynak"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_invite__resources_choice__all_assigned_resources
 msgid "Any User"
-msgstr ""
+msgstr "Herhangi Bir Kullanıcı"
 
 #. module: appointment
 #. odoo-javascript
@@ -1437,7 +2070,7 @@ msgstr "Randevu Türü"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_booking_line__appointment_user_id
 msgid "Appointment User"
-msgstr ""
+msgstr "Randevu Kullanıcısı"
 
 #. module: appointment
 #. odoo-python
@@ -1515,12 +2148,12 @@ msgstr "Arşivlendi"
 #. module: appointment
 #: model_terms:ir.actions.act_window,help:appointment.appointment_question_action
 msgid "Ask the right questions, get the right answers"
-msgstr ""
+msgstr "Doğru soruları sorun, doğru yanıtları alın"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__is_auto_assign
 msgid "Assign automatically"
-msgstr ""
+msgstr "Otomatik olarak atama"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_invite__resources_choice
@@ -1531,7 +2164,7 @@ msgstr "Atanan"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__assignment_method
 msgid "Assignment"
-msgstr ""
+msgstr "Atama"
 
 #. module: appointment
 #. odoo-python
@@ -1553,12 +2186,12 @@ msgstr "Katılımcılar"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__auto_confirm
 msgid "Auto Confirm"
-msgstr ""
+msgstr "Otomatik Onaylama"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__assignment_method__auto
 msgid "Automatically"
-msgstr ""
+msgstr "Otomatik olarak"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__auto_confirm
@@ -1570,6 +2203,12 @@ msgid ""
 "            Requested appointments are still considered as reserved for the "
 "slots availability"
 msgstr ""
+"Ayrılan toplam kapasitenin verilen yüzdesine kadar randevuları oluşturma "
+"sırasında otomatik olarak onaylayın.\n"
+"            İşaretlenmezse, randevular talep olarak oluşturulur ve manuel "
+"onay gerektirir.\n"
+"            Talep edilen randevular hala slot kullanılabilirliği için "
+"ayrılmış olarak kabul edilir"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__slot_ids
@@ -1626,7 +2265,7 @@ msgstr "Arkaplan Resmi"
 #. odoo-javascript
 #: code:addons/appointment/static/src/fields/badge_selection_icon_mapping_field.js:0
 msgid "Badges with Icon for Selection Field"
-msgstr ""
+msgstr "Seçim Alanı için Simgeli Rozetler"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_invite__base_book_url
@@ -1638,7 +2277,7 @@ msgstr "Temel Bağlantı URL'si"
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__schedule_based_on
 #: model:ir.model.fields,field_description:appointment.field_calendar_event__appointment_type_schedule_based_on
 msgid "Book"
-msgstr ""
+msgstr "Kitap"
 
 #. module: appointment
 #. odoo-python
@@ -1662,7 +2301,7 @@ msgstr "Rezervasyonlu Randevular"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form
 msgid "Booked Capacity"
-msgstr ""
+msgstr "Rezervasyonlu Kapasite"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_tree_booking
@@ -1697,13 +2336,13 @@ msgstr "Rezervasyon Başlangıç"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_meeting_details
 msgid "Booking details"
-msgstr ""
+msgstr "Rezervasyon detayları"
 
 #. module: appointment
 #. odoo-python
 #: code:addons/appointment/models/appointment_booking_line.py:0
 msgid "Booking line must have a user or resource set."
-msgstr ""
+msgstr "Rezervasyon hattında bir kullanıcı veya kaynak kümesi bulunmalıdır."
 
 #. module: appointment
 #: model:ir.ui.menu,name:appointment.menu_appointment_reporting_bookings
@@ -1719,11 +2358,15 @@ msgid ""
 "        reserved user/resource capacity exceeds this percentage of total "
 "capacity."
 msgstr ""
+"Toplam ücret ödendikten sonra rezervasyonlar otomatik olarak "
+"onaylanmayacaktır.\n"
+"        ayrılmış kullanıcı/kaynak kapasitesi toplam kapasitenin bu yüzdesini "
+"aşar."
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__assignment_method__manual
 msgid "By visitor"
-msgstr ""
+msgstr "Ziyaretçi tarafından"
 
 #. module: appointment
 #: model:ir.model,name:appointment.model_calendar_attendee
@@ -1739,12 +2382,12 @@ msgstr "Takvim Etkinliği"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category__anytime
 msgid "Calendar Link"
-msgstr ""
+msgstr "Takvim Bağlantısı"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_search
 msgid "Calendar Links"
-msgstr ""
+msgstr "Takvim Bağlantıları"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_form
@@ -1766,7 +2409,7 @@ msgstr "Randevunuzu iptal edin"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Cancellation"
-msgstr ""
+msgstr "İptal"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__canceled_mail_template_id
@@ -1808,13 +2451,14 @@ msgstr "Kullanıcı tarafından rezerve edilen kapasite"
 #. module: appointment
 #: model:ir.model.constraint,message:appointment.constraint_appointment_type_check_capacity_positive
 msgid "Capacity should be at least 1."
-msgstr ""
+msgstr "Kapasite en az 1 olmalıdır."
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_booking_line__capacity_used
 msgid ""
 "Capacity that will be used based on the capacity and user/resource selected"
 msgstr ""
+"Seçilen kapasite ve kullanıcı/kaynağa bağlı olarak kullanılacak kapasite"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__category
@@ -1825,7 +2469,7 @@ msgstr "Kategori"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form
 msgid "Check in"
-msgstr ""
+msgstr "Giriş"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_question__question_type__checkbox
@@ -1835,7 +2479,7 @@ msgstr "Onay Kutuları (birden fazla cevap)"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form
 msgid "Checked in"
-msgstr ""
+msgstr "Giriş Yapıldı"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__calendar_event__appointment_status__attended
@@ -1851,7 +2495,7 @@ msgstr "Giriş yapıldı"
 #. odoo-javascript
 #: code:addons/appointment/static/src/components/appointment_template_picker_dialog/appointment_template_picker_dialog.xml:0
 msgid "Choose an appointment preset"
-msgstr ""
+msgstr "Bir randevu ön ayarı seçin"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointments_list_layout
@@ -1874,7 +2518,7 @@ msgstr "Kapat"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Communication"
-msgstr ""
+msgstr "İletişim"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_resource__company_id
@@ -1931,7 +2575,7 @@ msgstr "Onay Mesajı"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Confirmation Page"
-msgstr ""
+msgstr "Onay Sayfası"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -1989,7 +2633,7 @@ msgstr "Bağlantıyı Kopyala ve Kapat"
 #. odoo-javascript
 #: code:addons/appointment/static/src/components/appointment_booking_action_helper/appointment_booking_action_helper.xml:0
 msgid "Create Booking"
-msgstr ""
+msgstr "Rezervasyon Oluştur"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_manage_leaves_view_form
@@ -1999,7 +2643,7 @@ msgstr "Kapanış Günü/Günleri Oluştur"
 #. module: appointment
 #: model:ir.model,website_form_label:appointment.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Müşteri Oluşturma"
 
 #. module: appointment
 #. odoo-javascript
@@ -2026,11 +2670,13 @@ msgstr "Bir Randevu Kaynağı Oluştur"
 msgid ""
 "Create questions your attendees can answer when booking their appointments."
 msgstr ""
+"Katılımcılarınızın randevularını alırken yanıtlayabilecekleri sorular "
+"oluşturun."
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__slot_creation_interval
 msgid "Create slot every"
-msgstr ""
+msgstr "Her seferinde yuva oluşturun"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_answer__create_uid
@@ -2094,7 +2740,7 @@ msgstr "Tarih &amp; saat"
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category__punctual
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_search
 msgid "Date-limited"
-msgstr ""
+msgstr "Tarih sınırlı"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_manage_leaves_view_form
@@ -2109,12 +2755,12 @@ msgstr "Reddedildi"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_search
 msgid "Default Questions"
-msgstr ""
+msgstr "Varsayılan Sorular"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_question__is_default
 msgid "Default question"
-msgstr ""
+msgstr "Varsayılan soru"
 
 #. module: appointment
 #. odoo-python
@@ -2221,12 +2867,13 @@ msgstr "İsim Göster"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__show_avatars
 msgid "Display pictures"
-msgstr ""
+msgstr "Resimleri göster"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__show_avatars
 msgid "Display user or resource images across the entire booking flow."
 msgstr ""
+"Tüm rezervasyon akışı boyunca kullanıcı veya kaynak resimlerini görüntüleyin."
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__category_time_display
@@ -2236,7 +2883,7 @@ msgstr "Görüntülenen kategori zaman alanları"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_form
 msgid "Displayed when the field is empty"
-msgstr ""
+msgstr "Alan boş olduğunda görüntülenir"
 
 #. module: appointment
 #. odoo-python
@@ -2247,7 +2894,7 @@ msgstr "Herhangi bir beslenme tercihiniz veya kısıtlamanız var mı?"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_resource_view_form
 msgid "Does not combine"
-msgstr ""
+msgstr "Birleştirilmez"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_question__question_type__select
@@ -2264,6 +2911,8 @@ msgstr "Süre"
 #: model_terms:appointment.type,message_intro:appointment.appointment_type_tennis_court
 msgid "Easily reserve tennis courts for your next match, anytime and anywhere."
 msgstr ""
+"Bir sonraki maçınız için istediğiniz zaman ve istediğiniz yerde tenis "
+"kortlarını kolayca rezerve edin."
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_form
@@ -2273,7 +2922,7 @@ msgstr "E-posta*"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Emails & SMS"
-msgstr ""
+msgstr "E-postalar ve SMS"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_manage_leaves__leave_end_dt
@@ -2308,7 +2957,7 @@ msgstr "Her"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_question__extra_comment
 msgid "Extra Comment"
-msgstr ""
+msgstr "Ekstra Yorum"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form_custom_share
@@ -2318,7 +2967,7 @@ msgstr "Onay Üzerine Ekstra Mesaj"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_form
 msgid "Extra comments..."
-msgstr ""
+msgstr "İlave yorumlar..."
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__message_confirmation
@@ -2328,13 +2977,13 @@ msgstr "Randevu alındıktan sonra sağlanan ek bilgiler."
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category_slot_scheduling__flexible
 msgid "Flexible"
-msgstr ""
+msgstr "Esnek"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category__custom
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_search
 msgid "Flexible Schedule"
-msgstr ""
+msgstr "Esnek Program"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.portal_my_home_appointment
@@ -2349,7 +2998,7 @@ msgstr "Takipçiler"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__message_partner_ids
 msgid "Followers (Partners)"
-msgstr ""
+msgstr "Takipçiler (İş ortakları)"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__activity_type_icon
@@ -2434,6 +3083,8 @@ msgid ""
 "How users and resources will be assigned to the meetings that customers book "
 "on your website."
 msgstr ""
+"Müşterilerin web sitenizde rezervasyon yaptığı toplantılara kullanıcıların "
+"ve kaynakların nasıl atanacağı."
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_answer__id
@@ -2466,7 +3117,7 @@ msgstr "İstisnai bir etkinliği belirtmek için kullanılan simge."
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_invite__identical_config_id
 msgid "Identical Config"
-msgstr ""
+msgstr "Aynı Yapılandırma"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__message_needaction
@@ -2572,7 +3223,7 @@ msgstr "Görsel 512"
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_question__is_default
 msgid "Include by default in new appointment types."
-msgstr ""
+msgstr "Yeni randevu türlerine varsayılan olarak ekleyin."
 
 #. module: appointment
 #. odoo-javascript
@@ -2588,7 +3239,7 @@ msgstr "Bağlantı ekle"
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_invite__identical_config_id
 msgid "Interface field to try to prevent creating identical links"
-msgstr ""
+msgstr "Aynı bağlantıların oluşturulmasını önlemeye çalışmak için arayüz alanı"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__message_intro
@@ -2599,7 +3250,7 @@ msgstr "Giriş Mesajı"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Introduction Page"
-msgstr ""
+msgstr "Giriş Sayfası"
 
 #. module: appointment
 #. odoo-javascript
@@ -2627,7 +3278,7 @@ msgstr "{{ object.event_id.name }} daveti"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__is_always_confirm
 msgid "Is Always Confirm"
-msgstr ""
+msgstr "Her Zaman Onaylanır"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__message_is_follower
@@ -2642,7 +3293,7 @@ msgstr "Yayınlandı"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_question__is_reusable
 msgid "Is Reusable"
-msgstr ""
+msgstr "Yeniden Kullanılabilir"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -2695,23 +3346,25 @@ msgstr ""
 #: code:addons/appointment/models/templates/appointment_type.py:0
 msgid "Let customers book a resource such as a room, a tennis court, etc."
 msgstr ""
+"Müşterilerin oda, tenis kortu vb. gibi bir kaynak için rezervasyon yapmasına "
+"izin verin."
 
 #. module: appointment
 #. odoo-python
 #: code:addons/appointment/models/templates/appointment_type.py:0
 msgid "Let customers book a table in your restaurant or bar"
-msgstr ""
+msgstr "Müşterilerin restoranınızda veya barınızda masa ayırtmasına izin verin"
 
 #. module: appointment
 #. odoo-python
 #: code:addons/appointment/models/templates/appointment_type.py:0
 msgid "Let others book a meeting in your calendar"
-msgstr ""
+msgstr "Başkalarının takviminizde toplantı rezervasyonu yapmasına izin verin"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_invite_view_form
 msgid "Link"
-msgstr ""
+msgstr "Bağlantı"
 
 #. module: appointment
 #. odoo-javascript
@@ -2732,7 +3385,7 @@ msgstr "Bağlantı URL'si"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_invite__book_url_params
 msgid "Link URL params"
-msgstr ""
+msgstr "Bağlantı URL parametreleri"
 
 #. module: appointment
 #. odoo-javascript
@@ -2793,11 +3446,13 @@ msgid ""
 "Manage the maximum amount of people a user/resource can handle (e.g. Table "
 "for 6 persons, ...)"
 msgstr ""
+"Bir kullanıcının/kaynağın idare edebileceği maksimum kişi sayısını yönetme "
+"(örn. 6 kişilik masa, ...)"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Mandatory"
-msgstr ""
+msgstr "Zorunlu"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_question__question_required
@@ -2807,23 +3462,23 @@ msgstr "Zorunlu Cevap"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_invite__resources_choice__current_user
 msgid "Me"
-msgstr ""
+msgstr "Bana"
 
 #. module: appointment
 #. odoo-python
 #: code:addons/appointment/models/templates/appointment_type.py:0
 msgid "Meeting"
-msgstr ""
+msgstr "Toplantı"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_calendar_event__name
 msgid "Meeting Subject"
-msgstr ""
+msgstr "Toplantı Konusu"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_meeting_details
 msgid "Meeting details"
-msgstr ""
+msgstr "Toplantı detayları"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_calendar_event__videocall_redirection
@@ -2834,7 +3489,7 @@ msgstr "Toplantı yönlendirme URL’si"
 #. odoo-python
 #: code:addons/appointment/controllers/calendar_view.py:0
 msgid "Meeting with %(name)s"
-msgstr ""
+msgstr "ile Toplantı %(name)s"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_kanban
@@ -2875,12 +3530,12 @@ msgstr "Randevularım"
 #. odoo-javascript
 #: code:addons/appointment/static/src/views/appointment_calendar/appointment_calendar_controller.xml:0
 msgid "My Calendar"
-msgstr ""
+msgstr "Takvimim"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_search
 msgid "My Calendar Link"
-msgstr ""
+msgstr "Takvim Bağlantım"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_invite_view_search
@@ -2942,7 +3597,7 @@ msgstr "Hiçbir Randevu veya Kaynak bulunamadı."
 #. odoo-javascript
 #: code:addons/appointment/static/src/components/appointment_booking_action_helper/appointment_booking_action_helper.xml:0
 msgid "No Bookings Found"
-msgstr ""
+msgstr "Rezervasyon Bulunamadı"
 
 #. module: appointment
 #: model_terms:ir.actions.act_window,help:appointment.appointment_invite_action
@@ -2970,7 +3625,7 @@ msgstr "Henüz veri yok!"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form
 msgid "No show"
-msgstr ""
+msgstr "Gösteri yok"
 
 #. module: appointment
 #. odoo-python
@@ -2983,7 +3638,7 @@ msgstr "Hiçbiri"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_search
 msgid "Not Reusable"
-msgstr ""
+msgstr "Tekrar Kullanılamaz"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_calendar_event__alarm_ids
@@ -3024,7 +3679,7 @@ msgstr "Odoo Sohbet"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category_time_display__punctual_fields
 msgid "On specific dates"
-msgstr ""
+msgstr "Belirli tarihlerde"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_slot__slot_type__unique
@@ -3065,7 +3720,7 @@ msgstr ""
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_invite_view_form
 msgid "Oops! The extension \""
-msgstr ""
+msgstr "Oops! Uzantı \""
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -3124,12 +3779,12 @@ msgstr "Randevuyu oluşturan kişi"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_question__question_type__phone
 msgid "Phone Number"
-msgstr ""
+msgstr "Telefon Numarası"
 
 #. module: appointment
 #: model:appointment.question,name:appointment.appointment_question_phone
 msgid "Phone number"
-msgstr ""
+msgstr "Telefon numarası"
 
 #. module: appointment
 #. odoo-javascript
@@ -3186,7 +3841,7 @@ msgstr "Sorular"
 #. odoo-python
 #: code:addons/appointment/controllers/appointment.py:0
 msgid "Questions & Answers"
-msgstr ""
+msgstr "Sorular & Cevaplar"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_question__question_type__radio
@@ -3290,7 +3945,7 @@ msgstr "Kaynak Rezervasyonları"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_invite__resources_resource_choice
 msgid "Resources Resource Choice"
-msgstr ""
+msgstr "Kaynaklar Kaynak Seçimi"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_calendar_event__unavailable_resource_ids
@@ -3331,7 +3986,7 @@ msgstr "Kullanıcılarla Kısıtla"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_search
 msgid "Reusable"
-msgstr ""
+msgstr "Yeniden kullanılabilir"
 
 #. module: appointment
 #. odoo-javascript
@@ -3378,6 +4033,7 @@ msgstr "Şuna Göre Planlayın:"
 msgid ""
 "Schedule a video meeting in a virtual room with one or more participants"
 msgstr ""
+"Sanal bir odada bir veya daha fazla katılımcıyla görüntülü toplantı planlayın"
 
 #. module: appointment
 #. odoo-javascript
@@ -3401,6 +4057,8 @@ msgid ""
 "Schedule your visit today and experience expert dental care brought right to "
 "your doorstep."
 msgstr ""
+"Ziyaretinizi bugün planlayın ve kapınıza kadar getirilen uzman diş bakımını "
+"deneyimleyin."
 
 #. module: appointment
 #. odoo-python
@@ -3460,7 +4118,7 @@ msgstr "Saat seçin"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__is_date_first
 msgid "Select date and time first"
-msgstr ""
+msgstr "Önce tarih ve saati seçin"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_answer_input__value_answer_id
@@ -3543,6 +4201,8 @@ msgstr "Bağlantıları Paylaş"
 msgid ""
 "Share this appointment type via link or schedule an appointment manually"
 msgstr ""
+"Bu randevu türünü bağlantı yoluyla paylaşın veya manuel olarak bir randevu "
+"planlayın"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_resource__shareable
@@ -3588,7 +4248,7 @@ msgstr "Slot türü"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Slots"
-msgstr ""
+msgstr "Slotlar"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__message_intro
@@ -3599,7 +4259,7 @@ msgstr "Randevu türünün küçük açıklaması."
 #. odoo-python
 #: code:addons/appointment/controllers/appointment.py:0
 msgid "Some required answers are missing in the form."
-msgstr ""
+msgstr "Formda bazı gerekli cevaplar eksiktir."
 
 #. module: appointment
 #. odoo-javascript
@@ -3639,7 +4299,7 @@ msgstr "Kaynak kombinasyonu"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_invite__resources_resource_choice__specific_resources
 msgid "Specific Resources"
-msgstr ""
+msgstr "Spesifik Kaynaklar"
 
 #. module: appointment
 #. odoo-javascript
@@ -3650,7 +4310,7 @@ msgstr "Belirli Zaman Dilimleri"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_invite__resources_choice__specific_resources
 msgid "Specific Users"
-msgstr ""
+msgstr "Belirli Kullanıcılar"
 
 #. module: appointment
 #: model:ir.actions.act_window,name:appointment.calendar_event_action_view_bookings_users
@@ -3696,11 +4356,13 @@ msgid ""
 "Starting from the beginning of the time slot, Odoo will create a new slot at "
 "regular intervals based on the time specified here."
 msgstr ""
+"Odoo, zaman aralığının başlangıcından başlayarak, burada belirtilen zamana "
+"göre düzenli aralıklarla yeni bir yuva oluşturacaktır."
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__select_first
 msgid "Starts with"
-msgstr ""
+msgstr "Şununla başlayan"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_form_gantt_booking
@@ -3861,6 +4523,10 @@ msgid ""
 "            This field is only used if the appointment type is not set to "
 "manage capacity."
 msgstr ""
+"Randevunun işleyebileceği slot başına maksimum rezervasyon miktarı (örneğin, "
+"verilen kullanıcı/kaynak için 6 rezervasyona izin ver).\n"
+"            Bu alan yalnızca randevu türü kapasiteyi yönetmek üzere "
+"ayarlanmamışsa kullanılır."
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__user_capacity
@@ -3868,6 +4534,8 @@ msgid ""
 "The maximum amount of capacity a user can handle when manage capacity is "
 "enabled."
 msgstr ""
+"Kapasite yönetimi etkinleştirildiğinde bir kullanıcının kullanabileceği "
+"maksimum kapasite miktarı."
 
 #. module: appointment
 #: model:ir.model.constraint,message:appointment.constraint_appointment_resource_check_capacity
@@ -3889,6 +4557,7 @@ msgstr ""
 #: model:ir.model.constraint,message:appointment.constraint_appointment_slot_check_start_and_end_datetimes
 msgid "The unique slot end datetime must be later than the start datetime."
 msgstr ""
+"Benzersiz yuva bitiş tarih saati, başlangıç tarih saatinden sonra olmalıdır."
 
 #. module: appointment
 #. odoo-javascript
@@ -3974,12 +4643,12 @@ msgstr "Bu, müşteri randevu formunun bir önizlemesidir."
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_form
 msgid "This question is used by"
-msgstr ""
+msgstr "Bu soru şu kişiler tarafından kullanılır"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_question__extra_comment
 msgid "This will appear below the question in the appointment form."
-msgstr ""
+msgstr "Bu, randevu formundaki sorunun altında görünecektir."
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_slot__weekday__4
@@ -4027,7 +4696,7 @@ msgstr "Token"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__max_bookings
 msgid "Total Bookings"
-msgstr ""
+msgstr "Toplam Rezervasyonlar"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__resource_total_capacity
@@ -4130,6 +4799,21 @@ msgid ""
 "            - Calendar Link: the user will create and share to another user "
 "an appointment type covering all their time slots"
 msgstr ""
+"Bu randevu türünün kategorisini tanımlamak için kullanılır.\n"
+"\n"
+"        Şunlardan biri olabilir:\n"
+"\n"
+"            - Haftalık Program: varsayılan kategori, haftalık yinelenen "
+"yuvalar. Web sitesinden erişilebilir\n"
+"\n"
+"            - Tarih sınırlı: düzenli slotlar 2 tarih arasında sınırlıdır. "
+"Web sitesinden erişilebilir\n"
+"\n"
+"            - Esnek Program: Kullanıcı, topladığı zaman aralıklarıyla özel "
+"bir randevu türü oluşturacak ve başka bir kullanıcıyla paylaşacaktır\n"
+"\n"
+"            - Takvim Bağlantısı: Kullanıcı, tüm zaman dilimlerini kapsayan "
+"bir randevu türü oluşturacak ve başka bir kullanıcıyla paylaşacaktır"
 
 #. module: appointment
 #: model:res.groups,name:appointment.group_appointment_user
@@ -4139,12 +4823,12 @@ msgstr "Kullanıcı"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__select_first__user_resource
 msgid "User / Resource"
-msgstr ""
+msgstr "Kullanıcı / Kaynak"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__user_capacity
 msgid "User Capacity"
-msgstr ""
+msgstr "Kullanıcı Kapasitesi"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_invite__staff_user_ids
@@ -4162,12 +4846,12 @@ msgstr "Görüntülü Görüşme"
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_type__event_videocall_source
 msgid "Video Link"
-msgstr ""
+msgstr "Video Bağlantısı"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_info
 msgid "We will book you with"
-msgstr ""
+msgstr "Sizin için rezervasyon yapacağız"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -4197,18 +4881,18 @@ msgstr "Haftanın Günü"
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category_slot_scheduling__weekly
 msgid "Weekly"
-msgstr ""
+msgstr "Haftalık"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category__recurring
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_search
 msgid "Weekly Schedule"
-msgstr ""
+msgstr "Haftalık Program"
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_type__select_first
 msgid "What is selected first by the customer when booking an appointment."
-msgstr ""
+msgstr "Randevu alırken müşteri tarafından ilk olarak ne seçilir."
 
 #. module: appointment
 #: model:ir.model.fields,help:appointment.field_appointment_question__is_reusable
@@ -4216,6 +4900,8 @@ msgid ""
 "Will appear in the list of available questions when adding one in any "
 "appointment. Always true for default questions."
 msgstr ""
+"Herhangi bir randevuya bir soru eklerken mevcut sorular listesinde "
+"görünecektir. Varsayılan sorular için her zaman doğrudur."
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.staff_user_select
@@ -4225,12 +4911,12 @@ msgstr "İle"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "Within availabilities,"
-msgstr ""
+msgstr "Müsaitlikler dahilinde,"
 
 #. module: appointment
 #: model:ir.model.fields.selection,name:appointment.selection__appointment_type__category_time_display__recurring_fields
 msgid "Within the next"
-msgstr ""
+msgstr "Bir sonraki"
 
 #. module: appointment
 #: model:ir.model.fields,field_description:appointment.field_appointment_resource__resource_calendar_id
@@ -4241,7 +4927,7 @@ msgstr "Çalışma Saatleri"
 #. odoo-javascript
 #: code:addons/appointment/static/src/xml/appointment_no_slot.xml:0
 msgid "You already booked \""
-msgstr ""
+msgstr "Zaten rezervasyon yaptınız \""
 
 #. module: appointment
 #. odoo-javascript
@@ -4270,12 +4956,12 @@ msgstr "Seçiminiz"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_form
 msgid "appointments"
-msgstr ""
+msgstr "randevular"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_info
 msgid "as you are already in touch with them."
-msgstr ""
+msgstr "çünkü onlarla zaten iletişim halindesiniz."
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -4285,17 +4971,17 @@ msgstr "de"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "at least"
-msgstr ""
+msgstr "en azından"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "days,"
-msgstr ""
+msgstr "günler,"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_question_view_form
 msgid "e.g. \"Anything else we should know?\""
-msgstr ""
+msgstr "Örneğin \"Bilmemiz gereken başka bir şey var mı?\""
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
@@ -4320,7 +5006,7 @@ msgstr ""
 #. module: appointment
 #: model:appointment.question,placeholder:appointment.appointment_question_phone
 msgid "e.g. +1 555-555-5555"
-msgstr ""
+msgstr "örn. +1 555-555-5555"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_manage_leaves_view_form
@@ -4373,7 +5059,7 @@ msgstr "örn. john.smith@example.com"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.calendar_event_view_gantt_kanban_popover
 msgid "guests"
-msgstr ""
+msgstr "misafirler"
 
 #. module: appointment
 #. odoo-javascript
@@ -4395,17 +5081,17 @@ msgstr "saat ve şu anda iptal edilemez.<br/>"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "hour(s) before start time"
-msgstr ""
+msgstr "başlangıç saatinden saat(ler) önce"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "hour(s) before the booking"
-msgstr ""
+msgstr "rezervasyondan önceki saat(ler)"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "of total capacity"
-msgstr ""
+msgstr "toplam kapasitenin"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -4422,7 +5108,7 @@ msgstr "kişiler"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "seats max"
-msgstr ""
+msgstr "maksimum koltuk"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
@@ -4433,6 +5119,11 @@ msgid ""
 "                                    <span invisible=\"schedule_based_on != "
 "'resources'\">resource</span>"
 msgstr ""
+"eşzamanlı randevu(lar) \n"
+"                                    <span invisible=\"schedule_based_on != "
+"'users'\"> kullanıcısı başına</span>\n"
+"                                    <span invisible=\"schedule_based_on != "
+"'resources'\">kaynağı</span>"
 
 #. module: appointment
 #. odoo-python
@@ -4444,7 +5135,7 @@ msgstr "birisi"
 #. odoo-python
 #: code:addons/appointment/controllers/portal.py:0
 msgid "start"
-msgstr ""
+msgstr "başlayın"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_validated
@@ -4460,7 +5151,7 @@ msgstr "den"
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.appointment_type_view_form
 msgid "up to"
-msgstr ""
+msgstr "’e kadar"
 
 #. module: appointment
 #: model_terms:ir.ui.view,arch_db:appointment.portal_my_appointments
@@ -4475,3 +5166,7 @@ msgid ""
 "== 'request' else 'Appointment Booked: ' }}"
 "{{ object.appointment_type_id.name }}"
 msgstr ""
+"{{ 'Appointment Requested: ' if not "
+"object.appointment_type_id.is_always_confirm and object.appointment_status "
+"== 'request' else 'Appointment Booked: ' }}"
+"{{ object.appointment_type_id.name }}"

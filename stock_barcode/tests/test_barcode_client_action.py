@@ -13,25 +13,20 @@ class TestBarcodeClientAction(HttpCase):
 
         self.uid = self.env.ref('base.user_admin').id
 
-        """ Remove all access rights linked to stock application"""
-        self.env.user.write({'group_ids': [
-            Command.unlink(self.env.ref('stock.group_production_lot').id),
-            Command.unlink(self.env.ref('stock.group_stock_multi_locations').id),
-            Command.unlink(self.env.ref('stock.group_tracking_lot').id),
-        ]})
-        # Explicitly remove the UoM group.
-        grp_uom = self.env.ref('uom.group_uom')
-        self.env.ref('base.group_user').write({'implied_ids': [Command.unlink(grp_uom.id)]})
-        self.env.user.write({'group_ids': [Command.unlink(grp_uom.id)]})
-
         self.env.user.email = 'info@example.com'
         self.supplier_location = self.env.ref('stock.stock_location_suppliers')
-        self.stock_location = self.env.ref('stock.stock_location_stock')
-        self.stock_location.write({
-            'barcode': 'LOC-01-00-00',
-        })
         self.customer_location = self.env.ref('stock.stock_location_customers')
-        self.pack_location = self.env.ref('stock.location_pack_zone')
+        # Create a company and a warehouse dedicated to the tests and configure its locations.
+        self.company = self.env['res.company'].create({'name': "Test Company"})
+        self.env.user.company_id = self.company
+        self.warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.company.id)])
+        self.warehouse.update({'name': 'Test Warehouse', 'code': 'WH'})
+        self.stock_location = self.warehouse.lot_stock_id
+        self.stock_location.barcode = 'LOC-01-00-00'
+        self.warehouse.wh_input_stock_loc_id.barcode = 'WHINPUT'
+        self.warehouse.wh_qc_stock_loc_id.barcode = 'WHQUALITY'
+        self.warehouse.wh_output_stock_loc_id.barcode = 'WHOUTPUT'
+        self.warehouse.wh_pack_stock_loc_id.barcode = 'WHPACKING'
         self.shelf3 = self.env['stock.location'].create({
             'name': 'Section 3',
             'location_id': self.stock_location.id,
@@ -39,12 +34,12 @@ class TestBarcodeClientAction(HttpCase):
         })
         self.shelf1 = self.env["stock.location"].create({
             'name': 'Section 1',
-            'location_id': self.env.ref('stock.warehouse0').lot_stock_id.id,
+            'location_id': self.stock_location.id,
             'barcode': 'LOC-01-01-00',
         })
         self.shelf2 = self.env['stock.location'].create({
             'name': 'Section 2',
-            'location_id': self.env.ref('stock.warehouse0').lot_stock_id.id,
+            'location_id': self.stock_location.id,
             'barcode': 'LOC-01-02-00',
         })
         self.shelf4 = self.env['stock.location'].create({
@@ -52,9 +47,10 @@ class TestBarcodeClientAction(HttpCase):
             'location_id': self.stock_location.id,
             'barcode': 'shelf4',
         })
-        self.picking_type_in = self.env.ref('stock.picking_type_in')
-        self.picking_type_internal = self.env.ref('stock.picking_type_internal')
-        self.picking_type_out = self.env.ref('stock.picking_type_out')
+        self.picking_type_in = self.warehouse.in_type_id
+        self.picking_type_internal = self.warehouse.int_type_id
+        self.picking_type_out = self.warehouse.out_type_id
+        self.picking_type_out.restrict_scan_source_location = 'mandatory'
 
         self.uom_unit = self.env.ref('uom.product_uom_unit')
         self.uom_dozen = self.env.ref('uom.product_uom_dozen')
@@ -100,6 +96,16 @@ class TestBarcodeClientAction(HttpCase):
             'uom_id': self.env.ref('uom.product_uom_unit').id
         })
 
+        # Remove all access rights linked to stock application to "reset" Inventory settings.
+        group_uom_id = self.ref('uom.group_uom')
+        self.env.ref('base.group_user').write({'implied_ids': [
+            Command.unlink(group_uom_id),
+            Command.unlink(self.ref('stock.group_stock_multi_locations')),
+            Command.unlink(self.ref('stock.group_stock_multi_warehouses')),
+            Command.unlink(self.ref('stock.group_production_lot')),
+            Command.unlink(self.ref('stock.group_tracking_lot')),
+        ]})
+        self.env.user.write({'group_ids': [Command.unlink(group_uom_id)]})
         self.call_count = 0
 
     def tearDown(self):

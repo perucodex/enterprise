@@ -24,13 +24,26 @@ export class Orderline extends Component {
     get attributeData() {
         return Object.values(
             this.preparation_line.attribute_value_ids.reduce((acc, attr) => {
+                const customValue = this.prepDisplay.data.models[
+                    "product.attribute.custom.value"
+                ].find(
+                    (customValue) =>
+                        customValue.pos_order_line_id === this.preparation_line.pos_order_line_id &&
+                        customValue.custom_product_template_attribute_value_id.id === attr.id
+                );
+
+                let value = attr.name;
+                if (customValue) {
+                    value += `: ${customValue.custom_value}`;
+                }
+
                 if (acc[attr.attribute_id.id]) {
-                    acc[attr.attribute_id.id].value += `, ${attr.name}`;
+                    acc[attr.attribute_id.id].value += `, ${value}`;
                 } else {
                     acc[attr.attribute_id.id] = {
                         id: attr,
                         name: attr.attribute_id.name,
-                        value: attr.name,
+                        value,
                     };
                 }
 

@@ -4,7 +4,6 @@ import logging
 import requests
 from requests.exceptions import HTTPError, ConnectionError, MissingSchema, Timeout
 from urllib3.exceptions import NewConnectionError
-import uuid
 from werkzeug.urls import url_join
 
 from odoo import api, models, fields, _, tools, modules
@@ -107,27 +106,23 @@ class ResCompany(models.Model):
     # --------------------------------
 
     def _l10n_au_make_public_request(self, endpoint, params=None, timeout=30):
+        """ Make a public http request to Payroll Proxy server. """
         if tools.config['test_enable'] or modules.module.current_test:
             raise UserError(_("Superchoice API Connection disabled in testing environment."))
         host = self.env["account_edi_proxy_client.user"]._get_server_url("l10n_au_payroll", self.l10n_au_payroll_mode or "test")
         params = params or {}
         params.update({
-            "db_uuid": self.env['ir.config_parameter'].get_param('database.uuid')
+            "db_uuid": self.env['ir.config_parameter'].get_param('database.uuid'),
         })
-        payload = {
-            'jsonrpc': '2.0',
-            'method': 'call',
-            'params': params,
-            'id': uuid.uuid4().hex,
-        }
         try:
             response = requests.get(
                 url=url_join(host, "/api/l10n_au_payroll/1" + endpoint),
-                json=payload,
+                params=params,
                 timeout=timeout
-            ).json()["result"]
+            )
+            response = response.json()
         except (ConnectionError, MissingSchema, Timeout, HTTPError, NewConnectionError) as e:
-            raise _l10n_au_raise_user_error(e)
+            _l10n_au_raise_user_error(e)
         return response
 
     def _l10n_au_payroll_create_proxy_user(self):
@@ -158,18 +153,20 @@ class ResCompany(models.Model):
             self.env["l10n_au.super.fund"]._update_active_funds()
         # Create a proxy user if it does not exist.
         if not self.l10n_au_payroll_proxy_user_id:
-            self._l10n_au_payroll_create_proxy_user()
-
-        response = self._l10n_au_payroll_get_proxy_user()._l10n_au_payroll_request(
-            "/register",
-            {
-                "client_bms_id": self.l10n_au_bms_id,
-                "company_name": self.name,
-                "company_abn": self.vat,
-                "registration_details": self.l10n_au_employer_registration_id._prepare_employer_registration()
-            }
-        )
-        self.l10n_au_bms_id = response.get("client_bms_id")
+            self.env['account_edi_proxy_client.user']._l10n_au_register_proxy_user(
+                self,
+                self.l10n_au_payroll_mode,
+                self.l10n_au_employer_registration_id._prepare_employer_registration()
+            )
+        # Update the payroll registration of the proxy user if already exists
+        else:
+            response = self._l10n_au_payroll_get_proxy_user()._l10n_au_payroll_request(
+                "/register",
+                {
+                    "registration_details": self.l10n_au_employer_registration_id._prepare_employer_registration()
+                }
+            )
+            self.l10n_au_bms_id = response.get("client_bms_id")
         for employee in self.env["hr.employee"].search([("company_id", "=", self.id), ("l10n_au_payroll_id", "=", False)]):
             employee.l10n_au_payroll_id = employee._l10n_au_generate_payroll_id(
                 employee.name,
@@ -180,9 +177,12 @@ class ResCompany(models.Model):
     def action_check_abn(self):
         self.ensure_one()
         response = self._l10n_au_make_public_request("/verify_abn", {"abn": self.vat, "legal_name": self.name})
-        if "error" in response:
-            raise ValidationError(response['error'])
-        self.l10n_au_abn_valid = True
+        if response.get("success", False):
+            self.l10n_au_abn_valid = True
+        elif "error" in response:
+            raise ValidationError(response["error"])
+        else:
+            raise ValidationError(_("Unable to verify this ABN. Please contact your system administrator."))
 
     def action_view_payroll_onboarding(self):
         self.ensure_one()

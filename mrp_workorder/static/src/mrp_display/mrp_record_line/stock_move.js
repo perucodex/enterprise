@@ -158,7 +158,12 @@ export class StockMove extends QualityCheck {
             if (this.displayCheck) {
                 await this.markAsDone(); // check button: accept prefilled values and confirm QC
             } else {
-                await this.createQuant(); // plus button: create a new move line
+                if (this.byproduct)
+                {
+                    this.createQuant(); // plus button: create a new move line. Create a new quant for the byproduct.
+                } else {
+                    this.addMoveLine(); // plus button: create a new move line. Show a list of quants  to take from.
+                }
             }
         } else {
             if (this.isComplete) {

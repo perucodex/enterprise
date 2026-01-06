@@ -55,6 +55,7 @@ class TestPoSSettleDueHttpCommon(TestPointOfSaleHttpCommon, TestPoSCommon):
 
     def test_settle_open_invoice(self):
         """ Test to settle an open invoice from PoS """
+        self.user.group_ids = [Command.unlink(self.env.ref('base.group_system').id)]
         self.partner_c = self.env["res.partner"].create({"name": "C Partner"})
         invoice = self.env['account.move'].create({
             'partner_id': self.partner_c.id,
@@ -80,3 +81,46 @@ class TestPoSSettleDueHttpCommon(TestPointOfSaleHttpCommon, TestPoSCommon):
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'pos_settle_open_invoice', login="accountman")
         self.main_pos_config.current_session_id.action_pos_session_closing_control()
         self.assertEqual(self.partner_c.total_due, 195)
+
+    def test_settle_open_invoice_with_credit_note(self):
+        """Ensure POS settles net amount of invoice minus credit note via 'Settle invoices'."""
+        self.partner_c = self.env["res.partner"].create({"name": "C Partner"})
+
+        invoice = self.env["account.move"].create({
+            "partner_id": self.partner_c.id,
+            "date": "2025-02-17",
+            "invoice_date": "2025-02-17",
+            "move_type": "out_invoice",
+            "invoice_line_ids": [(0, 0, {"name": "test", "price_unit": 10})],
+        })
+        invoice.action_post()
+        credit_note = self.env["account.move"].create({
+            "partner_id": self.partner_c.id,
+            "date": "2025-02-17",
+            "invoice_date": "2025-02-17",
+            "move_type": "out_refund",
+            "invoice_line_ids": [(0, 0, {"name": "credit", "price_unit": 2})],
+        })
+        credit_note.action_post()
+
+        self.assertEqual(self.partner_c.total_due, 8)
+
+        self.customer_account_payment_method = self.env["pos.payment.method"].create({
+            "name": "Customer Account",
+            "split_transactions": True,
+        })
+        self.main_pos_config.write({
+            "payment_method_ids": [(4, self.customer_account_payment_method.id, 0)],
+        })
+        self.main_pos_config.settle_invoice_product_id = self.env.ref(
+            "pos_settle_due.product_product_settle_invoice"
+        )
+
+        self.main_pos_config.open_ui()
+        self.start_tour(
+            "/pos/ui?config_id=%d" % self.main_pos_config.id,
+            "pos_settle_open_invoice_with_credit_note",
+            login="accountman",
+        )
+        self.main_pos_config.current_session_id.action_pos_session_closing_control()
+        self.assertEqual(self.partner_c.total_due, 0)

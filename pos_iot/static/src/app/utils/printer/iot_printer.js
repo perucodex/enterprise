@@ -21,11 +21,11 @@ export class IoTPrinter extends BasePrinter {
     /**
      * @override
      */
-    sendPrintingJob(img) {
-        return this.action({ action: "print_receipt", receipt: img });
+    sendPrintingJob(img, actionId) {
+        return this.action({ action: "print_receipt", receipt: img }, actionId);
     }
 
-    async action(data) {
+    async action(data, actionId = null) {
         return new Promise((resolve) => {
             const processResult = (printResult) => {
                 if (printResult.status === "success") {
@@ -42,7 +42,8 @@ export class IoTPrinter extends BasePrinter {
                 this.device.identifier,
                 data,
                 processResult,
-                processResult
+                processResult,
+                actionId
             );
         });
     }

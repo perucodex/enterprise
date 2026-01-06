@@ -429,6 +429,7 @@ class SpreadsheetMixin(models.AbstractModel):
                 for rev in revisions
             ],
             "initial_date": initial_date,
+            "default_currency": self.env["res.currency"].get_company_currency_for_spreadsheet(),
         }
 
     def rename_revision(self, revision_id, name):

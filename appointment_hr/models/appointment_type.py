@@ -150,13 +150,13 @@ class AppointmentType(models.Model):
                     lambda employee: employee.user_id,
                 )
             )
-        available_employees_tz = [
+        strict_schedule_employees_tz = [
             employees[0].with_context(tz=user.tz)
             for user, employees in users_to_employees.items()
-            if employees and employees[0].resource_calendar_id
+            if employees and employees[0].resource_calendar_id and not employees[0].resource_calendar_id.flexible_hours
         ]
 
-        for employee in available_employees_tz:
+        for employee in strict_schedule_employees_tz:
             calendar = employee.resource_id.calendar_id
             if calendar not in calendar_to_employees:
                 calendar_to_employees[calendar] = employee

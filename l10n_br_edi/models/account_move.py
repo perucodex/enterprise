@@ -323,6 +323,12 @@ class AccountMove(models.Model):
         )
         return super().button_draft()
 
+    def button_cancel(self):
+        # EXTENDS 'account'
+        res = super().button_cancel()
+        self.l10n_br_last_edi_status = "cancelled"
+        return res
+
     def _get_fields_to_detach(self):
         # EXTENDS account
         fields_list = super()._get_fields_to_detach()
@@ -710,6 +716,9 @@ class AccountMove(models.Model):
         customer = self.partner_id
         company_partner = self.company_id.partner_id
         transporter = self._l10n_br_get_transporter()
+        partner_shipping_id = service_params['partner_shipping']
+        if partner_shipping_location := (payload['header']['locations'].get('rendered', {}) or payload['header']['locations'].get('delivery', {})):
+            partner_shipping_location['address']['countryCode'] = partner_shipping_id.country_id.l10n_br_edi_code
 
         tax_data_to_include, tax_data_header = self._l10n_br_edi_get_tax_data()
         extra_payload = {
@@ -717,11 +726,13 @@ class AccountMove(models.Model):
                 "companyLocation": company_partner.vat,
                 **service_params['invoice_refs_edi'],
                 **self._l10n_br_type_specific_header(tax_data_header),
-                "locations": self._l10n_br_get_locations(
+                "locations": {
+                    **self._l10n_br_get_locations(
                     customer,
                     company_partner,
                     transporter,
-                ),
+                    ),
+                },
                 "payment": {
                     "paymentInfo": {
                         "paymentMode": [

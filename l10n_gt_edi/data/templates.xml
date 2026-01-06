@@ -37,7 +37,7 @@
                                 <dte:Pais t-out="receptor_direccion_pais"/>
                             </dte:DireccionReceptor>
                         </dte:Receptor>
-                        <dte:Frases>
+                        <dte:Frases t-if="not skip_phrases">
                             <dte:Frase
                                     t-foreach="frases" t-as="frase"
                                     t-att-TipoFrase="frase['tipo_frase']"
@@ -74,10 +74,11 @@
                             </dte:TotalImpuestos>
                             <dte:GranTotal t-out="gran_total"/>
                         </dte:Totales>
-                        <dte:Complementos t-if="have_exportacion or have_referencias or have_cambiaria">
+                        <dte:Complementos t-if="have_exportacion or have_referencias or have_cambiaria or is_especial_fectura">
                             <t t-if="have_exportacion" t-call="l10n_gt_edi.dte_complemento_exportacion"/>
                             <t t-if="have_referencias" t-call="l10n_gt_edi.dte_complemento_referencias"/>
                             <t t-if="have_cambiaria" t-call="l10n_gt_edi.dte_complemento_cambiaria"/>
+                            <t t-if="is_especial_fectura" t-call="l10n_gt_edi.dte_complemento_retencion"/>
                         </dte:Complementos>
                     </dte:DatosEmision>
                 </dte:DTE>
@@ -104,6 +105,23 @@
                 <cex:OtraReferencia t-out="exportacion_otra_referencia"/>
                 <cex:INCOTERM t-if="exportacion_incoterm" t-out="exportacion_incoterm"/>
             </cex:Exportacion>
+        </dte:Complemento>
+    </template>
+
+    <template id="dte_complemento_retencion" xmlns:dte="http://www.sat.gob.gt/dte/fel/0.2.0">
+        <dte:Complemento
+                IDComplemento="TEXT"
+                NombreComplemento="TEXT"
+                URIComplemento="TEXT">
+            <cfe:RetencionesFacturaEspecial
+                    Version="1"
+                    xmlns:cfe="http://www.sat.gob.gt/face2/ComplementoFacturaEspecial/0.1.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.sat.gob.gt/face2/ComplementoFacturaEspecial/0.1.0 C:\Users\User\Desktop\FEL\Esquemas\GT_Complemento_Fac_Especial-0.1.0.xsd">
+                <cfe:RetencionISR t-out="retencion_isr"/>
+                <cfe:RetencionIVA t-out="retencion_iva"/>
+                <cfe:TotalMenosRetenciones t-out="retencion_gran_total"/>
+            </cfe:RetencionesFacturaEspecial>
         </dte:Complemento>
     </template>
 

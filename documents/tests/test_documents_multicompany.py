@@ -12,9 +12,10 @@ class TestDocumentsMulticompany(TransactionCaseDocuments):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.company_allowed, cls.company_other, cls.company_disabled = cls.env['res.company'].create([
-            {'name': f'Company {name}'} for name in ['Allowed', 'Other', 'Disabled']
+        cls.company_allowed, cls.company_other, cls.company_disabled, cls.company_archived = cls.env['res.company'].create([
+            {'name': f'Company {name}'} for name in ['Allowed', 'Other', 'Disabled', 'Archived']
         ])
+        cls.company_archived.active = False
         cls.admin_user = cls.env['res.users'].create({
             'email': "an_admin@yourcompany.com",
             'group_ids': [Command.link(cls.env.ref('documents.group_documents_system').id)],
@@ -22,7 +23,11 @@ class TestDocumentsMulticompany(TransactionCaseDocuments):
             'name': "An Admin",
         })
         (cls.internal_user + cls.document_manager + cls.portal_user + cls.admin_user).write({
-            'company_ids': [Command.link(cls.company_allowed.id), Command.link(cls.company_disabled.id)],
+            'company_ids': [
+                Command.link(cls.company_allowed.id),
+                Command.link(cls.company_disabled.id),
+                Command.link(cls.company_archived.id),
+            ],
         })
 
     def _make_test_documents(self, company_id, user):
@@ -118,8 +123,21 @@ class TestDocumentsMulticompany(TransactionCaseDocuments):
             (self.company_allowed, ALL_DOCUMENTS, []),
             (self.company_other, ALL_DOCUMENTS, []),
             (self.company_disabled, [], []),
+            (self.company_archived, ALL_DOCUMENTS, []),
         ]
         self._test_company_with_user(cases, self.admin_user)
+
+    @mute_logger('odoo.addons.base.models.ir_rule')
+    def test_company_access_admin_no_active_test(self):
+        ALL_DOCUMENTS = list(range(6))
+        cases = [
+            (self.env['res.company'], ALL_DOCUMENTS, []),
+            (self.company_allowed, ALL_DOCUMENTS, []),
+            (self.company_other, ALL_DOCUMENTS, []),
+            (self.company_disabled, [], []),
+            (self.company_archived, ALL_DOCUMENTS, []),
+        ]
+        self._test_company_with_user(cases, self.admin_user.with_context(active_test=False))
 
     @mute_logger('odoo.addons.base.models.ir_rule')
     def test_company_access_manager(self):
@@ -130,6 +148,7 @@ class TestDocumentsMulticompany(TransactionCaseDocuments):
              [INTERNAL_VIEW, OWNER, MEMBER_INTERNAL_VIEW, MEMBER_VIEW_LINK_EDIT, INTERNAL_VIEW_LINK_EDIT], [MEMBER_VIEW]),
             (self.company_other, [OWNER, MEMBER_VIEW_LINK_EDIT], [MEMBER_VIEW, MEMBER_INTERNAL_VIEW]),
             (self.company_disabled, [], []),
+            (self.company_archived, [], []),
         ]
         self._test_company_with_user(cases, self.document_manager)
 
@@ -142,6 +161,7 @@ class TestDocumentsMulticompany(TransactionCaseDocuments):
              [OWNER, MEMBER_VIEW_LINK_EDIT, INTERNAL_VIEW_LINK_EDIT], [MEMBER_VIEW, INTERNAL_VIEW, MEMBER_INTERNAL_VIEW]),
             (self.company_other, [OWNER, MEMBER_VIEW_LINK_EDIT], [MEMBER_VIEW, MEMBER_INTERNAL_VIEW]),
             (self.company_disabled, [], []),
+            (self.company_archived, [], []),
         ]
         self._test_company_with_user(cases, self.internal_user)
 
@@ -152,6 +172,7 @@ class TestDocumentsMulticompany(TransactionCaseDocuments):
             (self.company_allowed, [OWNER, MEMBER_VIEW_LINK_EDIT], [MEMBER_VIEW, MEMBER_INTERNAL_VIEW]),
             (self.company_other, [OWNER, MEMBER_VIEW_LINK_EDIT], [MEMBER_VIEW, MEMBER_INTERNAL_VIEW]),
             (self.company_disabled, [], []),
+            (self.company_archived, [], []),
         ]
         self._test_company_with_user(cases, self.portal_user)
 

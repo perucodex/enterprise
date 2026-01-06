@@ -50,10 +50,11 @@ class AccountReturn(models.Model):
         """
         def _set_details_pos_lines(pos_order_lines):
             # Pre-warming cache so that accessing product.product fields is faster per iteration by
-            # reducing retrieval time for the fields 'type' and 'l10n_in_hsn_code'
+            # reducing retrieval time for 'l10n_in_hsn_code'
             products = self.env['product.product'].browse(pos_order_lines.product_id.ids)
-            products.fetch(['type'])
+            products.fetch(['l10n_in_hsn_code'])
             uoms = self.env['uom.uom'].search_fetch([], ['l10n_in_code'], order=None)
+            AccountMove = self.env["account.move"]
 
             details_pos_lines = {}
             for pos_order_line in pos_order_lines:
@@ -62,7 +63,9 @@ class AccountReturn(models.Model):
                 if pos_order_line.order_id.fiscal_position_id:
                     income_account = pos_order_line.order_id.fiscal_position_id.map_account(income_account)
                 details_pos_lines.setdefault(move_id, {})
-                if products.browse(pos_order_line.product_id.id).type == 'service':
+                if AccountMove._l10n_in_is_service_hsn(
+                    products.browse(pos_order_line.product_id.id).l10n_in_hsn_code
+                ):
                     uom_code = "NA"
                     product_qty = 0
                 else:

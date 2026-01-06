@@ -9,7 +9,7 @@ from collections.abc import Iterable
 from markupsafe import Markup
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import UserError
 from odoo.fields import Domain
 from odoo.tools import is_html_empty
 
@@ -20,6 +20,10 @@ _logger = logging.getLogger(__name__)
 
 class DocumentsDocument(models.Model):
     _inherit = "documents.document"
+
+    # Field used when inserting records in a prompt
+    # (will not show "Restricted" if we have no access)
+    _ai_rec_name = "name"
 
     AI_DOCUMENTS_CRON_BATCH_SIZE = 10
 
@@ -51,11 +55,6 @@ class DocumentsDocument(models.Model):
             vals["ai_to_sort"] = False
         return super().write(vals)
 
-    @api.constrains("type", "ai_sort_prompt")
-    def _check_ai_sort_prompt(self):
-        if any(d.type != "folder" and d.ai_sort_prompt for d in self):
-            raise ValidationError(_("The AI Sort Prompt can only be set on folder."))
-
     @api.depends("shortcut_document_id", "type", "attachment_id")
     def _compute_ai_sortable(self):
         # Only standard files can be sorted
@@ -83,15 +82,17 @@ class DocumentsDocument(models.Model):
 
     def _ai_action_move_in_folder(self, folder_id):
         self.ensure_one()
-        folder = self.browse(folder_id)
-        if folder.type != "folder":
+        # folder is sudo-ed because any folder in the ai_sort_prompt is a valid target, regardless
+        # of the user's access rights
+        folder_sudo = self.browse(folder_id).sudo()
+        if folder_sudo.type != "folder":
             raise UserError(_("Cannot move in a non-folder."))
 
         if not self.ai_sortable:
             raise UserError(_("This document cannot be auto-sorted."))
 
-        if folder == self.folder_id:
-            return _('Moved to "%(folder)s".', folder=self._ai_truncate(folder.name))
+        if folder_sudo == self.folder_id:
+            return _('Moved to "%(folder)s".', folder=self._ai_truncate(folder_sudo.name))
 
         # In case the LLM first moved the document by side effect, it should be able
         # to move to a different folder specified in the prompt
@@ -101,15 +102,16 @@ class DocumentsDocument(models.Model):
 
         _prompt, _fields, allowed_ids = parse_ai_prompt_values(
             self.env,
-            original_folder.ai_sort_prompt,
+            original_folder.sudo().ai_sort_prompt,  # sudo: ai_sort_prompt has group system
             "documents.document",
             False,
         )
-        if folder.id not in allowed_ids:
+        if folder_sudo.id not in allowed_ids:
             raise UserError(_("This folder isn't specified in the prompt and cannot be used as target."))
 
-        self.folder_id = folder.id
-        return _('Moved to "%(folder)s".', folder=self._ai_truncate(folder.name))
+        # sudo because the new folder might not be accessible by the user
+        self.sudo().folder_id = folder_sudo.id
+        return _('Moved to "%(folder)s".', folder=self._ai_truncate(folder_sudo.name))
 
     def _ai_action_add_tags(self, tag_names):
         self.ensure_one()
@@ -135,6 +137,18 @@ class DocumentsDocument(models.Model):
         if self.env.user._is_admin():
             panel_fields.append("ai_sort_prompt")
         return panel_fields
+
+    @api.model
+    def search_panel_select_range(self, field_name, **kwargs):
+        res = super().search_panel_select_range(field_name, **kwargs)
+        if field_name == 'user_folder_id':
+            # isinstance to filter out 'special roots' (my drive, trash, ...)
+            folders_ids = [vals['id'] for vals in res['values'] if isinstance(vals['id'], int)]
+            # sudo: ai_sort_prompt has group system
+            folders_with_sort_prompts_ids = set(self.sudo().search([('id', 'in', folders_ids), ('ai_sort_prompt', '!=', False)]).ids)
+            for vals in res['values']:
+                vals['ai_has_sort_prompt'] = vals['id'] in folders_with_sort_prompts_ids
+        return res
 
     ##############
     # Mail alias #
@@ -214,7 +228,8 @@ class DocumentsDocument(models.Model):
 
     def action_ai_sort(self):
         """Manually trigger the sort action on the given documents."""
-        documents = self.filtered(lambda d: d.ai_sortable and d.folder_id.ai_sort_prompt)
+        # sudo: ai_sort_prompt has group system
+        documents = self.filtered(lambda d: d.ai_sortable and d.folder_id.sudo().ai_sort_prompt)
         if not documents:
             raise UserError(_("No document suitable for AI sorting."))
 
@@ -236,8 +251,8 @@ class DocumentsDocument(models.Model):
                         "sticky": False,
                     },
                 }
-
-        ai_actions = self.env["ir.actions.server"].search(
+        # sudo: any user can trigger the ai-sort on their documents
+        ai_actions = self.env["ir.actions.server"].sudo().search(
             [("ai_autosort_folder_id", "in", documents.folder_id.ids)])
         ai_action_per_folder = ai_actions.grouped('ai_autosort_folder_id')
 

@@ -162,19 +162,19 @@ class L10n_Nl_ReportsEcSalesReportHandler(models.AbstractModel):
         company_currency = self.env.company.currency_id
         for line in lines:
             if report._get_markup(line['id']) != 'total':
-                if company_currency.compare_amounts(line['columns'][colname_to_idx['amount_product']].get('no_format', 0), 0) == 1:
+                if company_currency.compare_amounts(line['columns'][colname_to_idx['amount_product']].get('no_format', 0), 0):
                     codes_values['IntraCommunitySupplies'].append({
                         'CountryCodeISO': line['columns'][colname_to_idx['country_code']].get('name'),
                         'SuppliesAmount': str(int(line['columns'][colname_to_idx['amount_product']].get('no_format'))),
                         'VATIdentificationNumberNational': line['columns'][colname_to_idx['vat']].get('name'),
                     })
-                if company_currency.compare_amounts(line['columns'][colname_to_idx['amount_service']].get('no_format', 0), 0) == 1:
+                if company_currency.compare_amounts(line['columns'][colname_to_idx['amount_service']].get('no_format', 0), 0):
                     codes_values['IntraCommunityServices'].append({
                         'CountryCodeISO': line['columns'][colname_to_idx['country_code']].get('name'),
                         'ServicesAmount': str(int(line['columns'][colname_to_idx['amount_service']].get('no_format'))),
                         'VATIdentificationNumberNational': line['columns'][colname_to_idx['vat']].get('name', 0),
                     })
-                if company_currency.compare_amounts(line['columns'][colname_to_idx['amount_triangular']].get('no_format', 0), 0) == 1:
+                if company_currency.compare_amounts(line['columns'][colname_to_idx['amount_triangular']].get('no_format', 0), 0):
                     codes_values['IntraCommunityABCSupplies'].append({
                         'CountryCodeISO': line['columns'][colname_to_idx['country_code']].get('name'),
                         'SuppliesAmount': str(int(line['columns'][colname_to_idx['amount_triangular']].get('no_format'))),

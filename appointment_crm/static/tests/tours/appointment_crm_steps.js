@@ -16,6 +16,7 @@ class AppointmentCrmSteps {
                 content: "Confirm the selection.",
                 trigger: ".o_appointment_select_button",
                 run: "click",
+                expectUnloadPage: true,
             },
         ];
     }

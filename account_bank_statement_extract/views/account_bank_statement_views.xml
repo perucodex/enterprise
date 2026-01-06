@@ -14,6 +14,10 @@
                 <field name="extract_attachment_id" invisible="1"/> <!-- extract_attachment_id required for the JS part -->
                 <field name="extract_state" class="d-block" invisible="not is_in_extractable_state or extract_state == 'waiting_validation'" widget="extract_state_header"/>
             </xpath>
+            <xpath expr="//field[@name='line_ids']//field[@name='amount']" position='before'>
+                <field name="debit" optional="hide"/>
+                <field name="credit" optional="hide"/>
+            </xpath>
         </field>
     </record>
 </odoo>

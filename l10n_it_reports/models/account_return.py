@@ -142,3 +142,11 @@ class AccountReturn(models.Model):
             'target': 'new',
             'context': ctx,
         }
+
+    def _get_vat_closing_entry_additional_domain(self):
+        # EXTENDS account_reports
+        domain = super()._get_vat_closing_entry_additional_domain()
+        if self.type_external_id in ('l10n_it_reports.it_tax_return_type', 'l10n_it_edi_withholding_reports.it_withh_tax_return_type'):
+            tax_tags = self.type_id.report_id.line_ids.expression_ids._get_matching_tags()
+            domain.append(('tax_tag_ids', 'in', tax_tags.ids))
+        return domain

@@ -111,8 +111,9 @@ class PosOrder(models.Model):
                 order['l10n_mx_edi_cfdi_to_public'] = order.get('l10n_mx_edi_cfdi_to_public', False)
                 order['l10n_mx_edi_usage'] = order.get('l10n_mx_edi_usage', False)
             else:
-                # If no invoice set usage to default value
-                order['l10n_mx_edi_usage'] = 'G03'
+                partner_id = order.get('partner_id', False)
+                # Default to 'G03' when no partner, otherwise take partner's configured usage
+                order['l10n_mx_edi_usage'] = self.env['res.partner'].browse(partner_id).l10n_mx_edi_usage or 'G03'
 
         data = super().sync_from_ui(orders)
         if len(orders) > 0:

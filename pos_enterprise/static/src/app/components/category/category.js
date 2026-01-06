@@ -21,7 +21,7 @@ export class Category extends Component {
         this.productCount = 0;
 
         for (const state of category.states) {
-            if (!state.todo && state.stage_id.id === this.prepDisplay.lastStage.id) {
+            if (state.isStageDone(this.prepDisplay.lastStage.id)) {
                 continue;
             }
             if (state.stage_id.id === selectedStageId || !selectedStageId) {
@@ -42,6 +42,18 @@ export class Category extends Component {
                 }
 
                 this.productCount += state.prep_line_id.quantity - state.prep_line_id.cancelled;
+            }
+            if (
+                !products[state.product.id] &&
+                this.prepDisplay.selectedProductIds.has(state.product.id)
+            ) {
+                products[state.product.id] = {
+                    id: state.product.id,
+                    name: state.prep_line_id.product_id.display_name,
+                    categoryIds: state.categories.map((categ) => categ.id),
+                    quantity: 0,
+                    cancelled: 0,
+                };
             }
         }
 

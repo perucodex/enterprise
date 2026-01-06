@@ -18,16 +18,6 @@ class AIController(ThreadController):
         if message:
             channel.sudo().ai_agent_id.with_context(current_view_info=current_view_info, ai_session_identifier=ai_session_identifier)._generate_response_for_channel(message, channel)
 
-    # auth=public to allow visitors to interact with ai agents through livechat
-    @http.route(["/ai/post_error_message"], type="jsonrpc", auth="public")
-    @add_guest_to_context
-    def post_error_message(self, error_message, channel_id):
-        channel = self._get_ai_channel_from_id(channel_id)
-        # The channel could have been deleted (the ai chat channel has been closed) so do nothing instead of throwing an error.
-        if not channel:
-            return
-        channel.sudo().ai_agent_id._post_error_message(error_message, channel)
-
     @http.route('/ai/close_ai_chat', methods=["POST"], type="jsonrpc", auth='public')
     @add_guest_to_context
     def close_ai_chat(self, channel_id):

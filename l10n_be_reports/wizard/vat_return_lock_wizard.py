@@ -53,7 +53,8 @@ class L10n_BeVatReturnLockWizard(models.TransientModel):
             warnings={},
         )
         client_nihil = False
-        if all_column_groups_expression_totals:
+        end_date = fields.Date.from_string(options['date']['date_to'])
+        if all_column_groups_expression_totals and end_date.month == 12:
             expr_totals = next(iter(all_column_groups_expression_totals.values()))
             currency = self.return_id.company_id.currency_id
             client_nihil = currency.is_zero(expr_totals[c71_expr]['value']) and currency.is_zero(expr_totals[c72_expr]['value'])

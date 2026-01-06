@@ -340,3 +340,36 @@ class TestSubscriptionPaymentFlows(TestSubscriptionCommon, PaymentHttpCommon, Mo
         """Check that invoice documents get generated only once with automatic invoice enabled."""
         self.env = self.env['base'].with_context(automatic_invoice=True).env
         self.test_invoice_document_generation()
+
+    def test_downpayment_upsell_automatic_invoice(self):
+        """ Confirm the original subscription and trigger recurring invoices.
+            Prepare an upsell order from the subscription and get its sale order.
+            Set the quantity of actual product lines in the upsell order to 1 (for downpayment).
+            Confirm the upsell order and configure it to require payment with a 20% prepayment.
+            Calculate the downpayment amount and enable automatic invoice creation.
+            Create a direct payment transaction for the downpayment and reconcile it.
+            Verify that exactly one invoice is created for the downpayment and its amount matches the paid amount."""
+
+        self.subscription.action_confirm()
+        self.env['sale.order']._cron_recurring_create_invoice()
+        action = self.subscription.prepare_upsell_order()
+        upsell_so = self.env['sale.order'].browse(action['res_id'])
+        upsell_order_line = upsell_so.order_line.filtered(lambda line: not line.display_type)
+        for sol in upsell_order_line:
+            sol.product_uom_qty = 1.0
+        upsell_so.action_confirm()
+        upsell_so.require_payment = True
+        upsell_so.prepayment_percent = 0.2
+        amt = upsell_so.amount_total * upsell_so.prepayment_percent
+        self.env['ir.config_parameter'].sudo().set_param('sale.automatic_invoice', 'True')
+        tx = self._create_transaction(
+            flow='direct',
+            amount=amt,
+            sale_order_ids=[upsell_so.id],
+            state='done')
+        with mute_logger('odoo.addons.sale.models.payment_transaction'):
+            tx._post_process()
+        invoice = upsell_so.invoice_ids
+        self.assertTrue(len(invoice))
+        self.assertTrue(invoice.line_ids[0].is_downpayment)
+        self.assertAlmostEqual(invoice.amount_total, amt, "The amount paid and the amount of which invoice made should be same")

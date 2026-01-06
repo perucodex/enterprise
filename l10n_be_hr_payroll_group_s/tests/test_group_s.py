@@ -43,10 +43,9 @@ class TestHrContractGroupSCode(TransactionCase):
     def test_unique_group_s_code(self):
         """Test Group S code uniqueness within the same company"""
         with self.assertRaises(ValidationError):
-            self.env['hr.version'].create({
+            self.env['hr.employee'].create({
                 'name': 'Duplicate Group S Code Contract',
                 'date_version': '2020-01-01',
-                'employee_id': self.employee.id,
                 'company_id': self.company.id,
                 'wage': 3000,
                 'group_s_code': '123456',
@@ -59,16 +58,14 @@ class TestHrContractGroupSCode(TransactionCase):
             'name': 'Other Company',
             'country_id': self.belgium.id,
         })
-        other_contract = self.env['hr.version'].create({
+        other_employee = self.env['hr.employee'].create({
             'name': 'Contract in Other Company',
-            'date_version': '2020-01-01',
-            'employee_id': self.employee.id,
             'company_id': other_company.id,
             'wage': 2000,
             'group_s_code': '123456',
             'country_code': 'BE',
         })
-        self.assertEqual(other_contract.group_s_code, '123456', "Group S code should be valid in a different company.")
+        self.assertEqual(other_employee.group_s_code, '123456', "Group S code should be valid in a different company.")
 
     def test_export_to_group_s_with_no_group_s_code_in_company(self):
         """Test export to Group S with no Group S code in the company"""

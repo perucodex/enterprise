@@ -65,7 +65,7 @@ class HrContractSalary(main.HrContractSalary):
         if offer.country_code != 'BE' or not has_access:
             return has_access, error_page
 
-        if version.sudo().l10n_be_time_credit and version.sudo()._get_work_time_rate() == 0:
+        if version.sudo().l10n_be_time_credit and version.sudo().work_time_rate == 0:
             return False, request.render('http_routing.http_error', {
                 'status_code': self.env._('Oops'),
                 'status_message': self.env._('This contract is a full time credit time... No simulation can be done for this type of contract as its wage is equal to 0.')})
@@ -124,6 +124,10 @@ class HrContractSalary(main.HrContractSalary):
                 res['extra_values'] = [('wishlist_car_total_depreciated_cost', 0)]
             elif benefit_field == 'fold_company_bike_depreciated_cost' and not res['new_value']:
                 res['extra_values'] = [('company_bike_depreciated_cost', 0)]
+            elif benefit_field == 'fold_public_transport_reimbursed_amount' and not res['new_value']:
+                res['extra_values'] = [('public_transport_reimbursed_amount', 0)]
+            elif benefit_field == 'fold_train_transport_reimbursed_amount' and not res['new_value']:
+                res['extra_values'] = [('train_transport_reimbursed_amount', 0)]
             elif benefit_field in insurance_fields:
                 child_amount = float(request.env['ir.config_parameter'].sudo().get_param('hr_contract_salary.hospital_insurance_amount_child', default=7.2))
                 adult_amount = float(request.env['ir.config_parameter'].sudo().get_param('hr_contract_salary.hospital_insurance_amount_adult', default=20.5))
@@ -393,7 +397,7 @@ class HrContractSalary(main.HrContractSalary):
             new_version.date_end = version_vals.get('date_end')
         if new_version.car_id.id != version_vals.get('car_id'):
             # If the chosen car is different from the one in the current version, add the car model name to the diff
-            car = self.env['fleet.vehicle'].browse(version_vals.get('car_id'))
+            car = self.env['fleet.vehicle'].sudo().browse(version_vals.get('car_id'))
             version_diff.append((_('Company Car'), car.display_name or '', new_version.car_id.display_name or ''))
         if kw.get('package_submit', False):
             # If the chosen existing car is already taken by someone else (for example if the

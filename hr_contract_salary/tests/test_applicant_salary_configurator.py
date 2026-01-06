@@ -1,12 +1,14 @@
 from freezegun import freeze_time
-import odoo.tests
 import base64
+import json
+from odoo import fields
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.tools import file_open
+from odoo.tests import Form, HttpCase, tagged
 
 
-@odoo.tests.tagged('-at_install', 'post_install', 'salary')
-class TestSalaryConfiguratorForApplicant(odoo.tests.HttpCase):
+@tagged('-at_install', 'post_install', 'salary')
+class TestSalaryConfiguratorForApplicant(HttpCase):
     @classmethod
     @freeze_time('2022-01-01 09:00:00')
     def setUpClass(cls):
@@ -147,6 +149,7 @@ class TestSalaryConfiguratorForApplicant(odoo.tests.HttpCase):
 
         cls.env.ref('base.user_admin').write({
             'company_ids': [(4, cls.company_id.id)],
+            'company_id': cls.company_id.id,
             'name': 'Mitchell Admin',
             'sign_signature': img_content,
         })
@@ -160,7 +163,7 @@ class TestSalaryConfiguratorForApplicant(odoo.tests.HttpCase):
             'state_id': cls.env.ref('base.state_us_39').id,
             'phone': '+1 555-555-5555',
             'tz': 'Europe/Brussels',
-            'company_id': cls.env.company.id,
+            'company_id': cls.company_id.id,
         })
         demo.write({
             'partner_id': partner_id,
@@ -188,7 +191,7 @@ class TestSalaryConfiguratorForApplicant(odoo.tests.HttpCase):
             'company_id': cls.company_id.id,
         })
 
-        cls.env['hr.job'].create({
+        cls.senior_dev_job = cls.env['hr.job'].create({
             'name': 'Senior Developer BE',
             'company_id': cls.company_id.id,
             'contract_template_id': cls.senior_dev_contract.id,
@@ -217,3 +220,51 @@ class TestSalaryConfiguratorForApplicant(odoo.tests.HttpCase):
             self.assertEqual(archived_versions.wage, 0, "The archived version should be a dummy version")
 
             self.assertTrue(employee.active, 'Employee is active')
+
+    def test_applicant_offer_form(self):
+        applicant = self.env['hr.applicant'].create({
+            'partner_name': 'Test app',
+            'job_id': self.senior_dev_job.id,
+        })
+        applicant.action_generate_offer()
+        offer = self.env['hr.contract.salary.offer'].search([('applicant_id', '=', applicant.id)])
+        data = {
+            "params": {
+                "offer_id": offer.id,
+                "benefits": {
+                    'version': {
+                        'wage': 1000,
+                        'final_yearly_costs': 12000,
+                        'holidays': 10,
+                    },
+                    'version_personal': {
+                        'private_city': "Louvain-La-Neuve",
+                        'private_country_id': self.env.ref("base.be").id,
+                        'private_street': "58 rue des Wallons",
+                    },
+                    'employee': {
+                        'name': 'New Employee',
+                        'private_email': 'new_employee@test.example.com',
+                        'employee_job_id': self.senior_dev_job.id,
+                        'department_id': None,
+                        'job_title': self.senior_dev_job.name,
+                    },
+                    'address': {},
+                    'bank_account': {},
+                },
+                "token": offer.access_token,
+            }
+        }
+        res = self.url_open("/salary_package/submit", json=data)
+        content = json.loads(res.content)
+        new_version = self.env['hr.version'].browse(content['result']['new_version_id'])
+        new_version.action_generate_offer()
+        new_offer = self.env['hr.contract.salary.offer'].search([('employee_version_id', '=', new_version.id)])
+        with Form(new_offer) as offer_form:
+            self.assertEqual(offer_form.contract_template_id, new_version)
+            self.assertEqual(offer_form.sign_template_id, offer_form.contract_template_id.sign_template_id)
+            self.assertEqual(offer_form.final_yearly_costs, 12000)
+            self.assertEqual(offer_form.employee_job_id, self.senior_dev_job)
+            self.assertTrue(offer_form.job_title, self.senior_dev_job.name)
+            self.assertTrue(offer_form.contract_start_date, fields.Date.today())
+            self.assertTrue(offer_form.employee_id, new_version.employee_id)

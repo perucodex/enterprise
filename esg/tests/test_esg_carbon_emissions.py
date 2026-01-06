@@ -591,3 +591,20 @@ class TestEsgCarbonEmission(TestEsgCommon):
         self.assertFalse(rule.partner_id)
         self.assertFalse(rule.product_id)
         self.assertEqual(rule.account_id, self.expense_account)
+
+    def test_no_auto_generate_assignation_rules_on_copy(self):
+        assignation_rules_domain = [
+            ('esg_emission_factor_id', '=', self.emission_factor_delivery_transportation.id),
+        ]
+        self.assertFalse(self.env['esg.assignation.line'].search(assignation_rules_domain), "No rule should exist for the emission factors selected for the test.")
+        self.env['account.move.line'].create([
+            {'move_id': self.bill_1.id, 'product_id': self.product_a.id, 'account_id': self.expense_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+            {'move_id': self.bill_1.id, 'product_id': self.product_b.id, 'account_id': self.expense_direct_cost_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+            {'move_id': self.bill_1.id, 'product_id': self.product_a.id, 'account_id': self.expense_other_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+            {'move_id': self.bill_1.id, 'product_id': self.product_b.id, 'account_id': self.asset_fixed_account.id, 'esg_emission_factor_id': self.emission_factor_delivery_transportation.id},
+        ])
+        assignation_rules = self.env['esg.assignation.line'].search(assignation_rules_domain)
+        self.assertEqual(len(assignation_rules), 1, "1 rules should have been created")
+        self.bill_1.copy()
+        assignation_rules = self.env['esg.assignation.line'].search(assignation_rules_domain)
+        self.assertEqual(len(assignation_rules), 1, "No new rules should have been created")

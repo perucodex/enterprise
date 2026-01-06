@@ -78,6 +78,12 @@ class TestReportSections(AccountTestInvoicingHttpCommon):
             'name': "Test Sections",
             'section_report_ids': [Command.set((cls.section_1 + cls.section_2).ids)],
         })
+        cls.basic_return_type = cls.env['account.return.type'].create({
+            'name': 'Test return type',
+            'report_id': cls.composite_report.id,
+            'deadline_start_date': '2024-01-01',
+            'states_workflow': 'generic_state_tax_report',
+        })
 
     def test_sections_options_report_selection_variant(self):
         # Set a fictive country on the company ; making sure no variant is available for it, whatever the modules installed.
@@ -152,3 +158,47 @@ class TestReportSections(AccountTestInvoicingHttpCommon):
             })
 
         composite_report.export_to_xlsx(composite_report.get_options({}))
+
+    @freeze_time('2024-11-24')
+    def test_tax_return_with_section_report(self):
+        tax_return = self.env['account.return'].create({
+            'name': "Tax return",
+            'type_id': self.basic_return_type.id,
+            'company_id': self.env.company.id,
+            'date_from': '2024-01-01',
+            'date_to': '2024-01-31',
+        })
+        tax_tag = self.env['account.account.tag'].search([('name', '=', '+tag1_1')])
+        invoice_previous_period = self.env['account.move'].create({
+            'partner_id': self.partner.id,
+            'move_type': 'out_invoice',
+            'date': '2024-01-15',
+            'invoice_date': '2024-01-15',
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'quantity': 1,
+                    'price_unit': 1000,
+                })
+            ],
+        })
+        invoice_current_period = self.env['account.move'].create({
+            'partner_id': self.partner.id,
+            'move_type': 'out_invoice',
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'quantity': 1,
+                    'price_unit': 20000,
+                })
+            ],
+        })
+        for invoice in (invoice_previous_period | invoice_current_period):
+            invoice.action_post()
+            # We manually add this tax_tag, so the line will be counted in the Section 1 report
+            invoice.invoice_line_ids.tax_tag_ids = [tax_tag.id]
+        # To be sure we will compute amount_to_pay
+        tax_return.is_tax_return = True
+        tax_return._proceed_with_locking()
+        tax_return.action_submit()
+        self.assertEqual(tax_return.total_amount_to_pay, 150)

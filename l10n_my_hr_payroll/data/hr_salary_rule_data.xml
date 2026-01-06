@@ -83,8 +83,7 @@ result = categories['BASIC'] + categories['ALW']
         <field name="sequence">110</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
-result = categories['GROSS']
-result_rate = -payslip._rule_parameter("l10n_my_epf_rate_employee")
+result = -ceil(categories['GROSS'] * payslip._rule_parameter("l10n_my_epf_rate_employee") / 100)
         </field>
         <field name="struct_id" ref="l10n_my_hr_payroll.hr_payroll_structure_my_employee_salary"/>
     </record>
@@ -98,10 +97,12 @@ result_rate = -payslip._rule_parameter("l10n_my_epf_rate_employee")
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
 result = categories['GROSS']
+rate = 0
 if result &lt;= payslip._rule_parameter("l10n_my_epf_threshold_employer"):
-    result_rate = payslip._rule_parameter("l10n_my_epf_rate_employer_low")
+    rate = payslip._rule_parameter("l10n_my_epf_rate_employer_low")
 else:
-    result_rate = payslip._rule_parameter("l10n_my_epf_rate_employer_high")
+    rate = payslip._rule_parameter("l10n_my_epf_rate_employer_high")
+result = ceil(result * rate / 100)
         </field>
         <field name="appears_on_payslip" eval="False"/>
         <field name="struct_id" ref="l10n_my_hr_payroll.hr_payroll_structure_my_employee_salary"/>

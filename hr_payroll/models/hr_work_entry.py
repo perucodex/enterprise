@@ -24,6 +24,7 @@ class HrWorkEntry(models.Model):
             work_entry.has_payslip = any(
                 slip.employee_id == work_entry.employee_id
                 and slip.date_from <= work_entry.date <= slip.date_to
+                and not slip.is_refunded
                 for slip in all_payslips)
 
     def _check_undefined_slots(self, interval_start, interval_end):
@@ -56,6 +57,6 @@ class HrWorkEntry(models.Model):
         if vals.get('state') == 'conflict' or ('active' in vals and vals['active'] is False):
             return super().write(vals)
         for work_entry in self:
-            if work_entry.state == 'validated' and work_entry.has_payslip:
+            if work_entry.state == 'validated' and not vals.get('state'):
                 raise UserError(_("This work entry cannot be modified because it is already associated with a generated payslip."))
         return super().write(vals)

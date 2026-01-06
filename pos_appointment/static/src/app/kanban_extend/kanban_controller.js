@@ -8,6 +8,7 @@ import { usePopover } from "@web/core/popover/popover_hook";
 import { Domain } from "@web/core/domain";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { serializeDateTime } from "@web/core/l10n/dates";
 
 const { DateTime } = luxon;
 
@@ -79,20 +80,14 @@ export class PosKanbanController extends KanbanController {
                     [
                         "start",
                         ">=",
-                        value
-                            .set({ hour: 0, minute: 0, second: 0 })
-                            .toUTC()
-                            .toFormat("yyyy-MM-dd HH:mm:ss", { numberingSystem: "latn" }),
+                        serializeDateTime(value.set({ hour: 0, minute: 0, second: 0 })),
                     ],
                 ]),
                 new Domain([
                     [
                         "start",
                         "<=",
-                        value
-                            .set({ hour: 23, minute: 59, second: 59 })
-                            .toUTC()
-                            .toFormat("yyyy-MM-dd HH:mm:ss", { numberingSystem: "latn" }),
+                        serializeDateTime(value.set({ hour: 23, minute: 59, second: 59 })),
                     ],
                 ]),
             ]);
@@ -105,8 +100,8 @@ export class PosKanbanController extends KanbanController {
             const from = date.set({ hour: startHour, minute: 0, second: 0 });
             const to = date.set({ hour: endHour - 1, minute: 59, second: 59 });
             domain = new Domain([
-                ["start", ">=", from.toUTC().toFormat("yyyy-MM-dd HH:mm:ss")],
-                ["start", "<=", to.toUTC().toFormat("yyyy-MM-dd HH:mm:ss")],
+                ["start", ">=", serializeDateTime(from)],
+                ["start", "<=", serializeDateTime(to)],
             ]);
         } else {
             return;

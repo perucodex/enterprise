@@ -7,13 +7,14 @@
 # Tony Ng, 2025
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
-# "Tony Ng (ngto)" <ngto@odoo.com>, 2025.
+# "Tony Ng (ngto)" <ngto@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.3+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2025-10-18 18:33+0000\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2026-01-02 11:37+0000\n"
 "Last-Translator: \"Tony Ng (ngto)\" <ngto@odoo.com>\n"
 "Language-Team: Chinese (Traditional Han script) <https://translate.odoo.com/"
 "projects/odoo-19/planning/zh_Hant/>\n"
@@ -22,7 +23,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: planning
 #. odoo-python
@@ -56,25 +57,25 @@ msgstr "。"
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "1 Onsite Interview"
-msgstr ""
+msgstr "1 現場面試"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "1 Phone Call"
-msgstr ""
+msgstr "1 電話"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "2 open days"
-msgstr ""
+msgstr "2 個開放日"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "4 Days after Interview"
-msgstr ""
+msgstr "面試後 4 天"
 
 #. module: planning
 #: model_terms:digest.tip,tip_description:planning.digest_tip_planning_0
@@ -376,19 +377,19 @@ msgstr "<span class=\"o_stat_text\">規劃</span>"
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "<span class=\"text-muted small\">Days to get an Offer</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">天以獲得取錄</span>"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "<span class=\"text-muted small\">Process</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">過程</span>"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "<span class=\"text-muted small\">Time to Answer</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">回應時間</span>"
 
 #. module: planning
 #: model_terms:web_tour.tour,rainbow_man_message:planning.planning_tour
@@ -600,6 +601,69 @@ msgid ""
 "                </div>\n"
 "            </body>"
 msgstr ""
+"<style>\n"
+"                .planning_mail_template_button {\n"
+"                    padding: 5px 10px;\n"
+"                    text-decoration: none;\n"
+"                    border: 1px;\n"
+"                    border-radius: 3px;\n"
+"                    display: inline-block; \n"
+"                    width: 190px;\n"
+"                    text-align: center;\n"
+"                }\n"
+"                </style>\n"
+"                <body><div>\n"
+"                    <p t-if=\"ctx.get('employee')\">Dear <t t-"
+"out=\"ctx['employee'].name or ''\">Anita Oliver</t>,</p>\n"
+"                    <p t-else=\"\">Hello,</p>\n"
+"                    <br/>\n"
+"                    <p t-if=\"ctx.get('start_datetime') and "
+"ctx.get('end_datetime')\">\n"
+"                        Your upcoming shifts from <t t-"
+"out=\"format_date(ctx['start_datetime'])\">05-05-2021</t>\n"
+"                        to <t t-out=\"format_date(ctx['end_datetime'])"
+"\">05-11-2021</t> have been published.\n"
+"                    </p>\n"
+"                    <div style=\"display: flex; margin: 15px;\">\n"
+"                        <div t-if=\"ctx.get('planning_url')\" style=\"margin-"
+"right: 15px;\">\n"
+"                            <a t-att-href=\"ctx['planning_url']\" "
+"target=\"_blank\" class=\"planning_mail_template_button\" t-attf-"
+"style=\"color: {{object.company_id.email_primary_color or '#FFFFFF'}}; "
+"background-color: {{object.company_id.email_secondary_color or '#875A7B'}};"
+"\">View Your Planning</a>\n"
+"                        </div>\n"
+"                        <div t-if=\"ctx.get('planning_url_ics')\">\n"
+"                            <a t-att-href=\"ctx['planning_url_ics']\" "
+"target=\"_blank\" class=\"planning_mail_template_button\" style=\"color: "
+"#374151; background-color: #E7E9ED; border: solid #E7E9ED;\">Add to "
+"Calendar</a>\n"
+"                        </div>\n"
+"                    </div>\n"
+"                    <br/>\n"
+"                    <p t-if=\"ctx.get('slot_unassigned') or "
+"(object.allow_self_unassign and object.self_unassign_days_before)\">\n"
+"                        <t t-if=\"ctx.get('slot_unassigned')\">\n"
+"                            We would also like to remind you that there are "
+"some open shifts available, and if you are interested and available, please "
+"assign yourself to those shifts.\n"
+"                        </t>\n"
+"                        <t t-if=\"object.allow_self_unassign and "
+"object.self_unassign_days_before\">\n"
+"                            If you are unable to work a shift that has been "
+"assigned to you, please unassign yourself within <t t-"
+"out=\"object.self_unassign_days_before or ''\">5</t> day(s) before the start "
+"of the shift.\n"
+"                        </t>\n"
+"                    </p>\n"
+"                    <p t-if=\"ctx.get('message')\" t-out=\"ctx['message']\"/"
+">\n"
+"                    <p t-if=\"object.allow_self_unassign\">In case your "
+"current schedule doesn't suit you, we encourage you to reach out to your "
+"colleagues and request to switch shifts. They might be interested in "
+"exchanging shifts with you.</p>\n"
+"                </div>\n"
+"            </body>"
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_recurrency_check_until_limit
@@ -617,7 +681,7 @@ msgstr "輪班必須與它的重複發生事件屬於同一公司。"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
 msgid "Actions"
-msgstr ""
+msgstr "動作"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_role__active
@@ -838,7 +902,7 @@ msgstr "顏色"
 #. module: planning
 #: model:planning.role,name:planning.planning_role_cm
 msgid "Community Manager"
-msgstr ""
+msgstr "社群管理員"
 
 #. module: planning
 #: model:ir.model,name:planning.model_res_company
@@ -893,7 +957,7 @@ msgstr "複製上星期"
 #. module: planning
 #: model:planning.role,name:planning.planning_role_crane
 msgid "Crane"
-msgstr ""
+msgstr "起重機"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_open_shifts
@@ -1029,7 +1093,7 @@ msgstr "離職作業"
 #. module: planning
 #: model:planning.role,name:planning.planning_role_developer
 msgid "Developer"
-msgstr ""
+msgstr "開發者"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.employee_no_email_list_wizard
@@ -1188,7 +1252,7 @@ msgstr "額外訊息"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer.js:0
 msgid "Failed to undo reschedule"
-msgstr ""
+msgstr "未能取消改期"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_my_calendar
@@ -1235,12 +1299,12 @@ msgstr "每 %s 星期舉行，永遠重複"
 #. module: planning
 #: model:planning.role,name:planning.planning_furniture_assembler
 msgid "Furniture Assembler"
-msgstr ""
+msgstr "傢俬組裝工"
 
 #. module: planning
 #: model:planning.role,name:planning.planning_furniture_tool
 msgid "Furniture Tools"
-msgstr ""
+msgstr "家具製作工具"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
@@ -1352,7 +1416,7 @@ msgstr ""
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_view_form_simplified
 msgid "Job Position"
-msgstr ""
+msgstr "工作職稱"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__job_title
@@ -1446,7 +1510,7 @@ msgstr "清單"
 #: model:hr.job,name:planning.job_maintenance_technician
 #: model:planning.role,name:planning.planning_maintenance_technician
 msgid "Maintenance Technician"
-msgstr ""
+msgstr "維修技工"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_shift_template
@@ -1456,7 +1520,7 @@ msgstr "利用範本，使輪班編碼更容易。"
 #. module: planning
 #: model:planning.role,name:planning.planning_role_management
 msgid "Management"
-msgstr ""
+msgstr "管理"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__manager_id
@@ -1866,7 +1930,7 @@ msgstr "按住 Ctrl 以複製輪班"
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
 #: model_terms:ir.ui.view,arch_db:planning.planning_preview_view_form
 msgid "Preview"
-msgstr ""
+msgstr "預覽"
 
 #. module: planning
 #: model:ir.actions.act_window,name:planning.resource_preview_action
@@ -1878,7 +1942,7 @@ msgstr ""
 #: code:addons/planning/static/src/views/planning_calendar/planning_calendar_controller.xml:0
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
 msgid "Print"
-msgstr ""
+msgstr "列印"
 
 #. module: planning
 #. odoo-javascript
@@ -1895,7 +1959,7 @@ msgstr "專案計劃"
 #. module: planning
 #: model:planning.role,name:planning.planning_role_projector
 msgid "Projector"
-msgstr ""
+msgstr "投影機"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__slot_properties
@@ -1906,7 +1970,7 @@ msgstr "屬性"
 #. module: planning
 #: model:ir.model,name:planning.model_hr_employee_public
 msgid "Public Employee"
-msgstr ""
+msgstr "公開員工"
 
 #. module: planning
 #. odoo-javascript
@@ -1942,7 +2006,7 @@ msgstr "已發佈"
 #: model:hr.job,name:planning.job_quality_control
 #: model:planning.role,name:planning.planning_quality_control
 msgid "Quality Control Inspector"
-msgstr ""
+msgstr "品質控制檢驗員"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_res_company__planning_generation_interval
@@ -2161,7 +2225,7 @@ msgstr "完成設定後，請儲存此輪班。"
 #. module: planning
 #: model:planning.role,name:planning.planning_role_scanner
 msgid "Scanner"
-msgstr ""
+msgstr "掃瞄儀"
 
 #. module: planning
 #: model:ir.model,name:planning.model_planning_planning
@@ -2275,31 +2339,31 @@ msgstr "班次範本"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer.js:0
 msgid "Shift could not be removed"
-msgstr ""
+msgstr "未能移除輪班"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer.js:0
 msgid "Shift duplicated"
-msgstr ""
+msgstr "輪班已複製"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer.js:0
 msgid "Shift removed"
-msgstr ""
+msgstr "輪班已移除"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer.js:0
 msgid "Shift reschedule undone"
-msgstr ""
+msgstr "輪班已取消改期"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer.js:0
 msgid "Shift rescheduled"
-msgstr ""
+msgstr "輪班已改期"
 
 #. module: planning
 #. odoo-javascript
@@ -2349,12 +2413,12 @@ msgstr "輪班已重設為草稿"
 #. module: planning
 #: model:planning.role,name:planning.planning_shipping_associate
 msgid "Shipping Associate"
-msgstr ""
+msgstr "貨運助理"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_preview__slot_count
 msgid "Slot Count"
-msgstr ""
+msgstr "時段數目"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_kanban_inherit
@@ -2728,6 +2792,12 @@ msgstr "你不可取消指派其他員工，只可取消指派你自己。"
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+msgid "You cannot assign yourself to a shift belonging to another company."
+msgstr ""
+
+#. module: planning
+#. odoo-python
+#: code:addons/planning/models/planning_slot.py:0
 msgid "You cannot assign yourself to a shift in the past."
 msgstr "你不可將自己分配至過去的輪班。"
 
@@ -2869,7 +2939,7 @@ msgstr "個其他班次有衝突。"
 #. module: planning
 #: model:ir.model,name:planning.model_planning_calendar_resource
 msgid "planning calendar resource"
-msgstr ""
+msgstr "工作規劃日曆資源"
 
 #. module: planning
 #. odoo-python

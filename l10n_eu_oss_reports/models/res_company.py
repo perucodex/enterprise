@@ -13,3 +13,13 @@ class ResCompany(models.Model):
     def _map_eu_taxes(self):
         super()._map_eu_taxes()
         self.env['account.return.type']._generate_or_refresh_all_returns(self.root_id)
+
+    def _get_available_tax_units(self, report, limit=None):
+        self.ensure_one()
+        if report.availability_condition == 'oss':
+            return self.env['account.tax.unit'].search([
+                ('company_ids', 'in', self.id),
+                ('country_id', '=', self.account_fiscal_country_id.id),
+            ], limit=limit)
+
+        return super()._get_available_tax_units(report, limit=limit)

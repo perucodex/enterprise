@@ -10,7 +10,7 @@ class AppraisalSelectSurvey(models.TransientModel):
     survey_input_ids = fields.Many2many("survey.user_input", string="Survey Inputs", required=True)
     allowed_survey_template_ids = fields.Many2many('survey.survey', compute='_compute_allowed_survey_template_ids')
     survey_template_id = fields.Many2one('survey.survey', string="Survey", required=True,
-                                         compute='_compute_survey_template_id', store=True,
+                                         compute='_compute_survey_template_id', compute_sudo=False, store=True,
                                          readonly=False, domain="[('id', 'in', allowed_survey_template_ids)]")
 
     @api.depends('survey_input_ids')

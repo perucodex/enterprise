@@ -115,6 +115,7 @@
                                     <td>
                                         <span t-field="log.partner_id">Unknown Partner</span>
                                         <span t-if="log.partner_id.email" t-field="log.partner_id.email">demo@email.com</span>
+                                        <div t-if="log.user_id != log.create_uid">Connected as <t t-out="log.user_id.partner_id.name"/></div>
                                     </td>
                                     <td> <span t-out="o._get_user_formatted_datetime(log.log_date)">20-03-2000</span> </td>
                                     <td groups="sign.group_sign_manager">

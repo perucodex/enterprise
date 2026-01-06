@@ -62,3 +62,17 @@ class DocumentsSharing(models.TransientModel):
             is_spreadsheet_only = all(d.handler in ("spreadsheet", "frozen_spreadsheet") for d in record.document_ids)
             if is_spreadsheet_only and record.access_via_link.endswith('view'):
                 record.access_via_link_help = _("Can view the spreadsheet. Cannot make changes.")
+
+    @api.depends('error_message_spreadsheet')
+    def _compute_has_warning_link_with_more_rights(self):
+        """Hide other errors if we show the spreadsheet errors."""
+        with_spreadsheet_errors = self.filtered('error_message_spreadsheet')
+        with_spreadsheet_errors.has_warning_link_with_more_rights = False
+        super(DocumentsSharing, self - with_spreadsheet_errors)._compute_has_warning_link_with_more_rights()
+
+    @api.depends('error_message_spreadsheet')
+    def _compute_has_warning_partners_without_access(self):
+        """Hide other errors if we show the spreadsheet errors."""
+        with_spreadsheet_errors = self.filtered('error_message_spreadsheet')
+        with_spreadsheet_errors.has_warning_partners_without_access = False
+        super(DocumentsSharing, self - with_spreadsheet_errors)._compute_has_warning_partners_without_access()

@@ -46,7 +46,7 @@ class ProductUnspscCode(models.Model):
             return NotImplemented
         if isinstance(value, str) and value:
             code_value = value.split(' ')[0]
-            return Domain('code', '=', code_value) | Domain('name', operator, value)
+            return Domain('code', operator, code_value) | Domain('name', operator, value)
         if operator == '=':
             operator = 'in'
             value = [value]

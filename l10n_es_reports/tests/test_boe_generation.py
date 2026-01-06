@@ -39,9 +39,36 @@ class TestBOEGeneration(TestEsAccountReportsCommon):
         invoice = self.init_invoice('out_invoice', partner=self.spanish_partner, amounts=[10000], invoice_date=fields.Date.today())
         invoice.l10n_es_reports_mod347_invoice_type = 'regular'
         invoice._post()
+        spanish_partner_2 = self.env['res.partner'].create({
+            # ES Partner with vat not starting with 'ES', should still be included in 347
+            'name': 'Partner 2',
+            'street': "Avenida de los Informes Financieros, 43",
+            'zip': 4242,
+            'city': "Madrid",
+            'country_id': self.env.ref('base.es').id,
+            'state_id': self.env.ref('base.state_es_m').id,
+            'vat': '74280274A',
+        })
+        invoice_2 = self.init_invoice('out_invoice', partner=spanish_partner_2, amounts=[5000], invoice_date=fields.Date.today())
+        invoice_2.action_post()
         report = self.env.ref('l10n_es_reports.mod_347')
         options = self._generate_options(report, fields.Date.from_string('2020-01-01'), fields.Date.from_string('2020-12-31'))
         self._check_boe_export(report, options, 347)
+
+        # Check file content
+        report._get_lines(options)
+        vals = self.env[report.custom_handler_model_name].export_boe(options)
+        expected = [
+            # For information about data position, see page 7 & 16 of
+            # https://sede.agenciatributaria.gob.es/static_files/Sede/Disenyo_registro/DR_300_399/archivos/347.pdf
+            # 1,347,year,company vat
+            "13472020A12345674COMPANY_1_DATA                          T         BECAUSE I AM ACCOUNTMAN!                3470000000002  0000000000000000000002 000000001500000000000000 000000000000000                                                                                                                                                                                                                                                                                                                           ",
+            # 2,347,year,company vat,partner vat
+            "23472020A12345674A12345674         BERNARDO GANADOR                        D28   B 000000001000000  000000000000000 0000000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000001000000 000000000000000                     000000000000000                                                                                                                                                                                                         ",
+            "23472020A1234567474280274A         PARTNER 2                               D28   B 000000000500000  000000000000000 0000000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000500000 000000000000000                     000000000000000                                                                                                                                                                                                         ",
+        ]
+        for generated_line, expected_line in zip(vals['file_content'].decode('utf-8').splitlines(), expected):
+            self.assertEqual(generated_line, expected_line)
 
     @freeze_time('2020-12-22')
     def test_boe_mod_349(self):

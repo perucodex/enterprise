@@ -161,7 +161,6 @@ class TestSubscriptionStockCommon(TestSubscriptionCommon, ValuationReconciliatio
 
     def simulate_period(self, subscription, date, move_qty=False):
         with freeze_time(date), patch.object(self.env.cr, 'now', fields.Datetime.now):
-            subscription.picking_ids.create_date = fields.Date.today()
             today = fields.Date.today()
             invoice = subscription._create_recurring_invoice()
             if invoice and invoice.state == 'draft':

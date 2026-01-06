@@ -1,5 +1,4 @@
 from dateutil.relativedelta import relativedelta
-from datetime import date
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.fields import Domain
@@ -12,11 +11,6 @@ class AccountReturnType(models.Model):
     _inherit = 'account.return.type'
 
     def _get_start_date_elements(self, main_company):
-        if self == self.env.ref('account_reports.annual_corporate_tax_return_type') and main_company.account_fiscal_country_id.code == 'BE':
-            fiscal_year_date = date(2025, int(main_company.fiscalyear_last_month), main_company.fiscalyear_last_day)
-            start_date = fiscal_year_date + relativedelta(days=1)
-            return start_date.day, start_date.month
-
         return super()._get_start_date_elements(main_company)
 
     @api.model
@@ -149,52 +143,8 @@ class AccountReturn(models.Model):
     def _run_checks(self, check_codes_to_ignore):
         checks = super()._run_checks(check_codes_to_ignore)
 
-        if self.type_external_id == 'l10n_be_reports.be_vat_return_type':
-            checks += self._check_suite_be_vat_report(check_codes_to_ignore)
-        elif self.type_external_id == 'l10n_be_reports.be_vat_listing_return_type':
+        if self.type_external_id == 'l10n_be_reports.be_vat_listing_return_type':
             checks += self._check_suite_be_partner_vat_listing(check_codes_to_ignore)
-
-        return checks
-
-    def _check_suite_be_vat_report(self, check_codes_to_ignore):
-        def _evaluate_report_check(check_func, expression_totals):
-            return all(
-                check_func(expression_totals)
-                for expression_totals in all_column_groups_expression_totals.values()
-            )
-        checks = []
-
-        # report checks
-        report = self.type_id.report_id
-        options = self._get_closing_report_options()
-        warnings = {}
-
-        expressions_to_evaluate = self.env['account.report.expression']
-        if 'tax_report_code_13' not in check_codes_to_ignore:
-            expressions_to_evaluate |= report.line_ids.expression_ids
-
-        all_column_groups_expression_totals = report._compute_expression_totals_for_each_column_group(
-            report.line_ids.expression_ids,
-            options,
-            warnings=warnings,
-        )
-
-        if 'tax_report_code_13' not in check_codes_to_ignore:
-            expr_map = {
-                line.code: line.expression_ids.filtered(lambda x: x.label == 'balance')
-                for line in report.line_ids
-                if line.code
-            }
-            success = _evaluate_report_check(
-                lambda expr_totals: all(expr_totals[expr]['value'] >= 0 for expr in expr_map.values()),
-                all_column_groups_expression_totals
-            )
-            checks.append({
-                'code': 'tax_report_code_13',
-                'name': _lt("No negative amount in VAT report"),
-                'message': _lt("The Belgian VAT report should only include positive values. A negative amount probably means a misconfiguration."),
-                'result': 'reviewed' if success else 'anomaly'
-            })
 
         return checks
 
@@ -263,6 +213,7 @@ class AccountReturn(models.Model):
 
     def action_submit(self):
         # OVERRIDE
+        self._check_all_branches_allowed()
         if self.type_external_id == 'l10n_be_reports.be_vat_return_type':
             return self.env['l10n_be_reports.vat.return.submission.wizard']._open_submission_wizard(self)
 
@@ -291,14 +242,15 @@ class AccountReturn(models.Model):
 
         return super().action_submit()
 
-    def _generate_submission_attachments(self, options):
-        super()._generate_submission_attachments(options)
-        if self.type_id == self.env.ref('l10n_be_reports.be_vat_return_type'):
-            self._add_attachment(self.type_id.report_id.dispatch_report_action(options, 'export_tax_report_to_xml'))
+    def _generate_locking_attachments(self, options):
+        super()._generate_locking_attachments(options)
         if self.type_external_id == 'l10n_be_reports.be_vat_listing_return_type':
             self._add_attachment(self.type_id.report_id.dispatch_report_action(options, 'partner_vat_listing_export_to_xml'))
-        if self.type_external_id == 'l10n_be_reports.be_ec_sales_list_return_type':
+        elif self.type_external_id == 'l10n_be_reports.be_ec_sales_list_return_type':
             self._add_attachment(self.type_id.report_id.dispatch_report_action(options, 'export_to_xml_sales_report'))
+
+    def l10n_be_reset_2_sates_common(self):
+        return self.action_reset_2_states()
 
     def l10n_be_reset_tax_prepayment(self):
         self.ensure_one()

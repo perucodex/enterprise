@@ -1,8 +1,9 @@
 <odoo>
     <t t-name="spreadsheet_edition.CommonOdooChartConfigPanel">
-        <t t-if="!isModelValid">
+        <Section t-if="!isModelValid">
             <ValidationMessages messages="[invalidChartModel]" msgType="'error'" />
-        </t>
+            <button class="mx o-button o-button-primary mt-2 m-1" t-on-click="delete">Delete Chart</button>
+        </Section>
         <t t-else="">
             <Section title.translate="Model">
                 <div><t t-esc="modelDisplayName" /> (<t t-esc="model" />)</div>

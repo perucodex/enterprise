@@ -421,14 +421,13 @@ registry.category("web_tour.tours").add("test_gs1_package_receipt", {
         // previously scanned quantities.
         { trigger: ".o_barcode_client_action", run: "scan 00546879213579461324" },
         {
-            trigger: ".o_barcode_line:contains(546879213579461324)",
+            trigger: ".o_barcode_line .result-package:text('546879213579461324')",
             run: function () {
                 helper.assertLinesCount(1);
                 const line1 = helper.getLine({ barcode: "82655853" });
                 helper.assertLineIsHighlighted(line1, true);
                 helper.assertLineQty(line1, "4");
-                const product1_package = line1.querySelector('[name="package"]').innerText;
-                helper.assert(product1_package, "546879213579461324");
+                helper.assertLineResultPackage(line1, "546879213579461324");
             },
         },
         // Scans PRO_GTIN_12 x8.
@@ -440,8 +439,7 @@ registry.category("web_tour.tours").add("test_gs1_package_receipt", {
                 const line1 = helper.getLine({ barcode: "82655853" });
                 helper.assertLineIsHighlighted(line1, false);
                 helper.assertLineQty(line1, "4");
-                const product1_package = line1.querySelector('[name="package"]').innerText;
-                helper.assert(product1_package, "546879213579461324");
+                helper.assertLineResultPackage(line1, "546879213579461324");
                 const line2 = helper.getLine({ barcode: "584687955629" });
                 helper.assertLineIsHighlighted(line2, true);
                 helper.assertLineQty(line2, "8");
@@ -450,32 +448,29 @@ registry.category("web_tour.tours").add("test_gs1_package_receipt", {
         // Scans again the same package. Now it already exists but should be assigned anyway.
         { trigger: ".o_barcode_client_action", run: "scan 00546879213579461324" },
         {
-            trigger: '.o_barcode_line[data-barcode="584687955629"]:contains(546879213579461324)',
+            trigger: ".o_barcode_line[data-barcode='584687955629'] :text('546879213579461324')",
             run: function () {
                 helper.assertLinesCount(2);
                 const line1 = helper.getLine({ barcode: "82655853" });
                 helper.assertLineIsHighlighted(line1, false);
                 helper.assertLineQty(line1, "4");
-                const product1_package = line1.querySelector('[name="package"]').innerText;
-                helper.assert(product1_package, "546879213579461324");
+                helper.assertLineResultPackage(line1, "546879213579461324");
                 const line2 = helper.getLine({ barcode: "584687955629" });
                 helper.assertLineIsHighlighted(line2, true);
                 helper.assertLineQty(line2, "8");
-                const product2_package = line2.querySelector('[name="package"]').innerText;
-                helper.assert(product2_package, "546879213579461324");
+                helper.assertLineResultPackage(line2, "546879213579461324");
             },
         },
-        // Selects a line and scans a package type, it should be assing the package
-        // type to selected line's result package.
+        // Selects a line and scans a package type, it should assign it
+        // to the selected line's result package.
         {
             trigger: '.o_barcode_line[data-barcode="584687955629"]',
             run: "click",
         },
         { trigger: '.o_selected[data-barcode="584687955629"]', run: "scan 91WOODC" },
-        {
-            trigger:
-                ".o_notification .o_notification_content:contains('Package type Wooden Chest applied to the package 546879213579461324')",
-        },
+        ...stepUtils.checkNotificationMessage(
+            "Package type Wooden Chest applied to the package 546879213579461324"
+        ),
         {
             trigger: ".o_barcode_line",
             run: function () {
@@ -483,20 +478,18 @@ registry.category("web_tour.tours").add("test_gs1_package_receipt", {
                 const line1 = helper.getLine({ barcode: "82655853" });
                 helper.assertLineIsHighlighted(line1, false);
                 helper.assertLineQty(line1, "4");
-                const product1_package = line1.querySelector('[name="package"]').innerText;
-                helper.assert(product1_package, "546879213579461324");
+                helper.assertLineResultPackage(line1, "546879213579461324");
                 const line2 = helper.getLine({ barcode: "584687955629" });
                 helper.assertLineIsHighlighted(line2, true);
                 helper.assertLineQty(line2, "8");
-                const product2_package = line2.querySelector('[name="package"]').innerText;
-                helper.assert(product2_package, "546879213579461324");
+                helper.assertLineResultPackage(line2, "546879213579461324");
             },
         },
 
         // Scans PRO_GTIN_8 x6
         { trigger: ".o_barcode_client_action", run: "scan 0100000082655853300006" },
         {
-            trigger: '.o_barcode_line.o_selected:contains("PRO_GTIN_8")',
+            trigger: ".o_barcode_line.o_selected .o_product_label:text('PRO_GTIN_8')",
             run: function () {
                 helper.assertLinesCount(3);
                 const line = helper.getLine({ selected: true });
@@ -506,13 +499,12 @@ registry.category("web_tour.tours").add("test_gs1_package_receipt", {
         // Scans a package with a type => put in pack the selected line in this package with the type.
         { trigger: ".o_barcode_client_action", run: "scan 00130406658041178543\x1D91IRONC" },
         {
-            trigger: '.o_barcode_line.o_selected:contains("130406658041178543")',
+            trigger: ".o_barcode_line.o_selected .result-package:text('130406658041178543')",
             run: function () {
                 helper.assertLinesCount(3);
                 const line = helper.getLine({ selected: true });
                 helper.assertLineQty(line, "6");
-                const linePackage = line.querySelector('[name="package"]').innerText;
-                helper.assert(linePackage, "130406658041178543");
+                helper.assertLineResultPackage(line, "130406658041178543");
             },
         },
         // Scans PRO_GTIN_12 x12, then scans a package type to put in pack in a new package.
@@ -532,8 +524,7 @@ registry.category("web_tour.tours").add("test_gs1_package_receipt", {
                 helper.assertLinesCount(4);
                 const line = helper.getLine({ selected: true });
                 helper.assertLineQty(line, "12");
-                const linePackage = line.querySelector('[name="package"]').innerText;
-                helper.assert(linePackage, "PACK0000123");
+                helper.assertLineResultPackage(line, "PACK0000123");
             },
         },
         ...stepUtils.validateBarcodeOperation(),

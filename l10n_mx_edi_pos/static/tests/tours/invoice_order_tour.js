@@ -123,3 +123,40 @@ registry.category("web_tour.tours").add("l10n_mx_edi_pos.tour_invoice_order_defa
         Chrome.endTour(),
     ],
 });
+
+registry.category("web_tour.tours").add("tour_invoice_to_general_public", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.addOrderline("Whiteboard Pen"),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("Arturo Garcia"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Cash"),
+            PaymentScreen.remainingIs("0.0"),
+            PaymentScreen.clickInvoiceButton(),
+            {
+                content: "Set Invoice to public: 'No'",
+                trigger: "select[name='l10n_mx_edi_cfdi_to_public']",
+                run: "select 0",
+            },
+            Dialog.confirm(),
+            PaymentScreen.validateButtonIsHighlighted(true),
+            PaymentScreen.clickValidate(),
+            Dialog.is({ title: "Invalid Operation" }),
+            Dialog.confirm(),
+            PaymentScreen.clickInvoiceButton(),
+            PaymentScreen.clickInvoiceButton(),
+            {
+                content: "Set Invoice to public: 'Yes'",
+                trigger: "select[name='l10n_mx_edi_cfdi_to_public']",
+                run: "select 1",
+            },
+            Dialog.confirm(),
+            PaymentScreen.validateButtonIsHighlighted(true),
+            PaymentScreen.clickValidate(),
+            ReceiptScreen.isShown(),
+            Chrome.endTour(),
+        ].flat(),
+});

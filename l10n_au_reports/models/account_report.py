@@ -66,6 +66,7 @@ class L10n_AuReportHandler(models.AbstractModel):
                 'caret_options': 'res.partner',
                 'model': 'res.partner',
                 'name': partner_info['name'],
+                'level': 1,
                 'columns': columns,
             }
             lines.append((0, line))
@@ -127,7 +128,7 @@ class L10n_AuReportHandler(models.AbstractModel):
                 payee_state.name as state_name,
                 payee_state.code as state_code,
                 payee.zip as zip,
-                payee_country.name as country_name,
+                payee_country.name->>'en_US' as country_name,
                 payee.phone as phone,
                 payee_bank.sanitized_acc_number as account_number,
                 payee.email as email,

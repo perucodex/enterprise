@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import datetime
+
+from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models
 from ..models.account_return import PERIODS
@@ -104,8 +107,15 @@ class ResCompany(models.Model):
         root_companies_before = self.root_id
         res = super().write(vals)
 
-        if any(return_field in vals for return_field in ('account_return_periodicity', 'account_return_reminder_day', 'child_ids', 'parent_id', 'account_opening_date')):
-            roots_to_recompute = root_companies_before | self.root_id
+        roots_to_recompute = root_companies_before | self.root_id
+        if 'account_opening_date' in vals:
+            self.env['account.return.type'].with_context(
+                # 2 years to make sure we cover all cases, such as yearly returns with a deadline of more than 1 year.
+                forced_date_from=self.account_opening_date - relativedelta(years=2),
+                forced_date_to=datetime.date.today() + relativedelta(years=1),
+            )._generate_or_refresh_all_returns(roots_to_recompute)
+
+        elif set(vals) & {'account_return_periodicity', 'account_return_reminder_day', 'child_ids', 'parent_id'} and self.account_opening_date:
             self.env['account.return.type']._generate_or_refresh_all_returns(roots_to_recompute)
 
         return res

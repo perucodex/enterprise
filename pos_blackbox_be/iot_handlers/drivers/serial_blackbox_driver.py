@@ -16,7 +16,7 @@ BlackboxProtocol = SerialProtocol(
     bytesize=serial.EIGHTBITS,
     stopbits=serial.STOPBITS_ONE,
     parity=serial.PARITY_NONE,
-    timeout=3,
+    timeout=1.4,
     writeTimeout=0.2,
     measureRegexp=None,
     statusRegexp=None,
@@ -73,6 +73,7 @@ class BlackBoxDriver(SerialDriver):
         """Initializes `self._actions`, a map of action keys sent by the frontend to backend action methods."""
 
         self._actions.update({
+            'batchAction': self._batch_action,  # Batch of multiple actions to be done one after another and send all reponse at once
             'registerReceiptWeb': self._request_registerReceiptWeb,  # 'H' from server (websocket) so requires an answer
             'registerReceipt': self._request_registerReceipt,  # 'H'
             'registerPIN': self._request_registerPIN,  # 'P'
@@ -87,10 +88,10 @@ class BlackBoxDriver(SerialDriver):
         :return: whether the device is supported by the driver
         :rtype: bool
         """
-        for _ in range(3):
+        for i in range(3):
             try:
                 protocol = cls._protocol
-                probe_message = cls._wrap_low_level_message_around("S000")
+                probe_message = cls._wrap_low_level_message_around("S00" + str(i))
                 with serial_connection(device['identifier'], protocol) as connection:
                     connection.reset_output_buffer()
                     connection.reset_input_buffer()
@@ -111,9 +112,7 @@ class BlackBoxDriver(SerialDriver):
         """
         Sends a status request to the blackbox and stores the result status in self.data['message']
         """
-        packet = self._wrap_low_level_message_around(f'S{str(self.sequence_number % 100).zfill(2)}0')
-        self.sequence_number += 1
-        blackbox_response = self._send_to_blackbox(packet, self._connection)
+        blackbox_response = self._send_to_blackbox("S", data, self._connection)
         parsed_response = self._parse_blackbox_response(blackbox_response) if blackbox_response else {}
         if not parsed_response:
             self.data['message'] = self.data['result']['error']['errorCode']
@@ -195,8 +194,32 @@ class BlackBoxDriver(SerialDriver):
         except requests.exceptions.RequestException:
             _logger.exception('Could not reach confirmation status URL: %s', server_url)
 
+    def _batch_action(self, batch):
+        """Handles a batch of multiple actions to be done one after another and send all response at once.
+        :param batch: batch of arrays of action and the data to be sent to the blackbox
+        :type batch: array of tuples
+        """
+        responses = []
+        for (data, action) in batch['high_level_message']:
+            if action == 'registerReceipt':
+                self._registerReceipt(data)
+            elif action == 'registerPIN':
+                self._registerPIN(data)
+            else:
+                _logger.error("Unknown action '%s' in batch", action)
+                continue
+            responses.append(self.data['result'])
+            if self._is_last_response_error():
+                # If the last response was an error, we do not send the next messages in the batch. They will be sent later in a new batch.
+                break
+
+        self.data['result'] = responses
+
+    def _is_last_response_error(self):
+        return 'error' in self.data['result'] and self.data['result']['error']['errorCode'][:3] != '000'
+
     def _request_registerReceiptWeb(self, data):
-        self._request_registerReceipt(data)
+        self._registerReceipt(data['high_level_message'])
 
         self.send_blackbox_response({
             'order_id': data['id'],
@@ -205,51 +228,76 @@ class BlackBoxDriver(SerialDriver):
             'iot_mac': helpers.get_identifier()
         })
 
-    def _request_registerReceipt(self, data):
-        if data['high_level_message'].get('clock'):
-            packet = self._wrap_low_level_message_around(self._wrap_high_level_message_around('I', data['high_level_message']))
-            blackbox_response = self._send_to_blackbox(packet, self._connection)
+    def _registerReceipt(self, data):
+        if data.get('clock'):
+            blackbox_response = self._send_to_blackbox('I', data, self._connection)
 
-        packet = self._wrap_low_level_message_around(self._wrap_high_level_message_around('H', data['high_level_message']))
-        blackbox_response = self._send_to_blackbox(packet, self._connection)
+        blackbox_response = self._send_to_blackbox('H', data, self._connection)
+        if blackbox_response:
+            self.data['result'] = self._parse_blackbox_response(blackbox_response)
+
+    def _request_registerReceipt(self, data):
+        self._registerReceipt(data['high_level_message'])
+
+    def _registerPIN(self, data):
+        blackbox_response = self._send_to_blackbox("P", data, self._connection)
         if blackbox_response:
             self.data['result'] = self._parse_blackbox_response(blackbox_response)
 
     def _request_registerPIN(self, data):
-        packet = self._wrap_low_level_message_around("P040%s" % data['high_level_message'])
-        blackbox_response = self._send_to_blackbox(packet, self._connection)
-        if blackbox_response:
-            self.data['result'] = self._parse_blackbox_response(blackbox_response)
+        self._registerPIN(data['high_level_message'])
 
-    def _send_to_blackbox(self, packet, connection):
+    def _send_to_blackbox(self, request_type: str, data: dict, connection: serial.Serial) -> str | None:
         """Sends a message to and wait for a response from the blackbox.
 
-        :param bytearray packet: the message to be sent to the blackbox
-        :param int response_size: number of bytes of the expected response
-        :param serial.Serial connection: serial connection to the blackbox
+        :param request_type: "I", "H", "P" or "S"
+        :param data: data to be sent to the blackbox
+        :param connection: serial connection to the blackbox
         :return: the response to the message, or None if no valid response was received
-        :rtype: bytearray
         """
-        connection.reset_output_buffer()
-        connection.reset_input_buffer()
         error_code = '301'
-        try:
-            connection.write(packet)
-            buffer = connection.read_until(ETX)
-            if len(buffer) and buffer[0:1] == ACK:
-                response = buffer[2:-1].decode()  # remove ACK, STX and ETX
-                if buffer[1:2] == STX and buffer[-1:] == ETX and self._lrc(response) == ord(connection.read(1)):
-                    connection.write(ACK)
-                    return response
-                _logger.error("received ACK but not a valid response, sending NACK... (response: %s)", buffer)
-                connection.write(NACK)
-                # no ACK or not a valid response
+        for retry in range(3):
+            if retry > 0:
+                _logger.warning("Retrying (count=%s)...", retry)
+
+            packet = self._wrap_low_level_message_around(self._wrap_high_level_message_around(request_type, data, retry))
+            connection.reset_output_buffer()
+            connection.reset_input_buffer()
+            try:
+                connection.write(packet)
+                buffer = connection.read_until(ETX)
+
+                if not len(buffer) or buffer[0:1] not in (ACK, NACK):
+                    # When the blackbox is off or poorly connected its adaptor is still detected but always replies with empty bytestrings b''
+                    _logger.error("Blackbox did not respond, check the cable connection and the power supply.")
+                    error_code = '301'
+                    continue
+
+                error_code = '301'
+                if buffer[0:1] == NACK:
+                    _logger.error("received NACK from blackbox.")
+                    continue
+                elif buffer[0:1] == ACK:
+                    buffer = buffer[1:]  # remove ACK
+                    for _ in range(3):
+                        response_data = buffer[1:-1]  # remove STX and ETX
+                        if (
+                                len(buffer)
+                                and buffer[0:1] == STX
+                                and buffer[-1:] == ETX
+                                and self._lrc(response_data.decode()) == ord(connection.read(1))
+                        ):
+                            connection.write(ACK)
+                            return response_data.decode()
+
+                        _logger.error("received ACK but not a valid response, sending NACK... (response: %s)", buffer)
+                        connection.reset_input_buffer()
+                        connection.write(NACK)
+                        buffer = connection.read_until(ETX)
+                    break
+            except serial.SerialException:
+                _logger.warning("Error while sending to blackbox with protocol %s", self._protocol.name)
                 error_code = '300'
-            elif not len(buffer):
-                # When the blackbox is off or poorly connected its adaptor is still detected but always replies with empty bytestrings b''
-                _logger.error("Blackbox did not respond, check the cable connection and the power supply.")
-        except serial.SerialException:
-            _logger.warning("Error while sending to blackbox with protocol %s", self._protocol.name)
         self.data['result'] = {
             'error': {
                 'errorCode': error_code,
@@ -258,12 +306,15 @@ class BlackBoxDriver(SerialDriver):
         }
         return None
 
-    def _wrap_high_level_message_around(self, request_type, data):
+    def _wrap_high_level_message_around(self, request_type, data, retry=0):
         self.sequence_number += 1
-        wrap = request_type + str(self.sequence_number % 100).zfill(2) + '0'
+        wrap = request_type + str(self.sequence_number % 100).zfill(2) + str(retry)
 
-        if request_type == 'I':
+        if request_type in ("I", "S"):
             return wrap
+
+        if request_type == "P":
+            return wrap + data
 
         wrap += "{:>8}".format(data['date'])
         wrap += "{:>6}".format(data['ticket_time'])

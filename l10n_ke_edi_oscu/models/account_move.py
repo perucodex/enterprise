@@ -75,7 +75,8 @@ class AccountMove(models.Model):
         super()._compute_show_reset_to_draft_button()
         self.filtered(lambda m: m.l10n_ke_oscu_invoice_number).show_reset_to_draft_button = False
 
-    @api.depends('invoice_line_ids.product_id',
+    @api.depends('invoice_date',
+                 'invoice_line_ids.product_id',
                  'invoice_line_ids.product_uom_id',
                  'reversed_entry_id',
                  'l10n_ke_reason_code_id',
@@ -83,7 +84,7 @@ class AccountMove(models.Model):
     def _compute_l10n_ke_validation_message(self):
         """ Compute the series of messages to be displayed in the banner at the header of the invoice. """
         for move in self:
-            if not move.company_id.l10n_ke_oscu_is_active or not move.is_invoice(include_receipts=True):
+            if not move.is_invoice(include_receipts=True):
                 move.l10n_ke_validation_message = False
                 continue
 
@@ -92,6 +93,19 @@ class AccountMove(models.Model):
                 **product_lines.product_id._l10n_ke_get_validation_messages(for_invoice=True),
                 **product_lines.product_uom_id._l10n_ke_get_validation_messages(),
             }
+
+            if not move.company_id.l10n_ke_oscu_is_active:
+                messages['etims_configuration_warning'] = {
+                    'message': _(
+                        "eTIMS configuration is incomplete for company '%(company)s'. Please verify that the eTIMS Server Mode, "
+                        "OSCU Configuration, and the company's eTIMS Branch Code are correctly set up to proceed.",
+                        company=move.company_id.name
+                    ),
+                    'blocking': True,
+                }
+                move.l10n_ke_validation_message = messages
+                continue
+
             if move.l10n_ke_oscu_invoice_number and not move.l10n_ke_oscu_receipt_number and not move.l10n_ke_oscu_signature:
                 messages['timeout_warning'] = {
                     'message': _("The eTIMS connection timed out while sending the invoice, please try again later.")
@@ -115,6 +129,12 @@ class AccountMove(models.Model):
                         'blocking': True,
                     }
 
+                if move.reversed_entry_id and move.reversed_entry_id.invoice_date > move.invoice_date:
+                    messages['credit_date_error'] = {
+                        'message': _("eTims does not accept credit notes with a date earlier than the corresponding invoice."),
+                        'blocking': True,
+                    }
+
             if product_lines.filtered(lambda line: not line.product_id):
                 messages['no_product_warning'] = {
                     'message': _("Some lines are missing a product where one must be set. "),
@@ -133,7 +153,7 @@ class AccountMove(models.Model):
 
             if lines_not_single_tax:
                 messages['lines_not_single_vat_tax'] = {
-                    'message': _("All invoice lines must have Tax line and exactly one VAT tax (on which the KRA Tax Code is set)!"),
+                    'message': _("All invoice lines must include a tax line and exactly one VAT tax, with the KRA Tax Code properly set."),
                     'blocking': True,
                 }
 
@@ -464,13 +484,30 @@ class AccountMove(models.Model):
         fields_list.append('l10n_ke_oscu_attachment_file')
         return fields_list
 
+    def _l10n_ke_register_products(self):
+        """ Register products with eTIMS before sending invoices or vendor bills. """
+        for move in self:
+            products_to_register = move.invoice_line_ids.product_id.filtered(
+                lambda p: p and not p.l10n_ke_item_code
+            )
+
+            for product in products_to_register:
+                error, _content = product._l10n_ke_oscu_save_item(company=move.company_id)
+                if error:
+                    _logger.warning(
+                        "Failed to register product '%s' (ID: %d) for invoice %s: [%s] %s",
+                        product.name, product.id, move.name, error.get('code', 'Unknown'), error.get('message', 'Unknown error')
+                    )
+
     def _l10n_ke_oscu_send_customer_invoice(self):
         self.env['res.company']._with_locked_records(self)
+        self._l10n_ke_register_products()
         company = self.company_id
 
         if self.l10n_ke_oscu_invoice_number:
             error, data = self._l10n_ke_oscu_fetch_invoice_details()
             if not error:
+                data = data['receipt']
                 date_str = data['sdcDateTime'].split('.')[0]  # Remove microseconds
                 signing_date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S').replace(tzinfo=ZoneInfo('Africa/Nairobi')).astimezone(ZoneInfo('UTC')).replace(tzinfo=None)
                 self.write({
@@ -483,6 +520,23 @@ class AccountMove(models.Model):
                 return data, error
             elif error['code'] == 'TIM':
                 return data, error
+
+        if self.move_type == 'out_refund' and company.l10n_ke_server_mode != 'demo':
+            error, data = self.reversed_entry_id._l10n_ke_oscu_fetch_invoice_details()
+            if error:
+                return data, error
+            # Normalize None to False to avoid None != False when customer had no PIN on invoice
+            invoice_customer_pin = data['custTin'] or False
+            if invoice_customer_pin != self.partner_id.vat:
+                error = {
+                    'code': 'WRONG_PIN',
+                    'message': _(
+                        "The customer PIN on the credit note differs from the PIN on the original invoice submitted to the KRA.\n"
+                        "The KRA only accepts credit notes with matching PINs.\n"
+                        "Customer PIN on the invoice: %s", invoice_customer_pin or ''
+                    ),
+                }
+                return {}, error
 
         content = self._l10n_ke_oscu_json_from_move()
 
@@ -520,6 +574,7 @@ class AccountMove(models.Model):
             if (blocking := [msg for msg in (move.l10n_ke_validation_message or {}).values() if msg.get('blocking')]):
                 raise UserError(_("Please resolve these issues first.\n %s",
                                   '\n'.join([f"- {msg['message']}" for msg in blocking])))
+            move._l10n_ke_register_products()
             company = move.company_id
 
             if move.l10n_ke_oscu_attachment_file:
@@ -565,7 +620,7 @@ class AccountMove(models.Model):
             else:
                 _logger.error("Error retrieving invoice details from the OSCU: %s: %s", error['code'], error['message'])
             return error, None
-        return [], data['salesList'][0]['receipt'] if data['salesList'] else None
+        return [], data['salesList'][0] if data['salesList'] else None
 
     # === Fetching from eTIMS: vendor bills === #
 

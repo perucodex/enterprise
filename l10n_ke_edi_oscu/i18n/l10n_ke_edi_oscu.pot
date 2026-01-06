@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0+e\n"
+"Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-04 15:10+0000\n"
-"PO-Revision-Date: 2024-06-04 15:10+0000\n"
+"POT-Creation-Date: 2025-12-30 19:07+0000\n"
+"PO-Revision-Date: 2025-12-30 19:07+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,6 +17,7 @@ msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_company__l10n_ke_server_mode
+#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_server_mode
 msgid ""
 "\n"
 "            - Production: Connection to eTIMS in production mode.\n"
@@ -28,7 +29,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#, python-format
 msgid ""
 "\"%(item_name)s\" could not be matched to any product, since it has a "
 "barcode (%(barcode)s) and UNSPSCcode (%(unspsc_code)s) that do not match any"
@@ -38,21 +38,18 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#, python-format
 msgid "\"%s\" matched using an exact matching of barcode and UNSPSC code."
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#, python-format
 msgid "\"%s\" matched using an exact matching of name and UNSPSC code."
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#, python-format
 msgid ""
 "\"%s\" matched using an inexact matching of name and an exact matching of "
 "UNSPSC code."
@@ -61,7 +58,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
-#, python-format
 msgid ""
 "'%(product_name)s' exceeds quantity on original invoice by %(excess)f "
 "%(uom_name)s"
@@ -70,7 +66,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
-#, python-format
 msgid "'%s' is not present on the original invoice."
 msgstr ""
 
@@ -87,11 +82,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.report_invoice_document
 msgid "2021-09-19"
-msgstr ""
-
-#. module: l10n_ke_edi_oscu
-#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.report_invoice_document
-msgid "27.00"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -182,21 +172,20 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
-#, python-format
 msgid "A KRA reason code is required when creating credit notes. "
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
-#: code:addons/l10n_ke_edi_oscu/wizard/account_move_reversal.py:0
-#, python-format
-msgid "A reason code is required when creating credit notes."
+#: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
+msgid ""
+"A credit note must be linked to an invoice that has already been submitted "
+"to eTIMS."
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
-#, python-format
 msgid ""
 "A vendor with a matching Tax ID and Branch ID was not found. One with the "
 "corresponding details was created."
@@ -218,27 +207,22 @@ msgid "Account Move Send"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_company_form_inherit_l10n_ke_edi_oscu
-msgid "Actions"
-msgstr ""
-
-#. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_l10n_ke_edi_oscu_code__active
 msgid "Active"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_company__l10n_ke_oscu_user_agreement
+#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_oscu_user_agreement
 msgid "Agreement is required to use Odoo as an OSCU service provider."
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
-#, python-format
 msgid ""
-"All invoice lines must have Tax line and exactly one VAT tax (on which the "
-"KRA Tax Code is set)!"
+"All invoice lines must include a tax line and exactly one VAT tax, with the "
+"KRA Tax Code properly set."
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -249,13 +233,30 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
-#, python-format
 msgid "An eTIMS payment method is required when confirming a purchase. "
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
+msgid "Another user is already sending this invoice."
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
+msgid "Another user is already sending this vendor bill."
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields.selection,name:l10n_ke_edi_oscu.selection__l10n_ke_edi_oscu_code__code_type__36
 msgid "Bank"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
+msgid "Branch Code"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -265,18 +266,27 @@ msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
-#: code:addons/l10n_ke_edi_oscu/wizard/account_move_send.py:0
-#, python-format
+#: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
+msgid "Branches successfully created"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
+msgid "CMC Key"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/account_move_send.py:0
 msgid "Can't send to eTIMS"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#, python-format
 msgid ""
-"Cannot register '%s' on eTIMS:\n"
-"%s"
+"Cannot register '%(name)s' on eTIMS:\n"
+"%(msg)s"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -292,6 +302,7 @@ msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_l10n_ke_edi_oscu_code__code
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
 msgid "Code"
 msgstr ""
 
@@ -307,19 +318,18 @@ msgid "Companies"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_base_document_layout__company_details
-msgid "Company Details"
-msgstr ""
-
-#. module: l10n_ke_edi_oscu
 #: model:ir.model,name:l10n_ke_edi_oscu.model_base_document_layout
 msgid "Company Document Layout"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
+#: model:ir.model,name:l10n_ke_edi_oscu.model_res_config_settings
+msgid "Config Settings"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
-#, python-format
 msgid "Connection Error: %s\n"
 msgstr ""
 
@@ -336,14 +346,19 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_control_unit
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__l10n_ke_control_unit
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_payment__l10n_ke_control_unit
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_company__l10n_ke_control_unit
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_control_unit
 msgid "Control Unit ID"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields.selection,name:l10n_ke_edi_oscu.selection__l10n_ke_edi_oscu_code__code_type__05
 msgid "Country"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#: model:ir.model,website_form_label:l10n_ke_edi_oscu.model_res_partner
+msgid "Create a Customer"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -380,19 +395,51 @@ msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_company__l10n_ke_oscu_cmc_key
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_oscu_cmc_key
 msgid "Device Communication Key"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_chart_template__display_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__display_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move_line__display_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move_reversal__display_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move_send__display_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_tax__display_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_base_document_layout__display_name
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_l10n_ke_edi_oscu_code__display_name
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_l10n_ke_edi_oscu_notice__display_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_product_product__display_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_product_template__display_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_product_unspsc_code__display_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_company__display_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_partner__display_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_users__display_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_uom_uom__display_name
 msgid "Display Name"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
+#: model:ir.model,name:l10n_ke_edi_oscu.model_account_tax
+msgid "ETA tax codes mixin"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
 #. odoo-python
-#: code:addons/l10n_ke_edi_oscu/wizard/account_move_send.py:0
-#, python-format
+#: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
+msgid "Error connecting with the KRA."
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
+msgid "Error decoding response from KRA."
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/account_move_send.py:0
 msgid "Error when sending to the KRA:"
 msgstr ""
 
@@ -402,39 +449,42 @@ msgid "Fetch Data from eTIMS"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
+msgid ""
+"Fill out this information if you have an obligation to report company "
+"insurance to the KRA."
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
 #: model:ir.model.fields.selection,name:l10n_ke_edi_oscu.selection__product_product__l10n_ke_product_type_code__2
 #: model:ir.model.fields.selection,name:l10n_ke_edi_oscu.selection__product_template__l10n_ke_product_type_code__2
 msgid "Finished Product"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_base_document_layout__report_footer
-msgid "Footer text displayed at the bottom of all reports."
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
+msgid "Go to the company"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_company_form_inherit_l10n_ke_edi_oscu
-msgid "Get Item Codes"
-msgstr ""
-
-#. module: l10n_ke_edi_oscu
-#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_company_form_inherit_l10n_ke_edi_oscu
-msgid "Get Stock Moves List"
-msgstr ""
-
-#. module: l10n_ke_edi_oscu
-#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.l10n_ke_edi_code_search
-msgid "Group By"
-msgstr ""
-
-#. module: l10n_ke_edi_oscu
-#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_base_document_layout__company_details
-msgid "Header text displayed at the top of all reports."
-msgstr ""
-
-#. module: l10n_ke_edi_oscu
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_chart_template__id
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__id
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move_line__id
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move_reversal__id
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move_send__id
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_tax__id
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_base_document_layout__id
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_l10n_ke_edi_oscu_code__id
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_l10n_ke_edi_oscu_notice__id
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_product_product__id
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_product_template__id
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_product_unspsc_code__id
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_company__id
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_config_settings__id
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_partner__id
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_users__id
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_uom_uom__id
 msgid "ID"
 msgstr ""
 
@@ -445,6 +495,7 @@ msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_company__l10n_ke_insurance_code
+#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_insurance_code
 msgid ""
 "If this branch has a mandatory insurance policy (e.g. a pharmacy), put its "
 "code here."
@@ -452,6 +503,7 @@ msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_company__l10n_ke_oscu_cmc_key
+#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_oscu_cmc_key
 msgid "If you have an already initialized device, you can put your key here."
 msgstr ""
 
@@ -468,12 +520,12 @@ msgid ""
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_company_form_inherit_l10n_ke_edi_oscu
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
 msgid "Initialize OSCU"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_company_form_inherit_l10n_ke_edi_oscu
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
 msgid "Insurance"
 msgstr ""
 
@@ -485,30 +537,37 @@ msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_company__l10n_ke_insurance_code
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_insurance_code
 msgid "Insurance Code"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_company__l10n_ke_insurance_name
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_insurance_name
 msgid "Insurance Name"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_company__l10n_ke_insurance_rate
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_insurance_rate
 msgid "Insurance Rate"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
+msgid "Insurance status successfully registered"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_oscu_internal_data
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__l10n_ke_oscu_internal_data
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_payment__l10n_ke_oscu_internal_data
 msgid "Internal Data"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_oscu_invoice_number
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__l10n_ke_oscu_invoice_number
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_payment__l10n_ke_oscu_invoice_number
 msgid "Invoice Number"
 msgstr ""
 
@@ -575,7 +634,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
-#, python-format
 msgid "KRA PIN: %s"
 msgstr ""
 
@@ -617,27 +675,35 @@ msgid "KRA eTIMS Details"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
+msgid "KRA portal"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
+msgid "KRA test portal"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
 #: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_partner_view_form
 msgid "Kenya Accounting Details"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
+msgid "Kenya eTIMS Integration"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,help:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_reason_code_id
 #: model:ir.model.fields,help:l10n_ke_edi_oscu.field_account_move__l10n_ke_reason_code_id
 #: model:ir.model.fields,help:l10n_ke_edi_oscu.field_account_move_reversal__l10n_ke_reason_code_id
-#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_account_payment__l10n_ke_reason_code_id
 msgid "Kenyan code for Credit Notes"
-msgstr ""
-
-#. module: l10n_ke_edi_oscu
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move_send__l10n_ke_enable_oscu
-msgid "L10N Ke Enable Oscu"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_oscu_attachment_file
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__l10n_ke_oscu_attachment_file
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_payment__l10n_ke_oscu_attachment_file
 msgid "L10N Ke Oscu Attachment File"
 msgstr ""
 
@@ -649,13 +715,7 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_oscu_confirmation_datetime
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__l10n_ke_oscu_confirmation_datetime
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_payment__l10n_ke_oscu_confirmation_datetime
 msgid "L10N Ke Oscu Confirmation Datetime"
-msgstr ""
-
-#. module: l10n_ke_edi_oscu
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_company__l10n_ke_oscu_last_fetch_customs_import_date
-msgid "L10N Ke Oscu Last Fetch Customs Import Date"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -664,7 +724,7 @@ msgid "L10N Ke Oscu Last Fetch Purchase Date"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_company__l10n_ke_oscu_user_agreement_is_readonly
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_oscu_user_agreement_is_readonly
 msgid "L10N Ke Oscu User Agreement Is Readonly"
 msgstr ""
 
@@ -676,10 +736,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_validation_message
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__l10n_ke_validation_message
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move_reversal__l10n_ke_validation_message
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_payment__l10n_ke_validation_message
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_product_product__l10n_ke_validation_message
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_product_template__l10n_ke_validation_message
 msgid "L10N Ke Validation Message"
 msgstr ""
 
@@ -703,7 +759,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,help:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_payment_method_id
 #: model:ir.model.fields,help:l10n_ke_edi_oscu.field_account_move__l10n_ke_payment_method_id
-#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_account_payment__l10n_ke_payment_method_id
 msgid ""
 "Method of payment communicated to the KRA via eTIMS. This is required when "
 "confirming purchases."
@@ -711,6 +766,7 @@ msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_l10n_ke_edi_oscu_code__name
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
 msgid "Name"
 msgstr ""
 
@@ -726,31 +782,38 @@ msgid "Number of products in a package."
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_company_form_inherit_l10n_ke_edi_oscu
-msgid "OSCU Details"
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
+msgid "OSCU Configuration"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
+msgid "OSCU Serial Number"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_company__l10n_ke_oscu_user_agreement
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_oscu_user_agreement
 msgid "Odoo OSCU user agreement"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#, python-format
 msgid "Only one tax with a KRA tax code should be set on the product!"
-msgstr ""
-
-#. module: l10n_ke_edi_oscu
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_l10n_ke_edi_oscu_code__order
-msgid "Order"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_product_product__l10n_ke_origin_country_id
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_product_template__l10n_ke_origin_country_id
 msgid "Origin Country"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
+msgid "PIN Number (VAT)"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -776,6 +839,12 @@ msgid "Paid on"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/res_partner.py:0
+msgid "Partner successfully registered"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
 #: model:ir.model.fields.selection,name:l10n_ke_edi_oscu.selection__l10n_ke_edi_oscu_code__code_type__07
 msgid "Payment Type"
 msgstr ""
@@ -783,15 +852,23 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
-#, python-format
-msgid "Please agree to the terms of use of Odoo as an OSCU service provider."
+msgid ""
+"Please agree to the terms of use of Odoo as an OSCU service provider first. "
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
+msgid ""
+"Please confirm that you did the necessary steps in the eTIMS portal first. "
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
-#, python-format
-msgid "Please resolve these issues first.\n"
+msgid ""
+"Please resolve these issues first.\n"
+" %s"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -822,7 +899,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#, python-format
 msgid "Product successfully registered"
 msgstr ""
 
@@ -832,9 +908,16 @@ msgid "Production"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
+msgid ""
+"Production: Connection to eTIMS in production mode.<br/>\n"
+"                                    Test: Connection to eTIMS in test mode.<br/>\n"
+"                                    Demo: Mocked data, does not require an initialized OSCU.<br/>"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#, python-format
 msgid "Products"
 msgstr ""
 
@@ -851,7 +934,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
-#, python-format
 msgid "Purchase confirmed on eTIMS."
 msgstr ""
 
@@ -864,6 +946,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_uom_uom__l10n_ke_quantity_unit_id
 #: model:ir.model.fields.selection,name:l10n_ke_edi_oscu.selection__l10n_ke_edi_oscu_code__code_type__10
 msgid "Quantity Unit"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
+msgid "Rate"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -880,7 +967,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_oscu_receipt_number
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__l10n_ke_oscu_receipt_number
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_payment__l10n_ke_oscu_receipt_number
 msgid "Receipt Number"
 msgstr ""
 
@@ -890,15 +976,9 @@ msgid "Refund Reason"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_base_document_layout__report_footer
-msgid "Report Footer"
-msgstr ""
-
-#. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
-#, python-format
-msgid "Request Error Code: %(error_code)s, Message: %(message)s"
+msgid "Request Error Code: %(code)s, Message: %(msg)s"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -918,17 +998,13 @@ msgid "Save Item"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_company_form_inherit_l10n_ke_edi_oscu
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
 msgid "Send Insurance Details"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_account_move_send__l10n_ke_checkbox_oscu
-msgid "Send the invoice to the KRA"
-msgstr ""
-
-#. module: l10n_ke_edi_oscu
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move_send__l10n_ke_checkbox_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/account_move_send.py:0
 #: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.invoice_form_inherit_l10n_ke_oscu
 #: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_partner_view_form
 #: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_users_view_form
@@ -936,7 +1012,18 @@ msgid "Send to eTIMS"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_l10n_ke_edi_oscu_code__sequence
+msgid "Sequence"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
+msgid "Serial No."
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_company__l10n_ke_oscu_serial_number
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_oscu_serial_number
 msgid "Serial Number"
 msgstr ""
 
@@ -947,23 +1034,14 @@ msgid "Service"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_oscu_signature
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__l10n_ke_oscu_signature
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_payment__l10n_ke_oscu_signature
-msgid "Signature"
-msgstr ""
-
-#. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
-#, python-format
 msgid "Some lines are missing a product where one must be set. "
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/uom_uom.py:0
-#, python-format
 msgid ""
 "Some units of measure are missing a corresponding KRA code where one must be"
 " configured."
@@ -972,11 +1050,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields.selection,name:l10n_ke_edi_oscu.selection__l10n_ke_edi_oscu_code__code_type__12
 msgid "Stock I/O Type"
-msgstr ""
-
-#. module: l10n_ke_edi_oscu
-#: model:ir.model,name:l10n_ke_edi_oscu.model_account_tax
-msgid "Tax"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -1006,7 +1079,25 @@ msgid "The code assigned to this product on eTIMS"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
+msgid ""
+"The customer PIN on the credit note differs from the PIN on the original invoice submitted to the KRA.\n"
+"The KRA only accepts credit notes with matching PINs.\n"
+"Customer PIN on the invoice: %s"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
+msgid ""
+"The eTIMS connection timed out while sending the invoice, please try again "
+"later."
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_company__l10n_ke_insurance_name
+#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_insurance_name
 msgid "The name of the branch's insurance policy"
 msgstr ""
 
@@ -1018,27 +1109,30 @@ msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_company__l10n_ke_insurance_rate
+#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_insurance_rate
 msgid "The premium rate of the branch's insurance policy"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#, python-format
 msgid ""
 "The product \"%(product_name)s\" with UNSPSC code: \"%(unspsc_code)s\" could"
 " not be matched to any existing product."
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_company__l10n_ke_oscu_serial_number
-msgid "The serial number of the OSCU"
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
+msgid ""
+"The registration failed.  Maybe you did not do the necessary steps with the "
+"KRA or the device has been registered before elsewhere and you can copy the "
+"CMC key and control unit id manually. "
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#, python-format
 msgid ""
 "The tax set on the product has tax code %(product_tax_code)s, which differs "
 "from the tax code %(unspsc_tax_code)s specified by the KRA for the UNSPSC "
@@ -1048,7 +1142,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
-#, python-format
 msgid ""
 "There are products in use with UNSPSC codes for which the KRA has specified "
 "a different tax rate to that in use on the line."
@@ -1057,15 +1150,12 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#, python-format
 msgid "There should only be one product variant per product template!"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
-#, python-format
 msgid ""
 "This credit note exceeds the amount of the original customer invoice "
 "%(original_invoice)s. Please adjust this credit note to a total value equal "
@@ -1075,7 +1165,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
-#, python-format
 msgid ""
 "This credit note has items of a quantity exceeding that of the original customer invoice %(original_invoice)s. Please correct the quantity of these lines before confirming:\n"
 "%(lines_to_correct)s"
@@ -1084,7 +1173,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
-#, python-format
 msgid ""
 "This credit note in conjunction with %(other_credit_notes)s exceeds the "
 "amount on the original customer invoice %(original_invoice)s. Please adjust "
@@ -1095,7 +1183,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
-#, python-format
 msgid ""
 "This credit note in conjunction with %(other_credit_notes)s has items of a quantity exceeding that of the original customer invoice %(original_invoice)s. Please correct the quantity of these lines before confirming:\n"
 "%(lines_to_correct)s"
@@ -1103,7 +1190,16 @@ msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_company__l10n_ke_control_unit
+#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_control_unit
 msgid "This is retrieved from the device during initialization."
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
+msgid ""
+"Timeout Error: KRA is currently unable to process your document. Please try "
+"again later. Thank you for your patience."
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -1114,7 +1210,14 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
-#, python-format
+msgid ""
+"To initialize the device, please fill in the following elements:   \n"
+"%s"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/res_config_settings.py:0
 msgid ""
 "To use OSCU functionality in Odoo, please agree to the terms of use of Odoo "
 "as an OSCU service provider."
@@ -1126,10 +1229,22 @@ msgid "Transaction Type"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
+#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_company__l10n_ke_oscu_serial_number
+#: model:ir.model.fields,help:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_oscu_serial_number
+msgid ""
+"Unique Serial Number you will need to specify in the commitment form of your"
+" eTIMS taxpayer portal during the integration process. "
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
+msgid "Unit ID"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/uom_uom.py:0
-#, python-format
-msgid "UoM(s)"
+msgid "Unit(s)"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -1144,7 +1259,19 @@ msgid "User"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_company_form_inherit_l10n_ke_edi_oscu
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_company__l10n_ke_oscu_user_help
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_oscu_user_help
+msgid "User should go with the number to KRA first. "
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/res_users.py:0
+msgid "User successfully registered"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
 msgid ""
 "Users agree to take all measures necessary to ensure the unmodified "
 "execution of the parts of the software that are responsible for managing, "
@@ -1155,37 +1282,30 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
 #: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#, python-format
 msgid "View Product(s)"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/uom_uom.py:0
-#, python-format
-msgid "View UoM(s)"
+msgid "View Unit(s)"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#, python-format
 msgid ""
 "When sending to eTIMS, the products used must have a defined Cost, Product "
-"Type, Origin Country, Packaging Unit, Packaging Quantity and UNSPSC Code."
+"Type, Origin Country, Packaging Unit, Packaging Quantity, Sales Taxes and "
+"UNSPSC Code."
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #. odoo-python
 #: code:addons/l10n_ke_edi_oscu/models/product.py:0
-#, python-format
 msgid ""
 "When sending to eTIMS, the products used must have a defined Packaging Unit,"
-" Packaging Quantity and UNSPSC Code."
+" Packaging Quantity, Sales Taxes and UNSPSC Code."
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -1194,15 +1314,20 @@ msgid "Whether this company is set up for OSCU flows."
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_company_form_inherit_l10n_ke_edi_oscu
-msgid "eTIMS"
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
+msgid "You have requested an OSCU device for your Odoo instance on the"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_oscu_attachment_id
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__l10n_ke_oscu_attachment_id
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_payment__l10n_ke_oscu_attachment_id
-msgid "eTIMS Attachment"
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/res_company.py:0
+msgid "Your serial number should contain the PIN number and start: ODOO/%s/"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/res_partner.py:0
+msgid "[%(code)s] %(message)s"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
@@ -1225,7 +1350,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_reason_code_id
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__l10n_ke_reason_code_id
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_payment__l10n_ke_reason_code_id
 msgid "eTIMS Credit Note Reason"
 msgstr ""
 
@@ -1244,7 +1368,6 @@ msgstr ""
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_payment_method_id
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__l10n_ke_payment_method_id
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_payment__l10n_ke_payment_method_id
 msgid "eTIMS Payment Method"
 msgstr ""
 
@@ -1256,17 +1379,48 @@ msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_company__l10n_ke_server_mode
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_res_config_settings__l10n_ke_server_mode
+#: model_terms:ir.ui.view,arch_db:l10n_ke_edi_oscu.res_config_settings_view_form
 msgid "eTIMS Server Mode"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_oscu_signature
+#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__l10n_ke_oscu_signature
+msgid "eTIMS Signature"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_bank_statement_line__l10n_ke_oscu_datetime
 #: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_move__l10n_ke_oscu_datetime
-#: model:ir.model.fields,field_description:l10n_ke_edi_oscu.field_account_payment__l10n_ke_oscu_datetime
 msgid "eTIMS Signing Time"
 msgstr ""
 
 #. module: l10n_ke_edi_oscu
 #: model:ir.model,name:l10n_ke_edi_oscu.model_l10n_ke_edi_oscu_code
 msgid "eTIMS Technical Codes"
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
+msgid ""
+"eTIMS configuration is incomplete for company '%(company)s'. Please verify "
+"that the eTIMS Server Mode, OSCU Configuration, and the company's eTIMS "
+"Branch Code are correctly set up to proceed."
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/account_move.py:0
+msgid ""
+"eTims does not accept credit notes with a date earlier than the "
+"corresponding invoice."
+msgstr ""
+
+#. module: l10n_ke_edi_oscu
+#. odoo-python
+#: code:addons/l10n_ke_edi_oscu/models/product.py:0
+#: code:addons/l10n_ke_edi_oscu/models/uom_uom.py:0
+msgid "id"
 msgstr ""

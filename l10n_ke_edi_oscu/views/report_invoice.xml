@@ -79,21 +79,21 @@
                                                         <span t-out="tax_types[tax_rate]"/>
                                                     </td>
                                                     <td name="td_taxable_amount" class="col-2 text-end">
-                                                        <span t-out="'%.2f' % correct_sign(taxable_amount)"/>
+                                                        <span t-out="correct_sign(taxable_amount)" t-options='{"widget": "float", "precision": 2}'/>
                                                     </td>
                                                     <td name="td_tax_amount" class="col-2 text-end">
-                                                        <span t-out="'%.2f' % correct_sign(tax_amount)"/>
+                                                        <span t-out="correct_sign(tax_amount)" t-options='{"widget": "float", "precision": 2}'/>
                                                     </td>
                                                     <td name="td_total_amount" class="col-2 text-end">
-                                                        <span t-out="'%.2f' % correct_sign(taxable_amount + tax_amount)"/>
+                                                        <span t-out="correct_sign(taxable_amount + tax_amount)" t-options='{"widget": "float", "precision": 2}'/>
                                                     </td>
                                                 </tr>
                                             </t>
                                             <tr class="border-black">
                                                 <td name="td_total_tax_rate" class="text-start"><span>Total</span></td>
-                                                <td name="td_total_taxable_amount" class="text-end"><span t-out="'%.2f' % correct_sign(move_json['totTaxblAmt'])"/></td>
-                                                <td name="td_total_tax_amount" class="text-end"><span t-out="'%.2f' % correct_sign(move_json['totTaxAmt'])"/></td>
-                                                <td name="td_total_total_amount" class="text-end"><span t-out="'%.2f' % correct_sign(move_json['totAmt'])"/></td>
+                                                <td name="td_total_taxable_amount" class="text-end"><span t-out="correct_sign(move_json['totTaxblAmt'])" t-options='{"widget": "float", "precision": 2}'/></td>
+                                                <td name="td_total_tax_amount" class="text-end"><span t-out="correct_sign(move_json['totTaxAmt'])" t-options='{"widget": "float", "precision": 2}'/></td>
+                                                <td name="td_total_total_amount" class="text-end"><span t-out="correct_sign(move_json['totAmt'])" t-options='{"widget": "float", "precision": 2}'/></td>
                                             </tr>
                                         </tbody>
 
@@ -148,22 +148,14 @@
         <xpath expr="//td[@name='td_quantity']/span[1]" position="attributes">
             <attribute name="t-field"/>
             <attribute name="t-out">correct_sign(line.quantity)</attribute>
+            <attribute name="t-options">{"widget": "float", "precision": 2}</attribute>
         </xpath>
-        <xpath expr="//td[@name='td_subtotal']/span" position="attributes">
-            <attribute name="t-field"/>
-            <attribute name="t-out">correct_sign(line.price_subtotal)</attribute>
-        </xpath>
-        <xpath expr="//td[@name='td_subtotal']/span" position="attributes">
-            <attribute name="t-field"/>
-            <attribute name="t-out">correct_sign(line.price_subtotal)</attribute>
-        </xpath>
-        <xpath expr="//td[@name='td_subtotal']" position="inside">
-            <span t-field="o.currency_id.symbol"/>
-        </xpath>
-        <xpath expr="//td[@name='td_subtotal']" position="after">
+        <xpath expr="//td[@name='td_subtotal']" position="replace">
+            <td name="td_subtotal" class="text-end o_price_total">
+                <span class="text-nowrap" t-out="correct_sign(line.price_subtotal)" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+            </td>
             <td name="td_total" class="text-end o_price_total">
-                <span class="text-nowrap" t-out="correct_sign(line.price_total)">27.00</span>
-                <span t-field="o.currency_id.symbol"/>
+                <span class="text-nowrap" t-out="correct_sign(line.price_total)" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
             </td>
         </xpath>
     </template>

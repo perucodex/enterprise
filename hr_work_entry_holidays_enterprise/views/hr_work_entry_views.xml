@@ -19,23 +19,17 @@
     </record>
 
     <record id="payroll_hr_work_entry_view_form_inherit_contract" model="ir.ui.view">
-      <field name="name">payroll.hr.work.entry.view.form.inherit.contract</field>
-      <field name="model">hr.work.entry</field>
-      <field name="inherit_id" ref="hr_work_entry.hr_work_entry_view_form"/>
-      <field name="arch" type="xml">
-        <xpath expr="//div[@name='work_entry_undefined']" position="after">
-          <div invisible="not work_entry_type_id">
-            <div class="alert alert-warning" role="alert" invisible="not leave_id">
-              This work entry cannot be validated. There is a leave to approve (or refuse) at the same time.
-            </div>
-            <div class="alert alert-warning" role="alert" invisible="leave_id">
-                This work entry cannot be validated. It is conflicting with at least one work entry. <br/>
-                  Two work entries of the same employee cannot overlap at the same time.
-              </div>
-            </div>
-          </xpath>
+        <field name="name">payroll.hr.work.entry.view.form.inherit.contract</field>
+        <field name="model">hr.work.entry</field>
+        <field name="inherit_id" ref="hr_work_entry.hr_work_entry_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='work_entry_undefined']" position="inside">
+                <div invisible="not work_entry_type_id or not leave_id">
+                    This work entry cannot be validated. There is a leave to approve (or refuse) at the same time.
+                </div>
+            </xpath>
         </field>
-      </record>
+    </record>
 
     <record id="payroll_leave_hr_work_entry_type_view_form_inherit" model="ir.ui.view">
         <field name="name">payroll.leave.hr.work.entry.type.view.form.inherit</field>

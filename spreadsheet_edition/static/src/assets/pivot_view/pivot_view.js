@@ -74,6 +74,7 @@ patch(PivotRenderer.prototype, {
                         "pivot_column_groupby"
                     ),
                 },
+                colGroupTree: this.model.data.colGroupTree,
                 name,
                 actionXmlId: xml_id,
             },

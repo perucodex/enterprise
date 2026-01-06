@@ -3,6 +3,8 @@ from .common import TestEcEdiPosCommon
 import lxml
 from freezegun import freeze_time
 
+from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCommon
+
 from odoo.tests import tagged
 from odoo.tools import file_open
 
@@ -45,3 +47,11 @@ class TestEcPos(TestEcEdiPosCommon):
             with file_open('l10n_ec_edi_pos/tests/data/expected_document.xml', 'rt') as f:
                 expected_xml = lxml.etree.fromstring(f.read().encode())
             self.assertXmlTreeEqual(lxml.etree.fromstring(generated_file.encode()), expected_xml)
+
+
+@tagged('post_install_l10n', 'post_install', '-at_install')
+class TestUI(TestEcEdiPosCommon, TestPointOfSaleHttpCommon):
+
+    def test_ec_pos_order_refund(self):
+        self.main_pos_config.open_ui()
+        self.start_pos_tour('test_ec_pos_order_refund', login="accountman")

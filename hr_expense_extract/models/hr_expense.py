@@ -21,22 +21,10 @@ class HrExpense(models.Model):
 
     sample = fields.Boolean(help='Expenses created from sample receipt')
 
-    def _needs_product_price_computation(self):
-        # EXTENDS 'hr_expense'
-        self.ensure_one()
-        is_extracted = self.extract_state in {'waiting_validation', 'to_validate', 'done'} and self.is_editable
-        return super()._needs_product_price_computation() and not is_extracted
-
     @api.depends('state')
     def _compute_is_in_extractable_state(self):
         for expense in self:
             expense.is_in_extractable_state = expense.state == 'draft'
-
-    @api.depends('extract_state', 'state')
-    def _compute_extract_state_processed(self):
-        # Overrides 'iap_extract'
-        for expense in self:
-            expense.extract_state_processed = expense.extract_state == 'waiting_extraction' and expense.state == 'draft'
 
     @api.depends('extract_state', 'state')
     def _compute_extract_state_processed(self):
@@ -93,7 +81,7 @@ class HrExpense(models.Model):
             if default_receipt_name in self.name:
                 predicted_product_id = self._predict_product(description_ocr)
                 if predicted_product_id:
-                    vals['product_id'] = predicted_product_id
+                    vals['product_id'] = predicted_product_id or self.product_id.id
                 vals['name'] = description_ocr
                 # We need to set the name after the product change as changing the product may change the name
 
@@ -101,28 +89,34 @@ class HrExpense(models.Model):
             if not self.date or self.date == context_create_date:
                 vals['date'] = date_ocr
 
-            if not self.total_amount_currency:
+            product_id = vals.get('product_id', self.product_id.id)
+            product_price = product_id and self.env['product.product'].with_company(self.company_id).browse(product_id).standard_price
+            if product_price:
+                vals['price_unit'] = product_price
+                vals['total_amount_currency'] = product_price
+                vals['total_amount'] = product_price
+            else:
                 vals['total_amount_currency'] = total_ocr
+                vals['total_amount'] = total_ocr
+                vals['quantity'] = 1  # Always the case for expense that are not using a flat rate
+                vals['price_unit'] = total_ocr
+                if not self.currency_id or self.currency_id == self.env.company.currency_id:
+                    for comparison in ['=ilike', 'ilike']:
+                        matched_currency = self.env["res.currency"].with_context(active_test=False).search([
+                            '|', '|',
+                            ('currency_unit_label', comparison, currency_ocr),
+                            ('name', comparison, currency_ocr),
+                            ('symbol', comparison, currency_ocr),
+                        ])
+                        if len(matched_currency) == 1:
+                            vals['currency_id'] = matched_currency.id
 
-            self.flush_model()
-
-            if not self.currency_id or self.currency_id == self.env.company.currency_id:
-                for comparison in ['=ilike', 'ilike']:
-                    matched_currency = self.env["res.currency"].with_context(active_test=False).search([
-                        '|', '|',
-                        ('currency_unit_label', comparison, currency_ocr),
-                        ('name', comparison, currency_ocr),
-                        ('symbol', comparison, currency_ocr),
-                    ])
-                    if len(matched_currency) == 1:
-                        vals['currency_id'] = matched_currency.id
-
-                        if matched_currency != self.company_currency_id:
-                            vals['total_amount'] = matched_currency._convert(
-                                vals.get('total_amount_currency', self.total_amount_currency),
-                                self.company_currency_id,
-                                company=self.company_id,
-                                date=vals.get('date', self.date),
+                            if matched_currency != self.company_currency_id:
+                                vals['total_amount'] = matched_currency._convert(
+                                    vals.get('total_amount_currency', self.total_amount_currency),
+                                    self.company_currency_id,
+                                    company=self.company_id,
+                                    date=vals.get('date', self.date),
                             )
 
             self.write(vals)

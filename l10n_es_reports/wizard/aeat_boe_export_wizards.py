@@ -27,6 +27,21 @@ class L10n_Es_ReportsAeatBoeExportWizard(models.TransientModel):
             options = self.env.context.get('l10n_es_reports_report_options', {})
             return self.report_id.export_file({**options, 'l10n_es_reports_boe_wizard_id': self.id}, 'export_boe')
 
+    def action_proceed_with_locking(self):
+        # Hack to simulate an account_return override without changing the original wizard nor
+        # deactivating its original purpose
+        self.ensure_one()
+        if not self.env.company.vat:
+            raise UserError(_("Please first set the TIN of your company."))
+        return_id = self.env['account.return'].browse(self.env.context.get('return_id', None))
+        if return_id:
+            options = return_id._get_closing_report_options()
+            options['l10n_es_reports_boe_wizard_id'] = self.id
+            report = self.env['account.report'].browse(options['report_id'])
+            boe_file = report.dispatch_report_action(options, 'export_boe')
+            return_id._add_attachment(boe_file)
+            return return_id._proceed_with_locking()
+
 
 class L10n_Es_ReportsAeatBoeMod111and115and303ExportWizard(models.TransientModel):
     _name = 'l10n_es_reports.aeat.boe.mod111and115and303.export.wizard'

@@ -52,6 +52,9 @@
         "web.assets_web_dark": [
             'hr_referral/static/src/scss/hr_referral.dark.scss',
         ],
+        'web.assets_tests': [
+            'hr_referral/static/tests/tours/*',
+        ],
 
     },
     'author': 'Odoo S.A.',

@@ -68,7 +68,7 @@ registry.category("web_tour.tours").add("account_accountant_bank_rec_widget", {
         },
         {
             content: "Partner is set",
-            trigger: "div[name='statement_line_partner_name']",
+            trigger: "span[name='statement_line_partner_name']",
         },
         {
             content: "Fold statement line",
@@ -77,7 +77,7 @@ registry.category("web_tour.tours").add("account_accountant_bank_rec_widget", {
         },
         {
             content: "Statement line is reconciled because move with same partner and amount",
-            trigger: "span[name='reconciled_line_name']",
+            trigger: "div[name='reconciled_line_name']",
         },
         {
             content: "Create New statement",
@@ -103,21 +103,13 @@ registry.category("web_tour.tours").add("account_accountant_bank_rec_widget", {
             run: "click",
         },
         {
-            content: "Unfold statement line",
-            trigger:
-                "div[name=bank_statement_line]:contains(set partner):has(.oi-chevron-down):contains(150)",
-            async run(helpers) {
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-                await helpers.click();
-            },
-        },
-        {
-            content: "line is unfolded",
-            trigger: "div.o_button_line",
+            content: "Open Ellipsis button",
+            trigger: "button.btn-secondary i.oi-ellipsis-v",
+            run: "click",
         },
         {
             content: "Reconcile button",
-            trigger: "button.btn-secondary span:contains('Reconcile')",
+            trigger: "span.btn-link:contains('Reconcile')",
             run: "click",
         },
         {
@@ -130,13 +122,8 @@ registry.category("web_tour.tours").add("account_accountant_bank_rec_widget", {
             run: "click",
         },
         {
-            content: "Fold statement line",
-            trigger: "div[name='bank_statement_line']",
-            run: "click",
-        },
-        {
             content: "Statement line is reconciled",
-            trigger: "span[name='reconciled_line_name']",
+            trigger: "div[name='reconciled_line_name']",
         },
     ],
 });

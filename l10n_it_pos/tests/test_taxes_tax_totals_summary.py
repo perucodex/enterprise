@@ -138,6 +138,35 @@ class TestTaxesTaxTotalsSummaryL10nItPos(TestTaxCommonPOS, TestTaxesTaxTotalsSum
         }
         yield 4, self.populate_document(document_params), expected_values
 
+        document_params = self.init_document(
+            lines=[
+                {'price_unit': 0, 'quantity': 1.0, 'tax_ids': tax, 'l10n_it_epson_printer': True},
+            ],
+        )
+        expected_values = {
+            'same_tax_base': True,
+            'currency_id': self.currency.id,
+            'base_amount_currency': 0.00,
+            'tax_amount_currency': 0.0,
+            'total_amount_currency': 0.0,
+            'subtotals': [
+                {
+                    'name': "Untaxed Amount",
+                    'base_amount_currency': 0.0,
+                    'tax_amount_currency': 0.0,
+                    'tax_groups': [
+                        {
+                            'id': self.tax_groups[0].id,
+                            'base_amount_currency': 0.0,
+                            'tax_amount_currency': 0.0,
+                            'display_base_amount_currency': 0.0,
+                        },
+                    ],
+                },
+            ],
+        }
+        yield 5, self.populate_document(document_params), expected_values
+
     def test_taxes_l10n_it_epson_printer_generic_helpers(self):
         for test_index, document, expected_values in self._test_taxes_l10n_it_epson_printer():
             with self.subTest(test_index=test_index):

@@ -191,13 +191,14 @@ class PosOrder(models.Model):
         AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
         AccountTax._add_accounting_data_in_base_lines_tax_details(base_lines, self.company_id)
 
-        operation_type = self.env.ref("l10n_br_avatax.operation_type_1")
+        default_operation_type = self.env.ref("l10n_br_avatax.operation_type_1")
         res = []
         for line in base_lines:
+            product = line['record'].product_id
             res.append({
                 'base_line': line,
-                'description': line['record'].product_id.name,
-                'operation_type': operation_type,
+                'description': product.name,
+                'operation_type': product.l10n_br_operation_type_pos_id or default_operation_type,
             })
 
         return res
@@ -617,30 +618,30 @@ class PosOrder(models.Model):
 
         state_code = self.company_id.state_id.code
         return {
-            "AC": ("http://www.sefaznet.ac.gov.br/nfce/qrcode?p=",),
-            "AL": ("www.sefaz.al.gov.br/nfce/qrcode?p=",),
-            "AM": ("www.sefaz.am.gov.br/nfce/qrcode?p=",),
-            "AP": ("https://www.sefaz.ap.gov.br/sate/seg/qrcode?p=",),
-            "BA": ("https://www.sefaz.ba.gov.br/nfce/qrcode?p=", "http://hinternet.sefaz.ba.gov.br/nfce/qrcode?p="),
-            "CE": ("http://www.sefaz.ce.gov.br/nfce/qrcode?p=",),
-            "DF": ("www.fazenda.df.gov.br/nfce/qrcode?p=",),
-            "ES": ("http://www.sefaz.es.gov.br/nfce/qrcode?p=",),
-            "GO": ("http://www.sefaz.go.gov.br/nfce/qrcode?p=",),
-            "MA": ("http://www.nfce.sefaz.ma.gov.br/portal/qrcode?p=",),
-            "MG": ("http://nfce.fazenda.mg.gov.br/portalnfce/qrcode?p=", "http://hinternet.sefaz.ba.gov.br/nfce/qrcode?p="),
+            "AC": ("http://www.sefaznet.ac.gov.br/nfce/qrcode?p=", "http://www.hml.sefaznet.ac.gov.br/nfce/qrcode?p="),
+            "AL": ("http://nfce.sefaz.al.gov.br/QRCode/consultarNFCe.jsp?p=",),
+            "AM": ("https://sistemas.sefaz.am.gov.br/nfceweb/consultarNFCe.jsp?p=",),
+            "AP": ("https://www.sefaz.ap.gov.br/nfce/nfcep.php?p=", "https://www.sefaz.ap.gov.br/nfcehml/nfce.php?p="),
+            "BA": ("http://nfe.sefaz.ba.gov.br/servicos/nfce/qrcode.aspx?p=", "http://hnfe.sefaz.ba.gov.br/servicos/nfce/qrcode.aspx?p="),
+            "CE": ("http://nfce.sefaz.ce.gov.br/pages/ShowNFCe.html?p=", "http://nfceh.sefaz.ce.gov.br/pages/ShowNFCe.html?p="),
+            "DF": ("http://www.fazenda.df.gov.br/nfce/qrcode?p=",),
+            "ES": ("http://app.sefaz.es.gov.br/ConsultaNFCe?p=", "http://homologacao.sefaz.es.gov.br/ConsultaNFCe?p="),
+            "GO": ("https://nfeweb.sefaz.go.gov.br/nfeweb/sites/nfce/danfeNFCe?p=", "https://nfewebhomolog.sefaz.go.gov.br/nfeweb/sites/nfce/danfeNFCe?p="),
+            "MA": ("nfce.sefaz.ma.gov.br/portal/consultarNFCe.jsp?p=", "homolog acao.sefaz.ma.gov.br/portal/consultarNFCe.jsp?p="),
+            "MG": ("https://portalsped.fazenda.mg.gov.br/portalnfce/sistema/qrcode.xhtml?p=",),
             "MS": ("http://www.dfe.ms.gov.br/nfce/qrcode?p=",),
-            "MT": ("http://www.sefaz.mt.gov.br/nfce/qrcode?p=", "http://homologacao.sefaz.mt.gov.br/nfce/qrcode?p="),
-            "PA": ("http://www.sefa.pa.gov.br/nfce/qrcode?p=",),
-            "PB": ("https://www7.sefaz.pb.gov.br/atf/seg/qrcode?p=",),
-            "PE": ("http://nfce.sefaz.pe.gov.br/nfce/qrcode?p=",),
-            "PI": ("https://webas.sefaz.pi.gov.br/nfe/qrcode?p=",),
+            "MT": ("http://www.sefaz.mt.gov.br/nfce/consultanfce?p=", "http://homologacao.sefaz.mt.gov.br/nfce/consultanfce?p="),
+            "PA": ("https://appnfc.sefa.pa.gov.br/portal/view/consultas/nfce/nfceForm.seam?p=", "https://appnfc.sefa.pa.gov.br/portal-homologacao/view/consultas/nfce/nfceForm.seam?p="),
+            "PB": ("http://www.sefaz.pb.gov.br/nfce?p=", "http://www.sefaz.pb.gov.br/nfcehom?p="),
+            "PE": ("http://nfce.sefaz.pe.gov.br/nfce/consulta?p=", "http://nfcehomolog.sefaz.pe.gov.br/nfce/consulta?p="),
+            "PI": ("http://www.sefaz.pi.gov.br/nfce/qrcode?p=",),
             "PR": ("http://www.fazenda.pr.gov.br/nfce/qrcode?p=",),
-            "RJ": ("http://www.fazenda.rj.gov.br/nfce/qrcode?p=",),
-            "RN": ("https://nfce.set.rn.gov.br/portalDFE/NFCe/qrcode?p=",),
-            "RO": ("http://www.sefin.ro.gov.br/nfce/qrcode?p=",),
-            "RR": ("https://portalweb.sefaz.rr.gov.br/nfce/servlet/qrcode?p=",),
-            "RS": ("http://www.sefaz.rs.gov.br/nfce/qrcode?p=",),
-            "SC": ("https://sat.sef.sc.gov.br/tax.net/Sat.Dfe.NFCe.Web/qrcode?p=",),
+            "RJ": ("https://consultadfe.fazenda.rj.gov.br/consultaNFCe/QRCode?p=",),
+            "RN": ("http://nfce.set.rn.gov.br/consultarNFCe.aspx?p=", "http://hom.nfce.set.rn.gov.br/consultarNFCe.aspx?p="),
+            "RO": ("http://www.nfce.sefin.ro.gov.br/consultanfce/consulta.jsp?p=",),
+            "RR": ("https://www.sefaz.rr.gov.br/nfce/servlet/qrcode?p=", "http://200.174.88.103:8080/nfce/servlet/qrcode?p="),
+            "RS": ("https://www.sefaz.rs.gov.br/NFCE/NFCE-COM.aspx?p=",),
+            "SC": ("https://sat.sef.sc.gov.br/nfce/consulta?p=", "https://hom.sat.sef.sc.gov.br/nfce/consulta?p="),
             "SE": ("http://www.nfce.se.gov.br/nfce/qrcode?p=", "http://www.hom.nfe.se.gov.br/nfce/qrcode?p="),
             "SP": ("https://www.nfce.fazenda.sp.gov.br/qrcode?p=", "https://www.homologacao.nfce.fazenda.sp.gov.br/qrcode?p="),
             "TO": ("http://www.sefaz.to.gov.br/nfce/qrcode?p=",),
@@ -914,3 +915,8 @@ class PosOrder(models.Model):
             'url': f'/l10n_br_edi_pos/download_nfce_attachments/{",".join(map(str, attachments.ids))}',
             'target': 'self',
         }
+
+    def get_reference_last_part(self):
+        if self.config_id.company_id.account_fiscal_country_id == self.env.ref('base.br') and self.config_id.l10n_br_is_nfce:
+            return self.sequence_number
+        return super().get_reference_last_part()

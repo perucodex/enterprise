@@ -39,11 +39,10 @@ class SaleOrderLine(models.Model):
 
             def date_filter(m):
                 return (
-                    m.date_deadline
-                    and (not period_start or period_start <= m.date_deadline.date())
-                    and (not period_end or m.date_deadline.date() <= period_end)
+                    m.date
+                    and (not period_start or period_start <= m.date.date())
+                    and (not period_end or m.date.date() <= period_end)
                 )
-
             sub_outgoing_moves, sub_incoming_moves = sub_outgoing_moves.filtered(date_filter), sub_incoming_moves.filtered(date_filter)
             outgoing_moves += sub_outgoing_moves
             incoming_moves += sub_incoming_moves
@@ -121,7 +120,7 @@ class SaleOrderLine(models.Model):
             end = so.next_invoice_date
 
             def date_filter(m):
-                return m.date_deadline and start and end and start <= m.date_deadline.date() < end
+                return m.date and start and end and start <= m.date.date() < end
             return {
                 'incoming_moves': lambda m: base_filter['incoming_moves'](m) and date_filter(m),
                 'outgoing_moves': lambda m: base_filter['outgoing_moves'](m) and date_filter(m)
@@ -147,17 +146,17 @@ class SaleOrderLine(models.Model):
             return values
         # Remove 1 day as normal people thinks in terms of inclusive ranges.
         if not self.order_id.start_date or self.order_id.next_invoice_date == self.order_id.start_date and not self.order_id.last_invoice_date:
-            current_deadline = self.order_id.next_invoice_date + self.order_id.plan_id.billing_period - relativedelta(days=1)
+            move_date = self.order_id.next_invoice_date + self.order_id.plan_id.billing_period - relativedelta(days=1)
         else:
-            current_deadline = self.order_id.next_invoice_date - relativedelta(days=1)
+            move_date = self.order_id.next_invoice_date - relativedelta(days=1)
 
         current_period_start = self.order_id.last_invoice_date or self.order_id.start_date or fields.Date.today()
         lang_code = self.order_id.partner_id.lang
         format_start = format_date(self.env, current_period_start, lang_code=lang_code)
-        format_end = format_date(self.env, current_deadline, lang_code=lang_code)
+        format_end = format_date(self.env, move_date, lang_code=lang_code)
         values.update({
             'date_planned': current_period_start,
-            'date_deadline': current_deadline,
+            'date_deadline': move_date,
             'product_description_variants': f'{values.get("product_description_variants", "")}\n{format_start} to {format_end}',
         })
         return values

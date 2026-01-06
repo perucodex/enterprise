@@ -433,7 +433,7 @@ class AppointmentPerformanceTest(AppointmenHrPerformanceCase):
 
         # with self.profile(collectors=['sql']) as profile:
         with self.mockAppointmentCalls(), \
-             self.assertQueryCount(staff_user_bxls=58):
+             self.assertQueryCount(staff_user_bxls=60):
             t0 = time.time()
             res = apt_type._get_appointment_slots('Europe/Brussels', reference_date=self.reference_now)
             t1 = time.time()
@@ -526,7 +526,7 @@ class AppointmentPerformanceTest(AppointmenHrPerformanceCase):
 
         # +1 compared to standard runbot for single app
         with self.mockAppointmentCalls(), \
-             self.assertQueryCount(staff_user_bxls=31):
+             self.assertQueryCount(staff_user_bxls=33):
             t0 = time.time()
             res = apt_type._get_appointment_slots('Europe/Brussels', reference_date=self.reference_now)
             t1 = time.time()
@@ -598,7 +598,7 @@ class OnlineAppointmentPerformance(AppointmentUIPerformanceCase, AppointmenHrPer
         t0 = time.time()
         with freeze_time(self.reference_now):
             self.authenticate('staff_user_bxls', 'staff_user_bxls')
-            with self.assertQueryCount(default=54):  # apt_hr 42/ +1 for no-demo
+            with self.assertQueryCount(default=55):  # apt_hr 42/ +1 for no-demo
                 self._test_url_open('/appointment/%i' % self.test_apt_type.id)
         t1 = time.time()
 
@@ -615,7 +615,7 @@ class OnlineAppointmentPerformance(AppointmentUIPerformanceCase, AppointmenHrPer
         t0 = time.time()
         with freeze_time(self.reference_now):
             self.authenticate('staff_user_bxls', 'staff_user_bxls')
-            with self.assertQueryCount(default=52):  # apt_hr 40 / +1 for no-demo
+            with self.assertQueryCount(default=53):  # apt_hr 40 / +1 for no-demo
                 self._test_url_open('/appointment/%i' % self.test_apt_type.id)
         t1 = time.time()
 

@@ -61,3 +61,42 @@ class TestPosAppointmentFlow(CommonPosTest):
             'resource_ids': [(4, self.resource_1.id), (4, self.resource_2.id)],
         })
         self.assertEqual(resource_reservation.waiting_list_capacity, 6)
+
+    def test_prepare_calendar_event_values_phone_number(self):
+        """ Test that the phone number of the customer is added to the calendar event when an appointment is booked
+        from the POS. """
+        partner = self.env['res.partner'].create({
+            'name': 'Customer A',
+            'phone': '123456789',
+        })
+        appointment_invite = self.env['appointment.invite'].create({
+            'appointment_type_ids': self.reservation_appointment.ids,
+        })
+        event_values = self.reservation_appointment._prepare_calendar_event_values(
+            asked_capacity=2,
+            booking_line_values={},
+            description='Test Description',
+            duration=2,
+            allday=False,
+            appointment_invite=appointment_invite,
+            guests=0,
+            name='Test Event',
+            customer=partner,
+            staff_user=None,
+            start=odoo.fields.Datetime.now(),
+            stop=odoo.fields.Datetime.now(),
+        )
+        self.assertEqual(event_values['phone_number'], '123456789')
+
+        # Create calendar event
+        event = self.env['calendar.event'].create(event_values)
+        self.assertEqual(partner.phone, '123456789')
+        self.assertEqual(event.phone_number, '123456789')
+
+        # Phone number is not related to the partner
+        partner.phone = '987654321'
+        self.assertEqual(event.phone_number, '123456789')
+
+        # And reversely, changing the phone number on the event does not change it on the partner
+        event.phone_number = '111222333'
+        self.assertEqual(partner.phone, '987654321')

@@ -12,6 +12,29 @@ from lxml import etree
 class AccountIntrastatReportHandler(models.AbstractModel):
     _inherit = 'account.intrastat.report.handler'
 
+    def _custom_options_initializer(self, report, options, previous_options):
+        super()._custom_options_initializer(report, options, previous_options)
+
+        if self.env.company.account_fiscal_country_id.code != 'BE':
+            return
+
+        options['buttons'].extend([
+            {
+                'name': _('XML'),
+                'sequence': 30,
+                'action': 'export_file',
+                'action_param': 'be_intrastat_export_to_xml',
+                'file_export_type': _('XML'),
+            },
+            {
+                'name': _('CSV'),
+                'sequence': 40,
+                'action': 'export_file',
+                'action_param': 'be_intrastat_export_to_csv',
+                'file_export_type': _('CSV'),
+            },
+        ])
+
     def _show_region_code(self):
         if self.env.company.account_fiscal_country_id.code == 'BE' and not self.env.company.intrastat_region_id:
             return False

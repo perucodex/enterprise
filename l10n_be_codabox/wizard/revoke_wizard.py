@@ -1,5 +1,4 @@
 import requests
-import re
 from odoo import _, fields, models
 from odoo.exceptions import UserError
 from odoo.addons.l10n_be_codabox.const import get_error_msg
@@ -34,11 +33,11 @@ class L10n_Be_CodaboxRevokeWizard(models.TransientModel):
 
     def l10n_be_codabox_revoke(self):
         self.company_id._l10n_be_codabox_verify_prerequisites()
+        if not self.fidu_password:
+            raise UserError(get_error_msg({"type": "error_invalid_fidu_password"}))
         try:
             params = self.company_id._l10n_be_codabox_get_iap_common_params()
-            params["company_vat"] = re.sub(r'[^0-9]', '', self.company_vat)
-            if not self.fidu_password:
-                raise UserError(get_error_msg({"type": "error_invalid_fidu_password"}))
+            params["company_vat"] = self.company_id.l10n_be_codabox_company_vat
             params["fidu_password"] = self.fidu_password
             self.company_id._l10_be_codabox_call_iap_route("revoke", params)
             # We don't want to set the token and connection to false when revoking from another company's db

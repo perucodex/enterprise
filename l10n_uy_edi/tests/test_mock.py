@@ -22,7 +22,7 @@ class TestMock(common.TestUyEdi):
         self.company_uy.l10n_uy_edi_ucfe_commerce_code = False
 
         error_msg = self._mock_check_credentials(self.company_uy, "NO_RESPONSE")
-        self.assertRegex(error_msg, "Incomplete Data to connect to Uruware.*Please complete the UCFE data to test the connection: Uruware Commerce code")
+        self.assertRegex(error_msg, "Incomplete Data to connect to UCFE Provider.*Please complete the UCFE data to test the connection: UCFE Provider Commerce code")
 
     def test_20_bad_credentials(self):
         self.company_uy.l10n_uy_edi_ucfe_commerce_code = "comerce_xxx1"
@@ -81,15 +81,42 @@ class TestMock(common.TestUyEdi):
     def test_100_invoice_rejected(self):
         """ simulate we have a invoice in state received. then check status from uruware and receive
         rejected state """
-        invoice = self._create_move()
-        invoice.action_post()
-        self._mock_send_and_print(invoice, "mock_90_invoice_received", get_pdf=True)
 
-        self.assertEqual(invoice.l10n_uy_edi_cfe_state, "received")
-        self.assertTrue(invoice.invoice_pdf_report_file, "The pdf file was not created.")
+        def prepare_invoice():
+            invoice = self._create_move()
+            invoice.action_post()
+            self._mock_send_and_print(invoice, "mock_90_invoice_received", get_pdf=True)
 
-        self._mock_update_dgi_state(invoice, "mock_invoice_rejected")
-        self.assertEqual(invoice.l10n_uy_edi_cfe_state, "rejected")
+            self.assertEqual(invoice.l10n_uy_edi_cfe_state, "received")
+            self.assertTrue(invoice.invoice_pdf_report_file, "The pdf file was not created.")
+            self.assertEqual(invoice.state, "posted", "The invoice should be posted.")
+            return invoice
+
+        def mark_as_rejected(invoice):
+            self._mock_update_dgi_state(invoice, "mock_invoice_rejected")
+            self.assertEqual(invoice.l10n_uy_edi_cfe_state, "rejected")
+            self.assertEqual(invoice.state, "cancel", "The invoice should be posted.")
+            message = invoice.message_ids.filtered(
+                lambda m: 'The CFE has been rejected by DGI so we automatically cancel this record' in m.body)
+            self.assertTrue(message)
+            internal_followers = invoice.message_partner_ids.filtered(lambda x: x.user_ids and not x.user_ids.share)
+            return message, internal_followers
+
+        # Check notify to accounting managers (because there is not internal followers)
+        invoice = prepare_invoice()
+        # Explicitly remove accountman as follower (in 18.2+ he is automatically subscribed)
+        invoice.message_unsubscribe(partner_ids=self.user.partner_id.ids)
+        message, internal_followers = mark_as_rejected(invoice)
+        self.assertFalse(internal_followers, "There should not be internal followers")
+        accounting_manager_partners = self.env.ref('account.group_account_manager').user_ids.mapped('partner_id')
+        self.assertEqual(message.partner_ids, accounting_manager_partners)
+
+        # Check notify to internal followers only (because we have one)
+        invoice2 = prepare_invoice()
+        self.assertIn(self.user.partner_id, invoice2.message_partner_ids)
+        message2, internal_followers2 = mark_as_rejected(invoice2)
+        self.assertTrue(internal_followers2, "There should be internal followers")
+        self.assertEqual(message2.partner_ids, self.user.partner_id)
 
     def test_110_invoice_error(self):
         """ capture error return by DGI because the data we send in the XML is not valid """
@@ -140,7 +167,7 @@ class TestMock(common.TestUyEdi):
         available, so also exists a move that will be created. The goal of this tests is not to check if the received
         pdf is created because it is private information of an Uruware user and also is not updated the dgi state."""
         self._mock_cron_l10n_uy_edi_get_vendor_bills('test_130_cron_vendor_bills_ok')
-        new_move_created = self.env['l10n_uy_edi.document'].search([('uuid', '=', '9695285')]).move_id
+        new_move_created = self.env['l10n_uy_edi.document'].search([('uuid', '=', '9695285-notification')]).move_id
         self.assertEqual(new_move_created.name, 'e-FC A1419036')
         self.assertEqual(new_move_created.invoice_date.strftime('%Y-%m-%d'), '2025-10-01')
         self.assertEqual(new_move_created.invoice_date_due.strftime('%Y-%m-%d'), '2025-11-15')

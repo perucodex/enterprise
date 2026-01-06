@@ -15,13 +15,16 @@
 # Levent Karakaş <levent@mektup.at>, 2022
 # Halil, 2023
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# DeepL <noreply-mt-deepl@weblate.org>, 2025.
+# Odoo Turkish Import <dyki+tr@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:44+0000\n"
-"PO-Revision-Date: 2025-09-15 21:10+0000\n"
-"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-11-21 14:41+0000\n"
+"Last-Translator: Odoo Turkish Import <dyki+tr@odoo.com>\n"
 "Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/"
 "sale_amazon/tr/>\n"
 "Language: tr\n"
@@ -58,6 +61,29 @@ msgid ""
 "        </div>\n"
 "        "
 msgstr ""
+"<div>\n"
+"            <p>Amazon siparişinin <t t-out=\"ctx.get('amazon_order_ref') or "
+"''\">REF</t> referansıyla senkronizasyonu bir hatayla karşılaştı ve "
+"tamamlanamadı.</p>\n"
+"            <p>Sipariş SellerCentral'da iptal edilmediği sürece başka bir "
+"senkronizasyon denenmeyecektir.</p>\n"
+"            <p>Yeni bir senkronizasyon denemesi planlamak için aşağıdaki "
+"adımları izleyin:\n"
+"               </p><ol>\n"
+"                   <li>Geliştirici Araçlarına girin.</li>\n"
+"                    <li>Siparişin verildiği Amazon Hesabının formunu açın.</"
+"li>\n"
+"                    <li>Sipariş Takibi sekmesine gidin.</li>\n"
+"                    <li> <em> Son Sipariş Senkronizasyonu</em> için "
+"siparişin son durum güncellemesinden önceki bir tarih belirleyin.</li>\n"
+"                    <li>Değişiklikleri kaydedin ve <em>SYNC ORDERS</em> "
+"butouna tıklayın.</li>\n"
+"                </ol>\n"
+"            \n"
+"           <p>Sorun devam ederse <a href=\"https://www.odoo.com/help/\">Odoo "
+"destek</a> ile iletişime geçin.</p>\n"
+"        </div>\n"
+"        "
 
 #. module: sale_amazon
 #: model:mail.template,body_html:sale_amazon.picking_sync_failure
@@ -128,6 +154,72 @@ msgid ""
 "            </div>\n"
 "        </body>"
 msgstr ""
+"<style>\n"
+"                .amz_table {\n"
+"                    width: 100%;\n"
+"                    maksimum genişlik: 900px;\n"
+"                    border-collapse: collapse;\n"
+"                }\n"
+"\n"
+"                .amz_table th,\n"
+"                .amz_table td {\n"
+"                    kenarlık: 1px solid #888;\n"
+"                }\n"
+"\n"
+"                .amz_table th {\n"
+"                    white-space: nowrap;\n"
+"                }\n"
+"\n"
+"                .amz_table thead th {\n"
+"                    padding: 0.5em 0.5em;\n"
+"                    text-align: center;\n"
+"                    border-bottom: 1px solid #888;\n"
+"                }\n"
+"\n"
+"                .amz_table tbody th,\n"
+"                .amz_table tbody td {\n"
+"                    padding: 0.5em 0.5em 1em;\n"
+"                    vertical-align: top;\n"
+"                }\n"
+"           </style>\n"
+"            <body><div>\n"
+"                <p>Teslimat siparişlerinin senkronizasyonu bazı hatalarla "
+"karşılaştı ve tamamlanamadı.</p>\n"
+"                <p>Başka bir senkronizasyon denenmeyeceğinden, teslimat "
+"siparişlerini manuel olarak tekrar senkronize etmeden önce lütfen sorunu "
+"düzeltin.</p>\n"
+"                <p>İşte Amazon tarafından gönderilen hatalar: </p>\n"
+"                <table class=\"amz_table\">\n"
+"                   <thead>\n"
+"                        <tr>\n"
+"                           <th>Sipariş Referansı</th>\n"
+"                            <th>Mesaj</th>\n"
+"                        </tr>\n"
+"                   </thead>\n"
+"                    <tbody>\n"
+"                       <tr t-foreach=\"ctx.get('error_messages')\" t-"
+"as=\"error\">\n"
+"                            <th><t t-out=\"error['order_ref']\"/></th>\n"
+"                           <td>\n"
+"                                <t t-if=\"error['message']\" t-"
+"out=\"error['message']\"/>\n"
+"                               <t t-else=\"\">Amazon ile senkronizasyon "
+"sırasında bilinmeyen bir hata oluştu.\n"
+"                                    Maalesef, siparişin durumunun doğru olup "
+"olmadığını manuel olarak kontrol etmeniz gerekir.\n"
+"                                    Bununla ilgili tüm bilgileri "
+"bulabilirsiniz\n"
+"                                   <a href=\"https://www.odoo.com/"
+"documentation/latest/applications/sales/sales/amazon_connector/"
+"manage.html#manage_deliveries_errors\">\n"
+"                                        dokümantasyonda\n"
+"                                   </a>.</t>\n"
+"                            </td>\n"
+"                       </tr>\n"
+"                    </tbody>\n"
+"               </table>\n"
+"            </div>\n"
+"       </body>"
 
 #. module: sale_amazon
 #: model:mail.template,body_html:sale_amazon.inventory_sync_failure
@@ -193,6 +285,66 @@ msgid ""
 "            </div>\n"
 "        </body>"
 msgstr ""
+"<style>\n"
+"                .amz_table {\n"
+"                    width: 100%;\n"
+"                    max-width: 900px;\n"
+"                    border-collapse: collapse;\n"
+"                }\n"
+"\n"
+"                .amz_table th,\n"
+"                .amz_table td {\n"
+"                    border: 1px solid #888;\n"
+"                }\n"
+"\n"
+"                .amz_table th {\n"
+"                    white-space: nowrap;\n"
+"                }\n"
+"\n"
+"                .amz_table thead th {\n"
+"                    padding: 0.5em 0.5em;\n"
+"                    text-align: center;\n"
+"                    border-bottom: 1px solid #888;\n"
+"                }\n"
+"\n"
+"                .amz_table tbody th,\n"
+"                .amz_table tbody td {\n"
+"                    padding: 0.5em 0.5em 1em;\n"
+"                    vertical-align: top;\n"
+"                }\n"
+"            </style>\n"
+"            <body><div>\n"
+"                <p>Amazon Hesabı için ürünlerin stok durumunun "
+"senkronizasyonu sırasında\n"
+"                    <b><t t-out=\"ctx.get('amazon_account') or ''\">REF</t></"
+"b>\n"
+"                    bazı hatalar meydana geldi ve işlem tamamlanamadı.</p>\n"
+"                <p>Amazon tarafından gönderilen hatalar şunlardır: </p>\n"
+"                <table class=\"amz_table\">\n"
+"                    <thead>\n"
+"                        <tr>\n"
+"                            <th>SKU</th>\n"
+"                            <th>Mesaj</th>\n"
+"                        </tr>\n"
+"                    </thead>\n"
+"                    <tbody>\n"
+"                        <tr t-foreach=\"ctx.get('error_messages')\" t-"
+"as=\"error\">\n"
+"                            <th><t t-out=\"error['sku']\"/></th>\n"
+"                            <td>\n"
+"                                <t t-if=\"error['message']\" t-"
+"out=\"error['message']\"/>\n"
+"                                <t t-else=\"\">Amazon ile senkronizasyon "
+"sırasında bilinmeyen bir hata oluştu.\n"
+"                                    Maalesef, ürünün mevcut miktarının doğru "
+"olup olmadığını manuel olarak kontrol etmeniz gerekiyor.\n"
+"                                </t>\n"
+"                            </td>\n"
+"                        </tr>\n"
+"                    </tbody>\n"
+"                </table>\n"
+"            </div>\n"
+"        </body>"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_marketplace__api_ref
@@ -213,7 +365,7 @@ msgstr "Hesap Adı"
 #. module: sale_amazon
 #: model:ir.ui.menu,name:sale_amazon.accounts_menu
 msgid "Accounts"
-msgstr ""
+msgstr "Hesaplar"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__active
@@ -225,12 +377,12 @@ msgstr "Etkin"
 msgid ""
 "Add any new marketplace that this account has "
 "gained                                           access to."
-msgstr ""
+msgstr "Bu hesabın erişim sağladığı tüm yeni pazar yerlerini ekleyin."
 
 #. module: sale_amazon
 #: model:ir.ui.menu,name:sale_amazon.root_menu
 msgid "Amazon"
-msgstr ""
+msgstr "Amazon"
 
 #. module: sale_amazon
 #: model:ir.model,name:sale_amazon.model_amazon_account
@@ -251,7 +403,7 @@ msgstr "Amazon Hesapları"
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_offer__amazon_feed_ref
 #: model:ir.model.fields,field_description:sale_amazon.field_stock_picking__amazon_feed_ref
 msgid "Amazon Feed Reference"
-msgstr ""
+msgstr "Amazon Feed Referansı"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_sale_order_line__amazon_item_ref
@@ -283,22 +435,22 @@ msgstr "Amazon Teklifleri"
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_recover_order_wizard__amazon_order_ref
 msgid "Amazon Order Reference"
-msgstr ""
+msgstr "Amazon Sipariş Referansı"
 
 #. module: sale_amazon
 #: model:ir.model,name:sale_amazon.model_amazon_recover_order_wizard
 msgid "Amazon Recover Order Wizard"
-msgstr ""
+msgstr "Amazon Sipariş Kurtarma Sihirbazı"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_sale_order__amazon_order_ref
 msgid "Amazon Reference"
-msgstr ""
+msgstr "Amazon Referansı"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_offer__sku
 msgid "Amazon SKU"
-msgstr ""
+msgstr "Amazon SKU"
 
 #. module: sale_amazon
 #: model:product.template,name:sale_amazon.default_product_product_template
@@ -314,7 +466,7 @@ msgstr "Amazon Gönderi"
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_offer__amazon_sync_status
 #: model:ir.model.fields,field_description:sale_amazon.field_stock_picking__amazon_sync_status
 msgid "Amazon Synchronization Status"
-msgstr ""
+msgstr "Amazon Senkronizasyon Durumu"
 
 #. module: sale_amazon
 #: model_terms:ir.actions.act_window,help:sale_amazon.list_amazon_account_action
@@ -331,7 +483,7 @@ msgstr "Amazon pazar yerleri silinemez."
 #. odoo-python
 #: code:addons/sale_amazon/models/stock_move.py:0
 msgid "Amazon move: %s"
-msgstr ""
+msgstr "Amazon Stok Hareketi: %s"
 
 #. module: sale_amazon
 #. odoo-python
@@ -341,6 +493,9 @@ msgid ""
 "sure the following information are set on '%(location_name)s' (%"
 "(location)s): street, country and country code."
 msgstr ""
+"Amazon, gönderim konumu için belirli bilgiler gerektirir. Lütfen aşağıdaki "
+"bilgilerin '%(location_name)s' (%(location)s) adresinde cadde, ülke ve ülke "
+"kodu bilgilerinin ayarlandığından emin olun."
 
 #. module: sale_amazon
 #. odoo-python
@@ -437,7 +592,7 @@ msgstr "Amazon.fr"
 #. module: sale_amazon
 #: model:amazon.marketplace,name:sale_amazon.marketplace_IE
 msgid "Amazon.ie"
-msgstr ""
+msgstr "Amazon.ie"
 
 #. module: sale_amazon
 #: model:amazon.marketplace,name:sale_amazon.marketplace_IN
@@ -477,12 +632,12 @@ msgstr "Amazon.sg"
 #. module: sale_amazon
 #: model:mail.template,name:sale_amazon.inventory_sync_failure
 msgid "Amazon: Available Inventory for Offers Synchronization Failure"
-msgstr ""
+msgstr "Amazon: Teklifler için Mevcut Envanter Senkronizasyon Hatası"
 
 #. module: sale_amazon
 #: model:mail.template,name:sale_amazon.picking_sync_failure
 msgid "Amazon: Delivery Order Synchronization Failure"
-msgstr ""
+msgstr "Amazon: Teslimat Siparişi Senkronizasyon Hatası"
 
 #. module: sale_amazon
 #: model:mail.template,name:sale_amazon.order_sync_failure
@@ -492,17 +647,17 @@ msgstr "Amazon: Sipariş Senkronizasyonu Hatası"
 #. module: sale_amazon
 #: model:ir.actions.server,name:sale_amazon.ir_cron_sync_amazon_inventory_ir_actions_server
 msgid "Amazon: sync available inventory"
-msgstr ""
+msgstr "Amazon: mevcut envanteri senkronize et"
 
 #. module: sale_amazon
 #: model:ir.actions.server,name:sale_amazon.ir_cron_sync_amazon_pickings_ir_actions_server
 msgid "Amazon: sync delivery orders"
-msgstr ""
+msgstr "Amazon: teslimat siparişlerini senkronize edin"
 
 #. module: sale_amazon
 #: model:ir.actions.server,name:sale_amazon.ir_cron_sync_amazon_feeds_ir_actions_server
 msgid "Amazon: sync feeds"
-msgstr ""
+msgstr "Amazon: Feedleri senkronize et"
 
 #. module: sale_amazon
 #: model:ir.actions.server,name:sale_amazon.ir_cron_sync_amazon_orders_ir_actions_server
@@ -523,12 +678,12 @@ msgstr "Hesabınızı Amazon'a bağlarken bir hata oluştu."
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_search
 msgid "Archived"
-msgstr ""
+msgstr "Arşivlendi"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 msgid "Are you sure you want to disconnect this account?"
-msgstr ""
+msgstr "Bu hesabın bağlantısını kesmek istediğinizden emin misiniz?"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__available_marketplace_ids
@@ -543,7 +698,7 @@ msgstr "Hesabıma geri dön"
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.quick_create_account_form
 msgid "Cancel"
-msgstr ""
+msgstr "İptal"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__company_id
@@ -560,13 +715,13 @@ msgstr "Yapılandırma Ayarları"
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 #: model_terms:ir.ui.view,arch_db:sale_amazon.quick_create_account_form
 msgid "Connect"
-msgstr ""
+msgstr "Bağlantı Kurun"
 
 #. module: sale_amazon
 #: model:ir.model.fields.selection,name:sale_amazon.selection__amazon_account__state__connected
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 msgid "Connected"
-msgstr ""
+msgstr "Bağlandı"
 
 #. module: sale_amazon
 #: model:ir.model,name:sale_amazon.model_res_partner
@@ -601,12 +756,12 @@ msgstr "Kimlik %s ile Amazon hesabı bulunamadı"
 #. odoo-python
 #: code:addons/sale_amazon/utils.py:0
 msgid "Could not process the feed document send by Amazon."
-msgstr ""
+msgstr "Amazon tarafından gönderilen feed belgesi işlenemedi."
 
 #. module: sale_amazon
 #: model:ir.model,website_form_label:sale_amazon.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Müşteri Oluşturma"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__create_uid
@@ -643,13 +798,13 @@ msgstr "Sil"
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 msgid "Disconnect"
-msgstr ""
+msgstr "Bağlantıyı Kes"
 
 #. module: sale_amazon
 #: model:ir.model.fields.selection,name:sale_amazon.selection__amazon_account__state__disconnected
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 msgid "Disconnected"
-msgstr ""
+msgstr "Bağlantı Kesildi"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__display_name
@@ -683,13 +838,13 @@ msgstr "Hata"
 #. odoo-python
 #: code:addons/sale_amazon/models/amazon_account.py:0
 msgid "Error (%(code)s): %(message)s"
-msgstr ""
+msgstr "Hata (%(code)s): %(message)s"
 
 #. module: sale_amazon
 #. odoo-python
 #: code:addons/sale_amazon/utils.py:0
 msgid "Error code: %(error_code)s; description: %(error_message)s"
-msgstr ""
+msgstr "Hata kodu: %(error_code)s; açıklama: %(error_message)s"
 
 #. module: sale_amazon
 #: model:ir.model.fields.selection,name:sale_amazon.selection__amazon_marketplace__region__eu-west-1
@@ -699,12 +854,12 @@ msgstr "Avrupa"
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__location_id
 msgid "FBA Stock Location"
-msgstr ""
+msgstr "FBA Stok Konumu"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__synchronize_inventory
 msgid "FBM Stock"
-msgstr ""
+msgstr "FBM Stok"
 
 #. module: sale_amazon
 #: model:ir.model.fields.selection,name:sale_amazon.selection__amazon_marketplace__region__us-west-2
@@ -752,12 +907,12 @@ msgstr ""
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_res_config_settings__has_amazon_account
 msgid "Has Amazon Account"
-msgstr ""
+msgstr "Amazon Hesabı Var"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__base_marketplace_id
 msgid "Home Marketplace"
-msgstr ""
+msgstr "Pazaryeri Anasayfa"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__id
@@ -801,11 +956,13 @@ msgid ""
 "If the sale is locked, you can not modify it anymore. However, you will "
 "still be able to invoice or deliver."
 msgstr ""
+"Satış kesinleştikten sonra, üzerinde değişiklik yapamazsınız. Buna karşın "
+"faturalandırma ve teslim yapabilirsiniz."
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.picking_view_form
 msgid "In Processing by Amazon"
-msgstr ""
+msgstr "Amazon Tarafından İşleniyor"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__access_token
@@ -815,7 +972,7 @@ msgstr "LWA Erişim Token"
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__access_token_expiry
 msgid "LWA Access Token Expiry"
-msgstr ""
+msgstr "LWA Erişim Token Sona Ermesi"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__refresh_token
@@ -846,7 +1003,7 @@ msgstr "Son Güncelleme"
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.res_config_settings_view_form
 msgid "Link My Account"
-msgstr ""
+msgstr "Hesabımı Bağla"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
@@ -854,16 +1011,18 @@ msgid ""
 "Link your Amazon account with Odoo to start synchronizing your "
 "Amazon                               orders."
 msgstr ""
+"Amazon siparişlerinizi senkronize etmeye başlamak için Amazon hesabınızı "
+"Odoo ile bağlayın."
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_order_view_form
 msgid "Lock"
-msgstr ""
+msgstr "Kilitle"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_offer_view_search
 msgid "MarketPlace"
-msgstr ""
+msgstr "Pazaryeri"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_offer__marketplace_id
@@ -885,13 +1044,13 @@ msgstr "Adı"
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_tree
 msgid "New"
-msgstr ""
+msgstr "Yeni"
 
 #. module: sale_amazon
 #. odoo-python
 #: code:addons/sale_amazon/models/amazon_offer.py:0
 msgid "Non-storable product cannot be synced."
-msgstr ""
+msgstr "Depolanamayan ürün senkronize edilemez."
 
 #. module: sale_amazon
 #: model:ir.model.fields.selection,name:sale_amazon.selection__amazon_marketplace__region__us-east-1
@@ -979,7 +1138,7 @@ msgstr ""
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.recover_order_wizard_form
 msgid "Recover"
-msgstr ""
+msgstr "Kurtarmak"
 
 #. module: sale_amazon
 #. odoo-python
@@ -987,7 +1146,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 #: model_terms:ir.ui.view,arch_db:sale_amazon.recover_order_wizard_form
 msgid "Recover Order"
-msgstr ""
+msgstr "Sipariş Kurtarma"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_marketplace__region
@@ -1009,7 +1168,7 @@ msgstr ""
 #. module: sale_amazon
 #: model:ir.model.fields.selection,name:sale_amazon.selection__amazon_offer__amazon_sync_status__reset
 msgid "Reset FBM stock"
-msgstr ""
+msgstr "FBM stokunu sıfırlayın"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__restricted_data_token
@@ -1019,17 +1178,17 @@ msgstr "Kısıtlı Veri Token"
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__restricted_data_token_expiry
 msgid "Restricted Data Token Expiry"
-msgstr ""
+msgstr "Kısıtlı Veri Simgesinin Sona Ermesi"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.picking_view_form
 msgid "Retry Amazon Sync"
-msgstr ""
+msgstr "Amazon Sync'i Yeniden Deneyin"
 
 #. module: sale_amazon
 #: model:ir.model.constraint,message:sale_amazon.constraint_amazon_offer_unique_sku
 msgid "SKU must be unique for a given account."
-msgstr ""
+msgstr "SKU, belirli bir hesap için benzersiz/tek olmalıdır."
 
 #. module: sale_amazon
 #: model:ir.model,name:sale_amazon.model_sale_order
@@ -1054,12 +1213,12 @@ msgstr "Satış Temsilcisi"
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.picking_view_form
 msgid "Scheduled for Amazon Synchronization"
-msgstr ""
+msgstr "Amazon Senkronizasyonu için Planlandı"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.quick_create_account_form
 msgid "Select the amazon marketplace to log in from."
-msgstr ""
+msgstr "Giriş yapmak için Amazon pazaryerini seçin."
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_marketplace__seller_central_url
@@ -1074,17 +1233,17 @@ msgstr "Satıcı Anahtarı"
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__state
 msgid "State"
-msgstr ""
+msgstr "Durum"
 
 #. module: sale_amazon
 #: model:ir.model,name:sale_amazon.model_stock_move
 msgid "Stock Move"
-msgstr ""
+msgstr "Stok Hareketi"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_offer__sync_stock
 msgid "Stock Synchronization"
-msgstr ""
+msgstr "Stok Senkronizasyonu"
 
 #. module: sale_amazon
 #. odoo-python
@@ -1095,17 +1254,17 @@ msgstr "Bu hesap için mevcut olan pazaryerleri başarıyla güncellendi!"
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 msgid "Sync Deliveries"
-msgstr ""
+msgstr "Teslimatları Senkronize Et"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 msgid "Sync FBM Inventory"
-msgstr ""
+msgstr "FBM Envanterini Senkronize Et"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 msgid "Sync Feeds Status"
-msgstr ""
+msgstr "Feed Durumunu Senkronize Et"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
@@ -1115,7 +1274,7 @@ msgstr "Siparişleri Senkronize Et"
 #. module: sale_amazon
 #: model:mail.template,subject:sale_amazon.inventory_sync_failure
 msgid "Synchronization of Amazon Stock has failed"
-msgstr ""
+msgstr "Amazon Stok senkronizasyonu başarısız oldu"
 
 #. module: sale_amazon
 #: model:mail.template,subject:sale_amazon.order_sync_failure
@@ -1128,22 +1287,22 @@ msgstr ""
 #. module: sale_amazon
 #: model:mail.template,subject:sale_amazon.picking_sync_failure
 msgid "Synchronization of delivery orders has failed"
-msgstr ""
+msgstr "Teslimat siparişlerinin senkronizasyonu başarısız oldu"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.picking_view_form
 msgid "Synchronization with Amazon failed"
-msgstr ""
+msgstr "Amazon ile senkronizasyon başarısız oldu"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 msgid "Synchronize"
-msgstr ""
+msgstr "Senkronize edin"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.picking_view_form
 msgid "Synchronized with Amazon"
-msgstr ""
+msgstr "Amazon ile senkronize"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_marketplace__tax_included
@@ -1154,7 +1313,7 @@ msgstr "Vergi Dahil"
 #. odoo-python
 #: code:addons/sale_amazon/wizards/recover_order_wizard.py:0
 msgid "The Amazon order reference must be in 3-7-7 format."
-msgstr ""
+msgstr "Amazon sipariş referansı 3-7-7 formatında olmalıdır."
 
 #. module: sale_amazon
 #. odoo-python
@@ -1163,6 +1322,8 @@ msgid ""
 "The Amazon order with reference %(ref)s was not recovered because its "
 "currency was missing from the Amazon order data."
 msgstr ""
+"%(ref)s referanslı Amazon siparişi, para birimi Amazon sipariş verilerinde "
+"eksik olduğu için kurtarılamadı."
 
 #. module: sale_amazon
 #. odoo-python
@@ -1172,6 +1333,8 @@ msgid ""
 "(%(status)s) is not eligible for synchronization for its fulfillment channel "
 "(%(channel)s)."
 msgstr ""
+"%(ref)s referanslı Amazon siparişi, durumu (%(status)s) gönderim kanalı (%"
+"(channel)s) için senkronizasyona uygun olmadığından kurtarılamadı."
 
 #. module: sale_amazon
 #: model:ir.model.fields,help:sale_amazon.field_amazon_marketplace__region
@@ -1213,6 +1376,8 @@ msgid ""
 "The channel will be updated with the incomming orders or during the next "
 "stock synchronization."
 msgstr ""
+"Kanal, gelen siparişlerle veya bir sonraki stok senkronizasyonu sırasında "
+"güncellenecektir."
 
 #. module: sale_amazon
 #. odoo-python
@@ -1227,11 +1392,13 @@ msgid ""
 "The communication with the API failed.\n"
 "Error code: %(error_code)s; description: %(error_message)s"
 msgstr ""
+"API ile iletişim başarısız oldu.\n"
+"Hata kodu: %(error_code)s; açıklama: %(error_message)s"
 
 #. module: sale_amazon
 #: model:ir.model.fields,help:sale_amazon.field_amazon_account__base_marketplace_id
 msgid "The home marketplace of this account; used for authentication only."
-msgstr ""
+msgstr "Bu hesabın ana pazaryeri ; yalnızca kimlik doğrulama için kullanılır."
 
 #. module: sale_amazon
 #: model:ir.model.fields,help:sale_amazon.field_amazon_account__last_orders_sync
@@ -1292,23 +1459,26 @@ msgid ""
 "already been delivered. Please create a return for this order to adjust the "
 "stock."
 msgstr ""
+"Bazı ürünler zaten teslim edilmişken sipariş Amazon müşterisi tarafından "
+"iptal edildi. Stokları ayarlamak için lütfen bu sipariş için bir iade "
+"oluşturun."
 
 #. module: sale_amazon
 #. odoo-python
 #: code:addons/sale_amazon/models/amazon_account.py:0
 msgid "The order was not found on this account's marketplaces."
-msgstr ""
+msgstr "Sipariş bu hesabın pazar yerlerinde bulunamadı."
 
 #. module: sale_amazon
 #. odoo-python
 #: code:addons/sale_amazon/models/amazon_account.py:0
 msgid "The provided reference does not match any Amazon order."
-msgstr ""
+msgstr "Sağlanan referans herhangi bir Amazon siparişiyle eşleşmiyor."
 
 #. module: sale_amazon
 #: model:ir.model.fields,help:sale_amazon.field_amazon_recover_order_wizard__amazon_order_ref
 msgid "The reference to the Amazon order to recover, in 3-7-7 format"
-msgstr ""
+msgstr "3-7-7 formatında Amazon kurtarma emrine yapılan atıf"
 
 #. module: sale_amazon
 #. odoo-python
@@ -1316,6 +1486,7 @@ msgstr ""
 msgid ""
 "The sales order of this delivery order is not linked to an Amazon account."
 msgstr ""
+"Bu teslimat siparişinin satış siparişi bir Amazon hesabına bağlı değildir."
 
 #. module: sale_amazon
 #: model:ir.model.fields,help:sale_amazon.field_amazon_offer__account_id
@@ -1348,6 +1519,11 @@ msgid ""
 "- Done: The delivery details have been processed.\n"
 "- Error: The synchronization of the delivery order failed."
 msgstr ""
+"Teslimat siparişinin Amazon'a senkronizasyon durumu:\n"
+"- Beklemede: Teslimat siparişi onaylandı ve yakında senkronize edilecek.\n"
+"- İşleniyor: Teslimat ayrıntıları gönderildi ve işleniyor.\n"
+"- Tamamlandı: Teslimat detayları işlendi.\n"
+"- Hata oluştu: Teslimat siparişinin senkronizasyonu başarısız oldu."
 
 #. module: sale_amazon
 #: model:ir.model.fields,help:sale_amazon.field_amazon_offer__amazon_sync_status
@@ -1358,6 +1534,13 @@ msgid ""
 "- Error: The synchronization of the stock level failed.\n"
 "- Reset: The next stock synchronization will reset the FBM stock level to 0."
 msgstr ""
+"Ürünün stok seviyesinin Amazon ile senkronizasyon durumu:\n"
+"- İşleniyor: Stok seviyesi gönderildi ve işleniyor.\n"
+"- Tamamlandı: Stok seviyesi işlendi.\n"
+"- Hata: Stok seviyesi işlendi: Stok seviyesinin senkronizasyonu başarısız "
+"oldu.\n"
+"- Sıfırla: Bir sonraki stok senkronizasyonu FBM stok seviyesini 0'a "
+"sıfırlayacaktır."
 
 #. module: sale_amazon
 #. odoo-python
@@ -1366,6 +1549,8 @@ msgid ""
 "The synchronization with Amazon failed. Amazon gave us this information "
 "about the problem:"
 msgstr ""
+"Amazon ile senkronizasyon başarısız oldu. Amazon bize sorun hakkında bu "
+"bilgiyi verdi:"
 
 #. module: sale_amazon
 #: model:ir.model.fields,help:sale_amazon.field_amazon_account__name
@@ -1400,6 +1585,8 @@ msgid ""
 "This Amazon partner was created with an invalid state (%s); please set the "
 "correct state manually."
 msgstr ""
+"Bu Amazon iş ortağı geçersiz bir durumla oluşturuldu (%s); lütfen doğru "
+"durumu manuel olarak ayarlayın."
 
 #. module: sale_amazon
 #: model:ir.model,name:sale_amazon.model_stock_picking
@@ -1409,7 +1596,7 @@ msgstr "Aktarım"
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
 msgid "Update available marketplaces"
-msgstr ""
+msgstr "Mevcut pazar yerlerini güncelleyin"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_offer_view_tree
@@ -1428,6 +1615,8 @@ msgid ""
 "Whether the available quantities of FBM products linked to this account are "
 "synchronized with Amazon."
 msgstr ""
+"Bu hesaba bağlı Satıcı Tarafından Gönderim (FBM) ürünlerinin mevcut "
+"miktarlarının Amazon ile senkronize edilip edilmediği."
 
 #. module: sale_amazon
 #: model:ir.model.fields,help:sale_amazon.field_amazon_marketplace__tax_included
@@ -1441,6 +1630,8 @@ msgid ""
 "You cannot delete an account that is linked to sale orders. Please archive "
 "it instead."
 msgstr ""
+"Satış siparişleriyle bağlantılı bir hesabı silemezsiniz. Lütfen bunun yerine "
+"arşivleyin."
 
 #. module: sale_amazon
 #. odoo-python
@@ -1472,13 +1663,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/sale_amazon/models/amazon_account.py:0
 msgid "[%(gift_wrap_code)s] Gift Wrapping Charges for %(product)s"
-msgstr ""
+msgstr "[%(gift_wrap_code)s] %(product)s için Hediye Paketi Ücretleri"
 
 #. module: sale_amazon
 #. odoo-python
 #: code:addons/sale_amazon/models/amazon_account.py:0
 msgid "[%(shipping_code)s] Delivery Charges for %(product)s"
-msgstr ""
+msgstr "[%(shipping_code)s] %(product)s için Teslimat Ücretleri"
 
 #. module: sale_amazon
 #. odoo-python
@@ -1487,12 +1678,14 @@ msgid ""
 "[%(sku)s] %(item_title)s\n"
 "Condition: %(main_condition)s - %(sub_condition)s"
 msgstr ""
+"[%(sku)s] %(item_title)s\n"
+"Durum: %(main_condition)s - %(sub_condition)s"
 
 #. module: sale_amazon
 #. odoo-python
 #: code:addons/sale_amazon/models/amazon_account.py:0
 msgid "account_id"
-msgstr ""
+msgstr "account_id"
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_account_view_form
@@ -1503,7 +1696,7 @@ msgstr "örneğin Amerikan Pazarı"
 #. odoo-python
 #: code:addons/sale_amazon/models/amazon_account.py:0
 msgid "id"
-msgstr ""
+msgstr "kimlik"
 
 #~ msgid ""
 #~ "<div>\n"

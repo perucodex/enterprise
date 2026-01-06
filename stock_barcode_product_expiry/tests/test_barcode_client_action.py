@@ -27,6 +27,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         both dates are scanned, only the expiration date will be used.
         """
         self.env.company.nomenclature_id = self.env.ref('barcodes_gs1_nomenclature.default_gs1_nomenclature')
+        self.env.user.write({'group_ids': [Command.link(self.ref('stock.group_production_lot'))]})
 
         picking_form = Form(self.env['stock.picking'])
         picking_form.picking_type_id = self.picking_type_in
@@ -38,8 +39,8 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         receipt.action_confirm()
         receipt.action_assign()
 
-        url = self._get_client_action_url(receipt.id).replace('?', '?debug=assets&')
-        self.start_tour(url, 'test_gs1_receipt_expiration_date', login='admin', timeout=180)
+        url = self._get_client_action_url(receipt.id)
+        self.start_tour(url, 'test_gs1_receipt_expiration_date', login='admin')
 
         self.assertEqual(receipt.state, 'done')
         self.assertEqual(len(receipt.move_line_ids), 3)

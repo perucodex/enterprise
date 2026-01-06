@@ -43,3 +43,15 @@ class StockPicking(models.Model):
 
         _logger.info("Starshipit Cron: Finished processing pending prices.")
         return True
+
+    def action_print_starshipit_labels(self):
+        """ Returns the starshipit labels for all pickings in self. """
+        labels = self.env['ir.attachment'].search([
+            ('res_model', '=', 'stock.picking'),
+            ('res_id', 'in', self.ids),
+            ('name', '=like', 'LabelShipping-starshipit%'),
+        ])
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/delivery_starshipit/download_starshipit_labels/{",".join(map(str, labels.ids))}',
+        }

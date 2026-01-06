@@ -14,9 +14,10 @@ class SaleCommissionAchievementReport(models.Model):
         This method uses the same logic than sale.order.log.report.
         """
         conversion_date = fields.Date.today()
+        # In case we want to replay data at previous date
         if self.env.context.get('conversion_date'):
             conversion_date = datetime.strptime(self.env.context['conversion_date'], '%Y-%m-%d')
-        query =  f"""
+        query = f"""
             sub_rate_query AS(
                 SELECT
                         rc.id AS currency_id,
@@ -36,30 +37,28 @@ class SaleCommissionAchievementReport(models.Model):
 
     @api.model
     def _get_filtered_order_log_cte(self, users=None, teams=None):
-        date_from, date_to, company_condition = self._get_achievement_default_dates()
+        date_from, date_to = self._get_achievement_default_dates()
         today = fields.Date.today().strftime('%Y-%m-%d')
-        date_from_condition = f"""AND event_date >= '{datetime.strftime(date_from, "%Y-%m-%d")}'""" if date_from else ""
         query = f"""
         filtered_order_logs AS (
             SELECT
-                    id,
-                    order_id,
-                    plan_id,
-                    amount_signed,
-                    team_id,
-                    company_id,
-                    user_id,
-                    currency_id,
-                    event_date,
-                    effective_date,
-                    create_date
-              FROM sale_order_log
+                    l.id,
+                    l.order_id,
+                    l.plan_id,
+                    l.amount_signed,
+                    l.team_id,
+                    l.company_id,
+                    l.user_id,
+                    l.currency_id,
+                    l.event_date,
+                    l.effective_date,
+                    l.create_date
+              FROM sale_order_log l
              WHERE 1=1
-               {company_condition}
-               {'AND user_id in (%s)' % ','.join(str(i) for i in users.ids) if users else ''}
-               {'AND team_id in (%s)' % ','.join(str(i) for i in teams.ids) if teams else ''}
-               {date_from_condition}
-               AND event_date <= '{datetime.strftime(date_to, "%Y-%m-%d") if date_to else today}'
+               {'AND l.user_id in (%s)' % ','.join(str(i) for i in users.ids) if users else ''}
+               {'AND l.team_id in (%s)' % ','.join(str(i) for i in teams.ids) if teams else ''}
+               {"AND l.event_date >= '%s' " % datetime.strftime(date_from, "%Y-%m-%d") if date_from else ''}
+               AND l.event_date <= '{datetime.strftime(date_to, "%Y-%m-%d") if date_to else today}'
         ),
         """
         return query
@@ -72,7 +71,7 @@ class SaleCommissionAchievementReport(models.Model):
     def _get_sale_order_log_product(self):
         # TODO BIG CURRENCY CHANGES 0_0
         return """
-            rules.mrr_rate * log.amount_signed * cr.rate / log_rate.rate
+            rules.mrr_rate * log.amount_signed /  log_rate.rate
         """
 
     @api.model
@@ -129,23 +128,22 @@ subscription_rules AS (
         MAX(log.team_id) AS team_id,
         rules.plan_id,
         SUM({self._get_sale_order_log_product()}) AS achieved,
-        {self.env.company.currency_id.id} AS currency_id,
+        log.currency_id AS currency_id,
         MAX(log.event_date) AS date,
-        MAX(rules.company_id) AS company_id,
+        MAX(rules.company_id) AS plan_company_id,
+        MAX(log.company_id) AS achievement_company_id,
         MAX(log.order_id) AS related_res_id,
         MAX(so.partner_id) AS partner_id,
         -- create_date because _update_effective_date could update several logs at the same time
         -- transfers are created in the same transaction, we need to distinguish them too.
         -- We do it based on there id, generally they have very close id so modulo 10 is enough
-        MAX(log.create_date) + (MAX(log.id) %% 10) * INTERVAL '1 minute' AS entropy_date
+        MAX(log.create_date) + (MAX(log.id) % 10) * INTERVAL '1 minute' AS entropy_date
 
     FROM subscription_rules rules
     JOIN filtered_order_logs log ON log.team_id=rules.team_id
     JOIN sale_order so ON so.id = log.order_id
     JOIN sub_rate_query log_rate ON log_rate.currency_id=log.currency_id AND log_rate.company_id=log.company_id
-    JOIN currency_rate cr ON cr.company_id=log.company_id
     WHERE rules.team_rule
-      {self._get_company_condition('log', alias=True)}
       AND (rules.recurring_plan_id IS NULL OR log.plan_id = rules.recurring_plan_id)
       AND log.team_id = rules.team_id
     {'AND log.team_id in (%s)' % ','.join(str(i) for i in teams.ids) if teams else ''}
@@ -154,29 +152,30 @@ subscription_rules AS (
     GROUP BY
         log.id,
         rules.plan_id,
-        rules.user_id
+        rules.user_id,
+        log.currency_id
 ), subscription_commission_lines_user AS (
     SELECT
         rules.user_id,
         MAX(log.team_id) AS team_id,
         rules.plan_id,
         SUM({self._get_sale_order_log_product()}) AS achieved,
-        {self.env.company.currency_id.id} AS currency_id,
+        log.currency_id AS currency_id,
         MAX(log.event_date) AS date,
-        MAX(rules.company_id) AS company_id,
+        MAX(rules.company_id) AS plan_company_id,
+        MAX(log.company_id) AS achievement_company_id,
         MAX(log.order_id) AS related_res_id,
         MAX(so.partner_id) AS partner_id,
         -- create_date because _update_effective_date could update several logs at the same time
         -- transfers are created in the same transaction, we need to distinguish them too.
         -- We do it based on there id, generally they have very close id so modulo 10 is enough
-        MAX(log.create_date) + (MAX(log.id) %% 10) * INTERVAL '1 minute' AS entropy_date
+        MAX(log.create_date) + (MAX(log.id) % 10) * INTERVAL '1 minute' AS entropy_date
+
     FROM subscription_rules rules
         JOIN filtered_order_logs log ON log.user_id=rules.user_id
     JOIN sale_order so ON so.id = log.order_id
     JOIN sub_rate_query log_rate ON log_rate.currency_id=log.currency_id AND log_rate.company_id=log.company_id
-    JOIN currency_rate cr ON cr.company_id=log.company_id
     WHERE NOT rules.team_rule
-      {self._get_company_condition('log', alias=True)}
       AND (rules.recurring_plan_id IS NULL OR log.plan_id = rules.recurring_plan_id)
       AND log.user_id = rules.user_id
     {'AND log.user_id in (%s)' % ','.join(str(i) for i in users.ids) if users else ''}
@@ -185,7 +184,8 @@ subscription_rules AS (
     GROUP BY
         log.id,
         rules.plan_id,
-        rules.user_id
+        rules.user_id,
+        log.currency_id
 ), subscription_commission_lines AS (
     (SELECT *, 'sale.order' AS related_res_model FROM subscription_commission_lines_team)
     UNION ALL

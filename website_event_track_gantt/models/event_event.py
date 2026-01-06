@@ -15,8 +15,8 @@ class EventEvent(models.Model):
     @api.depends('track_ids.date', 'track_ids.date_end', 'date_begin', 'date_end')
     def _compute_track_gantt_information(self):
         for event in self:
-            first_date = min([event.date_begin] + [track.date for track in event.track_ids if track.date])
-            last_date = max([event.date_end] + [track.date_end for track in event.track_ids if track.date_end])
+            first_date = min([event.date_begin] + [track.date for track in event.track_ids if track.date]) if event.date_begin else None
+            last_date = max([event.date_end] + [track.date_end for track in event.track_ids if track.date_end]) if event.date_end else None
 
             if first_date and last_date:
                 duration = last_date - first_date

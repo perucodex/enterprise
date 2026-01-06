@@ -34,7 +34,7 @@ class SaleCommissionReport(models.Model):
     ################################################################################
     # Readonly Cursor hacks
     # These methods use a readonly cursor everywhere else in odoo but here we need a RW cursor because
-    # we are creating a temporary table in _search.
+    # we are creating a view (necessary even if the view is not materialized).
 
     @api.model
     def web_search_read(self, domain, specification, offset=0, limit=None, order=None, count_limit=None):
@@ -57,10 +57,6 @@ class SaleCommissionReport(models.Model):
 
     ################################################################################
 
-    def fetch(self, field_names=None):
-        self.env['sale.commission.achievement.report']._create_temp_invoice_table(users=None, teams=None)
-        return super().fetch(field_names=field_names)
-
     @api.model
     def _search(self, domain, *args, **kwargs):
         """ Extract the currency conversion date form the date_to field.
@@ -76,8 +72,6 @@ class SaleCommissionReport(models.Model):
         if date_to_list:
             date_to = max(date_to_list)
             model = model.with_context(conversion_date=date_to.strftime('%Y-%m-%d'))
-        self.env.cr.execute("SET LOCAL JIT = OFF")
-        self.env['sale.commission.achievement.report']._create_temp_invoice_table(users=None, teams=None)
         return super(SaleCommissionReport, model)._search(domain, *args, **kwargs)
 
     def action_achievement_detail(self):
@@ -151,9 +145,30 @@ class SaleCommissionReport(models.Model):
         teams = self.env.context.get('commission_team_ids', [])
         if teams:
             teams = self.env['crm.team'].browse(teams).exists()
+        achievement_view = self.env['sale.commission.achievement.report']._get_report_view()
+        if not self.env['sale.commission.achievement.report']._is_materialized_view() and achievement_view:
+            self.env.cr.execute(achievement_view)
+        # First, convert the achievement to allow sum them by period
         res = f"""
-WITH {self.env['sale.commission.achievement.report']._commission_lines_query(users=users, teams=teams)},
-achievement AS (
+WITH {self.env['sale.commission.achievement.report']._get_currency_rate()},
+commission_lines AS (
+    SELECT id,
+           target_id,
+           user_id,
+           team_id,
+           achieved * cr.rate AS achieved,
+           ca.currency_id,
+           plan_company_id,
+           achievement_company_id,
+           plan_id,
+           related_res_model,
+           related_res_id,
+           date,
+           partner_id
+FROM sale_commission_achievement_report_view ca
+LEFT JOIN currency_rate cr
+           ON cr.company_id = ca.achievement_company_id
+), achievement AS (
     SELECT
         (
             COALESCE(era.plan_id, 0) * 10^13 +
@@ -163,13 +178,12 @@ achievement AS (
         era.id AS target_id,
         era.plan_id AS plan_id,
         u.user_id AS user_id,
-        COALESCE(cl.company_id, MAX(scp.company_id)) AS company_id,
+        MAX(scp.company_id) AS company_id,
         SUM(achieved) AS achieved,
         CASE
-            WHEN MAX(era.amount) > 0 THEN GREATEST(SUM(achieved), 0) / MAX(era.amount)
+            WHEN MAX(era.amount) > 0 THEN GREATEST(SUM(achieved), 0) / (MAX(era.amount) * cr.rate)
             ELSE 0
         END AS achieved_rate,
-        cl.currency_id AS currency_id,
         MAX(era.amount) AS amount,
         MAX(era.payment_date) AS payment_date,
         MAX(scpf.id) AS forecast_id,
@@ -177,34 +191,36 @@ achievement AS (
         MAX(scpf.notes) AS notes
         FROM sale_commission_plan_target era
         LEFT JOIN sale_commission_plan_user u
-            ON u.plan_id=era.plan_id
-            AND COALESCE(u.date_from, era.date_from)<era.date_to
-            AND COALESCE(u.date_to, era.date_to)>era.date_from
+               ON u.plan_id=era.plan_id
+              AND COALESCE(u.date_from, era.date_from)<era.date_to
+              AND COALESCE(u.date_to, era.date_to)>era.date_from
         LEFT JOIN commission_lines cl
-        ON cl.plan_id = era.plan_id
-        AND cl.date::date >= era.date_from
-        AND cl.date::date <= era.date_to
-        AND cl.user_id = u.user_id
+               ON cl.plan_id = era.plan_id
+              AND cl.date::date >= era.date_from
+              AND cl.date::date <= era.date_to
+              AND cl.user_id = u.user_id
     LEFT JOIN sale_commission_plan_target_forecast scpf
-        ON (scpf.target_id = era.id AND u.user_id = scpf.user_id)
+           ON (scpf.target_id = era.id AND u.user_id = scpf.user_id)
     LEFT JOIN sale_commission_plan scp ON scp.id = u.plan_id
-        WHERE scp.active
-          AND scp.state = 'approved'
+    LEFT JOIN currency_rate cr ON cr.company_id = scp.company_id
+   WHERE scp.active
+     AND scp.state = 'approved'
     GROUP BY
         era.id,
         era.plan_id,
         u.user_id,
-        cl.company_id,
-        cl.currency_id
+        scp.company_id,
+        cr.rate
 ), target_com AS (
     SELECT
-        amount AS before,
+        amount * cr.rate AS before,
         target_rate AS rate_low,
-        LEAD(amount) OVER (PARTITION BY plan_id ORDER BY target_rate) AS amount,
+        LEAD(amount) OVER (PARTITION BY plan_id ORDER BY target_rate) * cr.rate AS amount,
         LEAD(target_rate) OVER (PARTITION BY plan_id ORDER BY target_rate) AS rate_high,
         plan_id
     FROM sale_commission_plan_target_commission scpta
     JOIN sale_commission_plan scp ON scp.id = scpta.plan_id
+    LEFT JOIN currency_rate cr ON cr.company_id = scp.company_id
     WHERE scp.type = 'target'
 ), achievement_target AS (
     SELECT
@@ -223,8 +239,7 @@ achievement AS (
         MAX(a.notes) AS notes,
         COUNT(1) AS ct
     FROM achievement a
-    LEFT JOIN currency_rate cr
-        ON cr.company_id = a.company_id
+    LEFT JOIN currency_rate cr ON cr.company_id = a.company_id
     GROUP BY
         a.plan_id, a.user_id, a.company_id, cr.rate, a.payment_date
 )

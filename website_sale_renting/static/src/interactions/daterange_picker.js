@@ -4,7 +4,7 @@ import { areDatesEqual, deserializeDateTime, serializeDateTime } from '@web/core
 import { rpc } from '@web/core/network/rpc';
 import wSaleUtils from '@website_sale/js/website_sale_utils';
 
-import { msecPerUnit, RentingMixin } from '@website_sale_renting/js/renting_mixin';
+import { unitMapping, RentingMixin } from '@website_sale_renting/js/renting_mixin';
 
 const { DateTime } = luxon;
 
@@ -186,11 +186,10 @@ export class DaterangePicker extends Interaction {
         }
         if (this.startDate) {
             // that means that the start date is already set
-            const rentingDurationMs = this.rentingMinimalTime.duration * msecPerUnit[this.rentingMinimalTime.unit];
-            const defaultRentingDurationMs = msecPerUnit['day']; // default duration is 1 day
-            let endDate = this.startDate.plus(
-                Math.max(rentingDurationMs, defaultRentingDurationMs), 'ms'
-            );
+            const { duration, unit } = this.rentingMinimalTime;
+            const minEndDate = this.startDate.plus({ [unitMapping[unit]]: duration });
+            const defaultEndDate = this.startDate.plus({ days: 1 });
+            const endDate = DateTime.max(minEndDate, defaultEndDate);
             return this._getFirstAvailableDate(endDate);
         }
         // that means that the date is not in the url and not in the hidden input

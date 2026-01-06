@@ -102,7 +102,12 @@ class HrJob(models.Model):
                     'medium_id': medium.id,
                     'source_id': user.utm_source_id.id,
                 })
-        new_trackers = self.env['link.tracker'].create(trackers_to_create)
+        LinkTrackers = self.env['link.tracker']
+        if not LinkTrackers.has_access('create') and\
+            self.env.user.has_group('hr_recruitment.group_hr_recruitment_manager'):
+            LinkTrackers = LinkTrackers.sudo()
+
+        new_trackers = LinkTrackers.create(trackers_to_create)
         for tracker, user in zip(new_trackers, user_without_tracker):
             referral_links_by_user[user] = tracker.short_url
 

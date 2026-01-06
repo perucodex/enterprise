@@ -208,3 +208,15 @@ class TestBaseImport(AccountTestInvoicingCommon):
         self.assertFalse(import_summary.import_summary_have_data)
         import_summary = self.env['account.import.summary'].create({'import_summary_move_ids': self._create_records('account.move')})
         self.assertTrue(import_summary.import_summary_have_data)
+
+    @unittest.skipUnless(can_import("xlrd.xlsx") or can_import("openpyxl"), "XLRD module not available")
+    def test_journal_name_preserved_on_import(self):
+        """Test that existing journal names are not overwritten when importing journal items."""
+        misc_journal = self.env["account.journal"].search([('code', '=', 'MISC'), ('company_id', '=', self.env.company.id)], limit=1)
+        original_name = misc_journal.name
+
+        result = self._create_save_import("account.move.line", self.journal_items_file_content)
+
+        misc_journal.invalidate_recordset()
+        self.assertEqual(misc_journal.name, original_name, "Existing journal name should not be overwritten")
+        self.assertEqual(result["messages"], [], "The import should have been successful without error")

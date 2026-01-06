@@ -20,8 +20,8 @@ export class MrpMenuDialog extends Component {
     static template = "mrp_workorder.MrpDisplayMenuDialog";
     static components = { Dialog };
     static NOTIFICATION_MESSAGE = {
-        button_scrap: "The scrap order has been successfully registered.",
-        button_quality_alert: "The quality alert has been successfully created.",
+        button_scrap: _t("The scrap order has been successfully registered."),
+        button_quality_alert: _t("The quality alert has been successfully created."),
     };
 
     setup() {
@@ -45,7 +45,7 @@ export class MrpMenuDialog extends Component {
         const message = MrpMenuDialog.NOTIFICATION_MESSAGE[method];
         if (message) {
             props.onSave = async () => {
-                this.notification.add(_t(message), { type: "success" });
+                this.notification.add(message, { type: "success" });
             };
         }
 

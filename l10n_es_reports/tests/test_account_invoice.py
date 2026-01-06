@@ -256,6 +256,7 @@ class TestAccountInvoice(TestAccountReportsCommon):
         })
         expense_bill = self.env['account.move'].create({
             'move_type': 'in_invoice',
+            'invoice_date': fields.Date.today(),
             'partner_id': internal_partner.id,
             'invoice_line_ids': [Command.create({
                 'product_id': self.product.id,
@@ -268,6 +269,7 @@ class TestAccountInvoice(TestAccountReportsCommon):
         })
         normal_bill = self.env['account.move'].create({
             'move_type': 'in_invoice',
+            'invoice_date': fields.Date.today(),
             'partner_id': external_partner.id,
             'invoice_line_ids': [Command.create({
                 'product_id': self.product.id,

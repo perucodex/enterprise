@@ -4,12 +4,13 @@
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # "Abe Manyo (abem)" <abem@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:45+0000\n"
-"PO-Revision-Date: 2025-10-23 09:45+0000\n"
+"POT-Creation-Date: 2025-12-30 18:43+0000\n"
+"PO-Revision-Date: 2025-12-18 02:52+0000\n"
 "Last-Translator: \"Abe Manyo (abem)\" <abem@odoo.com>\n"
 "Language-Team: Indonesian <https://translate.odoo.com/projects/odoo-19/ai/id/"
 ">\n"
@@ -18,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_read_group
@@ -108,16 +109,16 @@ msgstr ""
 "untuk pesanan ini\n"
 "            date_order|Order Date|datetime|true|true|Tanggal saat pesanan "
 "dibuat\n"
-"            order_line|Order Lines|one2many(sale.order.line)|false|false"
-"|Baris-baris di pesanan ini\n"
+"            order_line|Order Lines|one2many(sale.order.line)|false|false|"
+"Baris-baris di pesanan ini\n"
 "            state|Status|selection|true|true|Status pesanan\n"
 "            ```\n"
 "\n"
 "            Poin-poin kunci:\n"
 "            - ⚠️ Hanya mengembalikkan field yang DAPAT DICARI - lainnya tidak "
 "dapat digunakan di domain\n"
-"            - Untuk hubungan: Menunjukkan model terkait dalam tanda kurung ("
-"many2one, one2many, many2many)\n"
+"            - Untuk hubungan: Menunjukkan model terkait dalam tanda kurung "
+"(many2one, one2many, many2many)\n"
 "            - Hanya field-field hubungan dapat digunakan untuk menyebrang ke "
 "model lainnya\n"
 "            - Field-field literal seperti char/text/float TIDAK dapat "
@@ -213,8 +214,8 @@ msgid ""
 "        "
 msgstr ""
 "\n"
-"            Buka tampilan grafik/bagan menggunakan pencarian tampilan elemen."
-"\n"
+"            Buka tampilan grafik/bagan menggunakan pencarian tampilan "
+"elemen.\n"
 "            Terbaik untuk: Tren, perbandingan, distribusi, KPI visual.\n"
 "\n"
 "            Tipe bagan yang didukung:\n"
@@ -258,6 +259,23 @@ msgid ""
 "contain multiple search strings or be empty []\n"
 "        "
 msgstr ""
+"\n"
+"            Buka tampilan kanban (berdasarkan kartu) menggunakan pencarian "
+"elemen tampilan.\n"
+"            Terbaik untuk: Visualisasi tahap/status, tampilan pipeline, "
+"manajemen alur kerja.\n"
+"\n"
+"            Fitur-fitur kunci:\n"
+"            - Tampilan rekaman sebagai kartu di kolom\n"
+"            - Terapkan filter dari opsi menu yang tersedia\n"
+"            - Kelompokkan berdasarkan tahap alur kerja atau field lainnya\n"
+"            - Cari dalam field-field spesifik\n"
+"            - Ideal untuk pipeline CRM, papan tugas, alur kerja project\n"
+"\n"
+"            ⚠️ Gunakan hanya nama filter dan field groupby dari menu data\n"
+"            ⚠️ Setiap string pencarian harus menggunakan format 'field=text'. "
+"Array dapat memiliki lebih dari satu string pencarian atau kosong []\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_list
@@ -336,6 +354,36 @@ msgid ""
 "needs\n"
 "        "
 msgstr ""
+"\n"
+"            Membuka pivot table dengan pencarian dan filter advanced.\n"
+"            Best for: \"Top N\" queries, rankings, cross-tabulation, "
+"performance metrics.\n"
+"\n"
+"            Key features:\n"
+"            - Supports filters from search view\n"
+"            - Groups data by rows AND columns simultaneously\n"
+"            - Aggregates measures (sum, avg, count)\n"
+"            - Supports text search across searchable fields\n"
+"            - Excel-like pivot table functionality\n"
+"\n"
+"            💡 ALWAYS call compute_report_measures() first to get valid "
+"measures\n"
+"            💡 For rankings: Include ordering in measures (e.g., "
+"[\"amount_total desc\"])\n"
+"            💡 Use search parameter to filter by any searchable field BEFORE "
+"considering custom domains\n"
+"            ⚠️ Prefer \"Reporting\" app menus for best pivot experience\n"
+"            ⚠️ Each search string must use format 'field=text'. Array can "
+"contain multiple search strings or be empty []\n"
+"            ⚠️ Note: Uses row_groupbys/col_groupbys (arrays) instead of "
+"selected_groupbys\n"
+"\n"
+"            Example: For \"top salespeople selling office products\":\n"
+"            - Use search=[\"categ_id\", \"office\"] if categ_id is "
+"searchable\n"
+"            - Only use custom_domain if no searchable field matches your "
+"needs\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_get_menu_details
@@ -366,6 +414,31 @@ msgid ""
 "            ⚠️ Always validate the returned model matches your expectations\n"
 "        "
 msgstr ""
+"\n"
+"            Mengambil informasi rinci (context, domain, search_view) untuk "
+"menu tertentu.\n"
+"            HARUS dilakukan sebelum menggunakan alat open_menu_* apa un "
+"untuk mendapatkan detail yang spesifik ke menu.\n"
+"\n"
+"            Mengembalikkan CSV dengan pipe (|) delimiter:\n"
+"            ```\n"
+"            menu_id|model_name|context|domain|search_view\n"
+"            389|sale.order|{\"search_default_my_quotation\": 1}|[]|"
+"<search><fields>...</fields></search>\n"
+"            172|account.move|{\"search_default_draft\": 1}|[[\"type\", "
+"\"=\", \"out_invoice\"]]|<search>...</search>\n"
+"            ```\n"
+"\n"
+"            Key information:\n"
+"            - Context: Default filters/groupings applied when menu opens\n"
+"            - Domain: Permanent filters that cannot be removed by users\n"
+"            - Search_view: Full XML structure with available filters, "
+"groupbys, and searchable fields\n"
+"\n"
+"            💡 Performance tip: Request multiple menu details in one call "
+"when comparing options\n"
+"            ⚠️ Always validate the returned model matches your expectations\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_adjust_search
@@ -411,12 +484,52 @@ msgid ""
 "the current view info.\n"
 "        "
 msgstr ""
+"\n"
+"            User dapat terus menanyakan pertanyaan dan bila Anda merasa "
+"pencarian saat ini dapat disesuaikan tanpa membuka menu yang berbeda, Adna "
+"dapat menggunakan alat ini.\n"
+"\n"
+"            Disediakan di prompt <session_info_context> adalah informasi "
+"tampilan saat ini yang memiliki facet pencarian aktif.\n"
+"            Facet dapat merupakan kelompok filter `OR`, kelompok groupbys, "
+"atau kelompok istilah pencarian `OR`.\n"
+"\n"
+"            **Understanding the parameters**:\n"
+"            - `remove_facets` - Removing a facet removes the whole group of "
+"filters/groupbys/search terms. Removing a filter or a search facet reduces "
+"the constraints.\n"
+"            - `toggle_filters` - Toggling a filter will add/remove a filter "
+"from an active filter facet.\n"
+"            - `toggle_groupbys` - Toggling a groupby will add/remove a "
+"groupby from the active groupbys facet.\n"
+"            - `apply_searches` - Applying a search will `OR` the search term "
+"on an active search facet containing the same field. E.g., if there is a "
+"field facet of \"name=John\" and you provide search \"name=Jane\", the "
+"resulting search will be \"name=John OR name=Jane\".\n"
+"            - `measures` - Specifying measures will activate the selected "
+"measures in the current view if it's a pivot or a graph view.\n"
+"            - `mode` - Graph view only: This is the chart type. Choose from "
+"\"line\", \"bar\", or \"pie\" to change the chart type in the current graph "
+"view.\n"
+"            - `order` - Graph view only: Specifying the order will change "
+"the sorting of the results in the current graph view.\n"
+"            - `stacked` - Graph view only: Specifying stacked will change "
+"the stacking of the results in the current graph view.\n"
+"            - `cumulated` - Graph view only: Specifying cumulated will "
+"change the accumulation of the results in the current graph view.\n"
+"            - `custom_domain` - The search view elements may not be "
+"sufficient to express the needed domain. In that case, you can provide a "
+"custom domain as a JSON string.\n"
+"            - `switch_view_type` - Switching the view type will change the "
+"current view to the specified type. Select from the available view types in "
+"the current view info.\n"
+"        "
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0 code:addons/ai/models/ai_composer.py:0
 msgid "%s (copy)"
-msgstr ""
+msgstr "%s (salin)"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
@@ -460,7 +573,7 @@ msgstr "AI"
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_action_prompt
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_action_prompt
 msgid "AI Action Prompt"
-msgstr ""
+msgstr "Prompt Action AI"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_agent
@@ -490,25 +603,25 @@ msgstr "Embedding AI: Buat Embed"
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_prompt_button__name
 msgid "AI Prompt"
-msgstr ""
+msgstr "Prompt AI"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "AI Prompt Tools"
-msgstr ""
+msgstr "Alat Prompt AI"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_schema
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_schema
 msgid "AI Schema"
-msgstr ""
+msgstr "Skema AI"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_description
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_description
 msgid "AI Tool Description"
-msgstr ""
+msgstr "Deskripsi Alat AI"
 
 #. module: ai
 #. odoo-javascript
@@ -527,13 +640,13 @@ msgstr "Chat AI"
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
 msgid "AI is listening..."
-msgstr ""
+msgstr "AI sedang mendengarkan..."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/discuss/typing_patch.js:0
 msgid "AI is thinking..."
-msgstr ""
+msgstr "AI sedang berpikir..."
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_composer
@@ -555,112 +668,112 @@ msgstr "AI: %(name)s"
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_adjust_search
 msgid "AI: Adjust Search"
-msgstr ""
+msgstr "AI: Sesuaikan Pencarian"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_compute_report_measures
 msgid "AI: Compute Report Measures"
-msgstr ""
+msgstr "AI: Hitung Pengukuran Laporan"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_get_fields
 msgid "AI: Get Fields"
-msgstr ""
+msgstr "AI: Dapatkan Field"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_get_menu_details
 msgid "AI: Get Menu Details"
-msgstr ""
+msgstr "AI: Dapatkan Detail Menu"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_open_menu_graph
 msgid "AI: Open Menu Graph"
-msgstr ""
+msgstr "AI: Buka Grafik Menu"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_open_menu_kanban
 msgid "AI: Open Menu Kanban"
-msgstr ""
+msgstr "AI: Buka Menu Kanban"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_open_menu_list
 msgid "AI: Open Menu List"
-msgstr ""
+msgstr "AI: Buka Daftar Menu"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_open_menu_pivot
 msgid "AI: Open Menu Pivot"
-msgstr ""
+msgstr "AI: Buka Pivot Menu"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_read_group
 msgid "AI: Read group"
-msgstr ""
+msgstr "AI: Baca kelompok"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_search
 msgid "AI: Search"
-msgstr ""
+msgstr "AI: Cari"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 msgid "Access error"
-msgstr ""
+msgstr "Akses error"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__interface_key
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
 msgid "Action"
-msgstr ""
+msgstr "Tindakan"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
 msgid "Action \"%(action)s\" done."
-msgstr ""
+msgstr "Action \"%(action)s\" selesai."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__active
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__is_active
 msgid "Active"
-msgstr ""
+msgstr "Aktif"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
 msgid "Activity created for %(user)s."
-msgstr ""
+msgstr "Kegiatan dibuat untuk %(user)s."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Add"
-msgstr ""
+msgstr "Tambah"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Add Links"
-msgstr ""
+msgstr "Tambahkan Link-Link"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Add Sources"
-msgstr ""
+msgstr "Tambahkan Sumber-Sumber"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid "Add a Link"
-msgstr ""
+msgstr "Tambahkan Link"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
 msgid "Add notes about your upcoming meeting"
-msgstr ""
+msgstr "Tambahkan catatan mengenai meeting mendatang Anda"
 
 #. module: ai
 #. odoo-javascript
@@ -674,7 +787,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Adding sources..."
-msgstr ""
+msgstr "Menambahkan sumber-sumber..."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__agent_id
@@ -698,37 +811,31 @@ msgstr "Agen AI"
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_has_schema
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_has_schema
 msgid "Ai Tool Has Schema"
-msgstr ""
+msgstr "Alat AI Memiliki Skema"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_is_candidate
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_is_candidate
 msgid "Ai Tool Is Candidate"
-msgstr ""
+msgstr "Alat AI Adalah Kandidat"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_show_warning
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_show_warning
 msgid "Ai Tool Show Warning"
-msgstr ""
+msgstr "Alat AI Menunjukkan Peringatan"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_allow_end_message
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_allow_end_message
 msgid "Allow End Message"
-msgstr ""
+msgstr "Izinkan Pesan Akhir"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 msgid "An error occured"
-msgstr ""
-
-#. module: ai
-#. odoo-javascript
-#: code:addons/ai/static/src/discuss/core/common/thread_model_patch.js:0
-msgid "An error occurred while generating the AI response."
-msgstr ""
+msgstr "Terjadi error"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent__response_style__analytical
@@ -764,12 +871,12 @@ msgstr "Attachment Chunks Embedding"
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__available_prompts
 msgid "Available User Prompts"
-msgstr ""
+msgstr "Prompt-Prompt User yang Tersedia"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__avatar_128
 msgid "Avatar"
-msgstr ""
+msgstr "Avatar"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent__response_style__balanced
@@ -804,7 +911,7 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__checksum
 msgid "Checksum/SHA1"
-msgstr ""
+msgstr "Checksum/SHA1"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__content
@@ -856,6 +963,8 @@ msgid ""
 "Could you please provide info about '%s' as it is required to process your "
 "request"
 msgstr ""
+"Apakah Anda bisa menyediakan informasi mengenai '%s' karena diperlukan untuk "
+"memproses permintaan Anda"
 
 #. module: ai
 #: model:ir.model,website_form_label:ai.model_res_partner
@@ -913,7 +1022,7 @@ msgstr "Deskripsi"
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
 msgid "Dictate text or record a meeting"
-msgstr ""
+msgstr "Dikte teks atau rekam meeting"
 
 #. module: ai
 #. odoo-javascript
@@ -922,7 +1031,7 @@ msgstr ""
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
 msgid "Discard"
-msgstr ""
+msgstr "Buang"
 
 #. module: ai
 #: model:ir.model,name:ai.model_discuss_channel
@@ -953,13 +1062,13 @@ msgstr "Nama Tampilan"
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Edit"
-msgstr ""
+msgstr "Edit"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_prompt.xml:0
 msgid "Edit Field Prompt"
-msgstr ""
+msgstr "Edit Prompt Field"
 
 #. module: ai
 #. odoo-javascript
@@ -975,12 +1084,12 @@ msgstr "Templat Email"
 #. module: ai
 #: model:ir.model,name:ai.model_mail_thread
 msgid "Email Thread"
-msgstr ""
+msgstr "Thread email"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__embedding_model
 msgid "Embedding Model"
-msgstr ""
+msgstr "Embed Model"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__embedding_vector
@@ -991,7 +1100,7 @@ msgstr "Embedding Vector"
 #. odoo-python
 #: code:addons/ai/models/ai_agent_source.py:0
 msgid "Embedding generation failed using the current LLM model selected."
-msgstr ""
+msgstr "Pembuatan embedding gagal menggunakan mode LLM terpilih saat ini."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_res_config_settings__google_key_enabled
@@ -1006,34 +1115,40 @@ msgstr "Aktifkan OpenAI API Key kustom"
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__error_details
 msgid "Error Details"
-msgstr ""
+msgstr "Detail Error"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__failed
 msgid "Failed"
-msgstr ""
+msgstr "Gagal"
+
+#. module: ai
+#. odoo-python
+#: code:addons/ai/models/ai_agent_source.py:0
+msgid "Failed to fetch the content of the source."
+msgstr "Gagal untuk mengambil konten sumber."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
 msgid "Failed to get embeddings for the prompt."
-msgstr ""
+msgstr "Gagal untuk mendapatkan embedding untuk prompt."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "Field Selector"
-msgstr ""
+msgstr "Field Pemilih"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__type__binary
 msgid "File"
-msgstr ""
+msgstr "File"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__file_size
 msgid "File Size"
-msgstr ""
+msgstr "Ukuran File"
 
 #. module: ai
 #. odoo-javascript
@@ -1059,12 +1174,12 @@ msgstr "Google AI API key"
 #. module: ai
 #: model:ir.model,name:ai.model_ir_http
 msgid "HTTP Routing"
-msgstr ""
+msgstr "HTTP routing"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__has_embedding_generation_failed
 msgid "Has Embedding Generation Failed"
-msgstr ""
+msgstr "Apakah Pembuatan Embed Gagal"
 
 #. module: ai
 #. odoo-javascript
@@ -1112,20 +1227,20 @@ msgstr "Gambar"
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__indexed
 msgid "Indexed"
-msgstr ""
+msgstr "Diindeks"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_model_field_selector/ai_model_field_selector_popover.xml:0
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
 msgid "Insert"
-msgstr ""
+msgstr "Masukkan"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "Insert a field"
-msgstr ""
+msgstr "Masukkan field"
 
 #. module: ai
 #. odoo-javascript
@@ -1137,13 +1252,13 @@ msgstr "Masukkan prompt AI"
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_records_selector_plugin.js:0
 msgid "Insert records"
-msgstr ""
+msgstr "Masukkan rekaman"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_prompt_field.js:0
 msgid "Insert records the AI can use with the '/record' command"
-msgstr ""
+msgstr "Masukkan rekaman yang AI dapat buat dengan command '/record'"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__default_prompt
@@ -1155,13 +1270,13 @@ msgstr "Instruksi"
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
 msgid "Invalid JSON schema (malformed JSON)."
-msgstr ""
+msgstr "Schema JSON tidak vlaid (malformed JSON)."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_records_selector_plugin.js:0
 msgid "Invalid Record"
-msgstr ""
+msgstr "Rekaman Tidak Valid"
 
 #. module: ai
 #. odoo-python
@@ -1173,7 +1288,7 @@ msgstr "Lampiran tidak valid. Gagal untuk mengekstrak konten."
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
 msgid "Invalid search operator."
-msgstr ""
+msgstr "Operator pencarian tidak valid."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__is_ask_ai_agent
@@ -1183,7 +1298,7 @@ msgstr "Apakah Natural Language Query Agent"
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__is_system_default
 msgid "Is the rule a system default or user created"
-msgstr ""
+msgstr "Apakah peraturan merupakan peraturan default sistem atau dibuat user"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ir_actions_server__ai_tool_schema
@@ -1203,7 +1318,7 @@ msgstr ""
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.res_config_settings_view_form
 msgid "Key"
-msgstr ""
+msgstr "Kunci"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__llm_model
@@ -1232,7 +1347,7 @@ msgstr "Terakhir Diperbarui pada"
 
 #. module: ai
 #. odoo-javascript
-#: code:addons/ai/static/src/web/systray_action.js:0
+#: code:addons/ai/static/src/ai_chat_launcher_service.js:0
 msgid "Log Note"
 msgstr "Catatan Log"
 
@@ -1256,23 +1371,23 @@ msgstr "Mail Render Mixin"
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Max Length"
-msgstr ""
+msgstr "Panjang Maksimal"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__mimetype
 msgid "Mime Type"
-msgstr ""
+msgstr "Jenis MIME"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/tools_schema/validators.py:0
 msgid "Missing definition for %(name)s"
-msgstr ""
+msgstr "Definisi kurang untuk %(name)s"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__focused_models
 msgid "Models"
-msgstr ""
+msgstr "Model"
 
 #. module: ai
 #. odoo-javascript
@@ -1297,15 +1412,21 @@ msgstr ""
 
 #. module: ai
 #. odoo-python
+#: code:addons/ai/utils/llm_providers.py:0
+msgid "No embedding configuration found for the provider"
+msgstr "Tidak ada konfigurasi embdedding yang ditemukan untuk provier"
+
+#. module: ai
+#. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
 msgid "No embedding model found for the selected provider"
-msgstr ""
+msgstr "Tidak ada model embedding yang ditemukan untuk provider terpilih"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/llm_providers.py:0
 msgid "No provider found for the embedding model"
-msgstr ""
+msgstr "Tidak ada provider yang ditemukan untuk embedding model"
 
 #. module: ai
 #. odoo-python
@@ -1322,22 +1443,24 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid "No valid URLs found to process."
-msgstr ""
+msgstr "Tidak ada URL valid yang ditemukan untuk diproses."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid ""
-"No valid files to upload. Only PDF, Word, PowerPoint, Excel, Text, and "
+"No valid files to upload. Only PDF, Word, PowerPoint, Excel, Text, CSV, and "
 "OpenDocument files are allowed."
 msgstr ""
+"Tidak ada file valid untuk diunggah. Hanya file PDF, Word, PowerPoint, "
+"Excel, Text, CSV, dan OpenDocument yang diizinkan."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Notes"
-msgstr ""
+msgstr "Catatan-Catatan"
 
 #. module: ai
 #. odoo-javascript
@@ -1349,6 +1472,12 @@ msgstr "Daring"
 #. odoo-python
 #: code:addons/ai/models/ai_agent_source.py:0
 msgid "Only administrators can create sources from URLs."
+msgstr "Hanya administrator dapat membuat sumber-sumber dari URL."
+
+#. module: ai
+#. odoo-python
+#: code:addons/ai/models/ai_agent.py:0
+msgid "Oops, it looks like our AI is unreachable"
 msgstr ""
 
 #. module: ai
@@ -1370,24 +1499,24 @@ msgstr "Rekanan"
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Paste your links, one per line"
-msgstr ""
+msgstr "Tempel link Anda, satu per baris"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Pretty Edit"
-msgstr ""
+msgstr "Pretty Edit"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__processing
 msgid "Processing"
-msgstr ""
+msgstr "Memproses"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Processing..."
-msgstr ""
+msgstr "Memproses..."
 
 #. module: ai
 #. odoo-javascript
@@ -1402,6 +1531,7 @@ msgstr "Prompt"
 msgid ""
 "Prompt that can be attached to AI UI rules for quick access by the user."
 msgstr ""
+"Prompt dapat dilampirkan ke peraturan UI AI untuk akses cepat oleh user."
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ir_actions_server__ai_action_prompt
@@ -1418,19 +1548,19 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
 msgid "Record"
-msgstr ""
+msgstr "Rekam"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_records_selector_plugin.js:0
 msgid "Records Selector"
-msgstr ""
+msgstr "Pemilih Rekaman"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Required"
-msgstr ""
+msgstr "Diperlukan"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__response_style
@@ -1450,29 +1580,29 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__name
 msgid "Rule Name"
-msgstr ""
+msgstr "Aturan nama"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Save"
-msgstr ""
+msgstr "Simpan"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_prompt.xml:0
 msgid "Save & Generate"
-msgstr ""
+msgstr "Simpan & Buat"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
 msgid "Select a records"
-msgstr ""
+msgstr "Pilih rekaman"
 
 #. module: ai
 #. odoo-javascript
-#: code:addons/ai/static/src/web/systray_action.js:0
+#: code:addons/ai/static/src/ai_chat_launcher_service.js:0
 msgid "Send Message"
 msgstr "Kirim Pesan"
 
@@ -1497,13 +1627,13 @@ msgstr "Action Server"
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Share by email"
-msgstr ""
+msgstr "Bagikan melalui email"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 msgid "Share transcript summary"
-msgstr ""
+msgstr "Bagikan ringkasan transkrip"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
@@ -1517,20 +1647,24 @@ msgid ""
 "Some URLs are invalid and were skipped. URLs must start with http://, "
 "https://, or ftp://"
 msgstr ""
+"Beberapa URL tidak valid dan dilewati. URL harus dimulai dengan http://, "
+"https://, atau ftp://"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid ""
 "Some files have invalid formats and were skipped: %s. Only PDF, Word, "
-"PowerPoint, Excel, Text, and OpenDocument files are allowed."
+"PowerPoint, Excel, Text, CSV, and OpenDocument files are allowed."
 msgstr ""
+"Beberapa file memiliki format tidak valid dan dilewati: %s. Hanya file PDF, "
+"Word, PowerPoint, Excel, Text, CSV, dan OpenDocument yang diizinkan."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/views/fields/source_size_field.js:0
 msgid "SourceSizeIntegerField"
-msgstr ""
+msgstr "SourceSizeIntegerField"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__sources_ids
@@ -1540,37 +1674,37 @@ msgstr "Sumber-Sumber"
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__sources_fully_processed
 msgid "Sources Fully Processed"
-msgstr ""
+msgstr "Sumber-Sumber Sepenuhnya Diproses"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Start Recording"
-msgstr ""
+msgstr "Mulai Merekam"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
 msgid "Start recording to get a real-time transcript of the conversation"
-msgstr ""
+msgstr "Mulai merekam untuk mendapatkan transkrip real-time percakapan"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__status
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Stop Recording"
-msgstr ""
+msgstr "Berhenti Merekam"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Summary"
-msgstr ""
+msgstr "Ringkasan"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__voice_transcription_component
@@ -1597,19 +1731,19 @@ msgstr "Agen-agen sistem tidak dapat dihapus."
 #. odoo-python
 #: code:addons/ai/models/ai_composer.py:0
 msgid "System default prompts cannot be removed."
-msgstr ""
+msgstr "Prompt default sistem tidak dapat dihapus."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/plugins/chatgpt_plugin.js:0
 msgid "Text Selection"
-msgstr ""
+msgstr "Pemilihan Teks"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
 msgid "The action '%s' cannot be used as an AI tool."
-msgstr ""
+msgstr "Action '%s' tidak dapat digunakan sebagai alat AI."
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_composer__name
@@ -1620,7 +1754,7 @@ msgstr "Pengidentifikasi untuk komponen antarmuka untuk peraturan agen"
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.js:0
 msgid "The name should be unique"
-msgstr ""
+msgstr "Nama harus unik"
 
 #. module: ai
 #. odoo-python
@@ -1640,6 +1774,7 @@ msgid ""
 "The type of the parameter '%(name)s' is incorrect. It should be '%"
 "(expected_param_type)s'."
 msgstr ""
+"Tipe parameter '%(name)s' tidak tepat. Harusnya '%(expected_param_type)s'."
 
 #. module: ai
 #. odoo-python
@@ -1648,12 +1783,14 @@ msgid ""
 "The value '%(value)s' of the parameter '%(name)s' doesn't match the expected "
 "pattern '%(expected_pattern)s'."
 msgstr ""
+"Value '%(value)s' dari parameter '%(name)s' tidak cocok dengan pola yang "
+"diharapkan '%(expected_pattern)s'."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
 msgid "This action cannot be executed by an AI."
-msgstr ""
+msgstr "Action ini tidak dapat dijalankan oleh AI."
 
 #. module: ai
 #. odoo-python
@@ -1674,6 +1811,8 @@ msgstr ""
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Those parameters will be passed as global variables of the actions."
 msgstr ""
+"Parameter-parameter tersebut akan diloloskan sebagai variabel global "
+"tindakan."
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.mail_template_view_form
@@ -1691,14 +1830,14 @@ msgstr "Judul"
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
 msgid "To return a result to the AI agent, do <code>ai['result'] = ...</code>"
 msgstr ""
-"Untuk mengembalikkan hasil ke agen AI, lakukan <code>ai['result'] = "
-"...</code>"
+"Untuk mengembalikkan hasil ke agen AI, lakukan <code>ai['result'] = ...</"
+"code>"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_ids
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_ids
 msgid "Tools"
-msgstr ""
+msgstr "Alat"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__topic_ids
@@ -1710,13 +1849,13 @@ msgstr "Topik"
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Transcript"
-msgstr ""
+msgstr "Transkrip"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_natural_language_service.js:0
 msgid "Tried to switch to %s but the app is no longer in an action window."
-msgstr ""
+msgstr "Coba mengganti ke %s tapi aplikasi tidak lagi di jendela action."
 
 #. module: ai
 #. odoo-javascript
@@ -1725,7 +1864,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__state
 #: model:ir.model.fields,field_description:ai.field_ir_cron__state
 msgid "Type"
-msgstr ""
+msgstr "Ketik"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ir_actions_server__state
@@ -1744,48 +1883,54 @@ msgid ""
 "- 'Multi Actions': define an action that triggers several other server "
 "actions\n"
 msgstr ""
+"Tipe server action. Value-value berikut tersedia:\n"
+"- 'Update Record': update value pada record\n"
+"- 'Buat Kegiatan': buat kegiatan (Discuss)\n"
+"- 'Kirim Email': post pesan, catatan atau kirim email (Discuss)\n"
+"- 'Kirim SMS': kirim SMS, catat mereka pada dokumen (SMS)- 'Tambahkan/Hapus "
+"Pengikut': tambahkan atau hapus pengikut ke record (Discuss)\n"
+"- 'Buat Record': buat record baru dengan value-value baru\n"
+"- 'Jalankan Kode': kode Python yang akan dijalankan\n"
+"- 'Kirim Notifikasi Webhook': kirim permintaan POST ke sistem eksternal, "
+"dikenal juga sebagai Webhook\n"
+"- 'Multi Action': definisikan action yang memicu beberapa server action "
+"lainnya\n"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__url
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__type__url
 msgid "URL"
-msgstr ""
-
-#. module: ai
-#. odoo-python
-#: code:addons/ai/models/ai_agent_source.py:0
-msgid "URL content cannot be extracted."
-msgstr ""
+msgstr "URL"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 msgid "Unable to start the recording."
-msgstr ""
+msgstr "Tidak dapat memulai rekaman."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_natural_language_service.js:0
 msgid "Unable to switch view"
-msgstr ""
+msgstr "Tidak dapat mengganti tampilan"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/llm_api_service.py:0
 msgid "Unsupported provider '%s'"
-msgstr ""
+msgstr "Provider tidak didukung '%s'"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid "Upload a File"
-msgstr ""
+msgstr "Unggah File"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__use_in_ai
 #: model:ir.model.fields,field_description:ai.field_ir_cron__use_in_ai
 msgid "Use in AI"
-msgstr ""
+msgstr "Digunakan di AI"
 
 #. module: ai
 #. odoo-javascript
@@ -1806,13 +1951,13 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__user_has_access
 msgid "User Has Access"
-msgstr ""
+msgstr "User Memiliki Akses"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 msgid "User error"
-msgstr ""
+msgstr "Error user"
 
 #. module: ai
 #. odoo-javascript
@@ -1825,13 +1970,13 @@ msgstr "User online"
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Voice Recording"
-msgstr ""
+msgstr "Rekaman Suara"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
 msgid "Voice Transcript"
-msgstr ""
+msgstr "Transkrip Suara"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__mail_composer
@@ -1847,7 +1992,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/ai/utils/tools_schema/validators.py:0
 msgid "Wrong value %(value)s, should be in: %(enum)s"
-msgstr ""
+msgstr "Value salah %(value)s, seharusnya dalam: %(enum)s"
 
 #. module: ai
 #. odoo-javascript
@@ -1856,30 +2001,32 @@ msgid ""
 "You must allow the access to your microphone to start the recording. Try "
 "refreshing the page and start again."
 msgstr ""
+"Anda harus mengizinkan akses ke mikrofon Anda untuk memulai rekaman. Coba "
+"refresh halaman dan mulai lagi."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "eg: New name to write"
-msgstr ""
+msgstr "contoh: Nama baru untuk ditulis"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "eg: ^(\\\\([0-9]{3}\\\\))?[0-9]{3}-[0-9]{4}$"
-msgstr ""
+msgstr "contoh: ^(\\\\([0-9]{3}\\\\))?[0-9]{3}-[0-9]{4}$"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "eg: name"
-msgstr ""
+msgstr "contoh: nama"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "eg: red, blue, green"
-msgstr ""
+msgstr "contoh: merah, biru, hijau"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
@@ -1890,4 +2037,24 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "fa-hashtag"
-msgstr ""
+msgstr "fa-hashtag"
+
+#~ msgid "An error occurred while generating the AI response."
+#~ msgstr "Terjadi error selagi membuat tanggapan AI."
+
+#~ msgid "URL content cannot be extracted."
+#~ msgstr "Konten URL tidak dapat diekstrak."
+
+#~ msgid ""
+#~ "No valid files to upload. Only PDF, Word, PowerPoint, Excel, Text, and "
+#~ "OpenDocument files are allowed."
+#~ msgstr ""
+#~ "Tidak ada file valid untuk diunggah. Hanya file PDF, Word, PowerPoint, "
+#~ "Excel, Text, dan OpenDocument yang diizinkan."
+
+#~ msgid ""
+#~ "Some files have invalid formats and were skipped: %s. Only PDF, Word, "
+#~ "PowerPoint, Excel, Text, and OpenDocument files are allowed."
+#~ msgstr ""
+#~ "Beberapa file memiliki format tidak valid dan dilewati: %s. Hanya file "
+#~ "PDF, Word, PowerPoint, Excel, Text, dan OpenDocument yang diizinkan."

@@ -7,7 +7,9 @@ patch(BankRecKanbanRenderer.prototype, {
         super.setup();
 
         onWillStart(async () => {
-            await this.bankReconciliation.updateAvailableBatchPayments(this.globalState.journalId);
+            await this.bankReconciliation.updateHasAvailableBatchPayments(
+                this.globalState.journalId
+            );
         });
     },
 });

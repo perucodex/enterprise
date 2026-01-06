@@ -22,6 +22,7 @@ patch(accountTaxHelpers, {
             let new_base_line = this.prepare_base_line_for_taxes_computation(base_line, {
                 quantity: 1.0,
                 discount: 0.0,
+                l10n_it_epson_printer: false,
             });
             super.add_tax_details_in_base_line(new_base_line, company, {
                 rounding_method: rounding_method,
@@ -38,19 +39,21 @@ patch(accountTaxHelpers, {
                 rounding_method: rounding_method,
             });
             this.round_base_lines_tax_details([new_base_line], company);
-            new_base_line = this.reduce_base_lines_to_target_amount(
+            const reduced_base_lines = this.reduce_base_lines_to_target_amount(
                 [new_base_line],
                 company,
                 "fixed",
                 target_total_amount_currency
-            )[0];
-            this.fix_base_lines_tax_details_on_manual_tax_amounts([new_base_line], company);
-            for (const key of [
-                "manual_total_excluded_currency",
-                "manual_total_excluded",
-                "manual_tax_amounts",
-            ]) {
-                base_line[key] = new_base_line[key];
+            );
+            if (reduced_base_lines.length) {
+                this.fix_base_lines_tax_details_on_manual_tax_amounts(reduced_base_lines, company);
+                for (const key of [
+                    "manual_total_excluded_currency",
+                    "manual_total_excluded",
+                    "manual_tax_amounts",
+                ]) {
+                    base_line[key] = reduced_base_lines[0][key];
+                }
             }
         }
         super.add_tax_details_in_base_line(base_line, company, {

@@ -7,7 +7,10 @@ import { _t } from "@web/core/l10n/translation";
 
 export class PayslipsInternalLinkComponent extends Component {
     static template = "l10n_be_hr_payroll.PayslipsInternalLinkComponent";
-    static props = { ...standardWidgetProps};
+    static props = { 
+        ...standardWidgetProps,
+        payslipsYear: { type: String, optional: true },
+    };
 
     setup() {
         super.setup();

@@ -19,10 +19,10 @@ class AccountMove(models.Model):
     def _load_pos_data_domain(self, data, config):
         return False
 
-    @api.depends('pos_order_line_ids', 'amount_residual')
+    @api.depends('pos_order_line_ids', 'amount_residual_signed')
     def _compute_pos_amount_unsettled(self):
         for invoice in self:
             total_pos_paid = sum(invoice.pos_order_line_ids.filtered(
                 lambda line: line.order_id.session_id.state != 'closed'
             ).mapped('price_unit'))
-            invoice.pos_amount_unsettled = invoice.amount_residual - total_pos_paid
+            invoice.pos_amount_unsettled = invoice.amount_residual_signed - total_pos_paid

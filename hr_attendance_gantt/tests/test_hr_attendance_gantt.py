@@ -57,6 +57,25 @@ class TestHrAttendanceGantt(TransactionCase):
             'wage': 10,
         })
 
+        contract_emp1 = self.env['hr.employee'].create({
+            'name': "John Contract",
+            'date_version': date(2024, 2, 1),
+            'contract_date_start': date(2024, 1, 1),
+            'wage': 10,
+            'resource_calendar_id': calendar_8.id,
+        })
+
+        contract_emp1.create_version({
+            'date_version': date(2024, 3, 1),
+            'resource_calendar_id': calendar_10.id,
+            'wage': 10,
+        })
+        contract_emp1.create_version({
+            'date_version': date(2024, 4, 1),
+            'resource_calendar_id': calendar_12.id,
+            'wage': 10,
+        })
+
         # First Interval in January
         # should have 8 hours
 
@@ -86,6 +105,46 @@ class TestHrAttendanceGantt(TransactionCase):
                                                                   datetime(2024, 3, 10))
 
         self.assertEqual(interval_2[contract_emp.id]['max_value'], 12)
+
+        # First Interval in January
+        # should have 8 hours
+
+        interval_1 = self.env['hr.attendance']._gantt_progress_bar('employee_id',
+                                                                  [contract_emp1.id],
+                                                                  datetime(2024, 1, 8),
+                                                                  datetime(2024, 1, 14))
+
+        self.assertEqual(interval_1[contract_emp1.id]['max_value'], 8)
+
+        # Second Interval in January ending and February starting
+        # should have 8 hours
+
+        interval_2 = self.env['hr.attendance']._gantt_progress_bar('employee_id',
+                                                                  [contract_emp1.id],
+                                                                  datetime(2024, 1, 29),
+                                                                  datetime(2024, 2, 5))
+
+        self.assertEqual(interval_1[contract_emp1.id]['max_value'], 8)
+
+        # Third Interval in March
+        # should have 10 hours
+
+        interval_3 = self.env['hr.attendance']._gantt_progress_bar('employee_id',
+                                                                   [contract_emp1.id],
+                                                                   datetime(2024, 3, 8),
+                                                                   datetime(2024, 3, 14))
+
+        self.assertEqual(interval_3[contract_emp1.id]['max_value'], 10)
+
+        # Fourth Interval in April
+        # should have 12 hours
+
+        interval_4 = self.env['hr.attendance']._gantt_progress_bar('employee_id',
+                                                                  [contract_emp1.id],
+                                                                  datetime(2024, 4, 4),
+                                                                  datetime(2024, 4, 10))
+
+        self.assertEqual(interval_4[contract_emp1.id]['max_value'], 12)
 
     def test_gantt_progress_with_flexible_employees(self):
         flexible_calendar, calendar = self.env['resource.calendar'].create([

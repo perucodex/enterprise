@@ -2,9 +2,6 @@ from unittest.mock import patch
 
 from odoo import Command, fields
 from odoo.tests.common import tagged
-from odoo.tools import misc
-from lxml import etree
-import datetime
 
 from . import common
 
@@ -496,3 +493,27 @@ class TestManual(common.TestUyEdi):
         invoice.action_post()
         self._send_and_print(invoice)
         self._check_cfe(invoice, "e-FC", "200_e_invoice_with_reduced_vat_tax")
+
+    def test_210_usd_company_uyu(self):
+        """ Test the behavior of invoices in UYU for a company in USD."""
+        self._configure_usd_company_currency()
+        invoice = self._create_move(currency_id=self.env.ref("base.UYU").id)
+        self.assertEqual(invoice.l10n_latam_document_type_id.code, "101", "Not e-ticket")
+        invoice.action_post()
+        self._send_and_print(invoice)
+        self._check_cfe(invoice, "e-TK", "20_e_ticket")
+
+    def test_215_usd_company_usd(self):
+        """Test the behavior of invoices in USD for a company in USD."""
+        self._configure_usd_company_currency()
+        invoice = self._create_move(
+            l10n_latam_document_type_id=self.env.ref("l10n_uy.dc_e_inv_exp").id,
+            partner_id=self.foreign_partner.id,
+            l10n_uy_edi_cfe_sale_mode="1",
+            l10n_uy_edi_cfe_transport_route="1",
+            currency_id=self.env.ref("base.USD").id,
+        )
+        self.assertEqual(invoice.l10n_latam_document_type_id.code, "121", "Not Expo e-invoice")
+        invoice.action_post()
+        self._send_and_print(invoice)
+        self._check_cfe(invoice, "e-FCE", "60_e_invoice_another_currency")

@@ -212,6 +212,10 @@ class StockPicking(models.Model):
 
                 # Add the fulfillment data.
                 fulfillment_data_ = ElementTree.SubElement(order_fulfillment_, 'FulfillmentData')
+                carrier_code_ = picking_.with_context(
+                    amazon_carrier_name_fallback='Other'
+                )._get_formatted_carrier_name()
+                ElementTree.SubElement(fulfillment_data_, 'CarrierCode').text = carrier_code_
                 ElementTree.SubElement(
                     fulfillment_data_, 'CarrierName'
                 ).text = picking_._get_formatted_carrier_name()
@@ -277,7 +281,8 @@ class StockPicking(models.Model):
             if carrier_key in ('fixed', 'base_on_rule'):  # The delivery carrier is a custom one
                 carrier_key = self.carrier_id.name  # Fallback on the carrier name
             carrier_key = ''.join(filter(str.isalnum, carrier_key)).lower()  # Normalize the key
-            shipper_name = const.AMAZON_CARRIER_NAMES_MAPPING.get(carrier_key, self.carrier_id.name)
+            fallback = self.env.context.get('amazon_carrier_name_fallback', self.carrier_id.name)
+            shipper_name = const.AMAZON_CARRIER_NAMES_MAPPING.get(carrier_key, fallback)
         return shipper_name
 
     def _get_confirmed_order_lines(self):

@@ -21,6 +21,7 @@ import { RestoreVersionConfirmationDialog } from "./restore_version_dialog/resto
 import { OdooDataProvider } from "@spreadsheet/data_sources/odoo_data_provider";
 import { SpreadsheetNavbar } from "../components/spreadsheet_navbar/spreadsheet_navbar";
 import { deepCopy } from "@web/core/utils/objects";
+import { createDefaultCurrency } from "@spreadsheet/currency/helpers";
 
 export class VersionHistoryAction extends Component {
     static template = "spreadsheet_edition.VersionHistoryAction";
@@ -195,6 +196,9 @@ export class VersionHistoryAction extends Component {
         this.spreadsheetData = spreadsheetHistoryData.data;
         this.spreadsheetDataLastDate = spreadsheetHistoryData.initial_date;
         this.revisions = spreadsheetHistoryData.revisions;
+        this.defaultCurrency = spreadsheetHistoryData.default_currency
+            ? createDefaultCurrency(spreadsheetHistoryData.default_currency)
+            : undefined;
         this.generateRestorableRevisions();
         this.spreadsheetName = spreadsheetHistoryData.name;
         this.state.currentRevisionId =
@@ -317,6 +321,7 @@ export class VersionHistoryAction extends Component {
                     geoJsonService: this.geoJsonService,
                 },
                 mode: "readonly",
+                defaultCurrency: this.defaultCurrency,
             },
             revisions
         );

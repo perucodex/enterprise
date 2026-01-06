@@ -39,7 +39,7 @@ class L10nBeHrPayrollExportPrisma(models.Model):
         work_entry = we_dotdict.work_entries[0]
         duration = we_dotdict.duration
         return self.company_id.prisma_code + ' ' * 10 + employee.prisma_code.zfill(5) \
-            + work_entry.date_start.strftime('%Y%m%d') + '0' \
+            + work_entry.date.strftime('%Y%m%d') + '0' \
             + work_entry.work_entry_type_id.prisma_code.zfill(4) \
             + '01' * 2 + str(int(duration // 3600)).zfill(4) + ',' \
             + str(int(ceil(duration % 3600 / 3600 * 100))).zfill(2) + '\n'
@@ -75,6 +75,6 @@ class L10nBeHrPayrollExportPrismaEmployee(models.Model):
     def _relations_to_check(self):
         return super()._relations_to_check() + [
             (self.env._('companies'), 'export_id.company_id.prisma_code'),
-            (self.env._('employees'), 'employee_ids.prisma_code'),
+            (self.env._('employees'), 'employee_id.prisma_code'),
             (self.env._('work entry types'), 'work_entry_ids.work_entry_type_id.prisma_code'),
         ]

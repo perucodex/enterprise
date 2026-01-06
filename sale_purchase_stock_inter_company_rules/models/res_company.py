@@ -35,6 +35,7 @@ class ResCompany(models.Model):
                 company.intercompany_warehouse_id = False
                 company.intercompany_receipt_type_id = False
             else:
-                company.intercompany_warehouse_id = stock_warehouse.get(company, [False])[0]
+                if not company.intercompany_warehouse_id:
+                    company.intercompany_warehouse_id = stock_warehouse.get(company, [False])[0]
                 if not company.intercompany_receipt_type_id:
                     company.intercompany_receipt_type_id = stock_picking_type.get(company, [False])[0]

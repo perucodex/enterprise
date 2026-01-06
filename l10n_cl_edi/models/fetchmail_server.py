@@ -259,7 +259,7 @@ class FetchmailServer(models.Model):
             xml_tag_by_type.get(origin_type), namespaces=XML_NAMESPACES)
         if not receiver_rut:
             return None
-        return self.env['res.company'].sudo().search([('vat', '=', receiver_rut[0].text)])
+        return self.env['res.company'].sudo().search([('vat', '=', receiver_rut[0].text)], limit=1)
 
     def _is_dte_enabled_company(self, company):
         return False if not company.l10n_cl_dte_service_provider else True

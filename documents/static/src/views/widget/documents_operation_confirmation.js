@@ -112,7 +112,7 @@ export class DocumentsOperationConfirmation extends Component {
                 message = _t("Document created in %(folder_name)s!", destination);
             }
         }
-        this.notification.add(message, { title: "Done!", type: "success" });
+        this.notification.add(message, { title: _t("Done"), type: "success" });
     }
 
     get isMultiDocuments() {

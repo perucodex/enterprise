@@ -789,3 +789,72 @@ class TestPartnerLedgerReport(TestAccountReportsCommon):
             self.env['account.partner.ledger.report.handler'].action_toggle_no_followup(invoice_1_line_ids[0], line_ids)['updated_line_ids'],
             invoice_1_line_ids,
         )
+
+    def test_reconciled_misc_without_partner_shows_with_partner_filter(self):
+        """A misc move without a partner reconciled with a partner invoice must still appear
+        when filtering the Partner Ledger by that partner."""
+        bernard = self.env['res.partner'].create({'name': 'Bernard Gagnant'})
+        invoice = self.init_invoice('out_invoice', partner=bernard, invoice_date='2019-03-01', amounts=[1000.0], taxes=[], post=True)
+
+        misc_move = self.env['account.move'].create({
+            'date': '2019-03-02',
+            'journal_id': self.company_data['default_journal_misc'].id,
+            'line_ids': [
+                (0, 0, {'debit': 1000.0, 'credit': 0.0, 'account_id': self.company_data['default_account_revenue'].id}),
+                (0, 0, {'debit': 0.0,    'credit': 1000.0, 'account_id': self.company_data['default_account_receivable'].id}),
+            ],
+        })
+        misc_move.action_post()
+
+        invoice_receivable = invoice.line_ids.filtered(lambda l: l.account_id == self.company_data['default_account_receivable'])
+        misc_receivable = misc_move.line_ids.filtered(lambda l: l.account_id == self.company_data['default_account_receivable'] and not l.partner_id)
+        (invoice_receivable + misc_receivable).reconcile()
+
+        # Ensure both the invoice and the misc move appear when the report is fully unfolded.
+        options = self._generate_options(self.report, '2019-03-01', '2019-03-31', default_options={'unfold_all': True})
+        lines = self.report._get_lines(options)
+        self.assertLinesValues(
+            lines,
+            #   Name                                    Debit           Credit          Balance
+            [   0,                                         6,              7,             9],
+            [
+                (bernard.name,                        1000.0,         1000.0,           0.0),
+                (invoice.name,                        1000.0,            0.0,        1000.0),
+                (misc_move.name,                         0.0,         1000.0,           0.0),
+                ('Total ' + bernard.name,             1000.0,         1000.0,           0.0),
+                ('partner_a',                            0.0,            0.0,       20150.0),
+                ('Initial Balance',                       '',             '',       20150.0),
+                ('Total partner_a',                      0.0,            0.0,       20150.0),
+                ('partner_b',                            0.0,            0.0,        1200.0),
+                ('Initial Balance',                       '',             '',        1200.0),
+                ('Total partner_b',                      0.0,            0.0,        1200.0),
+                ('partner_c',                            0.0,            0.0,      -21350.0),
+                ('Initial Balance',                       '',             '',      -21350.0),
+                ('Total partner_c',                      0.0,            0.0,      -21350.0),
+                ('Unknown Partner',                   1000.0,         1000.0,           0.0),
+                ('Initial Balance',                       '',             '',           0.0),
+                ('MISC/2019/03/0001',                    0.0,         1000.0,       -1000.0),
+                ('MISC/2019/03/0001',                 1000.0,            0.0,           0.0),
+                ('Total Unknown Partner',             1000.0,         1000.0,           0.0),
+                ('Total',                             2000.0,         2000.0,           0.0),
+            ],
+            options,
+        )
+
+        # When filtering the report by the partner, the misc move (despite having no partner)
+        # must still appear because it is reconciled with the partner's invoice.
+        options_partner = self._generate_options(self.report, '2019-03-01', '2019-03-31', default_options={'unfold_all': True, 'partner_ids': bernard.ids})
+        lines_filtered = self.report._get_lines(options_partner)
+        self.assertLinesValues(
+            lines_filtered,
+            #   Name                                    Debit           Credit          Balance
+            [   0,                                         6,              7,             9],
+            [
+                (bernard.name,                        1000.0,         1000.0,           0.0),
+                (invoice.name,                        1000.0,            0.0,        1000.0),
+                (misc_move.name,                         0.0,         1000.0,           0.0),
+                ('Total ' + bernard.name,             1000.0,         1000.0,           0.0),
+                ('Total',                             1000.0,         1000.0,           0.0),
+            ],
+            options_partner,
+        )

@@ -903,6 +903,8 @@ class TestFinancialReport(TestAccountReportsCommon):
                 {'name': 'Plus Other Income', 'level': 1},
                 {'name': 'Less Other Expenses', 'level': 1},
                 {'name': 'Net Profit', 'level': 0},
+                {'name': 'Less Allocations and Plus Withdrawals', 'level': 1},
+                {'name': 'Net Profit Left After Allocations and Withdrawals', 'level': 0},
             ]
         )
 
@@ -914,3 +916,99 @@ class TestFinancialReport(TestAccountReportsCommon):
 
         self.assertEqual(line_id_1, [('markup1', 'account.account', 5), ('markup2', 'res.partner', 8), ('markup3', None, None)])
         self.assertEqual(line_id_2, [('', 'account.report', 14), ({"groupby_prefix_group": "~"}, 'account.report', 21)])
+
+    def test_multi_ledger_horizontal_group(self):
+        def _create_journal_group(name, excluded_journal_ids, company):
+            return self.env['account.journal.group'].create({
+                'name': name,
+                'excluded_journal_ids': [Command.set(excluded_journal_ids)],
+                'company_id': company.id if company else False,
+            })
+        c1 = self.company_data['company']
+        c2 = self.company_data_2['company']
+        context = dict(self.env.context, allowed_company_ids=[c1.id, c2.id])
+        self.env = self.env(context=context)
+
+        c1_sale = self.company_data['default_journal_sale']
+        c2_sale = self.company_data_2['default_journal_sale']
+        c1_no_sale_ledger = _create_journal_group('C1, no Sale', c1_sale.ids, c1)
+        c2_no_sale_ledger = _create_journal_group('C2, no Sale', c2_sale.ids, c2)
+        c1_c2_journals_no_sale = self.env['account.journal'].search([
+            ('company_id', 'in', [c1.id, c2.id]),
+            ('id', 'not in', [c1_sale.id, c2_sale.id])
+        ])
+        c1_c2_sale_ledger = _create_journal_group('Sale of C1, C2', c1_c2_journals_no_sale.ids, False)
+        report = self.env.ref('account_reports.profit_and_loss')
+        horizontal_group = self.env['account.report.horizontal.group'].create({
+            'name': 'Multi-Ledger',
+            'report_ids': [Command.set(report.ids)],
+            'rule_ids': [
+                Command.create({
+                    'field_name': 'journal_group_id',
+                    'domain':  str([('id', 'in', (c1_no_sale_ledger + c2_no_sale_ledger + c1_c2_sale_ledger).ids)]),
+                }),
+            ],
+        })
+        report.horizontal_group_ids |= horizontal_group
+
+        c1_move_data = [
+            {
+                'move_type': 'out_invoice',
+                'partner_id': self.partner_a.id,
+                'invoice_date': fields.Date.from_string('2020-01-03'),
+                'journal_id': c1_sale.id,
+                'invoice_line_ids': [Command.create({'price_unit': 100.0, 'account_id': self.company_data['default_account_revenue'].id})],
+            },
+            {
+                'move_type': 'in_invoice',
+                'partner_id': self.partner_a.id,
+                'invoice_date': fields.Date.from_string('2020-01-03'),
+                'journal_id': self.company_data['default_journal_purchase'].id,
+                'invoice_line_ids': [Command.create({'price_unit': 100.0, 'account_id': self.company_data['default_account_expense'].id})],
+            },
+        ]
+
+        c1_moves = self.env['account.move'].with_company(c1).create(c1_move_data)
+        c1_moves.action_post()
+
+        # 1 USD = 2 CAD
+        c2_move_data = [
+            {
+                'move_type': 'out_invoice',
+                'partner_id': self.partner_a.id,
+                'invoice_date': fields.Date.from_string('2020-01-03'),
+                'journal_id': c2_sale.id,
+                'invoice_line_ids': [Command.create({'price_unit': 100.0, 'account_id': self.company_data_2['default_account_revenue'].id})],
+            },
+            {
+                'move_type': 'in_invoice',
+                'partner_id': self.partner_a.id,
+                'invoice_date': fields.Date.from_string('2020-01-03'),
+                'journal_id': self.company_data_2['default_journal_purchase'].id,
+                'invoice_line_ids': [Command.create({'price_unit': 100.0, 'account_id': self.company_data_2['default_account_expense'].id})],
+            },
+        ]
+        c2_moves = self.env['account.move'].with_company(c2).create(c2_move_data)
+        c2_moves.action_post()
+
+        options = self._generate_options(report, '2020-01-01', '2020-12-31', default_options={'selected_horizontal_group_id': horizontal_group.id})
+        lines = report._get_lines(options)
+        # When company specified on ledger, journals for other companies are excluded
+        self.assertLinesValues(
+            lines,
+            #   Name                                                     C1, no sales         C2, no sales       Sale of C1, C2
+            [   0,                                                           1,                   2,                   3],
+            [
+                ('Revenue',                                                0.0,                 0.0,                150.0),
+                ('Less Costs of Revenue',                                  0.0,                 0.0,                  0.0),
+                ('Gross Profit',                                           0.0,                 0.0,                150.0),
+                ('Less Operating Expenses',                              100.0,                50.0,                  0.0),
+                ('Operating Income (or Loss)',                          -100.0,               -50.0,                150.0),
+                ('Plus Other Income',                                      0.0,                 0.0,                  0.0),
+                ('Less Other Expenses',                                    0.0,                 0.0,                  0.0),
+                ('Net Profit',                                          -100.0,               -50.0,                150.0),
+                ('Less Allocations and Plus Withdrawals',                  0.0,                 0.0,                  0.0),
+                ('Net Profit Left After Allocations and Withdrawals',   -100.0,               -50.0,                150.0),
+            ],
+            options,
+        )

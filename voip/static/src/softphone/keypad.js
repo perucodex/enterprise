@@ -4,7 +4,7 @@ import { Component, markup, useEffect, useRef } from "@odoo/owl";
 
 import { KeypadModel } from "@voip/softphone/softphone_model";
 import { tabComponents } from "@voip/softphone/tab";
-import { isCurrentFocusEditable } from "@voip/utils/utils";
+import { isCurrentFocusEditable, matchPhoneNumber } from "@voip/utils/utils";
 
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { _t } from "@web/core/l10n/translation";
@@ -12,9 +12,7 @@ import { normalize, normalizedMatch } from "@web/core/l10n/utils";
 import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
 import { htmlJoin } from "@web/core/utils/html";
-import { escapeRegExp } from "@web/core/utils/strings";
 import { useDebounced } from "@web/core/utils/timing";
-import { user } from "@web/core/user";
 
 const T9_MAPPING = Object.freeze({
     2: "ABC",
@@ -51,19 +49,30 @@ export class Keypad extends Component {
         this.selection = useSelection({
             refName: "input-ref",
             model: this.props.state.input.selection,
+            preserveOnClickAwayPredicate: (ev) =>
+                Boolean(ev.target.closest(".o-voip-Keypad-backspace, .o-voip-Keypad-digitBtn")),
         });
         this.ui = useService("ui");
-        this.regionNames = new Intl.DisplayNames(user.lang, { type: "region" });
         this.softphone = useService("voip").softphone;
-        this.isMobile = isMobileOS();
+        this.isMobile = isMobileOS(); // TODO unused, remove in master
         useEffect(
             (shouldFocusInput) => {
                 if (
                     shouldFocusInput &&
                     this.inputRef.el &&
                     !this.voip.error &&
-                    !isCurrentFocusEditable()
+                    (document.activeElement === this.inputRef.el || !isCurrentFocusEditable())
                 ) {
+                    // By default, the <input> is rendered with "none" as
+                    // inputMode, which should ensure that no update from OWL
+                    // would open the keyboard. We also re-force "none" here, in
+                    // the function that controls the focus. We only set to
+                    // "text" when the user actually engages with the input
+                    // using his finger. As soon as the input will change in any
+                    // other way than using the mobile keyboard, this will be
+                    // switched back to "none".
+                    this.inputRef.el.inputMode = "none";
+
                     this.inputRef.el.focus();
                     this.selection.restore();
                     this.props.state.input.focus = false;
@@ -146,12 +155,11 @@ export class Keypad extends Component {
                     break;
                 }
             }
-            // TODO: refine phone number match
-            const regex = new RegExp(`(^.*?)(${escapeRegExp(searchTerms)})(.*?$)`, "i");
-            const [, before, match, after] = contact.phone.match(regex) ?? [];
-            if (!match) {
+            const phoneMatch = matchPhoneNumber(contact.phone, searchTerms);
+            if (!phoneMatch) {
                 continue;
             }
+            const { before, match, after } = phoneMatch;
             uniqueMatches.add(contact.id);
             phoneNumberMatched.push({
                 contact,
@@ -185,11 +193,10 @@ export class Keypad extends Component {
     }
 
     get flagAltLabel() {
-        if (!this.props.state.input.countryCode.iso) {
+        if (!this.props.state.input.country) {
             return "";
         }
-        const country = this.regionNames.of(this.props.state.input.countryCode.iso.toUpperCase());
-        return _t("%(country)s flag", { country });
+        return _t("%(country)s flag", { country: this.props.state.input.country.name });
     }
 
     /** @returns {string} */
@@ -215,7 +222,7 @@ export class Keypad extends Component {
      * @returns {boolean}
      */
     get phoneNumberStartsWithCountryCode() {
-        if (!this.props.state.input.countryCode.itu) {
+        if (!this.props.state.input.country) {
             return false;
         }
         let phoneNumber = this.props.state.input.value.trim();
@@ -226,7 +233,7 @@ export class Keypad extends Component {
         } else {
             return false;
         }
-        return phoneNumber.startsWith(this.props.state.input.countryCode.itu);
+        return phoneNumber.startsWith(this.props.state.input.country.phone_code);
     }
 
     get showOthersButtonText() {
@@ -284,13 +291,13 @@ export class Keypad extends Component {
             selectionStart === selectionEnd && selectionStart !== 0
                 ? selectionStart - 1
                 : selectionStart;
-        if (selectionStart !== 0) {
+        if (selectionEnd !== 0) {
             this.props.state.input.value =
                 value.slice(0, cursorPosition) + value.slice(selectionEnd);
             this.updateCountryCode();
         }
         this.selection.moveCursor(cursorPosition);
-        this.props.state.input.focus = !this.isMobile;
+        this.props.state.input.focus = true;
         this.onInputSearchBar();
     }
 
@@ -322,10 +329,7 @@ export class Keypad extends Component {
             this.props.state.input.value =
                 value.slice(0, selectionStart) + key + value.slice(selectionEnd);
             this.selection.moveCursor(selectionStart + 1);
-            if (this.isMobile) {
-                this.inputRef.el.blur();
-            }
-            this.props.state.input.focus = !this.isMobile;
+            this.props.state.input.focus = true;
             this.onInputSearchBar();
         }
     }
@@ -369,9 +373,11 @@ export class Keypad extends Component {
         if (!phoneNumber.startsWith("00") && !phoneNumber.startsWith("+")) {
             return;
         }
-        this.props.state.input.countryCode = await rpc("/voip/get_country_code", {
+        const { countryId, storeData } = await rpc("/voip/get_country_store", {
             phone_number: phoneNumber,
         });
+        this.voip.store.insert(storeData);
+        this.props.state.input.country = this.voip.store["res.country"].get(countryId) || null;
     }
 }
 

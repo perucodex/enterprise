@@ -10,13 +10,14 @@
 # Martin Trigaux, 2022
 # Wichanon Jamwutthipreecha, 2022
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2025-09-16 22:56+0000\n"
-"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-11-16 18:00+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Thai <https://translate.odoo.com/projects/odoo-19/"
 "sale_subscription/th/>\n"
 "Language: th\n"
@@ -35,6 +36,10 @@ msgid ""
 "quantity of product based on invoicing policy, next invoice date and end "
 "date of the contract."
 msgstr ""
+"\n"
+"- คุณกำลังพยายามออกใบแจ้งหนี้สำหรับคำสั่งซื้อที่เกิดขึ้นซ้ำ "
+"โปรดตรวจสอบปริมาณผลิตภัณฑ์ที่จัดส่งตามนโยบายการออกใบแจ้งหนี้ วันออกใบแจ้งหนี้ครั้งต่อไป "
+"และวันสิ้นสุดสัญญา"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__nbr
@@ -57,13 +62,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/sale_subscription/models/product_pricelist_item.py:0
 msgid "%(price_details)s %(recurrence)s"
-msgstr ""
+msgstr "%(price_details)s %(recurrence)s"
 
 #. module: sale_subscription
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_order_line.py:0
 msgid "%(start)s to %(next)s"
-msgstr ""
+msgstr "%(start)s ถึง %(next)s"
 
 #. module: sale_subscription
 #. odoo-python
@@ -88,7 +93,7 @@ msgstr ""
 #: code:addons/sale_subscription/models/sale_order_line.py:0
 #: code:addons/sale_subscription/models/sale_subscription_plan.py:0
 msgid "%s days"
-msgstr ""
+msgstr "%s วัน"
 
 #. module: sale_subscription
 #. odoo-python
@@ -97,6 +102,8 @@ msgid ""
 "(*) These recurring products are discounted according to the prorated period "
 "from %(start)s to %(end)s"
 msgstr ""
+"(*) ผลิตภัณฑ์ที่เกิดขึ้นซ้ำเหล่านี้จะได้รับส่วนลดตามระยะเวลาที่จัดสรรตามสัดส่วนจาก %(start)s ถึง %"
+"(end)s"
 
 #. module: sale_subscription
 #. odoo-python
@@ -105,6 +112,7 @@ msgid ""
 "(*) These recurring products are entirely discounted as the next period has "
 "not been invoiced yet."
 msgstr ""
+"(*) สินค้าที่ซื้อซ้ำเหล่านี้จะได้รับส่วนลดเต็มจำนวน เนื่องจากยังไม่มีการเรียกเก็บเงินสำหรับงวดถัดไป"
 
 #. module: sale_subscription
 #. odoo-python
@@ -117,7 +125,7 @@ msgstr ""
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
 msgid "(Change Plan)"
-msgstr ""
+msgstr "(เปลี่ยนแผน)"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
@@ -135,7 +143,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_order.py:0
 msgid "- You delivered %(delivered)s %(name)s and invoiced %(invoiced)s"
-msgstr ""
+msgstr "- คุณส่งสินค้า %(delivered)s%(name)s แล้ว และออกใบแจ้งหนี้ %(invoiced)s แล้ว"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.invoice_warning_message
@@ -155,7 +163,7 @@ msgstr "1 เดือน"
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_subscription_plan.py:0
 msgid "1 Week"
-msgstr ""
+msgstr "1 สัปดาห์"
 
 #. module: sale_subscription
 #. odoo-python
@@ -166,12 +174,12 @@ msgstr ""
 #. module: sale_subscription
 #: model:sale.subscription.plan,name:sale_subscription.subscription_plan_6_month
 msgid "6 Months"
-msgstr ""
+msgstr "6 เดือน"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_sidebar
 msgid "<b>Payment Method</b>"
-msgstr ""
+msgstr "<b>วิธีการชำระเงิน</b>"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.view_sale_advance_payment_inv_sale_subscription
@@ -217,6 +225,40 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-"
+"family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
+"                <table style=\"width:600px;margin:5px auto;\">\n"
+"                    <tbody>\n"
+"                        <tr><td t-if=\"not "
+"object.company_id.uses_default_logo\">\n"
+"                            <a href=\"/\"><img t-attf-src=\"/logo.png?"
+"company={{ object.company_id.id }}\" style=\"vertical-align:baseline;max-"
+"width:100px;\"/></a>\n"
+"                        </td><td style=\"text-align:right;vertical-"
+"align:middle;\">\n"
+"                                การต่ออายุการสมัครสมาชิก\n"
+"                        </td></tr>\n"
+"                    </tbody>\n"
+"                </table>\n"
+"                <table style=\"width:600px;margin:0px "
+"auto;background:white;border:1px solid #e1e1e1;\">\n"
+"                    <tbody>\n"
+"                        <tr><td style=\"padding:15px 20px 10px 20px;\">\n"
+"                            <p>เรียน <t t-out=\"object.partner_id.name or "
+"''\">Brandon Freeman</t>,</p>\n"
+"                            <p>คุณต้องจัดการการสมัคร <strong t-out=\"object.name "
+"or ''\">\"บริการทำความสะอาดสำนักงาน\"</strong>ของคุณ</p>\n"
+"                            <p>เราขอเชิญคุณต่ออายุโดยคลิกที่ลิงค์ต่อไปนี้</p>\n"
+"                            <p>ขอแสดงความนับถือ</p>\n"
+"                        </td></tr>\n"
+"                        <tr data-o-mail-quote-container=\"1\"><td "
+"style=\"padding:15px 20px 10px 20px;\" t-out=\"object.user_id.signature or "
+"''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</"
+"td></tr>\n"
+"                    </tbody>\n"
+"                </table>\n"
+"            </div>\n"
+"        "
 
 #. module: sale_subscription
 #: model:mail.template,body_html:sale_subscription.mail_template_subscription_rating
@@ -322,11 +364,110 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"background:#F0F0F0;color:#515166;padding:10px 0px;font-"
+"family:Arial,Helvetica,sans-serif;font-size:14px;\">\n"
+"            <t t-set=\"access_token\" t-"
+"value=\"object._rating_get_access_token()\"/>\n"
+"                <table style=\"width:600px;margin:5px auto;\">\n"
+"                    <tbody>\n"
+"                        <tr><td t-if=\"not "
+"object.company_id.uses_default_logo\">\n"
+"                            <a href=\"/\"><img t-attf-src=\"/logo.png?"
+"company={{ object.company_id.id }}\" style=\"vertical-align:baseline;max-"
+"width:100px;\"/></a>\n"
+"                        </td><td style=\"text-align:right;vertical-"
+"align:middle;\">\n"
+"                                แบบสำรวจความพึงพอใจ\n"
+"                        </td></tr>\n"
+"                    </tbody>\n"
+"                </table>\n"
+"                <table style=\"width:600px;margin:0px "
+"auto;background:white;border:1px solid #e1e1e1;\">\n"
+"                    <tbody>\n"
+"                        <tr><td style=\"padding:15px 20px 10px 20px;\">\n"
+"                            <p>สวัสดีค่ะ</p>\n"
+"                            <p>โปรดใช้เวลาสักครู่เพื่อให้คะแนนบริการของเราที่เกี่ยวข้องกับการสมัคร "
+"\"<strong t-out=\"object.name or ''\">บริการทำความสะอาดสำนักงาน\"</strong> "
+"ของคุณ\n"
+"                               ถูกมอบหมายให้กับ <strong t-"
+"out=\"object._rating_get_operator().name or ''\">Mitchell Admin</strong></"
+"p>\n"
+"                            <p>เราขอขอบคุณสำหรับคำติชมของคุณ "
+"ช่วยให้เราปรับปรุงอย่างต่อเนื่อง</p>\n"
+"                        </td></tr>\n"
+"                        <tr><td style=\"padding:10px 20px\">\n"
+"                            <table summary=\"o_mail_notification\" "
+"style=\"width:100%;border-top:1px solid #e1e1e1;\">\n"
+"                                <tr>\n"
+"                                    <td style=\"text-align:center;\">\n"
+"                                        <h2 style=\"font-weight:300;font-"
+"size:18px;\">\n"
+"                                            บอกให้เรารู้ว่าคุณรู้สึกอย่างไรเกี่ยวกับบริการของเรา:\n"
+"                                        </h2>\n"
+"                                        <div style=\"text-color: "
+"#888888\">(คลิกที่อีโมติคอนเหล่านี้)</div>\n"
+"                                    </td>\n"
+"                                </tr>\n"
+"                                <tr>\n"
+"                                    <td style=\"padding:10px 10px;\">\n"
+"                                        <table style=\"width:100%;text-"
+"align:center;\">\n"
+"                                            <tr>\n"
+"                                                <td>\n"
+"                                                    <a t-attf-href=\"/rate/"
+"{{ access_token }}/5\">\n"
+"                                                        <img alt=\"Happy\" "
+"src=\"/rating/static/src/img/rating_5.png\" title=\"Happy\"/>\n"
+"                                                    </a>\n"
+"                                                </td>\n"
+"                                                <td>\n"
+"                                                    <a t-attf-href=\"/rate/"
+"{{ access_token }}/3\">\n"
+"                                                        <img alt=\"Neutral\" "
+"src=\"/rating/static/src/img/rating_3.png\" title=\"Neutral\"/>\n"
+"                                                    </a>\n"
+"                                                </td>\n"
+"                                                <td>\n"
+"                                                    <a t-attf-href=\"/rate/"
+"{{ access_token }}/1\">\n"
+"                                                        <img alt=\"Unhappy\" "
+"src=\"/rating/static/src/img/rating_1.png\" title=\"Unhappy\"/>\n"
+"                                                    </a>\n"
+"                                                </td>\n"
+"                                            </tr>\n"
+"                                        </table>\n"
+"                                    </td>\n"
+"                                </tr>\n"
+"                            </table>\n"
+"                        </td></tr>\n"
+"                        <tr data-o-mail-quote-container=\"1\"><td "
+"style=\"padding:15px 20px 10px 20px;\" t-out=\"object.user_id.signature or "
+"''\" data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</"
+"td></tr>\n"
+"                    </tbody>\n"
+"                </table>\n"
+"                <table style=\"width:600px;margin:auto;text-"
+"align:center;font-size:12px;\">\n"
+"                    <tbody>\n"
+"                        <tr><td style=\"padding-top:10px;color:#afafaf;\">\n"
+"                            <p>อีเมลจะถูกส่งโดยอัตโนมัติโดย <a target=\"_blank\" "
+"href=\"https://www.odoo.com/app/subscriptions\" t-attf-style=\"color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}}; text-"
+"decoration:none;\">Odoo Subscription</a> สำหรับ <a t-att-"
+"href=\"object.company_id.website\" t-attf-style=\"color: "
+"{{object.company_id.email_secondary_color or '#875A7B'}}; text-"
+"decoration:none;\" t-out=\"object.company_id.name or ''\">YourCompany</a></"
+"p>\n"
+"                        </td></tr>\n"
+"                    </tbody>\n"
+"                </table>\n"
+"            </div>\n"
+"        "
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_sidebar
 msgid "<i class=\"fa fa-download me-1\"/> Download"
-msgstr ""
+msgstr "<i class=\"fa fa-download me-1\"/> ดาวน์โหลด"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
@@ -336,12 +477,12 @@ msgstr "<i class=\"fa fa-fw fa-check\"/> อยู่ระหว่าดำเ
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
 msgid "<i class=\"fa fa-fw fa-check\"/> Paused"
-msgstr ""
+msgstr "<i class=\"fa fa-fw fa-check\"/> หยุดชั่วคราว"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
 msgid "<i class=\"fa fa-fw fa-check\"/> Renewed"
-msgstr ""
+msgstr "<i class=\"fa fa-fw fa-check\"/> ต่ออายุแล้ว"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
@@ -366,7 +507,7 @@ msgstr ""
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_so_portal_template
 msgid "<i class=\"oi oi-arrow-right me-1\"/>Back to your subscription"
-msgstr ""
+msgstr "<i class=\"oi oi-arrow-right me-1\"/>กลับไปที่การสมัครของคุณ"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_template
@@ -404,6 +545,7 @@ msgstr ""
 msgid ""
 "<span class=\"badge rounded-pill text-bg-info\"> Renewal Quotation </span>"
 msgstr ""
+"<span class=\"badge rounded-pill text-bg-info\">ใบเสนอราคาต่ออายุ </span>"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.portal_my_subscriptions
@@ -412,6 +554,8 @@ msgid ""
 "<span class=\"badge rounded-pill text-bg-primary\"><i class=\"fa fa-fw fa-"
 "check\"/> Upsell</span>"
 msgstr ""
+"<span class=\"badge rounded-pill text-bg-primary\"><i class=\"fa fa-fw fa-"
+"check\"/> ขายต่อยอด</span>"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.portal_my_subscriptions
@@ -419,6 +563,8 @@ msgid ""
 "<span class=\"badge rounded-pill text-bg-secondary\"><i class=\"fa fa-fw fa-"
 "check\"/> Renewed</span>"
 msgstr ""
+"<span class=\"badge rounded-pill text-bg-secondary\"><i class=\"fa fa-fw fa-"
+"check\"/> ต่ออายุแล้ว</span>"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.portal_my_subscriptions
@@ -435,6 +581,8 @@ msgid ""
 "<span class=\"badge rounded-pill text-bg-success\"><i class=\"fa fa-fw fa-"
 "check\"/> Paused</span>"
 msgstr ""
+"<span class=\"badge rounded-pill text-bg-success\"><i class=\"fa fa-fw fa-"
+"check\"/> หยุดชั่วคราว</span>"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_order_view_form
@@ -450,7 +598,7 @@ msgstr ""
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_order_view_form
 msgid "<span class=\"o_stat_text\">MRR</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">MRR</span>"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_plan_view_form
@@ -460,12 +608,12 @@ msgstr ""
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_plan_view_form
 msgid "<span class=\"o_stat_text\">Subscriptions</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">การสมัครสมาชิก</span>"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_sidebar
 msgid "<span class=\"text-muted\">Next Billing</span>"
-msgstr ""
+msgstr "<span class=\"text-muted\">การเรียกเก็บเงินครั้งถัดไป</span>"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.recurring_details
@@ -483,6 +631,8 @@ msgid ""
 "<span invisible=\"not plan_id or subscription_state == '7_upsell'\">until</"
 "span>"
 msgstr ""
+"<span invisible=\"not plan_id or subscription_state == '7_upsell'\">จนถึง</"
+"span>"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
@@ -492,6 +642,9 @@ msgid ""
 "subscription.\n"
 "                            </span>"
 msgstr ""
+"<span>\n"
+"                                มีการชำระเงินที่รอดำเนินการสำหรับการสมัครสมาชิกนี้แล้ว\n"
+"                            </span>"
 
 #. module: sale_subscription
 #: model_terms:web_tour.tour,rainbow_man_message:sale_subscription.sale_subscription_tour
@@ -500,6 +653,8 @@ msgid ""
 "be sent!\n"
 "        </span>"
 msgstr ""
+"<span><b>ขอแสดงความยินดี</b> ใบเสนอราคาสมัครสมาชิกฉบับแรกของคุณพร้อมส่งแล้ว!\n"
+"        </span>"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.report_saleorder_document
@@ -651,6 +806,135 @@ msgid ""
 "</table>\n"
 "        "
 msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"padding: 16px; background-color: white; color: #454748; border-"
+"collapse:separate;\">\n"
+"<tbody>\n"
+"    <!-- ส่วนหัว -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\">\n"
+"                    <t t-set=\"company\" t-value=\"object.company_id or "
+"object.user_id.company_id or user.company_id\"/>\n"
+"                    <span style=\"font-size: 10px;\">การสมัครของคุณ</span><br/"
+">\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\" t-"
+"out=\"object.name or ''\">บริการทำความสะอาดสำนักงาน</span>\n"
+"                </td></tr>\n"
+"                <tr><td valign=\"middle\" align=\"right\" t-if=\"not "
+"company.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?company={{ company.id }}\" "
+"style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-"
+"alt=\"company.name\"/>\n"
+"                </td></tr>\n"
+"                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- เนื้อหา -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    สวัสดี <t t-out=\"object.partner_id.name or ''\">Brandon "
+"Freeman</t><br/><br/>\n"
+"                    <t t-if=\"ctx.get('payment_token') and "
+"ctx.get('next_invoice_amount')\">\n"
+"                        ความพยายามครั้งสุดท้ายของเราในการประมวลผลการชำระเงินสำหรับการสมัครสมาชิกของคุณโดยใช้ช่องทางการชำระเงินของคุณ\n"
+"                        <t t-out=\"ctx.get('payment_token') or ''\">โทเค็น</"
+"t>\n"
+"                        สำหรับ <t t-out=\"ctx['next_invoice_amount'] or "
+"''\">100</t> <t t-out=\"ctx.get('currency') or ''\">$</t> นั้นล้มเหลว\n"
+"                        <t t-if=\"ctx.get('error')\">\n"
+"                            ธนาคารหรือสถาบันการเงินของคุณให้รายละเอียดเกี่ยวกับปัญหาดังต่อไปนี้: "
+"<pre t-out=\"ctx['error'] or ''\"/>\n"
+"                        </t>\n"
+"                    </t>\n"
+"                    <t t-else=\"\">\n"
+"                        ความพยายามครั้งสุดท้ายของเราในการประมวลผลการชำระเงินสำหรับการสมัครสมาชิกของคุณล้มเหลว "
+"เนื่องจากเราไม่มีวิธีการชำระเงินที่บันทึกไว้สำหรับคุณ\n"
+"                    </t>\n"
+"                    <br/><br/>\n"
+"                    เนื่องจากคุณควรชำระเงินเมื่อ <strong><t t-"
+"out=\"ctx.get('auto_close_limit') or ''\">5</t> วันที่แล้ว</strong> "
+"การสมัครของคุณจึงถูกยกเลิก\n"
+"                    หากคุณต้องการแก้ไขปัญหานี้ โปรดติดต่อเรา<br/><br/>\n"
+"                    ขอขอบคุณที่เลือกใช้บริการ <t t-out=\"company.name or "
+"''\">YourCompany</t>!\n"
+"                    <div t-if=\"user.signature\" data-o-mail-quote-"
+"container=\"1\">\n"
+"                        <br/><br/>\n"
+"                        <t t-out=\"user.signature or ''\" data-o-mail-"
+"quote=\"1\">--<br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
+"                    </div>\n"
+"                </td></tr>\n"
+"                <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- ส่วนท้าย -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\" align=\"left\">\n"
+"                    <t t-out=\"company.name or ''\">YourCompany</t>\n"
+"                </td></tr>\n"
+"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: "
+"0.7;\">\n"
+"                    <t t-if=\"company.phone\">\n"
+"                        <t t-out=\"company.phone or ''\">+1 650-123-4567</t> "
+"|\n"
+"                    </t>\n"
+"                    <t t-if=\"company.email\">\n"
+"                        <a t-attf-href=\"'mailto:%s' % {{ company.email }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.email or "
+"''\">info@yourcompany.com</a> |\n"
+"                    </t>\n"
+"                    <t t-if=\"company.website\">\n"
+"                        <a t-attf-href=\"'%s' % {{ company.website }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.website or "
+"''\">http://www.example.com</a>\n"
+"                    </t>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"</tbody>\n"
+"</table>\n"
+"</td></tr>\n"
+"<!-- สนับสนุนโดย -->\n"
+"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; "
+"padding: 8px; border-collapse:separate;\">\n"
+"      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"        สนับสนุนโดย <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{company.email_secondary_color or '#875A7B'}};\">Odoo</a>\n"
+"      </td></tr>\n"
+"    </table>\n"
+"</td></tr>\n"
+"</table>\n"
+"        "
 
 #. module: sale_subscription
 #: model:mail.template,body_html:sale_subscription.email_payment_reminder
@@ -802,6 +1086,145 @@ msgid ""
 "</table>\n"
 "        "
 msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"padding: 16px; background-color: white; color: #454748; border-"
+"collapse:separate;\">\n"
+"<tbody>\n"
+"    <!-- ส่วนหัว -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\">\n"
+"                    <t t-set=\"company\" t-value=\"object.company_id or "
+"object.user_id.company_id or user.company_id\"></t>\n"
+"                    <span style=\"font-size: 10px;\">การสมัครสมาชิกของคุณ</"
+"span><br>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\" t-"
+"out=\"object.name or ''\">บริการทำความสะอาดสำนักงาน</span>\n"
+"                </td></tr>\n"
+"                <tr><td valign=\"middle\" align=\"right\" t-if=\"not "
+"company.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?company={{ company.id }}\" "
+"style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-"
+"alt=\"company.name\">\n"
+"                </td></tr>\n"
+"                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\">\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- เนื้อหา -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    สวัสดี <t t-out=\"object.partner_id.name or ''\">Brandon "
+"Freeman</t>,<br><br>\n"
+"                    <t t-if=\"ctx.get('payment_token') and "
+"ctx.get('total_amount')\">\n"
+"                        เราไม่สามารถประมวลผลการชำระเงินสำหรับการสมัครสมาชิกของคุณโดยใช้ช่องทางการชำระเงินของคุณได้\n"
+"                        <t t-out=\"ctx['payment_token'] or ''\">โทเค็น</t>\n"
+"                        จำนวน <t t-out=\"ctx['total_amount'] or ''\">10</t> "
+"<t t-out=\"ctx.get('currency_name') or ''\">$</t>\n"
+"                        <t t-if=\"ctx.get('error')\">\n"
+"                            ธนาคารหรือสถาบันสินเชื่อของคุณให้รายละเอียดเกี่ยวกับปัญหาต่อไปนี้: "
+"<pre t-out=\"ctx['error'] or ''\"></pre>\n"
+"                        </t>\n"
+"                    </t>\n"
+"                    <t t-else=\"\">\n"
+"                        <t t-out=\"ctx.get('code') or ''\">รหัส</t> "
+"สมัครสมาชิกของคุณถึงกำหนดต่ออายุแล้ว แต่เรายังไม่ได้รับการชำระเงินจากคุณ "
+"หากต้องการให้การสมัครสมาชิกของคุณยังคงใช้งานได้ โปรดชำระเงินโดยเร็วที่สุด\n"
+"                    </t>\n"
+"                    <br><br>\n"
+"                    <t t-out=\"ctx.get('code') or ''\">รหัส</"
+"t>สมัครสมาชิกของคุณยังใช้ได้แต่จะ<strong>ถูกระงับ</strong>\n"
+"                    เมื่อ <t t-out=\"format_date(ctx.get('date_close')) or "
+"''\">05/05/2021</t><br>\n"
+"                    <div style=\"margin: 16px 0px; text-align: center;\">\n"
+"                        <a t-attf-href=\"{{ ctx.get('payment_link', "
+"object.get_portal_url()) }}\" style=\"display: inline-block; padding: 10px "
+"30px; text-decoration: none; background-color: #875A7B; color: #fff; border-"
+"radius: 5px;\">\n"
+"                            ชำระตอนนี้\n"
+"                        </a>\n"
+"                    </div>\n"
+"                    <br>\n"
+"                    โปรดอย่าลังเลที่จะติดต่อเราหากคุณมีคำถาม<br><br>\n"
+"                    ขอขอบคุณที่คุณเลือก<t t-out=\"company.name or "
+"''\">YourCompany</t>!\n"
+"                    <div>\n"
+"                    <t t-if=\"user.signature\">\n"
+"                        <br><br>\n"
+"                        <t t-out=\"user.signature or ''\">--<br>Mitchell "
+"Admin</t>\n"
+"                    </t>\n"
+"                    </div>\n"
+"                </td></tr>\n"
+"                <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\">\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- ส่วนท้าย -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\" align=\"left\">\n"
+"                    <t t-out=\"company.name or ''\">YourCompany</t>\n"
+"                </td></tr>\n"
+"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: "
+"0.7;\">\n"
+"                    <t t-if=\"company.phone\">\n"
+"                        <t t-out=\"company.phone or ''\">+1 650-123-4567</t> "
+"|\n"
+"                    </t>\n"
+"                    <t t-if=\"company.email\">\n"
+"                        <a t-attf-href=\"'mailto:%s' % {{ company.email }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.email or "
+"''\">info@yourcompany.com</a> |\n"
+"                    </t>\n"
+"                    <t t-if=\"company.website\">\n"
+"                        <a t-attf-href=\"'%s' % {{ company.website }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.website or "
+"''\">http://www.example.com</a>\n"
+"                    </t>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"</tbody>\n"
+"</table>\n"
+"</td></tr>\n"
+"<!-- สนับสนุนโดย -->\n"
+"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; "
+"padding: 8px; border-collapse:separate;\">\n"
+"      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"        สนับสนุนโดย <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" style=\"color: #875A7B;\">Odoo</a>\n"
+"      </td></tr>\n"
+"    </table>\n"
+"</td></tr>\n"
+"</table>\n"
+"        "
 
 #. module: sale_subscription
 #. odoo-python
@@ -809,7 +1232,7 @@ msgstr ""
 msgid ""
 "A cancelled SO cannot be in progress. You should close %s before cancelling "
 "it."
-msgstr ""
+msgstr "SO ที่ถูกยกเลิกไม่สามารถดำเนินการได้ คุณควรปิด %s ก่อนที่จะยกเลิก"
 
 #. module: sale_subscription
 #. odoo-python
@@ -821,7 +1244,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/sale_subscription/controllers/portal.py:0
 msgid "A renewal has been created by the client."
-msgstr ""
+msgstr "การต่ออายุถูกสร้างขึ้นโดยลูกค้า"
 
 #. module: sale_subscription
 #. odoo-python
@@ -833,19 +1256,19 @@ msgstr "สร้างใบเสนอราคาการต่ออาย
 #. odoo-python
 #: code:addons/sale_subscription/models/product_template.py:0
 msgid "A subscription combo product can only contain subscription products."
-msgstr ""
+msgstr "ผลิตภัณฑ์แบบสมัครสมาชิกรวมได้เฉพาะผลิตภัณฑ์แบบสมัครสมาชิกเท่านั้น"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.view_sale_order_log_analysis_graph
 #: model_terms:ir.ui.view,arch_db:sale_subscription.view_sale_order_log_growth_graph
 #: model_terms:ir.ui.view,arch_db:sale_subscription.view_sale_order_log_growth_pivot
 msgid "ARR Change"
-msgstr ""
+msgstr "การเปลี่ยนแปลง ARR"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_log_report__arr_change_normalized
 msgid "ARR Change (normalized)"
-msgstr ""
+msgstr "การเปลี่ยนแปลง ARR (ทำให้เป็นมาตรฐาน)"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_product_product__allow_one_time_sale
@@ -856,7 +1279,7 @@ msgstr ""
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_account_move_send
 msgid "Account Move Send"
-msgstr ""
+msgstr "ส่งย้ายบัญชี"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__message_needaction
@@ -871,13 +1294,13 @@ msgstr "เปิดใช้งาน"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_log_report__contract_number
 msgid "Active Subscriptions Change"
-msgstr ""
+msgstr "การเปลี่ยนแปลงการสมัครสมาชิกที่ใช้งานอยู่"
 
 #. module: sale_subscription
 #: model:ir.actions.act_window,name:sale_subscription.mail_activity_plan_action_subscription
 #: model:ir.ui.menu,name:sale_subscription.mail_activity_plan_menu_config_subscription
 msgid "Activity Plans"
-msgstr ""
+msgstr "แผนกิจกรรม"
 
 #. module: sale_subscription
 #: model:ir.actions.act_window,name:sale_subscription.mail_activity_type_action_config_subscription
@@ -891,24 +1314,26 @@ msgid ""
 "Activity plans are used to assign a list of activities in just a few clicks\n"
 "                (e.g. \"Renewal Offer\", \"Yearly Satisfaction Review\", ...)"
 msgstr ""
+"แผนกิจกรรมใช้เพื่อกำหนดรายการกิจกรรมด้วยการคลิกเพียงไม่กี่ครั้ง\n"
+"                (เช่น \"ข้อเสนอการต่ออายุ\", \"การตรวจสอบความพึงพอใจรายปี\" ...)"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__user_quantity
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_plan__user_quantity
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_plan_search
 msgid "Add Products"
-msgstr ""
+msgstr "เพิ่มสินค้า"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_sidebar
 msgid "Add Quantity"
-msgstr ""
+msgstr "เพิ่มปริมาณ"
 
 #. module: sale_subscription
 #. odoo-javascript
 #: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
 msgid "Add a new rule"
-msgstr ""
+msgstr "เพิ่มกฎใหม่"
 
 #. module: sale_subscription
 #. odoo-javascript
@@ -917,12 +1342,13 @@ msgid ""
 "Add a recurring plan for this product, or create a new one with the desired "
 "recurrence (e.g., Monthly)"
 msgstr ""
+"เพิ่มแผนการเกิดซ้ำสำหรับผลิตภัณฑ์นี้ หรือสร้างแผนใหม่ด้วยการเกิดซ้ำที่ต้องการ (เช่น รายเดือน)"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_plan__billing_first_day
 msgid ""
 "Align all subscription invoices on the first day of each billing period."
-msgstr ""
+msgstr "จัดเรียงใบแจ้งหนี้การสมัครสมาชิกทั้งหมดให้ตรงกับวันแรกของแต่ละรอบการเรียกเก็บเงิน"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_plan__billing_first_day
@@ -943,6 +1369,8 @@ msgid ""
 "in their subscription.Only products that are listed as \"optional products\" "
 "can be modified."
 msgstr ""
+"อนุญาตให้ลูกค้าสร้างใบเสนอราคาขายต่อยอด เพื่อปรับจำนวนสินค้าในการสมัครสมาชิก "
+"เฉพาะสินค้าที่อยู่ในรายการ \"สินค้าเสริม\" เท่านั้นที่สามารถแก้ไขได้"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_plan__pausable_by_user
@@ -957,19 +1385,20 @@ msgid ""
 "Allow your customers to switch from this plan to another on quotation (new "
 "subscription or renewal)"
 msgstr ""
+"อนุญาตให้ลูกค้าของคุณเปลี่ยนจากแผนนี้ไปเป็นแผนอื่นตามใบเสนอราคา (สมัครสมาชิกใหม่หรือต่ออายุ)"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_close_reason_view_form
 msgid ""
 "Allowing to be selected by customers in the portal when they are closing "
 "their subscriptions."
-msgstr ""
+msgstr "อนุญาตให้ลูกค้าเลือกในพอร์ทัลเมื่อพวกเขากำลังปิดการสมัครสมาชิก"
 
 #. module: sale_subscription
 #. odoo-python
 #: code:addons/sale_subscription/controllers/portal.py:0
 msgid "An upsell has been created by the client."
-msgstr ""
+msgstr "ลูกค้าสร้างการขายต่อยอดแล้ว"
 
 #. module: sale_subscription
 #. odoo-python
@@ -983,11 +1412,6 @@ msgid "Annual Recurring Revenue"
 msgstr "รายได้ที่เกิดขึ้นเป็นประจำทุกปี"
 
 #. module: sale_subscription
-#: model_terms:ir.ui.view,arch_db:sale_subscription.product_template_only_view_form_recurring
-msgid "Applied On"
-msgstr ""
-
-#. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_template_view_search
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_plan_view_form
 msgid "Archived"
@@ -996,12 +1420,12 @@ msgstr "เก็บถาวรแล้ว"
 #. module: sale_subscription
 #: model:ir.model.fields.selection,name:sale_subscription.selection__payment_transaction__subscription_action__assign_token
 msgid "Assign Token"
-msgstr ""
+msgstr "กำหนดโทเค็น"
 
 #. module: sale_subscription
 #: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_plan__user_closable_options__at_date
 msgid "At date"
-msgstr ""
+msgstr "ณ วันที่"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__message_attachment_count
@@ -1011,7 +1435,7 @@ msgstr "จำนวนสิ่งที่แนบมา"
 #. module: sale_subscription
 #: model:ir.model.fields.selection,name:sale_subscription.selection__payment_transaction__renewal_state__authorized
 msgid "Authorized"
-msgstr ""
+msgstr "ได้รับอนุญาต"
 
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_action
@@ -1020,6 +1444,8 @@ msgid ""
 "Automate invoices and payments, simplify upsell quotes, reduce churn and get "
 "insights (MRR, churn, CLTV, ...)"
 msgstr ""
+"สร้างใบแจ้งหนี้และการชำระเงินแบบอัตโนมัติ ลดความซับซ้อนของใบเสนอราคาเพิ่มยอดขาย "
+"ลดอัตราการสูญเสียลูกค้า และรับข้อมูลเชิงลึก (MRR, อัตราการสูญเสียลูกค้า, CLTV, ...)"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_plan__auto_close_limit
@@ -1030,7 +1456,7 @@ msgstr "ปิดอัตโนมัติ"
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_plan__auto_close_limit_display
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_plan_search
 msgid "Automatic Closing After"
-msgstr ""
+msgstr "ปิดอัตโนมัติหลังจาก"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
@@ -1057,6 +1483,8 @@ msgid ""
 "Automatic payment failed. Check the corresponding invoice %s. We can't "
 "automatically process negative payment"
 msgstr ""
+"การชำระเงินอัตโนมัติล้มเหลว ตรวจสอบใบแจ้งหนี้ที่เกี่ยวข้อง %s "
+"เราไม่สามารถประมวลผลการชำระเงินติดลบโดยอัตโนมัติได้"
 
 #. module: sale_subscription
 #. odoo-python
@@ -1125,7 +1553,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_plan__billing_period_display
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_plan_view_form
 msgid "Billing Period"
-msgstr ""
+msgstr "ระยะเวลาการเรียกเก็บเงิน"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_plan__billing_period_value
@@ -1135,7 +1563,7 @@ msgstr ""
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_plan__billing_period_display_sentence
 msgid "Billing Period Display"
-msgstr ""
+msgstr "การแสดงระยะเวลาการเรียกเก็บเงิน"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_close_reason__retention_button_link
@@ -1182,6 +1610,9 @@ msgid ""
 "the invoice been created and possibly even paid, it's a done deal. "
 "Cancelling the subscription would definitely cause some chaos!"
 msgstr ""
+"การยกเลิกสมาชิกภาพที่ได้ออกใบแจ้งหนี้ไปแล้วจะไม่เป็นธรรมกับลูกค้า เมื่อใบแจ้งหนี้ถูกสร้างขึ้น "
+"(และอาจชำระเงินแล้ว) ถือว่ารายการนั้นเสร็จสมบูรณ์ "
+"การยกเลิกสมาชิกภาพในขั้นตอนนี้จะสร้างความสับสนแน่นอน!"
 
 #. module: sale_subscription
 #: model:product.template,name:sale_subscription.product_car_leasing_product_template
@@ -1197,12 +1628,12 @@ msgstr "เงินทอนลูกค้า"
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_sidebar
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_so_portal_template
 msgid "Change Plan"
-msgstr ""
+msgstr "เปลี่ยนแผน"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_so_portal_template
 msgid "Change Plan for"
-msgstr ""
+msgstr "เปลี่ยนแผนสำหรับ"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_portal_content_inherit
@@ -1218,7 +1649,7 @@ msgstr "เปลี่ยนลูกค้า"
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_order.py:0
 msgid "Check reopened subscription"
-msgstr ""
+msgstr "ตรวจสอบการสมัครสมาชิกที่เปิดใหม่"
 
 #. module: sale_subscription
 #. odoo-javascript
@@ -1237,7 +1668,7 @@ msgstr "เลือกชื่อสินค้า<br/><i>(เช่น ก�
 #. odoo-javascript
 #: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
 msgid "Choose the invoice duration for your subscription"
-msgstr ""
+msgstr "เลือกระยะเวลาใบแจ้งหนี้สำหรับการสมัครของคุณ"
 
 #. module: sale_subscription
 #: model:ir.model.fields.selection,name:sale_subscription.selection__sale_order_log__event_type__2_churn
@@ -1260,14 +1691,14 @@ msgstr "การเสียลูกค้า"
 #. odoo-javascript
 #: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
 msgid "Click here to add some products or services"
-msgstr ""
+msgstr "คลิกที่นี่เพื่อเพิ่มผลิตภัณฑ์หรือบริการ"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__user_closable
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_plan__user_closable
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_plan_search
 msgid "Closable"
-msgstr ""
+msgstr "ปิดได้"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_portal_content_inherit
@@ -1318,7 +1749,7 @@ msgstr "ปิดการสมัครสมาชิก"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 msgid "Closing"
-msgstr ""
+msgstr "ปิด"
 
 #. module: sale_subscription
 #. odoo-python
@@ -1343,7 +1774,7 @@ msgstr "บริษัท"
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_res_config_settings
 msgid "Config Settings"
-msgstr ""
+msgstr "ตั้งค่าการกำหนดค่า"
 
 #. module: sale_subscription
 #: model:ir.ui.menu,name:sale_subscription.menu_sale_subscription_config
@@ -1356,12 +1787,12 @@ msgstr "การกำหนดค่า"
 msgid ""
 "Consolidate all of a customer's subscriptions that are due to be billed on "
 "the same day onto a single invoice."
-msgstr ""
+msgstr "รวมการสมัครใช้งานของลูกค้าทั้งหมดที่จะครบกำหนดเรียกเก็บเงินในวันเดียวกันไว้ในใบแจ้งหนี้ใบเดียว"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_res_config_settings__invoice_consolidation
 msgid "Consolidate subscriptions billing"
-msgstr ""
+msgstr "รวมการเรียกเก็บเงินการสมัครสมาชิก"
 
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_res_partner
@@ -1420,17 +1851,17 @@ msgstr "สร้างใบแจ้งหนี้"
 #. module: sale_subscription
 #: model:ir.model,website_form_label:sale_subscription.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "สร้างลูกค้า"
 
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.mail_activity_plan_action_subscription
 msgid "Create a Subscription Activity Plan"
-msgstr ""
+msgstr "สร้างแผนกิจกรรมการสมัครสมาชิก"
 
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_plan_action
 msgid "Create a new plan"
-msgstr ""
+msgstr "สร้างแผนใหม่"
 
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.product_action_subscription
@@ -1458,7 +1889,7 @@ msgstr "สร้างใบเสนอราคาการสมัครส
 msgid ""
 "Create subscriptions to manage recurring invoicing and payments from your "
 "customers."
-msgstr ""
+msgstr "สร้างการสมัครสมาชิกเพื่อจัดการการออกใบแจ้งหนี้และการชำระเงินที่เกิดซ้ำจากลูกค้าของคุณ"
 
 #. module: sale_subscription
 #. odoo-javascript
@@ -1532,24 +1963,24 @@ msgstr "อ้างอิงลูกค้า"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__state_id
 msgid "Customer State"
-msgstr ""
+msgstr "สถานะลูกค้า"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__partner_zip
 msgid "Customer ZIP"
-msgstr ""
+msgstr "รหัสไปรษณีย์ของลูกค้า"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_order__user_closable
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_plan__user_closable
 msgid "Customer can close their subscriptions."
-msgstr ""
+msgstr "ลูกค้าสามารถปิดการสมัครสมาชิกได้"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_order__user_extend
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_plan__user_extend
 msgid "Customer can create a renewal quotation for their subscription."
-msgstr ""
+msgstr "ลูกค้าสามารถสร้างใบเสนอราคาการต่ออายุสำหรับการสมัครสมาชิกของตนเองได้"
 
 #. module: sale_subscription
 #: model:ir.ui.menu,name:sale_subscription.menu_orders_customers
@@ -1564,12 +1995,12 @@ msgstr ""
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
 msgid "Date:"
-msgstr ""
+msgstr "วันที่:"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_plan_view_form
 msgid "Days"
-msgstr ""
+msgstr "วัน"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_product_product__allow_prorated_price
@@ -1588,12 +2019,12 @@ msgstr ""
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_portal_content_inherit
 msgid "Delivery Address"
-msgstr ""
+msgstr "ที่อยู่จัดส่ง"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_plan_view_form
 msgid "Details"
-msgstr ""
+msgstr "รายละเอียด"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_template
@@ -1613,7 +2044,7 @@ msgstr "จำนวนส่วนลด"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__display_late
 msgid "Display Late"
-msgstr ""
+msgstr "แสดงผลล่าช้า"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_account_move__display_name
@@ -1649,12 +2080,12 @@ msgstr "แสดงชื่อ"
 #: model:ir.model.fields,field_description:sale_subscription.field_product_product__display_subscription_pricing
 #: model:ir.model.fields,field_description:sale_subscription.field_product_template__display_subscription_pricing
 msgid "Display Price"
-msgstr ""
+msgstr "แสดงราคา"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_line__display_type
 msgid "Display Type"
-msgstr ""
+msgstr "ประเภทการแสดง"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_so_portal_template
@@ -1671,23 +2102,23 @@ msgstr "ดาวน์โหลด"
 #. module: sale_subscription
 #: model:ir.model.fields.selection,name:sale_subscription.selection__payment_transaction__renewal_state__draft
 msgid "Draft"
-msgstr ""
+msgstr "ร่าง"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_template__duration_unit
 msgid "Duration Unit"
-msgstr ""
+msgstr "หน่วยระยะเวลา"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_portal_content_inherit
 msgid "Edit"
-msgstr ""
+msgstr "แก้ไข"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_log__effective_date
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_log_report__effective_date
 msgid "Effective Date"
-msgstr ""
+msgstr "วันที่มีผล"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_subscription_plan__invoice_mail_template_id
@@ -1695,6 +2126,8 @@ msgid ""
 "Email template used to send invoicing email automatically.\n"
 "Leave it empty if you don't want to send email automatically."
 msgstr ""
+"เทมเพลตอีเมลที่ใช้ในการส่งอีเมลแจ้งหนี้โดยอัตโนมัติ\n"
+"ปล่อยว่างไว้ หากคุณไม่ต้องการส่งอีเมลโดยอัตโนมัติ"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_close_reason__empty_retention_message
@@ -1720,7 +2153,7 @@ msgstr "วันที่สิ้นสุด"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
 msgid "End Date:"
-msgstr ""
+msgstr "วันที่สิ้นสุด:"
 
 #. module: sale_subscription
 #: model:sale.order.close.reason,name:sale_subscription.close_reason_end_of_contract
@@ -1730,7 +2163,7 @@ msgstr "สิ้นสุดสัญญา"
 #. module: sale_subscription
 #: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_plan__user_closable_options__end_of_period
 msgid "End of period"
-msgstr ""
+msgstr "สิ้นสุดระยะเวลา"
 
 #. module: sale_subscription
 #. odoo-python
@@ -1739,6 +2172,7 @@ msgid ""
 "Error during renewal of contract %(order_ids)s %(order_refs)s %"
 "(payment_state)s"
 msgstr ""
+"เกิดข้อผิดพลาดระหว่างการต่ออายุสัญญา %(order_ids)s %(order_refs)s %(pay_state)s"
 
 #. module: sale_subscription
 #. odoo-python
@@ -1768,7 +2202,7 @@ msgstr "การขยาย"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
 msgid "Expiration Date:"
-msgstr ""
+msgstr "วันหมดอายุ:"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
@@ -1823,7 +2257,7 @@ msgstr "ผู้ติดตาม (พาร์ทเนอร์)"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.report_saleorder_document
 msgid "From"
-msgstr ""
+msgstr "จาก"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_kanban
@@ -1838,7 +2272,7 @@ msgstr "กิจกรรมในอนาคต"
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_payment_link_wizard
 msgid "Generate Sales Payment Link"
-msgstr ""
+msgstr "สร้างลิงก์การชำระเงินสำหรับการขาย"
 
 #. module: sale_subscription
 #. odoo-javascript
@@ -1861,7 +2295,7 @@ msgstr "กลับไปที่มุมมองการสมัครส
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_action_pending
 msgid "Great, there are no subscriptions to renew!"
-msgstr ""
+msgstr "เยี่ยม ไม่มีการสมัครสมาชิกที่จะต่ออายุ!"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__weight
@@ -1871,7 +2305,7 @@ msgstr "น้ำหนักรวม"
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_ir_http
 msgid "HTTP Routing"
-msgstr ""
+msgstr "การกำหนด HTTP"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_kanban
@@ -1891,7 +2325,7 @@ msgstr "มีบรรทัดที่เกิดซ้ำ"
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_action_pending
 msgid "Here you will find subscriptions overdue for renewal."
-msgstr ""
+msgstr "ที่นี่คุณจะพบกับการสมัครที่เกินกำหนดสำหรับการต่ออายุ"
 
 #. module: sale_subscription
 #. odoo-python
@@ -1977,7 +2411,7 @@ msgstr "หากตั้งค่าไว้ การยืนยันค�
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_order_line__pricelist_id
 msgid "If you change the pricelist, only newly added lines will be affected."
-msgstr ""
+msgstr "หากคุณเปลี่ยนรายการราคา เฉพาะบรรทัดที่เพิ่มใหม่เท่านั้นที่จะได้รับผลกระทบ"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
@@ -2011,17 +2445,17 @@ msgstr "อุตสาหกรรม"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__internal_note
 msgid "Internal Note"
-msgstr ""
+msgstr "บันทึกย่อภายใน"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__internal_note_display
 msgid "Internal Note Display"
-msgstr ""
+msgstr "จอแสดงผลบันทึกภายใน"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_order_view_form
 msgid "Internal notes"
-msgstr ""
+msgstr "โน้ตภายใน"
 
 #. module: sale_subscription
 #. odoo-python
@@ -2048,12 +2482,12 @@ msgstr ""
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_log_report_search
 msgid "Invoiced"
-msgstr ""
+msgstr "ออกใบแจ้งหนี้แล้ว"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_portal_content_inherit
 msgid "Invoicing Address"
-msgstr ""
+msgstr "ที่อยู่แจ้งหนี้"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__is_batch
@@ -2097,6 +2531,8 @@ msgid ""
 "It could be due to the fail of the automatic payment\n"
 "            or because the new invoice has not yet been issued."
 msgstr ""
+"อาจเป็นเพราะการชำระเงินอัตโนมัติล้มเหลว\n"
+"            หรือเนื่องจากยังไม่ได้ออกใบแจ้งหนี้ใหม่"
 
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_account_move
@@ -2131,7 +2567,7 @@ msgstr "KPI 3 เดือน MRR เดลต้า"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_template__is_unlimited
 msgid "Last Forever"
-msgstr ""
+msgstr "ตลอดไป"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_line__last_invoiced_date
@@ -2169,7 +2605,7 @@ msgstr "วันที่ออกใบแจ้งหนี้ครั้ง
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_order__last_reminder_date
 msgid "Last time when we sent a payment reminder"
-msgstr ""
+msgstr "ครั้งสุดท้ายที่เราส่งคำเตือนการชำระเงิน"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
@@ -2201,13 +2637,13 @@ msgstr "มาเพิ่มการกำหนดราคาด้วยก
 #. odoo-javascript
 #: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
 msgid "Let's add price for selected recurrence"
-msgstr ""
+msgstr "มาเพิ่มราคาสำหรับการเกิดซ้ำที่เลือกกัน"
 
 #. module: sale_subscription
 #. odoo-javascript
 #: code:addons/sale_subscription/static/src/js/tours/sale_subscription.js:0
 msgid "Let's choose the customer for your subscription"
-msgstr ""
+msgstr "มาเลือกลูกค้าสำหรับการสมัครสมาชิกของคุณกันดีกว่า"
 
 #. module: sale_subscription
 #. odoo-javascript
@@ -2218,7 +2654,7 @@ msgstr "ไปที่แคตตาล็อกเพื่อสร้าง
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_log_report__log_currency_id
 msgid "Log Currency"
-msgstr ""
+msgstr "บันทึกสกุลเงิน"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__recurring_monthly
@@ -2249,7 +2685,7 @@ msgstr "การเปลี่ยนแปลง MRR"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_log_report__mrr_change_normalized
 msgid "MRR Change (normalized)"
-msgstr ""
+msgstr "MRR การเปลี่ยนแปลง (ทำให้เป็นมาตรฐาน)"
 
 #. module: sale_subscription
 #: model:ir.ui.menu,name:sale_subscription.menu_sale_order_log_analysis_report
@@ -2281,7 +2717,7 @@ msgstr "MRR:"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.portal_my_home_subscription
 msgid "Manage your subscriptions"
-msgstr ""
+msgstr "จัดการการสมัครของคุณ"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_sidebar
@@ -2292,7 +2728,7 @@ msgstr "การจัดการวิธีการชำระเงิน
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 msgid "Manual Payment"
-msgstr ""
+msgstr "การชำระเงินด้วยตัวเอง"
 
 #. module: sale_subscription
 #. odoo-python
@@ -2301,6 +2737,8 @@ msgid ""
 "Manual payment succeeded. Payment reference: %(ref)s. Amount: %(amount)s. "
 "Contract set to: In Progress, Next Invoice: %(inv)s. Email sent to customer."
 msgstr ""
+"ชำระเงินอัตโนมัติสำเร็จแล้ว เลขที่อ้างอิงการชำระเงิน: %(ref)s จำนวน: %(amount)s "
+"สัญญากำหนดเป็น: อยู่ระหว่างดำเนินการ ใบแจ้งหนี้ถัดไป: %(inv)s ส่งอีเมลถึงลูกค้าแล้ว"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__margin
@@ -2344,7 +2782,7 @@ msgstr "มีการผสมระหว่างบรรทัดที่
 #: model:sale.subscription.plan,name:sale_subscription.subscription_plan_month
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_plan_view_form
 msgid "Monthly"
-msgstr ""
+msgstr "รายเดือน"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__recurring_monthly
@@ -2372,7 +2810,7 @@ msgstr "เดือน"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 msgid "My Activities"
-msgstr ""
+msgstr "กิจกรรมของฉัน"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_log_report_search
@@ -2471,12 +2909,12 @@ msgstr "ไม่มีวิธีการชำระเงิน"
 #. module: sale_subscription
 #: model_terms:ir.actions.act_window,help:sale_subscription.sale_subscription_action_upsell
 msgid "No Upsell Found"
-msgstr ""
+msgstr "ไม่พบการขายต่อยอด"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_plan_view_form
 msgid "No automatic mail"
-msgstr ""
+msgstr "ไม่มีเมลอัตโนมัติ"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_template
@@ -2508,7 +2946,7 @@ msgstr "ไม่มี"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_log_report_search
 msgid "Not Invoiced"
-msgstr ""
+msgstr "ไม่ออกใบแจ้งหนี้"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.view_sales_order_filter_subscription
@@ -2518,12 +2956,12 @@ msgstr "ไม่เกิดซ้ำ"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__note_order
 msgid "Note Order"
-msgstr ""
+msgstr "หมายเหตุของคำสั่งซื้อ"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_order_view_form
 msgid "Notes"
-msgstr ""
+msgstr "โน้ต"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_tree
@@ -2543,7 +2981,7 @@ msgstr "จํานวนข้อผิดพลาด"
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_order__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "จำนวนข้อความที่ต้องดำเนินการ"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_order__message_has_error_counter
@@ -2575,12 +3013,12 @@ msgstr ""
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_plan__related_plan_id
 msgid "Optional Plans"
-msgstr ""
+msgstr "แผนทางเลือก"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.product_template_only_view_form_recurring
 msgid "Options"
-msgstr ""
+msgstr "ตัวเลือก"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__order_reference
@@ -2597,7 +3035,7 @@ msgstr "วันที่สั่ง"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__invoice_status
 msgid "Order Invoice Status"
-msgstr ""
+msgstr "สถานะใบสั่งซื้อ"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__name
@@ -2612,7 +3050,7 @@ msgstr "สถานะคำสั่ง"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_sidebar
 msgid "Orders"
-msgstr ""
+msgstr "คำสั่ง"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_log__origin_order_id
@@ -2627,7 +3065,7 @@ msgstr "อื่นๆ"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_sidebar
 msgid "Overdue"
-msgstr ""
+msgstr "เกินกำหนด"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__subscription_id
@@ -2658,7 +3096,7 @@ msgstr ""
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_so_portal_template
 msgid "Pause"
-msgstr ""
+msgstr "หยุด"
 
 #. module: sale_subscription
 #: model:ir.actions.server,name:sale_subscription.model_sale_order_subscription_pause_record
@@ -2694,17 +3132,17 @@ msgstr "หยุด"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_sidebar
 msgid "Pay"
-msgstr ""
+msgstr "จ่าย"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_sidebar
 msgid "Pay Now"
-msgstr ""
+msgstr "ชำระเดี๋ยวนี้"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
 msgid "Pay now"
-msgstr ""
+msgstr "ชำระเงินตอนนี้"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_order_view_form
@@ -2737,13 +3175,13 @@ msgstr "ธุรกรรมสำหรับการชำระเงิน
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_order.py:0
 msgid "Payment not recorded"
-msgstr ""
+msgstr "ไม่ได้บันทึกการชำระเงิน"
 
 #. module: sale_subscription
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_order.py:0
 msgid "Payment recorded: %s"
-msgstr ""
+msgstr "บันทึกการชำระเงิน: %s"
 
 #. module: sale_subscription
 #: model:mail.template,subject:sale_subscription.email_payment_reminder
@@ -2757,17 +3195,17 @@ msgstr ""
 #. module: sale_subscription
 #: model:ir.model.fields.selection,name:sale_subscription.selection__payment_transaction__renewal_state__pending
 msgid "Pending"
-msgstr ""
+msgstr "รอดำเนินการ"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__pending_transaction
 msgid "Pending Transaction"
-msgstr ""
+msgstr "การทำธุรกรรมที่รอดำเนินการ"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_order_view_form
 msgid "Pending transaction"
-msgstr ""
+msgstr "การทำธุรกรรมที่รอดำเนินการ"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_log_report__plan_id
@@ -2780,7 +3218,7 @@ msgstr "แผน"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
 msgid "Plan:"
-msgstr ""
+msgstr "แผน:"
 
 #. module: sale_subscription
 #. odoo-python
@@ -2788,7 +3226,7 @@ msgstr ""
 msgid ""
 "Please add a recurring plan on the subscription or remove the recurring "
 "product."
-msgstr ""
+msgstr "โปรดเพิ่มแผนการสมัครสมาชิกแบบต่อเนื่องหรือลบผลิตภัณฑ์ที่ต่อเนื่อง"
 
 #. module: sale_subscription
 #. odoo-python
@@ -2796,7 +3234,7 @@ msgstr ""
 msgid ""
 "Please add a recurring product in the subscription or remove the recurring "
 "plan."
-msgstr ""
+msgstr "กรุณาเพิ่มผลิตภัณฑ์ที่เกิดขึ้นซ้ำในการสมัครสมาชิกหรือลบแผนที่เกิดขึ้นซ้ำ"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
@@ -2808,7 +3246,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/sale_subscription/static/src/xml/payment_form_templates.xml:0
 msgid "Please provide another payment method for these subscriptions first."
-msgstr ""
+msgstr "โปรดระบุวิธีการชำระเงินอื่นสำหรับการสมัครสมาชิกเหล่านี้ก่อน"
 
 #. module: sale_subscription
 #. odoo-python
@@ -2816,7 +3254,7 @@ msgstr ""
 msgid ""
 "Please remove the recurring plan on the subscription before sending the "
 "email."
-msgstr ""
+msgstr "โปรดลบแผนการเกิดซ้ำในการสมัครสมาชิกก่อนที่จะส่งอีเมล"
 
 #. module: sale_subscription
 #. odoo-python
@@ -2829,7 +3267,7 @@ msgstr ""
 #: code:addons/sale_subscription/models/sale_order.py:0
 msgid ""
 "Please set a recurring plan on the subscription before sending the email."
-msgstr ""
+msgstr "กรุณากำหนดแผนการสมัครสมาชิกแบบต่อเนื่องก่อนที่จะส่งอีเมล"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_close_reason_view_form
@@ -2840,7 +3278,7 @@ msgstr "พอร์ทัล: ขั้นตอนการเก็บรั�
 #: model_terms:ir.ui.view,arch_db:sale_subscription.product_template_only_view_form_recurring
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_sale_order_line_list
 msgid "Price"
-msgstr ""
+msgstr "ราคา"
 
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_product_pricelist
@@ -2854,7 +3292,7 @@ msgstr "รายการราคา"
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_product_pricelist_item
 msgid "Pricelist Rule"
-msgstr ""
+msgstr "กฎรายการราคา"
 
 #. module: sale_subscription
 #: model:ir.ui.menu,name:sale_subscription.menu_sale_subscription_pricelist
@@ -2886,6 +3324,11 @@ msgstr "หมวดหมู่สินค้า"
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_sales_order_line_filter
 msgid "Product Variant"
 msgstr "ตัวแปรสินค้า"
+
+#. module: sale_subscription
+#: model_terms:ir.ui.view,arch_db:sale_subscription.product_template_only_view_form_recurring
+msgid "Product Variants"
+msgstr ""
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_sale_order_line_list
@@ -2973,7 +3416,7 @@ msgstr "เทมเพลตใบเสนอราคา:"
 #: model:ir.actions.act_window,name:sale_subscription.sale_subscription_template_action
 #: model:ir.ui.menu,name:sale_subscription.menu_template_of_subscription
 msgid "Quotation Templates"
-msgstr ""
+msgstr "เทมเพลตใบเสนอราคา"
 
 #. module: sale_subscription
 #: model:ir.actions.act_window,name:sale_subscription.sale_subscription_action_quotes
@@ -3060,29 +3503,29 @@ msgstr "รายละเอียดที่เกิดซ้ำ"
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_plan_view_form
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 msgid "Recurring Plan"
-msgstr ""
+msgstr "แผนการประจำ"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_portal_content_inherit
 msgid "Recurring Plan:"
-msgstr ""
+msgstr "แผนที่เกิดซ้ำ:"
 
 #. module: sale_subscription
 #: model:ir.actions.act_window,name:sale_subscription.sale_subscription_plan_action
 #: model:ir.ui.menu,name:sale_subscription.menu_sale_subscription_plans
 msgid "Recurring Plans"
-msgstr ""
+msgstr "แผนการประจำ"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.product_pricelist_view
 msgid "Recurring Prices"
-msgstr ""
+msgstr "ราคาที่เกิดซ้ำ"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_product_pricelist__subscription_item_ids
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_plan__subscription_rule_ids
 msgid "Recurring Pricing"
-msgstr ""
+msgstr "ราคาที่เกิดซ้ำ"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__recurring_total
@@ -3097,6 +3540,7 @@ msgid ""
 "Recurring period must be a positive number. Please ensure the input is a "
 "valid positive numeric value."
 msgstr ""
+"ระยะเวลาที่เกิดซ้ำต้องเป็นจำนวนบวก โปรดตรวจสอบให้แน่ใจว่าป้อนข้อมูลเป็นค่าตัวเลขบวกที่ถูกต้อง"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.product_template_only_view_form_recurring
@@ -3111,7 +3555,7 @@ msgstr "อ้างอิง:"
 #. module: sale_subscription
 #: model:ir.model.fields.selection,name:sale_subscription.selection__payment_transaction__renewal_state__cancel
 msgid "Refused"
-msgstr ""
+msgstr "ปฏิเสธ"
 
 #. module: sale_subscription
 #: model:product.template,name:sale_subscription.product_fee_product_template
@@ -3159,7 +3603,7 @@ msgstr "ต่ออายุใบเสนอราคา"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_payment_transaction__renewal_state
 msgid "Renewal State"
-msgstr ""
+msgstr "สถานะการต่ออายุ"
 
 #. module: sale_subscription
 #: model:ir.model.fields.selection,name:sale_subscription.selection__sale_order__subscription_state__5_renewed
@@ -3178,7 +3622,7 @@ msgstr "เปิดอีกครั้ง"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
 msgid "Reopen your subscription"
-msgstr ""
+msgstr "เปิดการสมัครของคุณอีกครั้ง"
 
 #. module: sale_subscription
 #: model:ir.ui.menu,name:sale_subscription.menu_sale_subscription_report
@@ -3191,6 +3635,8 @@ msgid ""
 "Request a online payment from the customer to confirm the order. For a "
 "subscription, a payment will be required also before each renewal"
 msgstr ""
+"ขอให้ลูกค้าชำระเงินออนไลน์เพื่อยืนยันการสั่งซื้อ สำหรับการสมัครสมาชิก "
+"จะต้องชำระเงินก่อนการต่ออายุแต่ละครั้ง"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_order_view_form
@@ -3259,7 +3705,7 @@ msgstr "ขายการสมัคร: สร้างใบแจ้งห�
 #. module: sale_subscription
 #: model:ir.actions.server,name:sale_subscription.send_payment_reminder_ir_actions_server
 msgid "Sale Subscription: send reminder for subscriptions with no token"
-msgstr ""
+msgstr "การขายการสมัครสมาชิก: ส่งคำเตือนสำหรับการสมัครสมาชิกโดยไม่ต้องใช้โทเค็น"
 
 #. module: sale_subscription
 #: model:ir.actions.server,name:sale_subscription.account_analytic_cron_ir_actions_server
@@ -3285,7 +3731,7 @@ msgstr "ใบแจ้งหนี้การชำระเงินการ
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_sale_report
 msgid "Sales Analysis Report"
-msgstr ""
+msgstr "รายงานวิเคราะห์การขาย"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_order_view_form
@@ -3331,12 +3777,12 @@ msgstr "พนักงานขาย"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_portal_content_inherit
 msgid "Save"
-msgstr ""
+msgstr "บันทึก"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_sales_order_line_filter
 msgid "Search Sales Order"
-msgstr ""
+msgstr "ค้นหาคำสั่งขาย"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_template_view_search
@@ -3352,22 +3798,22 @@ msgstr "เลือกสินค้าที่เกิดซ้ำ"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_close_reason_view_form
 msgid "Selectable in Portal"
-msgstr ""
+msgstr "เลือกได้ในพอร์ทัล"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_plan_view_form
 msgid "Self-Service"
-msgstr ""
+msgstr "การบริการตัวเอง"
 
 #. module: sale_subscription
 #: model:ir.model.fields.selection,name:sale_subscription.selection__payment_transaction__subscription_action__automatic_send_mail
 msgid "Send Mail (automatic payment)"
-msgstr ""
+msgstr "ส่งเมล (ชำระเงินอัตโนมัติ)"
 
 #. module: sale_subscription
 #: model:ir.model.fields.selection,name:sale_subscription.selection__payment_transaction__subscription_action__manual_send_mail
 msgid "Send Mail (manual payment)"
-msgstr ""
+msgstr "ส่งเมล (ชำระเงินด้วยตนเอง)"
 
 #. module: sale_subscription
 #: model:ir.actions.act_window,name:sale_subscription.sale_subscription_act_window_sms_composer_multi
@@ -3403,12 +3849,12 @@ msgstr "กำหนดไว้ในระยะการสมัครรั
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.payment_form_inherit
 msgid "Set payment method for subscription"
-msgstr ""
+msgstr "กำหนดวิธีการชำระเงินสำหรับการสมัครสมาชิก"
 
 #. module: sale_subscription
 #: model:ir.ui.menu,name:sale_subscription.menu_sale_subscription_settings
 msgid "Settings"
-msgstr ""
+msgstr "การตั้งค่า"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__starred
@@ -3418,7 +3864,7 @@ msgstr "แสดงการสมัครสมาชิกบนแดชบ
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 msgid "Show all records whose next activity date is past"
-msgstr ""
+msgstr "แสดงบันทึกทั้งหมดที่มีวันที่กิจกรรมครั้งต่อไปที่ผ่านมาแล้ว"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__source_id
@@ -3489,17 +3935,23 @@ msgid ""
 "                                                created subscription and "
 "renew %(parent_link)s instead"
 msgstr ""
+"การสมัครสมาชิก %(link)s ถูกยกเลิกแล้ว คำสั่งซื้อหลัก %(parent_link)s ถูกเปิดอีกครั้ง\n"
+"                                                คุณควรปิด %(parent_link)s "
+"หากลูกค้าเลิกใช้งาน หรือต่ออายุหากลูกค้าใช้บริการต่อไป\n"
+"                                                หมายเหตุ: "
+"หากคุณสร้างการสมัครสมาชิกใหม่แล้วแทนที่จะต่ออายุ โปรดยกเลิกการสมัครสมาชิกใหม่\n"
+"                                                และต่ออายุ %(parent_link)s แทน"
 
 #. module: sale_subscription
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_order.py:0
 msgid "Subscription %s has been reopened. The end date has been removed"
-msgstr ""
+msgstr "เปิดการสมัครสมาชิก %s อีกครั้งแล้ว วันที่สิ้นสุดถูกลบออกแล้ว"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_payment_transaction__subscription_action
 msgid "Subscription Action"
-msgstr ""
+msgstr "การดำเนินการสมัครสมาชิก"
 
 #. module: sale_subscription
 #: model:ir.model,name:sale_subscription.model_sale_subscription_report
@@ -3625,7 +4077,7 @@ msgstr "ค่าสมัครสมาชิกแพงเกินไป"
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_order_log__subscription_state
 msgid "Subscription stage when the change occurred"
-msgstr ""
+msgstr "ขั้นตอนการสมัครสมาชิกเมื่อมีการเปลี่ยนแปลงเกิดขึ้น"
 
 #. module: sale_subscription
 #: model:mail.message.subtype,description:sale_subscription.subtype_state_change
@@ -3647,7 +4099,7 @@ msgstr ""
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_portal_content_inherit
 msgid "Subscription:"
-msgstr ""
+msgstr "การสมัครสมาชิก:"
 
 #. module: sale_subscription
 #: model:mail.template,name:sale_subscription.mail_template_subscription_alert
@@ -3753,7 +4205,7 @@ msgstr "บอกเราว่าทำไมคุณยกเลิกกา
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_report_search
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_search
 msgid "Template"
-msgstr ""
+msgstr "เทมเพลต"
 
 #. module: sale_subscription
 #: model:mail.template,description:sale_subscription.mail_template_subscription_alert
@@ -3801,6 +4253,8 @@ msgid ""
 "The deferred settings are not properly set. Please complete them to generate "
 "subscription deferred revenues"
 msgstr ""
+"การตั้งค่าที่เลื่อนออกไปไม่ได้กำหนดไว้อย่างถูกต้อง "
+"โปรดกรอกให้ครบถ้วนเพื่อสร้างรายได้รอการตัดบัญชีการสมัครสมาชิก"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_portal_content_inherit
@@ -3810,7 +4264,7 @@ msgstr ""
 #. module: sale_subscription
 #: model:ir.model.constraint,message:sale_subscription.constraint_sale_order_template_check_duration_value
 msgid "The duration can't be negative or 0."
-msgstr ""
+msgstr "ระยะเวลาต้องไม่เป็นลบหรือ 0"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_order__first_contract_date
@@ -3849,7 +4303,7 @@ msgstr "ใบแจ้งหนี้ล่าสุด (%s) ของการ
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_order__pending_transaction
 msgid "The last transaction of the order is currently pending"
-msgstr ""
+msgstr "ธุรกรรมล่าสุดของคำสั่งซื้ออยู่ระหว่างรอดำเนินการ"
 
 #. module: sale_subscription
 #: model:ir.model.constraint,message:sale_subscription.constraint_sale_order_check_start_date_lower_next_invoice_date
@@ -3871,6 +4325,7 @@ msgid ""
 "The payment method you selected can only pay amounts up to %s. Please create "
 "or select another one."
 msgstr ""
+"วิธีการชำระเงินที่คุณเลือกสามารถชำระเงินได้สูงสุด %s เท่านั้น โปรดสร้างหรือเลือกรายการอื่น"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_close_reason_view_form
@@ -3894,7 +4349,7 @@ msgstr "ลิงก์เปลี่ยนเส้นทางของคำ
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_order.py:0
 msgid "The renewal %s has been cancelled."
-msgstr ""
+msgstr "การต่ออายุ %s ถูกยกเลิกแล้ว"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_order__start_date
@@ -3916,7 +4371,7 @@ msgstr "ข้อความที่จะแสดงบนคำกระต
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_order.py:0
 msgid "The upsell %s has been cancelled."
-msgstr ""
+msgstr "การขายต่อยอด %s ถูกยกเลิกแล้ว"
 
 #. module: sale_subscription
 #. odoo-python
@@ -3925,6 +4380,8 @@ msgid ""
 "The upsell %s has been cancelled. Please recheck the quantities as they may "
 "have been affected by this cancellation."
 msgstr ""
+"การขายต่อยอด %s ถูกยกเลิกแล้ว "
+"โปรดตรวจสอบปริมาณอีกครั้งเนื่องจากอาจได้รับผลกระทบจากการยกเลิกครั้งนี้"
 
 #. module: sale_subscription
 #. odoo-python
@@ -3935,7 +4392,7 @@ msgstr "การขายต่อยอด %s ถูกยืนยันแ�
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_template
 msgid "There is a"
-msgstr ""
+msgstr "มี"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_view_kanban
@@ -3961,6 +4418,8 @@ msgid ""
 "the\n"
 "                following active subscriptions:"
 msgstr ""
+"ไม่สามารถลบวิธีการชำระเงินนี้ได้ เนื่องจากขณะนี้เชื่อมโยงกับการสมัคร\n"
+"                 ที่ใช้งานอยู่ต่อไปนี้:"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_order_view_form
@@ -4033,7 +4492,7 @@ msgstr "รายได้ที่ไม่เกิดซ้ำทั้งห
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_order_portal_content_inherit
 msgid "Total Quantity"
-msgstr ""
+msgstr "จำนวนรวม"
 
 #. module: sale_subscription
 #: model:ir.model.fields.selection,name:sale_subscription.selection__sale_order_log__event_type__3_transfer
@@ -4068,7 +4527,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_plan__billing_period_unit
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__product_uom_id
 msgid "Unit"
-msgstr ""
+msgstr "หน่วย"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__price_unit
@@ -4108,7 +4567,7 @@ msgstr "ยอดรวมที่ยังไม่ได้หักภาษ
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.report_saleorder_document
 msgid "Until"
-msgstr ""
+msgstr "ถึง"
 
 #. module: sale_subscription
 #. odoo-python
@@ -4128,6 +4587,8 @@ msgid ""
 "Upsell %(order)s for customer %(customer)s for the period %(date_start)s to %"
 "(date_end)s %(nl)s%(lines)s"
 msgstr ""
+"ขายต่อยอด %(order)s สำหรับลูกค้า %(customer)s ในช่วง %(date_start)s เป็น %"
+"(date_end)s %(nl)s%(lines)s"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order__upsell_count
@@ -4152,6 +4613,8 @@ msgid ""
 "                It can be created by clicking on the Upsell button from an "
 "active subscription."
 msgstr ""
+"คำสั่งซื้อต่อยอดทำให้คุณสามารถเพิ่มหรือลบผลิตภัณฑ์ออกจากการสมัครสมาชิกที่กำลังดำเนินอยู่ได้\n"
+"                สามารถสร้างได้โดยคลิกที่ปุ่มเพิ่มยอดขายจากการสมัครสมาชิกที่ใช้งานอยู่"
 
 #. module: sale_subscription
 #: model:ir.actions.act_window,name:sale_subscription.sale_subscription_action_upsell
@@ -4167,7 +4630,7 @@ msgstr ""
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_line__product_template_variant_value_ids
 msgid "Variant Values"
-msgstr ""
+msgstr "มูลค่าตัวเลือกย่อยสินค้า"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_order_close_reason__visible_in_portal
@@ -4177,7 +4640,7 @@ msgstr "มองเห็นได้ในพอร์ทัล"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_plan_view_form
 msgid "Visible to all"
-msgstr ""
+msgstr "มองเห็นได้ทุกคน"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__volume
@@ -4195,7 +4658,7 @@ msgstr ""
 msgid ""
 "Want a recurring billing through subscription management? Get started by "
 "clicking here"
-msgstr ""
+msgstr "ต้องการการเรียกเก็บเงินแบบประจำผ่านการจัดการการสมัครสมาชิกหรือไม่? เริ่มโดยคลิกที่นี่"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__warehouse_id
@@ -4216,7 +4679,7 @@ msgstr "คำเตือน"
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_advance_payment_inv__postpaid_warning_message
 msgid "Warning Message"
-msgstr ""
+msgstr "ข้อความเตือน"
 
 #. module: sale_subscription
 #. odoo-javascript
@@ -4252,7 +4715,7 @@ msgstr "ประวัติการสื่อสารของเว็บ
 #. module: sale_subscription
 #: model:ir.model.fields.selection,name:sale_subscription.selection__sale_subscription_plan__billing_period_unit__week
 msgid "Weeks"
-msgstr ""
+msgstr "สัปดาห์"
 
 #. module: sale_subscription
 #: model:ir.model.fields,help:sale_subscription.field_sale_order__starred
@@ -4262,7 +4725,7 @@ msgstr "การสมัครนี้ควรแสดงบนแดชบ
 #. module: sale_subscription
 #: model:sale.subscription.plan,name:sale_subscription.subscription_plan_year
 msgid "Yearly"
-msgstr ""
+msgstr "รายปี"
 
 #. module: sale_subscription
 #: model:ir.model.fields,field_description:sale_subscription.field_sale_subscription_report__recurring_yearly
@@ -4295,6 +4758,8 @@ msgid ""
 "You are about to permanently close a subscription that is valid until\n"
 "                    &amp;nbsp;"
 msgstr ""
+"คุณกำลังจะปิดการสมัครสมาชิกถาวรซึ่งจะมีผลจนถึง\n"
+"                    &amp;nbsp;"
 
 #. module: sale_subscription
 #. odoo-python
@@ -4302,7 +4767,7 @@ msgstr ""
 msgid ""
 "You can not change the recurring property of this product because it has "
 "been sold already."
-msgstr ""
+msgstr "คุณไม่สามารถเปลี่ยนคุณสมบัติที่เกิดซ้ำของสินค้านี้ได้เนื่องจากมีการขายไปแล้ว"
 
 #. module: sale_subscription
 #. odoo-python
@@ -4310,7 +4775,7 @@ msgstr ""
 msgid ""
 "You can not churn a contract that has not been invoiced. Please cancel the "
 "contract instead."
-msgstr ""
+msgstr "คุณไม่สามารถเลิกใช้สัญญาที่ยังไม่ได้ออกใบแจ้งหนี้ได้ กรุณายกเลิกสัญญาแทน"
 
 #. module: sale_subscription
 #. odoo-python
@@ -4350,6 +4815,9 @@ msgid ""
 " - Has not started yet.\n"
 " - Has no invoiced period in the future."
 msgstr ""
+"คุณไม่สามารถสร้างการขายต่อยอดสำหรับการสมัครสมาชิกนี้ได้เนื่องจาก:\n"
+"- ยังไม่ได้เริ่มดำเนินการ\n"
+"- ไม่มีระยะเวลาการออกใบแจ้งหนี้ในอนาคต"
 
 #. module: sale_subscription
 #. odoo-python
@@ -4376,7 +4844,7 @@ msgstr ""
 #. module: sale_subscription
 #: model:ir.model.constraint,message:sale_subscription.constraint_sale_order_sale_subscription_state_coherence_2
 msgid "You cannot have a draft SO be a confirmed subscription."
-msgstr ""
+msgstr "คุณไม่สามารถมีฉบับร่างได้ ดังนั้น จะต้องได้รับการยืนยันการสมัครสมาชิก"
 
 #. module: sale_subscription
 #. odoo-python
@@ -4400,13 +4868,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_order.py:0
 msgid "You cannot renew a contract that already has an active subscription. "
-msgstr ""
+msgstr "คุณไม่สามารถต่ออายุสัญญาที่มีการสมัครสมาชิกที่ใช้งานได้อยู่แล้ว "
 
 #. module: sale_subscription
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_order.py:0
 msgid "You cannot renew a subscription that has been renewed. "
-msgstr ""
+msgstr "คุณไม่สามารถต่ออายุการสมัครสมาชิกที่ต่ออายุแล้วได้ "
 
 #. module: sale_subscription
 #. odoo-python
@@ -4427,6 +4895,8 @@ msgid ""
 "You cannot set to draft a cancelled quotation linked to invoiced "
 "subscriptions. Please create a new quotation."
 msgstr ""
+"คุณไม่สามารถตั้งค่าให้ร่างใบเสนอราคาที่ยกเลิกซึ่งเชื่อมโยงกับการสมัครใช้งานที่ออกใบแจ้งหนี้ได้ "
+"กรุณาสร้างใบเสนอราคาใหม่"
 
 #. module: sale_subscription
 #: model:ir.model.constraint,message:sale_subscription.constraint_sale_order_sale_subscription_state_coherence
@@ -4448,6 +4918,8 @@ msgid ""
 "You cannot upsell a subscription whose next invoice date is in the past.\n"
 "Please, invoice directly the %s contract."
 msgstr ""
+"คุณไม่สามารถขายต่อยอดการสมัครสมาชิกที่มีวันที่ในใบแจ้งหนี้ครั้งถัดไปเป็นวันที่ผ่านมาแล้วได้\n"
+"กรุณาออกใบแจ้งหนี้ตามสัญญา %s โดยตรง"
 
 #. module: sale_subscription
 #. odoo-python
@@ -4476,7 +4948,7 @@ msgstr ""
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
 msgid "Your Subscription"
-msgstr ""
+msgstr "การสมัครสมาชิกของคุณ"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.payment_method_form
@@ -4486,7 +4958,7 @@ msgstr "รายละเอียดการชำระเงินของ
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
 msgid "Your subscription is about to end on the"
-msgstr ""
+msgstr "การสมัครของคุณกำลังจะสิ้นสุดในวันที่"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_content
@@ -4516,7 +4988,7 @@ msgstr ""
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_template
 msgid "and"
-msgstr ""
+msgstr "และ"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.sale_subscription_close_reason_view_form
@@ -4531,7 +5003,7 @@ msgstr "ข้อความของปุ่ม"
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_template
 msgid "existing for this subscription, please confirm it or reject it."
-msgstr ""
+msgstr "มีอยู่แล้วสำหรับการสมัครสมาชิกนี้ โปรดยืนยันหรือปฏิเสธ"
 
 #. module: sale_subscription
 #. odoo-python
@@ -4558,7 +5030,7 @@ msgstr ""
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_sidebar
 msgid "on"
-msgstr ""
+msgstr "เมื่อ"
 
 #. module: sale_subscription
 #. odoo-python
@@ -4570,37 +5042,37 @@ msgstr ""
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_subscription_plan.py:0
 msgid "per %d months"
-msgstr ""
+msgstr "ต่อ %d เดือน"
 
 #. module: sale_subscription
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_subscription_plan.py:0
 msgid "per %d weeks"
-msgstr ""
+msgstr "ต่อ %d สัปดาห์"
 
 #. module: sale_subscription
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_subscription_plan.py:0
 msgid "per %d years"
-msgstr ""
+msgstr "ต่อ %d ปี"
 
 #. module: sale_subscription
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_subscription_plan.py:0
 msgid "per month"
-msgstr ""
+msgstr "ต่อเดือน"
 
 #. module: sale_subscription
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_subscription_plan.py:0
 msgid "per week"
-msgstr ""
+msgstr "ต่อสัปดาห์"
 
 #. module: sale_subscription
 #. odoo-python
 #: code:addons/sale_subscription/models/sale_subscription_plan.py:0
 msgid "per year"
-msgstr ""
+msgstr "ต่อปี"
 
 #. module: sale_subscription
 #. odoo-python
@@ -4611,24 +5083,24 @@ msgstr ""
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_template
 msgid "quotation"
-msgstr ""
+msgstr "ใบเสนอราคา"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_template
 msgid ""
 "quotation existing for this subscription, please confirm it or reject it."
-msgstr ""
+msgstr "ใบเสนอราคาที่มีอยู่สำหรับการสมัครสมาชิกนี้ โปรดยืนยันหรือปฏิเสธ"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_template
 msgid ""
 "quotation existing for this subscription, please confirm them or reject them."
-msgstr ""
+msgstr "ใบเสนอราคาที่มีอยู่สำหรับการสมัครสมาชิกนี้ โปรดยืนยันหรือปฏิเสธ"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_template
 msgid "renewal"
-msgstr ""
+msgstr "ต่ออายุ"
 
 #. module: sale_subscription
 #. odoo-python
@@ -4639,12 +5111,12 @@ msgstr ""
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_so_portal_template
 msgid "to"
-msgstr ""
+msgstr "ถึง"
 
 #. module: sale_subscription
 #: model_terms:ir.ui.view,arch_db:sale_subscription.subscription_portal_template
 msgid "until"
-msgstr ""
+msgstr "จนถึง"
 
 #. module: sale_subscription
 #: model:sms.template,body:sale_subscription.sms_template_data_payment_failure
@@ -4692,6 +5164,9 @@ msgstr ""
 "{{ object.company_id.name }}: การสมัครสมาชิกของคุณ {{ object.name }} "
 "ต้องการความสนใจของคุณ หากคุณมีข้อสงสัยเกี่ยวกับเรื่องนี้โปรดติดต่อ "
 "{{ object.user_id.name }} ผู้ติดต่อของคุณ"
+
+#~ msgid "Applied On"
+#~ msgstr "นำไปใช้เมื่อ"
 
 #~ msgid "(Wrong address?)"
 #~ msgstr "(ที่อยู่ผิด?)"

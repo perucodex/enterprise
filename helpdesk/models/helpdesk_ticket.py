@@ -216,7 +216,7 @@ class HelpdeskTicket(models.Model):
         for ticket in self:
 
             # the current team is invalid, no need to compute new values since the transaction will be rolled back anyway.
-            if not ticket.team_id:
+            if not (ticket.team_id and ticket.team_id.use_sla):
                 continue
             min_deadline = False
             for status in ticket.sla_status_ids:
@@ -334,7 +334,7 @@ class HelpdeskTicket(models.Model):
     def _compute_close_hours(self):
         for ticket in self:
             create_date = fields.Datetime.from_string(ticket.create_date)
-            if create_date and ticket.close_date and ticket.team_id:
+            if create_date and ticket.close_date and ticket.team_id.resource_calendar_id:
                 duration_data = ticket.team_id.resource_calendar_id.get_work_duration_data(create_date, fields.Datetime.from_string(ticket.close_date), compute_leaves=True)
                 ticket.close_hours = duration_data['hours']
             else:
@@ -766,6 +766,19 @@ class HelpdeskTicket(models.Model):
         sla_status_to_remove.unlink()
         return self.env['helpdesk.sla.status'].create(sla_status_value_list)
 
+    def _sla_find_domain(self):
+        """
+        Get domain to find matching SLAs.
+        This function aims to be inherited by submodules
+        :return: domain
+        :rtype : list [tuple]
+        """
+        return [
+            ('team_id', '=', self.team_id.id),
+            ('priority', '=', self.priority),
+            ('stage_id.sequence', '>=', self.stage_id.sequence),
+        ]
+
     @api.model
     def _sla_find_false_domain(self):
         return [('partner_ids', '=', False)]
@@ -805,10 +818,13 @@ class HelpdeskTicket(models.Model):
                 tickets_map[key] |= ticket
                 # group the SLA to apply, by key
                 if key not in sla_domain_map:
-                    sla_domain_map[key] = Domain.AND([[
-                        ('team_id', '=', ticket.team_id.id), ('priority', '=', ticket.priority),
-                        ('stage_id.sequence', '>=', ticket.stage_id.sequence),
-                    ], Domain.OR([ticket._sla_find_extra_domain(), self._sla_find_false_domain()])])
+                    sla_domain_map[key] = Domain.AND([
+                        ticket._sla_find_domain(),
+                        Domain.OR([
+                            ticket._sla_find_extra_domain(),
+                            self._sla_find_false_domain(),
+                        ]),
+                    ])
 
         result = {}
         for key, tickets in tickets_map.items():  # only one search per ticket group

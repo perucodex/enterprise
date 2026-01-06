@@ -119,6 +119,10 @@ onRpc(
     }
 );
 
+onRpc("has_access", function () {
+    return true;
+});
+
 let openArticle;
 
 before(() => {

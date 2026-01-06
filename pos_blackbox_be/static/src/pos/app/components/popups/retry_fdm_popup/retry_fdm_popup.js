@@ -8,6 +8,7 @@ export class RetryFdmPopup extends Component {
         title: { type: String, optional: true },
         message: { type: String, optional: true },
         retry: { type: Function, optional: true },
+        downloadLogs: Function,
         close: Function,
     };
 

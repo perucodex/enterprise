@@ -23,6 +23,18 @@
         </field>
     </record>
 
+    <record id="view_account_list" model="ir.ui.view">
+        <field name="name">account.account.list</field>
+        <field name="model">account.account</field>
+        <field name="inherit_id" ref="account.view_account_list"/>
+        <field name="arch" type="xml">
+            <field name="company_ids" position="before">
+                <field name="current_rate" invisible="not current_rate" optional="hide"/>
+                <field name="fiscal_category_id" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
     <record id="view_account_search" model="ir.ui.view">
         <field name="name">account.account.search</field>
         <field name="model">account.account</field>

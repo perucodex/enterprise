@@ -139,6 +139,11 @@ export class DocumentService {
             this.store.Document.records[data.id] = document;
             // Get reactive version.
             document = this.store.Document.records[data.id];
+        } else {
+            // Document was renamed
+            if ("attachment" in data && data.name !== document.name) {
+                document.attachment = this.store.Attachment.insert(data.attachment);
+            }
         }
         // return reactive version
         return document;
@@ -158,37 +163,44 @@ export class DocumentService {
         return document && typeof document.id === "number";
     }
 
-    async downloadDocuments(documents) {
-        documents = documents.filter((rec) => !rec.isRequest());
-        if (!documents.length) {
-            return;
-        }
+    async downloadDocuments(documents, resIds) {
+        if (!resIds) {
+            documents = documents.filter((rec) => !rec.isRequest());
+            if (!documents.length) {
+                return;
+            }
 
-        const linkDocuments = documents.filter((el) => el.data.type === "url");
-        const noLinkDocuments = documents.filter((el) => el.data.type !== "url");
-        // Manage link documents
-        if (documents.length === 1 && linkDocuments.length) {
-            // Redirect to the link
-            let url = linkDocuments[0].data.url;
-            url = /^(https?|ftp):\/\//.test(url) ? url : `http://${url}`;
-            window.open(url, "_blank");
-        } else if (noLinkDocuments.length) {
-            // Download all documents which are not links
-            if (noLinkDocuments.length === 1) {
-                await download({
-                    data: {},
-                    url: `/documents/content/${noLinkDocuments[0].data.access_token}`,
-                });
+            const linkDocuments = documents.filter((el) => el.data.type === "url");
+            const noLinkDocuments = documents.filter((el) => el.data.type !== "url");
+            // Manage link documents
+            if (documents.length === 1 && linkDocuments.length) {
+                // Redirect to the link
+                let url = linkDocuments[0].data.url;
+                url = /^(https?|ftp):\/\//.test(url) ? url : `http://${url}`;
+                window.open(url, "_blank");
+                return;
+            } else if (noLinkDocuments.length) {
+                // Download all documents which are not links
+                if (noLinkDocuments.length === 1) {
+                    await download({
+                        data: {},
+                        url: `/documents/content/${noLinkDocuments[0].data.access_token}`,
+                    });
+                    return;
+                } else {
+                    resIds = noLinkDocuments.map((rec) => rec.data.id);
+                }
             } else {
-                await download({
-                    data: {
-                        file_ids: noLinkDocuments.map((rec) => rec.data.id),
-                        zip_name: `documents-${serializeDate(DateTime.now())}.zip`,
-                    },
-                    url: "/documents/zip",
-                });
+                return;
             }
         }
+        await download({
+            data: {
+                file_ids: resIds,
+                zip_name: `documents-${serializeDate(DateTime.now())}.zip`,
+            },
+            url: "/documents/zip",
+        });
     }
 
     isEditable(document) {

@@ -17,10 +17,6 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
         cls.company_data_2['default_account_payable'].with_context(context).code = '211010'
         cls.company_data_2['default_account_revenue'].with_context(context).code = '400010'
         cls.company_data_2['default_account_expense'].with_context(context).code = '600010'
-        cls.env['account.account'].search([
-            ('company_ids', '=', cls.company_data_2['company'].id),
-            ('account_type', '=', 'equity_unaffected')
-        ]).with_context(context).code = '999989'
 
         # Entries in 2016 for company_1 to test the initial balance.
         cls.move_2016_1 = cls.env['account.move'].create([{
@@ -131,14 +127,14 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
 
         self.assertLinesValues(
             self.report._get_lines(options),
-            #   Name                            Initial Balance         Debit          Credit          End Balance
-            [0,                                               1,             2,              3,                 4],
+            #   Name                                         Initial Balance         Debit          Credit          End Balance
+            [0,                                                            1,             2,              3,                 4],
             [
-                ('211000 Account Payable',               2000.0,         100.0,            0.0,            2100.0),
-                ('400000 Product Sales',                -3000.0,           0.0,          300.0,           -3300.0),
-                ('600000 Expenses',                      2000.0,         200.0,            0.0,            2200.0),
-                ('999999 Undistributed Profits/Losses', -1000.0,           0.0,            0.0,           -1000.0),
-                ('Total',                                   0.0,         300.0,          300.0,               0.0),
+                ('211000 Account Payable',                            2000.0,         100.0,            0.0,            2100.0),
+                ('400000 Product Sales',                             -3000.0,           0.0,          300.0,           -3300.0),
+                ('600000 Expenses',                                   2000.0,         200.0,            0.0,            2200.0),
+                ('Undistributed Profits/Losses - company_1_data',    -1000.0,           0.0,            0.0,           -1000.0),
+                ('Total',                                                0.0,         300.0,          300.0,               0.0),
 
             ],
             options,
@@ -170,14 +166,14 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
 
         self.assertLinesValues(
             self.report._get_lines(options),
-            #    Name                            Initial Balance         Debit          Credit      End Balance
-            [0,                                               1,             2,             3,              4],
+            #    Name                                        Initial Balance         Debit          Credit      End Balance
+            [0,                                                            1,             2,             3,              4],
             [
-                ('211000 Account Payable',               1000.0,        1100.0,           0.0,         2100.0),
-                ('400000 Product Sales',                    0.0,           0.0,        3300.0,        -3300.0),
-                ('600000 Expenses',                         0.0,        2200.0,           0.0,         2200.0),
-                ('999999 Undistributed Profits/Losses', -1000.0,           0.0,           0.0,        -1000.0),
-                ('Total',                                   0.0,        3300.0,        3300.0,            0.0),
+                ('211000 Account Payable',                            1000.0,        1100.0,           0.0,         2100.0),
+                ('400000 Product Sales',                                 0.0,           0.0,        3300.0,        -3300.0),
+                ('600000 Expenses',                                      0.0,        2200.0,           0.0,         2200.0),
+                ('Undistributed Profits/Losses - company_1_data',    -1000.0,           0.0,           0.0,        -1000.0),
+                ('Total',                                                0.0,        3300.0,        3300.0,            0.0),
             ],
             options,
         )
@@ -187,19 +183,19 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
 
         self.assertLinesValues(
             self.report._get_lines(options),
-            #    Name                            Initial Balance         Debit          Credit      End Balance
-            [0,                                               1,             2,             3,              4],
+            #    Name                                     Initial Balance          Debit         Credit      End Balance
+            [0,                                                         1,             2,             3,              4],
             [
-                ('121000 Account Receivable',               0.0,        1000.0,           0.0,          1000.0),
-                ('211000 Account Payable',                100.0,           0.0,           0.0,           100.0),
-                ('211010 Account Payable',                 50.0,           0.0,           0.0,            50.0),
-                ('400000 Product Sales',                    0.0,       20000.0,           0.0,         20000.0),
-                ('400010 Product Sales',                    0.0,           0.0,         200.0,          -200.0),
-                ('600000 Expenses',                         0.0,           0.0,       21000.0,        -21000.0),
-                ('600010 Expenses',                         0.0,         200.0,           0.0,           200.0),
-                ('999989 Undistributed Profits/Losses',   -50.0,           0.0,           0.0,           -50.0),
-                ('999999 Undistributed Profits/Losses',  -100.0,           0.0,           0.0,          -100.0),
-                ('Total',                                   0.0,       21200.0,       21200.0,             0.0),
+                ('121000 Account Receivable',                         0.0,        1000.0,           0.0,          1000.0),
+                ('211000 Account Payable',                          100.0,           0.0,           0.0,           100.0),
+                ('211010 Account Payable',                           50.0,           0.0,           0.0,            50.0),
+                ('400000 Product Sales',                              0.0,       20000.0,           0.0,         20000.0),
+                ('400010 Product Sales',                              0.0,           0.0,         200.0,          -200.0),
+                ('600000 Expenses',                                   0.0,           0.0,       21000.0,        -21000.0),
+                ('600010 Expenses',                                   0.0,         200.0,           0.0,           200.0),
+                ('Undistributed Profits/Losses - company_1_data',  -100.0,           0.0,           0.0,          -100.0),
+                ('Undistributed Profits/Losses - company_2',        -50.0,           0.0,           0.0,           -50.0),
+                ('Total',                                             0.0,       21200.0,       21200.0,             0.0),
             ],
             options,
         )
@@ -332,20 +328,20 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
         # Rate for 2016 and 2017 is (1/3 (from 2016) * 366 + 1/2 (from 2017) * 365) / 731 => 0.416552668
         self.assertLinesValues(
             self.report._get_lines(options),
-            #                                  [Initial Balance]   [     2016       ]    [End Balance]  [Initial Balance]      [       2017        ]      [End Balance]
-            #    Name                                  Balance      Debit      Credit         Balance          Balance         Debit          Credit          Balance
-            [0,                                         1,         2,          3,             4,                5,            6,              7,               8],
+            #                                             [Initial Balance]   [     2016       ]    [End Balance]  [Initial Balance]      [       2017        ]       [End Balance]
+            #    Name                                             Balance      Debit      Credit         Balance             Balance      Debit          Credit          Balance
+            [0,                                                    1,          2,          3,             4,                5,            6,              7,               8],
             [
-                ('121000 Account Receivable',              0.0,        0.0,         0.0,           0.0,              0.0,       1000.0,          0.0,            1000.0),
-                ('211000 Account Payable',                 0.0,      100.0,         0.0,         100.0,            100.0,          0.0,          0.0,             100.0),
-                ('211010 Account Payable',                 0.0,       50.0,        0.0,           50.0,             50.0,          0.0,          0.0,              50.0),
-                ('400000 Product Sales',                   0.0,        0.0,       300.0,        -300.0,              0.0,      20000.0,          0.0,           20000.0),
-                ('400010 Product Sales',                   0.0,        0.0,        41.66,        -41.66,             0.0,          0.0,        166.62,           -166.62),
-                ('600000 Expenses',                        0.0,      200.0,         0.0,         200.0,              0.0,          0.0,      21000.0,          -21000.0),
-                ('600010 Expenses',                        0.0,        0.0,         0.0,           0.0,              0.0,        166.62,         0.0,             166.62),
-                ('999989 Undistributed Profits/Losses',    0.0,        0.0,         0.0,           0.0,            -41.66,         0.0,          0.0,             -41.66),
-                ('999999 Undistributed Profits/Losses',    0.0,        0.0,         0.0,           0.0,           -100.0,          0.0,          0.0,            -100.0),
-                ('Total',                                  0.0,      350.0,      341.66,          8.34,             8.34,     21166.62,     21166.62,              8.34),
+                ('121000 Account Receivable',                        0.0,        0.0,         0.0,           0.0,              0.0,       1000.0,          0.0,            1000.0),
+                ('211000 Account Payable',                           0.0,      100.0,         0.0,         100.0,            100.0,          0.0,          0.0,             100.0),
+                ('211010 Account Payable',                           0.0,       50.0,         0.0,          50.0,             50.0,          0.0,          0.0,              50.0),
+                ('400000 Product Sales',                             0.0,        0.0,       300.0,        -300.0,              0.0,      20000.0,          0.0,           20000.0),
+                ('400010 Product Sales',                             0.0,        0.0,       41.66,        -41.66,              0.0,          0.0,       166.62,           -166.62),
+                ('600000 Expenses',                                  0.0,      200.0,         0.0,         200.0,              0.0,          0.0,      21000.0,          -21000.0),
+                ('600010 Expenses',                                  0.0,        0.0,         0.0,           0.0,              0.0,       166.62,          0.0,            166.62),
+                ('Undistributed Profits/Losses - company_1_data',    0.0,        0.0,         0.0,           0.0,           -100.0,          0.0,          0.0,            -100.0),
+                ('Undistributed Profits/Losses - company_2',         0.0,        0.0,         0.0,           0.0,           -41.66,          0.0,          0.0,            -41.66),
+                ('Total',                                            0.0,      350.0,      341.66,          8.34,             8.34,     21166.62,     21166.62,              8.34),
             ],
             options,
         )
@@ -356,19 +352,19 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
 
         self.assertLinesValues(
             self.report._get_lines(options),
-            #    Name                            Initial Balance            Debit          Credit      End Balance
-            [0,                                                1,               2,              3,               4],
+            #    Name                                      Initial Balance        Debit        Credit      End Balance
+            [0,                                                          1,           2,            3,               4],
             [
-                ('121000 Account Receivable',                0.0,          1000.0,            0.0,          1000.0),
-                ('211000 Account Payable',                 100.0,             0.0,            0.0,           100.0),
-                ('211010 Account Payable',                  50.0,             0.0,            0.0,            50.0),
-                ('400000 Product Sales',                     0.0,         20000.0,            0.0,         20000.0),
-                ('400010 Product Sales',                     0.0,             0.0,          200.0,          -200.0),
-                ('600000 Expenses',                          0.0,             0.0,        21000.0,        -21000.0),
-                ('600010 Expenses',                          0.0,           200.0,            0.0,           200.0),
-                ('999989 Undistributed Profits/Losses',    -50.0,             0.0,            0.0,           -50.0),
-                ('999999 Undistributed Profits/Losses',   -100.0,             0.0,            0.0,          -100.0),
-                ('Total',                                    0.0,         21200.0,        21200.0,             0.0),
+                ('121000 Account Receivable',                          0.0,      1000.0,          0.0,          1000.0),
+                ('211000 Account Payable',                           100.0,         0.0,          0.0,           100.0),
+                ('211010 Account Payable',                            50.0,         0.0,          0.0,            50.0),
+                ('400000 Product Sales',                               0.0,     20000.0,          0.0,         20000.0),
+                ('400010 Product Sales',                               0.0,         0.0,        200.0,          -200.0),
+                ('600000 Expenses',                                    0.0,         0.0,      21000.0,        -21000.0),
+                ('600010 Expenses',                                    0.0,       200.0,          0.0,           200.0),
+                ('Undistributed Profits/Losses - company_1_data',   -100.0,         0.0,          0.0,          -100.0),
+                ('Undistributed Profits/Losses - company_2',         -50.0,         0.0,          0.0,           -50.0),
+                ('Total',                                              0.0,     21200.0,      21200.0,             0.0),
             ],
             options,
         )
@@ -447,21 +443,21 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
         lines = self.report._get_lines(options)
         self.assertLinesValues(
             lines,
-            #    Name                            Initial Balance         Debit          Credit      End Balance
-            [0,                                                1,            2,              3,               4],
+            #    Name                                      Initial Balance        Debit        Credit      End Balance
+            [0,                                                          1,           2,            3,               4],
             [
-                ('6 Group_6',                           -21000.0,         200.0,             0.0,      -20800.0),
-                ('600000 Expenses',                     -21000.0,           0.0,             0.0,      -21000.0),
-                ('600010 Expenses',                          0.0,         200.0,             0.0,         200.0),
-                ('(No Group)',                           21000.0,           0.0,           200.0,       20800.0),
-                ('121000 Account Receivable',             1000.0,           0.0,             0.0,        1000.0),
-                ('211000 Account Payable',                 100.0,           0.0,             0.0,         100.0),
-                ('211010 Account Payable',                  50.0,           0.0,             0.0,          50.0),
-                ('400000 Product Sales',                 20000.0,           0.0,             0.0,       20000.0),
-                ('400010 Product Sales',                     0.0,           0.0,           200.0,        -200.0),
-                ('999989 Undistributed Profits/Losses',    -50.0,           0.0,             0.0,         -50.0),
-                ('999999 Undistributed Profits/Losses',   -100.0,           0.0,             0.0,        -100.0),
-                ('Total',                                    0.0,         200.0,           200.0,           0.0),
+                ('6 Group_6',                                     -21000.0,       200.0,          0.0,        -20800.0),
+                ('600000 Expenses',                               -21000.0,         0.0,          0.0,        -21000.0),
+                ('600010 Expenses',                                    0.0,       200.0,          0.0,           200.0),
+                ('(No Group)',                                     21150.0,         0.0,        200.0,         20950.0),
+                ('121000 Account Receivable',                       1000.0,         0.0,          0.0,          1000.0),
+                ('211000 Account Payable',                           100.0,         0.0,          0.0,           100.0),
+                ('211010 Account Payable',                            50.0,         0.0,          0.0,            50.0),
+                ('400000 Product Sales',                           20000.0,         0.0,          0.0,         20000.0),
+                ('400010 Product Sales',                               0.0,         0.0,        200.0,          -200.0),
+                ('Undistributed Profits/Losses - company_1_data',   -100.0,         0.0,          0.0,          -100.0),
+                ('Undistributed Profits/Losses - company_2',         -50.0,         0.0,          0.0,           -50.0),
+                ('Total',                                              0.0,       200.0,        200.0,             0.0),
             ],
             options,
         )
@@ -472,6 +468,78 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
         general_ledger_lines = general_ledger._get_lines(res['params']['options'])
         unfolded_lines = [line for line in general_ledger_lines if line.get("unfolded")]
         self.assertEqual(len(unfolded_lines), 9)
+
+    def test_action_general_ledger_unallocated_earnings(self):
+        """
+            This test checks that the action caret_option_open_general_ledger works as expected for the
+            Unallocated Earnings Lines, when only one company is selected and in a multi-company scenario
+        """
+        options = self._generate_options(self.report, '2017-06-01', '2017-06-01')
+        parent_line_id = self.report._get_generic_line_id(model_name='account.report.line', value=self.env.ref("account_reports.trial_balance_report_all").id)
+        unallocated_earnings_line_id = self.report._get_generic_line_id(model_name='res.company', value=self.company_data['company'].id, parent_line_id=parent_line_id)
+        params = {'line_id': unallocated_earnings_line_id}
+
+        # Test case with more than one company
+        res = self.report.caret_option_open_general_ledger(options, params)
+        self.assertEqual(res['context']['default_filter_accounts'], 'Undistributed Profits/Losses - company_1_data')
+
+        # Test case with only one company
+        self.env.user.write({
+            'company_ids': [Command.set((self.company_data['company']).ids)],
+            'company_id': self.company_data['company'].id,
+        })
+        res = self.report.caret_option_open_general_ledger(options, params)
+        self.assertEqual(res['context']['default_filter_accounts'], 'Undistributed Profits/Losses')
+
+    def test_trial_balance_multiple_years_initial_balance(self):
+        # Entries in 2015 for company_1 to test the initial balance for the Undistributed Profits/Losses line.
+        move_2015_1 = self.env['account.move'].create({
+            'move_type': 'entry',
+            'date': fields.Date.from_string('2015-01-01'),
+            'journal_id': self.company_data['default_journal_misc'].id,
+            'line_ids': [
+                (0, 0, {'debit': 50.0,     'credit': 0.0,      'name': '2015_1_1',     'account_id': self.company_data['default_account_payable'].id}),
+                (0, 0, {'debit': 100.0,     'credit': 0.0,      'name': '2015_1_2',     'account_id': self.company_data['default_account_expense'].id}),
+                (0, 0, {'debit': 0.0,       'credit': 150.0,    'name': '2015_1_3',     'account_id': self.company_data['default_account_revenue'].id}),
+            ],
+        })
+        move_2015_1.action_post()
+
+        # Entry in 2016 for company_1 to test the initial balance for equity_unaffected accounts.
+        equity_unaffected_acc = self.env['account.account'].search([('account_type', '=', 'equity_unaffected')], limit=1)
+        move_2016_1 = self.env['account.move'].create({
+            'move_type': 'entry',
+            'date': fields.Date.from_string('2016-01-01'),
+            'journal_id': self.company_data['default_journal_misc'].id,
+            'line_ids': [
+                (0, 0, {'debit': 70.0,     'credit': 0.0,      'name': '2016_1_1',     'account_id': self.company_data['default_account_payable'].id}),
+                (0, 0, {'debit': 0.0,      'credit': 70.0,     'name': '2016_1_2',     'account_id': equity_unaffected_acc.id}),
+            ],
+        })
+        move_2016_1.action_post()
+
+        options = self._generate_options(self.report, '2017-01-01', '2017-12-31')
+        options = self._update_comparison_filter(options, self.report, 'previous_period', 1, fields.Date.from_string('2017-01-01'), fields.Date.from_string('2017-12-31'))
+        self.assertLinesValues(
+            self.report._get_lines(options),
+            #                                              [Initial Balance]   [     2016       ]    [End Balance]  [Initial Balance]      [       2017        ]       [End Balance]
+            #    Name                                              Balance      Debit      Credit         Balance             Balance      Debit          Credit          Balance
+            [0,                                                     1,          2,          3,             4,                5,            6,              7,               8],
+            [
+                ('121000 Account Receivable',                         0.0,        0.0,         0.0,           0.0,              0.0,       1000.0,          0.0,            1000.0),
+                ('211000 Account Payable',                           50.0,      170.0,         0.0,         220.0,            220.0,          0.0,          0.0,             220.0),
+                ('211010 Account Payable',                            0.0,       50.0,         0.0,          50.0,             50.0,          0.0,          0.0,              50.0),
+                ('400000 Product Sales',                              0.0,        0.0,       300.0,        -300.0,              0.0,      20000.0,          0.0,           20000.0),
+                ('400010 Product Sales',                              0.0,        0.0,       41.66,        -41.66,              0.0,          0.0,       166.62,           -166.62),
+                ('600000 Expenses',                                   0.0,      200.0,         0.0,         200.0,              0.0,          0.0,      21000.0,          -21000.0),
+                ('600010 Expenses',                                   0.0,        0.0,         0.0,           0.0,              0.0,       166.62,          0.0,            166.62),
+                ('999999 Undistributed Profits/Losses',               0.0,        0.0,        70.0,         -70.0,              0.0,          0.0,          0.0,               0.0),
+                ('Undistributed Profits/Losses - company_1_data',   -50.0,        0.0,         0.0,         -50.0,           -220.0,          0.0,          0.0,            -220.0),
+                ('Undistributed Profits/Losses - company_2',          0.0,        0.0,         0.0,           0.0,           -41.66,          0.0,          0.0,            -41.66),
+                ('Total',                                             0.0,      420.0,      411.66,          8.34,             8.34,     21166.62,     21166.62,              8.34),
+            ],
+            options,
+        )
 
     def test_trial_balance_comparisons_continuous_months(self):
         # Ensure that when comparing multiple months, an initial and end balance appear when the fiscal year changes.
@@ -493,7 +561,7 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
                 ('211000 Account Payable',                 100.0,     0.0,   0.0,     0.0,    0.0,  100.0,   100.0,       0.0,      0.0,  0.0,    0.0,    100.0),
                 ('400000 Product Sales',                  -300.0,     0.0,   0.0,     0.0,    0.0, -300.0,     0.0,   20000.0,      0.0,  0.0,    0.0,  20000.0),
                 ('600000 Expenses',                        200.0,     0.0,   0.0,     0.0,    0.0,  200.0,     0.0,       0.0,  21000.0,  0.0,    0.0, -21000.0),
-                ('999999 Undistributed Profits/Losses',      0.0,     0.0,   0.0,     0.0,    0.0,    0.0,  -100.0,       0.0,      0.0,  0.0,    0.0,   -100.0),
+                ('Undistributed Profits/Losses',             0.0,     0.0,   0.0,     0.0,    0.0,    0.0,  -100.0,       0.0,      0.0,  0.0,    0.0,   -100.0),
                 ('Total',                                    0.0,     0.0,   0.0,     0.0,    0.0,    0.0,     0.0,   21000.0,  21000.0,  0.0,    0.0,      0.0),
             ],
             options,
@@ -519,7 +587,7 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
                 ('211000 Account Payable',                   0.0,    100.0,     0.0,   100.0,   100.0,       0.0,      0.0,     100.0),
                 ('400000 Product Sales',                     0.0,      0.0,   300.0,  -300.0,     0.0,   20000.0,      0.0,   20000.0),
                 ('600000 Expenses',                          0.0,    200.0,     0.0,   200.0,     0.0,       0.0,  21000.0,  -21000.0),
-                ('999999 Undistributed Profits/Losses',      0.0,      0.0,     0.0,     0.0,  -100.0,       0.0,      0.0,    -100.0),
+                ('Undistributed Profits/Losses',             0.0,      0.0,     0.0,     0.0,  -100.0,       0.0,      0.0,    -100.0),
                 ('Total',                                    0.0,    300.0,   300.0,     0.0,     0.0,   21000.0,  21000.0,       0.0),
 
             ],
@@ -550,7 +618,7 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
             'company_ids': [Command.set((self.company_data['company']).ids)],
             'company_id': self.company_data['company'].id,
         })
-        self.report.line_ids[0].user_groupby = 'account_or_unaff_id, partner_id, id'
+        self.report.line_ids[0].user_groupby = 'account_id, partner_id, id'
 
         options = self._generate_options(self.report, '2017-01-01', '2017-01-31', default_options={'unfold_all': True, 'test_unfold_all': True})
 
@@ -579,7 +647,7 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
                 ('INV/2017/00001 2017_1_7',                   0.0,              0.0,        6000.0,    -6000.0),
                 ('INV/2017/00001 2017_1_8',                   0.0,              0.0,        7000.0,    -7000.0),
                 ('INV/2017/00001 2017_1_9',                   0.0,              0.0,        8000.0,    -8000.0),
-                ('999999 Undistributed Profits/Losses',    -100.0,              0.0,           0.0,     -100.0),
+                ('Undistributed Profits/Losses',           -100.0,              0.0,           0.0,     -100.0),
                 ('Total',                                     0.0,          21100.0,       21100.0,        0.0),
             ],
             options,
@@ -614,17 +682,12 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
         move_1.action_post()
         move_1_expense_line = move_1.line_ids[1]
 
-        unaff_account = self.env['account.account'].search([
-            *self.env['account.account']._check_company_domain(self.company_data['company'].id),
-            ('account_type', '=', 'equity_unaffected'),
-        ])
-
         options = self._generate_options(self.report, '2024-01-01', '2024-12-31', default_options={
             'comparison': {'filter': 'previous_period', 'number_period': 1, 'period_order': 'ascending'},
         })
 
         lines = self.report._get_lines(options)
-        unaff_line = next(line for line in lines if line['name'] == unaff_account.display_name)
+        unaff_line = next(line for line in lines if self.report._get_markup(line['id']) == 'undistributed_profits_losses')
         expense_line = next(line for line in lines if line['name'] == self.company_data['default_account_expense'].display_name)
         trial_balance_top_parent_line = self.report.line_ids[0]
 
@@ -710,7 +773,7 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
             'company_ids': [Command.set((self.company_data['company']).ids)],
             'company_id': self.company_data['company'].id,
         })
-        self.report.line_ids[0].user_groupby = 'partner_id, account_or_unaff_id, id'
+        self.report.line_ids[0].user_groupby = 'partner_id, account_id, id'
 
         options = self._generate_options(self.report, '2017-01-01', '2017-01-31', default_options={'unfold_all': True, 'test_unfold_all': True})
 
@@ -738,7 +801,7 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
                 ('INV/2017/00001 2017_1_7',                   0.0,              0.0,        6000.0,    -6000.0),
                 ('INV/2017/00001 2017_1_8',                   0.0,              0.0,        7000.0,    -7000.0),
                 ('INV/2017/00001 2017_1_9',                   0.0,              0.0,        8000.0,    -8000.0),
-                ('999999 Undistributed Profits/Losses',    -100.0,              0.0,           0.0,     -100.0),
+                ('Undistributed Profits/Losses',           -100.0,              0.0,           0.0,     -100.0),
                 ('Total',                                     0.0,          21100.0,       21100.0,        0.0),
             ],
             options,
@@ -839,15 +902,15 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
         lines = self.report._get_lines(options)
         self.assertLinesValues(
             lines,
-            #                                          [         Initial Balance        ]    [            Jan 2020            ]    [           End Balance          ]
-            #                                          [ Account XYZ ]    [    Total    ]    [ Account XYZ ]    [    Total    ]    [ Account XYZ ]    [    Total    ]
-            #   Name                                   Debit    Credit    Debit    Credit    Debit    Credit    Debit    Credit    Debit    Credit    Debit    Credit
-            [0,                                            1,       2,        3,       4,        5,       6,        7,       8,        9,      10,       11,      12],
+            #                                                       [         Initial Balance        ]    [            Jan 2020            ]    [           End Balance          ]
+            #                                                       [ Account XYZ ]    [    Total    ]    [ Account XYZ ]    [    Total    ]    [ Account XYZ ]    [    Total    ]
+            #   Name                                                Debit    Credit    Debit    Credit    Debit    Credit    Debit    Credit    Debit    Credit    Debit    Credit
+            [0,                                                         1,       2,        3,       4,        5,       6,        7,       8,        9,      10,       11,      12],
             [
-                ('211000 Account Payable',              50.0,     0.0,     50.0,     0.0,    100.0,     0.0,    100.0,     0.0,    150.0,     0.0,    150.0,     0.0),
-                ('400000 Product Sales',                 0.0,     0.0,      0.0,     0.0,      0.0,   100.0,      0.0,   100.0,      0.0,   100.0,      0.0,   100.0),
-                ('999999 Undistributed Profits/Losses',  0.0,    50.0,      0.0,    50.0,      0.0,     0.0,      0.0,     0.0,      0.0,    50.0,      0.0,    50.0),
-                ('Total',                               50.0,    50.0,     50.0,    50.0,    100.0,   100.0,    100.0,   100.0,    150.0,   150.0,    150.0,   150.0),
+                ('211000 Account Payable',                           50.0,     0.0,     50.0,     0.0,    100.0,     0.0,    100.0,     0.0,    150.0,     0.0,    150.0,     0.0),
+                ('400000 Product Sales',                              0.0,     0.0,      0.0,     0.0,      0.0,   100.0,      0.0,   100.0,      0.0,   100.0,      0.0,   100.0),
+                ('Undistributed Profits/Losses - company_1_data',     0.0,    50.0,      0.0,    50.0,      0.0,     0.0,      0.0,     0.0,      0.0,    50.0,      0.0,    50.0),
+                ('Total',                                            50.0,    50.0,     50.0,    50.0,    100.0,   100.0,    100.0,   100.0,    150.0,   150.0,    150.0,   150.0),
             ],
             options,
         )
@@ -865,15 +928,15 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
         lines = self.report._get_lines(options)
         self.assertLinesValues(
             lines,
-            #                                          [         Initial Balance        ]    [            Jan 2020            ]    [           End Balance          ]
-            #                                          [   Plan XYZ  ]    [    Total    ]    [   Plan XYZ  ]    [    Total    ]    [   Plan XYZ  ]    [    Total    ]
-            #   Name                                   Debit    Credit    Debit    Credit    Debit    Credit    Debit    Credit    Debit    Credit    Debit    Credit
-            [0,                                            1,       2,        3,       4,        5,       6,        7,       8,        9,      10,       11,      12],
+            #                                                      [         Initial Balance        ]    [            Jan 2020            ]    [           End Balance          ]
+            #                                                      [   Plan XYZ  ]    [    Total    ]    [   Plan XYZ  ]    [    Total    ]    [   Plan XYZ  ]    [    Total    ]
+            #   Name                                               Debit    Credit    Debit    Credit    Debit    Credit    Debit    Credit    Debit    Credit    Debit    Credit
+            [0,                                                        1,       2,        3,       4,        5,       6,        7,       8,        9,      10,       11,      12],
             [
-                ('211000 Account Payable',              50.0,     0.0,     50.0,     0.0,    100.0,     0.0,    100.0,     0.0,    150.0,     0.0,    150.0,     0.0),
-                ('400000 Product Sales',                 0.0,     0.0,      0.0,     0.0,      0.0,   100.0,      0.0,   100.0,      0.0,   100.0,      0.0,   100.0),
-                ('999999 Undistributed Profits/Losses',  0.0,    50.0,      0.0,    50.0,      0.0,     0.0,      0.0,     0.0,      0.0,    50.0,      0.0,    50.0),
-                ('Total',                               50.0,    50.0,     50.0,    50.0,    100.0,   100.0,    100.0,   100.0,    150.0,   150.0,    150.0,   150.0),
+                ('211000 Account Payable',                          50.0,     0.0,     50.0,     0.0,    100.0,     0.0,    100.0,     0.0,    150.0,     0.0,    150.0,     0.0),
+                ('400000 Product Sales',                             0.0,     0.0,      0.0,     0.0,      0.0,   100.0,      0.0,   100.0,      0.0,   100.0,      0.0,   100.0),
+                ('Undistributed Profits/Losses - company_1_data',    0.0,    50.0,      0.0,    50.0,      0.0,     0.0,      0.0,     0.0,      0.0,    50.0,      0.0,    50.0),
+                ('Total',                                           50.0,    50.0,     50.0,    50.0,    100.0,   100.0,    100.0,   100.0,    150.0,   150.0,    150.0,   150.0),
             ],
             options,
         )
@@ -982,6 +1045,24 @@ class TestTrialBalanceReport(TestAccountReportsCommon):
                 ['1012 Group_1012',                    0.0,             200.0,          200.0,            0.0],
                 ['101200 Account A1',                  0.0,             200.0,          200.0,            0.0],
                 ['Total',                              0.0,             200.0,          200.0,            0.0],
+            ],
+            options,
+        )
+
+        # Test the filter on undistributed profits/losses
+        default_options = {
+            'unfold_all': True,
+            'export_mode': 'print',
+            'filter_search_bar': 'undistributed',
+        }
+        options = self._generate_options(self.report, '2017-06-01', '2017-06-01', default_options=default_options)
+        self.assertLinesValues(
+            self.report._get_lines(options),
+            [   0,                                                  1,              2,             3,            4],
+            [
+                ['Undistributed Profits/Losses - company_1_data',  -100.0,          0.0,           0.0,          -100.0],
+                ['Undistributed Profits/Losses - company_2',        -50.0,          0.0,           0.0,           -50.0],
+                ['Total',                                          -150.0,          0.0,           0.0,          -150.0],
             ],
             options,
         )

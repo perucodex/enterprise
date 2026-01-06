@@ -171,6 +171,58 @@ class L10n_EeKmdInfReportHandler(models.AbstractModel):
             # Part A grouped lines display no information, hence part A should be unfolded by default
             options['unfold_all'] = options['export_mode'] == 'print' or previous_options.get('unfold_all', True) if previous_options else True
 
+    def _custom_unfold_all_batch_data_generator(self, report, options, lines_to_expand_by_function):
+        """
+        VAT-specific batch data generator.
+        """
+
+        rslt = {}
+
+        if report == self.env.ref('l10n_ee_reports.kmd_inf_report_part_b', raise_if_not_found=False):
+            return rslt
+
+        for expand_function_name, lines_to_expand in lines_to_expand_by_function.items():
+            for line_to_expand in lines_to_expand:
+                if expand_function_name == '_report_expand_unfoldable_line_with_groupby':
+                    report_line_id = report._get_res_id_from_line_id(line_to_expand['id'], 'account.report.line')
+                    expressions_to_evaluate = report.line_ids.expression_ids.filtered(
+                        lambda x: x.report_line_id.id == report_line_id and x.engine == 'custom'
+                    )
+                    if not expressions_to_evaluate:
+                        continue
+
+                group_by = line_to_expand['groupby'].split(',')
+                groupby_to_expand = group_by[1] if len(group_by) > 1 else line_to_expand['groupby']
+
+                for column_group_key, column_group_options in report._split_options_per_column_group(options).items():
+                    all_column_groups_expression_totals = report._compute_expression_totals_for_each_column_group(
+                        expressions_to_evaluate,
+                        column_group_options,
+                        groupby_to_expand=groupby_to_expand,
+                    )
+
+                    all_line_ids = {
+                        grouping_key
+                        for grouping_key, _value
+                        in all_column_groups_expression_totals[column_group_key][expressions_to_evaluate[0]]['value']
+                    }
+
+                    # Batch fetch move_id for these lines
+                    move_lines = self.env['account.move.line'].browse(all_line_ids)
+                    line_to_move_map = {l.id: l.move_id.id for l in move_lines}
+
+                    for expression in expressions_to_evaluate:
+                        for grouping_key, result in all_column_groups_expression_totals[column_group_key][expression]['value']:
+                            move_id = line_to_move_map[grouping_key]
+
+                            # Build the same key to be used later
+                            full_key = f"[{report_line_id}]move_id:{move_id}=>id"
+                            rslt.setdefault(full_key, {}).setdefault(column_group_key, {}).setdefault(expression, {'value': [], 'sublines_info': set()})
+
+                            rslt[full_key][column_group_key][expression]['value'].append((grouping_key, result))
+                            rslt[full_key][column_group_key][expression]['sublines_info'].add(grouping_key)
+        return rslt
+
     def _custom_line_postprocessor(self, report, options, lines):
         """ Change label for grouping lines in the result of the report's _get_lines(),
         indicating the VAT rate and the special procedure of the line.

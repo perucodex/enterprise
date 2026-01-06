@@ -6,7 +6,6 @@ import { FilterEditorFieldMatching } from "./filter_editor_field_matching";
 import { useService } from "@web/core/utils/hooks";
 import { MultiRecordSelector } from "@web/core/record_selectors/multi_record_selector";
 import { components } from "@odoo/o-spreadsheet";
-import { _t } from "@web/core/l10n/translation";
 
 import { useState, onWillStart } from "@odoo/owl";
 import { SidePanelDomain } from "../../../components/side_panel_domain/side_panel_domain";
@@ -58,12 +57,6 @@ export class RelationFilterEditorSidePanel extends AbstractFilterEditorSidePanel
 
     async onWillStart() {
         await this.fetchRelationModelLabel();
-    }
-
-    get invalidModel() {
-        return _t(
-            "At least one data source has an invalid model. Please delete it before editing this global filter."
-        );
     }
 
     async onModelSelected({ technical, label }) {

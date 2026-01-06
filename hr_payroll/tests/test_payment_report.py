@@ -1,8 +1,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import base64
+import csv
+import io
+
 from datetime import date
-from odoo import Command
+from odoo import Command, fields
 from odoo.addons.hr_payroll.tests.common import TestPayslipBase
+from odoo.tools.misc import format_date
 
 
 class TestHrPayslipPaymentReport(TestPayslipBase):
@@ -105,3 +110,76 @@ class TestHrPayrunPaymentReport(TestHrPayslipPaymentReport):
         self.assertFalse(self.payslip_run.payment_report_format, "Payment report file format should be cleared")
         self.assertFalse(self.payslip_run.payment_report_date, "Payment report date should be cleared.")
         self.assertEqual(attachment_count, 0, "Payrun report attachment should be deleted after clearing.")
+
+    def test_payrun_payment_report_with_multiple_payslips(self):
+        self.payslip.compute_sheet()
+        self.payslip.action_payslip_done()
+
+        test_structure = self.env['hr.payroll.structure'].create({
+            'name': 'Test Salary Structure',
+            'type_id': self.structure_type.id,
+        })
+
+        net_salary_rule = test_structure.rule_ids.filtered(lambda r: r.code == "NET")
+        net_salary_rule.write({
+            'amount_select': 'fix',
+            'amount_fix': 0.0,
+
+        })
+
+        self.env['hr.payslip'].create({
+            'name': 'Test Payslip with 0.0 net salary',
+            'employee_id': self.richard_emp.id,
+            'date_from': date(2025, 1, 1),
+            'date_to': date(2025, 1, 31),
+            'payslip_run_id': self.payslip_run.id,
+            'struct_id': test_structure.id,
+        })
+
+        self.payslip_run.action_confirm()
+        self.payslip_run.action_validate()
+
+        wizard = self.env['hr.payroll.payment.report.wizard'].create({
+            'payslip_ids': self.payslip_run.slip_ids.ids,
+            'payslip_run_id': self.payslip_run.id,
+            'export_format': 'csv',
+        })
+        wizard.generate_payment_report()
+
+        attachment_count = self.env['ir.attachment'].search_count([
+            ('res_model', '=', 'hr.payslip.run'),
+            ('res_id', '=', self.payslip_run.id),
+            ('res_field', '=', 'payment_report'),
+        ])
+
+        self.assertTrue(self.payslip_run.payment_report, "Payrun payment report should be set.")
+        self.assertTrue(self.payslip_run.payment_report_filename)
+        self.assertTrue(self.payslip_run.payment_report_format)
+        self.assertTrue(self.payslip_run.payment_report_date)
+        self.assertEqual(attachment_count, 1, "Payrun report attachment should exist.")
+
+        csv_data = base64.b64decode(self.payslip_run.payment_report)
+        content = csv_data.decode('utf-8')
+        reader = csv.reader(io.StringIO(content), delimiter=',')
+
+        expected_values = [
+            # Header row
+            [
+                'Sequence', 'Payment Date', 'Report Date', 'Payslip Period',
+                'Employee name', 'Bank account', 'BIC', 'Amount to pay'
+            ],
+            # First data row
+            [
+                '1',
+                format_date(wizard.env, wizard.effective_date),
+                format_date(wizard.env, fields.Date.today()),
+                format_date(wizard.env, self.payslip.date_from) + ' - ' + format_date(wizard.env, self.payslip.date_to),
+                'Richard',
+                '9876543210',
+                '',
+                '$ 7,205.42',
+            ],
+        ]
+
+        for idx, content in enumerate(reader):
+            self.assertSequenceEqual(expected_values[idx], content)

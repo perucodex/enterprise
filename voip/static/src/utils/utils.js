@@ -1,4 +1,5 @@
 import { normalize } from "@web/core/l10n/utils";
+import { escapeRegExp } from "@web/core/utils/strings";
 
 /**
  * Removes whitespaces, dashes, slashes and periods from a phone number.
@@ -57,4 +58,38 @@ export function isSubstring(targetString, substring) {
         return false;
     }
     return normalize(targetString).includes(normalize(substring));
+}
+
+/**
+ * Matches a target number against a search term and returns a three-part result
+ * for highlighting.
+ *
+ * @param {string} targetNumber - The full phone number to search within.
+ * @param {string} searchTerms - The user's original search term.
+ * @returns {{before: string, match: string, after: string} | null}
+ * An object with the following properties if a match is found, otherwise null:
+ * - `before`: The substring of `targetNumber` that comes *before* the match.
+ * - `match`: The actual substring of `targetNumber` that *matched* the regex.
+ * - `after`: The substring of `targetNumber` that comes *after* the match.
+ */
+export function matchPhoneNumber(targetNumber, searchTerms) {
+    if (/[a-zA-Z]/.test(searchTerms)) {
+        return null;
+    }
+    const r = String.raw;
+    const hasPlusPrefix = searchTerms.trim().startsWith("+");
+    const sanitizedSearchTerms = searchTerms.replace(/[^0-9*#;,]/g, "");
+    let regexString = Array.from(sanitizedSearchTerms, escapeRegExp).join(r`\D*`);
+    if (!regexString && !hasPlusPrefix) {
+        return null;
+    }
+    if (hasPlusPrefix) {
+        regexString = r`\+\D*${regexString}`;
+    }
+    const regex = new RegExp(`(^.*?)(${regexString})(.*?$)`, "i");
+    const [, before, match, after] = targetNumber.match(regex) ?? [];
+    if (match) {
+        return { before, match, after };
+    }
+    return null;
 }

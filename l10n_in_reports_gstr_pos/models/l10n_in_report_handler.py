@@ -8,5 +8,11 @@ class L10n_InReportHandler(models.AbstractModel):
 
     def _get_invalid_no_hsn_line_domain(self):
         domain = super()._get_invalid_no_hsn_line_domain()
-        domain += [('move_id.pos_session_ids', '=', False)]
+        domain += [
+            "|",
+            "&",
+                ("move_id.pos_session_ids", "!=", False),
+                ("product_uom_id", "!=", False),
+            ("move_id.pos_session_ids", "=", False),
+        ]
         return domain

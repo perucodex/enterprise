@@ -1,11 +1,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.tools.urls import urljoin as url_join
+from odoo.tests import tagged, HttpCase
 
 from .common import TestHrReferralBase
 
 
-class TestReferralLinks(TestHrReferralBase):
+@tagged('post_install', '-at_install')
+class TestReferralLinks(TestHrReferralBase, HttpCase):
 
     def test_search_or_create_referral_links(self):
         '''
@@ -48,3 +50,43 @@ class TestReferralLinks(TestHrReferralBase):
         trackers = self.env['link.tracker'].search(
             [('url', '=', job_url), ('campaign_id', '=', job.utm_campaign_id.id)])
         self.assertEqual(len(trackers), len(all_links_set), 'There are new links created')
+
+    def test_referral_campaign_tour(self):
+        job = self.env['hr.job'].create({
+            'name': 'Test Job Referral Campaign',
+            'no_of_recruitment': '5',
+            'company_id': self.company_1.id,
+            'is_published': True,
+        })
+        self.env['hr.employee'].create([
+            {
+                'name': 'Steve employee',
+                'company_id': self.company_1.id,
+                'user_id': self.steve_user.id
+            }, {
+                'name': 'Richard employee',
+                'company_id': self.company_1.id,
+                'user_id': self.richard_user.id
+            }, {
+                'name': 'Employee without user',
+                'company_id': self.company_1.id,
+            },
+        ])
+        self.steve_user.email = 'steve.employee@company_test.com'
+        self.richard_user.email = 'richard.employee@company_test.com'
+        self.steve_user.group_ids += self.env.ref("hr_recruitment.group_hr_recruitment_manager")
+
+        self.assertFalse(job.utm_campaign_id)
+        self.steve_user.write({
+            'company_ids': [(4, self.company_1.id)],
+            'company_id': self.company_1.id,
+        })
+        self.start_tour("/odoo", 'hr_referral_utm_campaign_tour', login="stv")
+
+        self.assertTrue(job.utm_campaign_id.id)
+        nb_trackers = self.env['link.tracker'].search_count([('campaign_id', '=', job.utm_campaign_id.id)])
+        nb_employee_with_user = self.env['hr.employee'].search_count([
+            ('user_id', '!=', False),
+            ('company_id', '=', self.company_1.id)
+        ])
+        self.assertEqual(nb_trackers, nb_employee_with_user)

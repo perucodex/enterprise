@@ -139,6 +139,15 @@ export const DocumentsRendererMixin = (component) =>
             return record;
         }
 
+        getIsDomainSelected() {
+            if (this.env.model.isDomainSelected) {
+                this.env.model.notification.add(_t("Only current page items can be dragged."), {
+                    type: "info",
+                });
+            }
+            return this.env.model.isDomainSelected;
+        }
+
         /**
          * Number of documents in the current (container) folder
          */

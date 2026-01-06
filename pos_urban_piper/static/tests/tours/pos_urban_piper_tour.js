@@ -5,6 +5,7 @@ import * as Order from "@point_of_sale/../tests/generic_helpers/order_widget_uti
 import * as UrbanPiper from "@pos_urban_piper/../tests/tours/utils/pos_urban_piper_utils";
 import * as Chrome from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
 import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
+import { inLeftSide } from "@point_of_sale/../tests/pos/tours/utils/common";
 import { registry } from "@web/core/registry";
 
 registry.category("web_tour.tours").add("OrderFlowTour", {
@@ -133,5 +134,33 @@ registry.category("web_tour.tours").add("test_reject_order", {
                 trigger: ".selection-item:contains('Product is out of Stock')",
                 run: "click",
             },
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_to_check_attribute", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            UrbanPiper.fetchDeliveryData(),
+            UrbanPiper.checkNewOrderCount(1),
+            inLeftSide(
+                Order.hasLine({
+                    productName: "Configurable Chair",
+                    quantity: 2,
+                    attributeLine: "Red, Metal, Wool, Cushion, Cup Holder",
+                })
+            ),
+            UrbanPiper.onDropdownStatus("New"),
+            TicketScreen.selectOrder("001"),
+            UrbanPiper.orderButtonClick("Accept"),
+            UrbanPiper.fetchDeliveryData(),
+            UrbanPiper.checkNewOrderCount(0),
+            UrbanPiper.orderHasText("001", "Acknowledged"),
+            UrbanPiper.orderHasText("001", "Just Eat"),
+            TicketScreen.selectOrder("001"),
+            UrbanPiper.orderButtonClick("Mark as ready"),
+            UrbanPiper.fetchDeliveryData(),
+            UrbanPiper.orderHasText("001", "Food Ready"),
         ].flat(),
 });

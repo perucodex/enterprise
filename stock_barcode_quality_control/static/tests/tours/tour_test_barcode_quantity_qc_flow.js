@@ -146,3 +146,59 @@ registry.category("web_tour.tours").add("test_operation_quality_check_delivery_b
         },
     ],
 });
+
+registry.category("web_tour.tours").add("test_quality_check_partial_reception_barcode", {
+    steps: () => [
+        {
+            trigger: ".o_stock_barcode_main_menu",
+            run: "scan WHINQCPRB",
+        },
+        {
+            trigger: ".o_check_quality",
+            run: "click",
+        },
+        {
+            trigger:
+                ".modal-content:contains(product1):has(.o_field_widget[name=nb_checks]:contains(1)) .btn-close",
+            run: "click",
+        },
+        {
+            trigger: ".o_barcode_client_action",
+            run: "scan productserial1",
+        },
+        {
+            trigger: ".o_barcode_line.o_selected:contains(productserial1)",
+            run: "scan SN001",
+        },
+        {
+            trigger: ".o_barcode_line:contains(SN001)",
+        },
+        // Open QC's to check that only the one related to SN001 is todo
+        {
+            trigger: ".o_check_quality",
+            run: "click",
+        },
+        // Discard the dialog and check that the validation process displays the same QC
+        {
+            trigger: ".modal-content:has(.modal-header:contains(productserial1)) .btn-close",
+            run: "click",
+        },
+        {
+            trigger: ".o_validate_page",
+            run: "click",
+        },
+        {
+            trigger:
+                ".modal-content:has(.modal-header:contains('Incomplete Transfer')) button:contains(Validate)",
+            run: "click",
+        },
+        {
+            trigger:
+                ".modal-content:has(.modal-header:contains(productserial1)) button[name=do_pass]",
+            run: "click",
+        },
+        {
+            trigger: ".o_notification_bar.bg-success",
+        },
+    ],
+});

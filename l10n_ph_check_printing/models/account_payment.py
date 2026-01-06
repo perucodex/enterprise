@@ -22,8 +22,10 @@ class AccountPayment(models.Model):
                     check_amount = check_amount.replace('And ', '').replace(',', '')
                 if pay.amount % 1 > 0:
                     # If there are decimals, we write them as x/100
-                    check_amount += f' And {str(pay.amount).split(".")[1].ljust(2, "0")}/100'
-                pay.check_amount_in_words = check_amount + ' ONLY'
+                    check_amount += f' and {str(pay.amount).split(".")[1].ljust(2, "0")}/100'
+                else:
+                    check_amount += ' ONLY'
+                pay.check_amount_in_words = check_amount
             else:
                 pay.check_amount_in_words = False
         super(AccountPayment, self - ph_checks_payments)._compute_check_amount_in_words()

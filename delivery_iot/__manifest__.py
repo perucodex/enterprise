@@ -13,6 +13,7 @@ Allows using IoT devices, such as scales and printers, for delivery operations.
         'report/delivery_carrier_reports.xml',
         'wizard/stock_put_in_pack_views.xml',
         'views/iot_views.xml',
+        'views/stock_menu_views.xml',
         'views/stock_picking_views.xml',
         ],
     'author': 'Odoo S.A.',

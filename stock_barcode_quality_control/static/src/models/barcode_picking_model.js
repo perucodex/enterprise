@@ -16,9 +16,12 @@ patch(BarcodePickingModel.prototype, {
 
     async checkQuality() {
         await this.save();
-        const res = await this.orm.call(this.resModel, this.openQualityChecksMethod, [
+        const res = await this.orm.call(
+            this.resModel,
+            this.openQualityChecksMethod,
             [this.resId || this.record.id],
-        ]);
+            { context: { barcode_trigger: true } }
+        );
         if (typeof res === "object" && res !== null) {
             return this.action.doAction(res, {
                 onClose: async () => {

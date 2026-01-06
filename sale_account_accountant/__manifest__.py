@@ -9,6 +9,9 @@
 Notify that a matching sale order exists in the reconciliation widget.
     """,
     'depends': ['sale', 'account_accountant'],
+    'data': [
+        'views/sale_order_line_views.xml',
+    ],
     'installable': True,
     'auto_install': True,
     'author': 'Odoo S.A.',

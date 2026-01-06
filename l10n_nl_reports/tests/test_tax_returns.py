@@ -42,7 +42,7 @@ class TestTaxReturn(TestAccountReportsCommon):
         cls.startClassPatcher(freeze_time('2024-01-16'))
 
         with cls._patch_returns_generation():
-            cls.env.company.account_opening_date = '2023-01-01'
+            cls.env.company.account_opening_date = '2024-02-01'  # This will make the first return to be generated in January
 
     @classmethod
     def _patch_returns_generation(cls):
@@ -52,9 +52,8 @@ class TestTaxReturn(TestAccountReportsCommon):
         """ Checks a closing entry with rounding difference """
         first_return = self.env['account.return'].search([
             ('type_id', '=', self.basic_return_type.id),
-            ('date_from', '=', '2024-01-01'),
             ('company_id', '=', self.env.company.id),
-        ])
+        ], order='date_from', limit=1)
         with self.allow_pdf_render():
             first_return.action_validate()
         self.assertTrue(first_return.closing_move_ids)

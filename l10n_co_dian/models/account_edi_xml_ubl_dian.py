@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import re
 
 from odoo import api, models, fields, _
-from odoo.addons.account_edi_ubl_cii.models.account_edi_xml_ubl_20 import FloatFmt
+from odoo.addons.account_edi_ubl_cii.models.account_edi_common import FloatFmt
 from odoo.addons.account.tools import dict_to_xml
 from odoo.addons.l10n_co_dian import xml_utils
 from odoo.addons.l10n_co_edi.models.res_partner import FINAL_CONSUMER_VAT
@@ -761,9 +761,15 @@ class AccountEdiXmlUbl_Dian(models.AbstractModel):
 
         def grouping_function(base_line, tax_data):
             grouping_key = vals['tax_grouping_function'](base_line, tax_data)
-            if grouping_key is not None and tax_data['tax'].l10n_co_edi_type.code in ['32', '34']:
-                # Handle ICL/IBUA taxes
-                base_unit_measure_by_grouping_key[frozendict(grouping_key)] += base_line['product_id'].l10n_co_edi_ref_nominal_tax * (base_line['quantity'] if tax_data['tax'].l10n_co_edi_type.code == '34' else 1)
+            if grouping_key is not None and tax_data['tax'].l10n_co_edi_type.code in ['22', '32', '34']:
+                # Handle INC Bolsas/ICL/IBUA taxes
+                if tax_data['tax'].l10n_co_edi_type.code == '22':
+                    base_unit_measure_by_grouping_key[frozendict(grouping_key)] = tax_data['tax'].amount
+                else:
+                    base_unit_measure_by_grouping_key[frozendict(grouping_key)] += (
+                        base_line['product_id'].l10n_co_edi_ref_nominal_tax *
+                        (base_line['quantity'] if tax_data['tax'].l10n_co_edi_type.code == '34' else 1)
+                    )
             return grouping_key
 
         base_lines_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_tax_details(
@@ -833,11 +839,11 @@ class AccountEdiXmlUbl_Dian(models.AbstractModel):
         tax_details = vals['tax_details']
         grouping_key = vals['grouping_key']
 
-        if grouping_key['l10n_co_edi_type'].code not in ['32', '34']:
+        if grouping_key['l10n_co_edi_type'].code not in ['22', '32', '34']:
             tax_subtotal_node = super()._get_tax_subtotal_node(vals)
             tax_subtotal_node['cbc:Percent'] = None
         else:
-            # Special subtotals for ICL/IBUA taxes
+            # Special subtotals for INC Bolsas/ICL/IBUA taxes
             tax_subtotal_node = {
                 'cbc:TaxAmount': {
                     '_text': self.format_float(tax_details['tax_amount'], vals['currency_dp']),
@@ -845,7 +851,11 @@ class AccountEdiXmlUbl_Dian(models.AbstractModel):
                 },
                 'cbc:BaseUnitMeasure': {
                     '_text': tax_details['base_unit_measure'],
-                    'unitCode': 'LTR' if grouping_key['l10n_co_edi_type'].code == '32' else 'ML',
+                    'unitCode': {
+                        '22': 'NIU',
+                        '32': 'LTR',
+                        '34': 'ML'
+                    }.get(grouping_key['l10n_co_edi_type'].code),
                 },
                 'cbc:PerUnitAmount': {
                     '_text': self.format_float(grouping_key['amount'], 2),
@@ -865,8 +875,8 @@ class AccountEdiXmlUbl_Dian(models.AbstractModel):
             # The majority of taxes have only 2 decimals, but some have 3 (and they should be reported with all their decimals).
             'cbc:Percent': {
                 '_text': FloatFmt(abs(grouping_key['amount']), 2, 3)  # withholding taxes are reported as positives
-            } if grouping_key['l10n_co_edi_type'].code not in {'32', '34'}
-            else None,  # Don't include Percent for ICL/IBUA taxes
+            } if grouping_key['l10n_co_edi_type'].code not in {'22', '32', '34'}
+            else None,  # Don't include Percent for INC Bolsas/ICL/IBUA taxes
             'cac:TaxScheme': {
                 'cbc:ID': {
                     '_text': grouping_key['l10n_co_edi_type'].code,
@@ -915,13 +925,21 @@ class AccountEdiXmlUbl_Dian(models.AbstractModel):
 
         def grouping_function(base_line, tax_data):
             grouping_key = vals['tax_grouping_function'](base_line, tax_data)
-            if grouping_key is not None and tax_data['tax'].l10n_co_edi_type.code in ['32', '34']:
+            if grouping_key is not None and tax_data['tax'].l10n_co_edi_type.code in ['22', '32', '34']:
+                # - INC Bolsas (tax on plastic bags) is a tax based on the number of plastic bags used in the sale.
+                #   It is always sent in NIUs (Number of Items) according to the specifications listed in the DIAN documentation.
                 # - ICL (tax on alcoholic beverages) is a tax based on the alcohol percentage in the bottle.
                 #   It is always sent in LTRs according to the specifications listed in the DIAN documentation.
                 # - IBUA (tax on sugar beverages) is a tax based on the quantity of sugar per 100mL
                 #   e.g. if the quantity of sugar per 100mL is > 10gr -> tax of 35$ per 100mL
                 # In Odoo, we have a field for the volume of the product : l10n_co_edi_ref_nominal_tax
-                base_unit_measure_by_grouping_key[frozendict(grouping_key)] += base_line['product_id'].l10n_co_edi_ref_nominal_tax * (base_line['quantity'] if tax_data['tax'].l10n_co_edi_type.code == '34' else 1)
+                if tax_data['tax'].l10n_co_edi_type.code == '22':
+                    base_unit_measure_by_grouping_key[frozendict(grouping_key)] = tax_data['tax'].amount
+                else:
+                    base_unit_measure_by_grouping_key[frozendict(grouping_key)] += (
+                        base_line['product_id'].l10n_co_edi_ref_nominal_tax *
+                        (base_line['quantity'] if tax_data['tax'].l10n_co_edi_type.code == '34' else 1)
+                    )
             return grouping_key
 
         aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(

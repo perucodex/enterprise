@@ -19,9 +19,9 @@ class TestPurchaseOrder(TestAccountBudgetPurchaseCommon):
             'group_ids': [Command.set(self.env.ref('purchase.group_purchase_manager').ids)],
         })
 
-        self.assertTrue(
+        self.assertFalse(
             self.purchase_order.with_user(purchase_user).order_line.budget_line_ids,
-            " Purchase Order should be linked to a Budget and Purchaser should have access to it. "
+            " Purchase Order should be accessible by purchase manager even without accounting rights. "
         )
 
     def test_purchase_order_is_above_budget(self):

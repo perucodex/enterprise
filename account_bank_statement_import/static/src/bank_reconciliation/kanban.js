@@ -22,7 +22,6 @@ export class BankRecKanbanUploadController extends BankRecKanbanController {
 }
 
 export class BankRecKanbanUploadRenderer extends BankRecKanbanRenderer {
-    static template = "account.BankRecKanbanUploadRenderer";
     static components = {
         ...BankRecKanbanRenderer.components,
         UploadDropZone,

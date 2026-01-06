@@ -24,7 +24,7 @@ class L10nThaiTaxReportTest(AccountSalesReportCommon):
         super().setUpClass()
         cls.partner_b.write({
             'country_id': cls.env.ref('base.th').id,
-            "vat": "12345678",
+            "vat": "1234545678781",
             "company_registry": "12345678"
         })
 
@@ -80,8 +80,8 @@ class L10nThaiTaxReportTest(AccountSalesReportCommon):
 
         report_data = self.env['l10n_th.pnd53.report.handler'].l10n_th_print_pnd_tax_report_pnd53(options)['file_content']
         expected = ("No.,Tax ID,Title,Contact Name,Street,Street2,City,State,Zip,Branch Number,Invoice/Bill Date,Tax Rate,Total Amount,WHT Amount,WHT Condition,Tax Type\n"
-                    "1,12345678,บริษัท,Partner B,,,,,,12345678,20/05/2023,3.00,1000.00,30.00,1,Service\n"
-                    "2,12345678,บริษัท,Partner B,,,,,,12345678,20/05/2023,2.00,1000.00,20.00,1,Advertising\n").encode()
+                    f"1,{self.partner_b.vat},บริษัท,Partner B,,,,,,12345678,20/05/2023,3.00,1000.00,30.00,1,Service\n"
+                    f"2,{self.partner_b.vat},บริษัท,Partner B,,,,,,12345678,20/05/2023,2.00,1000.00,20.00,1,Advertising\n").encode()
 
         self.assertEqual(report_data, expected)
 
@@ -122,8 +122,8 @@ class L10nThaiTaxReportTest(AccountSalesReportCommon):
 
         report_data = self.env['l10n_th.pnd3.report.handler'].l10n_th_print_pnd_tax_report_pnd3(options)['file_content']
         expected = ("No.,Tax ID,Title,Contact Name,Street,Street2,City,State,Zip,Branch Number,Invoice/Bill Date,Tax Rate,Total Amount,WHT Amount,WHT Condition,Tax Type\n"
-                    "1,12345678,,Partner B,,,,,,12345678,20/05/2023,1.00,1000.00,10.00,1,Transportation\n"
-                    "2,12345678,,Partner B,,,,,,12345678,20/05/2023,2.00,1000.00,20.00,1,Advertising\n").encode()
+                    f"1,{self.partner_b.vat},,Partner B,,,,,,12345678,20/05/2023,1.00,1000.00,10.00,1,Transportation\n"
+                    f"2,{self.partner_b.vat},,Partner B,,,,,,12345678,20/05/2023,2.00,1000.00,20.00,1,Advertising\n").encode()
 
         self.assertEqual(report_data, expected)
 
@@ -140,7 +140,7 @@ class L10nThaiTaxReportTest(AccountSalesReportCommon):
         report_data = self.env['l10n_th.tax.report.handler'].l10n_th_print_sale_tax_report(options)['file_content']
         expected = [
             ['No.', 'Tax Invoice No.', 'Reference', 'Invoice Date', 'Contact Name', 'Tax ID', 'Company Information', 'Total Amount', 'Total Excluding VAT Amount', 'Vat Amount'],
-            [1, 'INV/2023/00001', '', datetime(2023, 5, 20), 'Partner B', '12345678', 'Branch 12345678', 2140.0, 2000.0, 140.0],
+            [1, 'INV/2023/00001', '', datetime(2023, 5, 20), 'Partner B', self.partner_b.vat, 'Branch 12345678', 2140.0, 2000.0, 140.0],
             ['', '', '', '', '', '', '', '', '', ''],
             ['', '', '', '', '', '', '', '', '', ''],
             ['', '', '', '', '', '', 'Total', 2140.0, 2000.0, 140]
@@ -159,7 +159,7 @@ class L10nThaiTaxReportTest(AccountSalesReportCommon):
         report_data = self.env['l10n_th.tax.report.handler'].l10n_th_print_sale_tax_report(options)['file_content']
         expected = [
             ['No.', 'Tax Invoice No.', 'Reference', 'Invoice Date', 'Contact Name', 'Tax ID', 'Company Information', 'Total Amount', 'Total Excluding VAT Amount', 'Vat Amount'],
-            [1, 'INV/2023/00001', '', datetime(2023, 5, 20), 'Partner B', '12345678', '', 2140.0, 2000.0, 140.0],
+            [1, 'INV/2023/00001', '', datetime(2023, 5, 20), 'Partner B', self.partner_b.vat, '', 2140.0, 2000.0, 140.0],
             ['', '', '', '', '', '', '', '', '', ''],
             ['', '', '', '', '', '', '', '', '', ''],
             ['', '', '', '', '', '', 'Total', 2140.0, 2000.0, 140]
@@ -182,9 +182,9 @@ class L10nThaiTaxReportTest(AccountSalesReportCommon):
         report_data = self.env['l10n_th.tax.report.handler'].l10n_th_print_purchase_tax_report(options)['file_content']
         expected = [
             ['No.', 'Tax Invoice No.', 'Reference', 'Invoice Date', 'Contact Name', 'Tax ID', 'Company Information', 'Total Amount', 'Total Excluding VAT Amount', 'Vat Amount'],
-            [1, 'RBILL/2023/05/0001', '', datetime(2023, 5, 31), 'Partner B', '12345678', '', -2140.0, -2000.0, -140.0],
-            [2, 'BILL/2023/05/0002', '', datetime(2023, 5, 20), 'Partner B', '12345678', '', 2140.0, 2000.0, 140.0],
-            [3, 'BILL/2023/05/0001', '', datetime(2023, 5, 20), 'Partner B', '12345678', '', 2140.0, 2000.0, 140.0],
+            [1, 'RBILL/2023/05/0001', '', datetime(2023, 5, 31), 'Partner B', self.partner_b.vat, '', -2140.0, -2000.0, -140.0],
+            [2, 'BILL/2023/05/0002', '', datetime(2023, 5, 20), 'Partner B', self.partner_b.vat, '', 2140.0, 2000.0, 140.0],
+            [3, 'BILL/2023/05/0001', '', datetime(2023, 5, 20), 'Partner B', self.partner_b.vat, '', 2140.0, 2000.0, 140.0],
             ['', '', '', '', '', '', '', '', '', ''],
             ['', '', '', '', '', '', '', '', '', ''],
             ['', '', '', '', '', '', 'Total', 2140.0, 2000.0, 140.0]
@@ -209,8 +209,8 @@ class L10nThaiTaxReportTest(AccountSalesReportCommon):
         report_data = self.env['l10n_th.tax.report.handler'].l10n_th_print_purchase_tax_report(options)['file_content']
         expected = [
             ['No.', 'Tax Invoice No.', 'Reference', 'Invoice Date', 'Contact Name', 'Tax ID', 'Company Information', 'Total Amount', 'Total Excluding VAT Amount', 'Vat Amount'],
-            [1, 'RBILL/2023/05/0001', '', datetime(2023, 5, 20), 'Partner B', '12345678', '', -1070.0, -1000.0, -70.0],
-            [2, 'BILL/2023/05/0001', '', datetime(2023, 5, 20), 'Partner B', '12345678', '', 2140.0, 2000.0, 140.0],
+            [1, 'RBILL/2023/05/0001', '', datetime(2023, 5, 20), 'Partner B', self.partner_b.vat, '', -1070.0, -1000.0, -70.0],
+            [2, 'BILL/2023/05/0001', '', datetime(2023, 5, 20), 'Partner B', self.partner_b.vat, '', 2140.0, 2000.0, 140.0],
             ['', '', '', '', '', '', '', '', '', ''],
             ['', '', '', '', '', '', '', '', '', ''],
             ['', '', '', '', '', '', 'Total', 1070.0, 1000.0, 70.0]

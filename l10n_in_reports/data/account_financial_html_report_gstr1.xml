@@ -12,6 +12,10 @@
                 <field name="name">Base</field>
                 <field name="expression_label">tax_base</field>
             </record>
+            <record id="account_report_gstr1_igst_column" model="account.report.column">
+                <field name="name">IGST</field>
+                <field name="expression_label">tax_igst</field>
+            </record>
             <record id="account_report_gstr1_cgst_column" model="account.report.column">
                 <field name="name">CGST</field>
                 <field name="expression_label">tax_cgst</field>
@@ -19,10 +23,6 @@
             <record id="account_report_gstr1_sgst_column" model="account.report.column">
                 <field name="name">SGST/UTGST</field>
                 <field name="expression_label">tax_sgst</field>
-            </record>
-            <record id="account_report_gstr1_igst_column" model="account.report.column">
-                <field name="name">IGST</field>
-                <field name="expression_label">tax_igst</field>
             </record>
             <record id="account_report_gstr1_cess_column" model="account.report.column">
                 <field name="name">CESS</field>
@@ -41,10 +41,10 @@
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
-                    <record id="account_report_gstr1_4_sgst_balance" model="account.report.expression">
-                        <field name="label">tax_sgst</field>
+                    <record id="account_report_gstr1_4_igst_balance" model="account.report.expression">
+                        <field name="label">tax_igst</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">b2b_regular.tax_sgst</field>
+                        <field name="formula">b2b_regular.tax_igst</field>
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
@@ -55,10 +55,10 @@
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
-                    <record id="account_report_gstr1_4_igst_balance" model="account.report.expression">
-                        <field name="label">tax_igst</field>
+                    <record id="account_report_gstr1_4_sgst_balance" model="account.report.expression">
+                        <field name="label">tax_sgst</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">b2b_regular.tax_igst</field>
+                        <field name="formula">b2b_regular.tax_sgst</field>
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
@@ -82,10 +82,10 @@
                                 <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2b_regular'), ('display_type', '=', 'product')]"/>
                                 <field name="subformula">-sum</field>
                             </record>
-                            <record id="account_report_gstr1_b2b_regular_sgst_balance" model="account.report.expression">
-                                <field name="label">tax_sgst</field>
+                            <record id="account_report_gstr1_b2b_regular_igst_balance" model="account.report.expression">
+                                <field name="label">tax_igst</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2b_regular'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
+                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2b_regular'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr1_b2b_regular_cgst_balance" model="account.report.expression">
@@ -94,10 +94,10 @@
                                 <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2b_regular'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_cgst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
-                            <record id="account_report_gstr1_b2b_regular_igst_balance" model="account.report.expression">
-                                <field name="label">tax_igst</field>
+                            <record id="account_report_gstr1_b2b_regular_sgst_balance" model="account.report.expression">
+                                <field name="label">tax_sgst</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2b_regular'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
+                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2b_regular'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr1_b2b_regular_cess_balance" model="account.report.expression">
@@ -163,10 +163,10 @@
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
-                    <record id="account_report_gstr1_6_sgst_balance" model="account.report.expression">
-                        <field name="label">tax_sgst</field>
+                    <record id="account_report_gstr1_6_igst_balance" model="account.report.expression">
+                        <field name="label">tax_igst</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">de.tax_sgst</field>
+                        <field name="formula">exp.tax_igst + sez.tax_igst + de.tax_igst</field>
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
@@ -177,10 +177,10 @@
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
-                    <record id="account_report_gstr1_6_igst_balance" model="account.report.expression">
-                        <field name="label">tax_igst</field>
+                    <record id="account_report_gstr1_6_sgst_balance" model="account.report.expression">
+                        <field name="label">tax_sgst</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">exp.tax_igst + sez.tax_igst + de.tax_igst</field>
+                        <field name="formula">de.tax_sgst</field>
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
@@ -334,10 +334,10 @@
                                 <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_deemed_export'), ('display_type', '=', 'product')]"/>
                                 <field name="subformula">-sum</field>
                             </record>
-                            <record id="account_report_gstr1_de_sgst_balance" model="account.report.expression">
-                                <field name="label">tax_sgst</field>
+                            <record id="account_report_gstr1_de_igst_balance" model="account.report.expression">
+                                <field name="label">tax_igst</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_deemed_export'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
+                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_deemed_export'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr1_de_cgst_balance" model="account.report.expression">
@@ -346,10 +346,10 @@
                                 <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_deemed_export'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_cgst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
-                            <record id="account_report_gstr1_de_igst_balance" model="account.report.expression">
-                                <field name="label">tax_igst</field>
+                            <record id="account_report_gstr1_de_sgst_balance" model="account.report.expression">
+                                <field name="label">tax_sgst</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_deemed_export'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
+                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_deemed_export'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr1_de_cess_balance" model="account.report.expression">
@@ -376,10 +376,10 @@
                                 <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2cs'), ('display_type', '=', 'product')]"/>
                                 <field name="subformula">-sum</field>
                             </record>
-                            <record id="account_report_gstr1_b2cs_sgst_balance" model="account.report.expression">
-                                <field name="label">tax_sgst</field>
+                            <record id="account_report_gstr1_b2cs_igst_balance" model="account.report.expression">
+                                <field name="label">tax_igst</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2cs'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
+                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2cs'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr1_b2cs_cgst_balance" model="account.report.expression">
@@ -388,10 +388,10 @@
                                 <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2cs'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_cgst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
-                            <record id="account_report_gstr1_b2cs_igst_balance" model="account.report.expression">
-                                <field name="label">tax_igst</field>
+                            <record id="account_report_gstr1_b2cs_sgst_balance" model="account.report.expression">
+                                <field name="label">tax_sgst</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2cs'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
+                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2cs'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr1_b2cs_cess_balance" model="account.report.expression">
@@ -466,10 +466,10 @@
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
-                    <record id="account_report_gstr1_9_sgst_balance" model="account.report.expression">
-                        <field name="label">tax_sgst</field>
+                    <record id="account_report_gstr1_9_igst_balance" model="account.report.expression">
+                        <field name="label">tax_igst</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">cdnr.tax_sgst</field>
+                        <field name="formula">cdnr.tax_igst + cdnur.tax_igst</field>
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
@@ -480,10 +480,10 @@
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
-                    <record id="account_report_gstr1_9_igst_balance" model="account.report.expression">
-                        <field name="label">tax_igst</field>
+                    <record id="account_report_gstr1_9_sgst_balance" model="account.report.expression">
+                        <field name="label">tax_sgst</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">cdnr.tax_igst + cdnur.tax_igst</field>
+                        <field name="formula">cdnr.tax_sgst</field>
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
@@ -508,10 +508,10 @@
                                 <field name="subformula" eval="False"/>
                                 <field name="green_on_positive" eval="False"/>
                             </record>
-                            <record id="account_report_gstr1_cdnr_sgst_balance" model="account.report.expression">
-                                <field name="label">tax_sgst</field>
+                            <record id="account_report_gstr1_cdnr_igst_balance" model="account.report.expression">
+                                <field name="label">tax_igst</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">cdnr_b2b_regular.tax_sgst + cdnr_de.tax_sgst</field>
+                                <field name="formula">cdnr_b2b_regular.tax_igst + cdnr_sezwp.tax_igst + cdnr_de.tax_igst</field>
                                 <field name="subformula" eval="False"/>
                                 <field name="green_on_positive" eval="False"/>
                             </record>
@@ -522,10 +522,10 @@
                                 <field name="subformula" eval="False"/>
                                 <field name="green_on_positive" eval="False"/>
                             </record>
-                            <record id="account_report_gstr1_cdnr_igst_balance" model="account.report.expression">
-                                <field name="label">tax_igst</field>
+                            <record id="account_report_gstr1_cdnr_sgst_balance" model="account.report.expression">
+                                <field name="label">tax_sgst</field>
                                 <field name="engine">aggregation</field>
-                                <field name="formula">cdnr_b2b_regular.tax_igst + cdnr_sezwp.tax_igst + cdnr_de.tax_igst</field>
+                                <field name="formula">cdnr_b2b_regular.tax_sgst + cdnr_de.tax_sgst</field>
                                 <field name="subformula" eval="False"/>
                                 <field name="green_on_positive" eval="False"/>
                             </record>
@@ -548,10 +548,10 @@
                                         <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_cdnr_regular'), ('display_type', '=', 'product')]"/>
                                         <field name="subformula">-sum</field>
                                     </record>
-                                    <record id="account_report_gstr1_cdnr_b2b_regular_sgst_balance" model="account.report.expression">
-                                        <field name="label">tax_sgst</field>
+                                    <record id="account_report_gstr1_cdnr_b2b_regular_igst_balance" model="account.report.expression">
+                                        <field name="label">tax_igst</field>
                                         <field name="engine">domain</field>
-                                        <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_cdnr_regular'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
+                                        <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_cdnr_regular'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
                                         <field name="subformula">-sum</field>
                                     </record>
                                     <record id="account_report_gstr1_cdnr_b2b_regular_cgst_balance" model="account.report.expression">
@@ -560,10 +560,10 @@
                                         <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_cdnr_regular'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_cgst'))]"/>
                                         <field name="subformula">-sum</field>
                                     </record>
-                                    <record id="account_report_gstr1_cdnr_b2b_regular_igst_balance" model="account.report.expression">
-                                        <field name="label">tax_igst</field>
+                                    <record id="account_report_gstr1_cdnr_b2b_regular_sgst_balance" model="account.report.expression">
+                                        <field name="label">tax_sgst</field>
                                         <field name="engine">domain</field>
-                                        <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_cdnr_regular'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
+                                        <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_cdnr_regular'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
                                         <field name="subformula">-sum</field>
                                     </record>
                                     <record id="account_report_gstr1_cdnr_b2b_regular_cess_balance" model="account.report.expression">
@@ -632,10 +632,10 @@
                                         <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_cdnr_deemed_export'), ('display_type', '=', 'product')]"/>
                                         <field name="subformula">-sum</field>
                                     </record>
-                                    <record id="account_report_gstr1_cdnr_de_sgst_balance" model="account.report.expression">
-                                        <field name="label">tax_sgst</field>
+                                    <record id="account_report_gstr1_cdnr_de_igst_balance" model="account.report.expression">
+                                        <field name="label">tax_igst</field>
                                         <field name="engine">domain</field>
-                                        <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_cdnr_deemed_export'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
+                                        <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_cdnr_deemed_export'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
                                         <field name="subformula">-sum</field>
                                     </record>
                                     <record id="account_report_gstr1_cdnr_de_cgst_balance" model="account.report.expression">
@@ -644,10 +644,10 @@
                                         <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_cdnr_deemed_export'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_cgst'))]"/>
                                         <field name="subformula">-sum</field>
                                     </record>
-                                    <record id="account_report_gstr1_cdnr_de_igst_balance" model="account.report.expression">
-                                        <field name="label">tax_igst</field>
+                                    <record id="account_report_gstr1_cdnr_de_sgst_balance" model="account.report.expression">
+                                        <field name="label">tax_sgst</field>
                                         <field name="engine">domain</field>
-                                        <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_cdnr_deemed_export'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
+                                        <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_cdnr_deemed_export'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
                                         <field name="subformula">-sum</field>
                                     </record>
                                     <record id="account_report_gstr1_cdnr_de_cess_balance" model="account.report.expression">
@@ -761,10 +761,10 @@
                         <field name="formula">hsn_b2b.tax_base + hsn_b2c.tax_base</field>
                         <field name="subformula" eval="False"/>
                     </record>
-                    <record id="account_report_gstr1_hsn_sgst_balance" model="account.report.expression">
-                        <field name="label">tax_sgst</field>
+                    <record id="account_report_gstr1_hsn_igst_balance" model="account.report.expression">
+                        <field name="label">tax_igst</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">hsn_b2b.tax_sgst + hsn_b2c.tax_sgst</field>
+                        <field name="formula">hsn_b2b.tax_igst + hsn_b2c.tax_igst</field>
                         <field name="subformula" eval="False"/>
                     </record>
                     <record id="account_report_gstr1_hsn_cgst_balance" model="account.report.expression">
@@ -773,10 +773,10 @@
                         <field name="formula">hsn_b2b.tax_cgst + hsn_b2c.tax_cgst</field>
                         <field name="subformula" eval="False"/>
                     </record>
-                    <record id="account_report_gstr1_hsn_igst_balance" model="account.report.expression">
-                        <field name="label">tax_igst</field>
+                    <record id="account_report_gstr1_hsn_sgst_balance" model="account.report.expression">
+                        <field name="label">tax_sgst</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">hsn_b2b.tax_igst + hsn_b2c.tax_igst</field>
+                        <field name="formula">hsn_b2b.tax_sgst + hsn_b2c.tax_sgst</field>
                         <field name="subformula" eval="False"/>
                     </record>
                     <record id="account_report_gstr1_hsn_cess_balance" model="account.report.expression">
@@ -799,10 +799,10 @@
                                 'sale_cdnr_regular', 'sale_cdnr_deemed_export', 'sale_cdnr_sez_wp', 'sale_cdnr_sez_wop', 'sale_nil_rated', 'sale_exempt', 'sale_non_gst_supplies']), ('move_id.l10n_in_gst_treatment', 'in', ['regular', 'composition', 'uin_holders', 'special_economic_zone', 'deemed_export']), ('display_type', '=', 'product')]"/>
                                 <field name="subformula">-sum</field>
                             </record>
-                            <record id="account_report_gstr1_hsn_b2b_sgst_balance" model="account.report.expression">
-                                <field name="label">tax_sgst</field>
+                            <record id="account_report_gstr1_hsn_b2b_igst_balance" model="account.report.expression">
+                                <field name="label">tax_igst</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['sale_b2b_regular', 'sale_cdnr_regular', 'sale_deemed_export', 'sale_cdnr_deemed_export']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
+                                <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['sale_b2b_regular', 'sale_sez_wp', 'sale_deemed_export', 'sale_cdnr_regular', 'sale_cdnr_deemed_export', 'sale_cdnr_sez_wp']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr1_hsn_b2b_cgst_balance" model="account.report.expression">
@@ -811,10 +811,10 @@
                                 <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['sale_b2b_regular', 'sale_cdnr_regular', 'sale_deemed_export', 'sale_cdnr_deemed_export']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_cgst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
-                            <record id="account_report_gstr1_hsn_b2b_igst_balance" model="account.report.expression">
-                                <field name="label">tax_igst</field>
+                            <record id="account_report_gstr1_hsn_b2b_sgst_balance" model="account.report.expression">
+                                <field name="label">tax_sgst</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['sale_b2b_regular', 'sale_sez_wp', 'sale_deemed_export', 'sale_cdnr_regular', 'sale_cdnr_deemed_export', 'sale_cdnr_sez_wp']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
+                                <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['sale_b2b_regular', 'sale_cdnr_regular', 'sale_deemed_export', 'sale_cdnr_deemed_export']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr1_hsn_b2b_cess_balance" model="account.report.expression">
@@ -836,10 +836,10 @@
                                 'sale_cdnur_b2cl', 'sale_cdnur_exp_wp', 'sale_cdnur_exp_wop', 'sale_nil_rated', 'sale_exempt', 'sale_non_gst_supplies']), ('move_id.l10n_in_gst_treatment', 'in', ['unregistered', 'consumer', 'overseas']), ('display_type', '=', 'product')]"/>
                                 <field name="subformula">-sum</field>
                             </record>
-                            <record id="account_report_gstr1_hsn_b2c_sgst_balance" model="account.report.expression">
-                                <field name="label">tax_sgst</field>
+                            <record id="account_report_gstr1_hsn_b2c_igst_balance" model="account.report.expression">
+                                <field name="label">tax_igst</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2cs'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
+                                <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['sale_b2cl', 'sale_b2cs', 'sale_exp_wp', 'sale_cdnur_b2cl', 'sale_cdnur_exp_wp']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr1_hsn_b2c_cgst_balance" model="account.report.expression">
@@ -848,10 +848,10 @@
                                 <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2cs'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_cgst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
-                            <record id="account_report_gstr1_hsn_b2c_igst_balance" model="account.report.expression">
-                                <field name="label">tax_igst</field>
+                            <record id="account_report_gstr1_hsn_b2c_sgst_balance" model="account.report.expression">
+                                <field name="label">tax_sgst</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['sale_b2cl', 'sale_b2cs', 'sale_exp_wp', 'sale_cdnur_b2cl', 'sale_cdnur_exp_wp']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
+                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_b2cs'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr1_hsn_b2c_cess_balance" model="account.report.expression">
@@ -875,10 +875,10 @@
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
-                    <record id="account_report_gstr1_eco_operator_sgst_balance" model="account.report.expression">
-                        <field name="label">tax_sgst</field>
+                    <record id="account_report_gstr1_eco_operator_igst_balance" model="account.report.expression">
+                        <field name="label">tax_igst</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">eco_52.tax_sgst + eco_9_5.tax_sgst</field>
+                        <field name="formula">eco_52.tax_igst + eco_9_5.tax_igst</field>
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
@@ -889,10 +889,10 @@
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
-                    <record id="account_report_gstr1_eco_operator_igst_balance" model="account.report.expression">
-                        <field name="label">tax_igst</field>
+                    <record id="account_report_gstr1_eco_operator_sgst_balance" model="account.report.expression">
+                        <field name="label">tax_sgst</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">eco_52.tax_igst + eco_9_5.tax_igst</field>
+                        <field name="formula">eco_52.tax_sgst + eco_9_5.tax_sgst</field>
                         <field name="subformula" eval="False"/>
                         <field name="green_on_positive" eval="False"/>
                     </record>
@@ -916,10 +916,10 @@
                                 <field name="formula" eval="[('move_id.move_type', 'in', ['out_invoice', 'out_refund', 'out_receipt']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_eco_tcs_52')), ('tax_tag_ids', 'in', [ref('l10n_in.tax_tag_base_cgst'), ref('l10n_in.tax_tag_base_sgst'), ref('l10n_in.tax_tag_base_igst'), ref('l10n_in.tax_tag_base_cess')])]"/>
                                 <field name="subformula">-sum</field>
                             </record>
-                            <record id="account_report_gstr1_eco_52_sgst_balance" model="account.report.expression">
-                                <field name="label">tax_sgst</field>
+                            <record id="account_report_gstr1_eco_52_igst_balance" model="account.report.expression">
+                                <field name="label">tax_igst</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('move_id.move_type', 'in', ['out_invoice', 'out_refund', 'out_receipt']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_eco_tcs_52')), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
+                                <field name="formula" eval="[('move_id.move_type', 'in', ['out_invoice', 'out_refund', 'out_receipt']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_eco_tcs_52')), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr1_eco_52_cgst_balance" model="account.report.expression">
@@ -928,10 +928,10 @@
                                 <field name="formula" eval="[('move_id.move_type', 'in', ['out_invoice', 'out_refund', 'out_receipt']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_eco_tcs_52')), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_cgst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
-                            <record id="account_report_gstr1_eco_52_igst_balance" model="account.report.expression">
-                                <field name="label">tax_igst</field>
+                            <record id="account_report_gstr1_eco_52_sgst_balance" model="account.report.expression">
+                                <field name="label">tax_sgst</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('move_id.move_type', 'in', ['out_invoice', 'out_refund', 'out_receipt']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_eco_tcs_52')), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
+                                <field name="formula" eval="[('move_id.move_type', 'in', ['out_invoice', 'out_refund', 'out_receipt']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_eco_tcs_52')), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr1_eco_52_cess_balance" model="account.report.expression">
@@ -952,10 +952,10 @@
                                 <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_eco_9_5'), ('display_type', '=', 'product')]"/>
                                 <field name="subformula">-sum</field>
                             </record>
-                            <record id="account_report_gstr1_eco_9_5_sgst_balance" model="account.report.expression">
-                                <field name="label">tax_sgst</field>
+                            <record id="account_report_gstr1_eco_9_5_igst_balance" model="account.report.expression">
+                                <field name="label">tax_igst</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_eco_9_5'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
+                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_eco_9_5'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr1_eco_9_5_cgst_balance" model="account.report.expression">
@@ -964,10 +964,10 @@
                                 <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_eco_9_5'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_cgst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
-                            <record id="account_report_gstr1_eco_9_5_igst_balance" model="account.report.expression">
-                                <field name="label">tax_igst</field>
+                            <record id="account_report_gstr1_eco_9_5_sgst_balance" model="account.report.expression">
+                                <field name="label">tax_sgst</field>
                                 <field name="engine">domain</field>
-                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_eco_9_5'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
+                                <field name="formula" eval="[('l10n_in_gstr_section', '=', 'sale_eco_9_5'), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr1_eco_9_5_cess_balance" model="account.report.expression">

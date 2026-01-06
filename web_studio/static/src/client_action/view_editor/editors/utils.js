@@ -188,15 +188,22 @@ export function fieldsToChoices(fields, availableTypes, filterCallback) {
     }));
 }
 
-export function getStudioNoFetchFields(_fieldNodes) {
-    const fieldNames = [];
+export function getStudioNoFetchFields(_fieldNodes, xml) {
+    let fieldNames = [];
     const fieldNodes = [];
-    Object.entries(_fieldNodes)
-        .filter(([fNode, field]) => field.attrs && field.attrs.studio_no_fetch)
-        .forEach(([fNode, field]) => {
-            fieldNames.push(field.name);
-            fieldNodes.push(fNode);
-        });
+    if (_fieldNodes && !xml) {
+        Object.entries(_fieldNodes)
+            .filter(([fNode, field]) => field.attrs && field.attrs.studio_no_fetch)
+            .forEach(([fNode, field]) => {
+                fieldNames.push(field.name);
+                fieldNodes.push(fNode);
+            });
+    }
+    if (xml && !_fieldNodes) {
+        fieldNames = Array.from(xml.querySelectorAll(`field[studio_no_fetch="1"]`)).map((n) =>
+            n.getAttribute("name")
+        );
+    }
     return {
         fieldNames,
         fieldNodes,

@@ -45,17 +45,10 @@ class L10n_Be_ReportsISOCPrepaymentPayWizard(models.TransientModel):
         }
 
     def _generate_communication(self):
-        ''' Taken from https://finances.belgium.be/fr/communication-structuree
-        '''
-        vat = (self.company_id.vat or '').replace("BE", "")
-        communication = ''
-        if len(vat) == 10:
-            number = int(vat)
-            suffix = f"{number % 97 or 97:02}"
-            communication = f"+++{vat[:3]}/{vat[3:7]}/{vat[7:]}{suffix}+++"
-        return communication
+        return self._be_company_vat_communication(self.company_id)
 
     def action_send_email_instructions(self):
+        # OVERRIDES account.return.payment.wizard
         self.ensure_one()
         template = self.env.ref('l10n_be_reports.email_template_vai_payment_instructions', raise_if_not_found=False)
         return self.return_id.action_send_email_instructions(self, template)

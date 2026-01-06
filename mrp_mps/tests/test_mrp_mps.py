@@ -257,6 +257,7 @@ class TestMpsMps(common.TransactionCase):
         line is updated.
         """
         self.env.company.horizon_days = 0
+        self.env.user.tz = 'UTC'
         forecast_screw = self.env['mrp.product.forecast'].create({
             'production_schedule_id': self.mps_screw.id,
             'date': self.mps_dates_month[0][0],

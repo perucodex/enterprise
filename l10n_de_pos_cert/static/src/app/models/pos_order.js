@@ -9,8 +9,6 @@ patch(PosOrder.prototype, {
         super.setup(...arguments);
         if (this.isCountryGermanyAndFiskaly()) {
             this.fiskalyUuid = this.fiskalyUuid || "";
-            this.transactionState = this.transactionState || "inactive"; // Used to know when we need to create the fiskaly transaction
-
             // Init the tssInformation with the values from the config
             this.l10n_de_fiskaly_transaction_uuid = vals.l10n_de_fiskaly_transaction_uuid || false;
             this.l10n_de_fiskaly_transaction_number =
@@ -28,6 +26,15 @@ patch(PosOrder.prototype, {
             this.l10n_de_fiskaly_client_serial_number =
                 vals.l10n_de_fiskaly_client_serial_number || false;
         }
+    },
+    initState() {
+        super.initState();
+        this.uiState = {
+            ...this.uiState,
+            transactionState: this.uiState.transactionState || "inactive", // Used to know when we need to create the fiskaly transaction,
+            fiskalyServerError: this.uiState.fiskalyServerError || false,
+            networkError: this.uiState.networkError || false,
+        };
     },
     get tss() {
         if (this.isCountryGermanyAndFiskaly()) {
@@ -69,6 +76,7 @@ patch(PosOrder.prototype, {
                     },
                 };
             } else {
+                // When there is TSS server is unreachable
                 return {
                     tss_issue: true,
                 };
@@ -93,19 +101,19 @@ patch(PosOrder.prototype, {
         return this.config.is_company_country_germany;
     },
     isTransactionInactive() {
-        return this.transactionState === "inactive";
+        return this.uiState.transactionState === "inactive";
     },
     transactionStarted() {
-        this.transactionState = "started";
+        this.uiState.transactionState = "started";
     },
     isTransactionStarted() {
-        return this.transactionState === "started";
+        return this.uiState.transactionState === "started";
     },
     transactionFinished() {
-        this.transactionState = "finished";
+        this.uiState.transactionState = "finished";
     },
     isTransactionFinished() {
-        return this.transactionState === "finished" || this.l10n_de_fiskaly_time_start;
+        return this.uiState.transactionState === "finished" || this.l10n_de_fiskaly_time_start;
     },
     /*
      *  Return an array of { 'payment_type': ..., 'amount': ...}

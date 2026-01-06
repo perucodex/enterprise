@@ -55,7 +55,7 @@ class PosSession(models.Model):
         orders = self.order_ids.filtered(lambda o: o.state == 'done')
         # We don't want to block the user that need to validate his session order in order to create his TSS
         if self.config_id.is_company_country_germany and self.config_id.l10n_de_fiskaly_tss_id and orders:
-            orders = orders.sorted('l10n_de_fiskaly_time_end')
+            orders = orders.sorted('write_date')  # there are possible cases where the end date won't be set
             json = self._l10n_de_create_cash_point_closing_json(orders)
             self._l10n_de_send_fiskaly_cash_point_closing(json)
 
@@ -139,9 +139,12 @@ class PosSession(models.Model):
 
         move_statements = [entry for entry in self.get_cash_in_out_list() if entry.get('cashier_name')]  # remove difference line
         for cash_move in move_statements:
-            # Need to update here if we update format in _prepareTryCashInOutPayload()
-            [_, move_type, statement_type, move_reason] = cash_move['name'].split('-')
-            statements.append({"type": statement_type.capitalize(), "name": f"Cash {move_type} - {move_reason}", "amounts_per_vat_id": [self._get_vat_details(5, cash_move['amount'], cash_move['amount'])]})
+            # Need to update here if we update format in _prepareTryCashInOutPayload(), _prepare_account_bank_statement_line_vals()
+            # current structure of name is: {session_name}-{move_type}-{statement_type}-{move_reason}
+            # so if - is in name or reason direct spiltting won't work
+            move_parts = cash_move['name'].removeprefix(self.name).split('-')
+            move_type, statement_type, move_reason = move_parts[1], move_parts[2], "-".join(move_parts[3:])
+            statements.append({"type": statement_type.capitalize(), "name": f"Cash {move_type} - {move_reason}"[:40], "amounts_per_vat_id": [self._get_vat_details(5, cash_move['amount'], cash_move['amount'])]})
         return statements
 
     def _get_dsfinvk_cash_point_closing_data(
@@ -155,6 +158,10 @@ class PosSession(models.Model):
         config = self.config_id
         session = self
 
+        # To update the value of `l10n_de_vat_definition_export_identifier` for existing customers when they upgrade
+        # this will ensure that all taxes have their export IDs set once their first session is closed
+        company._check_vat_definition_export_id()
+
         precision = self.currency_id.decimal_places
         transactions = []
         for i, o in enumerate(orders, start=1):
@@ -164,8 +171,8 @@ class PosSession(models.Model):
                     "buyer_export_id": f"{o.partner_id.id}",
                     "type": "Kunde" if company.id != o.partner_id.company_id.id else "Mitarbeiter",
                     "address": {
-                        "street": o.partner_id.street or '',
-                        "postal_code": o.partner_id.zip or '',
+                        "street": o.partner_id.street[:60] or 'N/A',  # minimum 1 character required
+                        "postal_code": o.partner_id.zip[:10] or 'N/A',  # minimum 1 character required
                         "country_code": COUNTRY_CODE_MAP.get(o.partner_id.country_id.code) or "DEU",
                     },
                 }
@@ -181,8 +188,8 @@ class PosSession(models.Model):
                     "type": "Beleg",
                     "storno": False,
                     "number": o.id,
-                    "timestamp_start": int(o.l10n_de_fiskaly_time_start.timestamp()),
-                    "timestamp_end": int(o.l10n_de_fiskaly_time_end.timestamp()),
+                    "timestamp_start": o.l10n_de_fiskaly_time_start and int(o.l10n_de_fiskaly_time_start.timestamp()) or 0,
+                    "timestamp_end": o.l10n_de_fiskaly_time_end and int(o.l10n_de_fiskaly_time_end.timestamp()) or 0,
                     "user": {
                         "user_export_id": f"{(o.user_id or o.create_uid).id}",
                         "name": f"{(o.user_id or o.create_uid).name[:50]}",
@@ -195,9 +202,8 @@ class PosSession(models.Model):
                     "amounts_per_vat_id": o._l10n_de_amounts_per_vat(),
                     "lines": lines_data,
                 },
-                "security": {
-                    "tss_tx_id": f"{o.l10n_de_fiskaly_transaction_uuid}",
-                },
+                # `l10n_de_fiskaly_signature_public_key` is set only when the transaction finishes successfully (no 5xx errors or network issues).
+                "security": {"tss_tx_id": f"{o.l10n_de_fiskaly_transaction_uuid}"} if o.l10n_de_fiskaly_signature_public_key else {"error_message": "Error while reaching TSS may be due to network issues or TSS unavailability."},
             }
             transactions.append(transaction)
 

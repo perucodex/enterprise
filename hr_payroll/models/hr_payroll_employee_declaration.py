@@ -6,6 +6,7 @@ import logging
 from collections import defaultdict
 
 from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -63,7 +64,10 @@ class HrPayrollEmployeeDeclaration(models.Model):
                 employees = self.env[res_model].browse(res_id).line_ids.employee_id
             else:
                 employees = declarations.employee_id
-            rendering_data = sheet._get_rendering_data(employees)
+            try:
+                rendering_data = sheet._get_rendering_data(employees)
+            except UserError as e:
+                rendering_data = {'error': str(e)}
             if 'error' in rendering_data:
                 sheet.pdf_error = rendering_data['error']
                 continue

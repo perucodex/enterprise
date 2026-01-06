@@ -7,7 +7,8 @@ export class KeypadModel {
             direction: "none",
         },
         focus: false,
-        countryCode: { iso: "", itu: "" },
+        /** @type {import("@mail/core/country_model").Country | null} */
+        country: null,
     };
     showMore = false;
 

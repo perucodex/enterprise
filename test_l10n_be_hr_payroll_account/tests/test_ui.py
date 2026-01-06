@@ -36,7 +36,7 @@ class Testl10nBeHrPayrollAccountUi(MockEmail, common.TestPayrollAccountCommon):
 
         with freeze_time("2022-01-01 11:00:00"):
             self.start_tour("/", 'hr_contract_salary_tour_hr_sign', login='admin', timeout=350)
-            # Contract is signed by new employee and HR, the new car must be created
+            # Contract is signed by new employee and HR, the new car must be created, and the allocation should be created and validated
             new_employee_id = self.env['hr.employee'].search([('name', 'ilike', 'nathalie')])
             new_version = self.env['hr.version'].search([('employee_id', '=', new_employee_id.id)])
             self.assertTrue(new_version, 'A contract has been created')
@@ -45,6 +45,10 @@ class Testl10nBeHrPayrollAccountUi(MockEmail, common.TestPayrollAccountCommon):
             self.assertEqual(vehicle.future_driver_id, new_employee_id.work_contact_id, 'Futur driver is set')
             self.assertEqual(vehicle.company_id, new_version.company_id, 'Vehicle is in the right company')
             self.assertEqual(vehicle, new_version.car_id, 'Car id is set properly')
+            allocation = self.env['hr.leave.allocation'].search([('employee_id', '=', new_employee_id.id), ('holiday_status_id', '=', self.extra_days_time_off_type.id)])
+            self.assertTrue(allocation, 'Allocation has been created')
+            self.assertEqual(allocation.number_of_days, 3, 'Correct number of extra days allocated')
+            self.assertEqual(allocation.state, 'validate', 'Allocation has been validated')
             self.assertTrue(new_employee_id.active, 'Employee is now active')
 
             # In the new contract, we can choose to order a car in the wishlist.

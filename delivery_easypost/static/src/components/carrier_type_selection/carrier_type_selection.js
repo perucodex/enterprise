@@ -11,8 +11,7 @@ export class CarrierTypeSelection extends SelectionField {
         }
     }
 
-    onChange(ev) {
-        const value = JSON.parse(ev.target.value);
+    onChange(value) {
         this.props.record.update({ [this.props.name]: value }, { save: this.props.autosave });
     }
 }

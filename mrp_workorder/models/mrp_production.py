@@ -35,7 +35,7 @@ class MrpProduction(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        if 'lot_producing_ids' in vals:
+        if 'lot_producing_ids' in vals and self._has_workorders():
             self.workorder_ids.check_ids.filtered(lambda c: c.test_type_id.technical_name == 'register_production').write({'lot_ids': self.lot_producing_ids.ids})
         return res
 

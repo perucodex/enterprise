@@ -35,6 +35,7 @@ export class SpreadsheetAction extends AbstractSpreadsheetAction {
             onFreezeAndShareSpreadsheet: this.freezeAndShareSpreadsheet.bind(this),
             moveToTrash: this.moveToTrash.bind(this),
             isFrozenSpreadsheet: () => this.data.handler === "frozen_spreadsheet",
+            isArchived: () => Boolean(this.data?.is_archived),
         });
     }
 

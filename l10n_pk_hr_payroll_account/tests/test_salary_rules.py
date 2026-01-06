@@ -24,11 +24,11 @@ class TestPayslipValidation(TestPayslipValidationCommon):
 
     def test_basic_payslip(self):
         payslip = self._generate_payslip(date(2024, 1, 1), date(2024, 1, 31))
-        payslip_results = {'BASIC': 800000.0, 'GROSS': 800000.0, 'GROSSY': 9600000.0, 'TXB': 2355000.0, 'TOTTB': -196250.0, 'NET': 603750.0}
+        payslip_results = {'BASIC': 800000.0, 'GROSS': 800000.0, 'GROSSY': 9600000.0, 'TXB': 2355000.0, 'TXW': -196250.0, 'NET': 603750.0}
         self._validate_payslip(payslip, payslip_results)
 
     def test_end_of_service_payslip(self):
         self.employee.departure_date = date(2024, 1, 31)
         payslip = self._generate_payslip(date(2024, 1, 1), date(2024, 1, 31))
-        payslip_results = {'BASIC': 800000.0, 'GROSS': 800000.0, 'GROSSY': 9600000.0, 'TXB': 2355000.0, 'EOS': 7384616.0, 'TOTTB': -196250.0, 'NET': 7988366.0}
+        payslip_results = {'BASIC': 800000.0, 'GROSS': 800000.0, 'GROSSY': 9600000.0, 'TXB': 2355000.0, 'EOS': 7384616.0, 'TXW': -196250.0, 'NET': 7988366.0}
         self._validate_payslip(payslip, payslip_results)

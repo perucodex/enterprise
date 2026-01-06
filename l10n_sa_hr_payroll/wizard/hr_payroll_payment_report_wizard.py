@@ -56,15 +56,46 @@ class HrPayrollPaymentReportWizard(models.TransientModel):
                     invalid_banks_employee_ids.mapped('name')))
             company_bank_account = company.l10n_sa_bank_account_id
             if not company_bank_account:
-                raise UserError(_("Please set the establishment's bank account in the settings"))
+                raise UserError(
+                    self.env._(
+                        "Kindly configure the establishment's bank account by navigating to:"
+                        " Payroll Configuration → Settings → Saudi Arabia Payroll."
+                    )
+                )
+            if not company_bank_account.bank_id:
+                raise UserError(
+                    self.env._(
+                        "Missing bank for company bank account"
+                    )
+                )
             if not company_bank_account.bank_id.l10n_sa_sarie_code:
-                raise UserError(_("Missing SARIE code on the company bank %s"), company_bank_account.bank_id.name)
+                raise UserError(
+                    self.env._(
+                        "Missing SARIE code on the company bank %s",
+                        company_bank_account.bank_id.name,
+                    )
+                )
             if not company_bank_account.bank_id.l10n_sa_bank_establishment_code:
-                raise UserError(_("Missing establishment code on the company bank %s"), company_bank_account.bank_id.name)
+                raise UserError(
+                    self.env._(
+                        "Missing establishment code on the company bank %s",
+                        company_bank_account.bank_id.name,
+                    )
+                )
             if not company.l10n_sa_mol_establishment_code:
-                raise UserError(_("Please set the MoL Establishment ID in the settings."))
+                raise UserError(
+                    self.env._(
+                        "Kindly configure the company's MoL Establishment ID by navigating to:"
+                        " Payroll Configuration → Settings → Saudi Arabia Payroll."
+                    )
+                )
             if self.l10n_sa_wps_debit_date and self.l10n_sa_wps_value_date and self.l10n_sa_wps_debit_date <= self.l10n_sa_wps_value_date:
-                raise UserError(_('The debit date cannot be later than the value date'))
+                raise UserError(
+                    self.env._(
+                        "Kindly set the Saudi National/IQAMA ID for the employees by navigating to:"
+                        " the Employee Form → Payroll Tab → Saudi Payroll Information section."
+                    )
+                )
 
     def generate_payment_report(self):
         super().generate_payment_report()

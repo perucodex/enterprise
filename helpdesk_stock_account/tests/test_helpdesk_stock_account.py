@@ -131,3 +131,53 @@ class TestHelpdeskStockAccount(HelpdeskCommon):
         })).save().process()  # return product
 
         return return_picking
+
+    def test_refund_only_one_product(self):
+        """
+        This test verifies that a refund of only one product is created if a product has been selected, in the case
+        of a corresponding invoice containing several products.
+        Test case:
+            - Create a SO with 2 products
+            - Confirm SO and create invoice
+            - Confirm invoice
+            - Create helpdesk Ticket
+            - In the refund wizard, select a product
+            - Create a credit note
+            - Check if the only product selected is present on the credit note
+        """
+        product_0 = self.env['product.product'].create({
+            'name': 'Test Product 0',
+            'list_price': 10,
+        })
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.partner.id,
+            'order_line': [
+                Command.create({
+                    'product_id': self.product.id,
+                    'product_uom_qty': 5,
+                }),
+                Command.create({
+                    'product_id': product_0.id,
+                    'product_uom_qty': 5,
+                })],
+            })
+
+        sale_order.action_confirm()
+        sale_order._create_invoices()
+        invoice = sale_order.invoice_ids
+        invoice.action_post()
+        ticket = self.env['helpdesk.ticket'].create({
+            'name': 'test',
+            'partner_id': self.partner.id,
+            'team_id': self.test_team.id,
+            'sale_order_id': sale_order.id,
+        })
+        credit_note = self.env['account.move.reversal'].create({
+            'helpdesk_ticket_id': ticket.id,
+            'journal_id': self.journal_id,
+            'reason': 'test',
+            'move_ids': invoice,
+            'product_id': self.product.id,
+        })
+        credit_note.refund_moves()
+        self.assertEqual(credit_note.new_move_ids.invoice_line_ids.product_id, self.product)

@@ -3,13 +3,14 @@
 # * hr_appraisal_survey
 #
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# "Marta (wacm)" <wacm@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:44+0000\n"
-"PO-Revision-Date: 2025-09-18 02:47+0000\n"
-"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-11-06 10:14+0000\n"
+"Last-Translator: \"Marta (wacm)\" <wacm@odoo.com>\n"
 "Language-Team: Polish <https://translate.odoo.com/projects/odoo-19/"
 "hr_appraisal_survey/pl/>\n"
 "Language: pl\n"
@@ -23,7 +24,7 @@ msgstr ""
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_survey_page_statistics_header
 msgid "- Feedback requested by -"
-msgstr "- Feedback wymagany przez -"
+msgstr "- Opinia wnioskowana przez -"
 
 #. module: hr_appraisal_survey
 #: model:ir.actions.act_window,name:hr_appraisal_survey.survey_survey_action_appraisal
@@ -37,7 +38,7 @@ msgstr "Feedback 360"
 #. module: hr_appraisal_survey
 #: model:ir.model.fields,field_description:hr_appraisal_survey.field_hr_appraisal_template__survey_template_ids
 msgid "360 Feedback Survey"
-msgstr ""
+msgstr "Ankieta Feedback 360"
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_survey_button_form_view
@@ -85,11 +86,48 @@ msgid ""
 "                \n"
 "            "
 msgstr ""
+"<p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    Dzień dobry <t t-out=\"object.partner_id.name or "
+"'uczestniku'\">[uczestniku]</t>,\n"
+"                    <br/>\n"
+"                    Jako część naszego procesu feedback 360°, <t t-"
+"out=\"ctx.get('logged_user')\">[Obecny użytkownik]</t> pragnie\n"
+"                    poznać Twoje spostrzeżenia na temat  <t t-"
+"out=\"ctx.get('employee')\">[pracownika]</t>.\n"
+"                    <br/>\n"
+"                    Twoja opinia jest wartościowa w rozpoznaniu mocnych "
+"stron i zidentyfikowaniu możliwości rozwoju.\n"
+"                    <br/>\n"
+"                    Wypełnienie ankiety nie powinno potrwać więcej niż kilka "
+"minut. Możesz ją znaleźć pod poniższym linkiem:\n"
+"                    <br/>\n"
+"                    </p><div class=\"text-center my-4\">\n"
+"                        <a t-att-href=\"object.get_start_url()\" t-attf-"
+"style=\"background-color: {{user.company_id.email_secondary_color or "
+"'#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: "
+"{{user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
+"font-size:13px;\">\n"
+"                            Wyraź swoją opinię\n"
+"                        </a>\n"
+"                    </div>\n"
+"                    Wypełnij ankietę przed <t t-out=\"ctx.get('deadline')"
+"\">[określonym terminem]</t>.\n"
+"                    <br/>\n"
+"                    Dziękujemy za poświęcony czas!\n"
+"                    <br/>\n"
+"                    <t t-if=\"ctx.get('user_body')\">\n"
+"                        <div class=\"my-3 py-2 px-3 bg-secondary\">\n"
+"                            <t t-out=\"ctx.get('user_body')\">[Dodatkowy "
+"komentarz]</t>\n"
+"                        </div>\n"
+"                    </t>\n"
+"                \n"
+"            "
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_view_form
 msgid "<span class=\"o_stat_text\">Feedbacks</span>"
-msgstr "<span class=\"o_stat_text\">Feedbacki</span>"
+msgstr "<span class=\"o_stat_text\">Opinie</span>"
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_view_form
@@ -150,7 +188,7 @@ msgstr "Dodaj nową ankietę"
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.appraisal_ask_feedback_view_form
 msgid "Add employees..."
-msgstr "Doddaj pracowników..."
+msgstr "Dodaj pracowników..."
 
 #. module: hr_appraisal_survey
 #: model:survey.question,title:hr_appraisal_survey.appraisal_2_3
@@ -166,7 +204,7 @@ msgstr "Przyznał/a się do swoich błędów"
 #: model:ir.model.fields,field_description:hr_appraisal_survey.field_appraisal_ask_feedback__allowed_survey_template_ids
 #: model:ir.model.fields,field_description:hr_appraisal_survey.field_appraisal_select_survey__allowed_survey_template_ids
 msgid "Allowed Survey Template"
-msgstr ""
+msgstr "Dozwolony szablon ankiety"
 
 #. module: hr_appraisal_survey
 #: model:survey.question.answer,value:hr_appraisal_survey.x_360_5_5
@@ -219,7 +257,7 @@ msgstr "Ocena"
 #. odoo-python
 #: code:addons/hr_appraisal_survey/wizard/appraisal_ask_feedback.py:0
 msgid "Appraisal: Ask Feedback new template"
-msgstr "Ocena: Nowy szablon prośby o feedback"
+msgstr "Ocena: Nowy szablon prośby o opinię"
 
 #. module: hr_appraisal_survey
 #: model:ir.model.fields,field_description:hr_appraisal_survey.field_survey_survey__appraisal_manager_user_ids
@@ -245,13 +283,13 @@ msgstr "Zapytaj o opinię"
 #. module: hr_appraisal_survey
 #: model:ir.model,name:hr_appraisal_survey.model_appraisal_ask_feedback
 msgid "Ask Feedback for Appraisal"
-msgstr "Prośba o feedback do oceny"
+msgstr "Prośba o opinię do oceny"
 
 #. module: hr_appraisal_survey
 #: model:ir.model.fields,field_description:hr_appraisal_survey.field_hr_appraisal__employee_feedback_ids
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.view_hr_appraisal_tree
 msgid "Asked Feedback"
-msgstr "Poproszono o feedback"
+msgstr "Poproszono o opinię"
 
 #. module: hr_appraisal_survey
 #: model_terms:survey.question,description:hr_appraisal_survey.appraisal_1
@@ -293,7 +331,7 @@ msgstr "Anuluj"
 #: code:addons/hr_appraisal_survey/models/survey_survey.py:0
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.appraisal_select_survey_view_form
 msgid "Choose Survey"
-msgstr ""
+msgstr "Wybierz ankietę"
 
 #. module: hr_appraisal_survey
 #: model:survey.question.answer,value:hr_appraisal_survey.y_360_5_3
@@ -323,7 +361,7 @@ msgstr ""
 #. module: hr_appraisal_survey
 #: model:survey.question,title:hr_appraisal_survey.appraisal_360_9
 msgid "Conclusion"
-msgstr "Wnioski"
+msgstr "Konkluzja"
 
 #. module: hr_appraisal_survey
 #: model:ir.model.fields,field_description:hr_appraisal_survey.field_appraisal_ask_feedback__body
@@ -389,7 +427,7 @@ msgstr "Nie spełnił/a standardów i oczekiwań"
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.appraisal_select_survey_view_form
 msgid "Discard"
-msgstr ""
+msgstr "Odrzuć"
 
 #. module: hr_appraisal_survey
 #: model:ir.model.fields,field_description:hr_appraisal_survey.field_appraisal_ask_feedback__display_name
@@ -406,7 +444,7 @@ msgstr "Nazwa wyświetlana"
 #: model:survey.question,title:hr_appraisal_survey.appraisal_360_10
 msgid "Do you have any comment to tell him/her in order to improve?"
 msgstr ""
-"Czy masz dla niego/jej jakieś wskazówki, które pomogą mu/jej poprawić swoje "
+"Czy masz dla niego/niej jakieś wskazówki, które pomogą mu/jej poprawić swoje "
 "wyniki?"
 
 #. module: hr_appraisal_survey
@@ -427,7 +465,7 @@ msgstr "Formularz oceny pracownika"
 #. module: hr_appraisal_survey
 #: model:ir.model,name:hr_appraisal_survey.model_hr_appraisal_template
 msgid "Employee Appraisal Template"
-msgstr ""
+msgstr "Szablon oceny pracownika"
 
 #. module: hr_appraisal_survey
 #: model:survey.question,title:hr_appraisal_survey.appraisal_5
@@ -452,7 +490,7 @@ msgstr "Entuzjazm i zaangażowanie w projekty/zadania"
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_template_view_form
 msgid "Every template allowed"
-msgstr ""
+msgstr "Wszystkie szablony dozwolone"
 
 #. module: hr_appraisal_survey
 #: model_terms:survey.question,description:hr_appraisal_survey.appraisal_3
@@ -479,7 +517,7 @@ msgstr "Przejdź do formularza oceny"
 #. module: hr_appraisal_survey
 #: model:mail.template,name:hr_appraisal_survey.mail_template_appraisal_ask_feedback
 msgid "HR: Ask Feedback 360"
-msgstr ""
+msgstr "HR: Poproś o feedback 360"
 
 #. module: hr_appraisal_survey
 #: model:survey.question,title:hr_appraisal_survey.appraisal_360_5
@@ -524,7 +562,7 @@ msgstr ""
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_view_form
 msgid "If you need,"
-msgstr ""
+msgstr "Jeśli potrzebujesz,"
 
 #. module: hr_appraisal_survey
 #: model:survey.question.answer,value:hr_appraisal_survey.arow_3_1_5
@@ -630,7 +668,7 @@ msgstr "Nigdy"
 #. odoo-python
 #: code:addons/hr_appraisal_survey/models/survey_survey.py:0
 msgid "No surveys found for this appraisal."
-msgstr ""
+msgstr "Nie znaleziono ankiety dla tej oceny."
 
 #. module: hr_appraisal_survey
 #: model:survey.question,title:hr_appraisal_survey.appraisal_2_1
@@ -645,7 +683,7 @@ msgstr "Często"
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.appraisal_ask_feedback_view_form
 msgid "Optional comment..."
-msgstr ""
+msgstr "Dodatkowy komentarz..."
 
 #. module: hr_appraisal_survey
 #: model:ir.model.fields,help:hr_appraisal_survey.field_appraisal_ask_feedback__lang
@@ -655,6 +693,10 @@ msgid ""
 "usually be a placeholder expression that provides the appropriate language, "
 "e.g. {{ object.partner_id.lang }}."
 msgstr ""
+"Opcjonalny język tłumaczenia (kod ISO) do wybrania podczas wysyłania e-"
+"maila. Jeśli nie jest skonfigurowany, zostanie użyty główny język partnera. "
+"Powinno to być zwykle wyrażeniem zastępczym, które oferuje adekwatny język, "
+"np. {{ object.partner_id.lang }}."
 
 #. module: hr_appraisal_survey
 #: model_terms:survey.question,description:hr_appraisal_survey.appraisal_1
@@ -700,7 +742,7 @@ msgstr "Cele projektu"
 #. module: hr_appraisal_survey
 #: model:survey.question.answer,value:hr_appraisal_survey.arow_3_1_12
 msgid "Promptness and attendance record"
-msgstr "Punktualność i obecność"
+msgstr "Punktualność i frekwencja"
 
 #. module: hr_appraisal_survey
 #: model:survey.question.answer,value:hr_appraisal_survey.x_360_5_2
@@ -725,7 +767,7 @@ msgstr "Model renderowania"
 #. module: hr_appraisal_survey
 #: model:ir.model.fields,field_description:hr_appraisal_survey.field_survey_user_input__requested_by
 msgid "Requested by"
-msgstr "Poproszono przez"
+msgstr "Zawnioskowane przez"
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_survey_user_input_view_tree
@@ -764,12 +806,12 @@ msgstr "Zobacz odpowiedzi"
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.appraisal_select_survey_view_form
 msgid "See Results"
-msgstr ""
+msgstr "Zobacz wyniki"
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_survey_user_input_view_tree
 msgid "See results"
-msgstr ""
+msgstr "Zobacz wyniki"
 
 #. module: hr_appraisal_survey
 #: model:survey.question.answer,value:hr_appraisal_survey.y_360_5_5
@@ -780,7 +822,7 @@ msgstr ""
 #. module: hr_appraisal_survey
 #: model:ir.model,name:hr_appraisal_survey.model_appraisal_select_survey
 msgid "Select survey type for an appraisal to show its results"
-msgstr ""
+msgstr "Wybierz typ ankiety oceny, aby wyświetlić jej wyniki"
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.appraisal_ask_feedback_view_form
@@ -853,7 +895,7 @@ msgstr "Ankieta zwrotna"
 #. module: hr_appraisal_survey
 #: model:ir.model.fields,field_description:hr_appraisal_survey.field_appraisal_select_survey__survey_input_ids
 msgid "Survey Inputs"
-msgstr ""
+msgstr "Odpowiedzi z ankiety"
 
 #. module: hr_appraisal_survey
 #: model:ir.model,name:hr_appraisal_survey.model_survey_question_answer
@@ -890,8 +932,8 @@ msgid ""
 "Team spirit: ability to work efficiently with peers, manage the conflicts "
 "with diplomacy"
 msgstr ""
-"Kooperacja: zdolność do efektywnej pracy ze wszpółpracownikami, dypomatyczne "
-"rozwiązywanie konfliktów"
+"Duch zespołowy: zdolność do efektywnej pracy ze współpracownikami i "
+"dyplomatycznego rozwiązywania konfliktów"
 
 #. module: hr_appraisal_survey
 #: model:survey.question.answer,value:hr_appraisal_survey.arow_3_1_10
@@ -961,6 +1003,8 @@ msgid ""
 "The survey templates available to choose from for the appraisals that use "
 "this template."
 msgstr ""
+"Dostępne szablony ankiet do wyboru w przypadku ankiet wykorzystujących ten "
+"szablon."
 
 #. module: hr_appraisal_survey
 #: model_terms:survey.survey,description:hr_appraisal_survey.appraisal_feedback_template
@@ -1007,7 +1051,7 @@ msgstr "Tu wpisz dowolne uwagi dotyczące powyższej oceny pracy."
 #. module: hr_appraisal_survey
 #: model:ir.model.fields,field_description:hr_appraisal_survey.field_appraisal_ask_feedback__user_body
 msgid "User Contents"
-msgstr ""
+msgstr "Treści użytkownika"
 
 #. module: hr_appraisal_survey
 #: model:ir.model.fields,help:hr_appraisal_survey.field_survey_survey__appraisal_manager_user_ids
@@ -1017,7 +1061,7 @@ msgstr "Użytkownicy, którzy mogą zobaczyć ankietę użytą w ocenie"
 #. module: hr_appraisal_survey
 #: model:survey.question.answer,value:hr_appraisal_survey.appraisal_360_3_sug1
 msgid "We're colleagues, for the same manager."
-msgstr "Jesteśmy współpracownikami tego samego menedżera."
+msgstr "Jesteśmy kolegami pod tym samym menadżerem."
 
 #. module: hr_appraisal_survey
 #: model:survey.question.answer,value:hr_appraisal_survey.appraisal_360_3_sug2
@@ -1036,12 +1080,12 @@ msgid ""
 "                Your answers will be viewed only by the managers. This is "
 "not an anonymous survey."
 msgstr ""
-"Witaj w tej ankiecie, <br><br>\n"
+"Witaj w ankiecie, <br><br>\n"
 "                Poproszono Cię o wzięcie udziału w ankiecie Feedback 360. To "
 "mała ankieta, która pozwoli menadżerom uzyskać większy wgląd na temat danego "
 "pracownika. \n"
-"                Ponieważ pracujecie razem, możesz najlepiej podzielić się "
-"swoimi przemyśleniami i wyjaśnić, jak wygląda wasza współpraca.<br><br>\n"
+"                Ponieważ pracujecie razem, możesz podzielić się swoimi "
+"przemyśleniami i wyjaśnić, jak wygląda wasza współpraca.<br><br>\n"
 "                Twoje odpowiedzi będą widoczne jedynie dla menadżerów. To "
 "nie jest anonimowa ankieta."
 
@@ -1081,25 +1125,25 @@ msgid ""
 "You can create surveys used for appraisals. Design easily your appraisal,\n"
 "                send invitations and analyze answers."
 msgstr ""
-"Możesz tworzyć ankiety używane do oceny. Łatwo zaprojektuj swoją ocenę,\n"
+"Możesz tworzyć ankiety używane do oceny. Zaprojektuj swoją ocenę,\n"
 "wysyłaj zaproszenia i analizuj odpowiedzi."
 
 #. module: hr_appraisal_survey
 #. odoo-python
 #: code:addons/hr_appraisal_survey/models/survey_survey.py:0
 msgid "You can't ask feedback for multiple appraisals at once."
-msgstr ""
+msgstr "Nie możesz poprosić o opinię dla wielu ocen na raz."
 
 #. module: hr_appraisal_survey
 #. odoo-python
 #: code:addons/hr_appraisal_survey/models/survey_survey.py:0
 msgid "You can't select multiple feedback templates."
-msgstr ""
+msgstr "Nie możesz wybrać wielu szablonów opinii."
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_view_form
 msgid "ask feedback"
-msgstr ""
+msgstr "poproś o opinię"
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_survey_button_form_view
@@ -1109,4 +1153,4 @@ msgstr "lub"
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_view_form
 msgid "to a selection of colleagues you work with."
-msgstr ""
+msgstr "do wybranych współpracowników."

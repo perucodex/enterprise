@@ -203,3 +203,109 @@ class CzechVIESReportTest(CzechReportsCommon):
             ],
             options,
         )
+
+    @freeze_time('2020-12-31')
+    def test_cz_vies_report_foreign_exchange_mismatch(self):
+        """
+            Test to verify that invoice amounts in currencies different from
+              the company's are correctly converted in the VIES summary report.
+        """
+        first_tax = self.env.ref(f'account.{self.env.company.id}_l10n_cz_21_domestic_supplies')
+
+        self.env['res.currency.rate'].create({
+            'name': '2020-11-12',
+            'currency_id': self.env.ref('base.USD').id,
+            'rate': 0.1,
+            'company_id': self.env.user.company_id.id,
+        })
+
+        partner = self.env['res.partner'].create({
+            'name': 'Test EU Partner',
+            'country_id': self.env.ref('base.be').id,
+            'vat': 'BE0477472701',
+        })
+
+        self.env['account.move'].create({
+            'currency_id': self.env.ref('base.USD').id,
+            'invoice_date': '2020-11-12',
+            'taxable_supply_date': '2020-11-12',
+            'move_type': 'out_invoice',
+            'partner_id': partner.id,
+            'invoice_line_ids': [Command.create({
+                'name': 'Test Line',
+                'quantity': 1,
+                'price_unit': 100,
+                'l10n_cz_transaction_code': '0',
+                'tax_ids': first_tax.ids,
+            })],
+        }).action_post()
+
+        report = self.env.ref('l10n_cz_reports.vies_summary_report')
+        options = self.env['account.report'].browse(report.id).get_options({})
+        options['date'] = {
+            'string': '11/11/2020 - 13/11/2020',
+            'mode': 'range',
+            'date_from': '2020-11-11',
+            'date_to': '2020-11-13',
+            'filter': 'custom',
+            'period_type': 'range',
+        }
+
+        xml_content = self.env['l10n_cz.vies.summary.report.handler'].export_to_xml(options)['file_content']
+        tree = self.get_xml_tree_from_string(xml_content)
+        veta_r = tree.find('.//VetaR')
+
+        self.assertEqual(veta_r.attrib.get('pln_hodnota'), '1000')
+
+    @freeze_time('2021-12-31')
+    def test_cz_vies_report_foreign_exchange_mismatch_refund(self):
+        """
+            Test to verify that invoice amounts in currencies different from
+              the company's are correctly converted in the VIES summary report when the move type is 'out_refund'.
+        """
+        first_tax = self.env.ref(f'account.{self.env.company.id}_l10n_cz_21_domestic_supplies')
+
+        self.env['res.currency.rate'].create({
+            'name': '2020-11-12',
+            'currency_id': self.env.ref('base.USD').id,
+            'rate': 0.1,
+            'company_id': self.env.user.company_id.id,
+        })
+
+        partner = self.env['res.partner'].create({
+            'name': 'Test EU Partner',
+            'country_id': self.env.ref('base.be').id,
+            'vat': 'BE0477472701',
+        })
+
+        self.env['account.move'].create({
+            'currency_id': self.env.ref('base.USD').id,
+            'invoice_date': '2021-11-12',
+            'taxable_supply_date': '2021-11-12',
+            'move_type': 'out_refund',
+            'partner_id': partner.id,
+            'invoice_line_ids': [Command.create({
+                'name': 'Refund Line',
+                'quantity': 1,
+                'price_unit': 100,
+                'l10n_cz_transaction_code': '0',
+                'tax_ids': first_tax.ids,
+            })],
+        }).action_post()
+
+        refund_report = self.env.ref('l10n_cz_reports.vies_summary_report')
+        refund_options = self.env['account.report'].browse(refund_report.id).get_options({})
+        refund_options['date'] = {
+            'string': '11/11/2021 - 13/11/2021',
+            'mode': 'range',
+            'date_from': '2021-11-11',
+            'date_to': '2021-11-13',
+            'filter': 'custom',
+            'period_type': 'range',
+        }
+
+        refund_xml_content = self.env['l10n_cz.vies.summary.report.handler'].export_to_xml(refund_options)['file_content']
+        refudn_tree = self.get_xml_tree_from_string(refund_xml_content)
+        refudn_veta_r = refudn_tree.find('.//VetaR')
+
+        self.assertEqual(refudn_veta_r.attrib.get('pln_hodnota'), '-1000')

@@ -84,5 +84,6 @@ class SaleOrder(models.Model):
 
     def unlink(self):
         """ Manually unlink in order to unlink answer inputs linked to calendar bookings. """
-        self.order_line.unlink()
+        bookings_to_unlink = self.order_line.calendar_booking_ids
+        bookings_to_unlink.unlink()
         return super().unlink()

@@ -247,7 +247,7 @@ class AmazonAccount(models.Model):
                 location = self.env['stock.location'].create({
                     'name': 'Amazon',
                     'usage': 'internal',
-                    'location_id': parent_location_data[0]['view_location_id'][0],
+                    'location_id': parent_location_data[0]['view_location_id'][0] if parent_location_data else False,
                     'company_id': vals.get('company_id'),
                 })
             vals.update({'location_id': location.id})

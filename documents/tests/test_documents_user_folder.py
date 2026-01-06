@@ -1,5 +1,6 @@
 from odoo import Command
 from odoo.exceptions import UserError
+from odoo.fields import Domain
 from odoo.tests import users
 
 from odoo.addons.documents.controllers.documents import ShareRoute
@@ -7,6 +8,12 @@ from odoo.addons.documents.tests.test_documents_common import TransactionCaseDoc
 
 
 class TestDocumentsUserFolder(TransactionCaseDocuments):
+
+    def assertDocumentsEqual(self, actual, expected):
+        missing = (expected - actual).mapped("name")
+        extra = (actual - expected).mapped("name")
+        msg = f"{f'Missing: {missing}, ' if missing else ''}{f'Unexpected: {extra}' if extra else ''}"
+        self.assertEqual(actual, expected, msg=msg)
 
     @classmethod
     def setUpClass(cls):
@@ -18,25 +25,70 @@ class TestDocumentsUserFolder(TransactionCaseDocuments):
                 'name': "Documents System Administrator",
             },
         ])
-        cls.company_doc, cls.company_restr, cls.internal_drive = cls.env["documents.document"].sudo().create([
+        (
+            cls.company_doc,
+            cls.company_restr_doc,
+            cls.internal_drive,
+            cls.company_folder,
+            cls.company_restr_folder,
+        ) = cls.env['documents.document'].sudo().create([
             {'name': 'Company Document', 'owner_id': False, 'access_internal': 'view'},
             {'name': 'Company Document Restricted', 'owner_id': False},
-            {'name': "Internal User's Drive Document", 'owner_id': cls.internal_user.id, 'type': 'folder'},
+            {
+                'name': "Internal User's Drive Document",
+                'owner_id': cls.internal_user.id,
+                'type': 'folder',
+            },
+            {
+                'name': 'Company Folder',
+                'type': 'folder',
+                'access_internal': 'edit',
+                'owner_id': False,
+            },
+            {
+                'name': 'Company Restricted Folder',
+                'type': 'folder',
+                'access_internal': 'none',
+                'owner_id': False,
+                'access_ids': False,
+            },
         ])
-        cls.company_folder = cls.env['documents.document'].sudo().create({
-            'name': 'Company Folder',
+
+        cls.sub_company_admin, cls.sub_drive_admin = cls.env['documents.document'].sudo().create([{
+            'name': f'{label} Admin Subfolder',
             'type': 'folder',
-            'access_internal': 'edit',
+            'folder_id': folder.id,
             'owner_id': False,
-        })
+            'access_internal': 'none',
+            'access_ids': False,
+        } for label, folder in (('Company', cls.company_folder), ('Drive', cls.internal_drive))])
+        (
+            cls.shared_doc_company_sub,
+            cls.shared_doc_drive,
+            cls.shared_doc_company
+        ) = cls.env["documents.document"].create([{
+            'name': f'{label} Shared doc',
+            'folder_id': folder.id,
+            'access_internal': 'view',
+        } for (label, folder) in (
+            ('Company', cls.sub_company_admin),
+            ('Drive', cls.sub_drive_admin),
+            ('Company Restricted', cls.company_restr_folder))
+        ])
         cls.test_documents = (
             cls.company_doc  # no owner, access_internal='view'
-            | cls.company_restr  # no owner, but no access to internal users
+            | cls.company_restr_doc  # no owner, but no access to internal users
             | cls.internal_drive  # internal_user's drive
             | cls.folder_a  # doc_user's drive
             | cls.folder_a_a
             | cls.folder_b  # doc_user's drive
             | cls.company_folder
+            | cls.sub_company_admin  # Company subfolder, restricted
+            | cls.shared_doc_company_sub
+            | cls.sub_drive_admin  # internal_user's drive subfolder, restricted
+            | cls.shared_doc_drive
+            | cls.company_restr_folder
+            | cls.shared_doc_company  # Company folder, restricted
         )
         cls.folder_a.action_update_access_rights(
             access_internal='edit',
@@ -46,23 +98,8 @@ class TestDocumentsUserFolder(TransactionCaseDocuments):
         for user in cls.doc_user, cls.document_sys_admin, cls.portal_user, cls.internal_user:
             ShareRoute._upsert_last_access_date(cls.env(user=user), cls.folder_a)
 
-        cls.company_restr.action_update_access_rights(partners={cls.doc_user.partner_id: ('view', False)})
+        cls.company_restr_doc.action_update_access_rights(partners={cls.doc_user.partner_id: ('view', False)})
         cls.env['documents.document'].search([('id', 'not in', cls.test_documents.ids)]).action_archive()
-
-    def test_compute_user_folder_id(self):
-        folder_a_id_str = str(self.folder_a.id)
-        tests_users = self.internal_user, self.doc_user, self.portal_user, self.document_sys_admin
-        expected_user_folder_ids = [
-            # company_doc, company_restr, internal_drive, folder_a,      folder_a_a, folder_b, company_folder,
-            [   'COMPANY',         False,           'MY', 'SHARED', folder_a_id_str, 'SHARED', 'COMPANY'],  # internal_user
-            [   'COMPANY',     'COMPANY',          False,     'MY', folder_a_id_str,     'MY', 'COMPANY'],  # doc_user
-            [       False,         False,          False,    False, folder_a_id_str,    False,     False],  # portal_user
-            [   'COMPANY',     'COMPANY',       'SHARED', 'SHARED', folder_a_id_str, 'SHARED', 'COMPANY'],  # document_sys_admin
-        ]
-        for user, expected in zip(tests_users, expected_user_folder_ids):
-            actual = self.test_documents.with_user(user).mapped('user_folder_id')
-            with self.subTest(user=user.name):
-                self.assertListEqual(actual, expected)
 
     @users('dtdm')
     def test_create_with_default_user_folder_id(self):
@@ -148,36 +185,83 @@ class TestDocumentsUserFolder(TransactionCaseDocuments):
 
     @users('internal_user')
     def test_search_child_of(self):
+        my_subfolder, company_subfolder, sub_sub_company_admin = self.env["documents.document"].sudo().create([
+            {'name': 'My Subfolder', 'folder_id': self.internal_drive.id},
+            {'name': 'Company Subfolder', 'type': 'folder', 'folder_id': self.company_folder.id},
+            {
+                'name': 'Sub Company Admin Folder',
+                'type': 'folder',
+                'access_internal': 'view',
+                'folder_id': self.sub_company_admin.id,
+            },
+        ])
+        sub_company_admin_folder_doc = self.env['documents.document'].create({
+            'name': 'Sub Company Admin Folder Doc',
+            'access_internal': 'view',
+            'folder_id': sub_sub_company_admin.id,
+        })
+        cases = [
+            ('SHARED',
+             self.folder_a | self.folder_a_a | self.folder_b | self.shared_doc_company_sub | self.shared_doc_drive
+             | self.shared_doc_company | sub_sub_company_admin | sub_company_admin_folder_doc),
+            ('MY', self.internal_drive | my_subfolder),
+            ('COMPANY', self.company_folder | company_subfolder | self.company_doc),
+            (str(self.internal_drive.id), my_subfolder),
+        ]
+        accessible_documents = self.env["documents.document"].search([])
+        for user_folder_id, expected in cases:
+            with self.subTest(user_folder_id=user_folder_id):
+                domain = [('user_folder_id', 'child_of', user_folder_id)]
+                actual = self.env['documents.document'].search(domain)
+                self.assertDocumentsEqual(actual, expected)
+                filtered = accessible_documents.filtered_domain(domain)
+                self.assertDocumentsEqual(filtered, expected)
+
+    @users('internal_user')
+    def test_search_folder_id_child_of(self):
         my_subfolder, company_subfolder = self.env['documents.document'].create([
             {'name': 'My Subfolder', 'folder_id': self.internal_drive.id},
             {'name': 'Company Subfolder', 'type': 'folder', 'folder_id': self.company_folder.id},
         ])
         cases = [
-            ('SHARED', self.folder_a | self.folder_a_a | self.folder_b),
-            ('MY', self.internal_drive | my_subfolder),
-            ('COMPANY', self.company_folder | company_subfolder | self.company_doc)
+            (self.internal_drive, self.internal_drive | my_subfolder),  # not shared_doc_drive
+            (self.company_folder, self.company_folder | company_subfolder)  # not shared_doc_company_sub
         ]
-        for user_folder_id, expected in cases:
-            with self.subTest(user_folder_id=user_folder_id):
-                actual = self.env['documents.document'].search([('user_folder_id', 'child_of', user_folder_id)])
-                self.assertEqual(actual, expected, f"Found {actual.mapped('name')}")
+        accessible_documents = self.env["documents.document"].search([])
+        for folder, expected in cases:
+            with self.subTest(folder=folder.name):
+                domain = [('folder_id', 'child_of', folder.id)]
+                actual = self.env['documents.document'].search(domain)
+                self.assertDocumentsEqual(actual, expected)
+                filtered = accessible_documents.filtered_domain(domain)
+                self.assertDocumentsEqual(filtered, expected)
 
-    def test_search_user_folder_id_equal(self):
+    def test_compute_and_search_user_folder_id_equal(self):
+        """Test user_folder_id's compute and search with "equal" operator.
+
+        Cases are shaped as [(user, expected), ...], where:
+            user: test user,
+            expected: records per user_folder_id value, such that
+              * searching for this value (if truthy) should retrieve these records
+              * computing user_folder_id for the records is correct ('False' for inaccessible docs)
+        """
         Document = self.env['documents.document']
         cases = [
             (self.internal_user, {
                 'COMPANY': self.company_doc | self.company_folder,
                 'MY': self.internal_drive,
-                'SHARED': self.folder_a | self.folder_b,
+                'SHARED': self.folder_a | self.folder_b | self.shared_doc_company_sub | self.shared_doc_drive | self.shared_doc_company,
                 'RECENT': self.internal_drive | self.folder_a,
                 str(self.folder_a.id): self.folder_a_a,
+                False: self.company_restr_doc | self.company_restr_folder | self.sub_company_admin | self.sub_drive_admin
             }),
             (self.doc_user, {
-                'COMPANY': self.company_doc | self.company_folder | self.company_restr,
+                'COMPANY': self.company_doc | self.company_folder | self.company_restr_doc,
                 'MY': self.folder_a | self.folder_b,
-                'SHARED': Document,
+                'SHARED': self.shared_doc_company_sub | self.shared_doc_drive | self.shared_doc_company,
                 'RECENT': self.folder_a | self.folder_a_a | self.folder_b,
                 str(self.folder_a.id): self.folder_a_a,
+                False: self.internal_drive | self.sub_company_admin | self.sub_drive_admin,
             }),
             (self.portal_user, {
                 'COMPANY': Document,
@@ -185,50 +269,106 @@ class TestDocumentsUserFolder(TransactionCaseDocuments):
                 'SHARED': self.folder_a,
                 'RECENT': self.folder_a,
                 str(self.folder_a.id): self.folder_a_a,
-            })
+                False: self.test_documents - self.folder_a_a,
+            }),
+            (self.document_sys_admin, {
+                'COMPANY': self.company_doc | self.company_restr_doc | self.company_folder | self.company_restr_folder,
+                'MY': Document,
+                'SHARED': self.internal_drive | self.folder_a | self.folder_b,
+                'RECENT': self.folder_a,
+                str(self.folder_a.id): self.folder_a_a,
+                str(self.company_folder.id): self.sub_company_admin,
+                str(self.internal_drive.id): self.sub_drive_admin,
+                str(self.company_restr_folder.id): self.shared_doc_company,
+                str(self.sub_drive_admin.id): self.shared_doc_drive,
+            }),
         ]
         for user, expected in cases:
             for user_folder_id, documents in expected.items():
                 with self.subTest(user=user.name, user_folder_id=user_folder_id):
-                    actual = self.env['documents.document'].with_user(user).search([('user_folder_id', '=', user_folder_id)])
-                    self.assertEqual(actual, documents, f"Found: {actual.mapped('name')}")
+                    if user_folder_id:
+                        actual = self.env['documents.document'].with_user(user).search(
+                            Domain('user_folder_id', '=', user_folder_id))
+                        self.assertDocumentsEqual(actual, documents)
+                    # Test compute except for no records or search-only results
+                    if (
+                        documents
+                        and user_folder_id != 'RECENT'
+                        and (user_folder_id != 'SHARED' or user != self.portal_user)
+                    ):
+                        self.assertEqual(set(documents.with_user(user).mapped('user_folder_id')), {user_folder_id})
 
     @users('internal_user')
     def test_search_user_folder_id_in_and_not_in(self):
         to_find_all = ['COMPANY', 'MY', 'SHARED', str(self.folder_a.id)]
         expected_all = self.company_doc | self.company_folder | self.internal_drive | self.folder_a | self.folder_a_a \
-            | self.folder_b
+            | self.folder_b | self.shared_doc_company_sub | self.shared_doc_drive | self.shared_doc_company
         actual = self.env['documents.document'].search([('user_folder_id', 'in', to_find_all)])
-        self.assertEqual(actual, expected_all, f"Found {actual.mapped('name')}")
+        self.assertDocumentsEqual(actual, expected_all)
 
         expected_company = self.company_doc | self.company_folder
         actual_company = self.env['documents.document'].search([('user_folder_id', 'in', 'COMPANY')])
-        self.assertEqual(actual_company, expected_company, f"Found {actual_company.mapped('name')}")
+        self.assertDocumentsEqual(actual_company, expected_company)
 
         expected_not_company = expected_all - expected_company
         actual_not_company = self.env['documents.document'].search([('user_folder_id', 'not in', 'COMPANY')])
-        self.assertEqual(actual_not_company, expected_not_company, f"Found {actual_not_company.mapped('name')}")
+        self.assertDocumentsEqual(actual_not_company, expected_not_company)
 
         expected_my = self.internal_drive
         actual_my = self.env['documents.document'].search([('user_folder_id', 'in', 'MY')])
-        self.assertEqual(actual_my, expected_my, f"Found {actual_my.mapped('name')}")
+        self.assertDocumentsEqual(actual_my, expected_my)
 
         expected_not_my = expected_all - expected_my
         actual_not_my = self.env['documents.document'].search([('user_folder_id', 'not in', 'MY')])
-        self.assertEqual(actual_not_my, expected_not_my, f"Found {actual_not_my.mapped('name')}")
+        self.assertDocumentsEqual(actual_not_my, expected_not_my)
 
-        expected_shared = self.folder_a | self.folder_b
+        expected_shared = self.folder_a | self.folder_b | self.shared_doc_company_sub | self.shared_doc_drive | self.shared_doc_company
         actual_shared = self.env['documents.document'].search([('user_folder_id', 'in', 'SHARED')])
-        self.assertEqual(actual_shared, expected_shared, f"Found {actual_shared.mapped('name')}")
+        self.assertDocumentsEqual(actual_shared, expected_shared)
 
         expected_not_shared = expected_all - expected_shared
         actual_not_shared = self.env['documents.document'].search([('user_folder_id', 'not in', 'SHARED')])
-        self.assertEqual(actual_not_shared, expected_not_shared, f"Found {actual_not_shared.mapped('name')}")
+        self.assertDocumentsEqual(actual_not_shared, expected_not_shared)
 
         expected_folder_a = self.folder_a_a
         actual_folder_a = self.env['documents.document'].search([('user_folder_id', 'in', str(self.folder_a.id))])
-        self.assertEqual(actual_folder_a, expected_folder_a, f"Found {actual_folder_a.mapped('name')}")
+        self.assertDocumentsEqual(actual_folder_a, expected_folder_a)
 
         expected_not_folder_a = expected_all - expected_folder_a
         actual_not_folder_a = self.env['documents.document'].search([('user_folder_id', 'not in', str(self.folder_a.id))])
-        self.assertEqual(actual_not_folder_a, expected_not_folder_a, f"Found {actual_not_folder_a.mapped('name')}")
+        self.assertDocumentsEqual(actual_not_folder_a, expected_not_folder_a)
+
+    def test_documents_search_panel(self):
+        cases = [
+            (
+                {},
+                {
+                    "Company": None,
+                    "Company Admin Subfolder": self.company_folder.id,
+                    "Company Folder": "COMPANY",
+                    "Company Restricted Folder": "COMPANY",
+                    "Drive Admin Subfolder": self.internal_drive.id,
+                    "Internal User's Drive Document": "SHARED",
+                    "My Drive": None,
+                    "Recent": None,
+                    "Shared with me": None,
+                    "Trash": None,
+                    "folder A": "SHARED",
+                    "folder A - A": self.folder_a.id,
+                    "folder B": "SHARED",
+                },
+            ),
+            (
+                {"documents_unique_folder_id": self.folder_a.id},
+                {
+                    "folder A": False,
+                    "folder A - A": self.folder_a.id,
+                },
+            ),
+        ]
+        for context, expected in cases:
+            with self.subTest(context=context):
+                Documents = self.env['documents.document'].with_context(context)
+                actual = Documents.search_panel_select_range("user_folder_id")['values']
+                user_folder_ids = {vals["display_name"]: vals.get("user_folder_id") for vals in actual}
+                self.assertEqual(user_folder_ids, expected)

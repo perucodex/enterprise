@@ -57,7 +57,6 @@ class L10n_Br_EdiInvoiceUpdate(models.TransientModel):
     def _finalize_update(self, iap_args):
         move = self.move_id
         if self.mode == "cancel":
-            move.l10n_br_last_edi_status = "cancelled"
             move.button_cancel()
         else:
             move.l10n_br_edi_last_correction_number = iap_args["seq"]
@@ -103,7 +102,6 @@ class L10n_Br_EdiInvoiceUpdate(models.TransientModel):
         move.message_post(
             body=_("E-invoice cancelled in Odoo, make sure to also cancel it in your city's portal."),
         )
-        move.l10n_br_last_edi_status = "cancelled"
         move.button_cancel()
 
     def action_submit(self):

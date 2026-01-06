@@ -2,7 +2,7 @@ import ast
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
-from odoo import Command, _, api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
 from odoo.tools import groupby
@@ -51,31 +51,6 @@ class AccountTransferModel(models.Model):
             new_model.account_ids += old_model.account_ids
             old_model.line_ids.copy({'transfer_model_id': new_model.id})
         return new_models
-
-    @api.onchange('account_ids')
-    def _onchange_account_ids(self):
-        """Ensure that the accounts used in the transfer model are reflected in the conditions field domain."""
-        domain = Domain(ast.literal_eval(self.conditions)) if self.conditions else Domain.TRUE
-        for cond in domain.iter_conditions():
-            if not (cond.field_expr == 'account_id' and cond.operator == 'in' and isinstance(cond.value, (list, tuple))):
-                domain &= Domain(cond.field_expr, cond.operator, cond.value)
-        if self.account_ids:
-            domain &= Domain('account_id', 'in', self.account_ids.ids)
-        self.conditions = domain
-
-    @api.onchange('conditions')
-    def _onchange_conditions(self):
-        """If the conditions domain contains an 'account_id in x' leaf, update account_ids accordingly."""
-        domain = Domain(ast.literal_eval(self.conditions)) if self.conditions else Domain.TRUE
-        self.account_ids = self.env['account.account']
-        for cond in domain.iter_conditions():
-            if (
-                cond.field_expr == 'account_id'
-                and cond.operator == 'in'
-                and isinstance(cond.value, (list, tuple))
-            ):
-                self.account_ids = [Command.link(id) for id in cond.value]
-                break
 
     @api.ondelete(at_uninstall=False)
     def _unlink_with_check_moves(self):

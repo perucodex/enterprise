@@ -386,3 +386,26 @@ subtotalTaxable: 435, tax: 0, taxType: ipi"""
         self.assertEqual(self.invoice.l10n_br_last_edi_status, "accepted", "Invoice should be accepted.")
         self.assertTrue(self.invoice.invoice_pdf_report_id, "PDF should have been saved.")
         self.assertTrue(self.invoice.l10n_br_edi_xml_attachment_id, "XML should have been saved.")
+
+    def test_update_cancel_accepted_invoice(self):
+        """
+        Test that cancelling an accepted posted invoice correctly sets EDI status to 'cancelled'.
+        """
+        # Simulate the real-world flow: invoice is posted and accepted
+        self.invoice.l10n_br_last_edi_status = "accepted"
+        self.invoice.l10n_br_access_key = "12345678901234567890123456789012345678901234"
+        self.assertEqual(self.invoice.state, "posted", "Invoice should be posted.")
+        self.assertEqual(self.invoice.l10n_br_last_edi_status, "accepted", "Invoice should be accepted.")
+
+        # Create cancellation wizard
+        wizard = self.env["l10n_br_edi.invoice.update"].create(
+            {"move_id": self.invoice.id, "mode": "cancel", "reason": "test reason with at least 15 characters"}
+        )
+
+        # Submit cancellation
+        with self.with_patched_account_move("_l10n_br_iap_cancel_invoice_goods", invoice_1_cancel_success_response):
+            wizard.action_submit()
+
+        # Verify the invoice is cancelled and EDI status is correctly set
+        self.assertEqual(self.invoice.state, "cancel", "Invoice should be cancelled.")
+        self.assertEqual(self.invoice.l10n_br_last_edi_status, "cancelled", "Invoice EDI status should be 'cancelled'")

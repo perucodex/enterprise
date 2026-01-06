@@ -32,7 +32,7 @@ registry.category("web_tour.tours").add("sale_external_optional_products", {
         },
         {
             content: "Check the quantity",
-            trigger: "tr:contains(optional product) input.js_quantity:value(1.0)",
+            trigger: "tr:contains(optional product) input.js_quantity:value(1)",
         },
         {
             content: "decrease quantity of the optional line",

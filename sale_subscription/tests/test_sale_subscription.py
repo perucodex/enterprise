@@ -2476,6 +2476,19 @@ class TestSubscription(TestSubscriptionCommon, MockEmail):
 
             self.assertIn("550 days 06/30/2025 to 12/31/2026", line['name'])
 
+    def test_subscription_upsell_alternative_invoice(self):
+        self.subscription.action_confirm()
+        self.env['sale.order']._cron_recurring_create_invoice()
+        action = self.subscription.prepare_upsell_order()
+        upsell_so = self.env['sale.order'].browse(action['res_id'])
+        action = upsell_so.create_alternative()
+        alternative_upsell_so = self.env['sale.order'].browse(action['res_id'])
+        alternative_upsell_order_line = alternative_upsell_so.order_line.filtered(lambda line: not line.display_type)
+        for sol in alternative_upsell_order_line:
+            sol.product_uom_qty = 1.0
+        alternative_upsell_so.action_confirm()
+        alternative_upsell_so._create_invoices()
+        self.assertTrue(len(alternative_upsell_so.invoice_ids), "An invoice should have been created for the alternative upsell sale order.")
 
     def test_churn_discount_removal(self):
         """ Test the following flow:
@@ -2736,6 +2749,55 @@ class TestSubscription(TestSubscriptionCommon, MockEmail):
         self.assertEqual(subscription.order_line.product_uom_qty, 2.0,
                          "The recurring product's quantity should not be changed in subscription")
 
+    def test_partial_refund_reduces_invoiced_quantity_on_subscription(self):
+        """
+        Verify that a partial refund on a subscription invoice
+        correctly updates the invoiced quantity on the order line.
+        """
+        with freeze_time("2024-09-01"):
+            subscription = self.env['sale.order'].create({
+                'partner_id': self.partner.id,
+                'plan_id': self.plan_month.id,
+                'order_line': [
+                    (0, 0, {
+                        'name': self.product.name,
+                        'product_id': self.product.id,
+                        'product_uom_qty': 3.0,
+                        'product_uom_id': self.product.uom_id.id,
+                        'price_unit': 12,
+                    })],
+            })
+            subscription.action_confirm()
+            subscription._create_recurring_invoice()
+            self.assertEqual(subscription.order_line.qty_invoiced, 3, "The 3 products should be invoiced")
+            subscription._get_invoiced()
+            inv = subscription.invoice_ids
+            inv.payment_state = 'paid'
+            refund_wizard = self.env['account.move.reversal'].with_context(
+                active_model="account.move",
+                active_ids=inv.ids).create({
+                'reason': 'Partial refund for Product A',
+                'journal_id': inv.journal_id.id,
+            })
+            refund_wizard.reverse_moves()
+
+            credit_note = self.env['account.move'].search([
+                ('reversed_entry_id', '=', inv.id),
+                ('move_type', '=', 'out_refund'),
+            ], limit=1)
+
+            for line in credit_note.invoice_line_ids:
+                if line.product_id.id == self.product.id:
+                    line.quantity = 2
+
+            credit_note._compute_amount()
+            credit_note._compute_tax_totals()
+
+            credit_note.action_post()
+
+        self.assertEqual(subscription.order_line.qty_invoiced, 1,
+                         "The invoiced quantity should be reduced by the refund")
+
     def test_sale_subscription_optional_product_discount(self):
         """
         Check that the discount on an optional product is correctly applied when the option is added to a SO.
@@ -2925,3 +2987,69 @@ class TestSubscription(TestSubscriptionCommon, MockEmail):
         sale_order.plan_id.billing_first_day = True
         sale_order.action_confirm()
         self.assertEqual(sale_order.next_invoice_date, datetime.date(2025, 10, 1), "The next invoice date is first of october")
+
+    def test_invoice_after_deleting_invoiced_line(self):
+        """ Test that invoicing works correctly after deleting an already invoiced subscription line.
+        This test covers the fix for _get_max_invoiced_date when sale_line_ids is empty
+        """
+        product_a = self.env['product.product'].create({
+            'name': 'Car Leasing (SUB)',
+            'type': 'service',
+            'recurring_invoice': True,
+            'uom_id': self.env.ref('uom.product_uom_unit').id,
+            'list_price': 20,
+        })
+        product_b = self.env['product.product'].create({
+            'name': 'Office Cleaning Service (SUB)',
+            'type': 'service',
+            'recurring_invoice': True,
+            'uom_id': self.env.ref('uom.product_uom_unit').id,
+            'list_price': 10,
+        })
+
+        with freeze_time('2025-11-11'):
+            subscription = self.env['sale.order'].create({
+                'name': 'Test Subscription',
+                'is_subscription': True,
+                'plan_id': self.plan_month.id,
+                'partner_id': self.partner.id,
+                'order_line': [Command.create({
+                    'product_id': product_a.id,
+                    'product_uom_qty': 1.0,
+                    'price_unit': 20,
+                })],
+            })
+            subscription.action_confirm()
+
+            invoice_1 = subscription._create_invoices()
+            invoice_1._post()
+
+            self.assertEqual(len(subscription.invoice_ids), 1, 'First invoice should be created')
+            self.assertEqual(subscription.order_line.qty_invoiced, 1.0, 'Product A should be invoiced')
+
+            subscription.write({
+                'order_line': [Command.create({
+                    'product_id': product_b.id,
+                    'product_uom_qty': 1.0,
+                    'price_unit': 10,
+                })],
+            })
+
+            line_to_delete = subscription.order_line.filtered(lambda l: l.product_id == product_a)
+            line_to_delete.unlink()
+
+            self.assertEqual(len(subscription.order_line), 1, 'Only product B line should remain')
+            self.assertEqual(subscription.order_line.product_id, product_b, 'Remaining line should be product B')
+            self.assertEqual(len(subscription.invoice_ids), 1, 'Invoice for product A should still exist')
+
+            invoice_2 = subscription._create_invoices()
+
+            self.assertTrue(invoice_2, 'Second invoice should be created successfully')
+            self.assertEqual(len(subscription.invoice_ids), 2, 'Should have two invoices total')
+
+            invoice_2_lines = invoice_2.invoice_line_ids.filtered(lambda l: l.display_type == 'product')
+            self.assertEqual(len(invoice_2_lines), 1, 'Second invoice should have one product line')
+            self.assertEqual(invoice_2_lines.product_id, product_b, 'Second invoice should be for product B')
+
+            invoice_2._post()
+            self.assertEqual(invoice_2.state, 'posted', 'Second invoice should be posted successfully')

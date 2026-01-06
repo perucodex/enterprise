@@ -238,7 +238,7 @@ class ShipRocket:
         tax_ids = stock_move.sale_line_id and stock_move.sale_line_id.sudo().tax_ids or stock_move.product_id.sudo().taxes_id
         for tax in tax_ids.flatten_taxes_hierarchy():
             tax_tag_ids = tax.invoice_repartition_line_ids.tag_ids
-            if tax_tag_ids and any(tax.env.ref(f"l10n_in.tax_tag_{gst}gst", False) in tax_tag_ids for gst in ["c", "s", "i"]):
+            if tax_tag_ids and any((tax.env.ref(f"l10n_in.tax_tag_{gst}gst", False) or tax.env['account.account.tag']) in tax_tag_ids for gst in ["c", "s", "i"]):
                 gst_tax_amount += tax.amount
         return gst_tax_amount
 

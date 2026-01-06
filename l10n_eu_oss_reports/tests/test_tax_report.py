@@ -250,6 +250,23 @@ class OSSTaxReportTest(TestAccountReportsCommon):
             self.get_xml_tree_from_string(expected_xml)
         )
 
+    def test_tax_units(self):
+        report = self.env.ref('l10n_eu_oss_reports.oss_sales_report')
+        self.company_data_2['company'].currency_id = self.env.ref('base.EUR')
+        tax_unit = self.env['account.tax.unit'].create({
+            'name': 'BE Tax Unit',
+            'country_id': self.env.ref('base.be').id,
+            'main_company_id': self.env.company.id,
+            'company_ids': [Command.set([self.company_data['company'].id, self.company_data_2['company'].id])],
+            'vat': 'BE0477472701',
+        })
+        options = self._generate_options(report, '2021-04-01', '2021-06-30')
+        self.assertEqual(options['tax_unit'], tax_unit.id)
+        self.assertEqual(
+            [company['id'] for company in options['companies']],
+            [self.company_data['company'].id, self.company_data_2['company'].id]
+        )
+
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
 class TestTaxReportOSSNoMapping(TestAccountReportsCommon):
@@ -401,4 +418,31 @@ class TestTaxReportOSSNoMapping(TestAccountReportsCommon):
                 ("Total Sales",                '',             25.0),
             ],
             options,
+        )
+
+    def test_oss_variants_available(self):
+        # Ensure OSS variants are available from their root reports (using OSS availability condition)
+        generic_tax_report = self.env.ref('account.generic_tax_report')
+        options = self._generate_options(generic_tax_report, '2022-02-01', '2022-02-28')
+        oss_reports = {
+            self.env.ref('l10n_eu_oss_reports.oss_sales_report').id,
+            self.env.ref('l10n_eu_oss_reports.oss_imports_report').id,
+        }
+        available_oss = [v for v in options['available_variants'] if v['id'] in oss_reports]
+        self.assertEqual(
+            len(available_oss), 2,
+            "OSS variants should be available in the generic tax report's variants"
+        )
+
+        # Remove OSS taxes
+        oss_tag = self.env.ref('l10n_eu_oss.tag_oss')
+        company_ids = generic_tax_report.get_report_company_ids(options)
+        oss_repartition_lines = self.env['account.tax.repartition.line'].search([('tag_ids', 'in', oss_tag.ids), ('company_id', 'in', company_ids)])
+        oss_repartition_lines.tax_id.unlink()
+
+        options = self._generate_options(generic_tax_report, '2022-02-01', '2022-02-28')
+        available_oss = [v for v in options['available_variants'] if v['id'] in oss_reports]
+        self.assertEqual(
+            len(available_oss), 0,
+            "OSS variants should not be available in the generic tax report's variants because no OSS taxes could be found"
         )

@@ -327,7 +327,7 @@ class SendCloud:
         return list(parcel_items.values())
 
     def _get_house_number(self, address):
-        house_number = re.search(r"(\d+[-\/]?\d* ?[a-zA-Z]?\d*)(?![a-zA-Z])", address)
+        house_number = re.search(r"(\d+(?:[-\/]?\d+)* ?[a-zA-Z]?\d*)(?![a-zA-Z])", address)
         if house_number:
             return house_number.group()
         return ' '
@@ -534,7 +534,7 @@ class SendCloud:
             return products_values
 
         for line in sale_order.order_line:
-            if line.product_id.type == 'consu' or line.display_type or float_is_zero(line.product_uom_qty, precision_rounding=line.product_uom_id.rounding) or line.product_uom_qty < 0:
+            if not line.product_id or line.product_id.type == 'consu' or line.display_type or float_is_zero(line.product_uom_qty, precision_rounding=line.product_uom_id.rounding) or line.product_uom_qty < 0:
                 continue
             if line.product_id.id in products_values:
                 products_values[line.product_id.id]['tot_qty'] += line.product_uom_qty
@@ -638,7 +638,7 @@ class SendCloud:
         return parcel_common
 
     def _get_pick_sender_address(self, picking):
-        warehouse_name = picking.location_id.warehouse_id.name.lower().replace(' ', '')
+        warehouse_name = picking._retrieve_warehouse_name().lower().replace(' ', '')
         addresses = self._get_addresses()
         res_id = None
         for addr in addresses:

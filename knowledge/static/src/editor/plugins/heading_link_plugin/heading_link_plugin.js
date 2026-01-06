@@ -2,6 +2,7 @@ import { Plugin } from "@html_editor/plugin";
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { ancestors, descendants } from "@html_editor/utils/dom_traversal";
+import { scrollAndHighlightHeading } from "@html_editor/utils/url";
 import { xml } from "@odoo/owl";
 import { renderToElement } from "@web/core/utils/render";
 
@@ -37,7 +38,7 @@ export class HeadingLinkPlugin extends Plugin {
             // Add a step to the history and make sure the ID is saved.
             this.dependencies.history.addStep();
             // Highlight the heading.
-            this.highlightHeading(headingId);
+            scrollAndHighlightHeading(this.editable, headingId);
         });
         this.addDomListener(this.headingLink, "dragstart", ev => ev.preventDefault());
 
@@ -46,19 +47,7 @@ export class HeadingLinkPlugin extends Plugin {
     }
 
     onStartEdition() {
-        if (browser.location.hash) {
-            const headingId = browser.location.hash.replace(/^#/, "");
-            if (headingId) {
-                // Wait until the browser has rendered the editor before
-                // scrolling. The timeout value of 500 is a little arbitrary,
-                // but it should be enough to prevent an irritating case where
-                // a Youtube video is in the document and loads while the
-                // autoscroll is happening, and stops it.
-                setTimeout(() => {
-                    this.highlightHeading(headingId);
-                }, 500);
-            }
-        }
+        scrollAndHighlightHeading(this.editable);
     }
 
     onMousemove(ev) {
@@ -104,17 +93,6 @@ export class HeadingLinkPlugin extends Plugin {
             if (!headingId) {
                 heading.setAttribute("data-heading-link-id", "" + Math.floor(Math.random() * Date.now()));
             }
-        }
-    }
-
-    highlightHeading(headingId) {
-        const heading = this.editable.querySelector(`[data-heading-link-id="${headingId}"]`);
-        if (heading) {
-            heading.scrollIntoView({ behavior: "smooth" });
-            heading.classList.add("o-highlight-heading");
-            setTimeout(() => {
-                heading.classList.remove("o-highlight-heading");
-            }, 2000);
         }
     }
 }

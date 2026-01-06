@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~18.2+e\n"
+"Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-10 12:11+0000\n"
-"PO-Revision-Date: 2025-03-10 12:11+0000\n"
+"POT-Creation-Date: 2025-12-30 19:08+0000\n"
+"PO-Revision-Date: 2025-12-30 19:08+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -46,6 +46,50 @@ msgid "- VAT number"
 msgstr ""
 
 #. module: l10n_nl_reports
+#. odoo-python
+#: code:addons/l10n_nl_reports/models/dutch_report_custom_handler.py:0
+msgid "5e. End total"
+msgstr ""
+
+#. module: l10n_nl_reports
+#. odoo-python
+#: code:addons/l10n_nl_reports/models/dutch_report_custom_handler.py:0
+msgid "5f. Balance already declared amount"
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model:mail.template,body_html:l10n_nl_reports.email_template_vat_payment_instructions
+msgid ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p>\n"
+"                    Dear <t t-out=\"object.company_id.name or ''\">NL Company</t>,\n"
+"                </p>\n"
+"                <p>\n"
+"                    Based on the documents and information received, the VAT return of <t t-out=\"object.company_id.name or ''\">NL Company</t>\n"
+"                    for period <t t-out=\"object.type_id._get_period_name(object.company_id, object.date_from, object.date_to)\"/> has been submitted.\n"
+"                </p>\n"
+"                <p>\n"
+"                    It has been determined that an amount of <t t-out=\"format_amount(object.total_amount_to_pay, object.amount_to_pay_currency_id)\"/> remains payable.\n"
+"                </p>\n"
+"                <t t-call=\"l10n_nl_reports.vat_payment_details_table\"/>\n"
+"                <p>Kind regards,</p>\n"
+"                <p><t t-out=\"user.name\">Mitchell Admin</t></p>\n"
+"            </div>\n"
+"        "
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.vat_payment_details_table
+msgid "<strong>Scan me with your banking app.</strong>"
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__partner_id
+#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.vat_payment_details_table
+msgid "Account Holder"
+msgstr ""
+
+#. module: l10n_nl_reports
 #: model:ir.model.fields,help:l10n_nl_reports.field_res_config_settings__l10n_nl_rounding_difference_loss_account_id
 msgid "Account used for losses from rounding the lines of Dutch tax reports"
 msgstr ""
@@ -53,6 +97,26 @@ msgstr ""
 #. module: l10n_nl_reports
 #: model:ir.model.fields,help:l10n_nl_reports.field_res_config_settings__l10n_nl_rounding_difference_profit_account_id
 msgid "Account used for profits from rounding the lines of Dutch tax reports"
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model:ir.model,name:l10n_nl_reports.model_account_return
+msgid "Accounting Return"
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__amount_to_pay
+msgid "Amount To Pay"
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__currency_id
+msgid "Amount To Pay Currency"
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.vat_payment_details_table
+msgid "Amount to Pay"
 msgstr ""
 
 #. module: l10n_nl_reports
@@ -99,6 +163,12 @@ msgid "Closing Entry"
 msgstr ""
 
 #. module: l10n_nl_reports
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__communication
+#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.vat_payment_details_table
+msgid "Communication"
+msgstr ""
+
+#. module: l10n_nl_reports
 #: model:ir.model,name:l10n_nl_reports.model_res_company
 msgid "Companies"
 msgstr ""
@@ -107,6 +177,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_icp_wizard__company_id
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_status_service__company_id
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_tax_report_wizard__company_id
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__company_id
 msgid "Company"
 msgstr ""
 
@@ -161,7 +232,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_nl_reports/wizard/l10n_nl_reports_sbr_tax_report_wizard.py:0
 #: code:addons/l10n_nl_reports/wizard/l10n_nl_sbr_icp_wizard.py:0
-#: model:ir.actions.server,name:l10n_nl_reports.action_open_closing_entry
 msgid "Create Closing Entry"
 msgstr ""
 
@@ -179,6 +249,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_icp_wizard__create_uid
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_status_service__create_uid
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_tax_report_wizard__create_uid
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__create_uid
 msgid "Created by"
 msgstr ""
 
@@ -186,6 +257,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_icp_wizard__create_date
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_status_service__create_date
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_tax_report_wizard__create_date
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__create_date
 msgid "Created on"
 msgstr ""
 
@@ -196,13 +268,19 @@ msgid "Digipoort Certificate"
 msgstr ""
 
 #. module: l10n_nl_reports
+#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.l10n_nl_vat_pay_wizard_form
+msgid "Discard"
+msgstr ""
+
+#. module: l10n_nl_reports
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_account_general_ledger_report_handler__display_name
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_account_return__display_name
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_ec_sales_report_handler__display_name
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_icp_wizard__display_name
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_status_service__display_name
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_tax_report_wizard__display_name
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_tax_report_handler__display_name
-#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_tax_report_handler__display_name
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__display_name
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_res_company__display_name
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_res_config_settings__display_name
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_res_users__display_name
@@ -216,13 +294,17 @@ msgid "Download"
 msgstr ""
 
 #. module: l10n_nl_reports
+#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.vat_payment_details_table
+msgid "Due By"
+msgstr ""
+
+#. module: l10n_nl_reports
 #: model:ir.model,name:l10n_nl_reports.model_l10n_nl_reports_ec_sales_report_handler
 msgid "Dutch EC Sales Report Custom Handler"
 msgstr ""
 
 #. module: l10n_nl_reports
 #: model:ir.model,name:l10n_nl_reports.model_l10n_nl_reports_tax_report_handler
-#: model:ir.model,name:l10n_nl_reports.model_l10n_nl_tax_report_handler
 msgid "Dutch Report Custom Handler"
 msgstr ""
 
@@ -244,7 +326,7 @@ msgstr ""
 
 #. module: l10n_nl_reports
 #: model:ir.model,name:l10n_nl_reports.model_account_general_ledger_report_handler
-msgid "General Ledger Custom Handler"
+msgid "FEC Report Custom Handler"
 msgstr ""
 
 #. module: l10n_nl_reports
@@ -263,6 +345,12 @@ msgid "Go to the Accounting Settings"
 msgstr ""
 
 #. module: l10n_nl_reports
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__acc_number
+#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.vat_payment_details_table
+msgid "IBAN"
+msgstr ""
+
+#. module: l10n_nl_reports
 #. odoo-python
 #: code:addons/l10n_nl_reports/wizard/l10n_nl_sbr_icp_wizard.py:0
 msgid "ICP report sent"
@@ -270,12 +358,13 @@ msgstr ""
 
 #. module: l10n_nl_reports
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_account_general_ledger_report_handler__id
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_account_return__id
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_ec_sales_report_handler__id
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_icp_wizard__id
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_status_service__id
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_tax_report_wizard__id
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_tax_report_handler__id
-#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_tax_report_handler__id
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__id
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_res_company__id
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_res_config_settings__id
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_res_users__id
@@ -286,6 +375,17 @@ msgstr ""
 #: model:ir.model.fields.selection,name:l10n_nl_reports.selection__l10n_nl_reports_sbr_icp_wizard__contact_type__int
 #: model:ir.model.fields.selection,name:l10n_nl_reports.selection__l10n_nl_reports_sbr_tax_report_wizard__contact_type__int
 msgid "Intermediary (INT)"
+msgstr ""
+
+#. module: l10n_nl_reports
+#. odoo-python
+#: code:addons/l10n_nl_reports/wizard/vat_pay_wizard.py:0
+msgid "Invalid tax periodicity. Please use one of the following: %s."
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__is_recoverable
+msgid "Is Recoverable"
 msgstr ""
 
 #. module: l10n_nl_reports
@@ -333,6 +433,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_icp_wizard__write_uid
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_status_service__write_uid
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_tax_report_wizard__write_uid
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__write_uid
 msgid "Last Updated by"
 msgstr ""
 
@@ -340,12 +441,23 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_icp_wizard__write_date
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_status_service__write_date
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_tax_report_wizard__write_date
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__write_date
 msgid "Last Updated on"
 msgstr ""
 
 #. module: l10n_nl_reports
 #: model_terms:ir.ui.view,arch_db:l10n_nl_reports.xaf_audit_file
 msgid "Last write"
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.l10n_nl_vat_pay_wizard_form
+msgid "Mark Paid"
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.l10n_nl_vat_pay_wizard_form
+msgid "Mark as Recovered"
 msgstr ""
 
 #. module: l10n_nl_reports
@@ -390,6 +502,16 @@ msgid "Omzetbelastingnummer"
 msgstr ""
 
 #. module: l10n_nl_reports
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__partner_bank_id
+msgid "Partner Bank"
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model:ir.model,name:l10n_nl_reports.model_l10n_nl_reports_vat_pay_wizard
+msgid "Payment instructions for VAT"
+msgstr ""
+
+#. module: l10n_nl_reports
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_icp_wizard__date_to
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_sbr_tax_report_wizard__date_to
 msgid "Period Ending Date"
@@ -410,8 +532,18 @@ msgid ""
 msgstr ""
 
 #. module: l10n_nl_reports
+#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.res_config_settings_view_form
+msgid "Post difference from rounding tax closing entries in:"
+msgstr ""
+
+#. module: l10n_nl_reports
 #: model:ir.actions.server,name:l10n_nl_reports.cron_l10n_nl_reports_status_process_ir_actions_server
 msgid "Process statusses of the unfinished submitted SBR reports"
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__qr_code
+msgid "Qr Code"
 msgstr ""
 
 #. module: l10n_nl_reports
@@ -420,12 +552,17 @@ msgid "Related closing entry"
 msgstr ""
 
 #. module: l10n_nl_reports
+#: model:ir.model.fields,field_description:l10n_nl_reports.field_l10n_nl_reports_vat_pay_wizard__return_id
+msgid "Return"
+msgstr ""
+
+#. module: l10n_nl_reports
 #: model:ir.model.fields,field_description:l10n_nl_reports.field_res_company__l10n_nl_reports_sbr_server_root_cert_id
 msgid "SBR Root Certificate"
 msgstr ""
 
 #. module: l10n_nl_reports
-#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.res_config_settings_view_form_l10n_nl
 msgid "SBR Services"
 msgstr ""
 
@@ -441,6 +578,7 @@ msgstr ""
 #. module: l10n_nl_reports
 #: model_terms:ir.ui.view,arch_db:l10n_nl_reports.l10n_nl_reports_sbr_icp_wizard_form
 #: model_terms:ir.ui.view,arch_db:l10n_nl_reports.l10n_nl_reports_sbr_tax_report_wizard_form
+#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.l10n_nl_vat_pay_wizard_form
 msgid "Send"
 msgstr ""
 
@@ -468,6 +606,14 @@ msgid ""
 "If you continue, please note that the fields <country> and <taxRegistrationCountry> will be skipped in the report for those partners.\n"
 "\n"
 "Otherwise, please change the address of the partners located in those countries.\n"
+msgstr ""
+
+#. module: l10n_nl_reports
+#. odoo-python
+#: code:addons/l10n_nl_reports/wizard/vat_pay_wizard.py:0
+msgid ""
+"Something went wrong while validating the VAT number: %s. You can modify it "
+"in the company settings."
 msgstr ""
 
 #. module: l10n_nl_reports
@@ -618,6 +764,32 @@ msgid "User"
 msgstr ""
 
 #. module: l10n_nl_reports
+#: model:account.return.type,name:l10n_nl_reports.nl_tax_return_type
+msgid "VAT"
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model:account.return.type,name:l10n_nl_reports.nl_tax_correction_return_type
+msgid "VAT Correction"
+msgstr ""
+
+#. module: l10n_nl_reports
+#. odoo-python
+#: code:addons/l10n_nl_reports/models/account_return.py:0
+msgid "VAT Payment"
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model:mail.template,name:l10n_nl_reports.email_template_vat_payment_instructions
+msgid "VAT payment"
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model:mail.template,subject:l10n_nl_reports.email_template_vat_payment_instructions
+msgid "VAT return payment instructions"
+msgstr ""
+
+#. module: l10n_nl_reports
 #. odoo-python
 #: code:addons/l10n_nl_reports/models/account_sales_report.py:0
 msgid "View Partner"
@@ -667,7 +839,13 @@ msgstr ""
 #. module: l10n_nl_reports
 #: model_terms:ir.ui.view,arch_db:l10n_nl_reports.icp_report_sbr
 #: model_terms:ir.ui.view,arch_db:l10n_nl_reports.icp_report_sbr_nt18
+#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.suppletie_tax_report_sbr
 #: model_terms:ir.ui.view,arch_db:l10n_nl_reports.tax_report_sbr
 #: model_terms:ir.ui.view,arch_db:l10n_nl_reports.tax_report_sbr_nt18
 msgid "iso4217:EUR"
+msgstr ""
+
+#. module: l10n_nl_reports
+#: model_terms:ir.ui.view,arch_db:l10n_nl_reports.vat_payment_details_table
+msgid "payment qr"
 msgstr ""

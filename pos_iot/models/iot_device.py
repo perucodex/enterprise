@@ -20,7 +20,7 @@ class IotDevice(models.Model):
 
     @api.model
     def _load_pos_data_domain(self, data, config):
-        return [('id', 'in', config.iot_device_ids.ids + [payment.iot_device_id.id for payment in config.payment_method_ids if payment.iot_device_id])]
+        return [('id', 'in', config.iot_device_ids.ids)]
 
     @api.model
     def _load_pos_data_fields(self, config):

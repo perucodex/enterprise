@@ -83,8 +83,10 @@ class ResUsers(models.Model):
 
     @api.depends("res_users_settings_id.voip_secret")
     def _compute_voip_secret(self):
+        self.voip_secret = False
         for user in self:
-            user.voip_secret = user.res_users_settings_id.voip_secret
+            if user._filtered_access('write') or user == self.env.user:
+                user.voip_secret = user.res_users_settings_id.voip_secret
 
     @api.depends("res_users_settings_id.voip_username")
     def _compute_voip_username(self):

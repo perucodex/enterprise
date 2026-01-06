@@ -1,20 +1,24 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* sale_shopee
+# * sale_shopee
 #
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.4+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:44+0000\n"
-"PO-Revision-Date: 2025-07-01 12:09+0000\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: \n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-11-17 03:19+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Romanian <https://translate.odoo.com/projects/odoo-19/"
+"sale_shopee/ro/>\n"
+"Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: \n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
+"20)) ? 1 : 2;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: sale_shopee
 #: model:mail.template,body_html:sale_shopee.order_sync_failure
@@ -43,6 +47,31 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div>\n"
+"                <p>Sincronizarea comenzii Shopee cu referința <t t-"
+"out=\"ctx.get('shopee_order_ref') or ''\">REF</t> a întâmpinat o eroare și "
+"nu a fost finalizată.</p>\n"
+"                <p>Dacă comanda nu este anulată în Shopee, nu va fi "
+"încercată nicio altă sincronizare.</p>\n"
+"                <p>Pentru a programa o nouă încercare de sincronizare, "
+"urmați pașii de mai jos:\n"
+"                    </p><ol>\n"
+"                        <li>Accesați Instrumentele pentru Dezvoltatori.</"
+"li>\n"
+"                        <li>Deschideți formularul magazinului Shopee unde a "
+"fost plasată comanda.</li>\n"
+"                        <li>Navigați la fila Urmărire Comenzi.</li>\n"
+"                        <li>Setați o dată pentru <em>Data ultimei "
+"sincronizări a comenzilor</em> care să fie anterioară ultimei actualizări de "
+"stare a comenzii.</li>\n"
+"                        <li>Salvați modificările și apăsați butonul "
+"<em>SINCRONIZARE COMENZI</em>.</li>\n"
+"                    </ol>\n"
+"                \n"
+"                <p>Dacă problema persistă, contactați <a href=\"https://"
+"www.odoo.com/help/\">suportul Odoo</a>.</p>\n"
+"            </div>\n"
+"        "
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
@@ -51,6 +80,9 @@ msgid ""
 "                    Shop authorization is expired. Please re-authorize the "
 "shop in the Shopee Account page."
 msgstr ""
+"<strong>Avertizare:</strong>\n"
+"                    Autorizația magazinului a expirat. Vă rugăm să "
+"reautorizați magazinul în pagina Cont Shopee."
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
@@ -59,6 +91,9 @@ msgid ""
 "                    Shop authorization will expire soon. Re-authorize the "
 "shop in the Shopee Account page."
 msgstr ""
+"<strong>Avertizare:</strong>\n"
+"                    Autorizația magazinului va expira în curând. "
+"Reautorizați magazinul în pagina Cont Shopee."
 
 #. module: sale_shopee
 #: model:mail.template,body_html:sale_shopee.picking_sync_failure
@@ -126,6 +161,69 @@ msgid ""
 "            </div>\n"
 "        </body>"
 msgstr ""
+"<style>\n"
+"                .shopee_table {\n"
+"                    width: 100%;\n"
+"                    max-width: 900px;\n"
+"                    border-collapse: collapse;\n"
+"                }\n"
+"\n"
+"                .shopee_table th,\n"
+"                .shopee_table td {\n"
+"                    border: 1px solid #888;\n"
+"                }\n"
+"\n"
+"                .shopee_table th {\n"
+"                    white-space: nowrap;\n"
+"                }\n"
+"\n"
+"                .shopee_table thead th {\n"
+"                    padding: 0.5em 0.5em;\n"
+"                    text-align: center;\n"
+"                    border-bottom: 1px solid #888;\n"
+"                }\n"
+"\n"
+"                .shopee_table tbody th,\n"
+"                .shopee_table tbody td {\n"
+"                    padding: 0.5em 0.5em 1em;\n"
+"                    vertical-align: top;\n"
+"                }\n"
+"            </style>\n"
+"            <body><div>\n"
+"                <p>Sincronizarea etichetelor de transport Shopee a "
+"întâmpinat unele erori și nu a fost finalizată.</p>\n"
+"                <p>Vă rugăm să corectați problema înainte de a sincroniza "
+"manual din nou livrările, deoarece nu va fi încercată nicio altă "
+"sincronizare.</p>\n"
+"                <p>Aici sunt erorile trimise de Shopee: </p>\n"
+"                <table class=\"shopee_table\">\n"
+"                    <thead>\n"
+"                        <tr>\n"
+"                            <th>Referințe loturi livrare</th>\n"
+"                            <th>Mesaj</th>\n"
+"                        </tr>\n"
+"                    </thead>\n"
+"                    <tbody>\n"
+"                        <tr t-foreach=\"ctx.get('error_messages')\" t-"
+"as=\"error\">\n"
+"                            <th><t t-out=\"error['batch_picking_refs']\"/></"
+"th>\n"
+"                            <td>\n"
+"                                <t t-if=\"error['message']\" t-"
+"out=\"error['message']\"/>\n"
+"                                <t t-else=\"\">A apărut o eroare necunoscută "
+"în timpul sincronizării cu Shopee.\n"
+"                                    Din păcate, trebuie să verificați manual "
+"dacă starea comenzii este corectă sau nu.\n"
+"                                    Dacă problema persistă, contactați <a "
+"href=\"https://www.odoo.com/help/\">suportul Odoo </a>.\n"
+"                                </t>\n"
+"                            </td>\n"
+"                        </tr>\n"
+"                    </tbody>\n"
+"                </table>\n"
+"            </div>\n"
+"        </body>"
 
 #. module: sale_shopee
 #: model:mail.template,body_html:sale_shopee.inventory_sync_failure
@@ -193,26 +291,90 @@ msgid ""
 "            </div>\n"
 "        </body>"
 msgstr ""
+"<style>\n"
+"                .shopee_table {\n"
+"                    width: 100%;\n"
+"                    max-width: 900px;\n"
+"                    border-collapse: collapse;\n"
+"                }\n"
+"\n"
+"                .shopee_table th,\n"
+"                .shopee_table td {\n"
+"                    border: 1px solid #888;\n"
+"                }\n"
+"\n"
+"                .shopee_table th {\n"
+"                    white-space: nowrap;\n"
+"                }\n"
+"\n"
+"                .shopee_table thead th {\n"
+"                    padding: 0.5em 0.5em;\n"
+"                    text-align: center;\n"
+"                    border-bottom: 1px solid #888;\n"
+"                }\n"
+"\n"
+"                .shopee_table tbody th,\n"
+"                .shopee_table tbody td {\n"
+"                    padding: 0.5em 0.5em 1em;\n"
+"                    vertical-align: top;\n"
+"                }\n"
+"            </style>\n"
+"            <body><div>\n"
+"                <p>Sincronizarea stocului pentru magazinul Shopee\n"
+"                    <b><t t-out=\"ctx.get('shopee_shop') or ''\">REF</t></"
+"b>\n"
+"                    a întâmpinat unele erori și nu a fost finalizată.</p>\n"
+"                <p>Aici sunt erorile trimise de Shopee: </p>\n"
+"                <table class=\"shopee_table\">\n"
+"                    <thead>\n"
+"                        <tr>\n"
+"                            <th>Identificator articol Shopee</th>\n"
+"                            <th>Mesaj</th>\n"
+"                        </tr>\n"
+"                    </thead>\n"
+"                    <tbody>\n"
+"                        <tr t-foreach=\"ctx.get('error_messages')\" t-"
+"as=\"error\">\n"
+"                            <th><t t-out=\"error['item_identifier']\"/></"
+"th>\n"
+"                            <td>\n"
+"                                <t t-if=\"error['message']\" t-"
+"out=\"error['message']\"/>\n"
+"                                <t t-else=\"\">A apărut o eroare necunoscută "
+"în timpul sincronizării cu Shopee.\n"
+"                                    Din păcate, trebuie să verificați manual "
+"dacă cantitatea disponibilă pentru produs este corectă sau nu.\n"
+"                                    Dacă problema persistă, contactați <a "
+"href=\"https://www.odoo.com/help/\">suportul Odoo </a>.\n"
+"                                </t>\n"
+"                            </td>\n"
+"                        </tr>\n"
+"                    </tbody>\n"
+"                </table>\n"
+"            </div>\n"
+"        </body>"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_account__api_endpoint
 msgid "API Endpoint"
-msgstr ""
+msgstr "Endpoint API"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__access_token
 msgid "Access Token"
-msgstr ""
+msgstr "Token de acces"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__access_token_expiration_date
 msgid "Access Token Expiration Date"
-msgstr ""
+msgstr "Data expirării tokenului de acces"
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_shop__access_token
 msgid "Access Token expires in 4 hours and is used to access the Shopee API."
 msgstr ""
+"Tokenul de acces expiră în 4 ore și este folosit pentru accesarea API-ului "
+"Shopee."
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_shop__access_token_expiration_date
@@ -220,45 +382,47 @@ msgid ""
 "Access token expiration date. Computed using the expires_in returned by "
 "Shopee."
 msgstr ""
+"Data expirării tokenului de acces. Calculată folosind expires_in returnat de "
+"Shopee."
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_account_view_form
 msgid "Account Name"
-msgstr ""
+msgstr "Nume cont"
 
 #. module: sale_shopee
 #: model:ir.ui.menu,name:sale_shopee.accounts_menu
 msgid "Accounts"
-msgstr ""
+msgstr "Conturi"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__active
 #: model:ir.model.fields.selection,name:sale_shopee.selection__shopee_shop__status__active
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_search
 msgid "Active"
-msgstr ""
+msgstr "Activ"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_shop.py:0
 msgid "Add-on Deal Main"
-msgstr ""
+msgstr "Ofertă suplimentară principală"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_shop.py:0
 msgid "Add-on Deal Sub"
-msgstr ""
+msgstr "Ofertă suplimentară secundară"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_account__company_ids
 msgid "Allowed Company"
-msgstr ""
+msgstr "Companie permisă"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Archived"
-msgstr ""
+msgstr "Arhivat"
 
 #. module: sale_shopee
 #. odoo-python
@@ -269,6 +433,10 @@ msgid ""
 "\n"
 "%(error_message)s"
 msgstr ""
+"La magazinul - %(shop_name)s, a apărut eroarea %(error_code)s în timpul "
+"operațiunii %(operation)s la contactarea API-ului Shopee. Shopee a trimis:\n"
+"\n"
+"%(error_message)s"
 
 #. module: sale_shopee
 #. odoo-python
@@ -279,6 +447,10 @@ msgid ""
 "\n"
 "%(error_message)s"
 msgstr ""
+"La magazinul - %(shop_name)s, a apărut eroarea %(error_code)s în timpul "
+"operațiunii %(operation)s la contactarea API-ului Shopee:\n"
+"\n"
+"%(error_message)s"
 
 #. module: sale_shopee
 #. odoo-python
@@ -287,115 +459,117 @@ msgid ""
 "Authorization Code is required to request an Access Token. Please authorize "
 "the connection first."
 msgstr ""
+"Codul de autorizare este necesar pentru a solicita un token de acces. Vă "
+"rugăm să autorizați mai întâi conexiunea."
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__authorization_expiration_date
 msgid "Authorization Expiration Date"
-msgstr ""
+msgstr "Data expirării autorizării"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__authorization_remaining_days
 msgid "Authorization Remaining Days"
-msgstr ""
+msgstr "Zile rămase din autorizare"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_account_view_form
 msgid "Authorize Shop"
-msgstr ""
+msgstr "Autorizează magazinul"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_shop.py:0
 msgid "Bundle Deal"
-msgstr ""
+msgstr "Ofertă pachet"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.quick_create_account_form
 msgid "Cancel"
-msgstr ""
+msgstr "Anulează"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__sale_order__shopee_delivery_status__cancelled
 msgid "Cancelled"
-msgstr ""
+msgstr "Anulat"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.picking_view_form
 msgid "Cancelled on Shopee"
-msgstr ""
+msgstr "Anulat pe Shopee"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_account.py:0
 msgid "Changing API endpoint will reset the authorization of the shops."
-msgstr ""
+msgstr "Schimbarea endpoint-ului API va reseta autorizarea magazinelor."
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_shop.py:0
 msgid "Changing the company of a Shopee shop is not allowed."
-msgstr ""
+msgstr "Schimbarea companiei unui magazin Shopee nu este permisă."
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_item__company_id
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__company_id
 msgid "Company"
-msgstr ""
+msgstr "Companie"
 
 #. module: sale_shopee
 #: model:ir.model,name:sale_shopee.model_res_partner
 msgid "Contact"
-msgstr ""
+msgstr "Contactați"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/controllers/onboarding.py:0
 msgid "Could not find Shopee account with id %(account)s"
-msgstr ""
+msgstr "Nu s-a putut găsi contul Shopee cu id-ul %(account)s"
 
 #. module: sale_shopee
 #: model:ir.actions.act_window,name:sale_shopee.quick_create_account_action
 msgid "Create Shopee Accounts"
-msgstr ""
+msgstr "Creează conturi Shopee"
 
 #. module: sale_shopee
 #: model:ir.model,website_form_label:sale_shopee.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Creează un client"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_account__create_uid
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_item__create_uid
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "Creat de"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_account__create_date
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_item__create_date
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__create_date
 msgid "Created on"
-msgstr ""
+msgstr "Creat pe"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_account_view_form
 msgid "Credentials"
-msgstr ""
+msgstr "Date autentificare"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Days"
-msgstr ""
+msgstr "Zile"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__team_id
 msgid "Default Sales Team"
-msgstr ""
+msgstr "Echipa de vânzări implicită"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__user_id
 msgid "Default Salesperson"
-msgstr ""
+msgstr "Agent de vânzări implicit"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_product_product__display_name
@@ -407,12 +581,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale_shopee.field_stock_move__display_name
 #: model:ir.model.fields,field_description:sale_shopee.field_stock_picking__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "Nume afișat"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__shopee_shop__status__error
 msgid "Error"
-msgstr ""
+msgstr "Eroare"
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_shop__authorization_expiration_date
@@ -421,16 +595,19 @@ msgid ""
 "Shopee shop authorization on Shopee Account view. Once expired, the user "
 "must re-authorize the connection on Shopee Account view."
 msgstr ""
+"Data expirării autorizării unui magazin, returnată în timpul autorizării "
+"magazinului Shopee în vizualizarea Cont Shopee. După expirare, utilizatorul "
+"trebuie să reautorizeze conexiunea în vizualizarea Cont Shopee."
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__fbs_location_id
 msgid "FBS Stock Location"
-msgstr ""
+msgstr "Locație stoc FBS"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__stock_picking__shopee_label_status__failed
 msgid "Failed"
-msgstr ""
+msgstr "Eșuat"
 
 #. module: sale_shopee
 #. odoo-python
@@ -442,57 +619,62 @@ msgid ""
 "One of the following input could be incorrect: Partner ID, Partner Key, or "
 "API Endpoint."
 msgstr ""
+"Autorizarea magazinului a eșuat din cauza următoarei erori:\n"
+"- %(message)s\n"
+"\n"
+"Unul dintre următoarele câmpuri ar putea fi incorect: Partner ID, Partner "
+"Key sau Endpoint API."
 
 #. module: sale_shopee
 #: model:ir.actions.server,name:sale_shopee.action_fetch_shipping_label
 msgid "Fetch Shipping Label"
-msgstr ""
+msgstr "Preia eticheta de transport"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Fetch Shipping Labels"
-msgstr ""
+msgstr "Preia etichete de transport"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.picking_view_form
 msgid "Fetch Shopee Label"
-msgstr ""
+msgstr "Preia eticheta Shopee"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_shop.py:0
 msgid "Flash Sale"
-msgstr ""
+msgstr "Vânzare fulger"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.view_order_form
 msgid "Fulfilled by Cross Border Seller"
-msgstr ""
+msgstr "Îndeplinit de vânzător transfrontalier"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.view_order_form
 msgid "Fulfilled by Merchant"
-msgstr ""
+msgstr "Completat de Comerciant"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.view_order_form
 msgid "Fulfilled by Shopee"
-msgstr ""
+msgstr "Îndeplinit de Shopee"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__sale_order__shopee_fulfillment_type__hybrid
 msgid "Fulfillment by Cross Border Seller"
-msgstr ""
+msgstr "Îndeplinire de către vânzător transfrontalier"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__sale_order__shopee_fulfillment_type__fbm
 msgid "Fulfillment by Merchant"
-msgstr ""
+msgstr "Împlinire de Comerciant"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__sale_order__shopee_fulfillment_type__fbs
 msgid "Fulfillment by Shopee"
-msgstr ""
+msgstr "Îndeplinire de către Shopee"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_product_product__id
@@ -504,13 +686,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale_shopee.field_stock_move__id
 #: model:ir.model.fields,field_description:sale_shopee.field_stock_picking__id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_shop__active
 msgid ""
 "If made inactive, this account will no longer be synchronized with Shopee."
-msgstr ""
+msgstr "Dacă este inactiv, acest cont nu va mai fi sincronizat cu Shopee."
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.view_order_form
@@ -518,154 +700,158 @@ msgid ""
 "If the sale is locked, you can not modify it anymore. However, you will "
 "still be able to invoice or deliver."
 msgstr ""
+"Dacă vânzarea este blocată, nu o mai puteți modifica. Cu toate acestea, veți "
+"putea în continuare să facturați sau să livrați."
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_account__company_ids
 msgid "If this field is empty, all companies will be allowed."
-msgstr ""
+msgstr "Dacă acest câmp este gol, toate companiile vor fi permise."
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__shopee_shop__status__inactive
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_search
 msgid "Inactive"
-msgstr ""
+msgstr "Inactiv"
 
 #. module: sale_shopee
 #: model:ir.model.constraint,message:sale_shopee.constraint_shopee_item_unique_shopee_item_and_model_identifiers
 msgid "Item and Model Identifiers must be unique for a given shop."
 msgstr ""
+"Identificatorii articolului și modelului trebuie să fie unici pentru un "
+"anumit magazin."
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_stock_picking__shopee_label_status
 msgid "Label Status"
-msgstr ""
+msgstr "Stare etichetă"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__last_orders_sync_date
 msgid "Last Order Synchronization Date"
-msgstr ""
+msgstr "Data ultimei sincronizări a comenzilor"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_stock_picking__last_picking_sync_date
 msgid "Last Picking Sync Date"
-msgstr ""
+msgstr "Data ultimei sincronizări a livrării"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__last_shop_status_sync_date
 msgid "Last Shop Status Synchronization Date"
-msgstr ""
+msgstr "Data ultimei sincronizări a stării magazinului"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_item__last_inventory_sync_date
 msgid "Last Sync Date"
-msgstr ""
+msgstr "Data ultimei sincronizări"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_account__write_uid
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_item__write_uid
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "Ultima actualizare făcută de"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_account__write_date
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_item__write_date
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "Ultima actualizare pe"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.view_order_form
 msgid "Lock"
-msgstr ""
+msgstr "Blocare"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_account__name
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__name
 msgid "Name"
-msgstr ""
+msgstr "Nume"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.picking_view_form
 msgid "Need to rearrange shipment on Shopee"
-msgstr ""
+msgstr "Este necesară reprogramarea livrării pe Shopee"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_account_view_list
 msgid "New"
-msgstr ""
+msgstr "Nou"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__stock_picking__shopee_label_status__not_available
 msgid "Not Available"
-msgstr ""
+msgstr "Nu este disponibil"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__order_count
 msgid "Order Count"
-msgstr ""
+msgstr "Numărul de Comenzi"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Orders"
-msgstr ""
+msgstr "Comenzi"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_account__partner_identifier
 msgid "Partner ID"
-msgstr ""
+msgstr "ID partener"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_account__partner_key
 msgid "Partner Key"
-msgstr ""
+msgstr "Cheie partener"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__sale_order__shopee_delivery_status__error
 msgid "Pickup Failed"
-msgstr ""
+msgstr "Preluare eșuată"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__stock_picking__shopee_label_status__processing
 msgid "Processing"
-msgstr ""
+msgstr "Se procesează"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_item__product_id
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_item_view_search
 msgid "Product"
-msgstr ""
+msgstr "Produs"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_shop.py:0
 msgid "Product Promotion"
-msgstr ""
+msgstr "Promoție produs"
 
 #. module: sale_shopee
 #: model:ir.model,name:sale_shopee.model_product_product
 msgid "Product Variant"
-msgstr ""
+msgstr "Variantă de produs"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__stock_picking__shopee_label_status__ready
 msgid "Ready"
-msgstr ""
+msgstr "Pregătit"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__sale_order__shopee_delivery_status__draft
 msgid "Ready to Ship"
-msgstr ""
+msgstr "Pregătit de expediere"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.picking_view_form
 msgid "Ready to arrange shipment via Shopee"
-msgstr ""
+msgstr "Pregătit pentru aranjarea livrării prin Shopee"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__refresh_token
 msgid "Refresh Token"
-msgstr ""
+msgstr "Reîmprospătare Token"
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_shop__refresh_token
@@ -674,16 +860,20 @@ msgid ""
 "Once expired, the user must re-authorize the connection on Shopee Account "
 "view."
 msgstr ""
+"Tokenul de actualizare este folosit pentru a solicita un nou Access Token și "
+"expiră în 30 de zile. După expirare, utilizatorul trebuie să reautorizeze "
+"conexiunea în vizualizarea Cont Shopee."
 
 #. module: sale_shopee
 #: model_terms:ir.actions.act_window,help:sale_shopee.action_shopee_account_list
 msgid "Register your Shopee account"
-msgstr ""
+msgstr "Înregistrați-vă contul Shopee"
 
 #. module: sale_shopee
 #: model_terms:ir.actions.act_window,help:sale_shopee.action_shopee_account_list
 msgid "Register yours to start synchronizing your orders into Odoo."
 msgstr ""
+"Înregistrează-ți al tău pentru a începe sincronizarea comenzilor cu Odoo."
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_shop__authorization_remaining_days
@@ -691,150 +881,152 @@ msgid ""
 "Remaining days of the shop authorization. Show a warning in the Shopee Shop "
 "view that the authorization will expire soon."
 msgstr ""
+"Zile rămase din autorizarea magazinului. Afișează un avertisment în "
+"vizualizarea Magazin Shopee că autorizarea va expira în curând."
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_shop.py:0
 msgid "Sale Orders"
-msgstr ""
+msgstr "Comenzi de Vânzări"
 
 #. module: sale_shopee
 #: model:ir.model,name:sale_shopee.model_sale_order
 msgid "Sales Order"
-msgstr ""
+msgstr "Comandă de vânzare"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.quick_create_account_form
 msgid "Save And Authorize"
-msgstr ""
+msgstr "Salvează și Autorizează"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__sale_order__shopee_delivery_status__confirmed
 msgid "Shipment Arranged"
-msgstr ""
+msgstr "Livrare aranjată"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.picking_view_form
 msgid "Shipment arranged via Shopee"
-msgstr ""
+msgstr "Livrare aranjată prin Shopee"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__sale_order__shopee_delivery_status__done
 msgid "Shipped"
-msgstr ""
+msgstr "Expediat"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.picking_view_form
 msgid "Shipped via Shopee"
-msgstr ""
+msgstr "Expediat prin Shopee"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/stock_picking.py:0
 msgid "Shipping Label Not Ready"
-msgstr ""
+msgstr "Eticheta de transport nu este pregătită"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_item__shop_id
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_search
 msgid "Shop"
-msgstr ""
+msgstr "Magazin"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_account__shop_count
 msgid "Shop Count"
-msgstr ""
+msgstr "Număr magazine"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Shop Information"
-msgstr ""
+msgstr "Informații magazin"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Shop Name"
-msgstr ""
+msgstr "Nume magazin"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Shop Settings"
-msgstr ""
+msgstr "Setări magazin"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Shop Status: Active"
-msgstr ""
+msgstr "Stare magazin: Activ"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Shop Status: Error"
-msgstr ""
+msgstr "Stare magazin: Eroare"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Shop Status: Inactive"
-msgstr ""
+msgstr "Stare magazin: Inactiv"
 
 #. module: sale_shopee
 #: model:ir.ui.menu,name:sale_shopee.root_menu
 msgid "Shopee"
-msgstr ""
+msgstr "Shopee"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_account.py:0
 msgid "Shopee API Account - %(partner_id)s"
-msgstr ""
+msgstr "Cont API Shopee - %(partner_id)s"
 
 #. module: sale_shopee
 #: model:ir.model,name:sale_shopee.model_shopee_account
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__account_id
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_account_view_form
 msgid "Shopee Account"
-msgstr ""
+msgstr "Cont Shopee"
 
 #. module: sale_shopee
 #: model:ir.actions.act_window,name:sale_shopee.action_shopee_account_list
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_account_view_list
 msgid "Shopee Accounts"
-msgstr ""
+msgstr "Conturi Shopee"
 
 #. module: sale_shopee
 #: model:product.template,name:sale_shopee.default_adjustment_product_product_template
 msgid "Shopee Amount Adjustment"
-msgstr ""
+msgstr "Ajustare sumă Shopee"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_res_partner__shopee_buyer_identifier
 #: model:ir.model.fields,field_description:sale_shopee.field_res_users__shopee_buyer_identifier
 msgid "Shopee Buyer ID"
-msgstr ""
+msgstr "ID Cumpărător Shopee"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_shop.py:0
 msgid "Shopee Customer #%(order_no)s"
-msgstr ""
+msgstr "Client Shopee #%(order_no)s"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_sale_order__shopee_fulfillment_type
 msgid "Shopee Fulfillment Type"
-msgstr ""
+msgstr "Tip îndeplinire Shopee"
 
 #. module: sale_shopee
 #: model:ir.model,name:sale_shopee.model_shopee_item
 msgid "Shopee Item"
-msgstr ""
+msgstr "Articol Shopee"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__shopee_item_count
 msgid "Shopee Item Count"
-msgstr ""
+msgstr "Număr articole Shopee"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_item__shopee_item_identifier
 msgid "Shopee Item ID"
-msgstr ""
+msgstr "ID articol Shopee"
 
 #. module: sale_shopee
 #. odoo-python
@@ -845,68 +1037,68 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_item_view_list
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Shopee Items"
-msgstr ""
+msgstr "Articole Shopee"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/stock_picking.py:0
 msgid "Shopee Label"
-msgstr ""
+msgstr "Etichetă Shopee"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_item__shopee_model_identifier
 msgid "Shopee Model ID"
-msgstr ""
+msgstr "ID model Shopee"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/tests/test_shopee.py:0
 msgid "Shopee Order %(order)s at mock_shopee_shop"
-msgstr ""
+msgstr "Comandă Shopee %(order)s la mock_shopee_shop"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_shop.py:0
 msgid "Shopee Order %(shopee_order_ref)s at %(shop_name)s"
-msgstr ""
+msgstr "Comandă Shopee %(shopee_order_ref)s la %(shop_name)s"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_shop.py:0
 #: code:addons/sale_shopee/tests/test_shopee.py:0
 msgid "Shopee Pricelist %(currency)s"
-msgstr ""
+msgstr "Listă de prețuri Shopee %(currency)s"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__shopee_account__api_endpoint__production_brazil
 msgid "Shopee Production Endpoint (Brazil)"
-msgstr ""
+msgstr "Endpoint producție Shopee (Brazilia)"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__shopee_account__api_endpoint__production_china
 msgid "Shopee Production Endpoint (China)"
-msgstr ""
+msgstr "Endpoint producție Shopee (China)"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__shopee_account__api_endpoint__production_singapore
 msgid "Shopee Production Endpoint (Singapore)"
-msgstr ""
+msgstr "Endpoint producție Shopee (Singapore)"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_sale_order__shopee_order_ref
 #: model:ir.model.fields,field_description:sale_shopee.field_stock_picking__shopee_order_ref
 msgid "Shopee Reference"
-msgstr ""
+msgstr "Referință Shopee"
 
 #. module: sale_shopee
 #: model:product.template,name:sale_shopee.default_sale_product_product_template
 msgid "Shopee Sale"
-msgstr ""
+msgstr "Vânzare Shopee"
 
 #. module: sale_shopee
 #: model:product.template,name:sale_shopee.default_shipping_product_product_template
 msgid "Shopee Shipping"
-msgstr ""
+msgstr "Transport Shopee"
 
 #. module: sale_shopee
 #: model:ir.model,name:sale_shopee.model_shopee_shop
@@ -914,51 +1106,51 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_item_view_search
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Shopee Shop"
-msgstr ""
+msgstr "Magazin Shopee"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_shop.py:0
 msgid "Shopee Shop #%(shop_id)s"
-msgstr ""
+msgstr "Magazin Shopee #%(shop_id)s"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__shop_identifier
 msgid "Shopee Shop ID"
-msgstr ""
+msgstr "ID magazin Shopee"
 
 #. module: sale_shopee
 #: model:ir.actions.act_window,name:sale_shopee.action_shopee_shop_list
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_list
 msgid "Shopee Shops"
-msgstr ""
+msgstr "Magazine Shopee"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_sale_order__shopee_delivery_status
 #: model:ir.model.fields,field_description:sale_shopee.field_stock_picking__shopee_delivery_status
 msgid "Shopee Status"
-msgstr ""
+msgstr "Stare Shopee"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__shopee_account__api_endpoint__test
 msgid "Shopee Testing Endpoint"
-msgstr ""
+msgstr "Endpoint testare Shopee"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__shopee_account__api_endpoint__test_china
 msgid "Shopee Testing Endpoint (China)"
-msgstr ""
+msgstr "Endpoint testare Shopee (China)"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_shop.py:0
 msgid "Shopee Warehouse - %(shop)s"
-msgstr ""
+msgstr "Depozit Shopee - %(shop)s"
 
 #. module: sale_shopee
 #: model_terms:ir.actions.act_window,help:sale_shopee.action_shopee_account_list
 msgid "Shopee accounts correspond to Shopee Seller Central accounts."
-msgstr ""
+msgstr "Conturile Shopee corespund conturilor Shopee Seller Central."
 
 #. module: sale_shopee
 #. odoo-python
@@ -967,6 +1159,8 @@ msgid ""
 "Shopee is processing the shipping label. Odoo will try fetching the shipping "
 "label again later."
 msgstr ""
+"Shopee procesează eticheta de transport. Odoo va încerca să preia din nou "
+"eticheta de transport mai târziu."
 
 #. module: sale_shopee
 #. odoo-python
@@ -977,37 +1171,37 @@ msgstr ""
 #. module: sale_shopee
 #: model:mail.template,name:sale_shopee.inventory_sync_failure
 msgid "Shopee: Inventory Synchronization Failure"
-msgstr ""
+msgstr "Shopee: Eșec sincronizare stoc"
 
 #. module: sale_shopee
 #: model:mail.template,name:sale_shopee.order_sync_failure
 msgid "Shopee: Order Synchronization Failure"
-msgstr ""
+msgstr "Shopee: Eșec sincronizare comandă"
 
 #. module: sale_shopee
 #: model:mail.template,name:sale_shopee.picking_sync_failure
 msgid "Shopee: Shipping Label Synchronization Failure"
-msgstr ""
+msgstr "Shopee: Eșec sincronizare etichetă de transport"
 
 #. module: sale_shopee
 #: model:ir.actions.server,name:sale_shopee.ir_cron_sync_shopee_pickings_retry_ir_actions_server
 msgid "Shopee: retry sync shipping labels"
-msgstr ""
+msgstr "Shopee: reîncearcă sincronizarea etichetelor de transport"
 
 #. module: sale_shopee
 #: model:ir.actions.server,name:sale_shopee.ir_cron_sync_shopee_inventory_ir_actions_server
 msgid "Shopee: sync inventory"
-msgstr ""
+msgstr "Shopee: sincronizează stocul"
 
 #. module: sale_shopee
 #: model:ir.actions.server,name:sale_shopee.ir_cron_sync_shopee_orders_ir_actions_server
 msgid "Shopee: sync orders"
-msgstr ""
+msgstr "Shopee: sincronizează comenzile"
 
 #. module: sale_shopee
 #: model:ir.actions.server,name:sale_shopee.ir_cron_sync_shopee_pickings_ir_actions_server
 msgid "Shopee: sync shipping labels"
-msgstr ""
+msgstr "Shopee: sincronizează etichetele de transport"
 
 #. module: sale_shopee
 #. odoo-python
@@ -1015,63 +1209,64 @@ msgstr ""
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_account__shop_ids
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_account_view_form
 msgid "Shops"
-msgstr ""
+msgstr "Magazine"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__status
 msgid "Status"
-msgstr ""
+msgstr "Stare"
 
 #. module: sale_shopee
 #: model:ir.model,name:sale_shopee.model_stock_move
 msgid "Stock Move"
-msgstr ""
+msgstr "Mișcare stoc"
 
 #. module: sale_shopee
 #: model:ir.model.fields.selection,name:sale_shopee.selection__stock_picking__shopee_label_status__stored
 msgid "Stored"
-msgstr ""
+msgstr "Stocat"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Sync Inventory"
-msgstr ""
+msgstr "Sincronizează stocul"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Sync Orders"
-msgstr ""
+msgstr "Sincronizare Comenzi"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Synchronization Information"
-msgstr ""
+msgstr "Informații sincronizare"
 
 #. module: sale_shopee
 #: model:mail.template,subject:sale_shopee.inventory_sync_failure
 msgid "Synchronization of Shopee inventory has failed"
-msgstr ""
+msgstr "Sincronizarea stocului Shopee a eșuat"
 
 #. module: sale_shopee
 #: model:mail.template,subject:sale_shopee.order_sync_failure
 msgid ""
 "Synchronization of Shopee order {{ ctx.get('shopee_order_ref') }} has failed"
 msgstr ""
+"Sincronizarea comenzii Shopee {{ ctx.get('shopee_order_ref') }} a eșuat"
 
 #. module: sale_shopee
 #: model:mail.template,subject:sale_shopee.picking_sync_failure
 msgid "Synchronization of shipping labels has failed"
-msgstr ""
+msgstr "Sincronizarea etichetelor de transport a eșuat"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_shop__synchronize_inventory
 msgid "Synchronize Inventory"
-msgstr ""
+msgstr "Sincronizează stocul"
 
 #. module: sale_shopee
 #: model:ir.model.fields,field_description:sale_shopee.field_shopee_item__sync_to_shopee
 msgid "Synchronize Inventory to Shopee"
-msgstr ""
+msgstr "Sincronizează stocul către Shopee"
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_account__api_endpoint
@@ -1080,27 +1275,30 @@ msgid ""
 "testing endpoints. Among the endpoints, choose the one that is "
 "geographically closest to the marketplace you are targeting."
 msgstr ""
+"Endpoint-ul API de utilizat pentru apelurile API Shopee. Există endpoint-uri "
+"de producție și de testare. Alegeți endpoint-ul cel mai apropiat geografic "
+"de piața pe care o vizați."
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_sale_order__shopee_shop_id
 msgid "The Shopee shop from which the order was placed."
-msgstr ""
+msgstr "Magazinul Shopee din care a fost plasată comanda."
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_sale_order__shopee_order_ref
 #: model:ir.model.fields,help:sale_shopee.field_stock_picking__shopee_order_ref
 msgid "The Shopee-defined order reference."
-msgstr ""
+msgstr "Referința comenzii definită de Shopee."
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_shop__team_id
 msgid "The default Sales Team assigned to Shopee orders for reporting"
-msgstr ""
+msgstr "Echipa de vânzări implicită alocată comenzilor Shopee pentru raportare"
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_shop__user_id
 msgid "The default salesperson assigned to Shopee orders"
-msgstr ""
+msgstr "Agentul de vânzări implicit alocat comenzilor Shopee"
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_shop__last_orders_sync_date
@@ -1108,22 +1306,25 @@ msgid ""
 "The last time the orders were synchronized with Shopee. Orders whose status "
 "has not changed since this date will not be created nor updated in Odoo."
 msgstr ""
+"Ultima dată când comenzile au fost sincronizate cu Shopee. Comenzile a căror "
+"stare nu s-a schimbat de la această dată nu vor fi create sau actualizate în "
+"Odoo."
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_stock_picking__last_picking_sync_date
 msgid "The last time the picking was synchronized with Shopee."
-msgstr ""
+msgstr "Ultima dată când livrarea a fost sincronizată cu Shopee."
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_shop__last_shop_status_sync_date
 msgid "The last time the shop status was synchronized with Shopee"
-msgstr ""
+msgstr "Ultima dată când starea magazinului a fost sincronizată cu Shopee"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/controllers/onboarding.py:0
 msgid "The request signature is not valid."
-msgstr ""
+msgstr "Semnătura cererii nu este validă."
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_shop__status
@@ -1132,6 +1333,9 @@ msgid ""
 "Shopee.- Active: The shop is active and can be synchronized with Odoo.- "
 "Error: The shop is banned and cannot be synchronized with Odoo."
 msgstr ""
+"Starea magazinului pe Shopee.- Inactiv: Magazinul nu este încă aprobat de "
+"Shopee.- Activ: Magazinul este activ și poate fi sincronizat cu Odoo.- "
+"Eroare: Magazinul este interzis și nu poate fi sincronizat cu Odoo."
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_sale_order__shopee_delivery_status
@@ -1145,6 +1349,14 @@ msgid ""
 "- Cancelled: The order has been cancelled.\n"
 "- Pickup Failed: 3PL parcel pickup failed. Need to rearrange shipment."
 msgstr ""
+"Starea livrării pe Shopee:\n"
+"- Pregătit de expediere: Vânzătorul poate aranja livrarea.\n"
+"- Livrare aranjată: Vânzătorul a aranjat livrarea online și a primit numărul "
+"de urmărire de la 3PL.\n"
+"- Expediat: Coletul a fost predat sau preluat de 3PL.\n"
+"- Anulat: Comanda a fost anulată.\n"
+"- Preluare eșuată: Preluarea coletului de către 3PL a eșuat. Este necesară "
+"reprogramarea livrării."
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_stock_picking__shopee_label_status
@@ -1156,6 +1368,12 @@ msgid ""
 "- Stored: The shipping label has been downloaded and stored.\n"
 "- Failed: The shipping label creation failed."
 msgstr ""
+"Starea etichetei de transport:\n"
+"- Nu e disponibilă: Eticheta nu este încă disponibilă.\n"
+"- Procesare: Eticheta este în curs de procesare.\n"
+"- Pregătită: Eticheta este pregătită pentru descărcare.\n"
+"- Stocată: Eticheta a fost descărcată și stocată.\n"
+"- Eșuată: Crearea etichetei a eșuat."
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_shop__fbs_location_id
@@ -1163,11 +1381,13 @@ msgid ""
 "The stock location managed by Shopee under the Fulfilled by Shopee (FBS) "
 "program."
 msgstr ""
+"Locația de stoc gestionată de Shopee în cadrul programului Fulfilled by "
+"Shopee (FBS)."
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_account__name
 msgid "The user-defined name of the account."
-msgstr ""
+msgstr "Numele definit de utilizator al contului."
 
 #. module: sale_shopee
 #: model:ir.model.constraint,message:sale_shopee.constraint_sale_order_unique_shopee_order_ref_shopee_shop_id
@@ -1175,33 +1395,35 @@ msgid ""
 "There can only exist one sale order for a given Shopee Order Reference per "
 "Shop."
 msgstr ""
+"Poate exista o singură comandă de vânzare pentru o referință de comandă "
+"Shopee per magazin."
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Tokens"
-msgstr ""
+msgstr "Token-uri"
 
 #. module: sale_shopee
 #: model:ir.model,name:sale_shopee.model_stock_picking
 msgid "Transfer"
-msgstr ""
+msgstr "Transfer"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_shop.py:0
 msgid "Unknown Promotion Type"
-msgstr ""
+msgstr "Tip promoție necunoscut"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "Update Shop"
-msgstr ""
+msgstr "Actualizează magazinul"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_account.py:0
 msgid "Warning"
-msgstr ""
+msgstr "Avertizare"
 
 #. module: sale_shopee
 #: model:ir.model.fields,help:sale_shopee.field_shopee_shop__synchronize_inventory
@@ -1210,18 +1432,21 @@ msgid ""
 "synchronized with Shopee. Only products available in FBM or hybrid will be "
 "synchronized."
 msgstr ""
+"Dacă cantitățile disponibile ale produselor legate de acest magazin sunt "
+"sincronizate cu Shopee. Doar produsele disponibile în FBM sau hybrid vor fi "
+"sincronizate."
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/controllers/onboarding.py:0
 msgid "You are not allowed to access this page."
-msgstr ""
+msgstr "Nu aveți permisiunea să accesați această pagină."
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_shop.py:0
 msgid "[%(sku)s] %(product_name)s"
-msgstr ""
+msgstr "[%(sku)s]%(product_name)s"
 
 #. module: sale_shopee
 #. odoo-python
@@ -1230,22 +1455,24 @@ msgid ""
 "[%(sku)s] %(product_title)s\n"
 "Promotion: %(promotion_type)s - id: %(promotion_id)d"
 msgstr ""
+"[%(sku)s] %(product_title)s\n"
+"Promoție: %(promotion_type)s - id: %(promotion_id)d"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_account_view_form
 msgid "e.g. American Market"
-msgstr ""
+msgstr "de exemplu. Piața americană"
 
 #. module: sale_shopee
 #: model_terms:ir.ui.view,arch_db:sale_shopee.shopee_shop_view_form
 msgid "e.g. Indonesian Shop"
-msgstr ""
+msgstr "ex. Magazin indonezian"
 
 #. module: sale_shopee
 #. odoo-python
 #: code:addons/sale_shopee/models/shopee_account.py:0
 msgid "id"
-msgstr ""
+msgstr "id"
 
 #. module: sale_shopee
 #. odoo-python

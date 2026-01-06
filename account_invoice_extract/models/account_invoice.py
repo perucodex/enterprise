@@ -39,7 +39,7 @@ class AccountMove(models.Model):
             record.extract_can_show_banners = (
                 record.state == 'draft' and
                 (
-                    (record.is_purchase_document() and record.company_id.extract_in_invoice_digitalization_mode != 'no_send') or
+                    (record.is_purchase_document(include_receipts=True) and record.company_id.extract_in_invoice_digitalization_mode != 'no_send') or
                     (record.is_sale_document() and record.company_id.extract_out_invoice_digitalization_mode != 'no_send')
                 )
             )
@@ -60,7 +60,7 @@ class AccountMove(models.Model):
                 move_form.invoice_payment_term_id = False
                 move_form.invoice_date_due = False
 
-                if move_form.is_purchase_document():
+                if move_form.is_purchase_document(include_receipts=True):
                     move_form.ref = False
                 elif move_form.is_sale_document() and move_form.quick_edit_mode:
                     move_form.name = False
@@ -107,7 +107,7 @@ class AccountMove(models.Model):
             return True
 
         # If it's an existing document to which an attachment is added, only auto extract it for purchase documents
-        return self.is_purchase_document()
+        return self.is_purchase_document(include_receipts=True)
 
     def _get_ocr_module_name(self):
         return 'account_invoice_extract'
@@ -168,7 +168,7 @@ class AccountMove(models.Model):
         elif field == "due_date":
             text_to_send["content"] = str(self.invoice_date_due) if self.invoice_date_due else False
         elif field == "invoice_id":
-            if self.is_purchase_document():
+            if self.is_purchase_document(include_receipts=True):
                 text_to_send["content"] = self.ref
             else:
                 text_to_send["content"] = self.name
@@ -298,7 +298,7 @@ class AccountMove(models.Model):
         return None
 
     def _find_partner_id_with_vat(self, vat_number_ocr):
-        rank_field = 'supplier_rank' if self.is_purchase_document() else 'customer_rank'
+        rank_field = 'supplier_rank' if self.is_purchase_document(include_receipts=True) else 'customer_rank'
         partner_vat = self.env["res.partner"].search([
             *self.env['res.partner']._check_company_domain(self.company_id),
             ("vat", "=ilike", vat_number_ocr),
@@ -379,7 +379,7 @@ class AccountMove(models.Model):
         if not partner_name:
             return 0
 
-        rank_field = 'supplier_rank' if self.is_purchase_document() else 'customer_rank'
+        rank_field = 'supplier_rank' if self.is_purchase_document(include_receipts=True) else 'customer_rank'
         partner = self.env["res.partner"].search([
             *self.env['res.partner']._check_company_domain(self.company_id),
             ("name", "=", partner_name),
@@ -439,12 +439,12 @@ class AccountMove(models.Model):
             if partner_vat:
                 return partner_vat, False
 
-        if self.is_purchase_document() and self.extract_detected_layout:
+        if self.is_purchase_document(include_receipts=True) and self.extract_detected_layout:
             partner = self._find_partner_from_previous_extracts()
             if partner:
                 return partner, False
 
-        if self.is_purchase_document() and iban_ocr:
+        if self.is_purchase_document(include_receipts=True) and iban_ocr:
             partner = self._find_partner_with_iban(iban_ocr, self.extract_partner_name)
             if partner:
                 return partner, False
@@ -465,7 +465,7 @@ class AccountMove(models.Model):
         Find taxes records to use from the taxes detected for an invoice line.
         """
         taxes_found = self.env['account.tax']
-        type_tax_use = 'purchase' if self.is_purchase_document() else 'sale'
+        type_tax_use = 'purchase' if self.is_purchase_document(include_receipts=True) else 'sale'
         if self.is_indian_taxes() and len(taxes_ocr) > 1:
             total_tax = sum(taxes_ocr)
             grouped_taxes_records = self.env['account.tax'].search([
@@ -644,7 +644,10 @@ class AccountMove(models.Model):
             # We assume that if the user has specifically created a credit note/receipt, it is indeed a credit note/receipt.
             detected_move_type = ocr_results.get('type')
             if detected_move_type == 'receipt':
-                self.move_type = self.move_type.replace('invoice', 'receipt')
+                if self.move_type == 'in_invoice':
+                    self.move_type = 'in_receipt'
+                elif self.move_type == 'out_invoice' and self.env['ir.config_parameter'].sudo().get_param('account.show_sale_receipts'):
+                    self.move_type = 'out_receipt'
             elif detected_move_type == 'refund':
                 self.action_switch_move_type()
 
@@ -698,7 +701,7 @@ class AccountMove(models.Model):
                 partner_id, created = self._get_partner(ocr_results)
                 if partner_id:
                     move_form.partner_id = partner_id
-                    if created and iban_ocr and not move_form.partner_bank_id and self.is_purchase_document():
+                    if created and iban_ocr and not move_form.partner_bank_id and self.is_purchase_document(include_receipts=True):
                         bank_account = self.env['res.partner.bank'].search([
                             *self.env['res.partner.bank']._check_company_domain(self.company_id),
                             ('acc_number', '=ilike', iban_ocr),
@@ -746,7 +749,7 @@ class AccountMove(models.Model):
                     country = self.env['res.country'].search([('code', '=', country_code)])
                     partner.country_id = country and country.id
 
-                if self.is_purchase_document():
+                if self.is_purchase_document(include_receipts=True):
                     iban = qr_content_list[3]
                     if iban and not self.env['res.partner.bank'].search_count([('acc_number', '=ilike', iban)], limit=1):
                         move_form.partner_bank_id = self.with_context(clean_context(self.env.context)).env['res.partner.bank'].create({
@@ -767,7 +770,7 @@ class AccountMove(models.Model):
                 else:
                     move_form.invoice_date_due = due_date_ocr
 
-            if self.is_purchase_document() and not move_form.ref:
+            if self.is_purchase_document(include_receipts=True) and not move_form.ref:
                 move_form.ref = invoice_id_ocr
 
             if self.is_sale_document() and self.quick_edit_mode:

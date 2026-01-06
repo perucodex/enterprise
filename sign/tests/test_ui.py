@@ -58,10 +58,11 @@ class TestUi(odoo.tests.HttpCase, SignRequestCommon):
             'height': 0.050,
         }])
         self.env['sign.template'].search([('id', '!=', self.template_1_role.id)]).write({'active': False})
+        self.template_1_role.user_id = self.user_1
         type_id = self.env['sign.item.type'].create({
             'name': "Issuer",
             'item_type': "text",
-            'placeholder': "Issued by Mitchell Admin",
+            'placeholder': "Issued by Laurie Poiret",
         })
         self.env['sign.item'].create([{
             'type_id': type_id.id,
@@ -78,12 +79,10 @@ class TestUi(odoo.tests.HttpCase, SignRequestCommon):
         with file_open('sign/static/demo/signature.png', "rb") as f:
             img_content = base64.b64encode(f.read())
 
-        self.env.ref('base.user_admin').write({
-            'name': 'Mitchell Admin',
+        self.user_1.write({
             'sign_signature': img_content,
-            'email': 'mitchell.admin@example.com',
         })
-        self.start_tour("/odoo", 'test_sign_flow_tour', login='admin')
+        self.start_tour("/odoo", 'test_sign_flow_tour', login=self.user_1.login)
 
     def test_template_edition(self):
         blank_template = self.env['sign.template'].create({

@@ -33,4 +33,4 @@ class WebsiteKnowledgeHelpdesk(KnowledgeWebsiteController):
         if not team or not team.website_article_id:
             return request.redirect('/knowledge/home')
         article = team.website_article_id
-        return self.redirect_to_article(article_id=article.id)
+        return request.redirect(article.website_url)

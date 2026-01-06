@@ -42,11 +42,7 @@ result = categories['BASIC'] + categories['ALW']
         <field name="sequence">130</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
-rates = payslip._rule_parameter('l10n_pk_tax_brackets')
-result = 0
-for low, high, rate, fix in rates:
-    if low &lt; GROSSY:
-        result += (rate * (GROSSY - low)) if GROSSY &lt;= high else fix
+result = (payslip._l10n_pk_get_tax(GROSSY))
 </field>
         <field name="struct_id" ref="l10n_pk_hr_payroll.hr_payroll_structure_pk_employee_salary"/>
     </record>
@@ -119,9 +115,9 @@ if years &gt;= 5:
     </record>
 
     <record id="pk_total_tak_bracket_monthly" model="hr.salary.rule">
-        <field name="name">Total Tax Brackets Monthly</field>
+        <field name="name">Income Tax Withheld</field>
         <field name="category_id" ref="l10n_pk_hr_payroll.pk_tax_deduction_salary_rule_category"/>
-        <field name="code">TOTTB</field>
+        <field name="code">TXW</field>
         <field name="sequence">190</field>
         <field name="condition_select">python</field>
         <field name="condition_python">result = 600000 &lt; GROSSY</field>

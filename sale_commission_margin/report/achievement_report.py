@@ -11,4 +11,4 @@ class SaleCommissionAchievementReport(models.Model):
         return super()._get_sale_rates() + ['margin']
 
     def _get_sale_rates_product(self):
-        return super()._get_sale_rates_product() + "+ (rules.margin_rate * cr.rate * COALESCE(sol.margin, 0)) / fo.currency_rate"
+        return super()._get_sale_rates_product() + "+ (rules.margin_rate * COALESCE(sol.margin, 0)) / fo.currency_rate"

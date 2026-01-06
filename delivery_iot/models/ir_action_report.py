@@ -1,6 +1,7 @@
 import logging
-from odoo import models
+from odoo import models, _
 from odoo.fields import Domain
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -16,6 +17,14 @@ class IrActionReport(models.Model):
         if self.report_name not in ['delivery_iot.report_shipping_labels', 'delivery_iot.report_shipping_docs']:
             return super().render_document(device_id_list, res_ids, data)
 
+        device_ids = self.env['iot.device'].browse(device_id_list)
+        if len(device_id_list) != len(device_ids.exists()):
+            raise UserError(_(
+                "One of the printer used to print the document has been removed.\n"
+                "To reset printers, go to the Inventory App, Configuration tab, \"Reset Linked Printers\""
+                " and retry the operation."
+            ))
+
         domain = [('res_model', '=', 'stock.picking'), ('res_id', 'in', res_ids)]
         if self.report_name == 'delivery_iot.report_shipping_labels':
             domain = Domain.AND([domain, [('name', 'ilike', 'Label%')]])
@@ -27,7 +36,6 @@ class IrActionReport(models.Model):
             _logger.warning("No attachment found for report %s and res_ids %s", self.report_name, res_ids)
             return []
 
-        device_ids = self.env['iot.device'].sudo().browse(device_id_list)
         return [
             {
                 "iotBoxId": device.iot_id.id,

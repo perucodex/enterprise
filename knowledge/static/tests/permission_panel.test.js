@@ -222,6 +222,10 @@ class KnowledgeArticle extends models.ServerModel {
     action_redirect_to_parent() {
         return { action: "redirect to parent" };
     }
+
+    has_access = function () {
+        return Promise.resolve(true);
+    };
 }
 
 defineMailModels();

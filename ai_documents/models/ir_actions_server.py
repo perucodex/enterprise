@@ -85,7 +85,8 @@ class IrActionsServer(models.Model):
             # that prompt on the document and not on the folder
             folder_prompt, folder_context_fields, target_folders = parse_ai_prompt_values(
                 self.env,
-                record.folder_id.ai_sort_prompt,
+                # sudo: ai_sort_prompt has group system
+                record.folder_id.sudo().ai_sort_prompt,
                 "documents.document",
             )
             context_fields |= folder_context_fields

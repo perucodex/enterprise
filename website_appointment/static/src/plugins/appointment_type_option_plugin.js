@@ -3,17 +3,20 @@ import { registry } from "@web/core/registry";
 import { _t } from '@web/core/l10n/translation';
 import { Cache } from "@web/core/utils/cache";
 import { BuilderAction } from "@html_builder/core/builder_action";
+import { BaseOptionComponent } from "@html_builder/core/utils";
+
+export class AppointmentTypeOption extends BaseOptionComponent {
+    static template = "website_appointment.AppointmentTypeOption";
+    static selector = "main:has(.o_wappointment_type_options)";
+    static editableOnly = false;
+    static title = _t("Appointment Type");
+    static groups = ["website.group_website_designer"];
+}
 
 class AppointmentTypeOptionPlugin extends Plugin {
     static id = "AppointmentTypeOption";
     resources = {
-        builder_options: {
-            template: "website_appointment.AppointmentTypeOption",
-            selector: "main:has(.o_wappointment_type_options)",
-            editableOnly: false,
-            title: _t("Appointment Type"),
-            groups: ["website.group_website_designer"],
-        },
+        builder_options: AppointmentTypeOption,
         builder_actions: {
             AppointmentTypeShowAvatarsAction,
             AppointmentTypeShowAllowGuestsAction,

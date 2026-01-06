@@ -1,5 +1,6 @@
 import { BankRecButtonList } from "../button_list/button_list";
 import { BankRecLineToReconcile } from "../line_to_reconcile/line_to_reconcile";
+import { BankRecReconciledLineName } from "../reconciled_line_name/reconciled_line_name";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { formatMonetary } from "@web/views/fields/formatters";
 import { KanbanRecord } from "@web/views/kanban/kanban_record";
@@ -7,7 +8,6 @@ import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { onWillStart, useState, useRef } from "@odoo/owl";
 import { useBankReconciliation } from "../bank_reconciliation_service";
-import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 
 export class BankRecStatementLine extends KanbanRecord {
     static template = "account_accountant.BankRecStatementLine";
@@ -15,11 +15,11 @@ export class BankRecStatementLine extends KanbanRecord {
         BankRecLineToReconcile,
         BankRecButtonList,
         DropdownItem,
+        BankRecReconciledLineName,
     };
     static props = [...KanbanRecord.props];
 
     setup() {
-        this.registerHotKeys();
         super.setup();
         this.orm = useService("orm");
         this.ui = useService("ui");
@@ -79,22 +79,27 @@ export class BankRecStatementLine extends KanbanRecord {
     }
 
     // -----------------------------------------------------------------------------
-    // EVENT HANDLERS
-    // -----------------------------------------------------------------------------
-
-    registerHotKeys() {
-        const hotKeyOptions = {
-            area: () => this.rootRef.el,
-            allowRepeat: true,
-        };
-        useHotkey("Enter", () => this.unfold(), hotKeyOptions);
-        useHotkey("ArrowRight", () => this.unfold(), hotKeyOptions);
-        useHotkey("ArrowLeft", () => this.fold(), hotKeyOptions);
-    }
-
-    // -----------------------------------------------------------------------------
     // HELPER
     // -----------------------------------------------------------------------------
+    get reconciledLineName() {
+        const reconciledLine = {};
+        for (const line of this.linesToReconcile) {
+            if (
+                line.reconciled_lines_excluding_exchange_diff_ids.records.length === 1 &&
+                line.reconciled_lines_excluding_exchange_diff_ids.records[0].data.move_name
+            ) {
+                reconciledLine[line.id] = {
+                    move: line.reconciled_lines_excluding_exchange_diff_ids.records[0].data
+                        .move_name,
+                };
+            } else if (line.tax_ids.count) {
+                reconciledLine[line.id] = { tax: line.tax_ids.records };
+            } else {
+                reconciledLine[line.id] = { account: line.account_id.display_name };
+            }
+        }
+        return reconciledLine;
+    }
 
     get record() {
         return this.props.record;
@@ -108,25 +113,33 @@ export class BankRecStatementLine extends KanbanRecord {
         if (this.state.isUnfolded) {
             this.toggleUnfold();
         }
-        this.bankReconciliation.selectStatementLine(this.record);
+        this.selectStatementLine();
     }
 
     unfold() {
         if (!this.state.isUnfolded) {
             this.toggleUnfold();
         }
-        this.bankReconciliation.selectStatementLine(this.record);
+        this.selectStatementLine();
     }
 
     toggleUnfold() {
         this.state.isUnfolded = !this.isUnfolded;
+        this.selectStatementLine();
+    }
+
+    selectStatementLine() {
         // Update the chatter with the last selected element
         this.bankReconciliation.selectStatementLine(this.record);
     }
 
     openChatter() {
-        this.bankReconciliation.selectStatementLine(this.record);
+        this.selectStatementLine();
         this.bankReconciliation.openChatter();
+    }
+
+    get hasInvalidAnalytics() {
+        return this.linesToReconcile.some((line) => line.has_invalid_analytics);
     }
 
     get isUnfolded() {
@@ -276,23 +289,6 @@ export class BankRecStatementLine extends KanbanRecord {
         return formatMonetary(this.recordData.amount_currency, {
             currencyId: this.recordData.foreign_currency_id.id,
         });
-    }
-
-    get reconciledLineName() {
-        const reconciledLineName = [];
-        for (const line of this.linesToReconcile) {
-            if (
-                line.reconciled_lines_excluding_exchange_diff_ids.records.length === 1 &&
-                line.reconciled_lines_excluding_exchange_diff_ids.records[0].data.move_name
-            ) {
-                reconciledLineName.push(
-                    line.reconciled_lines_excluding_exchange_diff_ids.records[0].data.move_name
-                );
-            } else {
-                reconciledLineName.push(line.account_id.display_name);
-            }
-        }
-        return reconciledLineName.join(", ");
     }
 
     get isSelected() {

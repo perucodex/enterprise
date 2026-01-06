@@ -8,9 +8,10 @@ from odoo.addons.voip.models.utils import extract_country_code
 
 
 class VoipController(http.Controller):
-    @http.route("/voip/get_country_code", type="jsonrpc", auth="user", methods=["POST"])
-    def get_country_code(self, phone_number):
-        return extract_country_code(phone_number)
+    @http.route("/voip/get_country_store", type="jsonrpc", auth="public", methods=["POST"])
+    def get_country_store(self, phone_number):
+        code = extract_country_code(phone_number)
+        return request.env["res.country"]._get_country_by_country_code(code["iso"])
 
     @http.route("/voip/upload_recording/<int:call_id>", type="http", auth="user", methods=["POST"], csrf=True)
     def upload_recording(self, call_id, ufile):

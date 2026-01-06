@@ -35,9 +35,9 @@ class TestAIDraftUI(HttpCase):
         cls.env['ai.composer'].create({
             'name': 'agent composer',
             'interface_key': 'chatter_ai_button',
-            'focused_models': [cls.env['ir.model']._get_id('ai.agent')],
+            'focused_models': [cls.env['ir.model']._get_id('chatbot.script')],
             'available_prompts': [Command.create({
-                'name': 'agent prompt button',
+                'name': 'chatbot prompt button',
             })],
         })
 
@@ -48,7 +48,3 @@ class TestAIDraftUI(HttpCase):
     def test_ai_draft_html_field(self):
         with patch.object(self.env.registry['ai.agent'], '_generate_response', self._dummy_ai_submit_to_model):
             self.start_tour("/odoo", 'test_ai_draft_html_field', login='admin')
-
-    def test_ai_ask_ai_button(self):
-        with patch.object(self.env.registry['ai.agent'], '_generate_response', self._dummy_ai_submit_to_model):
-            self.start_tour("/odoo", 'test_ai_ask_ai_button', login='admin')

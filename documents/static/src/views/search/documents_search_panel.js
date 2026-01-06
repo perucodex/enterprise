@@ -270,11 +270,7 @@ export class DocumentsSearchPanel extends SearchPanel {
         const folders = this.env.searchModel.getFolderAndParents(
             this.env.searchModel.getFolderById(folderId)
         );
-        if (
-            folders[0].id === "COMPANY" ||
-            folders[0].rootId !== "COMPANY" ||
-            this.state.expanded[sectionId]["COMPANY"]
-        ) {
+        if (folders[0].id === "COMPANY" || this.state.expanded[sectionId][folders[0].rootId]) {
             for (const folder of folders) {
                 if (!this.state.expanded[sectionId][folder.id]) {
                     this.state.expanded[sectionId][folder.id] = true;

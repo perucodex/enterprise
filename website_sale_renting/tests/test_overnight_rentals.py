@@ -3,6 +3,7 @@
 from freezegun import freeze_time
 from unittest.mock import patch
 
+from odoo import fields
 from odoo.fields import Command
 from odoo.tests import HttpCase, tagged
 from odoo.addons.website_sale.tests.common import MockRequest
@@ -98,6 +99,24 @@ class TestOvernightRental(HttpCase, TestWebsiteSaleRentingCommon):
                     )
                     self.assertEqual(start_date.hour, 5)  # 5h (midnight in UTC-5)
                     self.assertEqual(end_date.hour, 4)  # 4h59 (midnight - 1 in UTC-5)
+
+            # Don't recompute default dates when existing
+            with MockRequest(self.env, website=self.website) as request:
+                with patch.object(request, 'cookies', {'tz': 'Europe/Brussels'}):
+                    existing_start_date = fields.Datetime.to_datetime("2025-01-01 19:19:19")
+                    existing_end_date = fields.Datetime.to_datetime("2025-01-02 11:11:11")
+                    start_date, end_date = (
+                        self.hotel_room_early_check_in.product_tmpl_id._get_default_renting_dates(
+                            start_date=existing_start_date,
+                            end_date=existing_end_date,
+                            duration=24,
+                            unit='hour',
+                            pickup_time=15,
+                            return_time=10,
+                        )
+                    )
+                    self.assertEqual(start_date, existing_start_date)
+                    self.assertEqual(end_date, existing_end_date)
 
     def test_rental_order_created_with_pickup_return_times(self):
         """Test that the hours on the rental order are correctly taking the pickup/return times."""

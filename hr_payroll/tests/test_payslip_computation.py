@@ -254,7 +254,7 @@ class TestPayslipComputation(TestPayslipContractBase):
 
     def test_payslip_generation_with_overtime_work_rate(self):
         """ Test the computation of overtime amount in the payslip as per rate. """
-        work_entry = self.env['hr.work.entry'].create(self.env['hr.version']._generate_work_entries_postprocess([{
+        self.env['hr.work.entry'].create(self.env['hr.version']._generate_work_entries_postprocess([{
             'name': 'Overtime Work',
             'employee_id': self.richard_emp.id,
             'version_id': self.contract_cdi.id,
@@ -262,7 +262,6 @@ class TestPayslipComputation(TestPayslipContractBase):
             'date_start': datetime(2024, 12, 16, 18, 0, 0),
             'date_stop': datetime(2024, 12, 16, 22, 0, 0),
         }]))
-        work_entry.action_validate()
         payslip = self.env['hr.payslip'].create({
             'name': 'Payslip of Richard',
             'employee_id': self.richard_emp.id,
@@ -303,8 +302,8 @@ class TestPayslipComputation(TestPayslipContractBase):
         self.contract_cdd.generate_work_entries(date(2015, 12, 13), date(2015, 12, 13))
         hours = self.contract_cdd.get_work_hours(date(2015, 12, 13), date(2015, 12, 13))
         sum_hours = sum(v for k, v in hours.items() if k in self.env.ref('hr_work_entry.work_entry_type_attendance').ids)
-        # 0 hours after the lower bound
-        self.assertAlmostEqual(sum_hours, 2.3, delta=0.01)
+        # 3 hours after the lower bound
+        self.assertAlmostEqual(sum_hours, 3, delta=0.01, msg='It should count 3 attendance hours')
         entry_exceeding_upper_bound = self.env['hr.work.entry'].create(self.env['hr.version']._generate_work_entries_postprocess([{
             'name': 'Attendance',
             'employee_id': self.richard_emp.id,
@@ -317,8 +316,8 @@ class TestPayslipComputation(TestPayslipContractBase):
         self.contract_cdd.generate_work_entries(date(2015, 12, 14), date(2015, 12, 14))
         hours = self.contract_cdd.get_work_hours(date(2015, 12, 14), date(2015, 12, 14))
         sum_hours = sum(v for k, v in hours.items() if k in self.env.ref('hr_work_entry.work_entry_type_attendance').ids)
-        # 8 hours before the upper bound
-        self.assertAlmostEqual(sum_hours, 5.7, delta=0.01)
+        # 5 hours before the upper bound
+        self.assertAlmostEqual(sum_hours, 5, delta=0.01, msg='It should count 5 attendance hours')
 
     def test_payslip_without_contract(self):
         payslip = self.env['hr.payslip'].create({
@@ -588,20 +587,37 @@ class TestPayslipComputation(TestPayslipContractBase):
             'date': date(2016, 1, 1),
             'duration': 1,
         })
-        # Cannot edit validated work entries linked to a payslip
+        # Validated work entries linked to a payslip can be edited
         self.assertEqual(richard_work_entry.state, 'draft')
         self.assertFalse(richard_work_entry.has_payslip, False)
         self.richard_payslip.action_payslip_done()
         self.assertEqual(richard_work_entry.state, 'validated')
         self.assertEqual(richard_work_entry.has_payslip, True)
-        with self.assertRaises(UserError):
-            richard_work_entry.write({'state': 'draft'})
-        # Entry reset on payslip cancellation
-        self.richard_payslip.action_payslip_cancel()
-        self.assertEqual(richard_work_entry.state, 'draft')
-        # Edit is allowed for entries not linked to a payslip
-        self.assertEqual(richard_work_entry.has_payslip, False)
-        richard_work_entry.write({'state': 'validated'})
-        self.assertEqual(richard_work_entry.state, 'validated')
         richard_work_entry.write({'state': 'draft'})
         self.assertEqual(richard_work_entry.state, 'draft')
+
+    def test_duplicate_payslips_cancellation(self):
+        work_entries = self.env['hr.work.entry'].search([
+            ('employee_id', '=', self.richard_emp.id),
+            ('date', '>=', self.richard_payslip.date_from),
+            ('date', '<=', self.richard_payslip.date_to)])
+        self.richard_payslip.action_payslip_done()
+        self.assertTrue(all(entry.state == 'validated' for entry in work_entries))
+
+        dup_payslip = self.env['hr.payslip'].create({
+            'name': 'Payslip of Richard',
+            'employee_id': self.richard_emp.id,
+            'version_id': self.contract_cdi.id,
+            'struct_id': self.developer_pay_structure.id,
+            'date_from': date(2016, 1, 1),
+            'date_to': date(2016, 1, 31)
+        })
+        dup_payslip.action_payslip_done()
+        self.assertTrue(all(entry.state == 'validated' for entry in work_entries))
+
+        self.richard_payslip.action_payslip_cancel()
+        self.assertTrue(all(entry.state == 'validated' for entry in work_entries))
+
+        dup_payslip.action_payslip_cancel()
+        self.assertTrue(all(entry.state == 'draft' for entry in work_entries))
+        self.assertTrue(all(not entry.has_payslip for entry in work_entries))

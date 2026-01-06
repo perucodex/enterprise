@@ -11,7 +11,7 @@ class HrEmployee(models.Model):
     _inherit = "hr.employee"
 
     next_appraisal_date = fields.Date(
-        string='Next Appraisal Date', compute='_compute_next_appraisal_date', groups="hr.group_hr_user", readonly=False, store=True,
+        string='Next Appraisal Date', compute='_compute_next_appraisal_date', groups="hr.group_hr_user", readonly=False, store=True, copy=False,
         help="The date of the next appraisal is computed by the appraisal plan's dates (first appraisal + periodicity).")
     last_ongoing_appraisal_date = fields.Date(compute='_compute_last_ongoing_appraisal_date', groups="hr.group_hr_user")
     is_last_appraisal_late = fields.Boolean(compute='_compute_last_ongoing_appraisal_date', groups="hr.group_hr_user")
@@ -31,7 +31,7 @@ class HrEmployee(models.Model):
 
     def _get_appraisal_plan_starting_date(self):
         self.ensure_one()
-        return self.contract_date_start or self.date_version
+        return self.create_date
 
     def action_send_appraisal_request(self):
         return {
@@ -153,10 +153,6 @@ class HrEmployee(models.Model):
                 dates[employee.id] = today + relativedelta(months=months)
         return dates
 
-    def _get_appraisal_plan_starting_date(self):
-        self.ensure_one()
-        return self.create_date
-
     def action_open_goals(self):
         self.ensure_one()
         action = self.env["ir.actions.actions"]._for_xml_id('hr_appraisal.action_hr_appraisal_goal')
@@ -168,7 +164,7 @@ class HrEmployee(models.Model):
 
     def action_open_employee_appraisals(self):
         self.ensure_one()
-        if self.appraisal_count == 1:
+        if self.appraisal_count == 1 and self.appraisal_ids:
             return {
                 'res_model': 'hr.appraisal',
                 'view_mode': 'form',

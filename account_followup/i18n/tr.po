@@ -13,13 +13,16 @@
 # Ediz Duman <neps1192@gmail.com>, 2023
 # Ertuğrul Güreş <ertugrulg@projetgrup.com>, 2023
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# Weblate Translation Memory <noreply-mt-weblate-translation-memory@weblate.org>, 2025.
+# DeepL <noreply-mt-deepl@weblate.org>, 2025.
+# Odoo Turkish Import <dyki+tr@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:45+0000\n"
-"PO-Revision-Date: 2025-09-15 21:02+0000\n"
-"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:43+0000\n"
+"PO-Revision-Date: 2025-11-20 13:20+0000\n"
+"Last-Translator: Odoo Turkish Import <dyki+tr@odoo.com>\n"
 "Language-Team: Turkish <https://translate.odoo.com/projects/odoo-19/"
 "account_followup/tr/>\n"
 "Language: tr\n"
@@ -33,13 +36,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_followup/models/account_followup_report.py:0
 msgid "%(company)s Payment Reminder - %(partner)s"
-msgstr ""
+msgstr "%(company)s Ödeme Hatırlatıcısı - %(partner)s"
 
 #. module: account_followup
 #. odoo-python
 #: code:addons/account_followup/models/account_followup.py:0
 msgid "%(delay)s days (copy of %(name)s)"
-msgstr ""
+msgstr "%(delay)s gün (%(name)s kopyası)"
 
 #. module: account_followup
 #: model:ir.actions.report,print_report_name:account_followup.action_report_followup
@@ -54,7 +57,7 @@ msgstr "15 Gün"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.followup_filter_info_template
 msgid "2023-09-06"
-msgstr ""
+msgstr "06-09-2023"
 
 #. module: account_followup
 #: model:account_followup.followup.line,name:account_followup.demo_followup_line2
@@ -116,6 +119,43 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p>\n"
+"                        <t t-if=\"object.id != "
+"object.commercial_partner_id.id\">Sayın <t t-out=\"object.name or ''\"/> (<t "
+"t-out=\"object.commercial_partner_id.name or ''\"/>),</t>\n"
+"                        <t t-else=\"\">Sayın <t t-out=\"object.name or ''\"/"
+">,</t>\n"
+"                        <br/>\n"
+"                        Tarafınıza göndermiş olduğumuz birden fazla "
+"hatırlatmaya rağmen hesabınıza ait tarihi geçmiş ödeme hala yapılmamıştır.\n"
+"                        Önümüzdeki 8 gün içerisinde ödeme tümüyle "
+"yapılmadığı takdirde başka uyarı yapılmaksızın borcun tahsisi için gerekli "
+"yasal işlemler başlatılacaktır.\n"
+"                        Söz konusu yasal işlemlere ihtiyaç kalmadan ödemenin "
+"yapılacağına inanıyor ve bekleyen ödemelerin ayrıntılarını aşağıda "
+"paylaşıyoruz.\n"
+"                        Bu konuda sorularınız olması durumunda lütfen "
+"muhasebe departmanımızla iletişime geçmekten çekinmeyin.\n"
+"                        <br/>\n"
+"                        Saygılarımızla,\n"
+"                        <br/>\n"
+"                        <t t-if=\"not "
+"is_html_empty(object._get_followup_responsible().signature)\">\n"
+"                            <br/>\n"
+"                            <t t-"
+"out=\"object._get_followup_responsible().signature\"/>\n"
+"                        </t>\n"
+"                        <t t-else=\"\">\n"
+"                            <br/>\n"
+"                            --\n"
+"                            <br/>\n"
+"                            <t t-"
+"out=\"object._get_followup_responsible().name\"/>\n"
+"                        </t>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: account_followup
 #: model:mail.template,body_html:account_followup.demo_followup_email_template_2
@@ -161,6 +201,48 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p>\n"
+"                        <t t-if=\"object.id != "
+"object.commercial_partner_id.id\">Sayın <t t-out=\"object.name or ''\"/> (<t "
+"t-out=\"object.commercial_partner_id.name or ''\"/>),</t>\n"
+"                        <t t-else=\"\">Sayın <t t-out=\"object.name or ''\"/"
+">,</t>\n"
+"                        <br/>\n"
+"                        Göndermiş olduğumuz hatırlatmalara rağmen "
+"hesabınızın ödemesinin hala yapılmamış olduğunu görmek bizi hayal "
+"kırıklığına uğrattı.\n"
+"                        <br/>\n"
+"                        Ödemenin yapılması büyük önem taşımaktadır çünkü "
+"yapılmadığı takdirde hesabınızı dondurmamız gerekecektir; bu da şirketinize "
+"daha fazla (ürün/hizmet) tedariğinde bulunamayacağımız anlamına gelir. "
+"Lütfen bu ödemenin önümüzdeki 8 gün içinde yapılması için gereken adımları "
+"atın.\n"
+"                        <br/>\n"
+"                        Faturanın ödenmesi sırasında bizim bilgimiz dışında "
+"bir sorunla karşılaşıyorsanız sorunun hızla çözülebilmesi için muhasebe "
+"departmanımızla iletişime geçmekten çekinmeyin.\n"
+"                        <br/>\n"
+"                        Tarihi geçmiş ödemelerin ayrıntılarını aşağıda "
+"görebilirsiniz.\n"
+"                        <br/>\n"
+"                        Saygılarımızla,\n"
+"                        <t t-if=\"not "
+"is_html_empty(object._get_followup_responsible().signature)\">\n"
+"                            <br/>\n"
+"                            <t t-"
+"out=\"object._get_followup_responsible().signature\"/>\n"
+"                        </t>\n"
+"                        <t t-else=\"\">\n"
+"                            <br/>\n"
+"                            --\n"
+"                            <br/>\n"
+"                            <t t-"
+"out=\"object._get_followup_responsible().name\"/>\n"
+"                        </t>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: account_followup
 #: model:mail.template,body_html:account_followup.email_template_followup_1
@@ -214,6 +296,53 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p>\n"
+"                       <t t-if=\"object.id != "
+"object.commercial_partner_id.id\">Sayın <t t-out=\"object.name or ''\"/> (<t "
+"t-out=\"object.commercial_partner_id.name or ''\"/>),</t>\n"
+"                        <t t-else=\"\">Sayın <t t-out=\"object.name or ''\"/"
+">,</t>\n"
+"                    </p>\n"
+"                   <p>\n"
+"                        Hesabınızda <b><t t-"
+"out=\"format_amount(object.total_overdue_followup, object.currency_id) or "
+"''\"/></b> ödenmemiş bir bakiye olduğunu bildirmek isteriz.\n"
+"                        Bu tutarı önümüzdeki <b>8 gün</b> içerisinde "
+"ödemenizi rica ederiz.\n"
+"                   </p>\n"
+"                    <p t-if=\"object._show_pay_now_button()\">\n"
+"                       <a t-att-href=\"'/my/invoices/overdue'\" "
+"style=\"padding: 8px 12px; font-size: 12px; color: #FFFFFF; text-decoration: "
+"none !important; font-weight: 400; background-color: #875A7B; border: 0px "
+"solid #875A7B; border-radius:3px\">Şimdi öde</a>\n"
+"                    </p>\n"
+"                   <p>\n"
+"                        Ödeme zaten yapılmışsa, lütfen bu bildirimi dikkate "
+"almayın.\n"
+"                        Sorularınız veya yardıma ihtiyacınız olursa muhasebe "
+"departmanımızla iletişime geçmekten çekinmeyin.\n"
+"                   </p>\n"
+"                    <p>\n"
+"                        Bu meselenin çözümünde gösterdiğiniz işbirliği için "
+"teşekkür ederiz.\n"
+"                   </p>\n"
+"                    <p>\n"
+"                        Saygılarımla,\n"
+"                   </p>\n"
+"                    <p>\n"
+"                       <t t-if=\"not "
+"is_html_empty(object._get_followup_responsible().signature)\">\n"
+"                            <t t-"
+"out=\"object._get_followup_responsible().signature\"/>\n"
+"                       </t>\n"
+"                        <t t-else=\"\">\n"
+"                           <t t-"
+"out=\"object._get_followup_responsible().name\"/>\n"
+"                        </t>\n"
+"                   </p>\n"
+"                </div>\n"
+"            "
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.res_partner_view_form
@@ -227,6 +356,9 @@ msgid ""
 "                                Pending Invoices\n"
 "                            </strong>"
 msgstr ""
+"<strong>\n"
+"                                Bekleyen Faturalar\n"
+"                            </strong>"
 
 #. module: account_followup
 #: model:ir.model.constraint,message:account_followup.constraint_account_followup_followup_line_uniq_name
@@ -281,12 +413,12 @@ msgstr "Bilgilendirilecek kişi ekle..."
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__additional_follower_ids
 msgid "Add followers"
-msgstr ""
+msgstr "Takipçileri ekle"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.followup_filter_info_template
 msgid "Address"
-msgstr ""
+msgstr "Adres"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__join_invoices
@@ -309,7 +441,7 @@ msgstr "Otomatik"
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__body_has_template_value
 msgid "Body content is the same as the template"
-msgstr ""
+msgstr "Gövde içeriği şablonla aynı"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__can_edit_body
@@ -324,7 +456,7 @@ msgstr "İptal"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.missing_information_view_form
 msgid "Close"
-msgstr ""
+msgstr "Kapat"
 
 #. module: account_followup
 #. odoo-python
@@ -355,7 +487,7 @@ msgstr "İçerikler"
 #. module: account_followup
 #: model:ir.model,website_form_label:account_followup.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Müşteri Oluştur"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__create_uid
@@ -446,7 +578,7 @@ msgstr "Takip düzeylerini ve onlarla ilgili eylemleri tanımlayın."
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.followup_filter_info_template
 msgid "Demo Ref"
-msgstr ""
+msgstr "Demo Referansı"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__name
@@ -507,7 +639,7 @@ msgstr "E-posta Konusu"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.view_account_followup_followup_line_form
 msgid "Email Template"
-msgstr ""
+msgstr "E-posta Şablonu"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__email_recipient_ids
@@ -518,7 +650,7 @@ msgstr "Ek Alıcılar"
 #. odoo-python
 #: code:addons/account_followup/models/res_partner.py:0
 msgid "Follow-up %(partner)s - %(date)s.pdf"
-msgstr ""
+msgstr "Takip %(partner)s - %(date)s.pdf"
 
 #. module: account_followup
 #: model:ir.model,name:account_followup.model_account_followup_followup_line
@@ -563,7 +695,7 @@ msgstr "Takip Adımları"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.report_followup_print_all
 msgid "Follow-up details"
-msgstr ""
+msgstr "Takip detayları"
 
 #. module: account_followup
 #. odoo-python
@@ -574,7 +706,7 @@ msgstr "Takip mektubu oluşturuldu"
 #. module: account_followup
 #: model:ir.model,name:account_followup.model_account_followup_missing_information_wizard
 msgid "Followup missing information wizard"
-msgstr ""
+msgstr "Eksik takip bilgisi sihirbazı"
 
 #. module: account_followup
 #: model_terms:ir.actions.act_window,help:account_followup.action_account_followup_line_definition_form
@@ -598,7 +730,7 @@ msgstr "Dördüncü hatırlatma takibi"
 #: model:ir.model.fields,field_description:account_followup.field_res_partner__has_moves
 #: model:ir.model.fields,field_description:account_followup.field_res_users__has_moves
 msgid "Has Moves"
-msgstr ""
+msgstr "Muhasebe Hareketi Var"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__id
@@ -618,6 +750,9 @@ msgid ""
 "notifications about any email reply made by the partner on the reminder "
 "email."
 msgstr ""
+"Eğer bu seçenek ayarlanmışsa, bu kullanıcılar ilgili iş ortağına takipçi "
+"olarak eklenir ve hatırlatma e-postasına verilen yanıtlara dair bildirim "
+"alırlar."
 
 #. module: account_followup
 #: model:ir.model.fields.selection,name:account_followup.selection__res_partner__followup_status__in_need_of_action
@@ -627,12 +762,12 @@ msgstr "Eylem gerektiriyor"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.view_partner_property_form_followup
 msgid "Invoice Follow-ups"
-msgstr ""
+msgstr "Fatura Takipleri"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.template_followup_report
 msgid "Invoices Analysis"
-msgstr ""
+msgstr "Faturaların Analizi"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__is_mail_template_editor
@@ -649,7 +784,7 @@ msgstr "Yevmiye Kalemi"
 #: code:addons/account_followup/models/res_partner.py:0
 #: model_terms:ir.ui.view,arch_db:account_followup.view_partner_property_form_followup
 msgid "Journal Items"
-msgstr ""
+msgstr "Yevmiye Kalemleri"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.manual_reminder_view_form
@@ -697,12 +832,12 @@ msgstr "Manuel"
 #: code:addons/account_followup/models/res_partner.py:0
 #: code:addons/account_followup/wizard/followup_missing_information.py:0
 msgid "Missing information"
-msgstr ""
+msgstr "Eksik Bilgi"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.line_template
 msgid "Name"
-msgstr ""
+msgstr "Adı"
 
 #. module: account_followup
 #. odoo-python
@@ -729,6 +864,9 @@ msgid ""
 "                Sending a reminder will set this date depending on the "
 "levels configuration, and you can change it manually."
 msgstr ""
+"Bu tarihten önce herhangi bir takip işlemi yapılmaz.\n"
+"                Bir hatırlatma gönderildiğinde bu tarih, seviye "
+"yapılandırmasına göre ayarlanır; manuel olarak da değiştirilebilir."
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__activity_note
@@ -748,6 +886,10 @@ msgid ""
 "usually be a placeholder expression that provides the appropriate language, "
 "e.g. {{ object.partner_id.lang }}."
 msgstr ""
+"Bir e-posta gönderirken seçmek için isteğe bağlı çeviri dili (ISO kodu). "
+"Ayarlanmazsa, ana ortağın dili kullanılacaktır. Bu genellikle uygun dili "
+"sağlayan bir yer tutucu ifade olmalıdır, örneğin "
+"{{ object.partner_id.lang }}."
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.view_account_followup_followup_line_form
@@ -762,9 +904,13 @@ msgid "Origin"
 msgstr "Kaynak"
 
 #. module: account_followup
+#: model_terms:ir.ui.view,arch_db:account_followup.customer_statements_search_view
+msgid "Overdue Customer Invoices"
+msgstr ""
+
+#. module: account_followup
 #. odoo-python
 #: code:addons/account_followup/models/res_partner.py:0
-#: model_terms:ir.ui.view,arch_db:account_followup.customer_statements_search_view
 msgid "Overdue Invoices"
 msgstr "Gecikmiş Faturalar"
 
@@ -792,13 +938,13 @@ msgstr "Takip Mektubu Yazdır"
 #. module: account_followup
 #: model:ir.actions.server,name:account_followup.action_account_reports_customer_statements_do_followup
 msgid "Process Follow-ups"
-msgstr ""
+msgstr "Takip Sürecini Başlat"
 
 #. module: account_followup
 #. odoo-python
 #: code:addons/account_followup/models/account_followup_report.py:0
 msgid "Reference"
-msgstr ""
+msgstr "Referans"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.view_account_followup_followup_line_form
@@ -819,12 +965,12 @@ msgstr "İşleme Modeli"
 #. module: account_followup
 #: model:ir.model,name:account_followup.model_ir_actions_report
 msgid "Report Action"
-msgstr ""
+msgstr "Rapor işlemi"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.customer_statements_search_view
 msgid "Requires Follow-up"
-msgstr ""
+msgstr "Takip Gerektirir"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__activity_default_responsible_type
@@ -878,12 +1024,12 @@ msgstr "Gönder ve Yazdır"
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__show_print_button
 msgid "Show Print Button"
-msgstr ""
+msgstr "Yazdır Düğmesini Göster"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__show_send_button
 msgid "Show Send Button"
-msgstr ""
+msgstr "Gönder Düğmesini Göster"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__sms
@@ -919,12 +1065,12 @@ msgstr "Özet"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.table_header_template_followup_report
 msgid "Table Header"
-msgstr ""
+msgstr "Tablo Başlığı"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.line_template
 msgid "Table Value"
-msgstr ""
+msgstr "Tablo Değeri"
 
 #. module: account_followup
 #: model:ir.model.fields,help:account_followup.field_account_move_line__invoice_origin
@@ -959,13 +1105,13 @@ msgstr "Toplam"
 #: model:ir.model.fields,field_description:account_followup.field_res_partner__total_all_due
 #: model:ir.model.fields,field_description:account_followup.field_res_users__total_all_due
 msgid "Total All Due"
-msgstr ""
+msgstr "Toplam Vadesi Gelen Tutar"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_res_partner__total_all_overdue
 #: model:ir.model.fields,field_description:account_followup.field_res_users__total_all_overdue
 msgid "Total All Overdue"
-msgstr ""
+msgstr "Toplam Gecikmiş Tutar"
 
 #. module: account_followup
 #. odoo-python
@@ -987,7 +1133,7 @@ msgstr "Toplam Geciken"
 #: model:ir.model.fields,field_description:account_followup.field_res_partner__total_overdue_followup
 #: model:ir.model.fields,field_description:account_followup.field_res_users__total_overdue_followup
 msgid "Total Overdue Followup"
-msgstr ""
+msgstr "Toplam Gecikmiş Takip"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_res_partner__unpaid_invoice_ids
@@ -1010,7 +1156,7 @@ msgstr "Denkleştirilmemiş Aml"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.missing_information_view_form
 msgid "View partners"
-msgstr ""
+msgstr "Partnerleri Görüntüle"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.missing_information_view_form
@@ -1018,6 +1164,8 @@ msgid ""
 "We were not able to process some of the automated follow-up actions due to "
 "missing information on the partners."
 msgstr ""
+"Bazı otomatik takip işlemleri, partnerlere ait eksik bilgiler nedeniyle "
+"gerçekleştirilemedi."
 
 #. module: account_followup
 #: model:ir.model.fields.selection,name:account_followup.selection__res_partner__followup_status__with_overdue_invoices
@@ -1058,7 +1206,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_followup/models/res_partner.py:0
 msgid "commercial_partner_id"
-msgstr ""
+msgstr "commercial_partner_id"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.view_account_followup_followup_line_form

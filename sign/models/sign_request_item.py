@@ -435,7 +435,10 @@ class SignRequestItem(models.Model):
         """
         self.ensure_one()
         sign_user = self.partner_id.user_ids[:1]
-        if sign_user and signature_type in ['sign_signature', 'sign_initials']:
+        current_user_sign = False
+        if self.env.user._is_public() or sign_user and sign_user == self.env.user:
+            current_user_sign = True
+        if current_user_sign and signature_type in ['sign_signature', 'sign_initials']:
             return sign_user[signature_type]
         return False
 

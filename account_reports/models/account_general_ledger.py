@@ -39,8 +39,15 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
             **default_caret,
             'id_with_accumulated_balance_caret': [
                 {'name': _("View Journal Entry"), 'action': 'caret_option_open_record_form_custom_id_groupby', 'action_param': 'move_id'},
-            ]
+            ],
+            'undistributed_profits_losses': [
+                {'name': _("Journal Items"), 'action': 'open_unallocated_items_journal_items'},
+            ],
         }
+
+    def open_unallocated_items_journal_items(self, options, params):
+        report = self.env['account.report'].browse(options['report_id'])
+        return report.open_unallocated_items_journal_items(options, params)
 
     def caret_option_open_record_form_custom_id_groupby(self, options, params):
         report = self.env['account.report'].browse(options['report_id'])
@@ -102,10 +109,6 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                 'caret_builder': lambda grouping_key: None if 'balance_line' in grouping_key else 'id_with_accumulated_balance_caret',
                 'label_builder': custom_label_builder,
             },
-            'account_or_unaff_id': {
-                'model': 'account.account',
-                'domain_builder': lambda grouping_key: [('account_id', '=', grouping_key)]
-            }
         }
 
     def _report_custom_engine_general_ledger(self, expressions, options, date_scope, current_groupby, next_groupby, offset=0, limit=None, warnings=None):
@@ -115,20 +118,18 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                     return f"balance_line_{row['account_id']}"
                 else:
                     return json.dumps([fields.Date.to_string(row['date']), row['id']])
-            elif groupby == 'account_or_unaff_id':
-                return row['account_id']
             return row[groupby] if groupby else None
 
         report = self.env['account.report'].browse(options['report_id'])
         options_date_from = fields.Date.from_string(options['date']['date_from'])
         current_fiscalyear_date_from = self.env.company.compute_fiscalyear_dates(options_date_from)['date_from']
 
-        # We want to exclude move lines from expense and income accounts before the fiscal year for every groupby under account_or_unaff_id
+        # We want to exclude move lines from expense and income accounts before the fiscal year for every groupby under account_id
         additional_domain = [
             '|',
             ('account_id.include_initial_balance', '=', True),
             ('date', '>=', current_fiscalyear_date_from),
-        ] if any(field == 'account_id' for field, _op, _val in options.get('forced_domain', [])) else []
+        ]
 
         report_query = report._get_report_query(options, 'from_beginning', additional_domain)
 
@@ -175,7 +176,7 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                 account_code_select=account_code_select,
             )
             groupby = [SQL("1"), SQL("2"), SQL("account_id")]
-        elif current_groupby == 'account_or_unaff_id':
+        elif current_groupby == 'account_id':
             additional_select = SQL("""
                 result_account.id AS account_id,
                 result_account.account_type AS account_type,
@@ -198,17 +199,7 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
 
             LEFT JOIN res_partner partner ON partner.id = account_move_line.partner_id
             JOIN account_account account ON account.id = account_move_line.account_id
-            JOIN account_account result_account ON result_account.id = (
-                CASE
-                    WHEN account.account_type ILIKE ANY(ARRAY['income%%', 'expense%%'])
-                        AND account_move_line.date < %(fiscalyear_start)s
-                    THEN (
-                            %(unaffected_earnings_accounts_per_company)s::jsonb
-                            ->>(account_move_line.company_id::text)
-                    )::int
-                    ELSE account_move_line.account_id
-                END
-            )
+            JOIN account_account result_account ON result_account.id = account_move_line.account_id
 
             JOIN account_move move ON move.id = account_move_line.move_id
             %(currency_table_join)s
@@ -223,8 +214,6 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
             LIMIT %(limit)s
             """,
             additional_select=additional_select,
-            fiscalyear_start=current_fiscalyear_date_from,
-            unaffected_earnings_accounts_per_company=json.dumps(self.env['account.report']._get_unaffected_earnings_accounts_per_company(options)),
             select_balance=report._currency_table_apply_rate(SQL("account_move_line.balance")),
             select_debit=report._currency_table_apply_rate(SQL("account_move_line.debit")),
             select_credit=report._currency_table_apply_rate(SQL("account_move_line.credit")),
@@ -273,9 +262,8 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                     if row['currency_id'] != self.env.company.currency_id.id:
                         rows_by_key[aml_key]['amount_currency'] = row['amount_currency']
                         rows_by_key[aml_key]['currency_id'] = row['currency_id']
-                elif current_groupby == 'account_or_unaff_id':
-                    # Unaffected earnings accounts should not be unfoldable
-                    rows_by_key[aml_key]['has_sublines'] = row['account_type'] != 'equity_unaffected'
+                elif current_groupby == 'account_id':
+                    rows_by_key[aml_key]['has_sublines'] = True
                     if row.get('currency_id'):
                         rows_by_key[aml_key]['amount_currency'] = row['amount_currency']
                         rows_by_key[aml_key]['currency_id'] = row['currency_id']
@@ -340,6 +328,17 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
             },
         }
 
+    def _get_fiscalyear_start_date(self, options):
+        options_date_from = fields.Date.to_date(options['date']['date_from'])
+        return self.env.company.compute_fiscalyear_dates(options_date_from)['date_from']
+
+    def _adjust_total_with_unaffected_earnings(self, total_line_columns, unaffected_earning_values):
+        for col in total_line_columns:
+            if col and col['expression_label'] in unaffected_earning_values:
+                col['no_format'] += unaffected_earning_values[col['expression_label']]
+                col['is_zero'] = not bool(col['no_format'])
+        return total_line_columns
+
     def _custom_line_postprocessor(self, report, options, lines):
         """
         This post processor move the total line below the report as it should always be under in the general ledger
@@ -348,10 +347,26 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
         processed_lines = []
         main_line_dict = None
         account_move_lines = []
-        for line in lines:
+        unaffected_earning_values = defaultdict(float)
+
+        # Get the unaffected earning lines if the whole report has been generated
+        # (e.g., not when loading more lines in a group)
+        if report._parse_line_id(lines[0]['id'])[-1] == ('', 'account.report.line', report.line_ids[0].id):
+            unaffected_earning_lines = report._get_unallocated_earnings_lines(options, 'from_beginning')
+        else:
+            unaffected_earning_lines = []
+
+        for line in lines + unaffected_earning_lines:
             markup, model, res_id = report._parse_line_id(line['id'])[-1]
             if model == 'account.report.line' and res_id == general_ledger_custom_engine_line.id:
                 main_line_dict = line
+            elif markup == 'undistributed_profits_losses':
+                for column in line['columns']:
+                    # Swap no_format from 0.0 to None for unaffected lines, to match the other lines
+                    if column['expression_label'] == 'amount_currency' and column['is_zero']:
+                        column['no_format'] = None
+                    elif column['figure_type'] == 'monetary':
+                        unaffected_earning_values[column['expression_label']] += column['no_format']
             else:
                 processed_lines.append(line)
 
@@ -373,13 +388,19 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                 line['chatter']['model'] = 'account.move'
 
         if self.env.company.totals_below_sections and not options.get('ignore_totals_below_sections'):
+            if unaffected_earning_lines:
+                total_line = processed_lines.pop(-1)
+                total_line['columns'] = self._adjust_total_with_unaffected_earnings(total_line['columns'], unaffected_earning_values)
+                processed_lines.extend(unaffected_earning_lines)
+                processed_lines.append(total_line)
             return processed_lines
 
+        processed_lines.extend(unaffected_earning_lines)
         if main_line_dict:
             processed_lines.append({
                 'id': report._get_generic_line_id(None, None, 'total'),
                 'name': _("Total General Ledger"),
-                'columns': main_line_dict['columns'],
+                'columns': self._adjust_total_with_unaffected_earnings(main_line_dict['columns'], unaffected_earning_values),
                 'level': 1
             })
 
@@ -406,8 +427,8 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                 for date_scope, expressions_by_date_scope in groupby(expressions, lambda e: e.date_scope):
                     expressions_by_date_scope = list(expressions_by_date_scope)
                     # Get the custom engine results for the given groupby level.
-                    engine_account_lines = self._report_custom_engine_general_ledger(expressions_by_date_scope, column_group_options, date_scope, 'account_or_unaff_id', 'id_with_accumulated_balance')
-                    account_expression_totals = results.setdefault(f"[{report_line_id}]=>account_or_unaff_id", {})\
+                    engine_account_lines = self._report_custom_engine_general_ledger(expressions_by_date_scope, column_group_options, date_scope, 'account_id', 'id_with_accumulated_balance')
+                    account_expression_totals = results.setdefault(f"[{report_line_id}]=>account_id", {})\
                                                         .setdefault(column_group_key, {expression: {'value': [], 'sublines_info': set()} for expression in expressions_by_date_scope})
                     for account_id, engine_account_result_dict in engine_account_lines:
                         for expression in expressions_by_date_scope:
@@ -424,7 +445,7 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                         aml_data_by_account.setdefault(engine_result_dict['account_id'], []).append(engine_result_dict)
 
                     for account_id, engine_result_list in aml_data_by_account.items():
-                        account_aml_expression_totals = results.setdefault(f"[{report_line_id}]account_or_unaff_id:{account_id}=>id_with_accumulated_balance", {})\
+                        account_aml_expression_totals = results.setdefault(f"[{report_line_id}]account_id:{account_id}=>id_with_accumulated_balance", {})\
                                                             .setdefault(column_group_key, {expression: {'value': [], 'sublines_info': set()} for expression in expressions_by_date_scope})
                         for engine_result_dict in engine_result_list:
                             for expression in expressions_by_date_scope:

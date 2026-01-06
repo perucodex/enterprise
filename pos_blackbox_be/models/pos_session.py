@@ -58,9 +58,9 @@ class PosSession(models.Model):
         for rec in self:
             rec.amount_of_vat_tickets = len(rec.order_ids)
 
-    def set_opening_control(self, cashbox_value: int, notes: str):
+    def _set_opening_control_data(self, cashbox_value: int, notes: str):
         self.env['pos.blackbox.log.ip']._log_ip(self.config_id, None)
-        super().set_opening_control(cashbox_value, notes)
+        super()._set_opening_control_data(cashbox_value, notes)
 
     def increase_cash_box_opening_counter(self):
         self.cash_box_opening_number += 1

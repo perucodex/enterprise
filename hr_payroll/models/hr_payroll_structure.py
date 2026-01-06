@@ -190,7 +190,7 @@ class HrPayrollStructure(models.Model):
         all_rules = rule_ids | dependent_rules
 
         for rule in all_rules:
-            if res_model == 'hr.employee':
+            if res_model in ['hr.employee', 'hr.version']:
                 _add_property_to_definition(version_properties_definition, rule)
             elif res_model == 'hr.payslip':
                 _add_property_to_definition(payslip_properties_definition, rule)
@@ -201,3 +201,18 @@ class HrPayrollStructure(models.Model):
         self.write({
             'version_properties_definition': _sort_definition(version_properties_definition),
         })
+
+    def action_get_structure_inputs(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'view_mode': 'list',
+            'view_id': self.env.ref("hr_payroll.hr_salary_rule_benefit_selector_list", False).id,
+            'res_model': 'hr.salary.rule',
+            'target': 'new',
+            'domain': [
+                ('struct_id', '=', self.id),
+                ('condition_select', '=', 'property_input'),
+                ('input_usage_employee', '=', True),
+                ('dependent_input_id', '=', False),
+            ]
+        }

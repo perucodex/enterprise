@@ -2,6 +2,7 @@ import unicodedata
 
 from odoo import api, fields, models
 from odoo.fields import Domain
+from odoo.tools import escape_psql
 
 from odoo.addons.mail.tools.discuss import Store
 
@@ -106,16 +107,27 @@ class ResPartner(models.Model):
     def get_contacts(self, offset, limit, search_terms, t9_search=False):
         domain = Domain("phone", "!=", False)
         if search_terms:
+            escaped_search_terms = escape_psql(search_terms)
             subdomain = Domain.OR([
-                [("phone", "like", search_terms)],
-                [("complete_name", "ilike", search_terms)],
-                [("email", "ilike", search_terms)],
+                [("complete_name", "ilike", escaped_search_terms)],
+                [("email", "ilike", escaped_search_terms)],
             ])
+            if len(search_terms) >= self._phone_search_min_length:
+                subdomain |= Domain("phone_mobile_search", "like", escaped_search_terms)
             if t9_search:
-                subdomain |= Domain("t9_name", "ilike", f"% {search_terms}%")
-            domain &= subdomain
+                subdomain = Domain.OR([subdomain, [("t9_name", "ilike", f" {escaped_search_terms}")]])
+            domain = Domain.AND([domain, subdomain])
         contacts = self.search(domain, offset=offset, limit=limit)
         return Store().add(contacts, self._voip_get_store_fields()).get_result()
 
     def _voip_get_store_fields(self):
-        return ["commercial_company_name", "country_code_from_phone", "email", "function", "is_company", "name", "phone", "t9_name"]
+        return [
+            "commercial_company_name",
+            "email",
+            "function",
+            "is_company",
+            "name",
+            "phone",
+            Store.One("phone_country_id", self.env["res.country"]._voip_get_store_fields()),
+            "t9_name",
+        ]

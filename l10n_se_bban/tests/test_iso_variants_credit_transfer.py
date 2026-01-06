@@ -96,3 +96,16 @@ class TestSwedishIsoBBANCreditTransfer(TestSwedishIsoCreditTransfer):
             ('mimetype', '=', 'application/zip'),
         ])
         self.assertEqual(batch_attachment, 1)
+
+    def test_10n_se_account_types_computation(self):
+        self.swedish_partner_bank.lock_trust_fields = False
+        self.swedish_partner_bank.acc_number = '1-8'
+        self.assertEqual(self.swedish_partner_bank.acc_type, 'plusgiro')
+        self.swedish_partner_bank.acc_number = '112-3'
+        self.assertEqual(self.swedish_partner_bank.acc_type, 'plusgiro')
+        self.swedish_partner_bank.acc_number = '38201-0'
+        self.assertEqual(self.swedish_partner_bank.acc_type, 'plusgiro')
+        self.swedish_partner_bank.acc_number = '678653833066'
+        self.assertEqual(self.swedish_partner_bank.acc_type, 'bban_se')
+        self.swedish_partner_bank.acc_number = '99603406872188'
+        self.assertEqual(self.swedish_partner_bank.acc_type, 'bban_se')

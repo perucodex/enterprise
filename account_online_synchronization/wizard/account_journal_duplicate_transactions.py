@@ -50,7 +50,7 @@ class AccountDuplicateTransactionWizard(models.TransientModel):
     @api.depends('journal_id', 'date')
     def _compute_provider_duplicate_ids(self):
         for wizard in self:
-            wizard.provider_duplicate_ids = [Command.set(wizard.journal_id._get_provider_duplicate_transactions(wizard.date or fields.Date.today()))]
+            wizard.provider_duplicate_ids = [Command.set(wizard.journal_id._get_provider_duplicate_transactions(wizard.date or fields.Date.today()) if wizard.journal_id else [])]
 
     @api.depends('journal_id')
     def _compute_date(self):

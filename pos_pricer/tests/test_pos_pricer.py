@@ -1,10 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details
 from odoo.addons.product.tests.common import ProductCommon
-from odoo.tests import Form, tagged
+from odoo.tests import Form, tagged, TransactionCase
 
 
 @tagged('post_install', '-at_install')
-class TestPosPricer(ProductCommon):
+class TestPosPricer(ProductCommon, TransactionCase):
 
     def test_pos_pricer_sales_pricelist(self):
         """
@@ -25,3 +25,11 @@ class TestPosPricer(ProductCommon):
         # After saving, on_sale_price should change if lst_price is modified
         ProductForm.lst_price = 100
         self.assertEqual(ProductForm.on_sale_price, 90)
+
+    def test_pricer_display_price_compute(self):
+        """ Ensure the compute method sets a default value to avoid crash. """
+        product_form = Form(self.env['product.product'])
+        product_form.name = "Test Product"
+        product = product_form.save()
+        display_price = product.pricer_display_price
+        self.assertFalse(display_price)

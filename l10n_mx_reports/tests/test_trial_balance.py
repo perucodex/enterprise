@@ -261,6 +261,8 @@ class TestL10nMXTrialBalanceReport(TestL10nMXTrialBalanceReportCommon):
             <catalogocuentas:Ctas CodAgrup="501.01" NumCta="501.01" Desc="Cost of sales" Nivel="2" Natur="D"/>
             <catalogocuentas:Ctas CodAgrup="503" NumCta="503" Desc="Returns, discounts or rebates on purchases" Nivel="1" Natur="A"/>
             <catalogocuentas:Ctas CodAgrup="503.01" NumCta="503.01" Desc="Returns, discounts or rebates on purchases" Nivel="2" Natur="A"/>
+            <catalogocuentas:Ctas CodAgrup="505" NumCta="505" Desc="Cost of fixed assets" Nivel="1" Natur="D"/>
+            <catalogocuentas:Ctas CodAgrup="505.01" NumCta="505.01" Desc="Cost of fixed asset sales" Nivel="2" Natur="D"/>
             <catalogocuentas:Ctas CodAgrup="601" NumCta="601" Desc="Overheads" Nivel="1" Natur="D"/>
             <catalogocuentas:Ctas CodAgrup="601.01" NumCta="601.01" Desc="Wages and salaries" Nivel="2" Natur="D"/>
             <catalogocuentas:Ctas CodAgrup="601.06" NumCta="601.06" Desc="Holidays" Nivel="2" Natur="D"/>
@@ -394,6 +396,8 @@ class TestL10nMXTrialBalanceReport(TestL10nMXTrialBalanceReportCommon):
             <catalogocuentas:Ctas CodAgrup="501.01" NumCta="501.01" Desc="Cost of sales" Nivel="2" Natur="D"/>
             <catalogocuentas:Ctas CodAgrup="503" NumCta="503" Desc="Returns, discounts or rebates on purchases" Nivel="1" Natur="A"/>
             <catalogocuentas:Ctas CodAgrup="503.01" NumCta="503.01" Desc="Returns, discounts or rebates on purchases" Nivel="2" Natur="A"/>
+            <catalogocuentas:Ctas CodAgrup="505" NumCta="505" Desc="Cost of fixed assets" Nivel="1" Natur="D"/>
+            <catalogocuentas:Ctas CodAgrup="505.01" NumCta="505.01" Desc="Cost of fixed asset sales" Nivel="2" Natur="D"/>
             <catalogocuentas:Ctas CodAgrup="601" NumCta="601" Desc="Overheads" Nivel="1" Natur="D"/>
             <catalogocuentas:Ctas CodAgrup="601.01" NumCta="601.01" Desc="Wages and salaries" Nivel="2" Natur="D"/>
             <catalogocuentas:Ctas CodAgrup="601.06" NumCta="601.06" Desc="Holidays" Nivel="2" Natur="D"/>
@@ -499,9 +503,9 @@ class TestL10nMXTrialBalanceReport(TestL10nMXTrialBalanceReportCommon):
                 ('201.01.01 National suppliers',                              1000.0,      75.0,     0.0,    1075.0),
                 ('205.06.01.001 Extra deep code',                                0.0,      50.0,   400.0,    -350.0),
                 ('205.06.03 Dotted name C.V.',                                   0.0,     400.0,    50.0,     350.0),
-                ('305.01.01 Uncut results',                                 -1000.00,      0.00,    0.00,  -1000.00),
                 ('401.01.01 Sales and/or services taxed at the general rate',    0.0,       0.0,   325.0,    -325.0),
                 ('601.84.01 Other overheads',                                    0.0,     250.0,     0.0,     250.0),
+                ('Undistributed Profits/Losses - ESCUELA KEMPER URGATE',    -1000.00,      0.00,    0.00,  -1000.00),
                 ('Total',                                                        0.0,     775.0,   775.0,       0.0),
             ],
             options,
@@ -522,10 +526,6 @@ class TestL10nMXTrialBalanceReport(TestL10nMXTrialBalanceReportCommon):
                 ('205.06 Other short-term sundry creditors',                     0.0,     450.0,   450.0,       0.0),
                 ('205.06.01.001 Extra deep code',                                0.0,      50.0,   400.0,    -350.0),
                 ('205.06.03 Dotted name C.V.',                                   0.0,     400.0,    50.0,     350.0),
-                ("3 Stockholders' equity",                                  -1000.00,      0.00,    0.00,  -1000.00),
-                ('305 Result for the year',                                 -1000.00,      0.00,    0.00,  -1000.00),
-                ('305.01 Profit for the year',                              -1000.00,      0.00,    0.00,  -1000.00),
-                ('305.01.01 Uncut results',                                 -1000.00,      0.00,    0.00,  -1000.00),
                 ('4 Income',                                                     0.0,       0.0,   325.0,    -325.0),
                 ('401 Income',                                                   0.0,       0.0,   325.0,    -325.0),
                 ('401.01 Sales and/or services taxed at the general rate',       0.0,       0.0,   325.0,    -325.0),
@@ -534,6 +534,7 @@ class TestL10nMXTrialBalanceReport(TestL10nMXTrialBalanceReportCommon):
                 ('601 Overheads',                                                0.0,     250.0,     0.0,     250.0),
                 ('601.84 Other overheads',                                       0.0,     250.0,     0.0,     250.0),
                 ('601.84.01 Other overheads',                                    0.0,     250.0,     0.0,     250.0),
+                ('Undistributed Profits/Losses - ESCUELA KEMPER URGATE',    -1000.00,      0.00,    0.00,  -1000.00),
                 ('Total',                                                        0.0,     775.0,   775.0,       0.0),
             ],
             options,

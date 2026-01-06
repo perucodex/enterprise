@@ -31,6 +31,7 @@ import {
     CLASSES,
     SELECTORS,
     clickCell,
+    cssClassPresencePerCellInColumn,
     dragPill,
     editPill,
     focusToday,
@@ -267,7 +268,7 @@ test("select cells to plan a task: 1-level grouped", async () => {
     const { moveTo, drop } = await contains(getCell("11", "December 2018")).drag();
     moveTo(getCell("12", "December 2018"));
     await runAllTimers(); // Pointer move is subjected to throttleForAnimation in gantt
-    drop();
+    await drop();
 
     expect.verifySteps(["[dialog] Create"]);
 });
@@ -311,7 +312,7 @@ test("select cells to plan a task: 2-level grouped", async () => {
     const dragAndDrop2 = await contains(getCell("11", "December 2018", "Project 1")).drag();
     dragAndDrop2.moveTo(getCell("12", "December 2018", "Project 1"));
     await advanceTime(20);
-    dragAndDrop2.drop();
+    await dragAndDrop2.drop();
 
     expect.verifySteps(["[dialog] Create"]);
 });
@@ -2031,6 +2032,92 @@ test("drag&drop on other pill in grouped view", async () => {
                 },
             ],
         },
+    ]);
+});
+
+test("disable drop of pill on groups by readonly field", async () => {
+    // Group "Work Order" by: color > cost (readonly) > employee > size
+    // Pills can be only be dropped in the same "child groups" (employee & size)
+    // or any group above the highest readonly parent (color)
+    await mountGanttView({
+        resModel: "workorders",
+        arch: '<gantt date_start="start" date_stop="stop" />',
+        groupBy: ["color", "cost", "employee", "size"],
+    });
+
+    /*  Structure is the following:
+
+        color (1)
+        └── cost (86)
+            ├── employee (Jordan)
+            │   └── size (198) --> Work Order 1
+            └── employee (Michael)
+                └── size (198) --> Work Order 3
+        color (2)
+        └── cost (420)
+            └── employee (Jordan)
+                └── size (183) --> Work Order 2
+
+        Before drag, all but color rows should have the readonly class.
+    */
+    expect(cssClassPresencePerCellInColumn("o_gantt_readonly", ["16", "December 2018"])).toEqual([
+        false, // "color" is not readonly
+        true, // "cost" is readonly
+        true, // "employee"(Jordan) is not readonly but parent "cost" is
+        true, // "size"(198) is not readonly but parent "cost" is
+        true, // "employee"(Michael) is not readonly but parent "cost" is
+        true, // "size"(198) is not readonly but parent "cost" is
+        false, // "color" is not readonly
+        true, // "cost" is readonly
+        true, // "employee" is not readonly but parent "cost" is
+        true, // "size" is not readonly but parent "cost" is
+    ]);
+
+    const { drop, moveTo } = await dragPill("Work Order 1");
+    await moveTo({ pill: "Work Order 3" });
+    await advanceTime(20); // Pointer move is subjected to throttleForAnimation in gantt
+
+    // // During drag, the user should be able to drop in
+    // //  - the child groups (employee & size), so rows 3 to 6
+    // //  - the group above the highest readonly parent (color), so rows 1 & 7
+    expect(cssClassPresencePerCellInColumn("o_gantt_readonly", ["16", "December 2018"])).toEqual([
+        false,
+        true,
+        false, // part of child group
+        false, // original row of the pill
+        false, // part of child group
+        false, // part of child group
+        false,
+        true,
+        true, // NOT part of the child group so should remain readonly
+        true, // NOT part of the child group so should remain readonly
+    ]);
+
+    await drop({ pill: "Work Order 3" });
+    await advanceTime(20);
+
+    /*  After drop, structure should be the following:
+
+        color (1)
+        └── cost (86)
+            └── employee (Michael)
+                └── size (198) --> Work Order 1 & Work Order 3
+        color (2)
+        └── cost (420)
+            └── employee (Jordan)
+                └── size (183) --> Work Order 2
+
+        Again, all but color rows should have the readonly class
+    */
+    expect(cssClassPresencePerCellInColumn("o_gantt_readonly", ["16", "December 2018"])).toEqual([
+        false,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
     ]);
 });
 

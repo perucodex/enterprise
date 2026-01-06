@@ -5,12 +5,14 @@ from freezegun import freeze_time
 
 from odoo import fields, SUPERUSER_ID
 from odoo.exceptions import UserError
-from datetime import date
+from datetime import date, datetime
+
+from odoo.addons.mail.tests.common import MailCase, mail_new_test_user
 
 from odoo.addons.hr_timesheet.tests.test_timesheet import TestCommonTimesheet
 
 
-class TestTimesheetGridHolidays(TestCommonTimesheet):
+class TestTimesheetGridHolidays(TestCommonTimesheet, MailCase):
 
     @freeze_time('2018-2-6')
     def test_timer_methods_handle_project_access_restrictions(self):
@@ -150,3 +152,64 @@ class TestTimesheetGridHolidays(TestCommonTimesheet):
 
         with self.assertRaises(UserError, msg="the user cannot create a timesheet and start a timer in time off task"):
             timesheet.action_start_new_timesheet_timer(common_vals)
+
+    def test_employee_timesheet_reminder_skips_holidays_and_leaves(self):
+        """
+        Reminder mail should be sent to employees, skipping holidays and approved leaves.
+        steps:
+            - Create User & Employee
+            - Setup Leave Type
+            - Create & Validate Leave
+            - Create Public Holiday
+            - Create Timesheet Entry
+            - Set Next Reminder Date
+            - Run Cron & Assert Emails
+        """
+        user_hruser = mail_new_test_user(self.env, login='armande1', groups='base.group_user,hr_holidays.group_hr_holidays_user')
+        user_hruser.action_create_employee()
+
+        Requests = self.env['hr.leave'].with_context(mail_create_nolog=True, mail_notrack=True)
+        hr_leave_type = self.env['hr.leave.type'].create({
+            'name': 'Leave Type with timesheet generation',
+            'requires_allocation': False,
+        })
+
+        time_off = Requests.with_user(user_hruser).create({
+            'name': 'Test Time Off',
+            'employee_id': user_hruser.employee_id.id,
+            'holiday_status_id': hr_leave_type.id,
+            'request_date_from': '2022-01-31',
+            'request_date_to': '2022-01-31',
+        })
+        time_off.with_user(SUPERUSER_ID).action_approve()
+
+        self.env['resource.calendar.leaves'].create({
+            'name': 'New Public Holiday',
+            'calendar_id': user_hruser.employee_id.resource_calendar_id.id,
+            'date_from': '2022-02-01 00:00:00',
+            'date_to': '2022-02-01 23:59:00',
+        })
+
+        timesheet_date = datetime(2022, 2, 4, 8, 8, 15)
+        timesheet_vals = {
+            'name': "My Timesheet",
+            'project_id': self.project_customer.id,
+            'task_id': self.task2.id,
+            'date': '2022-02-03',
+            'unit_amount': 8.0,
+        }
+        self.env['account.analytic.line'].with_user(self.user_employee).create(timesheet_vals)
+
+        self.user_employee.company_id.timesheet_mail_employee_nextdate = timesheet_date
+
+        with freeze_time(timesheet_date), self.mock_mail_gateway():
+            self.env['res.company']._cron_timesheet_reminder_employee()
+
+            self.assertEqual(
+                len(self._new_mails.filtered(lambda x: x.res_id == self.user_employee.employee_id.id)),
+                1, "An email should be sent to 'User Empl Officer'"
+            )
+            self.assertEqual(
+                len(self._new_mails.filtered(lambda x: x.res_id == user_hruser.employee_id.id)),
+                0, "No email should be sent to 'HR User Empl Officer'"
+            )

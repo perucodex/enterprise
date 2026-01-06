@@ -64,6 +64,8 @@ class SaleOrder(models.Model):
         self.ensure_one()
         if not self.has_rented_products:
             return True
+        if not (self.rental_start_date and self.rental_return_date):
+            return False
         days_forbidden = self.company_id._get_renting_forbidden_days()
         converted_rental_start_date = self.convert_to_website_tz(self.rental_start_date)
         converted_rental_return_date = self.convert_to_website_tz(self.rental_return_date)
@@ -138,6 +140,8 @@ class SaleOrder(models.Model):
         :param ProductProduct product: The product concerned by the warning
         """
         self.ensure_one()
+        if not (self.rental_start_date and self.rental_return_date):
+            return self.env._("No dates were specified on your rental order.")
         company = self.company_id
         days_forbidden = company._get_renting_forbidden_days()
         pickup_forbidden = self.rental_start_date.isoweekday() in days_forbidden

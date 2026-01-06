@@ -14,11 +14,6 @@ class TestL10nEsAccountReportTrialBalance(TestAccountReportsCommon):
         cls.expense_account = cls.company_data['default_account_expense']
         cls.rec_account = cls.company_data['default_account_receivable']
 
-        cls.undistributed_pl_account_name = cls.env['account.account'].search([
-            *cls.env['account.account']._check_company_domain(cls.company_data['company'].id),
-            ('account_type', '=', 'equity_unaffected'),
-        ]).display_name
-
     def test_l10n_es_trial_balance_with_period_total(self):
         """
             Test the variant of the trial balance which has a "Period Total" column
@@ -67,14 +62,14 @@ class TestL10nEsAccountReportTrialBalance(TestAccountReportsCommon):
 
         self.assertLinesValues(
             self.report._get_lines(options),
-            #                                          [  Initial  ]  [                2023             ]    [ End Balance ]
-            #    Name                                    Balance       Debit       Credit    Period Total       Balance
-            [0,                                           1,            2,          3,            4,               5],
+            #                                                       [  Initial  ]  [                2023             ]    [ End Balance ]
+            #    Name                                                 Balance       Debit       Credit    Period Total       Balance
+            [0,                                                        1,            2,          3,            4,               5],
             [
-                (self.undistributed_pl_account_name,   500.0,          0.0,        0.0,           0.0,          500.0),
-                (self.rec_account.display_name,       -500.0,          0.0,     1000.0,       -1000.0,        -1500.0),
-                (self.expense_account.display_name,      0.0,       1000.0,        0.0,        1000.0,         1000.0),
-                ('Total',                                0.0,       1000.0,     1000.0,           0.0,            0.0),
+                (self.rec_account.display_name,                        -500.0,          0.0,     1000.0,       -1000.0,        -1500.0),
+                (self.expense_account.display_name,                       0.0,       1000.0,        0.0,        1000.0,         1000.0),
+                ('Undistributed Profits/Losses - company_1_data',       500.0,          0.0,        0.0,           0.0,          500.0),
+                ('Total',                                                 0.0,       1000.0,     1000.0,           0.0,            0.0),
             ],
             options,
         )

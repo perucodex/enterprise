@@ -9,6 +9,7 @@ const activityPatch = {
     setup() {
         super.setup();
         this.partner = fields.One("res.partner");
+        this.phone_country_id = fields.One("res.country");
     },
 };
 patch(Activity.prototype, activityPatch);

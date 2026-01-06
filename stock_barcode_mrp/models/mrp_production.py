@@ -130,8 +130,8 @@ class MrpProduction(models.Model):
             if parsed_results:
                 # filter with the last feasible rule
                 for result in parsed_results[::-1]:
-                    if result['rule'].type in ('product', 'package'):
-                        barcode_type = result['rule'].type
+                    if result['type'] in ('product', 'package'):
+                        barcode_type = result['type']
                         break
 
         base_domain = [

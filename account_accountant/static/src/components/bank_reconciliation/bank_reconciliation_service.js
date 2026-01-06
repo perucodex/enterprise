@@ -1,4 +1,5 @@
 import { EventBus, reactive, useState } from "@odoo/owl";
+import { browser } from "@web/core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 
@@ -13,7 +14,10 @@ export class BankReconciliationService {
         this.orm = services["orm"];
 
         this.chatterState = reactive({
-            visible: false,
+            visible:
+                JSON.parse(
+                    browser.sessionStorage.getItem("isBankReconciliationWidgetChatterOpened")
+                ) ?? false,
             statementLine: null,
         });
         this.reconcileCountPerPartnerId = reactive({});
@@ -22,6 +26,10 @@ export class BankReconciliationService {
 
     toggleChatter() {
         this.chatterState.visible = !this.chatterState.visible;
+        browser.sessionStorage.setItem(
+            "isBankReconciliationWidgetChatterOpened",
+            this.chatterState.visible
+        );
     }
 
     /**
@@ -110,6 +118,10 @@ export class BankReconciliationService {
 
     get statementLine() {
         return this.chatterState.statementLine;
+    }
+
+    get statementLineId() {
+        return this.statementLine?.data?.id;
     }
 }
 

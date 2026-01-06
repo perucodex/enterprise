@@ -21,6 +21,7 @@ import {
     makeDocumentRecordData,
 } from "@documents/../tests/helpers/data";
 import { makeDocumentsMockEnv } from "@documents/../tests/helpers/model";
+import { basicDocumentsOperationFormArch } from "@documents/../tests/helpers/views/form";
 import { basicDocumentsKanbanArch } from "@documents/../tests/helpers/views/kanban";
 import { getEnrichedSearchArch } from "@documents/../tests/helpers/views/search";
 
@@ -39,37 +40,51 @@ defineActions([
 DocumentsModels.DocumentsDocument._views = {
     kanban: basicDocumentsKanbanArch,
     [["search", false]]: getEnrichedSearchArch(),
-};
-DocumentsModels.DocumentsOperation._views = {
     form: `<form>
-        <field name="display_name" invisible="1" force_save="1"/>
-        <field name="user_permission" invisible="1" force_save="1"/>
-        <field name="access_internal" invisible="1" force_save="1"/>
-        <field name="access_via_link" invisible="1" force_save="1"/>
-        <field name="is_access_via_link_hidden" invisible="1" force_save="1"/>
-        <field name="operation" readonly="1" invisible="1"/>
-        <field name="attachment_id" invisible="1" force_save="1"/>
+        <field name="type" invisible="1" force_save="1"/>
+        <field name="active" string="Active" invisible="1"/>
         <sheet>
-            <field
-                name="destination"
-                widget="documents_user_folder_id_char"
-                options="{
-                    'extraUpdateFields': [
-                        'display_name', 'user_permission', 'access_internal', 'access_via_link', 
-                        'is_access_via_link_hidden',
-                    ],
-                    'ulClass': 'o_documents_operation_search_panel',
-                }"
-            />
+            <div class="oe_title">
+                <label for="name"/>
+                <h1><field name="name" required="True"/></h1>
+            </div>
         </sheet>
-        <footer>
-            <widget name="documents_operation_confirmation"/>
-            <widget name="documents_operation_new_folder"/>
-            <button string="Discard" special="cancel" class="btn-secondary"/>
-        </footer>
     </form>`,
 };
+DocumentsModels.DocumentsOperation._views = { form: basicDocumentsOperationFormArch };
 onRpc("/documents/touch/accessTokenRequest", () => ({}));
+onRpc("/documents/touch/accessTokenDuplicateTestDoc", () => ({}));
+onRpc("action_confirm", () => ({}));
+
+test("Duplicate a document in a Newly made folder", async function () {
+    const serverData = getDocumentsTestServerModelsData([
+        makeDocumentRecordData(2, "Duplicate Test Doc", { owner_id: serverState.userId }),
+    ]);
+    await makeDocumentsMockEnv({ serverData });
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+
+    await contains(".o_kanban_record:contains('Duplicate Test Doc') .o_record_selector").click();
+    await contains(".o_dropdown_title").click();
+    await contains(".o-dropdown-item .fa-copy").click();
+    await animationFrame();
+
+    expect(".btn-primary:contains('Duplicate in My Drive')").toHaveCount(1);
+    expect(".btn-secondary:contains('Create a folder in My Drive')").toHaveCount(1);
+
+    await contains(".o_widget_documents_operation_new_folder .btn-secondary").click();
+    await contains(".o_input").edit("New Folder");
+    await contains(".o_form_button_save").click();
+    await animationFrame();
+
+    expect(".btn-primary:contains('Duplicate in New Folder')").toHaveCount(1);
+    expect(".btn-secondary:contains('Create a folder in New Folder')").toHaveCount(1);
+
+    await contains(".o_widget_documents_operation_confirmation .btn-primary").click();
+
+    await waitFor(".o_notification");
+    expect(".o_notification_content").toHaveText("Done. Document created in New Folder!");
+});
 
 test('Internal users can always move to "My Drive"', async function () {
     const serverData = getDocumentsTestServerModelsData([

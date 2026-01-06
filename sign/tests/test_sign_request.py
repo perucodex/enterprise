@@ -272,6 +272,14 @@ class TestSignRequest(SignRequestCommon, MockEmail):
         with self.assertRaises(ValidationError, msg='All signers must have valid email addresses'):
             self.partner_1.write({'email': 'laurie.poiret.b'})
 
+        # change the email address to upper case (LAURIE.POIRET.A@example.com)
+        self.partner_1.write({'email': 'LAURIE.POIRET.A@example.com'})
+        self.assertEqual(request_item.signer_email, "laurie.poiret.a@example.com", 'email address should not be changed as is the same email')
+        self.assertFalse(
+            sign_request.sign_log_ids.filtered(lambda log: log.action == 'update_mail' and log.sign_request_item_id == request_item),
+            'No log with action="update_mail" should be created after changing the email to upper case'
+        )
+
         # change the email address of the signer (laurie.poiret.b@example.com)
         self.partner_1.write({'email': 'laurie.poiret.b@example.com'})
         token_b = request_item.access_token

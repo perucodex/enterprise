@@ -15,7 +15,7 @@ export class Registerer {
      *
      * The value is expressed in seconds.
      */
-    static EXPIRATION_INTERVAL = 3600;
+    static EXPIRATION_INTERVAL = 600;
     /**
      * Possible values:
      * - SIP.RegistererState.Initial
@@ -37,6 +37,16 @@ export class Registerer {
             expires: Registerer.EXPIRATION_INTERVAL,
         });
         this.__sipJsRegisterer.stateChange.addListener((state) => this._onStateChanged(state));
+        window.addEventListener("beforeunload", () => {
+            voip.isUnloading = true;
+            this.__sipJsRegisterer.unregister();
+            setTimeout(() => {
+                // if this runs, the unload has most likely been canceled;
+                // reestablish the connection
+                voip.isUnloading = false;
+                voip.env.services["voip.user_agent"].attemptReconnection();
+            }, 7_500);
+        });
     }
 
     /**

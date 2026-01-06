@@ -6,6 +6,7 @@ from itertools import product
 from dateutil.relativedelta import relativedelta
 
 from odoo import fields
+from odoo.exceptions import ValidationError
 from odoo.fields import Command
 from odoo.tests import Form, HttpCase, TransactionCase, tagged
 
@@ -358,6 +359,56 @@ class TestRentalCommon(TransactionCase):
             pricelist=pricelist_A.id
         )._get_contextual_price()
         self.assertEqual(price, 7, "Contextual price should take pickup and return date into account")
+
+    def test_return_quantity_always_compliant(self):
+        """
+        Try to return more products than what has been picked up.
+        """
+        now = fields.Date.today()
+        one_day_later = now + relativedelta(days=1)
+
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.env['res.partner'].create({'name': 'A partner'}).id,
+            'rental_start_date': now,
+            'rental_return_date': one_day_later,
+        })
+
+        sol = self.env['sale.order.line'].create({
+            'product_id': self.product_id.id,
+            'product_uom_qty': 5,
+            'price_unit': 10,
+            'order_id': sale_order.id,
+            'reservation_begin': now,
+        })
+        sol.update({'is_rental': True})
+
+        # Pickup
+        sale_order.action_confirm()
+        action_dict = sale_order.action_open_pickup()
+        pickup_wizard = self.env['rental.order.wizard'].with_context(
+            action_dict['context']
+        ).create({})
+        pickup_wizard._get_wizard_lines()
+        pickup_wizard.apply()
+
+        # Return
+        action_dict = sale_order.action_open_return()
+        return_wizard = self.env['rental.order.wizard'].with_context(
+            action_dict['context']
+        ).create({})
+        return_wizard._get_wizard_lines()
+        return_wizard.rental_wizard_line_ids.qty_returned = 4
+        return_wizard.apply()
+
+        with self.assertRaises(ValidationError):
+            # Try to return more than picked-up (4 + 4 > 5)
+            action_dict = sale_order.action_open_return()
+            return_wizard = self.env['rental.order.wizard'].with_context(
+                action_dict['context']
+            ).create({})
+            return_wizard._get_wizard_lines()
+            return_wizard.rental_wizard_line_ids.qty_returned = 4
+            return_wizard.apply()
 
     def test_discount_on_sol_remains(self):
         now = fields.Date.today()

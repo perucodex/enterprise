@@ -165,7 +165,12 @@
                         <img t-if="sign.signature" class="mobile-hide" t-attf-src="data:image/png;base64,{{sign.signature}}" alt="Signature"/>
                         <div class="o_sign_signer_status_info flex-column ps-4">
                             <div class="text-start"><b><t t-esc="sign.partner_id.name if sign.partner_id else 'Public user'"/></b></div>
-                            <div class="text-start"><small><i> Signed on <t t-esc="sign.signing_date"/></i></small></div>
+                            <t t-if="sign.create_uid.partner_id == sign.partner_id">
+                                <div class="text-start"><small><i> Signed on <t t-esc="sign.signing_date"/></i></small></div>
+                            </t>
+                            <t t-else="">
+                                <div class="text-start"><small><i> On <t t-esc="sign.signing_date"/> via <t t-esc="sign.create_uid.partner_id.name"/></i></small></div>
+                            </t>
                         </div>
                     </div>
                 </t>

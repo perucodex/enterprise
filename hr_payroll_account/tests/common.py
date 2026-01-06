@@ -177,6 +177,13 @@ class TestPayslipValidationCommon(AccountTestInvoicingCommon):
         self.assertEqual(len(error), 0, '\n\n' + '\n'.join(error))
 
     def _validate_worked_days(self, payslip, results, skip_lines=False):
+        """
+        Validate the worked days lines of a payslip.
+        :param payslip: The payslip
+        :param results: A dict of {work_entry_code: (number_of_days, number_of_hours, amount)}
+        :param skip_lines: If True, we don't check that all lines are present in the payslip
+        :return:
+        """
         error = []
         line_values = payslip._get_worked_days_line_values(set(results.keys()) | set(payslip.worked_days_line_ids.mapped('code')), ['number_of_days', 'number_of_hours', 'amount'])
         for code, (number_of_days, number_of_hours, amount) in results.items():

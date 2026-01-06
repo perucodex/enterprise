@@ -8,6 +8,11 @@ class LibroGiornaleReportHandler(models.AbstractModel):
     _inherit = 'account.journal.report.handler'
     _description = 'Libro Giornale Report Handler'
 
+    def _custom_options_initializer(self, report, options, previous_options):
+        super()._custom_options_initializer(report, options, previous_options=previous_options)
+        if self.env.ref('l10n_it_reports.libro_giornale_pdf', raise_if_not_found=False):
+            options['custom_display_config']['pdf_export']['pdf_export_main'] = 'l10n_it_reports.libro_giornale_pdf'
+
     def _get_base_line(self, report, options, export_type, document, line_entry, line_index, even, has_taxes):
         """Modify base line data for the report"""
 

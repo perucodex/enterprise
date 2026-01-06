@@ -134,7 +134,7 @@ class ResCompany(models.Model):
         caf_file_template = caf_file_template. \
             replace('76201224-3', self.vat). \
             replace('Blanco Martin Asociados EIRL', self.name). \
-            replace('<D>001</D><H>100</H>', '<D>1</D><H>999999</H>'). \
+            replace('<D>001</D><H>100</H>', '<D>1</D><H>499999</H>'). \
             replace('<IDK>100</IDK>', '<IDK>999999</IDK>'). \
             replace('2019-10-22', today_string_date)
         if not enabled_dte_documents:
@@ -147,12 +147,17 @@ class ResCompany(models.Model):
             if dte_caf.code in existing_caf_files:
                 continue
             caf_file = caf_file_template.replace('<TD></TD>', '<TD>%s</TD>' % dte_caf.code)
-            self.env['l10n_cl.dte.caf'].sudo().create({
-                'filename': ('FoliosSII%s%s%sDEMO.xml' % (self.vat, today_string_date, dte_caf.code)).replace('-', ''),
+            caf_id = self.env['l10n_cl.dte.caf'].sudo().create({
+                'filename': ('FoliosSII%s%s%sDEMO1.xml' % (self.vat, today_string_date, dte_caf.code)).replace('-', ''),
                 'caf_file': base64.b64encode(caf_file.encode('utf-8')),
                 'l10n_latam_document_type_id': dte_caf.id,
                 'status': 'in_use',
                 'company_id': self.id,
+            })
+            caf_file = caf_file.replace('<D>1</D><H>499999</H>', '<D>500000</D><H>999999</H>')
+            caf_id.copy({
+                'filename': ('FoliosSII%s%s%sDEMO2.xml' % (self.vat, today_string_date, dte_caf.code)).replace('-', ''),
+                'caf_file': base64.b64encode(caf_file.encode('utf-8')),
             })
 
     def _get_digital_signature(self, user_id=None):

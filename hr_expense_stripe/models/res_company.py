@@ -160,6 +160,8 @@ class ResCompany(models.Model):
         for company in self:
             ChartTemplate = self.env['account.chart.template'].with_company(company)
             journal = ChartTemplate.ref('stripe_issuing_journal', raise_if_not_found=False)
+            if not company.stripe_currency_id:
+                continue
             if not journal:
                 self.env['account.journal'].with_company(company)._load_records([
                     {

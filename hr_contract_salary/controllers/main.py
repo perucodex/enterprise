@@ -487,6 +487,8 @@ class HrContractSalary(http.Controller):
             'contract_date_end': offer.contract_end_date,
             'contract_type_id': version_vals.get('contract_type_id'),
             'originated_offer_id': offer.id,
+            'address_id': employee.address_id.id,
+            'work_location_id': employee.work_location_id.id,
         }
         if 'work_entry_source' in version_vals:
             new_version_vals['work_entry_source'] = version_vals.get('work_entry_source')
@@ -589,6 +591,8 @@ class HrContractSalary(http.Controller):
                 ('acc_number', '=', bank_account_vals['acc_number'])], limit=1)
             if existing_bank_account:
                 bank_account = existing_bank_account
+                if bank_account_vals.get('acc_holder_name'):
+                    bank_account.acc_holder_name = bank_account_vals['acc_holder_name']
             else:
                 bank_account = request.env['res.partner.bank'].sudo().create(bank_account_vals)
 

@@ -11,6 +11,6 @@ patch(OrderPaymentValidation.prototype, {
                 // do nothing with the error
             }
         }
-        await super.finalizeValidation(...arguments);
+        return await super.finalizeValidation(...arguments);
     },
 });

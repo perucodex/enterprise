@@ -50,20 +50,6 @@
                                                         placeholder="e.g. john.smith@example.com"/>
                                                 </div>
                                             </div>
-                                            <t t-if="appointment_type.allow_guests">
-                                                <div class="row mb-4 mt-1">
-                                                    <label class="col-sm-3 col-form-label fw-normal">Guests</label>
-                                                    <div class="o_appointment_add_guests col-sm-9">
-                                                        <button type="button" class="o_appointment_input_guest_add btn btn-link ps-0"><i class="oi oi-plus me-1"/> Add Guests</button>
-                                                        <textarea type="email" id="o_appointment_input_guest_emails" class="form-control s_website_form_input d-none" name="guest_emails_str" placeholder="e.g. john.doe@email.com &#13;&#10;e.g. jane.doe@example.com&#13;&#10;..." rows="5"/>
-                                                        <button type="button" class="o_appointment_input_guest_cancel btn btn-link d-none ps-0">Cancel</button>
-                                                        <div class="o_appointment_validation_error alert alert-danger d-none mt-2">
-                                                            <i class="fa fa-warning me-1"/>
-                                                            <span class="o_appointment_error_text"></span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </t>
                                             <t t-foreach="appointment_type.question_ids" t-as="question">
                                                 <div class="row mb-4" t-if="question.question_type!='text'">
                                                     <label class="col-sm-3 col-form-label fw-normal" t-attf-for="question_#{question.id}" t-out="' '.join([question.name, '*' if question.question_required else ''])"/>
@@ -126,6 +112,20 @@
                                                         t-att-required="question.question_required or None"
                                                         t-attf-name="question_#{question.id}"
                                                         t-att-placeholder="question.placeholder"/>
+                                                </div>
+                                            </t>
+                                            <t t-if="appointment_type.allow_guests">
+                                                <div class="row mb-4 mt-1">
+                                                    <label class="col-sm-3 col-form-label fw-normal">Guests</label>
+                                                    <div class="o_appointment_add_guests col-sm-9">
+                                                        <button type="button" class="o_appointment_input_guest_add btn btn-link ps-0"><i class="oi oi-plus me-1"/> Add Guests</button>
+                                                        <textarea type="email" id="o_appointment_input_guest_emails" class="form-control s_website_form_input d-none" name="guest_emails_str" placeholder="e.g. john.doe@email.com &#13;&#10;e.g. jane.doe@example.com&#13;&#10;..." rows="5"/>
+                                                        <button type="button" class="o_appointment_input_guest_cancel btn btn-link d-none ps-0">Cancel</button>
+                                                        <div class="o_appointment_validation_error alert alert-danger d-none mt-2">
+                                                            <i class="fa fa-warning me-1"/>
+                                                            <span class="o_appointment_error_text"></span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </t>
                                             <div class="my-3 pt-3">

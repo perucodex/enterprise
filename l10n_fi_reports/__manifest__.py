@@ -18,6 +18,7 @@ Accounting reports for Finland
         'data/account_report_ec_sales_list_report.xml',
         'data/tax_report.xml',
         'report/tax_report_export.xml',
+        'report/ec_sales_list_report_export.xml',
     ],
     'auto_install': ['l10n_fi', 'account_reports'],
     'installable': True,

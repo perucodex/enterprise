@@ -7,34 +7,14 @@ from odoo.fields import Date
 from freezegun import freeze_time
 
 PAY_SCHEDULES = {
-    'quarterly': {
-        'date_from': Date.to_date('2023-04-01'),
-        'date_to': Date.to_date('2023-06-30'),
-    },
-    'semi-annually': {
-        'date_from': Date.to_date('2023-01-01'),
-        'date_to': Date.to_date('2023-06-30'),
-    },
-    'annually': {
-        'date_from': Date.to_date('2023-01-01'),
-        'date_to': Date.to_date('2023-12-31'),
-    },
-    'weekly': {
-        'date_from': Date.to_date('2023-04-10'),
-        'date_to': Date.to_date('2023-04-16'),
-    },
-    'bi-weekly': {
-        'date_from': Date.to_date('2023-04-10'),
-        'date_to': Date.to_date('2023-04-23'),
-    },
-    'bi-monthly': {
-        'date_from': Date.to_date('2023-03-01'),
-        'date_to': Date.to_date('2023-04-30'),
-    },
-    'daily': {
-        'date_from': Date.to_date('2023-04-12'),
-        'date_to': Date.to_date('2023-04-12'),
-    }
+    'monthly': 30,
+    'quarterly': 89,
+    'semi-annually': 180,
+    'annually': 364,
+    'weekly': 6,
+    'bi-weekly': 13,
+    'bi-monthly': 58,
+    'daily': 0,
 }
 
 class TestScheduleRelativePayslip(TransactionCase):
@@ -81,15 +61,18 @@ class TestScheduleRelativePayslip(TransactionCase):
             self.assertEqual(payslip.date_to, Date.to_date('2023-01-31'))
 
     def test_payslip_adapting_to_schedule(self):
-        with freeze_time('2023-04-12'):
+        with freeze_time('2023-01-12'):
+            # Test default monthly payslip
             payslip_monthly = self.env['hr.payslip'].new({
                 'name': 'Black Spot',
                 'employee_id': self.billy_emp.id,
             })
-            self.assertEqual(payslip_monthly.date_from, Date.to_date('2023-04-01'), "date_from for the monthly payslip should be 2023-04-01")
-            self.assertEqual(payslip_monthly.date_to, Date.to_date('2023-04-30'), "date_to for the monthly payslip should be 2023-04-30")
+            self.assertEqual(payslip_monthly.date_from, Date.to_date('2023-01-01'), "date_from for the monthly payslip should be the first of the current month (2023-01-01)")
+            monthly_delta = (payslip_monthly.date_to - payslip_monthly.date_from).days
+            self.assertEqual(monthly_delta, PAY_SCHEDULES['monthly'], f"Delta for monthly payslip should be {PAY_SCHEDULES['monthly']} days")
 
-            for pay_schedule, dates in PAY_SCHEDULES.items():
+            # Test other pay schedules
+            for pay_schedule, expected_delta in PAY_SCHEDULES.items():
                 self.billy_contract.write({
                     'schedule_pay': pay_schedule,
                 })
@@ -97,8 +80,8 @@ class TestScheduleRelativePayslip(TransactionCase):
                     'name': 'Black Spot',
                     'employee_id': self.billy_emp.id,
                 })
-                self.assertEqual(payslip.date_from, dates['date_from'], "date_from for the %s payslip should be %s" % (pay_schedule, dates['date_from']))
-                self.assertEqual(payslip.date_to, dates['date_to'], "date_to for the %s payslip should be %s" % (pay_schedule, dates['date_to']))
+                self.assertEqual(payslip.date_from, Date.to_date('2023-01-01'), f"date_from for {pay_schedule} payslip should be the first of the current month (2023-04-01)")
+                self.assertEqual((payslip.date_to - payslip.date_from).days, expected_delta, f"Delta for {pay_schedule} payslip should be {expected_delta} days")
 
     def test_payslip_warnings(self):
         with freeze_time('2023-04-12'):

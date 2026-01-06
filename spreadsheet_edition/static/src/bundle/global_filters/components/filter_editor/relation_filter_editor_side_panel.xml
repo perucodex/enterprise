@@ -20,41 +20,43 @@
                     />
                 </div>
             </div>
-            <div class="o-section" t-if="store.filter.modelName">
-                <div class="o-section-title">Default value</div>
-                <div class="pivot_filter_input" t-if="store.filter.defaultValue?.ids !== 'current_user'">
-                    <MultiRecordSelector
-                        resModel="store.filter.modelName"
-                        resIds="store.filter.defaultValue?.ids ?? []"
-                        t-key="store.filter.modelName"
-                        placeholder="''"
-                        domain="store.evaluatedDomain"
-                        update.bind="onValuesSelected"
-                    />
+            <t t-if="store.filter.modelName and store.filter.modelName !== store.relationModelLabel">
+                <div class="o-section">
+                    <div class="o-section-title">Default value</div>
+                    <div class="pivot_filter_input" t-if="store.filter.defaultValue?.ids !== 'current_user'">
+                        <MultiRecordSelector
+                            resModel="store.filter.modelName"
+                            resIds="store.filter.defaultValue?.ids ?? []"
+                            t-key="store.filter.modelName"
+                            placeholder="''"
+                            domain="store.evaluatedDomain"
+                            update.bind="onValuesSelected"
+                        />
+                    </div>
+                    <div t-if="store.isResUserRelation" class="o-checkbox mt-2">
+                        <Checkbox
+                            name="'user_automatic_filter'"
+                            label.translate="Automatically filter on the current user"
+                            value="store.filter.defaultValue?.ids === 'current_user'"
+                            onChange.bind="toggleDefaultsToCurrentUser"
+                        />
+                    </div>
                 </div>
-                <div t-if="store.isResUserRelation" class="o-checkbox mt-2">
+                <Section title.translate="Possible values">
                     <Checkbox
-                        name="'user_automatic_filter'"
-                        label.translate="Automatically filter on the current user"
-                        value="store.filter.defaultValue?.ids === 'current_user'"
-                        onChange.bind="toggleDefaultsToCurrentUser"
+                        className="'mb-1'"
+                        label.translate="Restrict values with a domain"
+                        onChange.bind="toggleDomainRestriction"
+                        value="state.domainRestriction"
                     />
-                </div>
-            </div>
-            <Section t-if="store.filter.modelName" title.translate="Possible values">
-                <Checkbox
-                    className="'mb-1'"
-                    label.translate="Restrict values with a domain"
-                    onChange.bind="toggleDomainRestriction"
-                    value="state.domainRestriction"
-                />
-                <SidePanelDomain
-                    t-if="state.domainRestriction"
-                    resModel="store.filter.modelName"
-                    domain="store.filter.domainOfAllowedValues or '[]'"
-                    onUpdate.bind="onDomainUpdate"
-                />
-            </Section>
+                    <SidePanelDomain
+                        t-if="state.domainRestriction"
+                        resModel="store.filter.modelName"
+                        domain="store.filter.domainOfAllowedValues or '[]'"
+                        onUpdate.bind="onDomainUpdate"
+                    />
+                </Section>
+            </t>
             <t t-if="store.shouldDisplayFieldMatching">
                 <SidePanelCollapsible isInitiallyCollapsed="!store.isNew" title.translate="Field matching">
                     <t t-set-slot="content">
@@ -69,9 +71,9 @@
                 </SidePanelCollapsible>
             </t>
         </t>
-        <t t-else="1">
+        <Section t-else="1">
             <ValidationMessages messages="[invalidModel]" msgType="'error'"/>
-        </t>
+        </Section>
         <GlobalFilterFooter t-props="footerProps"/>
     </div>
 </templates>

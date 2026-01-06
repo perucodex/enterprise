@@ -191,6 +191,8 @@ class HrLeave(models.Model):
 
         # For employees with contracts
         for contract in employee_contracts:
+            if not contract.resource_calendar_id:
+                continue
             tmp_date_from = max(
                 start,
                 datetime.combine(contract.date_start, time.min))

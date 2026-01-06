@@ -1,7 +1,9 @@
-from odoo import fields
+from odoo import fields, Command
 from odoo.tests import tagged
 
 from odoo.addons.account_reports.tests.common import TestAccountReportsCommon
+
+from freezegun import freeze_time
 
 
 @tagged("post_install", "post_install_l10n", "-at_install")
@@ -196,4 +198,87 @@ class TestPeSales(TestAccountReportsCommon):
 """[
                 1:
             ],
+        )
+
+    @freeze_time('2022-08-01')
+    def test_sale_report_14_4_credit_note(self):
+        """
+        Test the behavior of credit note for the txt export of report 14.4
+        - If the credit note cancels a move within the current period:
+         the amount is reported on col 15/17 (base_igv/tax_igv)
+        - If the credit note cancels a move from a previous period:
+         the amount is reported on col 16/18 (amount_discount/tax_igv_discount)
+        """
+        report = self.env.ref("l10n_pe_reports.tax_report_ple_sales_14_1")
+        options = self._generate_options(
+            report, fields.Date.from_string("2022-08-01"), fields.Date.from_string("2022-08-31")
+        )
+        invoice_current = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'date': '2022-08-01',
+            'l10n_latam_document_type_id': self.env.ref("l10n_pe.document_type01").id,
+            'line_ids': [
+                Command.create({
+                    'name': 'Test',
+                    'quantity': 1.0,
+                    'price_unit': 100.0,
+                    'tax_ids': [self.tax_sale_a.id],
+                })],
+        })
+        invoice_current.action_post()
+        invoice_current.write({"edi_state": "sent"})
+
+        reversal_wizard = ((self.env['account.move.reversal']
+            .with_context(active_model='account.move', active_ids=invoice_current.id))
+            .create({'reason': 'test', 'date': '2022-08-01', 'journal_id': invoice_current.journal_id.id}))
+        reversal_id = reversal_wizard.refund_moves()
+        credit_note = self.env['account.move'].browse(reversal_id['res_id'])
+        credit_note.action_post()
+        credit_note.write({"edi_state": "sent"})
+
+        invoice_previous = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'date': '2022-07-01',
+            'invoice_date': '2022-07-01',
+            'l10n_latam_document_type_id': self.env.ref("l10n_pe.document_type01").id,
+            'line_ids': [
+                Command.create({
+                    'name': 'Test',
+                    'quantity': 1.0,
+                    'price_unit': 10.0,
+                    'tax_ids': [self.tax_sale_a.id],
+                })],
+        })
+        invoice_previous.action_post()
+        invoice_previous.write({"edi_state": "sent"})
+
+        reversal_wizard = ((self.env['account.move.reversal']
+            .with_context(active_model='account.move', active_ids=invoice_previous.id))
+            .create({'reason': 'test', 'date': '2022-08-01', 'journal_id': invoice_previous.journal_id.id}))
+        reversal_id = reversal_wizard.refund_moves()
+        credit_note = self.env['account.move'].browse(reversal_id['res_id'])
+        credit_note.action_post()
+        credit_note.write({"edi_state": "sent"})
+
+        # Test that cancelled invoice are not included in the 14.4 txt report
+        invoice_current.button_draft()
+        invoice_current.button_cancel()
+
+        self.assertEqual(
+            "\n".join(
+                [
+                    "|".join(line.split("|")[14:18])
+                    for line in self.env[report.custom_handler_model_name]
+                .export_to_txt(options)["file_content"]
+                .decode()
+                .split("\r\n")
+                ]
+            ),
+            """
+-100.0|0.00|-18.0|0.00
+0.00|-10.0|0.00|-1.8
+0.00|0.00|0.00|0.00
+"""[1:],
         )

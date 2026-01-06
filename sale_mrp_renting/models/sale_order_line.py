@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from collections import defaultdict
 
 from odoo import models
 
@@ -22,9 +22,10 @@ class SaleOrderLine(models.Model):
             qty = bom.product_uom_id._compute_quantity(qty_to_compute, self.product_uom_id)
         return qty
 
-    def _compute_qty_delivered(self):
+    def _prepare_qty_delivered(self):
         if not self._are_rental_pickings_enabled():
-            return super()._compute_qty_delivered()
+            return super()._prepare_qty_delivered()
+        rental_delivered_qties = defaultdict(float)
         todo_ids = []
         self.fetch(['is_rental', 'product_id'])
         for line in self:
@@ -43,7 +44,9 @@ class SaleOrderLine(models.Model):
                     product, line.product_uom_qty, bom, filters,
                 )
                 # Because we only use outgoing moves, it will always return a negative value
-                line.qty_delivered = -amount_kits_delivered
+                rental_delivered_qties[line] = -amount_kits_delivered
             else:
-                line.qty_delivered = 0
-        return super(SaleOrderLine, self.browse(todo_ids))._compute_qty_delivered()
+                rental_delivered_qties[line] = 0
+        delivered_qties = super(SaleOrderLine, self.browse(todo_ids))._prepare_qty_delivered()
+        delivered_qties.update(rental_delivered_qties)
+        return delivered_qties

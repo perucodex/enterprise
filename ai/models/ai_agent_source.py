@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import requests
+from collections import defaultdict
+
 
 from odoo import _, api, fields, models
 from odoo.addons.mail.tools import link_preview
@@ -126,11 +128,7 @@ class AIAgentSource(models.Model):
         request_session = requests.Session()
         vals_list = []
         for url in urls:
-            preview = link_preview.get_link_preview_from_url(url, request_session)
-            if preview and preview.get('og_title'):
-                name = preview['og_title']
-            else:
-                name = url
+            name = self._get_name_from_url(url, request_session)
             url_source = {
                 'name': name,
                 'url': url,
@@ -140,6 +138,22 @@ class AIAgentSource(models.Model):
             vals_list.append(url_source)
 
         return self.create(vals_list)
+
+    @api.model
+    def _get_name_from_url(self, url, session):
+        """
+        Get the name of the source from the URL.
+        :param url: URL to get the name from
+        :type url: str
+        :param session: request session
+        :type session: requests.Session
+        :return: name of the source
+        :rtype: str
+        """
+        preview = link_preview.get_link_preview_from_url(url, session)
+        if preview and preview.get('og_title'):
+            return preview['og_title']
+        return url
 
     @api.ondelete(at_uninstall=False)
     def _unlink_attachments(self):
@@ -301,70 +315,215 @@ class AIAgentSource(models.Model):
             'target': 'new',
         }
 
+    def action_reprocess_index(self):
+        """
+        Reprocess the index of the source.
+        """
+        self.ensure_one()
+        sources_to_reprocess = self.env['ai.agent.source'].search([
+            ('attachment_id.checksum', '=', self.attachment_id.checksum)
+        ])
+        sources_to_reprocess.write({
+            'status': 'processing',
+            'is_active': False,
+        })
+        sources_to_reprocess._update_name()
+        self.env.ref('ai.ir_cron_process_sources')._trigger()
+
+    def _update_name(self):
+        """
+        Update the name of the source if needed.
+        To be Overriden.
+        """
+        if not self:
+            return
+
+        source = self[0]
+        if source.type == 'url':
+            request_session = requests.Session()
+            current_name = self._get_name_from_url(source.url, request_session)
+            if source.name != current_name:
+                self.name = current_name
+
     def _cron_process_sources(self):
         """
-        Process sources for content extraction and create attachments if needed.
-        Overriden in ai_knowledge
+        Scrape and process all sources that require content retrieval.
+        This method fetches the latest content for each source, then creates
+        or updates the corresponding attachments.
         """
-        sources_with_urls = self.env['ai.agent.source'].search([('type', '=', 'url'), ('status', '=', 'processing')])
-        extractor = HTMLExtractor()
-        trigger_embeddings_cron = False
-        for source in sources_with_urls:
-            result = extractor.scrap(source.url)
-            if not result or not result['content']:
-                error_message = result.get('error', _("URL content cannot be extracted."))
-                source.write({
-                    'status': 'failed',
-                    'error_details': error_message,
-                })
-                continue
+        sources_to_process = self._get_sources_to_process()
+        if not sources_to_process:
+            return
 
-            trigger_embeddings_cron |= self._process_source_content(source, result['content'])
+        # Group sources by URL to process them
+        sources_by_url = defaultdict(lambda: self.env['ai.agent.source'])
+        for source in sources_to_process:
+            sources_by_url[source.url] |= source
+
+        trigger_embeddings_cron = False
+        if sources_by_url:
+            trigger_embeddings_cron = self._process_sources_content(sources_by_url)
 
         if trigger_embeddings_cron:
             self.env.ref('ai.ir_cron_generate_embedding')._trigger()
 
-    def _process_source_content(self, source, content, url=None):
+    def _get_sources_to_process(self):
         """
-        Process source content and create attachment if needed.
-        :param source: source record
-        :param content: content of the source
-        :param url: url of the source
-        :return: True if the source was processed successfully
-        and needs to be indexed, False otherwise
+        Get the sources to process.
+        Default for URL sources.
+        To be Overriden.
+        :return: sources to process
+        :rtype: ai.agent.source recordset
         """
-        embedding_model = source.agent_id._get_embedding_model()
-        attachment_url = url or source.url
+        target_urls = self.env['ai.agent.source'].search([
+            ('type', '=', 'url'),
+            ('status', '=', 'processing'),
+        ]).mapped('url')
 
-        existing_attachment = self.env['ir.attachment'].search([('url', '=', attachment_url)], limit=1)
+        sources_to_process = self.env['ai.agent.source'].search([
+            ('url', 'in', target_urls),
+        ])
 
-        if existing_attachment:
-            new_attachment = existing_attachment.copy()
-            new_attachment.write({
-                'res_model': 'ai.agent.source',
-                'res_id': source.id,
+        return sources_to_process
+
+    def _fetch_content(self, source):
+        """
+        Fetch the content of a url source.
+        Default for URL sources.
+        To be Overriden.
+        :param source: source to fetch the content from
+        :type source: ai.agent.source record
+        :return: dictionary with 'content', 'title', and 'error' keys, or None
+        :rtype: dict or None
+        """
+        if source.type == 'url' and source.url:
+            extractor = HTMLExtractor()
+            result = extractor.scrap(source.url)
+            if not result or not result['content']:
+                return {"content": None, "error": result.get('error', _("Failed to fetch the content of the source."))}
+            return result
+        return {'error': _("Failed to fetch the content of the source.")}
+
+    def _get_sources_indexing_state(self, sources, updated_checksum):
+        """
+        Determine the sources' embedding and indexing state.
+        :param sources: recordset of sources to determine the state
+        :type sources: ai.agent.source recordset
+        :param updated_checksum: checksum of the updated content
+        :type updated_checksum: str
+        :return: tuple of (indexed_sources, sources_to_update_status)
+        :rtype: tuple
+        """
+        indexed_embedding_models = self.env['ai.embedding']._get_indexed_embedding_models_by_checksum(updated_checksum)
+
+        indexed_sources = sources.filtered(lambda source: source.agent_id._get_embedding_model() in indexed_embedding_models)
+        non_indexed_sources = sources - indexed_sources
+        sources_to_update_status = non_indexed_sources.filtered(lambda source: source.status != 'processing')
+        trigger_embeddings_cron = bool(non_indexed_sources)
+
+        return indexed_sources, sources_to_update_status, trigger_embeddings_cron
+
+    def _update_sources_status(self, indexed_sources, processing_sources, failed_by_error=None):
+        """
+        Update sources' status based on embedding availability.
+        :param indexed_sources: recordset of indexed sources
+        :type indexed_sources: ai.agent.source recordset
+        :param processing_sources: recordset of processing sources
+        :type processing_sources: ai.agent.source recordset
+        :param failed_by_error: dictionary mapping error messages to sources
+        :type failed_by_error: dict
+        """
+        if indexed_sources:
+            indexed_sources.write({
+                'status': 'indexed',
+                'is_active': True,
             })
-            source.attachment_id = new_attachment.id
-            # Check if embeddings already exist
-            if not self.env['ai.embedding'].search_count([('checksum', '=', new_attachment.checksum), ('embedding_model', '=', embedding_model)], limit=1):
-                return True
-            else:
-                source.write({
-                    'status': 'indexed',
-                    'is_active': True,
+
+        if processing_sources:
+            processing_sources.write({
+                'status': 'processing',
+                'is_active': False,
+            })
+
+        if failed_by_error:
+            for error_msg, sources in failed_by_error.items():
+                sources.write({
+                    'status': 'failed',
+                    'is_active': False,
+                    'error_details': error_msg,
                 })
-                return False
-        else:
-            # Create new attachment
-            attachment_name = f"{source.name}-({attachment_url})"
-            new_attachment = self.env['ir.attachment'].create({
-                'name': attachment_name,
-                'res_model': 'ai.agent.source',
-                'res_id': source.id,
-                'raw': content,
-                'mimetype': 'text/html',
-                'url': attachment_url,
-                'index_content': content,
-            })
+
+    def _create_sources_attachments(self, sources, attachments_vals):
+        """
+        Create attachments for sources.
+        :param sources: recordset of sources to create attachments for
+        :type sources: ai.agent.source recordset
+        :param attachments_vals: list of dictionaries with attachment values
+        :type attachments_vals: list of dicts
+        """
+        new_attachments = self.env['ir.attachment'].create(attachments_vals)
+        for source, new_attachment in zip(sources, new_attachments):
             source.attachment_id = new_attachment.id
-            return True
+
+    def _process_sources_content(self, sources_by_url):
+        """
+        Process source content and create/update their attachments.
+        :param sources_by_url: dictionary mapping URLs to sources recordsets
+        :type sources_by_url: dict
+        :return: True if embeddings need to be generated, False otherwise
+        :rtype: bool
+        """
+        trigger_embeddings_cron = False
+        indexed_sources = self.env['ai.agent.source']
+        sources_to_update_status = self.env['ai.agent.source']
+        attachments_embeddings_to_unlink = self.env['ir.attachment']
+        failed_by_error = defaultdict(lambda: self.env['ai.agent.source'])
+
+        for url, url_sources in sources_by_url.items():
+            # Fetch content from a single representative source
+            result = self._fetch_content(url_sources[0])
+            if not result or not result['content']:
+                failed_by_error[result['error']] |= url_sources
+                continue
+
+            updated_content = result['content'].encode()
+            updated_content_checksum = self.env['ir.attachment']._compute_checksum(updated_content)
+
+            # Check for the new sources to attach
+            sources_to_attach = url_sources.filtered(lambda s: not s.attachment_id)
+            attachment_vals_list = []
+            for source in sources_to_attach:
+                attachment_vals_list.append({
+                    'name': f"{source.name}-({url})",
+                    'res_model': 'ai.agent.source',
+                    'res_id': source.id,
+                    'raw': updated_content,
+                    'mimetype': 'text/html',
+                    'url': url,
+                })
+
+            if attachment_vals_list:
+                self._create_sources_attachments(sources_to_attach, attachment_vals_list)
+
+            # Check for any sources with outdated attachments content or not indexed
+            attachments_to_update = url_sources.filtered(lambda source: source.attachment_id.checksum != updated_content_checksum).mapped('attachment_id')
+            attachments_embeddings_to_unlink |= attachments_to_update
+
+            url_indexed_sources, url_sources_to_update_status, url_trigger_embeddings_cron = self._get_sources_indexing_state(url_sources, updated_content_checksum)
+            indexed_sources |= url_indexed_sources
+            sources_to_update_status |= url_sources_to_update_status
+            trigger_embeddings_cron |= url_trigger_embeddings_cron
+
+            if attachments_to_update:
+                attachments_to_update.write({
+                    'raw': updated_content,
+                })
+
+        if attachments_embeddings_to_unlink:
+            self.env['ai.embedding'].search([
+                ('attachment_id', 'in', attachments_embeddings_to_unlink.ids)
+            ]).unlink()
+
+        self._update_sources_status(indexed_sources, sources_to_update_status, failed_by_error)
+
+        return trigger_embeddings_cron

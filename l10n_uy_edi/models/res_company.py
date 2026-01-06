@@ -19,12 +19,12 @@ class ResCompany(models.Model):
         help="UCFE environment to generate EDI invoices, if Demo is selected it will not connect to a webservice and"
         " it will do a dummy validation only in Odoo of the CFE")
     l10n_uy_edi_ucfe_password = fields.Char(
-        "Uruware WS Password",
+        "UCFE Provider WS Password",
         groups="base.group_system",
-        help="This password is used exclusively for accessing Uruware webservices, enabling communication and data"
-        " exchange between Odoo and Uruware. It is distinct from the password used to log in to Uruware's portal.")
-    l10n_uy_edi_ucfe_commerce_code = fields.Char("Uruware Commerce code", groups="base.group_system")
-    l10n_uy_edi_ucfe_terminal_code = fields.Char("Uruware Terminal code", groups="base.group_system")
+        help="This password is used exclusively for accessing UCFE webservices, enabling communication and data"
+        " exchange between Odoo and UCFE. It is distinct from the password used to log in to UCFE's portal.")
+    l10n_uy_edi_ucfe_commerce_code = fields.Char("UCFE Provider Commerce code", groups="base.group_system")
+    l10n_uy_edi_ucfe_terminal_code = fields.Char("UCFE Provider Terminal code", groups="base.group_system")
 
     # DGI
 

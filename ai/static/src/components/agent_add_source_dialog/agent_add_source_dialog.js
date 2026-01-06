@@ -70,7 +70,7 @@ export class AgentSourceAddDialog extends Component {
     }
 
     validateFileTypes(files) {
-        const allowedExtensions = ['.pdf', '.docx', '.doc', '.pptx', '.ppt', '.xlsx', '.xls', '.odt', '.ods', '.txt'];
+        const allowedExtensions = ['.pdf', '.docx', '.doc', '.pptx', '.ppt', '.xlsx', '.xls', '.odt', '.ods', '.txt', '.csv'];
         const validFiles = [];
         const invalidFiles = [];
         for (const file of files) {
@@ -96,7 +96,7 @@ export class AgentSourceAddDialog extends Component {
         if (invalidFiles.length > 0 && validFiles.length > 0) {
             const invalidFileNames = invalidFiles.map(file => file.name).join(', ');
             this.notification.add(
-                _t("Some files have invalid formats and were skipped: %s. Only PDF, Word, PowerPoint, Excel, Text, and OpenDocument files are allowed.", invalidFileNames),
+                _t("Some files have invalid formats and were skipped: %s. Only PDF, Word, PowerPoint, Excel, Text, CSV, and OpenDocument files are allowed.", invalidFileNames),
                 {
                     type: "warning",
                 }
@@ -105,7 +105,7 @@ export class AgentSourceAddDialog extends Component {
 
         if (validFiles.length === 0) {
             this.notification.add(
-                _t("No valid files to upload. Only PDF, Word, PowerPoint, Excel, Text, and OpenDocument files are allowed."),
+                _t("No valid files to upload. Only PDF, Word, PowerPoint, Excel, Text, CSV, and OpenDocument files are allowed."),
                 {
                     type: "danger",
                 }
@@ -195,7 +195,7 @@ export class AgentSourceAddDialog extends Component {
     get cardsData() {
         return [
             {
-                icon: "fa-file-pdf-o text-danger",
+                icon: "fa-upload",
                 title: _t("Upload a File"),
                 onClick: () => this.onAddFileSourceClick(),
             },

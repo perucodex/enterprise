@@ -3,12 +3,13 @@
 # * ai
 #
 # "Anastasiia Koroleva (koan)" <koan@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:45+0000\n"
-"PO-Revision-Date: 2025-10-24 11:22+0000\n"
+"POT-Creation-Date: 2025-12-30 18:43+0000\n"
+"PO-Revision-Date: 2025-11-11 09:18+0000\n"
 "Last-Translator: \"Anastasiia Koroleva (koan)\" <koan@odoo.com>\n"
 "Language-Team: Russian <https://translate.odoo.com/projects/odoo-19/ai/ru/>\n"
 "Language: ru\n"
@@ -29,6 +30,12 @@ msgid ""
 "must be in valid JSON format.\n"
 "        "
 msgstr ""
+"\n"
+"            **Название инструмента: Read group**\n"
+"\n"
+"            Выполняет поиск по модели с использованием домена в формате "
+"JSON.\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_search
@@ -40,6 +47,12 @@ msgid ""
 "must be in valid JSON format.\n"
 "        "
 msgstr ""
+"\n"
+"            **Название инструмента: search**\n"
+"\n"
+"            Выполняет поиск по модели с использованием домена в формате "
+"JSON.\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_get_fields
@@ -82,6 +95,43 @@ msgid ""
 "Make 3 parallel calls.\n"
 "        "
 msgstr ""
+"\n"
+"            Отображает только доступные для поиска поля конкретной модели, "
+"которые можно использовать в фильтрах и группировках.\n"
+"            Необходимо для построения корректных доменов – если поле не "
+"указано в списке, его нельзя использовать..\n"
+"\n"
+"            Формат возвращаемых данных:\n"
+"            ```\n"
+"            field_name|display_name|type|sortable|groupable|description\n"
+"            partner_id|Customer|many2one(res.partner)|true|true|Customer for "
+"this order\n"
+"            date_order|Order Date|datetime|true|true|Date when order was "
+"placed\n"
+"            order_line|Order Lines|one2many(sale.order.line)|false|false|"
+"Lines in this order\n"
+"            state|Status|selection|true|true|Order status\n"
+"            ```\n"
+"\n"
+"            Основные моменты:\n"
+"            - ⚠️Возвращаются только поля, ДОСТУПНЫЕ ДЛЯ ПОИСКА – другие "
+"нельзя использовать в доменах.\n"
+"            - Для связей: показывает связанную модель в скобках (many2one, "
+"one2many, many2many)\n"
+"            - Только реляционные поля могут быть использованы для перехода к "
+"другим моделям.\n"
+"            - Текстовые, числовые и прочие простые поля нельзя использовать "
+"для переходов (char/text/float)\n"
+"            - 'sortable' указывает, можно ли использовать поле в параметре "
+"order_by\n"
+"            - 'groupable' указывает, можно ли использовать поле для "
+"группировки, если оно недоступно в поисковом представлении.\n"
+"\n"
+"            💡 Совет по производительности: при исследовании нескольких "
+"моделей вызывайте этот инструмент несколько раз в ОДНОМ сообщении\n"
+"            Пример: если вы исследуете sale.order, product.product и "
+"res.partner, выполните 3 параллельных вызова.\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_compute_report_measures
@@ -110,6 +160,29 @@ msgid ""
 "            - Call multiple times in parallel if comparing different menus\n"
 "        "
 msgstr ""
+"\n"
+"            Выводит числовые поля (показатели), доступные для агрегации в "
+"сводных таблицах/графиках.\n"
+"            НЕОБХОДИМО вызвать до использования open_menu_pivot() или "
+"open_menu_graph()\n"
+"\n"
+"            Возвращает CSV с разделителем «|»:\n"
+"            ```\n"
+"            field_name|display_name|type|aggregator|sortable\n"
+"            __count|Count|integer||true\n"
+"            amount_total|Total|monetary|sum|true\n"
+"            margin|Margin|float|sum|true\n"
+"            quantity|Quantity|float|sum|true\n"
+"            ```\n"
+"\n"
+"            Основные моменты:\n"
+"            - Поле __count доступно всегда (считает записи).\n"
+"            - Возвращаются только числовые поля с агрегаторами\n"
+"            - Используйте field_name в параметре measures\n"
+"            - Для рейтингов в сводной таблице добавляйте сортировку "
+"(например, \"amount_total desc\")\n"
+"            - Для сравнения меню выполните несколько параллельных вызовов\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_graph
@@ -138,6 +211,33 @@ msgid ""
 "            ⚠️ Order must be exactly 'ASC' or 'DESC'\n"
 "        "
 msgstr ""
+"\n"
+"            Открывает график/диаграмму, используя элементы поискового "
+"представления.\n"
+"            Лучше всего подходит для трендов, сравнений, распределений, "
+"визуальных KPI.\n"
+"\n"
+"            Поддерживаемые типы диаграмм:\n"
+"            - 'bar': гистограмма – сравнение значений по категориям\n"
+"            - 'line': линейный график – показывает тренды в динамике\n"
+"            - 'pie': круговая диаграмма – показывает соотношение долей\n"
+"\n"
+"            Функции:\n"
+"            - Применение фильтров из доступных опций меню\n"
+"            - Визуализация одного показателя\n"
+"            - Группировка по полю оси\n"
+"            - Поиск по определенным полям\n"
+"            - Опции наложения (stacking) и накопления (cumulation)\n"
+"            - Контроль порядка сортировки (ASC/DESC)\n"
+"\n"
+"            💡 Сначала вызовите compute_report_measures(), чтобы получить "
+"валидные показатели\n"
+"            ⚠️ Каждая поисковая строка должна использовать формат "
+"'field=text'. Массив может содержать несколько поисковых строк или быть "
+"пустым []\n"
+"            ⚠️ Параметр mode должен быть строго 'bar', 'line' или 'pie'\n"
+"            ⚠️ Параметр order должен быть строго 'ASC' or 'DESC'\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_kanban
@@ -159,6 +259,25 @@ msgid ""
 "contain multiple search strings or be empty []\n"
 "        "
 msgstr ""
+"\n"
+"            Открывает канбан-представление (карточки по стадиям/статусам).\n"
+"            Подходит для визуализации воронок, задач и рабочих процессов.\n"
+"\n"
+"            Ключевые функции:\n"
+"            - Отображение записей в виде карточек, распределенных по "
+"столбцам\n"
+"            - Применение фильтров из доступных опций меню\n"
+"            - Группировка по этапам рабочего процесса или другим полям\n"
+"            - Поиск в пределах конкретных полей\n"
+"            - Идеально подходит для воронок CRM, досок задач и управления "
+"рабочими процессами проектов\n"
+"\n"
+"            ⚠️ Используйте только имена фильтров и поля группировки, "
+"доступные в меню\n"
+"            ⚠️ Каждая поисковая строка должна использовать формат "
+"'field=text'. Массив может содержать несколько поисковых строк или быть "
+"пустым []\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_list
@@ -182,6 +301,27 @@ msgid ""
 "contain multiple search strings or be empty []\n"
 "        "
 msgstr ""
+"\n"
+"            Открывает список (таблицу) с возможностью фильтрации и "
+"сортировки.\n"
+"            Лучше всего подходит для запросов «Show me» (покажи мне), «List "
+"all» (вывести все), детального просмотра и сортировки данных.\n"
+"\n"
+"            Ключевые функции\n"
+"            - Применение нескольких фильтров по имени\n"
+"            - Группировка записей по доступным полям\n"
+"            - Поиск текста в пределах конкретных полей\n"
+"            - Сортировка и просмотр записей в виде таблицы\n"
+"            - Идеально подходит для просмотра, фильтрации и экспорта данных\n"
+"\n"
+"            💡 Для фильтрации используйте параметр search ПЕРЕД применением "
+"custom_domain\n"
+"            ⚠️ Используйте только имена фильтров и поля группировки, "
+"доступные в меню\n"
+"            ⚠️ Каждая поисковая строка должна использовать формат "
+"'field=text'. Массив может содержать несколько поисковых строк или быть "
+"пустым []\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_pivot
@@ -217,6 +357,37 @@ msgid ""
 "needs\n"
 "        "
 msgstr ""
+"\n"
+"            Открывает сводную таблицу с расширенным поиском и фильтрацией.\n"
+"            Лучше всего подходит для «Top N»-отчетов, рейтингов, "
+"перекрестных таблиц и анализа показателей.\n"
+"\n"
+"            Ключевые функции:\n"
+"            - Поддержка фильтров из поискового представления\n"
+"            - Группировка данных по строкам И столбцам\n"
+"            - Агрегация показателей (sum – сумма, avg – среднее, count – "
+"количество)\n"
+"            - Поиск по тексту среди доступных полей\n"
+"            - EФункциональность сводной таблицы (аналогично Excel)\n"
+"\n"
+"            💡 ВСЕГДА вызывайте compute_report_measures() сначала, чтобы "
+"получить валидные показатели\n"
+"            💡 Для рейтингов: включайте порядок сортировки в показатели "
+"(напр: [\"amount_total desc\"])\n"
+"            💡 Для фильтрации используйте параметр search ПЕРЕД применением "
+"custom_domain\n"
+"            ⚠️ Оптимальный опыт работы – через меню «Отчеты»\n"
+"            ⚠️ Каждая поисковая строка должна использовать формат "
+"'field=text'. Массив может содержать несколько поисковых строк или быть "
+"пустым []\n"
+"            ⚠️ Примечание: использует row_groupbys/col_groupbys (массивы) "
+"вместо selected_groupbys\n"
+"\n"
+"            Пример: для «лучшие продавцы офисных товаров»:\n"
+"            - используйте search=[\"categ_id\", \"office\"], если поле "
+"categ_id доступно для поиска\n"
+"            - custom_domain используйте только при отсутствии нужных полей\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_get_menu_details
@@ -247,6 +418,34 @@ msgid ""
 "            ⚠️ Always validate the returned model matches your expectations\n"
 "        "
 msgstr ""
+"\n"
+"            Получает подробную информацию (context, domain, search_view) по "
+"конкретным меню.\n"
+"            ДОЛЖЕН быть вызван перед использованием любого инструмента "
+"open_menu_* для получения деталей, специфичных для меню.\n"
+"\n"
+"            Возвращает CSV с разделителем «|»:\n"
+"            ```\n"
+"            menu_id|model_name|context|domain|search_view\n"
+"            389|sale.order|{\"search_default_my_quotation\": 1}|[]|"
+"<search><fields>...</fields></search>\n"
+"            172|account.move|{\"search_default_draft\": 1}|[[\"type\", "
+"\"=\", \"out_invoice\"]]|<search>...</search>\n"
+"            ```\n"
+"\n"
+"            Ключевая информация:\n"
+"            - Context: контекст – фильтры/группировки по умолчанию, которые "
+"применяются при открытии меню.\n"
+"            - Domain: домен – постоянные фильтры, которые пользователь не "
+"может удалить\n"
+"            - Search_view: поисковое представление – полная XML-структура с "
+"доступными фильтрами, группировками и полями для поиска.\n"
+"\n"
+"            💡 Совет по производительности: запрашивайте детали нескольких "
+"меню одним вызовом, если вам нужно сравнить опции\n"
+"            ⚠️ Важно: всегда проверяйте, что возвращаемая модель "
+"соответствует вашим ожиданиям\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_adjust_search
@@ -292,12 +491,52 @@ msgid ""
 "the current view info.\n"
 "        "
 msgstr ""
+"\n"
+"            Пользователь может продолжать задавать вопросы, и если вы "
+"считаете, что текущий поиск можно просто скорректировать без открытия "
+"другого меню, вы можете использовать этот инструмент.\n"
+"\n"
+"            В параметре <session_info_context>, переданном в запросе, "
+"содержится информация о текущем представлении, включая активные поисковые "
+"фасеты.\n"
+"            Фасет – это группа фильтров, объединенных через `OR`(ИЛИ) , "
+"группа группировок или группа поисковых условий, также объединенных "
+"через`OR`.\n"
+"\n"
+"            **Понимание параметров**:\n"
+"            - `remove_facets` - удаление фасета полностью убирает группу "
+"фильтров, группировок или поисковых условий. Удаление отдельного фильтра или "
+"фасета поиска снижает ограничения.\n"
+"            - `toggle_filters` - добавляет или удаляет фильтр из активной "
+"группы фильтров.\n"
+"            - `toggle_groupbys` - добавляет или удаляет группировку из "
+"активных группировок.\n"
+"            - `apply_searches` - добавляет поисковое условие через `OR` к "
+"существующему фасету. Например: если есть «name=John» и добавляется "
+"«name=Jane», результат будет «name=John OR name=Jane».\n"
+"            - `measures` - активирует выбранные показатели в текущем "
+"представлении (например, в сводной таблице или графике).\n"
+"            - `mode` - только для графиков: это тип диаграммы. Выберите "
+"«line» (линейный график), «bar» (гистограмма) и «pie» (круговая диаграмма), "
+"чтобы изменить тип диаграммы в текущем представлении графика.\n"
+"            - `order` - только для графиков: задает порядок сортировки "
+"данных.\n"
+"            - `stacked` - только для графиков: включает или отключает режим "
+"наложения значений.\n"
+"            - `cumulated` - только для графиков: включает или отключает "
+"накопительный режим.\n"
+"            - `custom_domain` - используется, если стандартные элементы "
+"поискового представления не позволяют задать нужные условия; передается как "
+"JSON-строка.\n"
+"            - `switch_view_type` - переключает текущее представление на "
+"указанное (выбирается из доступных типов представлений).\n"
+"        "
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0 code:addons/ai/models/ai_composer.py:0
 msgid "%s (copy)"
-msgstr ""
+msgstr "%s (копия)"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
@@ -305,6 +544,8 @@ msgid ""
 "<br/>\n"
 "            It used the following tools:"
 msgstr ""
+"<br/>\n"
+"            Использованные инструменты:"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
@@ -313,11 +554,14 @@ msgid ""
 "ai_tool_show_warning\" aria-hidden=\"true\" title=\"The AI will not be "
 "limited by the groups defined on tools\"/>"
 msgstr ""
+"<i class=\"fa fa-warning text-warning me-2\" invisible=\"not "
+"ai_tool_show_warning\" aria-hidden=\"true\" title=\"ИИ не будет ограничен "
+"группами, определенными в инструментах\"/>"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
 msgid "<span>with arguments</span>"
-msgstr ""
+msgstr "<span>с аргументами</span>"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_agent__topic_ids
@@ -325,6 +569,8 @@ msgid ""
 "A topic includes instructions and tools that guide Odoo AI in helping the "
 "user complete their tasks."
 msgstr ""
+"Тема включает инструкции и инструменты, с помощью которых ИИ Odoo помогает "
+"пользователю выполнять свои задачи."
 
 #. module: ai
 #. odoo-javascript
@@ -333,143 +579,144 @@ msgstr ""
 #: code:addons/ai/static/src/web/systray_action.xml:0
 #: model:ir.model.fields.selection,name:ai.selection__ir_actions_server__state__ai
 msgid "AI"
-msgstr ""
+msgstr "ИИ"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_action_prompt
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_action_prompt
 msgid "AI Action Prompt"
-msgstr ""
+msgstr "Промпт действия ИИ"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_agent
 msgid "AI Agent"
-msgstr ""
+msgstr "ИИ-агент"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_agent_source
 msgid "AI Agent Source"
-msgstr ""
+msgstr "Источник ИИ-агента"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_cron_process_sources_ir_actions_server
 msgid "AI Agent Sources: Process Sources"
-msgstr ""
+msgstr "Источники ИИ-агента: обработка источников"
 
 #. module: ai
 #: model:ir.model.constraint,message:ai.constraint_discuss_channel_ai_channel_type_check
 msgid "AI Agent can only be set for ai_chat or livechat channels."
 msgstr ""
+"ИИ-агент может быть установлен только для каналов типа ai_chat или livechat."
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_cron_generate_embedding_ir_actions_server
 msgid "AI Embedding: Generate Embeddings"
-msgstr ""
+msgstr "Векторные представления ИИ: Сгенерировать векторные представления"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_prompt_button__name
 msgid "AI Prompt"
-msgstr ""
+msgstr "Промпт ИИ"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "AI Prompt Tools"
-msgstr ""
+msgstr "Инструменты для промптов ИИ"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_schema
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_schema
 msgid "AI Schema"
-msgstr ""
+msgstr "Схема ИИ"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_description
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_description
 msgid "AI Tool Description"
-msgstr ""
+msgstr "Описание ИИ-инструмента"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/plugins/chatgpt_plugin.js:0
 #: model:ir.model.fields,field_description:ai.field_ai_topic__tool_ids
 msgid "AI Tools"
-msgstr ""
+msgstr "Инструменты ИИ"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__discuss_channel__channel_type__ai_chat
 msgid "AI chat"
-msgstr ""
+msgstr "ИИ-чат"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
 msgid "AI is listening..."
-msgstr ""
+msgstr "ИИ слушает..."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/discuss/typing_patch.js:0
 msgid "AI is thinking..."
-msgstr ""
+msgstr "ИИ думает..."
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_composer
 msgid "AI model configurations (system prompts) for text drafting."
-msgstr ""
+msgstr "Конфигурации модели ИИ (системные промпты) для подготовки текстов."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/discuss_channel.py:0
 msgid "AI not reachable, AI Agent not found."
-msgstr ""
+msgstr "ИИ недоступен – агент не найден."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/discuss_channel.py:0
 msgid "AI: %(name)s"
-msgstr ""
+msgstr "ИИ: %(name)s"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_adjust_search
 msgid "AI: Adjust Search"
-msgstr ""
+msgstr "ИИ: Корректировка поиска"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_compute_report_measures
 msgid "AI: Compute Report Measures"
-msgstr ""
+msgstr "ИИ: Рассчитать показатели отчета"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_get_fields
 msgid "AI: Get Fields"
-msgstr ""
+msgstr "ИИ: Получить поля"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_get_menu_details
 msgid "AI: Get Menu Details"
-msgstr ""
+msgstr "ИИ: Получить детали меню"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_open_menu_graph
 msgid "AI: Open Menu Graph"
-msgstr ""
+msgstr "ИИ: Открыть график меню"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_open_menu_kanban
 msgid "AI: Open Menu Kanban"
-msgstr ""
+msgstr "ИИ: Открыть Канбан-меню"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_open_menu_list
 msgid "AI: Open Menu List"
-msgstr ""
+msgstr "ИИ: Открыть список меню"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_open_menu_pivot
 msgid "AI: Open Menu Pivot"
-msgstr ""
+msgstr "ИИ: Открыть сводную таблицу меню"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_read_group
@@ -479,79 +726,81 @@ msgstr ""
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_search
 msgid "AI: Search"
-msgstr ""
+msgstr "ИИ: Поиск"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 msgid "Access error"
-msgstr ""
+msgstr "Ошибка доступа"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__interface_key
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
 msgid "Action"
-msgstr ""
+msgstr "Действие"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
 msgid "Action \"%(action)s\" done."
-msgstr ""
+msgstr "Действие «%(action)s» выполнено."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__active
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__is_active
 msgid "Active"
-msgstr ""
+msgstr "Активный"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
 msgid "Activity created for %(user)s."
-msgstr ""
+msgstr "Дело создано для %(user)s."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Add"
-msgstr ""
+msgstr "Добавить"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Add Links"
-msgstr ""
+msgstr "Добавить ссылки"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Add Sources"
-msgstr ""
+msgstr "Добавить источники"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid "Add a Link"
-msgstr ""
+msgstr "Добавить ссылку"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
 msgid "Add notes about your upcoming meeting"
-msgstr ""
+msgstr "Добавить заметки о предстоящей встрече"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Add sources to your AI Agent to get answers based on specific content."
 msgstr ""
+"Добавьте источники, которые ИИ сможет использовать для ответов на основе "
+"контента."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Adding sources..."
-msgstr ""
+msgstr "Добавление источников..."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__agent_id
@@ -559,58 +808,52 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_res_partner__agent_ids
 #: model:ir.model.fields,field_description:ai.field_res_users__agent_ids
 msgid "Agent"
-msgstr ""
+msgstr "Агент"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__name
 msgid "Agent Name"
-msgstr ""
+msgstr "Имя агента"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_discuss_channel__ai_agent_id
 msgid "Ai Agent"
-msgstr ""
+msgstr "ИИ-агент"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_has_schema
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_has_schema
 msgid "Ai Tool Has Schema"
-msgstr ""
+msgstr "Инструмент ИИ имеет схему"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_is_candidate
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_is_candidate
 msgid "Ai Tool Is Candidate"
-msgstr ""
+msgstr "Инструмент ИИ является кандидатом"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_show_warning
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_show_warning
 msgid "Ai Tool Show Warning"
-msgstr ""
+msgstr "Инструмент ИИ показывает предупреждение"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_allow_end_message
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_allow_end_message
 msgid "Allow End Message"
-msgstr ""
+msgstr "Разрешить завершающее сообщение"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 msgid "An error occured"
-msgstr ""
-
-#. module: ai
-#. odoo-javascript
-#: code:addons/ai/static/src/discuss/core/common/thread_model_patch.js:0
-msgid "An error occurred while generating the AI response."
-msgstr ""
+msgstr "Произошла ошибка"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent__response_style__analytical
 msgid "Analytical"
-msgstr ""
+msgstr "Аналитический"
 
 #. module: ai
 #. odoo-javascript
@@ -619,54 +862,54 @@ msgstr ""
 #: code:addons/ai/static/src/mail_composer_chatgpt.xml:0
 #: code:addons/ai/static/src/web/systray_action.xml:0
 msgid "Ask AI"
-msgstr ""
+msgstr "Спросить ИИ"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__systray_ai_button
 msgid "Ask AI for help"
-msgstr ""
+msgstr "Попросить ИИ о помощи"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ir_attachment
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__attachment_id
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__attachment_id
 msgid "Attachment"
-msgstr ""
+msgstr "Вложение"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_embedding
 msgid "Attachment Chunks Embedding"
-msgstr ""
+msgstr "Фрагменты вложений для встраивания"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__available_prompts
 msgid "Available User Prompts"
-msgstr ""
+msgstr "Доступные промпты пользователя"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__avatar_128
 msgid "Avatar"
-msgstr ""
+msgstr "Аватар"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent__response_style__balanced
 msgid "Balanced"
-msgstr ""
+msgstr "Сбалансированный"
 
 #. module: ai
 #: model:ir.model,name:ai.model_base
 msgid "Base"
-msgstr ""
+msgstr "База"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_mail_template__body_html
 msgid "Body"
-msgstr ""
+msgstr "Основной текст"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_discuss_channel__channel_type
 msgid "Channel Type"
-msgstr ""
+msgstr "Тип канала"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_discuss_channel__channel_type
@@ -674,11 +917,14 @@ msgid ""
 "Chat is private and unique between 2 persons. Group is private among invited "
 "persons. Channel can be freely joined (depending on its configuration)."
 msgstr ""
+"Чат – это уникальная приватная переписка между двумя пользователями. Группа "
+"– закрытое пространство, доступное только для приглашенных. К каналу можно "
+"свободно присоединиться (в зависимости от его настроек)."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__checksum
 msgid "Checksum/SHA1"
-msgstr ""
+msgstr "Checksum/SHA1"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__content
@@ -690,38 +936,38 @@ msgstr ""
 #: code:addons/ai/static/src/ai_natural_language_service.js:0
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Close"
-msgstr ""
+msgstr "Закрыть"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_prompt_button__composer_id
 msgid "Composer"
-msgstr ""
+msgstr "Автор"
 
 #. module: ai
 #: model:ir.model,name:ai.model_res_config_settings
 msgid "Config Settings"
-msgstr ""
+msgstr "Настройки конфигурации"
 
 #. module: ai
 #: model:ir.model,name:ai.model_res_partner
 msgid "Contact"
-msgstr ""
+msgstr "Контакт"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_mail_compose_message__body
 #: model:ir.model.fields,field_description:ai.field_mail_composer_mixin__body
 msgid "Contents"
-msgstr ""
+msgstr "Содержимое"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_discuss_channel__ai_env_context
 msgid "Context for AI agent"
-msgstr ""
+msgstr "Контекст для ИИ-агента"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__html_prompt_shortcut
 msgid "Convert a prompt in an email"
-msgstr ""
+msgstr "Преобразовать промпт в e-mail"
 
 #. module: ai
 #. odoo-python
@@ -730,11 +976,13 @@ msgid ""
 "Could you please provide info about '%s' as it is required to process your "
 "request"
 msgstr ""
+"Не могли бы вы предоставить информацию о «%s», поскольку она необходима для "
+"обработки вашего запроса"
 
 #. module: ai
 #: model:ir.model,website_form_label:ai.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Создать клиента"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_topic
@@ -742,6 +990,8 @@ msgid ""
 "Create a topic that leverages instructions and tools to direct Odoo AI in "
 "assisting the user with their tasks."
 msgstr ""
+"Создайте тему, которая использует инструкции и инструменты, чтобы направить "
+"ИИ Odoo на помощь пользователю в его задачах."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__create_uid
@@ -751,7 +1001,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ai_prompt_button__create_uid
 #: model:ir.model.fields,field_description:ai.field_ai_topic__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "Создано:"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__create_date
@@ -761,17 +1011,17 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ai_prompt_button__create_date
 #: model:ir.model.fields,field_description:ai.field_ai_topic__create_date
 msgid "Created on"
-msgstr ""
+msgstr "Дата создания:"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent__response_style__creative
 msgid "Creative"
-msgstr ""
+msgstr "Креативный"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_agent__system_prompt
 msgid "Customize to control relevance and formatting."
-msgstr ""
+msgstr "Настроить параметры релевантности и форматирования."
 
 #. module: ai
 #. odoo-javascript
@@ -779,13 +1029,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ai_agent__subtitle
 #: model:ir.model.fields,field_description:ai.field_ai_topic__description
 msgid "Description"
-msgstr ""
+msgstr "Описание"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
 msgid "Dictate text or record a meeting"
-msgstr ""
+msgstr "Продиктовать текст или записать встречу"
 
 #. module: ai
 #. odoo-javascript
@@ -794,12 +1044,12 @@ msgstr ""
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
 msgid "Discard"
-msgstr ""
+msgstr "Отменить"
 
 #. module: ai
 #: model:ir.model,name:ai.model_discuss_channel
 msgid "Discussion Channel"
-msgstr ""
+msgstr "Канал обсуждения"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__display_name
@@ -819,130 +1069,138 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_res_config_settings__display_name
 #: model:ir.model.fields,field_description:ai.field_res_partner__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "Отображаемое имя"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Edit"
-msgstr ""
+msgstr "Редактировать"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_prompt.xml:0
 msgid "Edit Field Prompt"
-msgstr ""
+msgstr "Редактировать промпт поля"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/plugins/chatgpt_plugin.js:0
 msgid "Editor"
-msgstr ""
+msgstr "Редактор"
 
 #. module: ai
 #: model:ir.model,name:ai.model_mail_template
 msgid "Email Templates"
-msgstr ""
+msgstr "Шаблоны писем"
 
 #. module: ai
 #: model:ir.model,name:ai.model_mail_thread
 msgid "Email Thread"
-msgstr ""
+msgstr "Цепочка Email"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__embedding_model
 msgid "Embedding Model"
-msgstr ""
+msgstr "Модель векторных представлений"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__embedding_vector
 msgid "Embedding Vector"
-msgstr ""
+msgstr "Векторное представление"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent_source.py:0
 msgid "Embedding generation failed using the current LLM model selected."
 msgstr ""
+"Не удалось сгенерировать векторные представления, используя выбранную "
+"текущую модель LLM."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_res_config_settings__google_key_enabled
 msgid "Enable custom Google API key"
-msgstr ""
+msgstr "Включить кастомный ключ API Google"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_res_config_settings__openai_key_enabled
 msgid "Enable custom OpenAI API key"
-msgstr ""
+msgstr "Включить кастомный ключ API OpenAI"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__error_details
 msgid "Error Details"
-msgstr ""
+msgstr "Подробные сведения об ошибке"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__failed
 msgid "Failed"
+msgstr "Сбой"
+
+#. module: ai
+#. odoo-python
+#: code:addons/ai/models/ai_agent_source.py:0
+msgid "Failed to fetch the content of the source."
 msgstr ""
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
 msgid "Failed to get embeddings for the prompt."
-msgstr ""
+msgstr "Не удалось получить векторные представления для промпта."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "Field Selector"
-msgstr ""
+msgstr "Селектор поля"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__type__binary
 msgid "File"
-msgstr ""
+msgstr "Файл"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__file_size
 msgid "File Size"
-msgstr ""
+msgstr "Размер файла"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/plugins/chatgpt_plugin.js:0
 msgid "Generate or transform content with AI"
-msgstr ""
+msgstr "Сгенерировать или преобразовать контент с помощью ИИ"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__chatter_ai_button
 msgid "Get help on a record"
-msgstr ""
+msgstr "Получить помощь по записи"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_embedding__embedding_model__gemini-embedding-001
 msgid "Google"
-msgstr ""
+msgstr "Google"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_res_config_settings__google_key
 msgid "Google AI API key"
-msgstr ""
+msgstr "API-ключ Google AI"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ir_http
 msgid "HTTP Routing"
-msgstr ""
+msgstr "HTTP-маршрутизация"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__has_embedding_generation_failed
 msgid "Has Embedding Generation Failed"
-msgstr ""
+msgstr "Ошибка при генерации векторных представлений"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/discuss/thread_patch.js:0
 msgid "Hello, what can I help you with?"
-msgstr ""
+msgstr "Здравствуйте, чем я могу вам помочь?"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__id
@@ -962,98 +1220,100 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_res_config_settings__id
 #: model:ir.model.fields,field_description:ai.field_res_partner__id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_agent__restrict_to_sources
 msgid "If checked, the agent will only respond based on the provided sources."
 msgstr ""
+"Если флажок установлен, агент будет отвечать только на основе "
+"предоставленных источников."
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_agent_source__is_active
 msgid "If the source is active, it will be used in the RAG context."
-msgstr ""
+msgstr "Если источник активен, он будет использоваться в контексте RAG."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__image_128
 msgid "Image"
-msgstr ""
+msgstr "Изображение"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__indexed
 msgid "Indexed"
-msgstr ""
+msgstr "Проиндексировано"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_model_field_selector/ai_model_field_selector_popover.xml:0
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
 msgid "Insert"
-msgstr ""
+msgstr "Вставить"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "Insert a field"
-msgstr ""
+msgstr "Вставить поле"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/core/html_editor/prompt_plugin.js:0
 msgid "Insert an AI prompt"
-msgstr ""
+msgstr "Вставить ИИ-промпт"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_records_selector_plugin.js:0
 msgid "Insert records"
-msgstr ""
+msgstr "Вставить записи"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_prompt_field.js:0
 msgid "Insert records the AI can use with the '/record' command"
-msgstr ""
+msgstr "Вставьте записи, доступные ИИ через команду /record"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__default_prompt
 #: model:ir.model.fields,field_description:ai.field_ai_topic__instructions
 msgid "Instructions"
-msgstr ""
+msgstr "Инструкции"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
 msgid "Invalid JSON schema (malformed JSON)."
-msgstr ""
+msgstr "Недействительная JSON-схема (ошибка формата)."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_records_selector_plugin.js:0
 msgid "Invalid Record"
-msgstr ""
+msgstr "Недопустимая запись"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_embedding.py:0
 msgid "Invalid attachment. Failed to extract content."
-msgstr ""
+msgstr "Недопустимое вложение. Не удалось извлечь содержимое."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
 msgid "Invalid search operator."
-msgstr ""
+msgstr "Недопустимый оператор поиска."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__is_ask_ai_agent
 msgid "Is Natural Language Query Agent"
-msgstr ""
+msgstr "Агент для обработки естественного языка"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__is_system_default
 msgid "Is the rule a system default or user created"
-msgstr ""
+msgstr "Является ли правило системным по умолчанию или создано пользователем"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ir_actions_server__ai_tool_schema
@@ -1062,6 +1322,8 @@ msgid ""
 "JSON containing the values that can be returned by the LLM along with their "
 "properties (type, length, ...)"
 msgstr ""
+"JSON, содержащий значения, которые могут быть возвращены LLM, вместе с их "
+"свойствами (тип, длина и т. д.)"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
@@ -1069,16 +1331,18 @@ msgid ""
 "JSON schema for the parameters of the action (leave empty if no arguments "
 "are needed)"
 msgstr ""
+"JSON-схема для параметров действия (оставьте пустым, если аргументы не "
+"требуются)"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.res_config_settings_view_form
 msgid "Key"
-msgstr ""
+msgstr "Ключ"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__llm_model
 msgid "LLM Model"
-msgstr ""
+msgstr "Модель LLM"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__write_uid
@@ -1088,7 +1352,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ai_prompt_button__write_uid
 #: model:ir.model.fields,field_description:ai.field_ai_topic__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "Последнее обновление:"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__write_date
@@ -1098,105 +1362,111 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ai_prompt_button__write_date
 #: model:ir.model.fields,field_description:ai.field_ai_topic__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "Дата последнего обновления:"
 
 #. module: ai
 #. odoo-javascript
-#: code:addons/ai/static/src/web/systray_action.js:0
+#: code:addons/ai/static/src/ai_chat_launcher_service.js:0
 msgid "Log Note"
-msgstr ""
+msgstr "Создать заметку"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/discuss/message_actions_patch.js:0
 msgid "Log as Note"
-msgstr ""
+msgstr "Создать заметку"
 
 #. module: ai
 #: model:ir.model,name:ai.model_mail_composer_mixin
 msgid "Mail Composer Mixin"
-msgstr ""
+msgstr "Миксин редактора писем"
 
 #. module: ai
 #: model:ir.model,name:ai.model_mail_render_mixin
 msgid "Mail Render Mixin"
-msgstr ""
+msgstr "Миксин рендеринга писем"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Max Length"
-msgstr ""
+msgstr "Максимальная длина"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__mimetype
 msgid "Mime Type"
-msgstr ""
+msgstr "Тип Mime"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/tools_schema/validators.py:0
 msgid "Missing definition for %(name)s"
-msgstr ""
+msgstr "Отсутствует определение для %(name)s"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__focused_models
 msgid "Models"
-msgstr ""
+msgstr "Модели"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__name
 msgid "Name"
-msgstr ""
+msgstr "Имя"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/llm_api_service.py:0
 msgid "No API key set for provider '%s'"
-msgstr ""
+msgstr "Не установлен ключ API для провайдера «%s»"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
 msgid "No configured Ask AI agent. Please contact your administrator."
+msgstr "Нет настроенного агента «Спросить ИИ». Обратитесь к администратору."
+
+#. module: ai
+#. odoo-python
+#: code:addons/ai/utils/llm_providers.py:0
+msgid "No embedding configuration found for the provider"
 msgstr ""
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
 msgid "No embedding model found for the selected provider"
-msgstr ""
+msgstr "Не найдена модель векторных представлений для выбранного провайдера"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/llm_providers.py:0
 msgid "No provider found for the embedding model"
-msgstr ""
+msgstr "Не найден провайдер для модели векторных представлений"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/llm_providers.py:0
 msgid "No provider found for the selected model"
-msgstr ""
+msgstr "Не найден провайдер для выбранной модели"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
 msgid "No tool was executed."
-msgstr ""
+msgstr "Инструмент не был выполнен."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid "No valid URLs found to process."
-msgstr ""
+msgstr "Не найдены допустимые URL для обработки."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid ""
-"No valid files to upload. Only PDF, Word, PowerPoint, Excel, Text, and "
+"No valid files to upload. Only PDF, Word, PowerPoint, Excel, Text, CSV, and "
 "OpenDocument files are allowed."
 msgstr ""
 
@@ -1205,40 +1475,46 @@ msgstr ""
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Notes"
-msgstr ""
+msgstr "Заметки"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/im_status_patch.xml:0
 msgid "Online"
-msgstr ""
+msgstr "Онлайн"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent_source.py:0
 msgid "Only administrators can create sources from URLs."
+msgstr "Только администраторы могут создавать источники из URL."
+
+#. module: ai
+#. odoo-python
+#: code:addons/ai/models/ai_agent.py:0
+msgid "Oops, it looks like our AI is unreachable"
 msgstr ""
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_embedding__embedding_model__text-embedding-3-small
 msgid "OpenAI"
-msgstr ""
+msgstr "OpenAI"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_res_config_settings__openai_key
 msgid "OpenAI API key"
-msgstr ""
+msgstr "Ключ API OpenAI"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__partner_id
 msgid "Partner"
-msgstr ""
+msgstr "Партнер"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Paste your links, one per line"
-msgstr ""
+msgstr "Вставьте ссылки, по одной в строку"
 
 #. module: ai
 #. odoo-javascript
@@ -1249,13 +1525,13 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__processing
 msgid "Processing"
-msgstr ""
+msgstr "Обработка"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Processing..."
-msgstr ""
+msgstr "Обработка..."
 
 #. module: ai
 #. odoo-javascript
@@ -1263,120 +1539,122 @@ msgstr ""
 #: code:addons/ai/static/src/core/html_editor/prompt_plugin.js:0
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
 msgid "Prompt"
-msgstr ""
+msgstr "Промпт"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_prompt_button
 msgid ""
 "Prompt that can be attached to AI UI rules for quick access by the user."
 msgstr ""
+"Промпт, который можно привязать к правилам интерфейса ИИ для быстрого "
+"доступа пользователем."
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ir_actions_server__ai_action_prompt
 #: model:ir.model.fields,help:ai.field_ir_cron__ai_action_prompt
 msgid "Prompt used by \"AI\" action"
-msgstr ""
+msgstr "Промпт, используемый действием «ИИ»"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.res_config_settings_view_form
 msgid "Provide your API key to connect with your account"
-msgstr ""
+msgstr "Укажите API-ключ для подключения к вашему аккаунту"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
 msgid "Record"
-msgstr ""
+msgstr "Запись"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_records_selector_plugin.js:0
 msgid "Records Selector"
-msgstr ""
+msgstr "Селектор записей"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Required"
-msgstr ""
+msgstr "Обязательно"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__response_style
 msgid "Response Style"
-msgstr ""
+msgstr "Стиль ответа"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__restrict_to_sources
 msgid "Restrict to Sources"
-msgstr ""
+msgstr "Ограничить источники"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__html_field_text_select
 msgid "Rewrite content"
-msgstr ""
+msgstr "Переписать содержимое"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__name
 msgid "Rule Name"
-msgstr ""
+msgstr "Имя правила"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Save"
-msgstr ""
+msgstr "Сохранить"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_prompt.xml:0
 msgid "Save & Generate"
-msgstr ""
+msgstr "Сохранить и сгенерировать"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
 msgid "Select a records"
-msgstr ""
+msgstr "Выбрать запись"
 
 #. module: ai
 #. odoo-javascript
-#: code:addons/ai/static/src/web/systray_action.js:0
+#: code:addons/ai/static/src/ai_chat_launcher_service.js:0
 msgid "Send Message"
-msgstr ""
+msgstr "Отправить сообщение"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/discuss/message_actions_patch.js:0
 msgid "Send as Message"
-msgstr ""
+msgstr "Отправить как сообщение"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__sequence
 #: model:ir.model.fields,field_description:ai.field_ai_prompt_button__sequence
 msgid "Sequence"
-msgstr ""
+msgstr "Последовательность"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ir_actions_server
 msgid "Server Action"
-msgstr ""
+msgstr "Действие сервера"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Share by email"
-msgstr ""
+msgstr "Поделиться по e-mail"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 msgid "Share transcript summary"
-msgstr ""
+msgstr "Поделиться сводкой диалога"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
 msgid "Short explanation of what this does"
-msgstr ""
+msgstr "Краткое описание выполняемой функции"
 
 #. module: ai
 #. odoo-javascript
@@ -1385,121 +1663,123 @@ msgid ""
 "Some URLs are invalid and were skipped. URLs must start with http://, "
 "https://, or ftp://"
 msgstr ""
+"Некоторые URL-адреса недействительны и были пропущены. URL-адреса должны "
+"начинаться с http://, https:// или ftp://"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid ""
 "Some files have invalid formats and were skipped: %s. Only PDF, Word, "
-"PowerPoint, Excel, Text, and OpenDocument files are allowed."
+"PowerPoint, Excel, Text, CSV, and OpenDocument files are allowed."
 msgstr ""
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/views/fields/source_size_field.js:0
 msgid "SourceSizeIntegerField"
-msgstr ""
+msgstr "SourceSizeIntegerField"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__sources_ids
 msgid "Sources"
-msgstr ""
+msgstr "Источники"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__sources_fully_processed
 msgid "Sources Fully Processed"
-msgstr ""
+msgstr "Источники полностью обработаны"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Start Recording"
-msgstr ""
+msgstr "Начать запись"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
 msgid "Start recording to get a real-time transcript of the conversation"
-msgstr ""
+msgstr "Начните запись для получения расшифровки разговора в реальном времени"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__status
 msgid "Status"
-msgstr ""
+msgstr "Статус"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Stop Recording"
-msgstr ""
+msgstr "Остановить запись"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Summary"
-msgstr ""
+msgstr "Краткое описание"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__voice_transcription_component
 msgid "Summary Buttons for Voice Transcription Component"
-msgstr ""
+msgstr "Смарт-кнопки управления компонентом голосовой расшифровки"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__is_system_agent
 msgid "System Agent"
-msgstr ""
+msgstr "Системный агент"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__system_prompt
 msgid "System Prompt"
-msgstr ""
+msgstr "Системный промпт"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
 msgid "System agents cannot be deleted."
-msgstr ""
+msgstr "Системные агенты нельзя удалить."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_composer.py:0
 msgid "System default prompts cannot be removed."
-msgstr ""
+msgstr "Системные промпты по умолчанию нельзя удалить."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/plugins/chatgpt_plugin.js:0
 msgid "Text Selection"
-msgstr ""
+msgstr "Выделение текста"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
 msgid "The action '%s' cannot be used as an AI tool."
-msgstr ""
+msgstr "Действие «%s» не может использоваться как инструмент ИИ."
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_composer__name
 msgid "The identifier for the interface component to agent rule"
-msgstr ""
+msgstr "Идентификатор для связи компонента интерфейса с правилом агента"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.js:0
 msgid "The name should be unique"
-msgstr ""
+msgstr "Имя должно быть уникальным"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
 msgid "The partner linked to an AI agent can't be changed"
-msgstr ""
+msgstr "Партнер, связанный с ИИ-агентом, не может быть изменен"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_prompt_button__name
 msgid "The prompt sent to the AI when clicked on"
-msgstr ""
+msgstr "Промпт, отправляемый ИИ при нажатии"
 
 #. module: ai
 #. odoo-python
@@ -1507,7 +1787,7 @@ msgstr ""
 msgid ""
 "The type of the parameter '%(name)s' is incorrect. It should be '%"
 "(expected_param_type)s'."
-msgstr ""
+msgstr "Тип параметра «%(name)s» неверен. Ожидается «%(expected_param_type)s»."
 
 #. module: ai
 #. odoo-python
@@ -1516,18 +1796,20 @@ msgid ""
 "The value '%(value)s' of the parameter '%(name)s' doesn't match the expected "
 "pattern '%(expected_pattern)s'."
 msgstr ""
+"Значение «%(value)s» параметра «%(name)s» не соответствует ожидаемому "
+"шаблону «%(expected_pattern)s»."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
 msgid "This action cannot be executed by an AI."
-msgstr ""
+msgstr "Это действие не может быть выполнено ИИ."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
 msgid "This action is interactive and cannot be executed by the agent."
-msgstr ""
+msgstr "Это действие является интерактивным и не может быть выполнено агентом."
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ir_actions_server__ai_tool_allow_end_message
@@ -1536,12 +1818,13 @@ msgid ""
 "This tool is automatically provided with `__end_message` param which when "
 "provided, the LLM processing loop is terminated."
 msgstr ""
+"Этот инструмент имеет параметр __end_message, завершающий цикл обработки LLM."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Those parameters will be passed as global variables of the actions."
-msgstr ""
+msgstr "Эти параметры будут переданы как глобальные переменные действий."
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.mail_template_view_form
@@ -1549,40 +1832,46 @@ msgid ""
 "Tip: Write /field to insert values or /prompt to integrate AI-generated "
 "dynamic content!"
 msgstr ""
+"Совет: Введите /field для вставки значений или /prompt для интеграции "
+"динамического контента, сгенерированного ИИ!"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_topic__name
 msgid "Title"
-msgstr ""
+msgstr "Заголовок"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
 msgid "To return a result to the AI agent, do <code>ai['result'] = ...</code>"
 msgstr ""
+"Чтобы вернуть результат ИИ-агенту, используйте <code>ai['result'] = ...</"
+"code>"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_ids
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_ids
 msgid "Tools"
-msgstr ""
+msgstr "Инструменты"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__topic_ids
 msgid "Topics"
-msgstr ""
+msgstr "Темы"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Transcript"
-msgstr ""
+msgstr "Расшифровка"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_natural_language_service.js:0
 msgid "Tried to switch to %s but the app is no longer in an action window."
 msgstr ""
+"Попытка переключиться на %s не удалась, так как модуль больше не находится в "
+"окне действия."
 
 #. module: ai
 #. odoo-javascript
@@ -1591,7 +1880,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__state
 #: model:ir.model.fields,field_description:ai.field_ir_cron__state
 msgid "Type"
-msgstr ""
+msgstr "Тип"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ir_actions_server__state
@@ -1622,7 +1911,7 @@ msgstr ""
 "- 'Выполнить код': выполнить блок Python-кода\n"
 "- 'Отправить вебхук-уведомление': отправить POST-запрос во внешнюю систему "
 "(вебхук)\n"
-"- 'Групповое действие': определите действие, которое запускает сразу "
+"- 'Групповое действие': определить действие, которое запускает сразу "
 "несколько действий сервера\n"
 
 #. module: ai
@@ -1632,102 +1921,96 @@ msgid "URL"
 msgstr "URL"
 
 #. module: ai
-#. odoo-python
-#: code:addons/ai/models/ai_agent_source.py:0
-msgid "URL content cannot be extracted."
-msgstr ""
-
-#. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 msgid "Unable to start the recording."
-msgstr ""
+msgstr "Невозможно начать запись."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_natural_language_service.js:0
 msgid "Unable to switch view"
-msgstr ""
+msgstr "Не удалось переключить представление"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/llm_api_service.py:0
 msgid "Unsupported provider '%s'"
-msgstr ""
+msgstr "Неподдерживаемый провайдер «%s»"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid "Upload a File"
-msgstr ""
+msgstr "Загрузить файл"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__use_in_ai
 #: model:ir.model.fields,field_description:ai.field_ir_cron__use_in_ai
 msgid "Use in AI"
-msgstr ""
+msgstr "Использовать в ИИ"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/discuss/message_actions_patch.js:0
 msgid "Use this"
-msgstr ""
+msgstr "Использовать это"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.res_config_settings_view_form
 msgid "Use your own ChatGPT account"
-msgstr ""
+msgstr "Использовать собственный аккаунт ChatGPT"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.res_config_settings_view_form
 msgid "Use your own Google Gemini account"
-msgstr ""
+msgstr "Использовать собственный аккаунт Google Gemini"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__user_has_access
 msgid "User Has Access"
-msgstr ""
+msgstr "У пользователя есть доступ"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 msgid "User error"
-msgstr ""
+msgstr "Ошибка пользователя"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/im_status_patch.xml:0
 msgid "User is online"
-msgstr ""
+msgstr "Пользователь в сети"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Voice Recording"
-msgstr ""
+msgstr "Голосовая запись"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
 msgid "Voice Transcript"
-msgstr ""
+msgstr "Расшифровка речи"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__mail_composer
 msgid "Write an email"
-msgstr ""
+msgstr "Написать письмо"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__html_field_record
 msgid "Write in an HTML field"
-msgstr ""
+msgstr "Ввести текст в HTML-поле"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/tools_schema/validators.py:0
 msgid "Wrong value %(value)s, should be in: %(enum)s"
-msgstr ""
+msgstr "Неверное значение %(value)s, допустимые значения: %(enum)s"
 
 #. module: ai
 #. odoo-javascript
@@ -1736,38 +2019,60 @@ msgid ""
 "You must allow the access to your microphone to start the recording. Try "
 "refreshing the page and start again."
 msgstr ""
+"Вы должны разрешить доступ к микрофону, чтобы начать запись. Попробуйте "
+"обновить страницу и начать снова."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "eg: New name to write"
-msgstr ""
+msgstr "напр.: новое имя для записи"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "eg: ^(\\\\([0-9]{3}\\\\))?[0-9]{3}-[0-9]{4}$"
-msgstr ""
+msgstr "напр.: ^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "eg: name"
-msgstr ""
+msgstr "напр.: имя"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "eg: red, blue, green"
-msgstr ""
+msgstr "напр.: красный, синий, зеленый"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
 msgid "executed."
-msgstr ""
+msgstr "выполнено."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "fa-hashtag"
-msgstr ""
+msgstr "fa-hashtag"
+
+#~ msgid "An error occurred while generating the AI response."
+#~ msgstr "Произошла ошибка при генерации ответа ИИ."
+
+#~ msgid "URL content cannot be extracted."
+#~ msgstr "Невозможно извлечь контент URL-адреса."
+
+#~ msgid ""
+#~ "No valid files to upload. Only PDF, Word, PowerPoint, Excel, Text, and "
+#~ "OpenDocument files are allowed."
+#~ msgstr ""
+#~ "Нет валидных файлов для загрузки. Разрешены только файлы PDF, Word, "
+#~ "PowerPoint, Excel, Text и OpenDocument."
+
+#~ msgid ""
+#~ "Some files have invalid formats and were skipped: %s. Only PDF, Word, "
+#~ "PowerPoint, Excel, Text, and OpenDocument files are allowed."
+#~ msgstr ""
+#~ "Некоторые файлы имеют неверный формат и были пропущены: %s. Разрешены "
+#~ "только файлы в формате PDF, Word, PowerPoint, Excel, Text и OpenDocument."

@@ -38,15 +38,19 @@ class HrExpense(models.Model):
             expense.is_card_expense = bool(expense.card_id)
 
     def _get_default_responsible_for_approval(self):
-        # EXTEND hr_expense to bypass approval for expenses created from a stripe authorization/
+        # EXTEND hr_expense to bypass approval for expenses created from a stripe authorization
         self.ensure_one()
         if self.sudo().card_id:
             return self.env['res.users']
         else:
             return super()._get_default_responsible_for_approval()
 
+    def _can_be_autovalidated(self):
+        # EXTEND hr_expense to bypass approval for expenses created from a stripe authorization
+        return super()._can_be_autovalidated() or bool(self.sudo().card_id)
+
     def _do_approve(self, check=True):
-        # EXTEND hr_expense to bypass approval for expenses created from a stripe transaction
+        # EXTEND hr_expense to bypass approval for expenses created from a stripe authorization
         expenses_from_stripe = self.filtered(lambda exp: exp.sudo().card_id and exp.state in {'submitted', 'draft'})
         for expense in expenses_from_stripe:
             expense.sudo().write({
@@ -81,8 +85,7 @@ class HrExpense(models.Model):
 
     @api.model
     def _create_from_stripe_authorization(self, auth_object, refusal_reason=None):
-        """ Create an expense from a stripe `authorization.request` event, when refused. Used to log the refusal and the reason
-        why it was refused.
+        """ Create an expense from a stripe `authorization.request` event, refused if refusal_reason is specified.
         """
         merchant_data = auth_object['merchant_data']
         amount_object = auth_object['pending_request'] or auth_object  # The key is always present, but the value may be empty
@@ -133,10 +136,13 @@ class HrExpense(models.Model):
             'payment_method_line_id': card.payment_method_line_id.id,
             'vendor_id': vendor and vendor.id,
         }
-        if isinstance(refusal_reason, LazyGettext):
-            refusal_reason = refusal_reason._translate(card.sudo().employee_id.lang)  # pylint: disable=gettext-variable
         new_expense = self.env['hr.expense'].with_company(card.company_id).create([create_dict])
-        new_expense._do_refuse(refusal_reason)
+        if refusal_reason:
+            if isinstance(refusal_reason, LazyGettext):
+                refusal_reason = refusal_reason._translate(card.sudo().employee_id.lang)  # pylint: disable=gettext-variable
+            new_expense._do_refuse(refusal_reason)
+        else:
+            new_expense._stripe_create_user_activity()
         return new_expense
 
     def _update_from_stripe_authorization(self, auth_object):
@@ -374,3 +380,16 @@ class HrExpense(models.Model):
             'res_id': self.card_id.id,
         })
         return action
+
+    def action_submit(self):
+        # EXTEND hr_expense
+        if any(expense for expense in self if expense.state == 'draft' and expense.stripe_authorization_id and not expense.stripe_transaction_id):
+            raise UserError(self.env._("You cannot submit an expense that is reserved. Please wait for the transaction to be captured."))
+        return super().action_submit()
+
+    def action_split_wizard(self):
+        # EXTEND hr_expense
+        self.ensure_one()
+        if self.state == 'draft' and self.stripe_authorization_id and not self.stripe_transaction_id:
+            raise UserError(self.env._("You cannot split an expense that is reserved. Please wait for the transaction to be captured."))
+        return super().action_split_wizard()

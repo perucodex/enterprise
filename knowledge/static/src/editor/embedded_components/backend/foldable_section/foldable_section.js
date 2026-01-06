@@ -14,7 +14,9 @@ export class FoldableSection extends ReadonlyFoldableSection {
         this.state = useEmbeddedState(this.props.host);
     }
     onInputChange(ev) {
-        this.env.editorShared.setCursorEnd(this.editableDescendants.title.firstElementChild);
+        this.env.editorShared.selection.setCursorEnd(
+            this.editableDescendants.title.firstElementChild
+        );
         super.onInputChange(ev);
     }
 }

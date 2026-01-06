@@ -1,10 +1,10 @@
 import { browser } from "@web/core/browser/browser";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { Domain } from "@web/core/domain";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { getCommonEmbeddedActions } from "@documents/views/utils";
-
 
 export const DocumentsModelMixin = (component) =>
     class extends component {
@@ -117,6 +117,21 @@ export const DocumentsModelMixin = (component) =>
             this.documentService.setPreviewedDocument(null);
         }
 
+        get isDomainSelected() {
+            return this.root.isDomainSelected && !this.documentService.previewedDocument;
+        }
+
+        getResIds(extraDomain) {
+            if (extraDomain) {
+                const newDomain = Domain.and([this.root.domain, extraDomain]).toList();
+                return this.orm.search("documents.document", newDomain, {
+                    limit: this.activeIdsLimit,
+                    context: this.root.context,
+                });
+            }
+            return this.root.getResIds(true);
+        }
+
         get targetRecords() {
             return this.documentService.rightPanelReactive.previewedDocument
                 ? [this.documentService.rightPanelReactive.previewedDocument.record]
@@ -204,14 +219,14 @@ export const DocumentsModelMixin = (component) =>
                     confirmLabel: _t("Unlock"),
                     confirm: async () => {
                         await this.orm.call("documents.document", "toggle_lock", [record.data.id]);
-                        await record.load();
+                        await this._notifyChange();
                     },
                     cancelLabel: _t("Discard"),
                     cancel: () => {},
                 });
             } else {
                 await this.orm.call("documents.document", "toggle_lock", [record.data.id]);
-                await record.load();
+                await this._notifyChange();
             }
         }
 
@@ -228,11 +243,12 @@ export const DocumentsModelMixin = (component) =>
         async onCreateShortcut() {
             const documents = this.targetRecords;
             await this.documentService.openOperationDialog({
-                documents: documents.map((d) => ({
-                    id: d.data.id,
-                    name: d.data.name,
-                    shortcut_document_id: d.data.shortcut_document_id,
-                })),
+                documents: this.isDomainSelected
+                    ? (await this.getResIds()).map((d) => ({ id: d }))
+                    : documents.map((d) => ({
+                          id: d.data.id,
+                          name: d.data.name,
+                      })),
                 operation: "shortcut",
                 onClose: async () => this._notifyChange(),
             });
@@ -242,9 +258,6 @@ export const DocumentsModelMixin = (component) =>
          * Unlink the selected documents if they are archived.
          */
         async onDelete() {
-            const records = !this.documentService.userIsInternal
-                ? this.targetRecords
-                : this.targetRecords.filter((r) => !r.data.active);
             const confirmed = await new Promise((resolve) => {
                 const dialogProps = {
                     title: _t("Delete permanently"),
@@ -266,7 +279,19 @@ export const DocumentsModelMixin = (component) =>
             if (!confirmed) {
                 return;
             }
-            await this.root.deleteRecords(records);
+            if (!this.isDomainSelected) {
+                const records = !this.documentService.userIsInternal
+                    ? this.targetRecords
+                    : this.targetRecords.filter((r) => !r.data.active);
+                await this.root.deleteRecords(records);
+            } else {
+                const resIds = !this.documentService.userIsInternal
+                    ? await this.getResIds()
+                    : await this.getResIds([["active", "=", false]]);
+                await this.orm.unlink("documents.document", resIds, {
+                    context: this.root.context,
+                });
+            }
             await this._notifyChange();
         }
 
@@ -275,7 +300,9 @@ export const DocumentsModelMixin = (component) =>
          */
         async onArchive() {
             const records = this.targetRecords.filter((r) => r.data.active && !r.data.lock_uid);
-            const recordIds = records.map((r) => r.data.id);
+            const recordIds = this.isDomainSelected
+                ? await this.getResIds([["lock_uid", "=", false]])
+                : records.map((rec) => rec.data.id);
             await this.documentService.moveToTrash(recordIds);
             await this._notifyChange();
         }
@@ -286,11 +313,12 @@ export const DocumentsModelMixin = (component) =>
         async onDuplicate() {
             const documents = this.targetRecords;
             await this.documentService.openOperationDialog({
-                documents: documents.map((d) => ({
-                    id: d.data.id,
-                    name: d.data.name,
-                    shortcut_document_id: d.data.shortcut_document_id,
-                })),
+                documents: this.isDomainSelected
+                    ? (await this.getResIds()).map((d) => ({ id: d }))
+                    : documents.map((d) => ({
+                          id: d.data.id,
+                          name: d.data.name,
+                      })),
                 operation: "copy",
                 onClose: async () => this.env.searchModel._reloadSearchModel(true),
             });
@@ -308,7 +336,9 @@ export const DocumentsModelMixin = (component) =>
          */
         async onRestore() {
             const records = this.targetRecords.filter((r) => !r.data.active);
-            const recordIds = records.map((r) => r.data.id);
+            const recordIds = this.isDomainSelected
+                ? await this.getResIds([["active", "=", false]])
+                : records.map((r) => r.data.id);
             await this.orm.call("documents.document", "action_unarchive", [recordIds]);
             await this.env.searchModel._reloadSearchModel(true);
         }
@@ -356,11 +386,12 @@ export const DocumentsModelMixin = (component) =>
         async onMove() {
             const documents = this.targetRecords.filter((r) => r.data.user_can_move);
             await this.documentService.openOperationDialog({
-                documents: documents.map((d) => ({
-                    id: d.data.id,
-                    name: d.data.name,
-                    shortcut_document_id: d.data.shortcut_document_id,
-                })),
+                documents: this.isDomainSelected
+                    ? (await this.getResIds()).map((d) => ({ id: d }))
+                    : documents.map((d) => ({
+                          id: d.data.id,
+                          name: d.data.name,
+                      })),
                 operation: "move",
                 onClose: async () => this.env.searchModel._reloadSearchModel(true),
             });
@@ -400,6 +431,19 @@ export const DocumentsModelMixin = (component) =>
          * Download the selected documents.
          */
         async onDownload() {
-            this.documentService.downloadDocuments(this.targetRecords);
+            if (this.isDomainSelected) {
+                const domain = Domain.and([
+                    [["type", "!=", "url"]],
+                    Domain.or([
+                        [["type", "=", "folder"]],
+                        [["attachment_id", "!=", false]],
+                        [["shortcut_document_id.attachment_id", "!=", false]],
+                    ]),
+                ]);
+                const resIds = await this.getResIds(domain);
+                this.documentService.downloadDocuments(this.targetRecords, resIds);
+            } else {
+                this.documentService.downloadDocuments(this.targetRecords);
+            }
         }
     };

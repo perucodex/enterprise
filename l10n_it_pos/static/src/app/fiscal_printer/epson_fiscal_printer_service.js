@@ -13,6 +13,7 @@ import {
 } from "@l10n_it_pos/app/documents";
 import {
     PrintDuplicateReceipt,
+    PrintContentByNumbers,
     DisplayText,
     OpenDrawer,
     RTStatus,
@@ -24,6 +25,7 @@ const DEFAULT_DEVID = "local_printer";
 const CONFIG = {
     isHttps: false,
     ip: null,
+    printerLogin: null,
     showErrorInDialog: true,
     logCommands: true,
 };
@@ -32,7 +34,13 @@ class EpsonFiscalPrinter extends Reactive {
     constructor(isHttps, ip, ...args) {
         super(...args);
         this.setup(...args);
-        CONFIG.ip = ip;
+        // workaround for duplicate receipt printing
+        // the italian printer IP can have the special form my_fiscal_printer_ip?login=xxxxx
+        // if the user ever modified the printer login (12345 by default)
+        const [baseIp, query = ""] = ip.split("?");
+        CONFIG.ip = baseIp;
+        const prefix = "login=";
+        CONFIG.printerLogin = query.startsWith(prefix) ? query.slice(prefix.length) : "12345";
         CONFIG.isHttps = isHttps;
     }
     setup(env, { dialog, epson_fiscal_printer_command }) {
@@ -93,6 +101,24 @@ class EpsonFiscalPrinter extends Reactive {
     async getPrinterSerialNumber() {
         const result = await this.directIO("3217", "01");
         return result.addInfo.responseData;
+    }
+
+    /*
+     * In theory, the printer command can reprint any number of receipts.
+     * We decide that we will only use it to reprint the one receipt selected by the user.
+     * This moves the complexity of parsing date strings and ranges to the command component and
+     * therefore will keep the rest of the code cleaner
+     */
+    async printContentByNumbers({ timeout, devid, order } = {}) {
+        // must be logged in to print fiscal data :facepalm:
+        // magic prepend "02" and pad to 100 comes from the documentation
+        let passwordParam = "02" + CONFIG.printerLogin;
+        passwordParam = passwordParam.padEnd(100, " ");
+        await this.directIO("4038", passwordParam);
+
+        //once logged in, actually do the print
+        const command = await this.command.create(PrintContentByNumbers, { order: order });
+        return this.sendCommand(command, { timeout, devid });
     }
 
     async sendCommand(command, { timeout, devid } = {}) {

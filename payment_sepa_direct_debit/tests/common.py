@@ -2,6 +2,7 @@
 
 from odoo import fields
 from odoo.fields import Command
+from odoo.tests.common import new_test_user
 
 from odoo.addons.account_payment.tests.common import AccountPaymentCommon
 from odoo.addons.payment_custom.tests.common import PaymentCustomCommon
@@ -48,3 +49,7 @@ class SepaDirectDebitCommon(AccountPaymentCommon, PaymentCustomCommon):
 
         cls.provider = cls.sepa
         cls.currency = cls.currency_euro
+
+        cls.invoicing_banks_user = new_test_user(
+            cls.env, 'invoicing_banks_user', groups='account.group_account_basic'
+        )

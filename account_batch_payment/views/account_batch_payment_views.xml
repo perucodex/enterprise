@@ -26,10 +26,15 @@ if records:
                     <button id="validate_button" name="validate_batch_button" class="oe_highlight" string="Validate" type="object" invisible="state != 'draft' or not payment_ids"/>
                     <field name="state" widget="statusbar"/>
                 </header>
+                <field name="invalid_sct_partners_ids" invisible="1"/>
+                <div class="alert alert-danger" invisible="not invalid_sct_partners_ids" role="alert">
+                    The country or city of <a type="object" name="action_invalid_partners_from_sct">these partners</a>
+                    is not set, which could cause the file to be refused by the bank.
+                </div>
                 <sheet>
                     <group>
                         <group>
-                            <field name="batch_type" readonly="payment_ids.length"/>
+                            <field name="batch_type" readonly="payment_ids.length" force_save="1"/>
                             <field name="journal_id" domain="[('type', '=', 'bank')]" options="{'no_open': True, 'no_create': True}" readonly="state != 'draft'"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="available_payment_method_ids" invisible="1"/>

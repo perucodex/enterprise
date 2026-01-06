@@ -27,7 +27,6 @@ export class FoldableSectionPlugin extends Plugin {
                 text: _t("Type something inside this section"),
             }),
         ],
-        mount_component_handlers: this.setupNewFoldableSection.bind(this),
         move_node_blacklist_selectors: `${hostSelector} ${titleSelector} > ${baseContainerGlobalSelector}`,
         user_commands: [
             {
@@ -81,16 +80,6 @@ export class FoldableSectionPlugin extends Plugin {
             )
         );
         this.dependencies.history.addStep();
-    }
-    setupNewFoldableSection({ name, env }) {
-        if (name !== "foldableSection") {
-            return;
-        }
-        Object.assign(env, {
-            editorShared: {
-                ...this.dependencies.selection,
-            },
-        });
     }
     showPowerButtons(selection) {
         return (

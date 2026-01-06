@@ -403,6 +403,7 @@ class AccountPartnerLedgerReportHandler(models.AbstractModel):
         queries = []
         report = self.env.ref('account_reports.partner_ledger_report')
         for column_group_key, column_group_options in report._split_options_per_column_group(options).items():
+            partner_ids = column_group_options.pop('partner_ids')
             query = report._get_report_query(column_group_options, 'from_beginning')
             queries.append(SQL(
                 """
@@ -422,6 +423,7 @@ class AccountPartnerLedgerReportHandler(models.AbstractModel):
                 %(currency_table_join)s
                 WHERE partial.max_date <= %(date_to)s AND %(search_condition)s
                     AND account_move_line.partner_id IS NULL
+                    %(partner_id_constraint)s
                 GROUP BY aml_with_partner.partner_id
                 """,
                 column_group_key=column_group_key,
@@ -432,6 +434,7 @@ class AccountPartnerLedgerReportHandler(models.AbstractModel):
                 currency_table_join=report._currency_table_aml_join(column_group_options, aml_alias=SQL("aml_with_partner")),
                 date_to=column_group_options['date']['date_to'],
                 search_condition=query.where_clause,
+                partner_id_constraint=SQL(' AND aml_with_partner.partner_id IN %s', tuple(partner_ids)) if partner_ids else SQL(''),
             ))
 
         return SQL(" UNION ALL ").join(queries)
@@ -544,6 +547,7 @@ class AccountPartnerLedgerReportHandler(models.AbstractModel):
         additional_columns = self._get_additional_column_aml_values()
         order_by = self._get_order_by_aml_values()
         for column_group_key, group_options in report._split_options_per_column_group(options).items():
+            group_options.pop('partner_ids')   # Handled by the partner_ids parameter, to support the case of misc entries (without partner) reconciled with invoices
             query = report._get_report_query(group_options, 'strict_range')
             account_alias = query.left_join(lhs_alias='account_move_line', lhs_column='account_id', rhs_table='account_account', rhs_column='id', link='account_id')
             account_code = self.env['account.account']._field_to_sql(account_alias, 'code', query)

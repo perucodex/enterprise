@@ -8,6 +8,7 @@ class Provider(NamedTuple):
     name: str
     display_name: str
     embedding_model: str
+    embedding_config: dict
     llms: list[tuple[str, str]]
 
 
@@ -16,6 +17,11 @@ PROVIDERS = [
         "openai",
         "OpenAI",
         "text-embedding-3-small",
+        {
+            # https://platform.openai.com/docs/api-reference/embeddings/create
+            "max_batch_size": 2048,
+            "max_tokens_per_request": 200000,
+        },
         [
             ("gpt-3.5-turbo", "GPT-3.5 Turbo"),
             ("gpt-4", "GPT-4"),
@@ -30,6 +36,11 @@ PROVIDERS = [
         "google",
         "Google",
         "gemini-embedding-001",
+        {
+            # https://googleapis.dev/python/generativelanguage/latest/_modules/google/ai/generativelanguage_v1alpha/types/text_service.html#BatchEmbedTextRequest
+            "max_batch_size": 100,
+            "max_tokens_per_request": 10000,
+        },
         [
             ("gemini-2.5-pro", "Gemini 2.5 Pro"),
             ("gemini-2.5-flash", "Gemini 2.5 Flash"),
@@ -57,3 +68,10 @@ def get_provider(env, llm_model):
         if llm_model in [m[0] for m in p.llms]:
             return p.name
     raise UserError(env._("No provider found for the selected model"))
+
+
+def get_embedding_config(env, provider):
+    for p in PROVIDERS:
+        if p.name == provider:
+            return p.embedding_config
+    raise UserError(env._("No embedding configuration found for the provider"))

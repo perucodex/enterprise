@@ -138,7 +138,16 @@ export class TaskGanttModel extends TaskGanttModelCommon {
             }
         }
         if (displayUnassigned) {
-            domain = Domain.or([domain, "[('user_ids', '=', false)]"]).toList();
+            const domainList = new Domain(domain).toList();
+            const projectId = context?.default_project_id || null;
+            let unassignedOnlyDomain = new Domain([["user_ids", "=", false]]);
+            if (projectId) {
+                unassignedOnlyDomain = Domain.and([
+                    unassignedOnlyDomain,
+                    [["project_id", "=", projectId]],
+                ]);
+            }
+            domain = Domain.or([domainList, unassignedOnlyDomain]).toList();
         }
         searchParams.domain = this._processSearchDomain(domain);
         return super.load({ ...searchParams, context: { ...context }, displayUnassigned });

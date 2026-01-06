@@ -92,3 +92,44 @@ class TestBarcodeClientActionPicking(TestBarcodeClientAction):
             {'title': 'check product 2', 'quality_state': 'fail'},
         ])
         self.assertEqual(quality_checks.picking_id.state, "done")
+
+    def test_quality_check_partial_reception_barcode(self):
+        """
+        Check that quality checks triggered at validation are related to the products
+        that are picked (hence moved).
+        """
+        self.env['quality.point'].create([
+            {
+                'title': f"check on {measure_on}",
+                'measure_on': measure_on,
+                'product_ids': [Command.link(product.id)],
+                'picking_type_ids': [Command.link(self.picking_type_in.id)],
+            } for measure_on, product in (('product', self.product1), ('move_line', self.productserial1))
+        ])
+
+        picking_in = self.env['stock.picking'].create({
+            'name': 'WHINQCPRB',
+            'picking_type_id': self.picking_type_in.id,
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'move_ids': [
+                Command.create({
+                    'product_id': product.id,
+                    'product_uom': product.uom_id.id,
+                    'product_uom_qty': 2,
+                    'location_id': self.supplier_location.id,
+                    'location_dest_id': self.stock_location.id,
+                }) for product in (self.product1, self.productserial1)
+            ],
+        })
+        picking_in.action_confirm()
+        self.assertRecordValues(picking_in.check_ids.sorted(lambda qc: qc.point_id.id), [
+            {'product_id': self.product1.id, 'measure_on': 'product'},
+            {'product_id': self.productserial1.id, 'measure_on': 'move_line'},
+            {'product_id': self.productserial1.id, 'measure_on': 'move_line'},
+        ])
+        self.start_tour("/odoo/barcode", "test_quality_check_partial_reception_barcode", login="admin")
+        self.assertEqual(picking_in.state, 'done')
+        self.assertRecordValues(picking_in.check_ids, [
+            {'product_id': self.productserial1.id, 'measure_on': 'move_line', 'quality_state': 'pass', 'lot_name': 'SN001'},
+        ])

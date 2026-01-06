@@ -7,6 +7,7 @@ import { Component, useState, useEffect, onWillStart, useRef } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
 import { InputVerificationCode } from "./verification_code_input";
+import { cookie } from "@web/core/browser/cookie";
 
 class PrivateCardViewDialog extends Component {
     static template = "hr_expense_stripe.privateCardViewDialog";
@@ -152,7 +153,7 @@ class PrivateCardViewDialog extends Component {
                     ephemeralKeySecret: this.state.ephemeralKey,
                     style: {
                         base: {
-                            color: '#000',
+                            color: cookie.get("color_scheme") === "dark" ? '#fff' : '#000',
                             fontWeight: 400,
                             fontSize: '14px',
                             alignSelf: 'center'

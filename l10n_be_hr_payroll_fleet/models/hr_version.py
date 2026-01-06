@@ -1,6 +1,5 @@
 from odoo import api, fields, models
 from odoo.fields import Domain
-from odoo.addons.fleet.models.fleet_vehicle_model import FUEL_TYPES
 
 
 class HrVersion(models.Model):
@@ -11,21 +10,12 @@ class HrVersion(models.Model):
         domain = Domain.AND([
             Domain.OR([
                 [('company_id', '=', False)],
-                [('company_id', '=', self.company_id.id)]
+                [('company_id', '=', self.company_id.id)],
             ]),
-            Domain.AND([
-                Domain.AND([
-                    Domain.OR([
-                        [('future_driver_id', '=', False)],
-                        [('future_driver_id', 'in', driver_ids.ids if driver_ids else [])],
-                    ]),
-                    [('model_id.vehicle_type', '=', vehicle_type)],
-                ]),
-                Domain.OR([
-                    [('driver_id', '=', False)],
-                    [('driver_id', 'in', driver_ids.ids if driver_ids else [])],
-                    [('plan_to_change_car', '=', True)] if vehicle_type == 'car' else [('plan_to_change_bike', '=', True)]
-                ])
+            [('model_id.vehicle_type', '=', vehicle_type)],
+            Domain.OR([
+                [(f'plan_to_change_{vehicle_type}', '=', True)],
+                [('future_driver_id', 'in', driver_ids.ids if driver_ids else [])],
             ]),
             [('write_off_date', '=', False)],
         ])
@@ -94,7 +84,7 @@ class HrVersion(models.Model):
     max_unused_cars = fields.Integer(compute='_compute_max_unused_cars', groups='hr.group_hr_user')
     acquisition_date = fields.Date(related='car_id.acquisition_date', readonly=False, groups="fleet.fleet_group_manager")
     car_value = fields.Float(related="car_id.car_value", readonly=False, groups="fleet.fleet_group_manager")
-    fuel_type = fields.Selection(selection=lambda self: FUEL_TYPES, compute="_compute_fuel_type", readonly=False, groups="fleet.fleet_group_manager")
+    fuel_type = fields.Selection(selection=lambda self: self.env['fleet.vehicle']._fields['fuel_type']._description_selection(self.env), compute="_compute_fuel_type", readonly=False, groups="fleet.fleet_group_manager")
     co2 = fields.Float(related="car_id.co2", readonly=False, groups="fleet.fleet_group_manager")
     driver_id = fields.Many2one('res.partner', related="car_id.driver_id", readonly=False, groups="fleet.fleet_group_manager")
     car_open_contracts_count = fields.Integer(compute='_compute_car_open_contracts_count', groups="fleet.fleet_group_manager")
@@ -222,16 +212,16 @@ class HrVersion(models.Model):
                     lambda c: c.state == 'open'
                 ).recurring_cost_amount_depreciated = version.recurring_cost_amount_depreciated
 
+    def _get_available_cars_domain(self):
+        return self._get_vehicles_without_current_drivers_domain(
+            self.employee_id.work_contact_id,
+        )
+
     @api.depends('name')
     def _compute_available_cars_amount(self):
         for version in self:
             version.available_cars_amount = self.env['fleet.vehicle'].sudo().search_count(
-                Domain.AND([
-                    version._get_vehicles_without_current_drivers_domain(
-                        version.employee_id.work_contact_id
-                    ),
-                    [('state_id.hide_in_offer', '=', False)]
-                ])
+                version._get_available_cars_domain(),
             )
 
     @api.depends('name')
@@ -270,7 +260,8 @@ class HrVersion(models.Model):
 
     def write(self, vals):
         # Force to track cars in employee form if any changes is found after version write
-        self.employee_id._track_prepare(["car_id", "ordered_car_id", "bike_id"])
+        if not self.env.context.get('tracking_disable'):
+            self.employee_id._track_prepare(["car_id", "ordered_car_id", "bike_id"])
         return super().write(vals=vals)
 
     def _get_fields_that_recompute_payslip(self):

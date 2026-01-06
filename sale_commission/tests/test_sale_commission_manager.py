@@ -44,7 +44,7 @@ class TestSaleCommissionManager(TestSaleCommissionCommon):
             })],
             'team_id': self.commission_user_1.sale_team_id.id,
         })
-
+        self.env['sale.commission.achievement.report']._pre_achievement_operation()
         achievements = self.env['sale.commission.achievement.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
         commissions = self.env['sale.commission.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
 
@@ -53,8 +53,7 @@ class TestSaleCommissionManager(TestSaleCommissionCommon):
         self.assertFalse(sum(commissions.mapped('target_amount')), 'SO has not been confirmed yet, there should be no commission.')
 
         SO.action_confirm()
-        self.env.invalidate_all()
-
+        self.env['sale.commission.achievement.report']._pre_achievement_operation()
         achievements = self.env['sale.commission.achievement.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
         commissions = self.env['sale.commission.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
 
@@ -66,8 +65,7 @@ class TestSaleCommissionManager(TestSaleCommissionCommon):
 
         AM = SO._create_invoices()
         AM._post()
-        self.env.invalidate_all()
-
+        self.env['sale.commission.achievement.report']._pre_achievement_operation()
         achievements = self.env['sale.commission.achievement.report'].search([('plan_id', '=', self.commission_plan_manager.id)]).\
             filtered(lambda x: x.related_res_id == AM.id and x.related_res_model == 'account.move')
         commissions = self.env['sale.commission.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
@@ -89,8 +87,7 @@ class TestSaleCommissionManager(TestSaleCommissionCommon):
             'team_id': self.commission_user_1.sale_team_id.id,
         })
         SO2.action_confirm()
-        self.env.invalidate_all()
-
+        self.env['sale.commission.achievement.report']._pre_achievement_operation()
         achievements = self.env['sale.commission.achievement.report'].search([('plan_id', '=', self.commission_plan_manager.id)]).\
             filtered(lambda x: x.related_res_id == SO2.id and x.related_res_model == 'sale.order')
         commissions = self.env['sale.commission.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
@@ -103,8 +100,7 @@ class TestSaleCommissionManager(TestSaleCommissionCommon):
 
         AM2 = SO2._create_invoices()
         AM2._post()
-        self.env.invalidate_all()
-
+        self.env['sale.commission.achievement.report']._pre_achievement_operation()
         achievements = self.env['sale.commission.achievement.report'].search([('plan_id', '=', self.commission_plan_manager.id)]).\
             filtered(lambda x: x.related_res_id == AM2.id and x.related_res_model == 'account.move')
         commissions = self.env['sale.commission.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
@@ -164,7 +160,7 @@ class TestSaleCommissionManager(TestSaleCommissionCommon):
             })],
             'team_id': self.commission_user_1.sale_team_id.id,
         })
-
+        self.env['sale.commission.achievement.report']._pre_achievement_operation()
         achievements = self.env['sale.commission.achievement.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
         commissions = self.env['sale.commission.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
 
@@ -172,8 +168,7 @@ class TestSaleCommissionManager(TestSaleCommissionCommon):
         self.assertEqual(len(commissions), 12, 'SO has not been confirmed yet, there should be no commission but we have forecast.')
 
         SO.action_confirm()
-        self.env.invalidate_all()
-
+        self.env['sale.commission.achievement.report']._pre_achievement_operation()
         achievements = self.env['sale.commission.achievement.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
         commissions = self.env['sale.commission.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
 
@@ -185,8 +180,7 @@ class TestSaleCommissionManager(TestSaleCommissionCommon):
 
         AM = SO._create_invoices()
         AM._post()
-        self.env.invalidate_all()
-
+        self.env['sale.commission.achievement.report']._pre_achievement_operation()
         achievements = self.env['sale.commission.achievement.report'].search([('plan_id', '=', self.commission_plan_manager.id)]).\
             filtered(lambda x: x.related_res_id == AM.id and x.related_res_model == 'account.move')
         commissions = self.env['sale.commission.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
@@ -208,8 +202,7 @@ class TestSaleCommissionManager(TestSaleCommissionCommon):
             'team_id': self.commission_user_1.sale_team_id.id,
         })
         SO2.action_confirm()
-        self.env.invalidate_all()
-
+        self.env['sale.commission.achievement.report']._pre_achievement_operation()
         achievements = self.env['sale.commission.achievement.report'].search([('plan_id', '=', self.commission_plan_manager.id)]).\
             filtered(lambda x: x.related_res_id == SO2.id and x.related_res_model == 'sale.order')
         commissions = self.env['sale.commission.report'].search([('plan_id', '=', self.commission_plan_manager.id)])
@@ -223,8 +216,7 @@ class TestSaleCommissionManager(TestSaleCommissionCommon):
                                                        'Amount = 3500 (AR = 2) + 200 (AR-2 * 500)')
         AM2 = SO2._create_invoices()
         AM2._post()
-        self.env.invalidate_all()
-
+        self.env['sale.commission.achievement.report']._pre_achievement_operation()
         achievements = self.env['sale.commission.achievement.report'].search([('plan_id', '=', self.commission_plan_manager.id)]).\
             filtered(lambda x: x.related_res_id == AM2.id and x.related_res_model == 'account.move')
         commissions = self.env['sale.commission.report'].search([('plan_id', '=', self.commission_plan_manager.id)])

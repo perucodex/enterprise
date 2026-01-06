@@ -3,7 +3,7 @@
 import { browser } from "@web/core/browser/browser";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
-import { useState } from "@odoo/owl";
+import { useState, markRaw } from "@odoo/owl";
 
 export class AccountReportController {
     constructor(action) {
@@ -20,10 +20,10 @@ export class AccountReportController {
 
     async load(env) {
         this.env = env;
-        this.reportOptionsMap = {};
+        this.reportOptionsMap = markRaw({});
         this.reportInformationMap = {};
         this.lastOpenedSectionByReport = {};
-        this.loadingCallNumberByCacheKey = new Proxy(
+        this.loadingCallNumberByCacheKey = markRaw(new Proxy(
             {},
             {
                 get(target, name) {
@@ -34,7 +34,7 @@ export class AccountReportController {
                     return true;
                 },
             }
-        );
+        ));
         this.actionReportId = this.action.context.report_id;
         const isOpeningReport = !this.action?.keep_journal_groups_options  // true when opening the report, except when coming from the breadcrumb
         const mainReportOptions = await this.loadReportOptions(this.actionReportId, false, this.action.params?.ignore_session, isOpeningReport);

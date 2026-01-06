@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from unittest.mock import patch
 from odoo.tests.common import tagged
 from odoo.addons.pos_restaurant.tests.test_frontend import TestFrontend
 from odoo import Command, http
@@ -19,6 +20,8 @@ class TestFiskalyPoS(TestFrontend):
             "l10n_de_fiskaly_organization_id": "12345679",
             "l10n_de_fiskaly_api_secret": "123456789",
             "l10n_de_fiskaly_api_key": "123456789",
+            "l10n_de_fiskaly_dsfinvk_token": "111111",
+            "l10n_de_vat_export_data": [{"percentage": 19, "vat_definition_export_id": 1}, {"percentage": 7, "vat_definition_export_id": 2}, {"percentage": 10.7, "vat_definition_export_id": 3}, {"percentage": 5.5, "vat_definition_export_id": 4}, {"percentage": 0, "vat_definition_export_id": 5}],
         })
         self.main_pos_config.write({
             "l10n_de_fiskaly_tss_id": "123456798",
@@ -82,24 +85,29 @@ class TestFiskalyPoS(TestFrontend):
             del PosController.fake_receipt_printer
             self.env.registry.clear_cache('routing')
 
+    def get_vat_definition_export_id(self):
+        return
+
     def test_fiskaly_basic_order(self):
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'FiskalyTour', login="pos_user")
+        with patch.object(self.env.registry['account.tax'], 'get_vat_definition_export_id', self.get_vat_definition_export_id):
+            self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'FiskalyTour', login="pos_user")
 
     def test_fiskaly_tss_payload(self):
-        # Change the payment method name to anything else than "Cash"
-        self.main_pos_config.payment_method_ids.filtered(lambda p: p.type == 'cash').name = "Random Name"
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'test_fiskaly_tss_payload', login="pos_user")
+        with patch.object(self.env.registry['account.tax'], 'get_vat_definition_export_id', self.get_vat_definition_export_id):
+            # Change the payment method name to anything else than "Cash"
+            self.main_pos_config.payment_method_ids.filtered(lambda p: p.type == 'cash').name = "Random Name"
+            self.main_pos_config.with_user(self.pos_user).open_ui()
+            self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'test_fiskaly_tss_payload', login="pos_user")
 
     def test_fiskaly_receipt_printer(self):
         """This test make sure that the receipt is printed only once.
            We use a route that will receive all the receipts and increment a counter."""
-        self.main_pos_config.write({
-            "iface_print_auto": True,
-            "other_devices": True,
-            "epson_printer_ip": "127.0.0.1:8069/receipt_receiver",
-        })
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'test_fiskaly_receipt_printer', login="pos_user")
-        self.assertEqual(self.received_receipt_count, 1)
+        with patch.object(self.env.registry['account.tax'], 'get_vat_definition_export_id', self.get_vat_definition_export_id):
+            self.main_pos_config.write({
+                "iface_print_auto": True,
+                "other_devices": True,
+                "epson_printer_ip": "127.0.0.1:8069/receipt_receiver",
+            })
+            self.main_pos_config.with_user(self.pos_user).open_ui()
+            self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'test_fiskaly_receipt_printer', login="pos_user")
+            self.assertEqual(self.received_receipt_count, 1)

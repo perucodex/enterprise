@@ -69,6 +69,8 @@ class ApprovalRequest(models.Model):
     def action_create_purchase_orders(self):
         """ Create and/or modifier Purchase Orders. """
         self.ensure_one()
+        if self.purchase_order_count:
+            return
         self._create_purchase_orders()
         self._log_po_creation_to_chatter()
 

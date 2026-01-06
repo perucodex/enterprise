@@ -22,6 +22,7 @@ from odoo.http import request
 from odoo.tools.mail import html_to_inner_content
 from odoo.tools.misc import mute_logger, submap
 
+from odoo.addons.ai.utils.ai_citation import apply_numeric_citations, get_attachment_ids_from_text
 from odoo.addons.ai.utils.llm_api_service import LLMApiService
 from odoo.addons.ai.utils.llm_providers import PROVIDERS, get_provider
 
@@ -54,7 +55,7 @@ PREPROMPTS = {
 
         2. For all other questions, you MUST ONLY use information from the provided context and conversation history.
 
-        3. If the context and history don't contain information to answer the query:
+        3. If the RAG context and history don't contain information to answer the query or it is not provided at all:
            - use the assistant/user messages as context or ask the user to provide more information.
            - DO NOT make up information or use your general knowledge.
 
@@ -69,13 +70,13 @@ PREPROMPTS = {
         7. Avoid using HTML elements in your response.
     """).strip(),
     'context': dedent("""
-        - Use the context to answer the question.
-        - Provide references to all attachments as a new paragraph at the end of the response, listing each reference in a bullet point.
-        - If your response doesn't make use of the context, don't list the attachments.
-    """).strip(),
-    'unaccessible_references': dedent("""
-        - Ignore UNACCESSIBLE_REFERENCES in the response's references even if you use them in your response.
-        - Append only accessible references to the response's references if you use them, if you don't use any in the response or only unaccessible ones, don't append any references.
+        - Use the RAG context to answer the question.
+        - Every claim or piece of information provided in the answer **MUST** be immediately followed by an inline citation in the format **[SOURCE:Attachment ID]** to indicate its source from the RAG context (e.g., "The capital of France is Paris [SOURCE:210].").
+        - If a claim draws on multiple sources, cite all of them (e.g., "The process requires heat and pressure [SOURCE:210, 211].").
+        - If **NO** source chunks were used to answer the question, do not include any citations.
+
+        - Example of the required format for the response with the attachment IDs [SOURCE:210, 211] in its answer:
+        - The primary goal of the project is to enhance data security protocols [SOURCE:210]. This enhancement includes a mandatory two-factor authentication system [SOURCE:211].
     """).strip(),
 }
 
@@ -403,22 +404,17 @@ class AIAgent(models.Model):
 
     def _generate_response_for_channel(self, mail_message, channel):
         self.ensure_one()
-
         prompt, session_info_context = self._parse_user_message(mail_message)
-        response = self.with_context(discuss_channel=channel)._generate_response(
-            prompt=prompt,
-            chat_history=[{'content': session_info_context, 'role': 'user'}] + self._retrieve_chat_history(channel),
-            extra_system_context=self._build_extra_system_context(channel),
-        )
-        for message in response or []:
-            self._post_ai_response(channel, message)
-
-    def _post_error_message(self, error_message: str, channel):
-        self.ensure_one()
-        response = self._generate_response(
-            prompt=f"Error '{error_message}' occured. Generate a message for the user stating that we are unable to process the request but don't mention any technical details. Perhaps also tell them to try again later.",
-            chat_history=self._retrieve_chat_history(channel),
-            extra_system_context="Do not mention any technical terms, links, or error codes in the generated message.")
+        try:
+            response = self.with_context(discuss_channel=channel)._generate_response(
+                prompt=prompt,
+                chat_history=[{'content': session_info_context, 'role': 'user'}] + self._retrieve_chat_history(channel),
+                extra_system_context=self._build_extra_system_context(channel),
+            )
+        except Exception:
+            if self.env.user._is_internal():
+                raise
+            response = [self.env._("Oops, it looks like our AI is unreachable")]
         for message in response or []:
             self._post_ai_response(channel, message)
 
@@ -449,7 +445,7 @@ class AIAgent(models.Model):
         if not ask_ai_agent:
             raise UserError(_('No configured Ask AI agent. Please contact your administrator.'))
 
-        channel = ask_ai_agent._get_or_create_ai_chat()
+        channel = ask_ai_agent._create_ai_chat_channel()
         return {
             'type': 'ir.actions.client',
             'tag': 'agent_chat_action',
@@ -533,7 +529,7 @@ class AIAgent(models.Model):
         system_messages = self._build_system_context(extra_system_context=extra_system_context)
         if rag_context := self._build_rag_context(prompt):
             system_messages.extend(rag_context)
-        return LLMApiService(env=self.env, provider=self._get_provider()).request_llm(
+        llm_response = LLMApiService(env=self.env, provider=self._get_provider()).request_llm(
             self.llm_model,
             system_messages,
             [],
@@ -541,6 +537,47 @@ class AIAgent(models.Model):
             tools=self.topic_ids.tool_ids._get_ai_tools(),
             temperature=TEMPERATURE_MAP[self.response_style],
         )
+        if rag_context:
+            llm_response = self._get_llm_response_with_sources(llm_response)
+
+        return llm_response
+
+    def _get_llm_response_with_sources(self, llm_response):
+        """
+        Parses inline citations (e.g., [SOURCE:210]) from each LLM message,
+        replaces them with clickable sequential superscript numbers, and enriches
+        the message content with a numbered list of corresponding source names
+        and links.
+
+        :param llm_response: The list of messages from the LLM
+        :type llm_response: list[str]
+        :return: The list of messages with the sources added
+        :rtype: list[str]
+        """
+        llm_response_with_sources = []
+        base_url = self.get_base_url()
+        link_attrs = 'target="_blank" rel="noreferrer noopener"'
+
+        for message_content in llm_response:
+            unique_attachment_ids = get_attachment_ids_from_text(message_content)
+            attachment_data = {}
+            accessible_sources = self.env['ai.agent.source']
+            if unique_attachment_ids:
+                sources = self.env['ai.agent.source'].search([
+                    ('attachment_id', 'in', unique_attachment_ids),
+                    ('agent_id', '=', self.id),
+                ])
+                accessible_sources = sources.filtered(lambda s: s.user_has_access)
+                for source in accessible_sources:
+                    attachment_data[source.attachment_id.id] = {
+                        'source_name': source.name,
+                        'url': source.url or f"{base_url}/web/content/{source.attachment_id.id}",
+                    }
+
+            new_content = apply_numeric_citations(message_content, attachment_data, link_attrs=link_attrs)
+            llm_response_with_sources.append(new_content)
+
+        return llm_response_with_sources
 
     def _retrieve_chat_history(self, discuss_channel, no_messages=20):
         chat_history = [
@@ -608,19 +645,25 @@ class AIAgent(models.Model):
                 top_n=5
             )
             if similar_embeddings:
-                referenced_attachments = set()
+                embeddings_attachment_checksums = similar_embeddings.mapped('attachment_id.checksum')
+                agent_sources = self.env['ai.agent.source'].search([
+                    ('attachment_id.checksum', 'in', embeddings_attachment_checksums),
+                    ('agent_id', '=', self.id),
+                ])
+                source_map = {source.attachment_id.checksum: source for source in agent_sources}
                 for embedding in similar_embeddings:
-                    context += f"{embedding.attachment_id.name}\n{embedding.content}\n\n"
-                    if embedding.attachment_id and embedding.attachment_id.name:
-                        referenced_attachments.add(embedding.attachment_id.name)
-                referenced_sources = self.env['ai.agent.source'].search([('attachment_id.name', 'in', referenced_attachments)])
-                unaccessible_sources_names = referenced_sources.filtered(lambda s: not s.user_has_access).mapped('name')
-                accessible_referenced_sources_names = referenced_sources.filtered(lambda s: s.user_has_access).mapped('name')
-                context += f"##References:\n{', '.join(accessible_referenced_sources_names)}"
-                if unaccessible_sources_names:
-                    context += f"\n [UNACCESSIBLE_REFERENCES: {', '.join(unaccessible_sources_names)}] {PREPROMPTS['unaccessible_references']}"
-        if context:
-            messages.append(f"##Context information:\n\n{context}\n{PREPROMPTS['context']}")
+                    checksum = embedding.attachment_id.checksum
+                    agent_source = source_map[checksum]
+                    context += (
+                        f"(Source Chunk {agent_source.name})\n"
+                        f" (attachment_id: {agent_source.attachment_id.id})\n"
+                        f"{embedding.content}\n\n"
+                    )
+
+                final_context_message = f"##RAG context information:\n\n{context}"
+
+                messages.append(final_context_message)
+                messages.append(PREPROMPTS['context'])
         return messages
 
     @api.depends("sources_ids.status")
@@ -687,7 +730,7 @@ class AIAgent(models.Model):
             ('is_member', '=', True),
             ('channel_type', '=', 'ai_chat'),
         ]))
-        return channels.filtered(lambda channel: channel.sudo().ai_agent_id == self)
+        return channels.filtered(lambda channel: channel.sudo().ai_agent_id == self)[:1]
 
     def _create_ai_chat_channel(self, channel_name=None):
         # The method is called in three safe scenarios:
@@ -775,10 +818,11 @@ class AIAgent(models.Model):
                     current_action = self.env['ir.actions.client'].browse(action_id)
                 if current_action:
                     current_action_name = current_action.name
-                    search_view = self.env[current_action.res_model].get_view(current_action.search_view_id.id, 'search')
-                    search_view_xml = clean_search_view_xml(search_view['arch']) if search_view else ""
-                    if search_view_xml:
-                        context_lines.append(f"  {search_view_xml}")
+                    if action.type == 'ir.actions.act_window':
+                        search_view = self.env[current_action.res_model].get_view(current_action.search_view_id.id, 'search')
+                        search_view_xml = clean_search_view_xml(search_view['arch']) if search_view else ""
+                        if search_view_xml:
+                            context_lines.append(f"  {search_view_xml}")
 
                 context_lines.append(
                     f'  <current_view id="{current_view_info.get("view_id")}" '

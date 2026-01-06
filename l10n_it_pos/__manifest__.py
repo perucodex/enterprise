@@ -24,6 +24,9 @@
         'web.assets_frontend': [
             'l10n_it_pos/static/src/app/overrides/helpers/account_tax.js',
         ],
+        'web.assets_unit_tests_setup': [
+            'l10n_it_pos/static/src/app/documents/fiscal_document/body/body.js',
+        ],
         'web.assets_unit_tests': [
             'l10n_it_pos/static/src/app/utils/html_to_xml.js',
             'l10n_it_pos/static/tests/unit/**/*',

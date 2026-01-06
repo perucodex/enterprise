@@ -156,8 +156,8 @@ class TestL10nMXTrialBalanceMonth13(TestAccountReportsCommon, odoo.tests.HttpCas
             [0,                                                                     1,        2,        3,         4],
             [
                 ('105.01.01 Domestic customers',                                 1000.0,    300.0,     0.0,     1300.0),
-                ('305.01.01 Uncut results',                                     -1000.0,      0.0,     0.0,    -1000.0),
                 ('401.01.01 Sales and/or services taxed at the general rate',       0.0,      0.0,   300.0,     -300.0),
+                ('Undistributed Profits/Losses - company_1_data',               -1000.0,      0.0,     0.0,    -1000.0),
                 ('Total',                                                           0.0,    300.0,   300.0,        0.0),
 
             ],
@@ -172,8 +172,9 @@ class TestL10nMXTrialBalanceMonth13(TestAccountReportsCommon, odoo.tests.HttpCas
             [0,                                                                     1,        2,        3,         4],
             [
                 ('105.01.01 Domestic customers',                                 1000.0,    320.0,      0.0,    1320.0),
-                ('305.01.01 Uncut results',                                     -1000.0,      0.0,    250.0,   -1250.0),
+                ('305.01.01 Uncut results',                                         0.0,      0.0,    250.0,    -250.0),
                 ('401.01.01 Sales and/or services taxed at the general rate',       0.0,    250.0,    320.0,     -70.0),
+                ('Undistributed Profits/Losses - company_1_data',               -1000.0,      0.0,    0.0,     -1000.0),
                 ('Total',                                                           0.0,    570.0,    570.0,       0.0),
             ],
             options,
@@ -196,8 +197,9 @@ class TestL10nMXTrialBalanceMonth13(TestAccountReportsCommon, odoo.tests.HttpCas
             [0,                                                                    1,         2,        3,         4],
             [
                 ('105.01.01 Domestic customers',                                1300.0,       0.0,      0.0,    1300.0),
-                ('305.01.01 Uncut results',                                    -1000.0,       0.0,    250.0,   -1250.0),
+                ('305.01.01 Uncut results',                                        0.0,       0.0,    250.0,    -250.0),
                 ('401.01.01 Sales and/or services taxed at the general rate',   -300.0,     250.0,      0.0,     -50.0),
+                ('Undistributed Profits/Losses - company_1_data',              -1000.0,       0.0,      0.0,   -1000.0),
                 ('Total',                                                          0.0,     250.0,    250.0,       0.0),
             ],
             options,
@@ -223,14 +225,15 @@ class TestL10nMXTrialBalanceMonth13(TestAccountReportsCommon, odoo.tests.HttpCas
         })
         self.assertLinesValues(
             self.report._get_lines(options),
-            #                                                                  [Initial]     [   Nov 2022   ]    [   Dec 2022   ]     [ End ]
-            #    Name                                                           Balance       Debit    Credit     Debit    Credit     Balance
-            [0,                                                                   1,             2,      3,          4,        5,        6],
+            #                                                                  [Initial]     [   Nov 2022   ]    [   Dec 2022   ]       [ End ]
+            #    Name                                                           Balance       Debit    Credit     Debit    Credit       Balance
+            [0,                                                                   1,             2,      3,          4,        5,          6],
             [
-                ('105.01.01 Domestic customers',                               1000.0,          0.0,     0.0,      300.0,       0.0,  1300.0),
-                ('305.01.01 Uncut results',                                   -1000.0,          0.0,     0.0,        0.0,       0.0, -1000.0),
-                ('401.01.01 Sales and/or services taxed at the general rate',     0.0,          0.0,     0.0,        0.0,     300.0,  -300.0),
-                ('Total',                                                         0.0,          0.0,     0.0,      300.0,     300.0,     0.0),
+                ('105.01.01 Domestic customers',                               1000.0,          0.0,     0.0,      300.0,       0.0,    1300.0),
+                # Values manually added to the equity unaffected account
+                ('401.01.01 Sales and/or services taxed at the general rate',     0.0,          0.0,     0.0,        0.0,     300.0,    -300.0),
+                ('Undistributed Profits/Losses - company_1_data',             -1000.0,          0.0,     0.0,        0.0,       0.0,   -1000.0),
+                ('Total',                                                         0.0,          0.0,     0.0,      300.0,     300.0,       0.0),
             ],
             options,
         )
@@ -247,14 +250,15 @@ class TestL10nMXTrialBalanceMonth13(TestAccountReportsCommon, odoo.tests.HttpCas
         })
         self.assertLinesValues(
             self.report._get_lines(options),
-            #                                                                  [Initial]  [   Dec 2022   ]   [Initial]  [ End ]  [   Jan 2023   ]    [ End ]
-            #    Name                                                           Balance    Debit    Credit    Balance   Balance   Debit   Credit    Balance
-            [0,                                                                    1,         2,        3,        4,       5,       6,       7,         8],
+            #                                                                  [Initial]  [   Dec 2022   ]   [Initial]   [ End ]  [   Jan 2023   ]     [ End ]
+            #    Name                                                           Balance    Debit    Credit    Balance    Balance   Debit   Credit     Balance
+            [0,                                                                    1,         2,        3,        4,        5,       6,       7,          8],
             [
-                ('105.01.01 Domestic customers',                               1000.0,     300.0,      0.0,   1300.0,   1300.0,    20.0,      0.0,   1320.0),
-                ('305.01.01 Uncut results',                                   -1000.0,       0.0,    250.0,  -1250.0,  -1300.0,     0.0,      0.0,  -1300.0),
-                ('401.01.01 Sales and/or services taxed at the general rate',     0.0,     250.0,    300.0,    -50.0,      0.0,     0.0,     20.0,    -20.0),
-                ('Total',                                                         0.0,     550.0,    550.0,      0.0,      0.0,    20.0,     20.0,      0.0),
+                ('105.01.01 Domestic customers',                               1000.0,     300.0,      0.0,   1300.0,    1300.0,    20.0,      0.0,    1320.0),
+                ('305.01.01 Uncut results',                                       0.0,       0.0,    250.0,   -250.0,       0.0,     0.0,      0.0,       0.0),
+                ('401.01.01 Sales and/or services taxed at the general rate',     0.0,     250.0,    300.0,    -50.0,       0.0,     0.0,     20.0,     -20.0),
+                ('Undistributed Profits/Losses - company_1_data',             -1000.0,       0.0,      0.0,  -1000.0,   -1300.0,     0.0,      0.0,   -1300.0),
+                ('Total',                                                         0.0,     550.0,    550.0,      0.0,       0.0,    20.0,     20.0,       0.0),
             ],
             options,
         )

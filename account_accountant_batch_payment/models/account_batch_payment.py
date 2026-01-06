@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
 
-from odoo import Command, models, _
+from odoo import Command, _, models
 
 
 class AccountBatchPayment(models.Model):
@@ -47,3 +47,7 @@ class AccountBatchPayment(models.Model):
 
         amls_to_create += (self.payment_ids - payments_with_move)._get_amls_for_payment_without_move()
         return amls, amls_to_create
+
+    def _get_amls_for_reconciliation(self, st_line):
+        amls_to_create, has_exchange_diff = self.payment_ids._get_amls_for_reconciliation(st_line)
+        return amls_to_create, has_exchange_diff

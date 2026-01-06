@@ -15,6 +15,7 @@ Base module for Bulgarian reports
         'data/account_return_data.xml',
         'data/balance_sheet.xml',
         'data/profit_loss.xml',
+        'data/account_report_ec_sales_list_report.xml',
     ],
     'auto_install': True,
     'installable': True,

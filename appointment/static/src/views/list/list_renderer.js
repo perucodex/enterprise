@@ -13,6 +13,8 @@ export class AppointmentBookingListRenderer extends ListRenderer {
 
         onWillStart(async () => {
             this.isAppointmentManager = await user.hasGroup("appointment.group_appointment_manager");
+            // Using this context key is a stable workaround, to be improved in master
+            this.isResourceView = this.props.list.context.appointment_default_assign_user_attendees === false;
         });
     }
 

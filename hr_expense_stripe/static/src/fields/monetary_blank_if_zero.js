@@ -2,6 +2,7 @@ import { registry } from "@web/core/registry";
 import { MonetaryField, monetaryField } from "@web/views/fields/monetary/monetary_field";
 
 export class MonetaryFieldBlankIfZero extends MonetaryField {
+    static template = "hr_expense_stripe.MonetaryFieldBlankIfZero";
 
     get formattedValue() {
         if (!this.value) {

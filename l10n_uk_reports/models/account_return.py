@@ -1,4 +1,3 @@
-import datetime
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models
@@ -29,15 +28,6 @@ class AccountReturnType(models.Model):
                 ec_sales_return_type._try_create_return_for_period(date_from, main_company, tax_unit)
 
         return rslt
-
-    def _get_start_date_elements(self, main_company):
-        if self == self.env.ref('l10n_uk_reports.uk_tax_return_type') and main_company.account_fiscal_country_id.code == 'GB':
-            today = datetime.date.today()
-            fy_dates_dict = main_company.compute_fiscalyear_dates(today)
-            date_from = fy_dates_dict['date_from']
-            return date_from.day, date_from.month
-
-        return super()._get_start_date_elements(main_company)
 
 
 class AccountReturn(models.Model):

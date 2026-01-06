@@ -63,7 +63,9 @@ export class DocumentsListRenderer extends DocumentsRendererMixin(DocumentsSecon
             model: this.env.model,
             targetSelector: ".o_data_row.o_folder_record",
             elements: ".o_data_row",
-            preventDrag: () => this.env.searchModel.getSelectedFolderId() === "TRASH",
+            preventDrag: () =>
+                this.env.searchModel.getSelectedFolderId() === "TRASH" ||
+                this.getIsDomainSelected(),
             onTargetPointerEnter: ({ addClass, target, isInvalid }) => {
                 addClass(target, isInvalid ? "table-danger" : "table-success");
             },

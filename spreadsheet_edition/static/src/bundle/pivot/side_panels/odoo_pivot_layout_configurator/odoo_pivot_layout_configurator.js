@@ -3,6 +3,7 @@ import { ODOO_AGGREGATORS } from "@spreadsheet/pivot/pivot_helpers";
 import { ModelFieldSelector } from "@web/core/model_field_selector/model_field_selector";
 import { ModelFieldSelectorPopover } from "@web/core/model_field_selector/model_field_selector_popover";
 import { _t } from "@web/core/l10n/translation";
+import { usePopover } from "@web/core/popover/popover_hook";
 const { PivotLayoutConfigurator } = components;
 
 /**
@@ -47,6 +48,23 @@ export class PivotModelFieldSelector extends ModelFieldSelector {
     static components = {
         Popover: PivotModelFieldSelectorPopover,
     };
+
+    setup() {
+        super.setup();
+        // Patch popover to add o_spreadsheet_pivot_field_selector class to override dark mode style
+        this.popover = usePopover(this.constructor.components.Popover, {
+            popoverClass: "o_popover_field_selector o_spreadsheet_pivot_field_selector",
+            onClose: async () => {
+                if (this.newPath !== null) {
+                    const fieldInfo = await this.fieldService.loadFieldInfo(
+                        this.props.resModel,
+                        this.newPath
+                    );
+                    this.props.update(this.newPath, fieldInfo);
+                }
+            },
+        });
+    }
 }
 
 export class OdooPivotLayoutConfigurator extends PivotLayoutConfigurator {

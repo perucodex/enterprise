@@ -20,13 +20,13 @@ class AccountAnalyticLine(models.Model):
         return res
 
     def action_timer_stop(self, try_to_match=False):
-        should_log_note = False
+        fsm_task = self.env['project.task']
         if self.task_id.is_fsm and self.timer_start:
-            should_log_note = True
+            fsm_task = self.task_id
         minutes_spent = super().action_timer_stop(try_to_match)
-        if should_log_note:
+        if fsm_task:
             time = fields.Datetime.context_timestamp(self, fields.Datetime.now())
-            self.task_id.message_post(
+            fsm_task.message_post(
                 body=self.env._(
                     "Timer stopped at: %(date)s %(time)s",
                     date=time.strftime(get_lang(self.env).date_format),

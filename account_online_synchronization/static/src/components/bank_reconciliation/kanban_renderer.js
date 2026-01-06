@@ -3,7 +3,7 @@ import { BankRecKanbanRenderer } from "@account_accountant/components/bank_recon
 
 patch(BankRecKanbanRenderer.prototype, {
     async getJournalTotalAmount() {
-        const values = super.getJournalTotalAmount();
+        const values = await super.getJournalTotalAmount();
         this.globalState.journalAvailableBalanceAmount = values.available_balance_amount || "";
     },
 });

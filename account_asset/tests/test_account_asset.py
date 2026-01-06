@@ -3288,3 +3288,65 @@ class TestAccountAsset(TestAccountReportsCommon):
             'credit': 0.0,
             'account_id': self.env.company.loss_account_id.id,
         }])
+
+    def test_non_fully_deductible_asset(self):
+        non_deductible_tax = self.env['account.tax'].create({
+            'name': 'Non-deductible Tax',
+            'amount': 21,
+            'amount_type': 'percent',
+            'type_tax_use': 'purchase',
+            'invoice_repartition_line_ids': [
+                Command.create({'repartition_type': 'base'}),
+                Command.create({
+                    'factor_percent': 10,
+                    'repartition_type': 'tax',
+                    'use_in_tax_closing': False
+                }),
+                Command.create({
+                    'factor_percent': 90,
+                    'repartition_type': 'tax',
+                    'use_in_tax_closing': True
+                }),
+            ],
+            'refund_repartition_line_ids': [
+                Command.create({'repartition_type': 'base'}),
+                Command.create({
+                    'factor_percent': 10,
+                    'repartition_type': 'tax',
+                    'use_in_tax_closing': False
+                }),
+                Command.create({
+                    'factor_percent': 90,
+                    'repartition_type': 'tax',
+                    'use_in_tax_closing': True
+                }),
+            ],
+        })
+        account_asset_model = self.env['account.asset'].create({
+            'account_depreciation_id': self.company_data['default_account_assets'].id,
+            'account_depreciation_expense_id': self.company_data['default_account_expense'].id,
+            'journal_id': self.company_data['default_journal_misc'].id,
+            'name': 'Electronic devices',
+            'method_number': 3,
+            'method_period': '12',
+            'prorata_computation_type': 'daily_computation',
+            'state': 'model',
+        })
+        self.company_data['default_account_assets'].create_asset = 'validate'
+        self.company_data['default_account_assets'].asset_model_ids = account_asset_model
+
+        invoice = self.env['account.move'].create({
+            'move_type': 'in_invoice',
+            'partner_id': self.env['res.partner'].create({'name': 'Res Partner 12'}).id,
+            'invoice_date': '2020-12-31',
+            'invoice_line_ids': [(0, 0, {
+                'name': 'Beautiful shiny smartphone',
+                'account_id': self.company_data['default_account_assets'].id,
+                'price_unit': 1000,
+                'quantity': 1,
+                'deductible_amount': 20,
+                'tax_ids': non_deductible_tax.ids,
+            })],
+        })
+        invoice.action_post()
+        self.assertEqual(invoice.asset_ids.original_value, 204.2)

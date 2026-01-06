@@ -9,7 +9,7 @@ class AccountReport(models.Model):
 
     filter_cash_basis = fields.Boolean(
         string="Cash Basis",
-        compute=lambda x: x._compute_report_option_filter('filter_cash_basis', False), readonly=False, store=True, depends=['root_report_id'],
+        compute=lambda x: x._compute_report_option_filter('filter_cash_basis', False), readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
         help="Display the option to switch to cash basis mode."
     )
 

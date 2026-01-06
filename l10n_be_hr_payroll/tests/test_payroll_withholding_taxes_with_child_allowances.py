@@ -140,6 +140,7 @@ class TestPayrollWithholdingTaxesWithChildAllowances(TestPayrollCommon):
         structure = self.env['hr.payroll.structure'].search(
             [('name', '=', 'CP200: Employees Double Holidays')]
         )
+        self.employee_withholding_taxes.generate_work_entries(date_from, date_to)
         self.employee_withholding_taxes_payslip.write({
             'date_from': date_from,
             'date_to': date_to,

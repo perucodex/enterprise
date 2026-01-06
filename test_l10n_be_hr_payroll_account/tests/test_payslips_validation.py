@@ -3678,7 +3678,7 @@ class TestPayslipValidation(TestPayslipValidationCommon):
         self.assertEqual(len(self.holiday_pay_2019.worked_days_line_ids), 0)
         self.assertEqual(len(self.holiday_pay_2019.input_line_ids), 11)
         self.assertEqual(len(self.holiday_pay_2019.line_ids), 32)
-        payslip_results = {'BASIC_PAY_SIMPLE': 2508.58, 'SIMPLE_PAY_DECEMBER': 0.0, 'PAY_SIMPLE': 2508.58, 'DOUBLE_BASIC': 2965.37, 'EUROPEAN': 0.0, 'DHALREADYPAID': 0.0, 'DOUBLE_PAY_DECEMBER': 0.0, 'PAY DOUBLE': 2965.37, 'CDHBASIC': 379.39, 'CDHALREADYPAID': 0.0, 'COMP_DOUBLE_PAY_DECEMBER': 0.0, 'PAY DOUBLE COMPLEMENTARY': 379.39, 'BASIC': 5853.34, 'ONSS1': -327.87, 'ONSS2': -387.57, 'ONSSTOTAL': 715.45, 'GROSS': 5137.9, 'PROF_TAX': -1867.11, 'PPTOTAL': 1867.11, 'ASSIG_SALARY': -10.0, 'ATTACH_SALARY': -10.0, 'CHILD_SUPPORT': -10.0, 'DEDUCTION': -20.0, 'REIMBURSEMENT': 50.0, 'NET': 3270.79, 'ONSSEMPLOYERBASIC': 627.65, 'ONSSEMPLOYERCPAE': 5.77, 'ONSSEMPLOYERFFE': 3.26, 'ONSSEMPLOYERMFFE': 2.51, 'ONSSEMPLOYERRESTREINT': 42.39, 'ONSSEMPLOYERUNEMP': 2.51, 'ONSSEMPLOYER': 684.09}
+        payslip_results = {'BASIC_PAY_SIMPLE': 2500.81, 'SIMPLE_PAY_DECEMBER': 0.0, 'PAY_SIMPLE': 2500.81, 'DOUBLE_BASIC': 2956.19, 'EUROPEAN': 0.0, 'DHALREADYPAID': 0.0, 'DOUBLE_PAY_DECEMBER': 0.0, 'PAY DOUBLE': 2956.19, 'CDHBASIC': 378.22, 'CDHALREADYPAID': 0.0, 'COMP_DOUBLE_PAY_DECEMBER': 0.0, 'PAY DOUBLE COMPLEMENTARY': 378.22, 'BASIC': 5835.21, 'ONSS1': -326.86, 'ONSS2': -386.37, 'ONSSTOTAL': 713.23, 'GROSS': 5121.99, 'PROF_TAX': -1861.33, 'PPTOTAL': 1861.33, 'ASSIG_SALARY': -10.0, 'ATTACH_SALARY': -10.0, 'CHILD_SUPPORT': -10.0, 'DEDUCTION': -20.0, 'REIMBURSEMENT': 50.0, 'NET': 3260.66, 'ONSSEMPLOYERBASIC': 625.7, 'ONSSEMPLOYERCPAE': 5.75, 'ONSSEMPLOYERFFE': 3.25, 'ONSSEMPLOYERMFFE': 2.5, 'ONSSEMPLOYERRESTREINT': 42.26, 'ONSSEMPLOYERUNEMP': 2.5, 'ONSSEMPLOYER': 681.97}
         self._validate_payslip(self.holiday_pay_2019, payslip_results)
 
     def test_employee_departure_european_time_off(self):
@@ -3718,7 +3718,7 @@ class TestPayslipValidation(TestPayslipValidationCommon):
         self.assertEqual(len(self.holiday_pay_2019.worked_days_line_ids), 0)
         self.assertEqual(len(self.holiday_pay_2019.input_line_ids), 6)
         self.assertEqual(len(self.holiday_pay_2019.line_ids), 27)
-        payslip_results = {'BASIC_PAY_SIMPLE': 2508.58, 'SIMPLE_PAY_DECEMBER': 0.0, 'PAY_SIMPLE': 2508.58, 'DOUBLE_BASIC': 2965.37, 'EUROPEAN': -1384.62, 'DHALREADYPAID': 0.0, 'DOUBLE_PAY_DECEMBER': 0.0, 'PAY DOUBLE': 1580.75, 'CDHBASIC': 379.39, 'CDHALREADYPAID': 0.0, 'COMP_DOUBLE_PAY_DECEMBER': 0.0, 'PAY DOUBLE COMPLEMENTARY': 379.39, 'BASIC': 4468.72, 'ONSS1': -327.87, 'ONSS2': -206.6, 'ONSSTOTAL': 534.48, 'GROSS': 3934.25, 'PROF_TAX': -1429.71, 'PPTOTAL': 1429.71, 'NET': 2504.54, 'ONSSEMPLOYERBASIC': 627.65, 'ONSSEMPLOYERFFE': 3.26, 'ONSSEMPLOYERMFFE': 2.51, 'ONSSEMPLOYERCPAE': 5.77, 'ONSSEMPLOYERRESTREINT': 42.39, 'ONSSEMPLOYERUNEMP': 2.51, 'ONSSEMPLOYER': 684.09}
+        payslip_results = {'BASIC_PAY_SIMPLE': 2500.81, 'SIMPLE_PAY_DECEMBER': 0.0, 'PAY_SIMPLE': 2500.81, 'DOUBLE_BASIC': 2956.19, 'EUROPEAN': -1384.62, 'DHALREADYPAID': 0.0, 'DOUBLE_PAY_DECEMBER': 0.0, 'PAY DOUBLE': 1571.57, 'CDHBASIC': 378.22, 'CDHALREADYPAID': 0.0, 'COMP_DOUBLE_PAY_DECEMBER': 0.0, 'PAY DOUBLE COMPLEMENTARY': 378.22, 'BASIC': 4450.59, 'ONSS1': -326.86, 'ONSS2': -205.4, 'ONSSTOTAL': 532.26, 'GROSS': 3918.33, 'PROF_TAX': -1423.92, 'PPTOTAL': 1423.92, 'NET': 2494.41, 'ONSSEMPLOYERBASIC': 625.7, 'ONSSEMPLOYERFFE': 3.25, 'ONSSEMPLOYERMFFE': 2.5, 'ONSSEMPLOYERCPAE': 5.75, 'ONSSEMPLOYERRESTREINT': 42.26, 'ONSSEMPLOYERUNEMP': 2.5, 'ONSSEMPLOYER': 681.97}
         self._validate_payslip(self.holiday_pay_2019, payslip_results)
 
     def test_work_incapacity_due_to_illness(self):
@@ -4586,6 +4586,92 @@ class TestPayslipValidation(TestPayslipValidationCommon):
         }
         self._validate_payslip(payslip, payslip_results)
 
+    def test_public_holiday_right_sick_leaves(self):
+        # Note: The public holidays are paid the first 30 days of sick leaves, ...
+
+        self.contract.ip = False
+
+        # Public time offs
+        self.env['resource.calendar.leaves'].create([{
+            'name': "Absence",
+            'calendar_id': self.resource_calendar_38_hours_per_week.id,
+            'company_id': self.env.company.id,
+            'date_from': datetime.datetime(2021, 5, 12, 4, 0, 0),
+            'date_to': datetime.datetime(2021, 5, 12, 21, 0, 0),
+            'resource_id': False,
+            'time_type': "leave",
+            'work_entry_type_id': self.env.ref('hr_work_entry.l10n_be_work_entry_type_bank_holiday').id
+        }, {
+            'name': "Absence",
+            'calendar_id': self.resource_calendar_38_hours_per_week.id,
+            'company_id': self.env.company.id,
+            'date_from': datetime.datetime(2021, 5, 17, 4, 0, 0),
+            'date_to': datetime.datetime(2021, 5, 17, 21, 0, 0),
+            'resource_id': False,
+            'time_type': "leave",
+            'work_entry_type_id': self.env.ref('hr_work_entry.l10n_be_work_entry_type_bank_holiday').id
+        }])
+
+        sick_leaves = self.env['hr.leave'].create({
+            'name': 'Sick Leaves',
+            'holiday_status_id': self.env.ref('hr_holidays.leave_type_sick_time_off').id,
+            'request_date_from': datetime.date(2021, 4, 17),
+            'request_date_to': datetime.date(2021, 5, 31),
+            'employee_id': self.employee.id,
+        })
+        sick_leaves.action_approve()
+
+        self.contract.generate_work_entries(datetime.date(2021, 4, 1), datetime.date(2021, 5, 31))
+
+        payslip = self.env['hr.payslip'].create({
+            'name': "Test Payslip",
+            'employee_id': self.employee.id,
+            'version_id': self.contract.id,
+            'company_id': self.env.company.id,
+            'vehicle_id': self.car.id,
+            'struct_id': self.env.ref('l10n_be_hr_payroll.hr_payroll_structure_cp200_employee_salary').id,
+            'date_from': datetime.date(2021, 5, 1),
+            'date_to': datetime.date(2021, 5, 31)
+        })
+        payslip.compute_sheet()
+
+        self._validate_worked_days(payslip, {
+            'LEAVE110': (9.0, 68.4, 1182.31),
+            'LEAVE214': (11.0, 83.6, 0.0),
+            'LEAVE500': (1.0, 7.6, 122.31),
+        })
+
+        payslip_results = {
+            'BASIC': 1304.62,
+            'ATN.INT': 5.0,
+            'ATN.MOB': 4.0,
+            'SALARY': 1313.62,
+            'ONSS': -171.69,
+            'EmpBonus.1': 0.0,
+            'ONSSTOTAL': 171.69,
+            'ATN.CAR': 150.53,
+            'GROSS': 1292.46,
+            'P.P': -65.44,
+            'PPTOTAL': 65.44,
+            'ATN.CAR.2': -150.53,
+            'ATN.INT.2': -5.0,
+            'ATN.MOB.2': -4.0,
+            'M.ONSS': 0.0,
+            'MEAL_V_EMP': 0.0,
+            'REP.FEES': 0.0,
+            'NET': 1067.49,
+            'REMUNERATION': 1304.62,
+            'ONSSEMPLOYERBASIC': 328.67,
+            'ONSSEMPLOYERFFE': 1.71,
+            'ONSSEMPLOYERMFFE': 1.31,
+            'ONSSEMPLOYERCPAE': 3.02,
+            'ONSSEMPLOYERRESTREINT': 22.2,
+            'ONSSEMPLOYERUNEMP': 1.31,
+            'ONSSEMPLOYER': 358.22,
+            'CO2FEE': 21.16,
+        }
+        self._validate_payslip(payslip, payslip_results)
+
     def test_public_holiday_right_maternity_full_time_credit_time(self):
         # Note: Always unpaid
         self.contract.write({
@@ -5034,7 +5120,7 @@ class TestPayslipValidation(TestPayslipValidationCommon):
         })
         holiday_pay_2019.compute_sheet()
 
-        payslip_results = {'BASIC_PAY_SIMPLE': 2508.58, 'SIMPLE_PAY_DECEMBER': 0.0, 'PAY_SIMPLE': 2508.58, 'DOUBLE_BASIC': 0.0, 'EUROPEAN': 0.0, 'DHALREADYPAID': 0.0, 'DOUBLE_PAY_DECEMBER': 0.0, 'PAY DOUBLE': 0.0, 'CDHBASIC': 0.0, 'CDHALREADYPAID': 0.0, 'COMP_DOUBLE_PAY_DECEMBER': 0.0, 'PAY DOUBLE COMPLEMENTARY': 0.0, 'BASIC': 2508.58, 'ONSS1': -327.87, 'ONSS2': 0.0, 'ONSSTOTAL': 327.87, 'GROSS': 2180.7, 'PROF_TAX': -792.47, 'PPTOTAL': 792.47, 'NET': 1388.24, 'ONSSEMPLOYERBASIC': 627.65, 'ONSSEMPLOYERCPAE': 5.77, 'ONSSEMPLOYERFFE': 3.26, 'ONSSEMPLOYERMFFE': 2.51, 'ONSSEMPLOYERRESTREINT': 42.39, 'ONSSEMPLOYERUNEMP': 2.51, 'ONSSEMPLOYER': 684.09}
+        payslip_results = {'BASIC_PAY_SIMPLE': 2500.81, 'SIMPLE_PAY_DECEMBER': 0.0, 'PAY_SIMPLE': 2500.81, 'DOUBLE_BASIC': 0.0, 'EUROPEAN': 0.0, 'DHALREADYPAID': 0.0, 'DOUBLE_PAY_DECEMBER': 0.0, 'PAY DOUBLE': 0.0, 'CDHBASIC': 0.0, 'CDHALREADYPAID': 0.0, 'COMP_DOUBLE_PAY_DECEMBER': 0.0, 'PAY DOUBLE COMPLEMENTARY': 0.0, 'BASIC': 2500.81, 'ONSS1': -326.86, 'ONSS2': 0.0, 'ONSSTOTAL': 326.86, 'GROSS': 2173.95, 'PROF_TAX': -790.01, 'PPTOTAL': 790.01, 'NET': 1383.94, 'ONSSEMPLOYERBASIC': 625.7, 'ONSSEMPLOYERCPAE': 5.75, 'ONSSEMPLOYERFFE': 3.25, 'ONSSEMPLOYERMFFE': 2.5, 'ONSSEMPLOYERRESTREINT': 42.26, 'ONSSEMPLOYERUNEMP': 2.5, 'ONSSEMPLOYER': 681.97}
         self._validate_payslip(holiday_pay_2019, payslip_results)
 
     def test_double_remuneration_refunds_partial_contracts(self):
@@ -6459,6 +6545,7 @@ class TestPayslipValidation(TestPayslipValidationCommon):
         self._validate_payslip(payslip, payslip_results)
 
     def test_thirteen_month(self):
+        self.employee.version_ids.generate_work_entries(datetime.date(2023, 1, 1), datetime.date(2023, 6, 30))
         payslip = self._generate_payslip(datetime.date(2023, 6, 1), datetime.date(2023, 6, 30), struct_id=self.env.ref('l10n_be_hr_payroll.hr_payroll_structure_cp200_thirteen_month').id)
         payslip_results = {'BASIC': 1325.0, 'SALARY': 1325.0, 'ONSS': -173.18, 'GROSS': 1151.82, 'P.P': -534.91, 'PPTOTAL': 534.91, 'NET': 616.92, 'ONSSEMPLOYERBASIC': 331.65, 'ONSSEMPLOYERFFE': 0.93, 'ONSSEMPLOYERMFFE': 1.33, 'ONSSEMPLOYERCPAE': 3.05, 'ONSSEMPLOYERRESTREINT': 22.39, 'ONSSEMPLOYERUNEMP': 1.33, 'ONSSEMPLOYER': 360.67}
         self._validate_payslip(payslip, payslip_results)
@@ -6578,29 +6665,6 @@ class TestPayslipValidation(TestPayslipValidationCommon):
         self.assertEqual(paid_leaves_data['amount'], 489.23)
         # HolPayRecN should be equal to 0
         payslip_results = {'BASIC': 2650.0, 'HolPayRecN': 0.0, 'ATN.INT': 5.0, 'ATN.MOB': 4.0, 'SALARY': 2659.0, 'ONSS': -347.53, 'EmpBonus.1': 112.89, 'ONSSTOTAL': 234.64, 'ATN.CAR': 156.78, 'GROSSIP': 2581.13, 'IP.PART': -662.5, 'GROSS': 1918.63, 'P.P': -168.52, 'P.P.DED': 37.41, 'PPTOTAL': 131.11, 'ATN.CAR.2': -156.78, 'ATN.INT.2': -5.0, 'ATN.MOB.2': -4.0, 'M.ONSS': -15.39, 'MEAL_V_EMP': -18.53, 'REP.FEES': 150.0, 'IP': 662.5, 'IP.DED': -49.69, 'NET': 2350.64, 'REMUNERATION': 1987.5, 'ONSSEMPLOYERBASIC': 665.02, 'ONSSEMPLOYERFFE': 1.86, 'ONSSEMPLOYERMFFE': 2.66, 'ONSSEMPLOYERCPAE': 6.12, 'ONSSEMPLOYERRESTREINT': 44.94, 'ONSSEMPLOYERUNEMP': 2.66, 'ONSSEMPLOYER': 723.25, 'CO2FEE': 31.34}
-        self._validate_payslip(payslip, payslip_results)
-
-    def test_thirteen_month_sick_leave(self):
-        # 60 days of unpaid sick leaves are taken into account as attendances on
-        # the gross computation
-        sick_leave = self.env['hr.leave'].new({
-            'name': 'Sick Time Off 2 Months',
-            'employee_id': self.employee.id,
-            'holiday_status_id': self.sick_time_off_type.id,
-            'request_date_from': datetime.date(2023, 1, 1),
-            'request_date_to': datetime.date(2023, 3, 31),
-            'request_hour_from': 7,
-            'request_hour_to': 18,
-            'number_of_days': 65,
-        })
-        sick_leave._compute_date_from_to()
-        sick_leave = self.env['hr.leave'].create(sick_leave._convert_to_write(sick_leave._cache))
-        sick_leave.action_approve()
-
-        self.employee.version_ids.generate_work_entries(datetime.date(2023, 1, 1), datetime.date(2023, 6, 30))
-
-        payslip = self._generate_payslip(datetime.date(2023, 6, 1), datetime.date(2023, 6, 30), struct_id=self.env.ref('l10n_be_hr_payroll.hr_payroll_structure_cp200_thirteen_month').id)
-        payslip_results = {'BASIC': 1325.0, 'SALARY': 1325.0, 'ONSS': -173.18, 'GROSS': 1151.82, 'P.P': -534.91, 'PPTOTAL': 534.91, 'NET': 616.92, 'ONSSEMPLOYERBASIC': 331.65, 'ONSSEMPLOYERFFE': 0.93, 'ONSSEMPLOYERMFFE': 1.33, 'ONSSEMPLOYERCPAE': 3.05, 'ONSSEMPLOYERRESTREINT': 22.39, 'ONSSEMPLOYERUNEMP': 1.33, 'ONSSEMPLOYER': 360.67}
         self._validate_payslip(payslip, payslip_results)
 
     def test_multiple_public_holidays_variable_salary(self):

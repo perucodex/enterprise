@@ -164,6 +164,7 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
         self.assertEqual(mls_with_lot.filtered(lambda ml: ml.lot_id.name == 'lot2').qty_done, 1)
         self.assertEqual(mls_with_lot.filtered(lambda ml: ml.lot_id.name == 'lot3').qty_done, 1)
         self.assertEqual(set(mls_with_sn.mapped('lot_id.name')), {'serial1', 'serial2', 'serial3'})
+        self.assertFalse(moves_with_sn.lot_ids.company_id)
 
     def test_inventory_adjustment_tracked_product_multilocation(self):
         """ This test ensures two things:
@@ -285,7 +286,7 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
             'show_expected_quantity': True,
         })
         wizard_request_count.action_request_count()
-        self.start_tour("/odoo/barcode?debug=assets", 'test_inventory_dialog_not_counted_serial_numbers', login='admin', timeout=180)
+        self.start_tour("/odoo/barcode", 'test_inventory_dialog_not_counted_serial_numbers', login='admin')
         self.assertRecordValues(quants, [
             {'product_id': self.productserial1.id, 'lot_id': serial1_sns[0].id, 'quantity': 1, 'location_id': self.shelf1.id},
             {'product_id': self.productserial1.id, 'lot_id': serial1_sns[1].id, 'quantity': 1, 'location_id': self.shelf1.id},
@@ -432,6 +433,10 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
         self.env['stock.quant']._update_available_quantity(self.product1, self.shelf1, 40.0)
         self.env['stock.quant']._update_available_quantity(self.product1, self.shelf2, 80.0)
 
+        self.start_tour("/odoo/barcode", "test_inventory_packaging_location", login="admin")
+        # Relaunch the same tour with a mobile device config.
+        self.browser_size = '375x667'
+        self.touch_enabled = True
         self.start_tour("/odoo/barcode", "test_inventory_packaging_location", login="admin")
 
     def test_inventory_owner_scan_package(self):
@@ -849,7 +854,7 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
         })
         self.env["stock.quant"].create({
             'product_id': product.id,
-            'location_id': self.env.ref('stock.stock_location_stock').id,
+            'location_id': self.stock_location.id,
             'quantity': 10,
             'package_id': self.env['stock.package'].create({
                 'name': 'Package-test',
@@ -871,7 +876,7 @@ class TestInventoryAdjustmentBarcodeClientAction(TestBarcodeClientAction):
         shelf1 = self.env['stock.location'].create({
             'name': 'Shelf 11',
             'barcode': 'Shelf11',
-            'location_id': self.env.ref('stock.warehouse0').lot_stock_id.id,
+            'location_id': self.warehouse.lot_stock_id.id,
         })
         product = self.env['product.product'].create({
             'name': 'Product',

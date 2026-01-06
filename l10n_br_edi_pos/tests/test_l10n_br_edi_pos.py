@@ -43,6 +43,11 @@ class TestL10nBREDIPOSCommon(TestL10nBREDICommon, TestBRMockedRequests):
 
 @tagged("post_install_l10n", "post_install", "-at_install")
 class TestL10nBREDIPOS(TestL10nBREDIPOSCommon, CommonPosBrEdiTest):
+
+    def setUp(self):
+        super().setUp()
+        self.pos_config_usd.order_seq_id.write({'number_next_actual': 1})
+
     def test_01_access_key_check_digit(self):
         self.assertEqual(
             self.env["pos.order"]._l10n_br_calculate_access_key_check_digit("4323070738511100010255503000765973124086659"),
@@ -343,6 +348,43 @@ class TestL10nBREDIPOS(TestL10nBREDIPOSCommon, CommonPosBrEdiTest):
         }
         self.assertDictEqual(payload['header']['payment'], expected_dict, 'paymentMode should still be set for free orders!')
 
+    def test_09_order_name(self):
+        # Test that the order name uses the NFCE sequence number as expected
+        self.pos_config_usd.order_seq_id.write({'number_next_actual': 5})
+
+        self.pos_config_usd.open_ui()
+        order = self.env['pos.order'].create({
+            "name": "/",
+            "pos_reference": "Order 12345-123-1234",
+            'company_id': self.env.company.id,
+            'session_id': self.pos_config_usd.current_session_id.id,
+            'partner_id': self.partner_a.id,
+            'access_token': '1234567890',
+            'lines': [],
+            'amount_tax': 0,
+            'amount_total': 0,
+            'amount_paid': 0,
+            'amount_return': 0,
+        })
+        order.write({'state': 'paid'})
+        self.assertEqual(order.name, 'PoS Config USD - 5')
+
+        order_2 = self.env['pos.order'].create({
+            "name": "/",
+            "pos_reference": "Order 12345-123-1235",
+            'company_id': self.env.company.id,
+            'session_id': self.pos_config_usd.current_session_id.id,
+            'partner_id': self.partner_a.id,
+            'access_token': '1234567891',
+            'lines': [],
+            'amount_tax': 0,
+            'amount_total': 0,
+            'amount_paid': 0,
+            'amount_return': 0,
+        })
+        order_2.write({'state': 'paid'})
+        self.assertEqual(order_2.name, 'PoS Config USD - 6')
+
 
 @freeze_time(TEST_DATETIME)
 @tagged("post_install_l10n", "post_install", "-at_install")
@@ -426,6 +468,7 @@ class TestGenericBR(TestGenericLocalization, TestL10nBREDIPOSCommon):
     @AccountTestInvoicingCommon.setup_country('br')
     def setUpClass(cls):
         super().setUpClass()
+        cls.main_pos_config.company_id.name = 'Company BR'
         cls.main_pos_config.write(
             {
                 "l10n_br_is_nfce": True,

@@ -114,6 +114,7 @@ patch(PlanningGanttRenderer.prototype, {
                     await this.model.orm.call(this.model.metaData.resModel, "action_unschedule", [
                         record.id,
                     ]);
+                    await this.model.fetchData(this.model.searchParams);
                 },
             };
 

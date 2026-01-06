@@ -10,25 +10,30 @@
                 autofocus="true"
             />
         </Section>
-        <Section title.translate="Default value">
-            <NumericFilterValue
-                value="store.filter.defaultValue?.targetValue"
-                onValueChanged.bind="updateNumericDefaultValue"
-            />
-        </Section>
-        <t t-if="store.shouldDisplayFieldMatching">
-            <SidePanelCollapsible isInitiallyCollapsed="!store.isNew" title.translate="Field matching">
-                <t t-set-slot="content">
-                    <Section class="'pt-0'">
-                        <FilterEditorFieldMatching
-                            fieldMatchings="store.fieldsMatching"
-                            selectField.bind="store.updateFieldMatching"
-                            filterModelFieldSelectorField="store.filterModelFieldSelectorField"
-                        />
-                    </Section>
-                </t>
-            </SidePanelCollapsible>
+        <t t-if="store.isValid">
+            <Section title.translate="Default value">
+                <NumericFilterValue
+                    value="store.filter.defaultValue?.targetValue"
+                    onValueChanged.bind="updateNumericDefaultValue"
+                />
+            </Section>
+            <t t-if="store.shouldDisplayFieldMatching">
+                <SidePanelCollapsible isInitiallyCollapsed="!store.isNew" title.translate="Field matching">
+                    <t t-set-slot="content">
+                        <Section class="'pt-0'">
+                            <FilterEditorFieldMatching
+                                fieldMatchings="store.fieldsMatching"
+                                selectField.bind="store.updateFieldMatching"
+                                filterModelFieldSelectorField="store.filterModelFieldSelectorField"
+                            />
+                        </Section>
+                    </t>
+                </SidePanelCollapsible>
+            </t>
         </t>
+        <Section t-else="1">
+            <ValidationMessages messages="[invalidModel]" msgType="'error'"/>
+        </Section>
         <GlobalFilterFooter t-props="footerProps"/>
     </div>
 </templates>

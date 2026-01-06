@@ -130,3 +130,22 @@ class TestHrContract(TestPayrollCommon):
             msg="PF employer amount should be 12% of updated basic salary")
         self.assertAlmostEqual(version.l10n_in_gratuity_percentage, 0.0481,
             msg="Gratuity should be 4.81% of updated basic salary")
+
+    def test_l10n_in_basic_percentage_computation(self):
+        """ Test the computation of basic percentage fields in hr.version model in salary calculator for Indian company"""
+
+        if 'hr_contract_salary' not in self.env["ir.module.module"]._installed():
+            self.skipTest('hr_contract_salary is not installed')
+
+        default_percentage = self.env['hr.rule.parameter']._get_parameter_from_code('l10n_in_basic_percent', raise_if_not_found=False)
+        offer = self.env['hr.contract.salary.offer'].create([{
+            'monthly_wage': 0.0,
+        }])
+
+        offer.final_yearly_costs = 500000.0
+        version = offer._get_version()
+        version.company_id.country_code = 'IN'
+
+        self.assertEqual(version.l10n_in_basic_percentage, default_percentage,
+        msg="Default basic percentage should be 60%")
+        self.assertEqual(version.l10n_in_basic_salary_amount, 25000.0)

@@ -38,7 +38,7 @@ class TestSynchStatementCreation(AccountOnlineSynchronizationCommon):
         transactions = self._create_online_transactions(['2016-01-05'])
         self.account_online_account.balance = 2000
         self.BankStatementLine._online_sync_bank_statement(transactions, self.account_online_account)
-        created_st_lines = self.BankStatementLine.search([('journal_id', '=', self.euro_bank_journal.id)], order='date asc')
+        created_st_lines = self.BankStatementLine.search([('journal_id', '=', self.euro_bank_journal.id)], order='internal_index asc')
         # Verify that all imported bank transactions are converted into statement lines in chronological order and match the expected amounts and dates.
         self.assertRecordValues(
             created_st_lines,
@@ -55,7 +55,7 @@ class TestSynchStatementCreation(AccountOnlineSynchronizationCommon):
         self.BankStatementLine._online_sync_bank_statement(transactions, self.account_online_account)
         # Since ending balance is 20$ and we only have 20$ of transactions and that it is the first statement
         # it should NOT create a initial statement before this one
-        created_st_lines = self.BankStatementLine.search([('journal_id', '=', self.euro_bank_journal.id)], order='date asc')
+        created_st_lines = self.BankStatementLine.search([('journal_id', '=', self.euro_bank_journal.id)], order='internal_index asc')
         self.assertRecordValues(
             created_st_lines,
             [
@@ -72,12 +72,12 @@ class TestSynchStatementCreation(AccountOnlineSynchronizationCommon):
         self.BankStatementLine._online_sync_bank_statement(transactions, self.account_online_account)
         # Since ending balance is 1000$ and we only have 20$ of transactions and that it is the first statement
         # it should create a statement before this one with the initial statement line
-        created_st_lines = self.BankStatementLine.search([('journal_id', '=', self.euro_bank_journal.id)], order='date asc')
+        created_st_lines = self.BankStatementLine.search([('journal_id', '=', self.euro_bank_journal.id)], order='internal_index asc')
         self.assertEqual(len(created_st_lines), 2, 'Should have created two bank statement lines for the synchronization')
         transactions = self._create_online_transactions(['2016-01-05'])
         self.account_online_account.balance = -30
         self.BankStatementLine._online_sync_bank_statement(transactions, self.account_online_account)
-        created_st_lines = self.BankStatementLine.search([('journal_id', '=', self.euro_bank_journal.id)], order='date asc')
+        created_st_lines = self.BankStatementLine.search([('journal_id', '=', self.euro_bank_journal.id)], order='internal_index asc')
         self.assertRecordValues(
             created_st_lines,
             [
@@ -211,7 +211,7 @@ class TestSynchStatementCreation(AccountOnlineSynchronizationCommon):
         self.assertTrue('account_online_identifier' in res.get('params', {}).get('includeParam', {}))
 
     def test_duplicate_transaction_date_amount_account(self):
-        """ This test verifies that the duplicate transaction wizard is detects transactions with
+        """ This test verifies that the duplicate transaction wizard detects transactions with
             same date, amount, account_number and currency
         """
         # Create 2 groups of respectively 2 and 3 duplicate transactions
@@ -236,7 +236,7 @@ class TestSynchStatementCreation(AccountOnlineSynchronizationCommon):
         self.assertTrue(has_duplicate_transactions is True)  # explicit check on bool type
 
     def test_duplicate_transaction_online_transaction_identifier(self):
-        """ This test verifies that the duplicate transaction wizard is detects transactions with
+        """ This test verifies that the duplicate transaction wizard detects transactions with
             same online_transaction_identifier
         """
         # Create transactions

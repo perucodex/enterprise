@@ -2,9 +2,9 @@ import { ProjectTaskKanbanRecord } from "@project/views/project_task_kanban/proj
 import { CANCEL_GLOBAL_CLICK } from "@web/views/kanban/kanban_record";
 
 export class FsmMyTaskKanbanRecord extends ProjectTaskKanbanRecord {
-    onGlobalClick(ev) {
+    onGlobalClick(ev, newWindow) {
         if (!this.env.isSmall) {
-            super.onGlobalClick(ev);
+            super.onGlobalClick(ev, newWindow);
             return;
         }
         if (!ev.target.closest(CANCEL_GLOBAL_CLICK)) {

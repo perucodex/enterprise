@@ -11,6 +11,7 @@
         'hr_attendance',
     ],
     'data': [
+        'data/hr_attendance_overtime_rule_data.xml',
         'views/hr_attendance_overtime_views.xml',
         'views/hr_employee_views.xml',
         'views/hr_contract_template_views.xml',

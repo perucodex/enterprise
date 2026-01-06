@@ -45,7 +45,7 @@ registry.category("web_tour.tours").add("account_reports", {
         },
         {
             content: "Line is folded",
-            trigger: "tr:nth-child(4) td:nth-child(2):contains(/^75.00$/)",
+            trigger: "tr:nth-child(4) td:nth-child(2):text(75.00)",
             run: () => {
                 Asserts.DOMContainsNumber("tbody > tr:not(.d-none):not(.empty)", 28);
             },
@@ -74,7 +74,7 @@ registry.category("web_tour.tours").add("account_reports", {
         },
         {
             content: "Initial sortable",
-            trigger: "tr:nth-child(11) td:nth-child(2):contains(/^100.00$/)",
+            trigger: "tr:nth-child(11) td:nth-child(2):text(100.00)",
             run: () => {
                 // Bank and Cash Accounts
                 Asserts.isEqual(

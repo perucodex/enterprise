@@ -145,6 +145,28 @@
             <field name="perm_unlink" eval="True"/>
         </record>
 
+        <record id="ir_rule_sign_item_role_group_sign_user_readonly_own" model="ir.rule">
+            <field name="name">sign.item.role: group_sign_user: Write/Create/delete own item roles</field>
+            <field name="model_id" ref="sign.model_sign_item_role"/>
+            <field name="domain_force">[('create_uid.id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('sign.group_sign_user'))]"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <record id="ir_rule_sign_item_role_group_sign_manager" model="ir.rule">
+            <field name="name">sign.item.role: group_sign_manager: Manage all item roles</field>
+            <field name="model_id" ref="sign.model_sign_item_role"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('sign.group_sign_manager'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
         <record id="ir_rule_sign_completed_document_group_manager" model="ir.rule">
             <field name="name">sign.completed.document: group_sign_manager: Create and manage completed documents</field>
             <field name="model_id" ref="sign.model_sign_completed_document"/>

@@ -78,6 +78,11 @@ class WebsiteSaleRenting(WebsiteSale):
         return {}
 
     def _get_additional_shop_values(self, values, start_date=None, end_date=None, **kwargs):
+        try:
+            start_date = fields.Datetime.to_datetime(start_date)
+            end_date = fields.Datetime.to_datetime(end_date)
+        except ValueError:
+            start_date = end_date = None
         vals = super()._get_additional_shop_values(
             values, start_date=start_date, end_date=end_date, **kwargs
         )

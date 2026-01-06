@@ -97,7 +97,7 @@ transition_date = date(2025, 5, 1)
 post_transition_slips = payslip.employee_id.slip_ids.filtered_domain([
     ('state', 'in', ['paid', 'validated']),
     ('struct_id', '=', payslip.env.ref('l10n_hk_hr_payroll.hr_payroll_structure_cap57_employee_salary').id),
-    ('date_to', '&gt;', transition_date),
+    ('date_to', '&gt;=', transition_date),
 ])
 values = post_transition_slips._get_line_values(["ERVC"], compute_sum=True)
 result = -min(abs(values["ERVC"]["sum"]["total"]), result_rules['SEVERANCE_PAYMENT_POST_TRANSITION']['total'])

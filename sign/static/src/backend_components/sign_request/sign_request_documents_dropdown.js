@@ -32,7 +32,7 @@ export class SignRequestDocumentsDropdown extends Component {
         onWillStart(async () => {
             // Check if we're in a view context where we need to fetch sign request data
             const { context, evalContext } = this.props.record || {};
-            if (context?.active_id || evalContext?.id) {
+            if (evalContext?.id || context?.active_id) {
                 // if active_id is present, we're in the form view context where we need to fetch sign request data
                 // because signInfo service is not initialized with the required data
                 await this.fetchSignRequestData();
@@ -49,14 +49,14 @@ export class SignRequestDocumentsDropdown extends Component {
      */
     async fetchSignRequestData() {
         const { context, evalContext } = this.props.record || {};
-        const signRequestId = context?.active_id || evalContext?.id;
+        const signRequestId = evalContext?.id || context?.active_id;
         if (signRequestId) {
             const signRequestData = await this.orm.read(
                 'sign.request',
                 [signRequestId],
                 ['access_token', 'state']
             );
-            if (signRequestData) {
+            if (signRequestData?.length) {
                 // Initialize signInfo with the fetched data
                 this.signInfo.set({
                     documentId: signRequestId,

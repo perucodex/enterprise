@@ -8,7 +8,7 @@ class ResCompany(models.Model):
     _inherit = 'res.company'
 
     l10n_at_pos_is_tax_exempted = fields.Boolean(string="Tax exempted?", default=False, copy=False)
-    l10n_at_pos_test_mode = fields.Boolean(string="Test Fiskaly", default=True, copy=False)
+    l10n_at_pos_test_mode = fields.Boolean(string="Test Fiskaly", default=False, copy=False)
     # Fiskaly api fields
     l10n_at_fiskaly_api_key = fields.Char(string="Fiskaly API Key (AUT)", copy=False)
     l10n_at_fiskaly_api_secret = fields.Char(string="Fiskaly API Secret (AUT)", copy=False)
@@ -122,6 +122,13 @@ class ResCompany(models.Model):
 
     def action_generate_fiskaly_credentials(self):
         self.ensure_one()
+        # Force to be managed by Odoo
+        if not self.l10n_at_is_odoo_managed_org:
+            self.write({
+                'l10n_at_is_odoo_managed_org': True,
+                'l10n_at_fiskaly_api_key': False,
+                'l10n_at_fiskaly_api_secret': False,
+            })
         params = self._l10n_at_create_organization_payload()
         response = fiskaly_iap_rpc(self, '/register', params)
         self.write({
@@ -130,12 +137,17 @@ class ResCompany(models.Model):
             'l10n_at_fiskaly_api_secret': response[0]['l10n_at_fiskaly_api_secret'],
         })
 
+        return self.action_auth_fiskaly_credentials()
+
     def action_auth_fiskaly_credentials(self, refresh=False):
+        self.auth_fiskaly_credentials(refresh=refresh)
+        return self._notify("success", _("Fiskaly Authentication Successful!"))
+
+    def auth_fiskaly_credentials(self, refresh=False):
         """Authenticate with Fiskaly and store the access token."""
         self.ensure_one()
         fiskaly_client = FiskalyClient(self, self.l10n_at_fiskaly_api_key, self.l10n_at_fiskaly_api_secret)
         self.l10n_at_fiskaly_access_token = fiskaly_client.auth()
-        return self._notify("success", _("Fiskaly Authenticated Successfully!"))
 
     def _verify_required_fields(self):
         missing_fields_by_company = {}

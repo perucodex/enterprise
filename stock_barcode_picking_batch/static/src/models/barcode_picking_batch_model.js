@@ -149,6 +149,24 @@ export default class BarcodePickingBatchModel extends BarcodePickingModel {
         }
     }
 
+    async processBarcode(barcode) {
+        // scans should be ignored until the batch has been created
+        if (this.record.state == "draft") {
+            this.notification(
+                _t(
+                    "This batch transfer is still in draft, scans are disabled until the batch is confirmed"
+                ),
+                { type: "danger" }
+            );
+        } else if (this.isDone) {
+            return this.notification(_t("This batch is already done"), { type: "danger" });
+        } else if (this.isCancelled) {
+            return this.notification(_t("This batch is already cancelled"), { type: "danger" });
+        } else {
+            return super.processBarcode(barcode);
+        }
+    }
+
     get canCreateNewLot() {
         return this.picking.use_create_lots;
     }
@@ -312,12 +330,15 @@ export default class BarcodePickingBatchModel extends BarcodePickingModel {
             const parentLine = this._getParentLine(this.selectedLine);
             if (parentLine && this._lineIsNotComplete(parentLine)) {
                 let foundLine = false;
+                const hasLotLessLine = parentLine.lines.some(
+                    (line) => !line.lot_id && !line.lot_name
+                );
                 for (const line of parentLine.lines) {
                     const lineLotName = line.lot_name || (line.lot_id && line.lot_id.name) || false;
                     const sameLotName = Boolean(lineLotName && dataLotName === lineLotName);
                     if (
-                        dataLotName &&
-                        (sameLotName || this._canOverrideTrackingNumber(line, dataLotName))
+                        this._canOverrideTrackingNumber(line, dataLotName) &&
+                        (!sameLotName || this._lineIsNotComplete(line) || !hasLotLessLine)
                     ) {
                         foundLine = line;
                         if (sameLotName) {
@@ -347,7 +368,8 @@ export default class BarcodePickingBatchModel extends BarcodePickingModel {
             }
         }
         // Get the line's picking as the default one, or take the batch's first one.
-        const defaultPicking = line?.picking_id || this.picking;
+        const defaultPicking =
+            (fieldsParams && fieldsParams.picking_id) || (line && line.picking_id) || this.picking;
         if (!this.config.group_lines_by_product) {
             // Don't add the color if lines are grouped by product.
             defaultValues.colorLine = this.colorByPickingId.get(defaultPicking.id);

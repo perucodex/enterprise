@@ -372,27 +372,27 @@ class TestAccountReports(TestAccountReportsCommon):
         options['report_cash_basis'] = True
         options['ignore_totals_below_sections'] = True
         parent_line_id = report._get_generic_line_id(model_name='account.report.line', value=self.env.ref("account_reports.general_ledger_custom_engine_line").id)
-        account_revenue_line_id = report._get_generic_line_id(model_name='account.account', value=self.company_data['default_account_revenue'].id, markup={'groupby': 'account_or_unaff_id'}, parent_line_id=parent_line_id)
+        account_revenue_line_id = report._get_generic_line_id(model_name='account.account', value=self.company_data['default_account_revenue'].id, markup={'groupby': 'account_id'}, parent_line_id=parent_line_id)
         options['unfolded_lines'] = [account_revenue_line_id]
 
         lines = report._get_lines(options)
         self.assertLinesValues(
             lines,
-            #   Name                                    Debit       Credit     Balance
+            #   Name                                                Debit       Credit     Balance
             [0, 4, 5, 6],
             [
                 # Accounts.
-                ('101401 Bank',                         460.0,      0,          460.0),
-                ('101403 Outstanding Receipts',         3000.0,     0,          3000.0),
-                ('121000 Account Receivable',           3460.0,     3460.0,     0.0),
+                ('101401 Bank',                                      460.0,          0,       460.0),
+                ('101403 Outstanding Receipts',                     3000.0,          0,      3000.0),
+                ('121000 Account Receivable',                       3460.0,     3460.0,         0.0),
                 # Expanded line
-                ('400000 Product Sales',                0,          3000.0,     -3000.0),
-                ('INV/2023/00001 test line',            0,          2000.0,     -2000.0),  # All lines are grouped if they are on the same date with the same id
-                ('INV/2023/00001 test line',            0,          500.0,      -2500.0),
-                ('Load more...',                        '',         '',          ''),
-                ('999999 Undistributed Profits/Losses', 0,          460.0,      -460.0),
+                ('400000 Product Sales',                                 0,     3000.0,     -3000.0),
+                ('INV/2023/00001 test line',                             0,     2000.0,     -2000.0),  # All lines are grouped if they are on the same date with the same id
+                ('INV/2023/00001 test line',                             0,      500.0,     -2500.0),
+                ('Load more...',                                        '',         '',          ''),
+                ('Undistributed Profits/Losses - company_1_data',        0,      460.0,      -460.0),
                 # Report Total.
-                ('Total General Ledger',                6920.0,     6920.0,     0),
+                ('Total General Ledger',                            6920.0,     6920.0,           0),
             ],
             options,
         )

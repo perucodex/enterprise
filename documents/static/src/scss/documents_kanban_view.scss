@@ -11,6 +11,20 @@
         height: 100%;
         width: 100%;
 
+        @include media-breakpoint-down(lg) {
+            &.o_kanban_grouped {
+                div:has(.o_kanban_record) {
+                    width: 100%;
+                }
+                .o_kanban_record {
+                    width: 95%;
+                }
+                &.o_documents_recent {
+                    overflow: auto !important;
+                }
+            }
+        }
+
         .o_kanban_record {
             flex-direction: column;
             width: 260px;
@@ -34,6 +48,9 @@
 
             &.o_kanban_ghost {
                 min-height: 0;
+                @include media-breakpoint-down(lg) {
+                    display: none;
+                }
             }
 
             &:hover .o-file-upload-progress-bar-abort {

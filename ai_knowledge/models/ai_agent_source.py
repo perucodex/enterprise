@@ -1,4 +1,4 @@
-from odoo import api, models, fields
+from odoo import _, api, fields, models
 
 from odoo.addons.ai.utils.html_extractor import HTMLExtractor
 
@@ -23,6 +23,7 @@ class AIAgentSource(models.Model):
                 'name': article.name,
                 'agent_id': agent_id,
                 'article_id': article.id,
+                'url': article.article_url,
                 'type': 'knowledge_article',
             })
         sources = super().create(vals_list)
@@ -37,46 +38,74 @@ class AIAgentSource(models.Model):
         """
         article_sources = self.filtered(lambda s: s.type == 'knowledge_article')
         for source in article_sources:
-            source.user_has_access = source.article_id.user_has_access
+            # evaluate access with the current user without elevating to sudo (used in LLM response flow)
+            source.user_has_access = source.article_id.with_user(self.env.user).user_can_read
         super(AIAgentSource, self - article_sources)._compute_user_has_access()
+
+    def _update_name(self):
+        """
+        Override to update the name of the source if it is a knowledge article.
+        """
+        if not self:
+            return
+
+        source = self[0]
+
+        if source.type != 'knowledge_article':
+            return super()._update_name()
+
+        current_name = source.article_id.name
+        if source.name != current_name:
+            source.name = current_name
 
     def action_access_source(self):
         """Override to open the article if article_id exists"""
         self.ensure_one()
-        if self.article_id:
-            article_url = self.article_id.article_url
-            if article_url:
-                return {
-                    'type': 'ir.actions.act_url',
-                    'url': article_url,
-                    'target': 'new',
-                }
+        if self.url:
+            return {
+                'type': 'ir.actions.act_url',
+                'url': self.url,
+                'target': 'new',
+            }
         return super().action_access_source()
 
-    def _cron_process_sources(self):
+    def _get_sources_to_process(self):
         """
-        Extended method to handle both URL scraping and knowledge article processing.
+        Override to append the knowledge article sources to process.
+        :return: sources to process
+        :rtype: ai.agent.source recordset
         """
-        article_sources = self.search([('type', '=', 'knowledge_article'), ('status', '=', 'processing')])
+        sources_to_process = super()._get_sources_to_process()
+        target_articles = self.env['ai.agent.source'].search([
+            ('type', '=', 'knowledge_article'),
+            ('status', '=', 'processing'),
+        ]).mapped('article_id')
+        knowledge_sources_to_process = self.env['ai.agent.source'].search([
+            ('article_id', 'in', target_articles.ids),
+        ])
+        return sources_to_process | knowledge_sources_to_process
+
+    def _fetch_content(self, source):
+        """
+        Override to fetch the content of a knowledge article source
+        and all its descendants if the source is a knowledge article.
+        :param source: source to fetch the content from
+        :type source: ai.agent.source record
+        :return: dictionary with 'content', 'title', and 'error' keys, or None
+        :rtype: dict or None
+        """
+        if source.type != 'knowledge_article':
+            return super()._fetch_content(source)
+
         extractor = HTMLExtractor()
-        trigger_embeddings_cron = False
-
-        for source in article_sources:
-            parent_article = source.article_id
-            article_descendants = parent_article._get_descendants()
-            all_articles = article_descendants | parent_article
-            index_content = ""
-            for article in all_articles:
-                result = extractor.extract_from_html(article.body)
-                if result['content']:
-                    index_content += result['content'] + '\n'
-
-            article_url = parent_article.article_url
-            should_trigger = self._process_source_content(source, index_content, url=article_url)
-            if should_trigger:
-                trigger_embeddings_cron = True
-
-        if trigger_embeddings_cron:
-            self.env.ref('ai.ir_cron_generate_embedding')._trigger()
-
-        super()._cron_process_sources()
+        parent_article = source.article_id
+        article_descendants = parent_article._get_descendants()
+        all_articles = article_descendants | parent_article
+        content = ""
+        for article in all_articles:
+            result = extractor.extract_from_html(article.body)
+            if result and result['content']:
+                content += result['content'] + '\n'
+            else:
+                return {"content": None, "error": result.get('error', _("Failed to extract content from the articles."))}
+        return {"content": content, "error": None}

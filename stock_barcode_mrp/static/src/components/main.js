@@ -112,12 +112,19 @@ patch(MainComponent.prototype, {
 
     async saveFormView(lineRecord) {
         if (lineRecord.resModel === "mrp.production") {
+            const prev_qty_producing = this.env.model.record.qty_producing;
+            const curr_qty_producing = lineRecord.data.qty_producing;
+            const is_product_form = !this.env.model.record.product_id;
             const recordId = lineRecord.resId;
             let update = Boolean(this.resId);
             if (!this.resId) {
                 this.resId = recordId;
                 await this.env.model.confirmAndSetData(recordId);
                 this.toggleBarcodeLines();
+            }
+            if (!is_product_form && prev_qty_producing != curr_qty_producing){
+                await this.orm.call("mrp.production", "set_qty_producing", [[recordId]]);
+                await this._onRefreshState({ recordId });
             }
             if (update) {
                 if (lineRecord.data.product_qty != this.env.model.record.product_qty) {

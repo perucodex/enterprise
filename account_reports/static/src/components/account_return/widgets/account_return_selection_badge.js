@@ -63,30 +63,35 @@ export class AccountReturnSelectionBadge extends Component {
         return editableOptions;
     }
 
-    decorationForValue(value, isDropdownItem=false) {
+    getDropdownButtonDecoration(value) {
+        const decoration = this.props.options[value]?.decoration
+        if (!decoration || decoration === 'muted') {
+            return 'btn-outline-secondary'
+        }
+        return `btn-outline-${decoration}`
+    }
+
+    getDropdownItemDecoration(value) {
         const colorScheme = cookie.get("color_scheme");
-        const defaultStyle = isDropdownItem && colorScheme == 'dark' ? "text-bg-200" : "text-bg-300";
-        const decoration = this.props.options[value]?.decoration;
+        const decoration = this.props.options[value]?.decoration
         if (decoration) {
             if (decoration === "muted") {
-                return defaultStyle;
+                return colorScheme == 'dark' ? "text-bg-200" : "text-bg-300";
             }
             return `text-bg-${this.props.options[value].decoration}`;
         }
-        return isDropdownItem && colorScheme == 'dark' ? "text-bg-200" : "text-bg-100";
+        return colorScheme == 'dark' ? "text-bg-200" : "text-bg-100";
     }
 
     get additionalClassName() {
-        return this.props.class || "";
-    }
-
-    get capsuleStyle() {
-        if (this.props.size === 'normal') {
-            return "min-width: 70px; height:21px;";
+        const addClasses = [];
+        if (this.props.size === 'small' || this.env.config.viewType === 'list') {
+            addClasses.push('o_account_return_selection_badge_button_small');
         }
-        else {
-            return "";
+        if (this.props.class) {
+            addClasses.push(this.props.class);
         }
+        return addClasses.join(' ');
     }
 
     async onChange(value) {

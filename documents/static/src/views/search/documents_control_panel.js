@@ -43,7 +43,9 @@ export class DocumentsControlPanel extends ControlPanel {
             !!this.env.model.root.selection.find(
                 (r) => r.id === this.rightPanelState.focusedRecord.id
             );
-        return !previewing && (!focusing || focusedSelected);
+        return (
+            this.env.config.viewType != "activity" && !previewing && (!focusing || focusedSelected)
+        );
     }
 
     get pathBreadcrumbs() {

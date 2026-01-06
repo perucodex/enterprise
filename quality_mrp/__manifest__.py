@@ -3,7 +3,7 @@
 
 {
     'name': 'MRP features for Quality Control',
-    'version': '1.0',
+    'version': '1.1',
     'category': 'Supply Chain/Quality',
     'sequence': 50,
     'summary': 'Quality Management with MRP',

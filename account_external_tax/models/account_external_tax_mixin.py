@@ -127,13 +127,17 @@ class AccountExternalTaxMixin(models.AbstractModel):
         tax_by_name = {}
         for tax_name, tax_values in tax_names.items():
             price_include_override_domain = []
+            type_tax_use_domain = []
             if 'price_include_override' in tax_values:
                 price_include_override_domain = [('price_include_override', '=', tax_values['price_include_override'])]
+            if 'type_tax_use' in tax_values:
+                type_tax_use_domain = [('type_tax_use', '=', tax_values['type_tax_use'])]
 
             existing_tax = self.env['account.tax'].with_context(active_test=not search_archived_taxes).search([
                 *self.env['account.tax']._check_company_domain(company),
                 (tax_key_field, 'in', tax_name),
                 *price_include_override_domain,
+                *type_tax_use_domain,
             ], limit=1)
             if existing_tax:
                 tax_by_name[existing_tax[tax_key_field]] = existing_tax

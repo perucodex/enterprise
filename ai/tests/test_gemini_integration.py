@@ -25,7 +25,7 @@ class TestGeminiIntegration(TransactionCase):
         test_attachment = self.env["ir.attachment"].create(
             {
                 "name": "test_doc.txt",
-                "index_content": "Odoo is an open-source ERP system with many modules.",
+                "raw": b"Odoo is an open-source ERP system with many modules.",
                 "res_model": "ai.agent",
                 "res_id": self.agent.id,
             }
@@ -87,10 +87,10 @@ class TestGeminiIntegration(TransactionCase):
             elif endpoint.startswith("/models/"):
                 self.assertIn("gemini-1.5-flash", endpoint)
                 self.assertEqual(body.get("generationConfig", {}).get("temperature"), 0.2)
-                self.assertEqual(params.get("key"), "test-gemini-key")
+                self.assertEqual(headers.get("x-goog-api-key"), "test-gemini-key")
 
                 instructions = body["systemInstruction"]
-                rag_context_found = "##Context information:" in str(instructions["parts"])
+                rag_context_found = "##RAG context information:" in str(instructions["parts"])
                 self.assertTrue(rag_context_found, "RAG context not found in messages")
                 self.assertIn(
                     "Odoo is an open-source ERP system", str(instructions["parts"])

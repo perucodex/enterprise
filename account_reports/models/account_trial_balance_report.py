@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import json
 import datetime
-import contextlib
+from collections import defaultdict
 
 from odoo import api, models, _, fields
 from odoo.tools import SQL, groupby, frozendict
@@ -191,7 +191,15 @@ class AccountTrialBalanceReportHandler(models.AbstractModel):
                 {'name': _("General Ledger"), 'action': 'caret_option_open_general_ledger'},
                 {'name': _("Journal Items"), 'action': 'open_journal_items'},
             ],
+            'undistributed_profits_losses': [
+                {'name': _("General Ledger"), 'action': 'caret_option_open_general_ledger'},
+                {'name': _("Journal Items"), 'action': 'open_unallocated_items_journal_items'},
+            ],
         }
+
+    def open_unallocated_items_journal_items(self, options, params):
+        report = self.env['account.report'].browse(options['report_id'])
+        return report.open_unallocated_items_journal_items(options, params)
 
     ###################
     #  REPORT ENGINE  #
@@ -202,10 +210,6 @@ class AccountTrialBalanceReportHandler(models.AbstractModel):
 
             Return a list of lines with keys {'balance', 'debit', 'credit'} that are the aggregation
             of the journal items specified by the options' domain and dates.
-
-            When 'account_or_unaff_id' is in the groupby, use the options key
-            'trial_balance_block_fiscalyear_start' as a cutoff date before which journal items
-            in profit and loss accounts are attributed to the unaffected earnings account.
         """
         report = self.env['account.report'].browse(options['report_id'])
 
@@ -219,12 +223,12 @@ class AccountTrialBalanceReportHandler(models.AbstractModel):
             return []
 
         extra_domain = []
-        # Unless we are grouping by `account_or_unaff_id`, don't consider income and expense AMLs from previous fiscal years.
+        # Don't consider income and expense AMLs from previous fiscal years.
         # (1) This is an optimization that speeds up the report but prevents expanding the Unaffected Earnings account.
         # (2) This also has the functional purpose of ensuring that income and expense accounts only take into account AMLs
         #     from the current fiscal year when coming from the `_expand_groupby`, because the `_expand_groupby` only adds
         #     a forced_domain on 'account_id' and doesn't do any restriction based on date.
-        if current_groupbys and current_groupbys[-1] != 'account_or_unaff_id' and (fiscalyear_start := options.get('trial_balance_block_fiscalyear_start')):
+        if fiscalyear_start := options.get('trial_balance_block_fiscalyear_start'):
             extra_domain = [
                 '|',
                 ('account_id.include_initial_balance', '=', True),
@@ -266,34 +270,12 @@ class AccountTrialBalanceReportHandler(models.AbstractModel):
         next_groupbys = next_groupby.split(',') if next_groupby else []
         query = report._get_report_query(options, date_scope, domain=extra_domain)
 
-        if next_groupbys:
-            next_groupby_expression = self._get_sql_expression_for_field(options, query, next_groupbys[0])
-        else:
-            next_groupby_expression = SQL.identifier('account_move_line', 'id')
-
         if current_groupbys:
             select_groupby_key_components = SQL('\n').join(
-                SQL("%s AS %s,", self._get_sql_expression_for_field(options, query, groupby_key), SQL.identifier(f'groupby_key_{groupby_key}'))
+                SQL("%s AS %s,", self.env['account.move.line']._field_to_sql("account_move_line", groupby_key, query), SQL.identifier(f'groupby_key_{groupby_key}'))
                 for groupby_key in current_groupbys
             )
             query.groupby = SQL(',').join(SQL.identifier(f'groupby_key_{groupby_key}') for groupby_key in current_groupbys)
-
-        # If we will show an Unaffected Earnings line, make sure that it can't be unfolded.
-        if (
-            current_groupbys
-            and current_groupbys[-1] == 'account_or_unaff_id'
-            and (fiscalyear_start := options.get('trial_balance_block_fiscalyear_start'))
-        ):
-            is_unaffected_earnings = SQL(
-                """ BOOL_AND(%(account_type)s ILIKE ANY(ARRAY[%(income_pattern)s, %(expense_pattern)s]) AND account_move_line.date < %(fiscalyear_start)s OR %(account_type)s = 'equity_unaffected')
-                """,
-                account_type=SQL.identifier('account_move_line__account_id', 'account_type'),
-                income_pattern=r'income%',
-                expense_pattern=r'expense%',
-                fiscalyear_start=fiscalyear_start,
-            )
-        else:
-            is_unaffected_earnings = SQL("FALSE")
 
         sql_query = SQL(
             """
@@ -301,8 +283,7 @@ class AccountTrialBalanceReportHandler(models.AbstractModel):
                 %(select_groupby_key_components)s
                 COALESCE(SUM(%(select_balance)s), 0.0) AS balance,
                 COALESCE(SUM(%(select_debit)s), 0.0) AS debit,
-                COALESCE(SUM(%(select_credit)s), 0.0) AS credit,
-                %(is_unaffected_earnings)s AS is_unaffected_earnings
+                COALESCE(SUM(%(select_credit)s), 0.0) AS credit
             FROM %(table_references)s
             %(currency_table_join)s
             WHERE %(search_condition)s
@@ -312,8 +293,6 @@ class AccountTrialBalanceReportHandler(models.AbstractModel):
             select_balance=report._currency_table_apply_rate(SQL("account_move_line.balance")),
             select_debit=report._currency_table_apply_rate(SQL("account_move_line.debit")),
             select_credit=report._currency_table_apply_rate(SQL("account_move_line.credit")),
-            next_groupby_expression=next_groupby_expression,
-            is_unaffected_earnings=is_unaffected_earnings,
             table_references=query.from_clause,
             currency_table_join=report._currency_table_aml_join(options),
             search_condition=query.where_clause,
@@ -346,53 +325,10 @@ class AccountTrialBalanceReportHandler(models.AbstractModel):
                     if len(current_groupbys) == 1
                     else tuple(query_result[f'groupby_key_{groupby}'] for groupby in current_groupbys)
                 ),
-                {**query_result, 'has_sublines': not disable_expand and not query_result['is_unaffected_earnings']},
+                {**query_result, 'has_sublines': not disable_expand},
             )
             for query_result in query_results
         ]
-
-    def _get_sql_expression_for_field(self, options, query, field):
-        """ Get an SQL expression for the given field on account.move.line. """
-        if field == 'account_or_unaff_id':
-            if fiscalyear_start := options.get('trial_balance_block_fiscalyear_start'):
-                unaffected_earnings_accounts_per_company = self.env['account.report']._get_unaffected_earnings_accounts_per_company(options)
-
-                if 'account_move_line__account_id' not in query._joins:
-                    account_alias = query.join("account_move_line", "account_id", "account_account", "id", "account_id")
-                else:
-                    account_alias = 'account_move_line__account_id'
-
-                account_or_unaff_id_expression = SQL(
-                    """ CASE
-                            WHEN %(account_type)s ILIKE ANY(ARRAY[%(income_pattern)s, %(expense_pattern)s])
-                                AND account_move_line.date < %(fiscalyear_start)s
-                            THEN (
-                                    %(unaffected_earnings_accounts_per_company)s::jsonb
-                                    ->>(account_move_line.company_id::text)
-                            )::int
-                            ELSE account_move_line.account_id
-                        END
-                    """,
-                    account_type=SQL.identifier(account_alias, 'account_type'),
-                    income_pattern=r'income%',
-                    expense_pattern=r'expense%',
-                    fiscalyear_start=fiscalyear_start,
-                    unaffected_earnings_accounts_per_company=json.dumps(unaffected_earnings_accounts_per_company)
-                )
-                return account_or_unaff_id_expression
-
-            else:
-                field = 'account_id'
-
-        return self.env['account.move.line']._field_to_sql("account_move_line", field, query)
-
-    def _get_custom_groupby_map(self):
-        return {
-            'account_or_unaff_id': {
-                'model': 'account.account',
-                'domain_builder': lambda account_or_unaff_id: [('account_id', '=', account_or_unaff_id)],
-            }
-        }
 
     def _custom_line_postprocessor(self, report, options, lines):
         """ Compute the end balance for each column block and each horizontal group,
@@ -407,8 +343,26 @@ class AccountTrialBalanceReportHandler(models.AbstractModel):
             analytic_group = tuple(column_group['forced_options'].get('analytic_accounts_list', []))
             return block_id, horizontal_group, analytic_group
 
-        for line in lines:
+        # Unaffected Earnings lines
+        if report._parse_line_id(lines[0]['id'])[-1] == ('', 'account.report.line', report.line_ids[0].id):
+            unaffected_earning_lines = report._get_unallocated_earnings_lines(options, 'strict_range', auditable=True)
+        else:
+            unaffected_earning_lines = []
 
+        if self.env.company.totals_below_sections:
+            total_line_id = lines[-1]['id']
+        else:
+            total_line_id = lines[0]['id']
+
+        unaffected_earning_values = defaultdict(
+            lambda: {
+                'initial_balance': {'debit': 0, 'credit': 0, 'balance': 0},
+                'period': {'debit': 0, 'credit': 0, 'balance': 0},
+            }
+        )
+
+        for line in unaffected_earning_lines + lines:
+            unaffected_earning_line = report._get_markup(line['id']) == 'undistributed_profits_losses'
             # Group by column block ID and horizontal groupby element to sum up end balance
             grouped_by_block = groupby(line['columns'], key=get_block_and_group_key)
 
@@ -422,12 +376,19 @@ class AccountTrialBalanceReportHandler(models.AbstractModel):
                 # there is a single Balance column (if there is no horizontal groupby) or separate Debit and
                 # Credit columns in the initial balance and end balance (if there is a horizontal groupby)
                 sum_debit = sum_credit = 0.0
-                for col in columns_grouped_by_type['initial_balance'] + columns_grouped_by_type['period']:
-                    if not col['is_zero']:
-                        if col['expression_label'] == 'debit' or (col['expression_label'] == 'balance' and col in columns_grouped_by_type['initial_balance']):
-                            sum_debit += col['no_format']
-                        elif col['expression_label'] == 'credit':
-                            sum_credit += col['no_format']
+                for col_type, cols in columns_grouped_by_type.items():
+                    if col_type in ('initial_balance', 'period'):
+                        for col in cols:
+                            if line['id'] == total_line_id:
+                                col['no_format'] += unaffected_earning_values[_grouping_key][col_type][col['expression_label']]
+                                col['is_zero'] = not bool(col['no_format'])
+                            if not col['is_zero']:
+                                if col['expression_label'] == 'debit' or (col['expression_label'] == 'balance' and col in columns_grouped_by_type['initial_balance']):
+                                    sum_debit += col['no_format']
+                                elif col['expression_label'] == 'credit':
+                                    sum_credit += col['no_format']
+                                if unaffected_earning_line:
+                                    unaffected_earning_values[_grouping_key][col_type][col['expression_label']] += col['no_format']
 
                 for end_balance_col in columns_grouped_by_type.get('end_balance', []):
                     match end_balance_col['expression_label']:
@@ -448,7 +409,12 @@ class AccountTrialBalanceReportHandler(models.AbstractModel):
             # Only the total line should be displayed at the bottom, in bold
             if self.env.company.totals_below_sections:  # total line already exists
                 lines.pop(0)
+                if unaffected_earning_lines:
+                    total_line = lines.pop(-1)
+                    lines.extend(unaffected_earning_lines)
+                    lines.append(total_line)
             else:
+                lines.extend(unaffected_earning_lines)
                 lines.append(lines.pop(0))
                 # To make the style as if totals_below_sections was activated
                 lines[-1]['id'] = report._build_subline_id(lines[-1]['id'], report._build_line_id([('total', None, None)]))
@@ -477,12 +443,8 @@ class AccountTrialBalanceReportHandler(models.AbstractModel):
         account_dict = {account.id: account.account_type for account in accounts}
         return account_dict
 
-    def _get_unaffected_earnings_accounts(self, report, options):
-        return self.env['account.account'].search([
-            ('display_name', 'ilike', options.get('filter_search_bar')),
-            *self.env['account.account']._check_company_domain(report.get_report_company_ids(options)),
-            ('account_type', '=', 'equity_unaffected'),
-        ])
+    def _get_fiscalyear_start_date(self, options):
+        return options.get('trial_balance_block_fiscalyear_start')
 
     def _custom_unfold_all_batch_data_generator(self, report, options, lines_to_expand_by_function):
         """ Generate the custom engine's results for each full-sub-groupby-key that
@@ -574,20 +536,16 @@ class AccountTrialBalanceReportHandler(models.AbstractModel):
         account = self.env['account.account'].browse(account_id)
 
         modified_domain = []
-        if account.account_type == 'equity_unaffected':
-            for condition in action['domain']:
-                match condition:
-                    case ['account_id', '=', account_id]:
-                        modified_domain.extend([
-                            '|', ('account_id', '=', account_id),
-                            '&', ('account_id.include_initial_balance', '=', False),
-                            ('date', '<', column_group_forced_options['trial_balance_block_fiscalyear_start']),
-                        ])
-                    case _:
-                        modified_domain.append(condition)
-            action['domain'] = modified_domain
+        if not account:
+            action['domain'] += report._get_unallocated_earnings_lines_domain(
+                column_group_forced_options['trial_balance_block_fiscalyear_start'],
+                report._get_res_id_from_line_id(params['calling_line_dict_id'], 'res.company')
+            )
 
-        elif column_group_forced_options['trial_balance_column_type'] in ('initial_balance', 'end_balance') and account.internal_group in ('income', 'expense'):
+        elif (
+                column_group_forced_options['trial_balance_column_type'] in ('initial_balance', 'end_balance')
+                and (account.internal_group in ('income', 'expense') or account.account_type == 'equity_unaffected')
+        ):
             for condition in action['domain']:
                 match condition:
                     case ['account_id', '=', account_id]:

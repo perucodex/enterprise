@@ -1922,7 +1922,7 @@ class TestTaxReport(TestAccountReportsCommon):
             account = self.env['account.account'].search([('company_ids', '=', company.id), ('account_type', '=', account_types[tax.type_tax_use])], limit=1)
             # create one entry and it's reverse
             move_form = Form(self.env['account.move'].with_context(default_move_type='entry'))
-            with move_form.journal_line_ids.new() as line:
+            with move_form.line_ids.new() as line:
                 line.account_id = account
                 if tax.type_tax_use == 'sale':
                     line.credit = 1000
@@ -1932,7 +1932,7 @@ class TestTaxReport(TestAccountReportsCommon):
                 line.tax_ids.add(tax)
 
             # Create a third account.move.line for balance.
-            with move_form.journal_line_ids.new() as line:
+            with move_form.line_ids.new() as line:
                 line.account_id = account
                 if tax.type_tax_use == 'sale':
                     line.debit = 1200
@@ -2020,14 +2020,14 @@ class TestTaxReport(TestAccountReportsCommon):
                     .with_company(self.company_data['company']) \
                     .with_context(default_move_type='entry'))
         move_form.date = fields.Date.today()
-        with move_form.journal_line_ids.new() as base_line_form:
+        with move_form.line_ids.new() as base_line_form:
             base_line_form.name = "Base line"
             base_line_form.account_id = self.company_data['default_account_revenue']
             base_line_form.credit = 100
             base_line_form.tax_ids.clear()
             base_line_form.tax_ids.add(tax)
 
-        with move_form.journal_line_ids.new() as receivable_line_form:
+        with move_form.line_ids.new() as receivable_line_form:
             receivable_line_form.name = "Receivable line"
             receivable_line_form.account_id = self.company_data['default_account_receivable']
             receivable_line_form.debit = 142

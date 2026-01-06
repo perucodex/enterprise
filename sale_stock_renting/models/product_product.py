@@ -134,7 +134,7 @@ class ProductProduct(models.Model):
             from_date=pivot_date, to_date=pivot_date, **kwargs
         )
         active_lines = active_lines.filtered(lambda line:
-            line.order_id.rental_status in ('pickup', 'return')
+            line.rental_status in ('pickup', 'return')
                 and (
                     not line.order_id.has_pickable_lines
                     or (

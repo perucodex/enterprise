@@ -15,13 +15,14 @@
 # karolína schusterová <karolina.schusterova@vdp.sk>, 2022
 # Aleš Fiala <f.ales1@seznam.cz>, 2023
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2025-09-15 12:00+0000\n"
-"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-11-08 19:43+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Czech <https://translate.odoo.com/projects/odoo-19/planning/"
 "cs/>\n"
 "Language: cs\n"
@@ -36,7 +37,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/planning/models/resource_resource.py:0
 msgid "%(resource_name)s (%(role)s)"
-msgstr ""
+msgstr "%(resource_name)s (%(role)s)"
 
 #. module: planning
 #. odoo-python
@@ -64,25 +65,25 @@ msgstr ".&amp;nbsp;"
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "1 Onsite Interview"
-msgstr ""
+msgstr "1 Pohovor na místě"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "1 Phone Call"
-msgstr ""
+msgstr "1 Telefonní hovor"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "2 open days"
-msgstr ""
+msgstr "2 dny otevřených dveří"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "4 Days after Interview"
-msgstr ""
+msgstr "4 Dny po pohovoru"
 
 #. module: planning
 #: model_terms:digest.tip,tip_description:planning.digest_tip_planning_0
@@ -306,19 +307,19 @@ msgstr ""
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "<span class=\"text-muted small\">Days to get an Offer</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">Dny na získání nabídky</span>"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "<span class=\"text-muted small\">Process</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">Průběh</span>"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
 #: model_terms:hr.job,job_details:planning.job_quality_control
 msgid "<span class=\"text-muted small\">Time to Answer</span>"
-msgstr ""
+msgstr "<span class=\"text-muted small\">Čas na odpověď</span>"
 
 #. module: planning
 #: model_terms:web_tour.tour,rainbow_man_message:planning.planning_tour
@@ -460,6 +461,117 @@ msgid ""
 "                </div>\n"
 "            </body>"
 msgstr ""
+"<style>\n"
+"                    .planning_mail_template_button {\n"
+"                        padding: 5px 10px;\n"
+"                        text-decoration: none;\n"
+"                        border: 1px;\n"
+"                        border-radius: 3px;\n"
+"                        text-align: center;\n"
+"                        color: #374151;\n"
+"                        background-color: #E7E9ED;\n"
+"                        border: solid #E7E9ED;\n"
+"                        flex: 1 1 40%;\n"
+"                    }\n"
+"                    .top_button {\n"
+"                        color: #FFFFFF;\n"
+"                        background-color: #714B67;\n"
+"                        border: solid #714B67;\n"
+"                        flex: 1 1 60%;\n"
+"                    }\n"
+"                    .button_box {\n"
+"                        display: flex;\n"
+"                        flex-wrap: wrap;\n"
+"                        gap: 10px;\n"
+"                        margin: 20px 15px 0px 15px;\n"
+"                    }\n"
+"                </style>\n"
+"                <body><div>\n"
+"                    <p t-if=\"ctx.get('employee_name')\">Vážený/á <t t-"
+"out=\"ctx['employee_name']\">Anita Oliver</t>,</p>\n"
+"                    <p t-else=\"\">Dobrý den,</p>\n"
+"                    <br/>\n"
+"                    <p t-if=\"ctx.get('open_shift_available')\">Máme novou "
+"otevřenou směnu:</p>\n"
+"                    <p t-else=\"\">Byli jste připsání k následující směně:</"
+"p>\n"
+"                    <table style=\"margin-left: 30px;\">\n"
+"                        <tr t-if=\"(ctx.get('start_datetime') and "
+"ctx.get('end_datetime'))                                   or "
+"ctx.get('allocated_hours')                                   or "
+"ctx.get('allocated_percentage')\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Datum</th>\n"
+"                            <td style=\"padding: 5px;\">\n"
+"                                <span t-if=\"ctx.get('start_datetime') and "
+"ctx.get('end_datetime')\" t-out=\"'%s ⟶ %s' % "
+"(                                     ctx['start_datetime'],                                     "
+"ctx['end_datetime'],                                 )\">\n"
+"                                    05/31/2021, 8:00 ⟶ 05/31/2021, 16:00\n"
+"                                </span>\n"
+"                                <span t-if=\"ctx.get('allocated_hours')\" "
+"style=\"opacity: 0.5;\">\n"
+"                                    (<t t-out=\"ctx['allocated_hours']"
+"\">4:00</t>h)\n"
+"                                </span>\n"
+"                                <span t-if=\"ctx.get('allocated_percentage') "
+"and ctx['allocated_percentage'] != '100'\" style=\"opacity: 0.5;\">\n"
+"                                    (<t t-out=\"ctx['allocated_percentage']"
+"\">50</t>%)\n"
+"                                </span>\n"
+"                            </td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"object.role_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Role</th>\n"
+"                            <td style=\"padding: 5px;\" t-"
+"out=\"object.role_id.name or ''\">Barmán</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'project_id') and "
+"object.project_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Projekt</th>\n"
+"                            <td style=\"padding: 5px;\" t-"
+"out=\"object.sudo().project_id.name or ''\">Shromaždění</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'sale_line_id') and "
+"object.sale_line_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Položka prodejní objednávky</th>\n"
+"                            <td style=\"padding: 5px;\" t-"
+"out=\"object.sudo().sale_line_id.name or ''\">Káva</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'name') and "
+"object.name\">\n"
+"                            <th style=\"padding: 5px; text-align: left;"
+"\">Poznámka</th>\n"
+"                            <td style=\"padding: 5px;\" t-out=\"object.name "
+"or ''\">/</td>\n"
+"                        </tr>\n"
+"                    </table>\n"
+"                    <div class=\"button_box\">\n"
+"                        <a t-if=\"ctx.get('available_link')\" t-att-"
+"href=\"ctx['available_link']\" target=\"_blank\" "
+"class=\"planning_mail_template_button top_button\">Přiřaďte mi tuto směnu</"
+"a>\n"
+"                        <a t-if=\"ctx.get('unavailable_link')\" t-att-"
+"href=\"ctx['unavailable_link']\" target=\"_blank\" "
+"class=\"planning_mail_template_button top_button\">Nejsem dostupný/á</a>\n"
+"                        <a t-if=\"ctx.get('google_url')\" t-att-"
+"href=\"ctx['google_url']\" target=\"_blank\" "
+"class=\"planning_mail_template_button\">Přidejte do kalendáře Google</a>\n"
+"                        <a t-if=\"ctx.get('iCal_url')\" t-att-"
+"href=\"ctx['iCal_url']\" target=\"_blank\" "
+"class=\"planning_mail_template_button\">Přidejte do iCal/Outlook</a>\n"
+"                    </div>\n"
+"                    <br/>\n"
+"                    <p t-if=\"ctx.get('open_shift_available')\">Pokud máte "
+"zájem a jste k dispozici, přiřaďte si tuto směnu.</p>\n"
+"                    <p t-else=\"\">V případě, že aktuální směna vám "
+"nevyhovuje, doporučujeme kontaktovat své kolegy a požádat je o výměnu směny. "
+"Možná budou mít zájem si s vámi směny výměnit.</p>\n"
+"                </div>\n"
+"            </body>"
 
 #. module: planning
 #: model:mail.template,body_html:planning.email_template_planning_planning
@@ -545,7 +657,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
 msgid "Actions"
-msgstr ""
+msgstr "Akce"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_role__active
@@ -625,7 +737,7 @@ msgstr "Přidělený čas (%)"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_ics_description
 msgid "Allocated Time:"
-msgstr ""
+msgstr "Přidělený čas:"
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_slot_check_allocated_hours_positive
@@ -674,13 +786,13 @@ msgstr "Opravdu chcete tuto směnu smazat?"
 #. odoo-javascript
 #: code:addons/planning/static/src/components/conflicting_slot_ids_field/conflicting_slot_ids_field.xml:0
 msgid "Arrow"
-msgstr ""
+msgstr "Šipka"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/components/conflicting_slot_ids_field/conflicting_slot_ids_field.xml:0
 msgid "Arrow icon"
-msgstr ""
+msgstr "Ikona šipky"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
@@ -731,7 +843,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_filter_section/planning_calendar_filter_section.xml:0
 msgid "Avatar"
-msgstr ""
+msgstr "Avatar"
 
 #. module: planning
 #: model:ir.ui.menu,name:planning.planning_menu_schedule_by_resource
@@ -809,7 +921,7 @@ msgstr "Konfigurace"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_ask_recurrence_update/planning_ask_recurrence_update_dialog.xml:0
 msgid "Confirm"
-msgstr ""
+msgstr "Potvrdit"
 
 #. module: planning
 #. odoo-javascript
@@ -1107,7 +1219,7 @@ msgstr "Chyba: každý token zaměstnance musí být jedinečný"
 #. odoo-python
 #: code:addons/planning/models/planning_recurrency.py:0
 msgid "Every %(repeat_interval)s week(s) until %(repeat_until)s"
-msgstr ""
+msgstr "Každý %(repeat_interval)s týden (y) do %(repeat_until)s"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_send__note
@@ -1133,7 +1245,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 msgid "First you have to specify the date of the invitation."
-msgstr ""
+msgstr "Nejprve musíte zvolit datum pozvání."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.view_employee_filter_inherit_hr
@@ -1286,7 +1398,7 @@ msgstr ""
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_view_form_simplified
 msgid "Job Position"
-msgstr ""
+msgstr "Pracovní pozice"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__job_title
@@ -1372,7 +1484,7 @@ msgstr "Začněme spravovat plán vašich zaměstnanců!"
 #. odoo-javascript
 #: code:addons/planning/static/src/js/planning_calendar_front.js:0
 msgid "List"
-msgstr ""
+msgstr "Seznam"
 
 #. module: planning
 #: model:hr.job,name:planning.job_maintenance_technician
@@ -1426,7 +1538,7 @@ msgstr "Upraveno od poslední publikace"
 #. odoo-javascript
 #: code:addons/planning/static/src/js/planning_calendar_front.js:0
 msgid "Month"
-msgstr ""
+msgstr "Měsíc"
 
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__planning_recurrency__repeat_unit__month
@@ -1475,7 +1587,7 @@ msgstr "Název"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_calendar_controller.js:0
 msgid "New Event"
-msgstr ""
+msgstr "Nová událost"
 
 #. module: planning
 #. odoo-javascript
@@ -1552,7 +1664,7 @@ msgstr "Poznámka"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_ics_description
 msgid "Note:"
-msgstr ""
+msgstr "Poznámka:"
 
 #. module: planning
 #. odoo-javascript
@@ -1613,7 +1725,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_calendar_controller.js:0
 msgid "Open: %s"
-msgstr ""
+msgstr "Otevřít: %s"
 
 #. module: planning
 #. odoo-python
@@ -1636,7 +1748,7 @@ msgstr "Období"
 msgid ""
 "Plan resource allocation across projects and estimate deadlines more "
 "accurately"
-msgstr ""
+msgstr "Naplánujte alokaci zdrojů napříč projekty a přesněji odhadujte termíny"
 
 #. module: planning
 #. odoo-javascript
@@ -1657,7 +1769,7 @@ msgstr ""
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
 msgid "Planned Date"
-msgstr ""
+msgstr "Plánované datum"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot_template__start_time
@@ -1724,7 +1836,7 @@ msgstr "Plánovací směna"
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__slot_id
 msgid "Planning Slot"
-msgstr ""
+msgstr "Plánovací slot"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_role__slot_properties_definition
@@ -1784,7 +1896,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/planning/static/src/components/conflicting_slot_ids_field/conflicting_slot_ids_field.xml:0
 msgid "Prepare for the ultimate multi-tasking challenge:"
-msgstr ""
+msgstr "Připravte se na ultimátní výzvu být na více místech v jeden čas."
 
 #. module: planning
 #. odoo-javascript
@@ -1798,7 +1910,7 @@ msgstr ""
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
 #: model_terms:ir.ui.view,arch_db:planning.planning_preview_view_form
 msgid "Preview"
-msgstr ""
+msgstr "Náhled"
 
 #. module: planning
 #: model:ir.actions.act_window,name:planning.resource_preview_action
@@ -1810,7 +1922,7 @@ msgstr ""
 #: code:addons/planning/static/src/views/planning_calendar/planning_calendar_controller.xml:0
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
 msgid "Print"
-msgstr ""
+msgstr "Tisk"
 
 #. module: planning
 #. odoo-javascript
@@ -1822,23 +1934,23 @@ msgstr ""
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_res_config_settings__module_project_forecast
 msgid "Project Planning"
-msgstr ""
+msgstr "Plánování projektu"
 
 #. module: planning
 #: model:planning.role,name:planning.planning_role_projector
 msgid "Projector"
-msgstr ""
+msgstr "Projektor"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__slot_properties
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search
 msgid "Properties"
-msgstr ""
+msgstr "Vlastnosti"
 
 #. module: planning
 #: model:ir.model,name:planning.model_hr_employee_public
 msgid "Public Employee"
-msgstr ""
+msgstr "Veřejný zaměstnanec"
 
 #. module: planning
 #. odoo-javascript
@@ -2081,7 +2193,7 @@ msgstr "Uložit a odeslat plán"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
 msgid "Save Template"
-msgstr ""
+msgstr "Uložit šablonu"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__template_creation
@@ -2097,7 +2209,7 @@ msgstr "Jakmile je změna připravena, uložte ji."
 #. module: planning
 #: model:planning.role,name:planning.planning_role_scanner
 msgid "Scanner"
-msgstr ""
+msgstr "Skener"
 
 #. module: planning
 #: model:ir.model,name:planning.model_planning_planning
@@ -2595,7 +2707,7 @@ msgstr "Zobrazit plánování"
 #. odoo-javascript
 #: code:addons/planning/static/src/js/planning_calendar_front.js:0
 msgid "Week"
-msgstr ""
+msgstr "Týden"
 
 #. module: planning
 #. odoo-python
@@ -2662,6 +2774,12 @@ msgstr "Nemůžete se přiřadit k již přiřazené směně."
 #: code:addons/planning/models/planning_slot.py:0
 msgid "You can not unassign another employee than yourself."
 msgstr "Nemůžete zrušit přiřazení jiného zaměstnance než sebe."
+
+#. module: planning
+#. odoo-python
+#: code:addons/planning/models/planning_slot.py:0
+msgid "You cannot assign yourself to a shift belonging to another company."
+msgstr ""
 
 #. module: planning
 #. odoo-python
@@ -2756,6 +2874,8 @@ msgid ""
 "Your shift on {{ ctx.get('start_datetime') }} was re-assigned to "
 "{{ ctx.get('new_assignee_name', 'Marc Demo') }}"
 msgstr ""
+"Vaše směna dne {{ ctx.get('start_datetime') }} byla přidělena k "
+"{{ ctx.get('new_assignee_name', 'Marc Demo') }}"
 
 #. module: planning
 #. odoo-javascript
@@ -2766,7 +2886,7 @@ msgstr ""
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
 msgid "close"
-msgstr ""
+msgstr "zavřít"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form

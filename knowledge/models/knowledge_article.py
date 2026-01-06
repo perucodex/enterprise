@@ -918,6 +918,10 @@ class KnowledgeArticle(models.Model):
                     vals['sequence'] = current_sequence
                     current_sequence += 1
 
+        # check access rights only if all records needs sudo
+        if all(vals_as_sudo):
+            self.check_access('create')
+
         # sort by sudo / not sudo
         notsudo_articles = iter(super().create([
             vals for vals, can_sudo in zip(vals_list, vals_as_sudo)
@@ -1187,7 +1191,7 @@ class KnowledgeArticle(models.Model):
             if not preserve_name and self.name else self.name
 
         # Copy the article and make it private:
-        article = self.create({
+        article = self.env['knowledge.article'].create({
             'article_member_ids': [(0, 0, {
                 'partner_id': self.env.user.partner_id.id,
                 'permission': 'write'
@@ -1214,7 +1218,7 @@ class KnowledgeArticle(models.Model):
 
         # Copy the related article items and link them to their corresponding stage:
         article_items = self.child_ids.filtered(lambda article: article.is_article_item)
-        self.create([{
+        self.env['knowledge.article'].create([{
             'article_properties': article_item.article_properties,
             'body': article_item.body,
             'cover_image_id': article_item.cover_image_id.id,

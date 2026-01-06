@@ -39,7 +39,7 @@ class AccountBatchPayment(models.Model):
             )
             bban_payments = sorted_payments - iban_payments
             bban_payments_data = self._generate_payment_template(bban_payments)
-            bban_payments_xml = self.journal_id.create_iso20022_credit_transfer(
+            bban_payments_xml = self.with_context(bban=True).journal_id.create_iso20022_credit_transfer(
                 bban_payments_data,
                 self.payment_method_code,
                 batch_booking=self.iso20022_batch_booking,
@@ -62,9 +62,3 @@ class AccountBatchPayment(models.Model):
         if self.payment_method_code == 'iso20022_se' and self.payment_ids and self.payment_ids[0].partner_bank_id.acc_type != 'iban':
             return "PAIN-"
         return super()._get_export_file_name_prefix()
-
-    def _get_payment_vals(self, payment):
-        return {
-            **super()._get_payment_vals(payment),
-            'acc_type': payment.partner_bank_id.acc_type,
-        }

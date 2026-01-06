@@ -103,7 +103,7 @@ class TestReleaseToPayInvoice(AccountTestInvoicingCommon):
             line_form.quantity = 1
             line_form.price_unit = 10
         move_form.save()
-        with move_form.journal_line_ids.edit(0) as line_form:
+        with move_form.line_ids.edit(0) as line_form:
             line_form.amount_currency = -30
         move_form.save()
-        self.assertEqual(move_form.journal_line_ids.edit(0).amount_currency, -30)
+        self.assertEqual(move_form.line_ids.edit(0).amount_currency, -30)

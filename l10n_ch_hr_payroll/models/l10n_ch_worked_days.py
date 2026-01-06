@@ -29,17 +29,20 @@ class HrPayslipSwissWage(models.Model):
 
     def _get_allowed_work_entry_types(self):
         return [
-            "CH_1000",  # Monthly Salary
-            "CH_1005",  # Hourly Salary
-            "CH_1006",  # Lesson Salary
-            "CH_1065",  # Overtime
-            "CH_1061",  # Overtime 125%
-            "CH_ILLNESS",  # Illness
-            "CH_ACCIDENT",  # Accident
-            "CH_MATERNITY",  # Maternity Leave
-            "CH_MILITARY",  # Military Leave
-            "CH_ILLNESS_HOURLY",  # Illness
-            "CH_ACCIDENT_HOURLY",  # Accident
-            "CH_MATERNITY_HOURLY",  # Maternity Leave
-            "CH_MILITARY_HOURLY",  # Military Leave
+            "CH_1000", # Monthly Salary
+            "CH_1005", # Hourly Salary
+            "CH_1006", # Lesson Salary
+            "CH_1065", # Overtime
+            "CH_1061", # Overtime 125%
+            "CH_1066", # Overtime 150%
+            "CH_1071", # On-call duty 125%
+            "CH_1075", # Night shift 110%
+            "CH_ILLNESS", # Illness
+            "CH_ACCIDENT", # Accident
+            "CH_MATERNITY", # Maternity Leave
+            "CH_MILITARY", # Military Leave
+            "CH_ILLNESS_HOURLY", # Illness
+            "CH_ACCIDENT_HOURLY", # Accident
+            "CH_MATERNITY_HOURLY", # Maternity Leave
+            "CH_MILITARY_HOURLY", # Military Leave
         ]

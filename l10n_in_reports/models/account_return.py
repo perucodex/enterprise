@@ -11,7 +11,7 @@ from odoo import _, api, fields, models, SUPERUSER_ID
 from odoo.addons.l10n_in_reports.tools.gstr1_spreadsheet_generator import GSTR1SpreadsheetGenerator
 from odoo.exceptions import UserError, AccessError, ValidationError, RedirectWarning
 from odoo.fields import Domain
-from odoo.tools import date_utils, html_escape, SQL
+from odoo.tools import date_utils, float_is_zero, html_escape, SQL
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DF
 from .irn_exception import IrnException
 
@@ -265,13 +265,12 @@ class AccountReturn(models.Model):
                 })
 
     def _get_l10n_in_error_level(self, error_codes):
-        blocking_level = "error"
-        if "RTN_24" in error_codes:
-            # File Generation is in progress, please try after sometime.
-            blocking_level = "warning"
-        if "404" in error_codes:
-            blocking_level = "warning"
-        return blocking_level
+        warning_codes = {
+            "RTN_24",  # File Generation is in progress, please try after sometime.
+            "404",  # Resource temporarily unavailable / not found
+            "RET2B1017",  # GSTR-2B data for the selected period is not yet available. Please try after sometime.
+        }
+        return "warning" if warning_codes.intersection(error_codes) else "error"
 
     # ===============================
     # GSTR-1
@@ -398,7 +397,7 @@ class AccountReturn(models.Model):
                     tax_rate = int(tax_rate)
                 uqc = uoms.browse(line.product_uom_id.id).l10n_in_code and uoms.browse(line.product_uom_id.id).l10n_in_code.split("-")[0] or "OTH"
                 hsn_code = line.l10n_in_hsn_code
-                is_service_line = hsn_code and hsn_code.startswith('99')
+                is_service_line = self.env["account.move"]._l10n_in_is_service_hsn(hsn_code)
                 if is_service_line:
                     # If product is service then UQC is Not Applicable (NA)
                     uqc = "NA"
@@ -788,18 +787,22 @@ class AccountReturn(models.Model):
                     lines_json[tax_rate]['iamt'] += line_tax_details['igst']
                     lines_json[tax_rate]['csamt'] += line_tax_details['cess']
                 if lines_json:
+                    is_out_refund = move_id.move_type == "out_refund"
+                    sign = is_out_refund and 1 or -1
                     invoice_type = 'B2CL'
+                    invoice_total = move_id.amount_total_signed * -sign
                     if move_id.l10n_in_gst_treatment == "overseas" and is_lut:
                         invoice_type = 'EXPWOP'
                     elif move_id.l10n_in_gst_treatment == "overseas":
                         invoice_type = 'EXPWP'
-                    is_out_refund = move_id.move_type == "out_refund"
-                    sign = is_out_refund and 1 or -1
+                        # If Base amount and Invoice total is same then add tax values in total for Export with payment only
+                        if float_is_zero(invoice_total - sum(line['txval'] for line in lines_json.values()), precision_digits=2):
+                            invoice_total += sum(line['iamt'] + line['csamt'] for line in lines_json.values())
                     inv_json = {
                         "ntty": is_out_refund and "C" or "D",
                         "nt_num": move_id.name,
                         "nt_dt": move_id.invoice_date.strftime("%d-%m-%Y"),
-                        "val": AccountMove._l10n_in_round_value(move_id.amount_total_signed * -sign),
+                        "val": AccountMove._l10n_in_round_value(invoice_total),
                         "typ": invoice_type,
                         "itms": [
                             {"num": index, "itm_det": {
@@ -856,14 +859,18 @@ class AccountReturn(models.Model):
                     lines_json[tax_rate]['iamt'] += line_tax_details['igst'] * -1
                     lines_json[tax_rate]['csamt'] += line_tax_details['cess'] * -1
                 if lines_json:
-                    invoice_type = 'WPAY'
-                    if is_lut:
-                        invoice_type = 'WOPAY'
+                    invoice_total = move_id.amount_total_signed
+                    invoice_type = 'WOPAY'
+                    if not is_lut:
+                        invoice_type = 'WPAY'
+                        # If Base amount and Invoice total is same then add tax values in total for Export with payment only
+                        if float_is_zero(invoice_total - sum(line['txval'] for line in lines_json.values()), precision_digits=2):
+                            invoice_total += sum(line['iamt'] + line['csamt'] for line in lines_json.values())
                     export_json.setdefault(invoice_type, [])
                     export_inv = {
                         "inum": move_id.name,
                         "idt": move_id.invoice_date.strftime("%d-%m-%Y"),
-                        "val": AccountMove._l10n_in_round_value(move_id.amount_total_signed),
+                        "val": AccountMove._l10n_in_round_value(invoice_total),
                         "itms": [{
                             **d,
                             "txval": AccountMove._l10n_in_round_value(d['txval']),
@@ -1549,6 +1556,7 @@ class AccountReturn(models.Model):
         for return_period in self.search([
             ('l10n_in_gstr2b_status', '=', 'fetching'),
             ('company_id.l10n_in_gst_efiling_feature', '=', True),
+            ('l10n_in_gstr2b_blocking_level', '!=', 'error'),
         ]):
             return_period.get_l10n_in_gstr2b_data()
 
@@ -1560,6 +1568,7 @@ class AccountReturn(models.Model):
         return_periods = self.search([
             ('l10n_in_gstr2b_status', '=', 'fetch'),
             ('company_id.l10n_in_gst_efiling_feature', '=', True),
+            ('l10n_in_gstr2b_blocking_level', '!=', 'error'),
         ])
         for return_period in return_periods:
             return_period.gstr2b_match_data()
@@ -1811,21 +1820,27 @@ class AccountReturn(models.Model):
             to_match_bills = AccountMove.search(domain)
             for late_bill in gstr2b_late_streamline_bills:
                 bill_month_start, bill_month_end = date_utils.get_month(late_bill.get('bill_date'))
-                to_match_bills += AccountMove.search([
+                late_bill_domain = [
                     ('l10n_in_account_return_id', '!=', self.id),
                     ("invoice_date", ">=", bill_month_start),
                     ("invoice_date", "<=", bill_month_end),
                     ("company_id", "in", self.company_ids.ids or self.company_id.ids),
                     ("move_type", "in", AccountMove.get_purchase_types()),
-                    "|", ('ref', '=', late_bill.get('bill_number')),
-                        ("l10n_in_irn_number", "=", late_bill.get('irn')),
                     "|",
                         ("state", "in", ["draft", "cancel"]),
                         '&', '&', '&', ("state", "=", "posted"),
                             ("line_ids.tax_ids", "!=", False),
                             ("l10n_in_gstr2b_reconciliation_status", "not in", ('matched', 'partially_matched', 'manually_matched')),
                             ("l10n_in_gst_treatment", "not in", ('composition', 'unregistered', 'consumer')),
-                ])
+                ]
+                if late_bill.get('irn'):
+                    late_bill_domain += [
+                        "|", ("ref", "=", late_bill.get('bill_number')),
+                            ("l10n_in_irn_number", "=", late_bill['irn']),
+                    ]
+                else:
+                    late_bill_domain += [("ref", "=", late_bill.get('bill_number'))]
+                to_match_bills += AccountMove.search(late_bill_domain)
             for bill in to_match_bills:
                 bill_type = 'bill'
                 amount = bill.amount_total
@@ -2343,7 +2358,6 @@ class AccountReturn(models.Model):
         options = self._get_closing_report_options()
         hsn_base_line_domain = [
                 ('l10n_in_gstr_section', '=like', 'sale%'),
-                ('l10n_in_gstr_section', '!=', 'sale_out_of_scope'),
                 ('display_type', '=', 'product'),
             ]
         options_domain = report._get_options_domain(options, date_scope='strict_range')
@@ -2370,8 +2384,9 @@ class AccountReturn(models.Model):
                 'result': 'anomaly' if line_ids else 'reviewed',
                 'action': line_ids._get_records_action(
                     name=_("Invalid tax for Intra State Transaction"),
-                    views=[(False, 'list')]
-                ),
+                    views=[(False, 'list')],
+                    domain=[('id', 'in', line_ids.ids)]
+                ) if line_ids else None,
             })
 
         # Invalid Inter-State Tax
@@ -2387,8 +2402,9 @@ class AccountReturn(models.Model):
                 'result': 'anomaly' if line_ids else 'reviewed',
                 'action': line_ids._get_records_action(
                     name=_("Invalid tax for Inter State Transaction"),
-                    views=[(False, 'list')]
-                ),
+                    views=[(False, 'list')],
+                    domain=[('id', 'in', line_ids.ids)]
+                ) if line_ids else None,
             })
 
         # Missing HSN
@@ -2404,42 +2420,9 @@ class AccountReturn(models.Model):
                 'result': 'anomaly' if line_ids else 'reviewed',
                 'action': line_ids._get_records_action(
                     name=_("Missing HSN for Journal Items"),
-                    views=[(False, 'list'), (False, 'form')]
-                )
-            })
-
-        # Invalid HSN for Goods products
-        if 'invalid_hsn_code_goods' not in check_codes_to_ignore:
-            _template, line_ids = self.env['l10n_in.report.handler']._get_invalid_goods_hsn_products(aml_domain)
-            line_count = len(line_ids)
-            checks.append({
-                'code': 'invalid_hsn_code_goods',
-                'name': _("Invalid HSN Codes"),
-                'message': _("HSN for other than Service type product shall not start with 99, Certain Product Lines do not comply."),
-                'records_model': self.env['ir.model']._get('account.move.line').id,
-                'records_count': line_count,
-                'result': 'anomaly' if line_ids else 'reviewed',
-                'action': line_ids._get_records_action(
-                    name=_("Invalid HSN Code"),
-                    views=[(False, 'list'), (False, 'form')]
-                ),
-            })
-
-        # Invalid HSN Code for service products
-        if 'invalid_hsn_code_service' not in check_codes_to_ignore:
-            _template, line_ids = self.env['l10n_in.report.handler']._get_invalid_service_hsn_products(aml_domain)
-            line_count = len(line_ids)
-            checks.append({
-                'code': 'invalid_hsn_code_service',
-                'name': _("Invalid HSN Codes"),
-                'message': _("HSN for Service type product shall start with 99, Certain Product Lines do not comply."),
-                'records_model': self.env['ir.model']._get('account.move.line').id,
-                'records_count': line_count,
-                'result': 'anomaly' if line_ids else 'reviewed',
-                'action': line_ids._get_records_action(
-                    name=_("Invalid HSN Code"),
-                    views=[(False, 'list'), (False, 'form')]
-                ),
+                    views=[(False, 'list'), (False, 'form')],
+                    domain=[('id', 'in', line_ids.ids)]
+                ) if line_ids else None,
             })
 
         # Invalue UQC code
@@ -2450,13 +2433,14 @@ class AccountReturn(models.Model):
                 'code': 'invalid_uqc_code',
                 'name': _("Invalid UQC Codes"),
                 'message': _("UQC code must match the Indian GST standards."),
-                'records_model': self.env['ir.model']._get('account.move.line').id,
+                'records_model': self.env['ir.model']._get('uom.uom').id,
                 'records_count': line_count,
                 'result': 'anomaly' if line_ids else 'reviewed',
                 'action': line_ids._get_records_action(
                     name=_("Invalid UQC Code"),
-                    views=[(False, 'list'), (False, 'form')]
-                ),
+                    views=[(False, 'list'), (False, 'form')],
+                    domain=[('id', 'in', line_ids.ids)]
+                ) if line_ids else None,
             })
 
         # Credit Notes
@@ -2472,7 +2456,7 @@ class AccountReturn(models.Model):
                 'records_model': self.env['ir.model']._get('account.move').id,
                 'records_count': move_count,
                 'result': 'anomaly' if move_ids else 'reviewed',
-                'action': move_ids._get_records_action(name=_("Credit Notes")),
+                'action': move_ids._get_records_action(name=_("Credit Notes")) if move_ids else None,
             })
 
         if 'unlinked_unregistered_inter_state_reversed_move' not in check_codes_to_ignore:
@@ -2485,7 +2469,7 @@ class AccountReturn(models.Model):
                 'records_model': self.env['ir.model']._get('account.move').id,
                 'records_count': move_count,
                 'result': 'anomaly' if move_ids else 'reviewed',
-                'action': move_ids._get_records_action(name=_("Credit Notes")),
+                'action': move_ids._get_records_action(name=_("Credit Notes")) if move_ids else None,
             })
 
         # Document Summary Check

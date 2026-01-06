@@ -8,3 +8,7 @@ class StockPicking(models.Model):
 
     sendcloud_parcel_ref = fields.Json("Sendcloud Parcel Reference", copy=False) # List of : int (common shipping) or List<int> (multicollo shipping)
     sendcloud_return_parcel_ref = fields.Json("Sendcloud Return Parcel Ref", copy=False)
+
+    def _retrieve_warehouse_name(self):
+        self.ensure_one()
+        return self.location_id.warehouse_id.name

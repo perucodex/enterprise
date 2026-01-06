@@ -386,14 +386,26 @@ class AccountAgedPartnerBalanceReportHandler(models.AbstractModel):
         if period != "total" and period[-1].isdigit():
             period_number = int(period[-1])
             if period_number == 0:
-                domain = [('date_maturity', '>=', options['date']['date_to'])]
+                domain = [
+                    '|',
+                    ('date_maturity', '>=', options['date']['date_to']),
+                    '&', ('date_maturity', '=', False), ('date', '>=', options['date']['date_to']),
+                ]
             else:
                 options_date_to = datetime.datetime.strptime(options['date']['date_to'], '%Y-%m-%d')
                 period_end = options_date_to - datetime.timedelta(30*(period_number-1)+1)
                 period_start = options_date_to - datetime.timedelta(30*(period_number))
-                domain = [('date_maturity', '>=', period_start), ('date_maturity', '<=', period_end)]
+                domain = [
+                        '|',
+                        '&', ('date_maturity', '>=', period_start), ('date_maturity', '<=', period_end),
+                        '&', '&', ('date_maturity', '=', False), ('date', '>=', period_start), ('date', '<=', period_end),
+                    ]
                 if period_number == 5:
-                    domain = [('date_maturity', '<=', period_end)]
+                    domain = [
+                        '|',
+                        ('date_maturity', '<=', period_end),
+                        '&', ('date_maturity', '=', False), ('date', '<=', period_end),
+                    ]
         else:
             domain = []
         return domain

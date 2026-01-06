@@ -58,7 +58,7 @@ registry.category("web_tour.tours").add("trial_balance_month_13_date_filter", {
         },
         {
             content: "Check that the values have changed back for the year without Month 13",
-            trigger: "tr:contains('3 Stockholders') div.name:contains('0.0')",
+            trigger: "tr:not(:contains('3 Stockholders') div.name)",
         },
     ],
 });

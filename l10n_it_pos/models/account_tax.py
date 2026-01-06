@@ -21,7 +21,12 @@ class AccountTax(models.Model):
             and base_line['tax_ids'][0].amount_type == 'percent'
             and not base_line['tax_ids'][0].price_include
         ):
-            new_base_line = self._prepare_base_line_for_taxes_computation(base_line, quantity=1, discount=0)
+            new_base_line = self._prepare_base_line_for_taxes_computation(
+                base_line,
+                quantity=1,
+                discount=0,
+                l10n_it_epson_printer=False,
+            )
             super()._add_tax_details_in_base_line(new_base_line, company, rounding_method=rounding_method)
             self._round_base_lines_tax_details([new_base_line], company)
             target_total_amount_currency = base_line['currency_id'].round(
@@ -32,16 +37,17 @@ class AccountTax(models.Model):
             new_base_line = self._prepare_base_line_for_taxes_computation(base_line)
             super()._add_tax_details_in_base_line(new_base_line, company, rounding_method=rounding_method)
             self._round_base_lines_tax_details([new_base_line], company)
-            new_base_line = self._reduce_base_lines_to_target_amount(
+            reduced_base_lines = self._reduce_base_lines_to_target_amount(
                 base_lines=[new_base_line],
                 company=company,
                 amount_type='fixed',
                 amount=target_total_amount_currency,
-            )[0]
-            self._fix_base_lines_tax_details_on_manual_tax_amounts(
-                base_lines=[new_base_line],
-                company=company,
             )
-            for key in ('manual_total_excluded_currency', 'manual_total_excluded', 'manual_tax_amounts'):
-                base_line[key] = new_base_line[key]
+            if reduced_base_lines:
+                self._fix_base_lines_tax_details_on_manual_tax_amounts(
+                    base_lines=reduced_base_lines,
+                    company=company,
+                )
+                for key in ('manual_total_excluded_currency', 'manual_total_excluded', 'manual_tax_amounts'):
+                    base_line[key] = reduced_base_lines[0][key]
         super()._add_tax_details_in_base_line(base_line, company, rounding_method=rounding_method)

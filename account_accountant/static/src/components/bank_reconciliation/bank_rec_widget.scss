@@ -42,15 +42,23 @@
                     }
 
                     .o_payment_ref {
-                        grid-column: 1 / 3;
+                        grid-column: 1 / 4;
+
+                        span > span:last-child {
+                            font-size: 13px;
+                        }
+
+                        .oi-close {
+                            font-size: 0.85em;
+                        }
                     }
 
                     .o_line_name {
-                        grid-column: 1 / 2;
+                        grid-column: 1 / 3;
                     }
 
                     .o_line_amount {
-                        text-align: end;
+                        grid-column: 3 / 4;
                     }
 
                     .o_bg-black-10 {
@@ -61,6 +69,11 @@
 
             .o_button_line {
                 grid-column: 1 / 3;
+
+                button {
+                    min-width: 0;
+                    max-width: 200px;
+                }
             }
 
             .o_chatter_icon {
@@ -97,7 +110,7 @@
     @include media-breakpoint-up(md) {
         .o_bank_reconciliation_kanban_renderer {
             .o_statement_line .o_grid_container {
-                grid-template-columns: 90px 2fr 1fr 2fr 1.5fr 40px;
+                grid-template-columns: 90px 3fr 1fr 1fr 40px;
                 column-gap: map-get($spacers, 3);
                 row-gap: map-get($spacers, 2);
                 line-height: 24px;
@@ -112,26 +125,23 @@
                     }
 
                     .o_line_amount {
-                        grid-column: 5 / 6;
+                        grid-column: 4 / 5;
                     }
 
                     .o_line_to_reconcile_button {
-                        grid-column: 6 / 7;
+                        grid-column: 5 / 6;
                     }
 
-                    .o_top_button_line {
-                        display: flex !important;
+                    .o_button_line {
                         gap: map-get($spacers, 1);
                         align-items: center;
+
+                        grid-column: 3 / 4;
+
+                        button {
+                            max-width: 100%;
+                        }
                     }
-                }
-
-                .o_button_line {
-                    grid-column: 2 / 5;
-                }
-
-                .o_partner_button {
-                    grid-column: 3 / 3;
                 }
             }
 
@@ -144,7 +154,7 @@
             .o_kanban_record:not(.o_kanban_ghost) {
                 border: 0;
                 border-bottom: $border-width solid $border-color;
-                margin:0;
+                margin: 0;
                 width: 100%;
 
                 &:hover {

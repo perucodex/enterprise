@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
     <t t-name="l10n_cl_edi_pos.ReceiptHeader" t-inherit="point_of_sale.ReceiptHeader" t-inherit-mode="extension">
         <xpath expr="//div[hasclass('pos-receipt-contact')]" position="before">
-            <div t-if="isChileanCompany" class="pt-3">
+            <div t-if="isChileanCompany and order.finalized" class="pt-3">
                 <div class="chili-ticket-info fw-bolder border border-dark d-flex flex-column align-items-center ">
                     <span>RUT: <t t-out="order.company.vat"/></span>
                     <t t-out="order.account_move?.l10n_latam_document_type_id.name"/>

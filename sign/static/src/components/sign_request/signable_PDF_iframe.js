@@ -148,6 +148,9 @@ export class SignablePDFIframe extends PDFIframe {
                         signItemElement.value = "striked";
                     }
                 });
+            } else {
+                signItemElement.firstChild.classList.add("o_sign_strikethrough_line_striked");
+                signItemElement.value = "striked";
             }
         }
 
@@ -381,7 +384,7 @@ export class SignablePDFIframe extends PDFIframe {
     getContext(signItem) {
         const context = super.getContext(signItem);
         const type = this.signItemTypesById[signItem.type_id];
-        if (type.name === _t("Date")) {
+        if (type.name === _t("Date") && signItem.responsible === this.currentRole) {
             context.placeholder = this.signInfo.get('dateFormat')?.toUpperCase();
         }
         return context;
@@ -532,7 +535,7 @@ export class SignablePDFIframe extends PDFIframe {
         // Removing wrap in order to have scrollWidth > width
         element.setAttribute("wrap", "off");
 
-        const strRawValue = element.value;
+        const strRawValue = element.value || element.textContent;
         element.value = "";
         if (!strRawValue) {
            return element.value;

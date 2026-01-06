@@ -50,7 +50,7 @@ patch(ControlButtons.prototype, {
                 this.pos.waitBeforePayment = false;
             }
         } else {
-            await super.applyDiscount(pc);
+            await super.applyDiscount(...arguments);
         }
     },
 });

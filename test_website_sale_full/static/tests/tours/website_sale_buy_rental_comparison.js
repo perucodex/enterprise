@@ -43,7 +43,7 @@ registry.category("web_tour.tours").add("shop_buy_rental_product_comparison", {
             trigger: '#cart_products div div.css_quantity input[value="1"]',
         },
         {
-            trigger: "#cart_products .oe_currency_value:contains(75.00)",
+            trigger: "#cart_products .oe_currency_value:contains(3.50)",
         },
         {
             content: "go to checkout",

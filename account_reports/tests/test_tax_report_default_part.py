@@ -408,7 +408,7 @@ class TestTaxReportDefaultPart(TestAccountReportsCommon):
 
         move_form = Form(self.env['account.move'].with_context(default_move_type='entry'))
         move_form.date = fields.Date.from_string('2019-01-01')
-        with move_form.journal_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.name = 'debit line'
             line_form.account_id = self.revenue_1
             line_form.debit = 1000.0
@@ -416,7 +416,7 @@ class TestTaxReportDefaultPart(TestAccountReportsCommon):
             line_form.tax_ids.add(tax_10)
             line_form.tax_ids.add(tax_20)
             line_form.tax_ids.add(tax_30)
-        with move_form.journal_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.name = 'credit line'
             line_form.account_id = self.revenue_2
             line_form.credit = 1600
@@ -515,13 +515,13 @@ class TestTaxReportDefaultPart(TestAccountReportsCommon):
         move_form.date = fields.Date.from_string('2019-01-01')
         for _i in range(2):
             for tax in tax_10 + tax_20 + tax_30:
-                with move_form.journal_line_ids.new() as line_form:
+                with move_form.line_ids.new() as line_form:
                     line_form.name = 'debit line'
                     line_form.account_id = self.revenue_1
                     line_form.debit = 500.0
                     line_form.tax_ids.clear()
                     line_form.tax_ids.add(tax)
-        with move_form.journal_line_ids.new() as line_form:
+        with move_form.line_ids.new() as line_form:
             line_form.name = 'credit line'
             line_form.account_id = self.revenue_2
             line_form.credit = 3600
@@ -1072,7 +1072,7 @@ class TestTaxReportDefaultPart(TestAccountReportsCommon):
                 ("refund line in entry", self.company_data['default_account_revenue'], 10.0, 0.0, tax),
                 ("Receivable line in entry", self.company_data['default_account_receivable'], 11.0, 0.0, None),
         ):
-            with move_form.journal_line_ids.new() as line_form:
+            with move_form.line_ids.new() as line_form:
                 line_form.name = name
                 line_form.account_id = account_id
                 line_form.debit = debit

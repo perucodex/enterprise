@@ -52,6 +52,7 @@ class AccountMove(models.Model):
         selection=[
             ('expense', 'Deferred Expense'),
             ('revenue', 'Deferred Revenue'),
+            ('misc', 'Deferred Miscellaneous'),
         ],
         compute='_compute_deferred_entry_type',
         copy=False,
@@ -116,13 +117,6 @@ class AccountMove(models.Model):
                 move._generate_deferred_entries()
         return posted
 
-    def action_post(self):
-        # EXTENDS 'account' to trigger the CRON auto-reconciling the statement lines.
-        res = super().action_post()
-        if self.statement_line_id and not self.env.context.get('skip_statement_line_cron_trigger'):
-            self.env.ref('account_accountant.auto_reconcile_bank_statement_line')._trigger()
-        return res
-
     def button_draft(self):
         if any(len(deferral_move.deferred_original_move_ids) > 1 for deferral_move in self.deferred_move_ids):
             raise UserError(_("You cannot reset to draft an invoice that is grouped in deferral entry. You can create a credit note instead."))
@@ -146,7 +140,21 @@ class AccountMove(models.Model):
 
     def _get_deferred_entries_method(self):
         self.ensure_one()
-        if self.is_outbound():
+        if self.is_entry():
+            move_types = set(self.line_ids.account_id.mapped("internal_group"))
+            if (
+                "expense" in move_types and "income" in move_types
+                and self.company_id.generate_deferred_expense_entries_method != self.company_id.generate_deferred_revenue_entries_method
+            ):
+                raise UserError(self.env._(
+                    "Having different deferred entries generation methods for expenses and revenues is not supported on "
+                    "journal entries involving both expense and revenue accounts. You can split this entry into two entries instead."
+                ))
+            elif "expense" in move_types:
+                return self.company_id.generate_deferred_expense_entries_method
+            else:
+                return self.company_id.generate_deferred_revenue_entries_method
+        if self.is_purchase_document():
             return self.company_id.generate_deferred_expense_entries_method
         return self.company_id.generate_deferred_revenue_entries_method
 
@@ -154,7 +162,13 @@ class AccountMove(models.Model):
     def _compute_deferred_entry_type(self):
         for move in self:
             if move.deferred_original_move_ids:
-                move.deferred_entry_type = 'expense' if move.deferred_original_move_ids[0].is_outbound() else 'revenue'
+                move_types = set(move.deferred_original_move_ids.mapped('move_type'))
+                if len(move_types) > 1 or move.deferred_original_move_ids[0].is_entry():
+                    move.deferred_entry_type = 'misc'
+                elif move.deferred_original_move_ids[0].is_purchase_document():
+                    move.deferred_entry_type = 'expense'
+                else:
+                    move.deferred_entry_type = 'revenue'
             else:
                 move.deferred_entry_type = False
 
@@ -265,93 +279,108 @@ class AccountMove(models.Model):
         if self.state != 'posted':
             return
 
-        deferred_type = "expense" if self.is_purchase_document(include_receipts=True) else "revenue"
-        deferred_account = self.company_id.deferred_expense_account_id if deferred_type == "expense" else self.company_id.deferred_revenue_account_id
-        deferred_journal = self.company_id.deferred_expense_journal_id if deferred_type == "expense" else self.company_id.deferred_revenue_journal_id
-        if not deferred_journal:
-            raise UserError(_("Please set the deferred journal in the accounting settings."))
-        if not deferred_account:
-            raise UserError(_("Please set the deferred accounts in the accounting settings."))
-
-        moves_vals_to_create = []
-        lines_vals_to_create = []
-        lines_periods = []
-        for line in self.line_ids.filtered(lambda l: l.deferred_start_date and l.deferred_end_date):
-            periods = line._get_deferred_periods()
-            if not periods:
+        for deferred_type in ('expense', 'revenue'):
+            moves_vals_to_create = []
+            lines_vals_to_create = []
+            lines_periods = []
+            lines = self.line_ids.filtered(lambda l: (
+                l.account_id.internal_group == ('expense' if deferred_type == 'expense' else 'income')
+                and l.deferred_start_date
+                and l.deferred_end_date
+            ))
+            if not lines:
                 continue
 
-            ref = _("Deferral of %s", line.move_id.name or '')
+            deferred_account = self.company_id.deferred_expense_account_id if deferred_type == "expense" else self.company_id.deferred_revenue_account_id
+            deferred_journal = self.company_id.deferred_expense_journal_id if deferred_type == "expense" else self.company_id.deferred_revenue_journal_id
+            deferred_method = self.company_id.deferred_expense_amount_computation_method if deferred_type == "expense" else self.company_id.deferred_revenue_amount_computation_method
+            if not deferred_journal:
+                raise UserError(_("Please set the deferred journal in the accounting settings."))
+            if not deferred_account:
+                raise UserError(_("Please set the deferred accounts in the accounting settings."))
 
-            moves_vals_to_create.append({
-                'move_type': 'entry',
-                'deferred_original_move_ids': [Command.set(line.move_id.ids)],
-                'journal_id': deferred_journal.id,
-                'company_id': self.company_id.id,
-                'partner_id': line.partner_id.id,
-                'auto_post': 'at_date',
-                'ref': ref,
-                'name': False,
-                'date': line.move_id.date,
-            })
-            lines_vals_to_create.append([
-                self.env['account.move.line']._get_deferred_lines_values(account.id, coeff * line.balance, ref, line.analytic_distribution, line)
-                for (account, coeff) in [(line.account_id, -1), (deferred_account, 1)]
-            ])
-            lines_periods.append((line, periods))
-        # create the deferred moves
-        moves_fully_deferred = self.create(moves_vals_to_create)
-        # We write the lines after creation, to make sure the `deferred_original_move_ids` is set.
-        # This way we can avoid adding taxes for deferred moves.
-        for move_fully_deferred, lines_vals in zip(moves_fully_deferred, lines_vals_to_create):
-            for line_vals in lines_vals:
-                # This will link the moves to the lines. Instead of move.write('line_ids': lines_ids)
-                line_vals['move_id'] = move_fully_deferred.id
-        self.env['account.move.line'].create(list(chain(*lines_vals_to_create)))
+            for line in lines:
+                periods = line._get_deferred_periods()
+                if not periods:
+                    continue
 
-        deferral_moves_vals = []
-        deferral_moves_line_vals = []
-        # Create the deferred entries for the periods [deferred_start_date, deferred_end_date]
-        for (line, periods), move_vals in zip(lines_periods, moves_vals_to_create):
-            remaining_balance = line.balance
-            for period_index, period in enumerate(periods):
-                # For the last deferral move the balance is forced to remaining balance to avoid rounding errors
-                force_balance = remaining_balance if period_index == len(periods) - 1 else None
-                deferred_amounts = self._get_deferred_amounts_by_line(line, [period], deferred_type)[0]
-                balance = deferred_amounts[period] if force_balance is None else force_balance
-                remaining_balance -= line.currency_id.round(balance)
-                deferral_moves_vals.append({**move_vals, 'date': period[1]})
-                deferral_moves_line_vals.append([
-                    {
-                        **self.env['account.move.line']._get_deferred_lines_values(account.id, coeff * balance, move_vals['ref'], line.analytic_distribution, line),
-                        'partner_id': line.partner_id.id,
-                        'product_id': line.product_id.id,
-                    }
-                    for (account, coeff) in [(deferred_amounts['account_id'], 1), (deferred_account, -1)]
+                start_date = line.deferred_start_date
+                end_date = line.deferred_end_date
+                accounting_date = line.date
+
+                # When using the 'full_months' computation method, every consumed month counts as a full month.
+                # We therefore need to subtract one month from the end date for the following check on dates.
+                if deferred_method == 'full_months':
+                    # We need to add one day to the end date since it's excluded by _get_deferred_diff_dates().
+                    if self._get_deferred_diff_dates(start_date.replace(day=1), end_date + relativedelta(days=1)) < 2:
+                        end_date += relativedelta(months=-1)
+
+                # When all move line dates (start, end, accounting) are within the same month, we skip the line.
+                # It would otherwise lead to the creation of both a reversal and a deferral move that would cancel each other out.
+                if start_date.replace(day=1) == end_date.replace(day=1) == accounting_date.replace(day=1):
+                    continue
+
+                ref = _("Deferral of %s", line.move_id.name or '')
+
+                moves_vals_to_create.append({
+                    'move_type': 'entry',
+                    'deferred_original_move_ids': [Command.set(line.move_id.ids)],
+                    'journal_id': deferred_journal.id,
+                    'company_id': self.company_id.id,
+                    'partner_id': line.partner_id.id,
+                    'auto_post': 'at_date',
+                    'ref': ref,
+                    'name': False,
+                    'date': line.move_id.date,
+                })
+                lines_vals_to_create.append([
+                    self.env['account.move.line']._get_deferred_lines_values(account.id, coeff * line.balance, ref, line.analytic_distribution, line)
+                    for (account, coeff) in [(line.account_id, -1), (deferred_account, 1)]
                 ])
+                lines_periods.append((line, periods))
+            # create the deferred moves
+            moves_fully_deferred = self.create(moves_vals_to_create)
+            # We write the lines after creation, to make sure the `deferred_original_move_ids` is set.
+            # This way we can avoid adding taxes for deferred moves.
+            for move_fully_deferred, lines_vals in zip(moves_fully_deferred, lines_vals_to_create):
+                for line_vals in lines_vals:
+                    # This will link the moves to the lines. Instead of move.write('line_ids': lines_ids)
+                    line_vals['move_id'] = move_fully_deferred.id
+            self.env['account.move.line'].create(list(chain(*lines_vals_to_create)))
 
-        deferral_moves = self.create(deferral_moves_vals)
-        for deferral_move, lines_vals in zip(deferral_moves, deferral_moves_line_vals):
-            for line_vals in lines_vals:
-                # This will link the moves to the lines. Instead of move.write('line_ids': lines_ids)
-                line_vals['move_id'] = deferral_move.id
-        self.env['account.move.line'].create(list(chain(*deferral_moves_line_vals)))
+            deferral_moves_vals = []
+            deferral_moves_line_vals = []
+            # Create the deferred entries for the periods [deferred_start_date, deferred_end_date]
+            for (line, periods), move_vals in zip(lines_periods, moves_vals_to_create):
+                remaining_balance = line.balance
+                for period_index, period in enumerate(periods):
+                    # For the last deferral move the balance is forced to remaining balance to avoid rounding errors
+                    force_balance = remaining_balance if period_index == len(periods) - 1 else None
+                    deferred_amounts = self._get_deferred_amounts_by_line(line, [period], deferred_type)[0]
+                    balance = deferred_amounts[period] if force_balance is None else force_balance
+                    remaining_balance -= line.currency_id.round(balance)
+                    deferral_moves_vals.append({**move_vals, 'date': period[1]})
+                    deferral_moves_line_vals.append([
+                        {
+                            **self.env['account.move.line']._get_deferred_lines_values(account.id, coeff * balance, move_vals['ref'], line.analytic_distribution, line),
+                            'partner_id': line.partner_id.id,
+                            'product_id': line.product_id.id,
+                        }
+                        for (account, coeff) in [(deferred_amounts['account_id'], 1), (deferred_account, -1)]
+                    ])
 
-        to_unlink = deferral_moves.filtered(lambda move: move.currency_id.is_zero(move.amount_total))
-        for move_fully_deferred in moves_fully_deferred:
-            # If, after calculation, we have 2 deferral entries in the same month, it means that
-            # they simply cancel out each other, so there is no point in creating them.
-            deferred_move_ids = move_fully_deferred + deferral_moves
-            cancelling_moves = deferred_move_ids.filtered(lambda move:
-                move_fully_deferred.date.replace(day=1) == move.date.replace(day=1)
-                and move.amount_total == move_fully_deferred.amount_total
-            )
-            if len(cancelling_moves) == 2:
-                to_unlink |= cancelling_moves
-                continue
+            deferral_moves = self.create(deferral_moves_vals)
+            for deferral_move, lines_vals in zip(deferral_moves, deferral_moves_line_vals):
+                for line_vals in lines_vals:
+                    # This will link the moves to the lines. Instead of move.write('line_ids': lines_ids)
+                    line_vals['move_id'] = deferral_move.id
+            self.env['account.move.line'].create(list(chain(*deferral_moves_line_vals)))
 
-        to_unlink.unlink()
-        (moves_fully_deferred + deferral_moves - to_unlink)._post(soft=True)
+            # Avoid having deferral moves with a total amount of 0.
+            to_unlink = deferral_moves.filtered(lambda move: move.currency_id.is_zero(move.amount_total))
+            to_unlink.unlink()
+
+            (moves_fully_deferred + deferral_moves - to_unlink)._post(soft=True)
 
     def open_deferred_entries(self):
         self.ensure_one()
@@ -499,7 +528,10 @@ class AccountMove(models.Model):
         super().js_assign_outstanding_line(line_id)
         line = self.env['account.move.line'].browse(line_id)
         if line.account_id.account_type == 'asset_cash' and line.statement_line_id:
-            return line.statement_line_id.with_context(skip_payment_tolerance=True).set_line_bank_statement_line(self.line_ids.filtered(lambda line: line.account_id.account_type in {'asset_receivable', 'liability_payable'}).ids)
+            return line.statement_line_id.with_context(
+                skip_payment_tolerance=True,
+                stop_reco_at_first_partial=True,
+            ).set_line_bank_statement_line(self.line_ids.filtered(lambda line: line.account_id.account_type in {'asset_receivable', 'liability_payable'}).ids)
 
     def js_remove_outstanding_partial(self, partial_id):
         # EXTENDS
@@ -584,7 +616,8 @@ class AccountMoveLine(models.Model):
     @api.depends('balance')
     def _compute_full_amount_switch_html(self):
         for line in self:
-            if not (reconciled_lines := line.reconciled_lines_excluding_exchange_diff_ids):
+            # Ignore lines with no reconciled lines or not linked to a bank statement.
+            if not (reconciled_lines := line.reconciled_lines_excluding_exchange_diff_ids) or not line.statement_line_id:
                 line.full_amount_switch_html = False
                 continue
 
@@ -650,6 +683,7 @@ class AccountMoveLine(models.Model):
             line.has_abnormal_deferred_dates = (
                 line.deferred_start_date
                 and line.deferred_end_date
+                and line.deferred_start_date != line.deferred_end_date
                 and float_compare(
                     self.env['account.move']._get_deferred_diff_dates(line.deferred_start_date, line.deferred_end_date + relativedelta(days=1)) % 1,  # end date is included
                     1 / 30,
@@ -673,15 +707,19 @@ class AccountMoveLine(models.Model):
             self.account_id.internal_group in ('expense', 'income')
         )
 
-    @api.onchange('deferred_start_date')
+    @api.onchange('deferred_start_date', 'account_id')
     def _onchange_deferred_start_date(self):
         if not self._has_deferred_compatible_account():
             self.deferred_start_date = False
+        if self.deferred_start_date and not self.deferred_end_date:
+            self.deferred_end_date = self.deferred_start_date
 
-    @api.onchange('deferred_end_date')
+    @api.onchange('deferred_end_date', 'account_id')
     def _onchange_deferred_end_date(self):
         if not self._has_deferred_compatible_account():
             self.deferred_end_date = False
+        if self.deferred_start_date and not self.deferred_end_date:
+            self.deferred_end_date = self.deferred_start_date
 
     @api.depends('deferred_end_date', 'move_id.invoice_date', 'move_id.state')
     def _compute_deferred_start_date(self):

@@ -18,11 +18,9 @@
         <t t-set-slot="entry" t-slot-scope="slot">
             <t t-set="call" t-value="slot.item"/>
             <t t-set="title" t-value="call.partner_id?.voipName ?? call.phone_number"/>
-            <t t-set="countryCode" t-value="call.country_code_from_phone"/>
             <t t-set="phoneNumber" t-value="call.phone_number"/>
             <TabEntry
                 avatarUrl="call.partner_id?.avatarUrl ?? '/base/static/img/avatar_grey.png'"
-                countryCode="countryCode"
                 title="title"
                 subtitle="getStatusText(call)"
                 subtitleClass="getStatusColor(call)"
@@ -37,12 +35,12 @@
                 <t t-set-slot="info">
                     <div class="d-flex flex-column d-empty-none gap-1">
                         <p t-if="phoneNumber !== title" class="mb-0 text-muted text-truncate">
-                            <span t-if="countryCode" class="o-voip-countryFlag-wrapper d-inline-block me-1 align-middle">
-                                <img class="o-voip-countryFlag mx-auto" t-attf-src="/base/static/img/country_flags/{{ countryCode }}.png"
+                            <span t-if="call.phone_country_id?.image_url" class="o-voip-countryFlag-wrapper d-inline-block me-1 align-middle">
+                                <img class="o-voip-countryFlag mx-auto" t-att-src="call.phone_country_id.image_url"
                                 t-att-alt="flagAlt"/>
                             </span>
                             <i t-else="" class="fa fa-phone fa-fw me-1"/>
-                            <span t-att-class="{ 'align-middle': countryCode }" t-esc="phoneNumber"/>
+                            <span t-att-class="{ 'align-middle': call.phone_country_id?.image_url }" t-esc="phoneNumber"/>
                         </p>
                         <p t-if="call.partner_id?.commercial_company_name" class="m-0 text-muted">
                             <i class="fa fa-fw fa-building-o me-1" aria-hidden="true"/>

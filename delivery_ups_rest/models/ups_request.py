@@ -422,36 +422,6 @@ class UPSRequest:
                     'PaymentInformation': {
                         'ShipmentCharge': payment_info,
                     },
-                    'GlobalTaxInformation': {
-                        'DestinationCountryShipmentValue': '01',
-                        'ShipperTypeValue': '02',
-                        'AgentTaxIdentificationNumber': [
-                            {
-                                'AgentRole': '20',  # ship_from
-                                'TaxIdentificationNumber': {
-                                    'IdentificationNumber': shipper.vat or '',
-                                    'IDNumberCustomerRole': '06',
-                                    'IDNumberEncryptionIndicator': '0',
-                                    'IDNumberIssuingCntryCd': shipper.country_code or '',
-                                    'IDNumberPurposeCode': '01',
-                                    'IDNumberTypeCode': '0001',
-                                    'IncludeIDNumberOnShippingBrokerageDocs': '01',
-                                },
-                            },
-                            {
-                                'AgentRole': '30',  # ship_to
-                                'TaxIdentificationNumber': {
-                                    'IdentificationNumber': ship_to.vat or '',
-                                    'IDNumberCustomerRole': '18',
-                                    'IDNumberEncryptionIndicator': '0',
-                                    'IDNumberIssuingCntryCd': ship_to.country_code or '',
-                                    'IDNumberPurposeCode': '01',
-                                    'IDNumberTypeCode': '0002',
-                                    'IncludeIDNumberOnShippingBrokerageDocs': '01',
-                                },
-                            },
-                        ],
-                    }
                 },
             },
         }

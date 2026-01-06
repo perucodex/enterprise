@@ -107,15 +107,14 @@ class TestVoipCall(TransactionCase):
         self.assertFalse(call.is_within_same_company)
 
     def test_get_contact_info_with_voip_extension(self):
-        caller = new_test_user(self.env, login="test_user")
-        caller.voip_username = "8888"
+        user_with_extension = new_test_user(self.env, login="user_with_extension", voip_username="8888")
+        voip_user = new_test_user(self.env, login="voip_user")
         call = self.env["voip.call"].create(
             {
                 "phone_number": "8888",
-                "user_id": caller.id,
+                "user_id": voip_user.id,
             }
         )
-        store_data = call.get_contact_info()
+        store_data = call.with_user(voip_user).get_contact_info()
 
-        self.assertEqual(store_data["res.partner"][0]["name"], caller.partner_id.name)
-        self.assertEqual(store_data["voip.call"][0]["partner_id"], caller.partner_id.id)
+        self.assertEqual(store_data["res.partner"][0]["id"], user_with_extension.partner_id.id)

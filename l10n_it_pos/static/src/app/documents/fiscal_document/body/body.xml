@@ -6,7 +6,7 @@
                 <PrintRecRefund operator="1" description="line.description" quantity="line.quantity" unitPrice="line.unitPrice" department="line.department" />
             </t>
             <t t-elif="line.isReward">
-                <PrintRecItemAdjustment operator="1" adjustmentType="0" description="line.discount.description" amount="line.discount.amount" department="line.department" justification="1" />
+                <PrintRecItemAdjustment operator="1" adjustmentType="3" description="line.discount.description" amount="line.discount.amount" department="line.department" justification="1" />
             </t>
             <t t-elif="line.isGlobalDiscount">
                 <PrintRecItemAdjustment operator="1" adjustmentType="3" description="line.description" amount="line.unitPrice" department="line.department" justification="1" />
@@ -29,7 +29,7 @@
         </t>  
         <t t-else="">
             <printRecSubtotal operator="1" option="1">
-                <t t-foreach="payments" t-as="payment" t-key="payment.index">
+                <t t-foreach="payments" t-as="payment" t-key="payment.id">
                     <PrintRecTotal operator="1" description="payment.description" payment="payment.payment" paymentType="payment.paymentType" index="payment.index" justification="2"/>
                 </t>
             </printRecSubtotal>

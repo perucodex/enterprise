@@ -547,7 +547,12 @@ export class SignTemplateIframe extends EditablePDFIframeMixin(PDFIframe) {
      */
     deleteSignItem(signItem) {
         if (signItem.data.type == "radio"){
-            return this.deleteRadioSet(this.getSignItemById(signItem.data.id).data.radio_set_id);
+            const radioItem = this.getSignItemById(signItem.data.id);
+            if (!radioItem) {
+                /* Check if it was already deleted as radio buttons are deleted in chain. */
+                return;
+            }
+            return this.deleteRadioSet(radioItem.data.radio_set_id);
         }
         this.deletedSignItemIds.push(signItem.data.id);
         super.deleteSignItem(signItem);

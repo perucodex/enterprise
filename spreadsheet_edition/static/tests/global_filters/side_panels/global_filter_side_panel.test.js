@@ -65,7 +65,7 @@ async function replaceSidePanel(model, env) {
 }
 
 /**
- * @param {"text" | "date" | "relation"} type
+ * @param {"text" | "date" | "relation" | "boolean" | "selection" | "numeric"} type
  */
 async function clickCreateFilter(type) {
     await contains(FILTER_CREATION_SELECTORS[type]).click();
@@ -223,7 +223,7 @@ describe("integration", () => {
         const [pivotId] = model.getters.getPivotIds();
         updatePivot(model, pivotId, { actionXmlId: "action_partner" });
         await contains(".o_topbar_filter_icon").click();
-        await contains(".global-filter-suggestions .btn").click();
+        await contains(".global-filter-suggestions button").click();
         await waitFor(".o_spreadsheet_filter_editor_side_panel");
         await contains(".o_global_filter_save").click();
         const globalFilter = model.getters.getGlobalFilters()[0];

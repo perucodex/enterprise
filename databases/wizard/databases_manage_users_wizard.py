@@ -70,6 +70,7 @@ class DatabasesInviteUsersWizard(models.TransientModel):
     def _compute_everywhere_user_ids(self):
         for rec in self:
             if not rec.database_ids:
+                rec.everywhere_user_ids = None
                 continue
             # Compute the intersection of local_user_ids in each database
             dbit = iter(rec.database_ids)

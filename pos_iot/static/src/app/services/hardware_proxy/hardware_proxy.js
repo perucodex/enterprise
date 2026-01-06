@@ -36,7 +36,10 @@ patch(HardwareProxy.prototype, {
             const timeoutController = new AbortController();
             setTimeout(() => timeoutController.abort(), 1000);
             browser
-                .fetch(formatEndpoint(ip, "/hw_proxy/hello"), { signal: timeoutController.signal })
+                .fetch(formatEndpoint(ip, "/hw_proxy/hello", odoo.use_lna), {
+                    signal: timeoutController.signal,
+                    targetAddressSpace: odoo.use_lna ? "local" : undefined,
+                })
                 .catch(() => ({}))
                 .then((response) => this.setProxyConnectionStatus(ip, response.ok || false));
         }

@@ -10,6 +10,7 @@ from odoo.fields import Domain
 from odoo.http import request
 
 from odoo.addons.website.controllers import form, main
+from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo.addons.base.models.ir_qweb_fields import nl2br, nl2br_enclose
 from odoo.tools import html2plaintext
 from odoo.tools.translate import LazyTranslate
@@ -25,7 +26,31 @@ class WebsiteHelpdesk(http.Controller):
             'main_object': team,
         }
 
-    @http.route(['/helpdesk', '/helpdesk/<model("helpdesk.team"):team>'], type='http', auth="public", website=True, sitemap=True, list_as_website_content=_lt('Helpdesk'))
+    def sitemap_helpdesk(env, rule, qs):
+        HelpdeskTeam = env['helpdesk.team']
+        slug = env['ir.http']._slug
+
+        dom = (
+            env['website'].get_current_website().website_domain()
+            & Domain('use_website_helpdesk_form', '=', True)
+            & Domain('website_published', '=', True)
+        )
+        dom += sitemap_qs2dom(qs, '/helpdesk', HelpdeskTeam._rec_name)
+
+        teams = HelpdeskTeam.search(dom)
+        for team in teams:
+            loc = '/helpdesk/%s' % slug(team)
+            if not qs or qs.lower() in loc:
+                yield {'loc': loc}
+
+        if not teams:
+            # avoid 404 or blank page in sitemap
+            return False
+
+        if not qs or qs.lower() in '/helpdesk':
+            yield {'loc': '/helpdesk'}
+
+    @http.route(['/helpdesk', '/helpdesk/<model("helpdesk.team"):team>'], type='http', auth="public", website=True, sitemap=sitemap_helpdesk, list_as_website_content=_lt('Helpdesk'))
     def website_helpdesk_teams(self, team=None, **kwargs):
         search = kwargs.get('search')
 

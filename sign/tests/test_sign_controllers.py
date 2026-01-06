@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from unittest.mock import patch
 from freezegun import freeze_time
 from json import dumps
@@ -215,7 +216,7 @@ class TestSignController(TestSignControllerCommon):
     def test_make_public_user_with_duplicate_contact(self):
         """
         Test make_public_user behavior with duplicate contacts.
-        Ensures that when a user has a duplicate contact with the same email and name, 
+        Ensures that when a user has a duplicate contact with the same email and name,
         the sign request associates the correct partner ID which contains user_ids.
         """
         user = self.env['res.users'].create({
@@ -299,3 +300,30 @@ class TestSignController(TestSignControllerCommon):
             self.next_sign_request.request_item_ids[0].id, found_item_ids,
             "The 'next' sign request item must be able to be accessed through the public route."
         )
+
+    def test_sign_request_local(self):
+        # Make sure the stored signature of an user can't be used by another user locally
+        # make sure the log user_id is correct
+        # user_1 is linked to partner1
+        self.user_1.sign_signature = b'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNgYGAAAAAEAAH2FzhVAAAAAElFTkSuQmCC'
+        sign_request = self.create_sign_request_1_role(self.partner_1, self.env['res.partner'])
+        sign_request_item = sign_request.request_item_ids[0]
+        res = sign_request_item.with_user(self.user_2)._get_user_signature(signature_type='sign_signature')
+        self.assertFalse(res, "The signature of user1 is not available to user 2")
+        res = sign_request_item.with_user(self.user_1)._get_user_signature(signature_type='sign_signature')
+        self.assertTrue(res, "The signature of user1 is available to user1")
+
+        sign_vals = self.create_sign_values(sign_request.template_id.sign_item_ids, sign_request_item.role_id.id)
+        self.authenticate(self.user_2.login, "user_2!user_2")
+        response = self._json_url_open(
+            '/sign/sign/%d/%s' % (sign_request.id, sign_request_item.access_token),
+            data={'signature': sign_vals}
+        ).json()['result']
+        self.assertTrue(response['success'], "success request")
+        logs = sign_request.sign_log_ids
+        create_log = logs.filtered(lambda l: l.action == 'create')
+        signature_log = logs.filtered(lambda l: l.action == 'sign')
+        self.assertEqual(create_log.create_uid, self.env.user, "the signature is created by current user")
+        self.assertEqual(create_log.user_id, self.env.user, "The sign request is created by current user")
+        self.assertEqual(signature_log.create_uid, self.user_1, "the signature is created by the signing user")
+        self.assertEqual(signature_log.user_id, self.user_2, "the signature log user_id is the logged in user")

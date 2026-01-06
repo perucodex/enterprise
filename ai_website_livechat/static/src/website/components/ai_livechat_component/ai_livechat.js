@@ -33,6 +33,7 @@ export class AILivechatComponent extends Component {
         this.promptInputRef = useRef("promptInput");
         this.messagesDiv = useRef("messagesDiv");
         this.channel = undefined;
+        let firstRender = true;
 
         onWillStart(this.isLivechatAvailable.bind(this));
         onMounted(() => {
@@ -53,7 +54,10 @@ export class AILivechatComponent extends Component {
         );
         useEffect(
             () => {
-                if (this.props.chatStyle === 'fullscreen'){
+                if (firstRender) {
+                    firstRender = false;
+                }
+                else if (this.props.chatStyle === 'fullscreen') {
                     this.promptInputRef.el.focus();
                 }
             },

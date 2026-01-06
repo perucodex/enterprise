@@ -45,3 +45,58 @@ registry.category("web_tour.tours").add('industry_fsm_sale_products_tour', {
     content: 'Price is 500',
     id: 'fsm_stock_start'
 }]});
+
+registry.category("web_tour.tours").add("test_industry_fsm_sale_add_product_on_invoice_tour", {
+    url: "/odoo/field-service",
+    steps: () => [
+        {
+            trigger: "input.o_searchview_input",
+            content: "Search Field Service task",
+            run: `edit Fsm task`,
+        },
+        {
+            trigger: '.o_searchview_autocomplete .o-dropdown-item:contains("Fsm task")',
+            content: 'Validate search',
+            run: "click",
+        },
+        {
+            trigger: '.o_kanban_record span:contains("Fsm task")',
+            content: "Open task",
+            run: "click",
+        },
+        {
+            trigger: ".o_form_sheet",
+            run: function (action) {
+                const moreButton = document.querySelector(".o_button_more");
+                if (moreButton) {
+                    action.click(moreButton);
+                }
+            },
+        },
+        {
+            trigger: "[name=action_view_invoices]",
+            content: "Go to the invoices",
+            run: "click",
+        },
+        {
+            trigger: "a:contains('Add a line')",
+            run: "click",
+        },
+        {
+            trigger: "[name='product_id'] input",
+            run: "edit sale product",
+        },
+        {
+            trigger: '.dropdown-item:contains(Sale Product):not(:contains(create "sale product"))',
+            run: "click",
+        },
+
+        {
+            trigger: "[name=action_post]",
+            run: "click",
+        },
+        {
+            trigger: '.o_field_widget:contains("INV/")',
+        },
+    ],
+});

@@ -23,6 +23,15 @@ class TestMxExtendedEdiCommon(TestMxEdiCommon):
             'l10n_mx_edi_umt_aduana_id': cls.env.ref('uom.product_uom_kgm').id,
         })
 
+        cls.service_product.update({
+            'default_code': 'service_mx',
+            'name': 'service_mx',
+            'uom_id': cls.env.ref('l10n_mx.product_uom_service_unit').id,
+            'l10n_mx_edi_umt_aduana_id': cls.env.ref('l10n_mx.product_uom_service_unit').id,
+            'unspsc_code_id': cls.env.ref('product_unspsc.unspsc_code_01010101').id,
+        })
+        cls.env.ref('l10n_mx.product_uom_service_unit').l10n_mx_edi_code_aduana = '99'
+
         rate = 1 / (RATE_WITH_USD if EXTERNAL_MODE else TEST_RATE_WITH_USD)
         cls.usd = cls.setup_other_currency('USD', rates=[(cls.frozen_today.date(), rate)])
 

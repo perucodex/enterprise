@@ -8,13 +8,16 @@
 # Thi Huong Nguyen, 2023
 # Martin Trigaux, 2023
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# "Thi Huong Nguyen (thng)" <thng@odoo.com>, 2025.
+# Odoo Translation Bot <c3p@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:45+0000\n"
-"PO-Revision-Date: 2025-09-15 23:08+0000\n"
-"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:43+0000\n"
+"PO-Revision-Date: 2025-12-06 09:52+0000\n"
+"Last-Translator: Odoo Translation Bot <c3p@odoo.com>\n"
 "Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-19/"
 "account_reports/vi/>\n"
 "Language: vi\n"
@@ -22,7 +25,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: account_reports
 #. odoo-javascript
@@ -35,6 +38,18 @@ msgstr "\" số dư tài khoản bị ảnh hưởng bởi"
 #: code:addons/account_reports/models/account_journal_report.py:0
 msgid "%(journal)s - %(account)s"
 msgstr "%(journal)s - %(account)s"
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_report.py:0
+msgid "%(line_name)s - %(company)s"
+msgstr ""
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_report.py:0
+msgid "%(line_name)s - %(company_name)s"
+msgstr ""
 
 #. module: account_reports
 #. odoo-python
@@ -98,10 +113,8 @@ msgstr ""
 #: code:addons/account_reports/models/account_report.py:0
 msgid ""
 "'Open General Ledger' caret option is only available form report lines "
-"targetting accounts."
+"targetting accounts or Undistributed Profits/Losses."
 msgstr ""
-"Tùy chọn dấu mũ 'Mở sổ cái chung' chỉ khả dụng cho các dòng báo cáo nhắm mục "
-"tiêu tới tài khoản."
 
 #. module: account_reports
 #. odoo-python
@@ -184,6 +197,28 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p style=\"margin: 0px; padding: 0px;\">\n"
+"                   <t t-if=\"object.id != "
+"object.commercial_partner_id.id\">Kính gửi <t t-out=\"object.name or ''\"/> "
+"(<t t-out=\"object.commercial_partner_id.name or ''\"/>),</t>\n"
+"                    <t t-else=\"\">Kính gửi <t t-out=\"object.name or ''\"/>,"
+"</t>\n"
+"                    <br/>\n"
+"                    Kính gửi quý khách, xin vui lòng xem danh sách các hóa "
+"đơn chưa thanh toán của quý khách đính kèm dưới đây.\n"
+"                   <br/> \n"
+"                    Nếu có bất kỳ thắc mắc nào, xin vui lòng liên hệ với "
+"chúng tôi.\n"
+"                   <br/> \n"
+"                    Trân trọng,\n"
+"                   <br/>\n"
+"                    <t t-out=\"object._get_followup_responsible().name if "
+"is_html_empty(object._get_followup_responsible().signature) else "
+"object._get_followup_responsible().signature\"/> \n"
+"               </p>\n"
+"            </div>\n"
+"        "
 
 #. module: account_reports
 #: model:mail.template,body_html:account_reports.email_template_customer_statement
@@ -272,6 +307,41 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p>\n"
+"                    Xin chào <t t-"
+"out=\"object.company_id.name\">YourCompany</t>,\n"
+"                </p>\n"
+"                <p>\n"
+"                    Dựa trên các tài liệu và thông tin đã nhận, tờ khai thuế "
+"GTGT của <t t-out=\"object.company_id.name\">YourCompany</t>\n"
+"                    cho kỳ báo cáo <t t-"
+"out=\"object.type_id._get_period_name(object.company_id, object.date_from, "
+"object.date_to)\"/> đã được nộp.\n"
+"                </p>\n"
+"                <p>\n"
+"                    Chúng tôi đã xác định rằng vẫn còn số tiền <t t-"
+"out=\"format_amount(object.total_amount_to_pay, "
+"object.amount_to_pay_currency_id)\"/> phải thanh toán.\n"
+"                </p>\n"
+"                <table style=\"border:1px solid black; padding:20px; text-"
+"align:left; border-spacing: 16px;\">\n"
+"                    <tr>\n"
+"                        <td>Số tiền cần thanh toán</td>\n"
+"                        <td><t t-"
+"out=\"format_amount(object.total_amount_to_pay, "
+"object.amount_to_pay_currency_id)\"/></td>\n"
+"                    </tr>\n"
+"                    <tr>\n"
+"                        <td>Đến hạn vào</td>\n"
+"                        <td><t t-out=\"format_date(object.date_deadline)\"/"
+"></td>\n"
+"                    </tr>\n"
+"                </table>\n"
+"                <p>Trân trọng,</p>\n"
+"                <p><t t-out=\"user.name\">Mitchell Admin</t></p>\n"
+"            </div>\n"
+"        "
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
@@ -281,7 +351,7 @@ msgstr "<i class=\"fa fa-ellipsis-v\" title=\"Menu thả xuống\"/>"
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 msgid "<i class=\"fa fa-paperclip fa-lg\" title=\"Open Attachments\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-paperclip fa-lg\" title=\"Mở tệp đính kèm\"/>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_send_form
@@ -345,6 +415,17 @@ msgid ""
 "                            <span invisible=\"not "
 "show_warning_existing_return\" class=\"fa fa-exclamation-triangle text-"
 "danger pb-2\" title=\"A return already exists for the selected period.\"/>"
+msgstr ""
+"<span invisible=\"not show_warning_wrong_dates\" class=\"fa fa-exclamation-"
+"triangle text-danger pb-2\" title=\"Khoảng thời gian đã chọn không khớp với "
+"bất kỳ kỳ kế toán nào.\"/>.\n"
+"<span invisible=\"not show_warning_existing_return\" class=\"fa fa-"
+"exclamation-triangle text-danger pb-2\" title=\"Đã tồn tại một tờ khai cho "
+"kỳ đã chọn.\"/>"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_form_view
+msgid "<span style=\"width: 85%\">days after tax period</span>"
 msgstr ""
 
 #. module: account_reports
@@ -509,12 +590,12 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_account_balances_search_view
 msgid "Account Type"
-msgstr ""
+msgstr "Loại tài khoản"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_account_balances_search_view
 msgid "Account with Entries"
-msgstr ""
+msgstr "Tài khoản với bút toán"
 
 #. module: account_reports
 #. odoo-javascript
@@ -561,7 +642,7 @@ msgstr "Biểu thức báo cáo kế toán"
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_report_external_value
 msgid "Accounting Report External Value"
-msgstr ""
+msgstr "Báo cáo kế toán Giá trị bên ngoài"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_report_line
@@ -640,7 +721,7 @@ msgstr "Lỗi có thể xử lý"
 #: model:ir.model.fields,field_description:account_reports.field_account_return__active
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__is_return_active
 msgid "Active"
-msgstr ""
+msgstr "Đang hoạt động"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__activity_ids
@@ -1035,14 +1116,20 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_kanban_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 msgid "Archive"
-msgstr ""
+msgstr "Lưu trữ"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
 msgid "Archived"
-msgstr ""
+msgstr "Đã lưu trữ"
+
+#. module: account_reports
+#. odoo-javascript
+#: code:addons/account_reports/static/src/views/accrual_list_view.xml:0
+msgid "As of"
+msgstr "Tính đến:"
 
 #. module: account_reports
 #. odoo-python
@@ -1066,6 +1153,12 @@ msgstr ""
 #: model:account.report.column,name:account_reports.aged_receivable_report_period0
 msgid "At Date"
 msgstr "Vào ngày"
+
+#. module: account_reports
+#. odoo-javascript
+#: code:addons/account_reports/static/src/views/accrual_list_view.xml:0
+msgid "At the date of"
+msgstr ""
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_send_form
@@ -1135,7 +1228,7 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_search_view
 msgid "Automated"
-msgstr ""
+msgstr "Tự động"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_form_view
@@ -1281,12 +1374,12 @@ msgstr "Trình xử lý tuỳ chỉnh báo cáo đối chiếu ngân hàng"
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__model__account_bank_statement_line
 msgid "Bank Statement Line"
-msgstr ""
+msgstr "Dòng sao kê ngân hàng"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_bank_statements
 msgid "Bank Statements"
-msgstr ""
+msgstr "Sao kê ngân hàng"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_bank_view0
@@ -1301,6 +1394,11 @@ msgid ""
 msgstr ""
 "Việc đối soát ngân hàng không bắt buộc đối với các tờ khai thuế GTGT nhưng "
 "giúp phát hiện các hóa đơn bị thiếu."
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.bank_information_customer_report
+msgid "Bank:"
+msgstr ""
 
 #. module: account_reports
 #. odoo-javascript
@@ -1371,6 +1469,8 @@ msgid ""
 "By default, Odoo applies its own deadline for returns (shown as 0). Entering "
 "a value here will override it and be used as the new deadline."
 msgstr ""
+"Theo mặc định, Odoo áp dụng thời hạn trả hàng riêng (hiển thị là 0). Việc "
+"nhập giá trị tại đây sẽ ghi đè và được sử dụng làm thời hạn mới."
 
 #. module: account_reports
 #. odoo-python
@@ -1523,7 +1623,7 @@ msgstr "Số dư quỹ tiền mặt"
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__category
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_search_view
 msgid "Category"
-msgstr ""
+msgstr "Danh mục"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_change_lock_date
@@ -1541,7 +1641,7 @@ msgstr "Chatter"
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__type__check
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__type__check
 msgid "Check"
-msgstr ""
+msgstr "Kiểm tra"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__code
@@ -1558,7 +1658,7 @@ msgstr "Kiểm tra (các) email của (các) đối tác"
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
 msgid "Check State"
-msgstr ""
+msgstr "Giai đoạn kiểm tra"
 
 #. module: account_reports
 #: model:ir.actions.act_window,name:account_reports.action_view_account_return_check_templates
@@ -1571,6 +1671,8 @@ msgid ""
 "Check for payables overdue by more than 60 days and validate that all "
 "amounts due are properly recorded."
 msgstr ""
+"Kiểm tra các khoản phải trả quá hạn hơn 60 ngày và xác nhận rằng tất cả số "
+"tiền đến hạn đã được ghi nhận đầy đủ."
 
 #. module: account_reports
 #. odoo-javascript
@@ -1753,6 +1855,8 @@ msgid ""
 "Compare the general ledger cash account with the physical cash inventory "
 "provided by the client. Investigate and explain any discrepancies."
 msgstr ""
+"So sánh tài khoản tiền mặt trong sổ cái chung với số dư tiền mặt thực tế do "
+"khách hàng cung cấp. Điều tra và giải thích bất kỳ chênh lệch nào."
 
 #. module: account_reports
 #. odoo-javascript
@@ -1784,6 +1888,8 @@ msgid ""
 "Conduct a comparative account review to identify key variances, analyze "
 "trends, and assess performance versus prior periods."
 msgstr ""
+"Thực hiện đánh giá so sánh báo cáo tài chính để xác định các chênh lệch "
+"chính, phân tích xu hướng và đánh giá hiệu quả so với các kỳ trước."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_trade_payables_analytical_review
@@ -1821,6 +1927,12 @@ msgid ""
 "Confirm proper classification, fair value measurement, and disposal "
 "treatment of marketable securities."
 msgstr ""
+
+#. module: account_reports
+#. odoo-javascript
+#: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
+msgid "Consolidation"
+msgstr "Hợp nhất"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_res_partner
@@ -1963,11 +2075,6 @@ msgstr "Được tạo vào"
 #: model:ir.model.fields,field_description:account_reports.field_account_account__audit_credit
 msgid "Credit"
 msgstr "Có"
-
-#. module: account_reports
-#: model:ir.ui.menu,name:account_reports.menu_action_account_report_multicurrency_revaluation
-msgid "Currencies"
-msgstr ""
 
 #. module: account_reports
 #: model:account.report.column,name:account_reports.aged_payable_report_currency
@@ -2134,7 +2241,9 @@ msgstr "Ngày đến hạn chót"
 #: model:ir.model.fields,field_description:account_reports.field_account_return__date_deadline
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__date_deadline
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__deadline_days_delay
+#: model:ir.model.fields,field_description:account_reports.field_res_config_settings__account_return_reminder_day
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
+#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
 msgid "Deadline"
 msgstr "Thời hạn"
 
@@ -2371,6 +2480,8 @@ msgid ""
 "Displays the value of the selected field as a textual hint. If the selected "
 "field is empty, the static placeholder attribute is displayed instead."
 msgstr ""
+"Hiển thị giá trị của trường đã chọn dưới dạng gợi ý bằng văn bản. Nếu trường "
+"đã chọn trống, thuộc tính phần giữ chỗ tĩnh sẽ được hiển thị thay thế."
 
 #. module: account_reports
 #. odoo-python
@@ -2387,6 +2498,11 @@ msgstr ""
 #: model:account.return.check.template,description:account_reports.account_return_check_template_audit_accounting_process
 msgid "Document current accounting processes (especially if done in-house)."
 msgstr ""
+
+#. module: account_reports
+#: model:account.report.column,name:account_reports.journal_report_count
+msgid "Documents"
+msgstr "Tài liệu"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard__doc_name
@@ -2428,6 +2544,11 @@ msgid "Draft Entries"
 msgstr "Bút toán nháp"
 
 #. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.view_journal_report_audit_move_line_search
+msgid "Draft To Review"
+msgstr ""
+
+#. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
 msgid "Draft entries"
@@ -2456,7 +2577,7 @@ msgstr "Ngày đến hạn"
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_audit_balance_clickable_char_field.js:0
 msgid "Dynamic Placeholder"
-msgstr ""
+msgstr "Phần giữ chỗ động"
 
 #. module: account_reports
 #: model:account.report,name:account_reports.generic_ec_sales_report
@@ -2519,7 +2640,7 @@ msgstr "Email"
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_mail_compose_message
 msgid "Email composition wizard"
-msgstr ""
+msgstr "Trình soạn thảo email"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__mail_template_id
@@ -2604,6 +2725,9 @@ msgid ""
 "and that any unrealized exchange differences are properly recorded in profit "
 "or loss (accounts 654/754) under Belgian GAAP."
 msgstr ""
+"Đảm bảo rằng các khoản phải trả bằng ngoại tệ được đánh giá lại theo tỷ giá "
+"khoá sổ cuối năm và mọi chênh lệch tỷ giá chưa thực hiện được ghi nhận đúng "
+"vào lãi hoặc lỗ (tài khoản 654/754) theo chuẩn mực kế toán Bỉ (Belgian GAAP)."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_non_recoverable_vat_gross_accounting
@@ -2630,7 +2754,7 @@ msgstr "Bút toán với đối tác không có thuế GTGT"
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__equity
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__equity
 msgid "Equity"
-msgstr ""
+msgstr "Vốn chủ sở hữu"
 
 #. module: account_reports
 #. odoo-python
@@ -2893,7 +3017,7 @@ msgstr "Trình xử lý tuỳ chỉnh báo cáo follow-up"
 #. module: account_reports
 #: model:ir.actions.client,name:account_reports.action_account_report_followup
 msgid "Follow-up Report"
-msgstr ""
+msgstr "Báo cáo Follow-up"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_follower_ids
@@ -2920,6 +3044,11 @@ msgid ""
 "- Has a payment plan been negotiated?\n"
 "- Is a provision recorded if recovery is doubtful?"
 msgstr ""
+"Đối với mỗi khoản phải thu rủi ro cao (>60 ngày), hãy kiểm tra các điều "
+"sau:\n"
+"- Follow-up có được ghi chép không?\n"
+"- Kế hoạch thanh toán đã được thương lượng chưa?\n"
+"- Có ghi nhận dự phòng nếu nghi ngờ về khả năng thu hồi không?"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_foreign_currency_liabilities
@@ -3074,7 +3203,7 @@ msgstr "Phân loại hàng hoá và dịch vụ"
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__government
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__state
 msgid "Government"
-msgstr ""
+msgstr "Chính phủ"
 
 #. module: account_reports
 #. odoo-javascript
@@ -3346,7 +3475,7 @@ msgstr "In %s"
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_return_dashboard_list.js:0
 msgid "In %s days"
-msgstr ""
+msgstr "Trong %s ngày"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_report_search
@@ -3502,7 +3631,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__inventory
 #: model:ir.ui.menu,name:account_reports.account_audit_inventory_entries_menu
 msgid "Inventory"
-msgstr ""
+msgstr "Tồn kho"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_inventory_analytical_review
@@ -3623,6 +3752,7 @@ msgstr "Hạng mục bút toán"
 #. odoo-javascript
 #. odoo-python
 #: code:addons/account_reports/models/account_deferred_reports.py:0
+#: code:addons/account_reports/models/account_general_ledger.py:0
 #: code:addons/account_reports/models/account_report.py:0
 #: code:addons/account_reports/models/account_return.py:0
 #: code:addons/account_reports/models/account_trial_balance_report.py:0
@@ -3671,7 +3801,7 @@ msgstr "Phát sinh:"
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_kpi_provider
 msgid "KPI Provider"
-msgstr ""
+msgstr "Nhà cung cấp KPI"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_liabilities_view0
@@ -3783,6 +3913,11 @@ msgid "Ledgers"
 msgstr ""
 
 #. module: account_reports
+#: model:account.report.line,name:account_reports.account_financial_report_allocations_withdrawals0
+msgid "Less Allocations and Plus Withdrawals"
+msgstr ""
+
+#. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_cost_sales0
 msgid "Less Costs of Revenue"
 msgstr "Giá vốn hàng bán ít hơn"
@@ -3822,12 +3957,12 @@ msgstr "Tải thêm..."
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/account_report.xml:0
 msgid "Loading..."
-msgstr ""
+msgstr "Đang tải..."
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__date_lock
 msgid "Lock Date"
-msgstr ""
+msgstr "Ngày khoá sổ"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.company_information
@@ -3842,7 +3977,7 @@ msgstr "Tiện ích tệp đính kèm chính"
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_mail_tracking_value
 msgid "Mail Tracking Value"
-msgstr ""
+msgstr "Giá trị Theo vết Thư"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_main_attachment_id
@@ -3881,7 +4016,7 @@ msgstr "Quản lý lỗi tạo tệp từ các bản xuất báo cáo."
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_search_view
 msgid "Manual"
-msgstr ""
+msgstr "Thủ công"
 
 #. module: account_reports
 #. odoo-python
@@ -3946,7 +4081,7 @@ msgstr "Menu"
 #: model:ir.model,name:account_reports.model_mail_message
 #: model:ir.model.fields,field_description:account_reports.field_account_report_annotation__message_id
 msgid "Message"
-msgstr ""
+msgstr "Tin nhắn"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_has_error
@@ -3986,6 +4121,10 @@ msgid ""
 "such as using the wrong VAT rate, wrongly exempting transactions.\n"
 "                "
 msgstr ""
+"Việc thiếu thông tin công ty (như mã số thuế GTGT hoặc quốc gia) có thể gây "
+"ra lỗi trong báo cáo của bạn,\n"
+"ví dụ như áp dụng sai thuế suất hoặc miễn thuế giao dịch không chính xác.\n"
+"                "
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__mode
@@ -4102,6 +4241,11 @@ msgid "Net Profit"
 msgstr "Lợi nhuận ròng"
 
 #. module: account_reports
+#: model:account.report.line,name:account_reports.account_financial_report_net_profit_after_allocations0
+msgid "Net Profit Left After Allocations and Withdrawals"
+msgstr ""
+
+#. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_net_assets0
 msgid "Net assets"
 msgstr "Tài sản ròng"
@@ -4123,7 +4267,7 @@ msgstr "Biên lợi nhuận ròng (doanh thu/lợi nhuận ròng)"
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_review_submit__new
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_tax_report__new
 msgid "New"
-msgstr ""
+msgstr "Mới"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__activity_calendar_event_id
@@ -4360,7 +4504,7 @@ msgstr "Một trong những định dạng đã chọn không thể xuất đư�
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__audit_status__ongoing
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 msgid "Ongoing"
-msgstr ""
+msgstr "Đang diễn ra"
 
 #. module: account_reports
 #. odoo-python
@@ -4407,7 +4551,7 @@ msgstr "Mở báo cáo khách hàng"
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_return_check_attachment_viewer.xml:0
 msgid "Open Document"
-msgstr ""
+msgstr "Mở Tài liệu"
 
 #. module: account_reports
 #: model:ir.actions.server,name:account_reports.action_server_open_view_account_return
@@ -4454,7 +4598,7 @@ msgstr "Tuỳ chọn:"
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__other
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__other
 msgid "Others"
-msgstr ""
+msgstr "Khác"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.outstanding
@@ -4603,7 +4747,7 @@ msgstr "Đạt"
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__audit_status__paused
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 msgid "Paused"
-msgstr ""
+msgstr "Đã tạm ngừng"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_only_pay__paid
@@ -4657,13 +4801,13 @@ msgstr "Ngân hàng của đối tác thanh toán"
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__model__account_payment
 msgid "Payments"
-msgstr ""
+msgstr "Thanh toán"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__payroll
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__payroll
 msgid "Payroll"
-msgstr ""
+msgstr "Bảng lương"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_performance0
@@ -4844,6 +4988,8 @@ msgid ""
 "Prepare a summary of subsidiaries and investments including ownership "
 "percentages, acquisition values, net equity, earnings, and dividends paid."
 msgstr ""
+"Chuẩn bị bản tóm tắt về các công ty con và khoản đầu tư bao gồm tỷ lệ sở "
+"hữu, giá trị mua, vốn chủ sở hữu ròng, lợi nhuận và cổ tức đã chi trả."
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_prepayements0
@@ -4950,7 +5096,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__purchases
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__purchases
 msgid "Purchases"
-msgstr ""
+msgstr "Mua hàng"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_qr_code_payment_wizard__qr_code
@@ -5033,7 +5179,7 @@ msgstr "Tên bản ghi"
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/views/refresh_returns_cog_menu.xml:0
 msgid "Refresh"
-msgstr ""
+msgstr "Làm mới"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__refresh_result
@@ -5053,8 +5199,6 @@ msgstr ""
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_year_op__account_return_reminder_day
-#: model:ir.model.fields,field_description:account_reports.field_res_config_settings__account_return_reminder_day
-#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
 msgid "Reminder"
 msgstr "Nhắc nhở"
 
@@ -5250,6 +5394,8 @@ msgid "Reverse charge mention"
 msgstr "Đề cập thuế trả ngược"
 
 #. module: account_reports
+#. odoo-javascript
+#: code:addons/account_reports/static/src/components/journal_report/line_name.xml:0
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_review__reviewed
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_review_submit__reviewed
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_tax_report__reviewed
@@ -5263,6 +5409,8 @@ msgid ""
 "Review FX rates used at year-end, compare with prior year, and verify "
 "appropriate recognition and presentation of currency adjustments."
 msgstr ""
+"Kiểm tra tỷ giá ngoại tệ sử dụng tại cuối năm, so sánh với năm trước và xác "
+"minh việc ghi nhận cũng như trình bày điều chỉnh ngoại tệ phù hợp."
 
 #. module: account_reports
 #. odoo-python
@@ -5328,6 +5476,8 @@ msgid ""
 "Review petty cash accounts to ensure they do not have credit balances. "
 "Investigate and justify any anomalies."
 msgstr ""
+"Kiểm tra các tài khoản tiền mặt nhỏ để đảm bảo chúng không có số dư thẻ tín "
+"dụng. Điều tra và giải thích bất kỳ sự bất thường nào."
 
 #. module: account_reports
 #. odoo-python
@@ -5342,6 +5492,10 @@ msgid ""
 "services delivered in the next period, estimate the revenue that should be "
 "recognized later (accrued income), and document how this was determined."
 msgstr ""
+"Rà soát các khoản doanh thu được ghi nhận trong tháng cuối của kỳ, xác định "
+"bất kỳ dịch vụ nào được cung cấp ở kỳ tiếp theo, ước tính phần doanh thu cần "
+"được ghi nhận sau (thu nhập dồn tích) và lập tài liệu giải trình cách xác "
+"định các khoản này."
 
 #. module: account_reports
 #. odoo-python
@@ -5369,7 +5523,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__result__reviewed
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_search_view
 msgid "Reviewed"
-msgstr ""
+msgstr "Đã rà soát"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_report_search
@@ -5391,7 +5545,7 @@ msgstr "Lỗi gửi SMS"
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__sales
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__sales
 msgid "Sales"
-msgstr ""
+msgstr "Bán hàng"
 
 #. module: account_reports
 #. odoo-javascript
@@ -5408,7 +5562,7 @@ msgstr "Hãy quét tôi bằng ứng dụng ngân hàng của bạn."
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_mail_scheduled_message
 msgid "Scheduled Message"
-msgstr ""
+msgstr "Tin nhắn đã lên lịch"
 
 #. module: account_reports
 #. odoo-javascript
@@ -5675,13 +5829,13 @@ msgstr "Báo cáo đang được gửi trong nền."
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__states_workflow
 msgid "States"
-msgstr ""
+msgstr "Tỉnh/TP"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__audit_status
 #: model:ir.model.fields,field_description:account_reports.field_account_audit_account_status__status
 msgid "Status"
-msgstr ""
+msgstr "Trạng thái"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__activity_state
@@ -5794,6 +5948,7 @@ msgstr "Mã số thuế"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.company_information
+#: model_terms:ir.ui.view,arch_db:account_reports.tax_information_customer_report
 msgid "Tax ID:"
 msgstr "Mã số thuế:"
 
@@ -5921,7 +6076,7 @@ msgstr "Đối tượng kỹ thuật để tải xuống báo cáo kế toán"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__template_id
 msgid "Template"
-msgstr ""
+msgstr "Mẫu"
 
 #. module: account_reports
 #. odoo-javascript
@@ -5995,6 +6150,8 @@ msgid ""
 "The operation is refused as it would impact an already issued tax statement. "
 "Please change the following lock dates to proceed: %(lock_date_info)s."
 msgstr ""
+"Giao dịch bị từ chối vì sẽ ảnh hưởng đến báo cáo thuế đã phát hành. Vui lòng "
+"thay đổi các ngày khóa sổ sau để tiếp tục: %(lock_date_info)s."
 
 #. module: account_reports
 #. odoo-python
@@ -6216,7 +6373,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__name
 msgid "Title"
-msgstr ""
+msgstr "Tiêu đề"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
@@ -6224,12 +6381,13 @@ msgid "To Do"
 msgstr "Việc cần làm"
 
 #. module: account_reports
+#: model:account.report.column,name:account_reports.journal_report_to_review
 #: model:ir.model.fields.selection,name:account_reports.selection__account_account__audit_status__todo
 #: model:ir.model.fields.selection,name:account_reports.selection__account_audit_account_status__status__todo
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__result__todo
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_search_view
 msgid "To Review"
-msgstr ""
+msgstr "Cần rà soát"
 
 #. module: account_reports
 #. odoo-javascript
@@ -6373,7 +6531,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_list_view
 msgid "Type"
-msgstr ""
+msgstr "Loại"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__type_external_id
@@ -6394,13 +6552,19 @@ msgstr "Thu nhập chưa phân bổ"
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_kanban_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 msgid "Unarchive"
-msgstr ""
+msgstr "Bỏ lưu trữ"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "Undefined"
 msgstr "Không xác định"
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_report.py:0
+msgid "Undistributed Profits/Losses"
+msgstr ""
 
 #. module: account_reports
 #. odoo-javascript
@@ -6434,6 +6598,11 @@ msgid "Unknown date scope: %s"
 msgstr "Phạm vi ngày không xác định: %s"
 
 #. module: account_reports
+#: model:ir.ui.menu,name:account_reports.menu_action_account_report_multicurrency_revaluation
+msgid "Unrealized Currencies"
+msgstr ""
+
+#. module: account_reports
 #: model:account.report,name:account_reports.multicurrency_revaluation_report
 #: model:ir.actions.client,name:account_reports.action_account_report_multicurrency_revaluation
 msgid "Unrealized Currency Gains/Losses"
@@ -6452,13 +6621,13 @@ msgstr "Bút toán chưa đối chiếu"
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__type__file
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__type__file
 msgid "Upload Document"
-msgstr ""
+msgstr "Tải lên tài liệu"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_return_check_file_uploader.xml:0
 msgid "Upload File"
-msgstr ""
+msgstr "Tải lên tệp"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_financial_year_op__vat_label
@@ -6536,6 +6705,19 @@ msgid ""
 "exchange for immediate cash.\n"
 "            "
 msgstr ""
+"Xác minh rằng các khoản thu tiền mặt và thẻ ghi nhận vào cuối kỳ thực sự "
+"được thanh toán trong kỳ tiếp theo. Đồng thời, kiểm tra việc hạch toán đúng "
+"các giao dịch cession Dailly, các hoạt động chiết khấu và các hợp đồng bao "
+"thanh toán.\n"
+"\n"
+"* \"\"Luật Dailly\"\" là luật của Pháp cho phép doanh nghiệp chuyển nhượng "
+"các khoản phải thu thương mại (như hóa đơn) cho một tổ chức tín dụng (như "
+"ngân hàng) để nhận nguồn tài chính.\n"
+"\n"
+"** Hợp đồng bao thanh toán là việc doanh nghiệp bán các hóa đơn chưa thanh "
+"toán của mình cho một công ty thứ ba, gọi là đơn vị bao thanh toán, để nhận "
+"tiền mặt ngay lập tức.\n"
+"            "
 
 #. module: account_reports
 #. odoo-python
@@ -6788,6 +6970,8 @@ msgid ""
 "You cannot reset this return to new, as another return has been locked at a "
 "later date."
 msgstr ""
+"Bạn không thể đặt lại trạng thái này về trạng thái mới, vì một trạng thái "
+"khác đã được khóa vào một ngày sau đó."
 
 #. module: account_reports
 #. odoo-python
@@ -6822,6 +7006,7 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.journal_report_pdf_export_main
 #: model_terms:ir.ui.view,arch_db:account_reports.pdf_export_main
+#: model_terms:ir.ui.view,arch_db:account_reports.pdf_export_main_customer_report
 msgid "[Draft]"
 msgstr "[Nháp]"
 
@@ -6849,14 +7034,9 @@ msgid "days after period"
 msgstr "ngày sau kỳ"
 
 #. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_form_view
-msgid "days after tax period"
-msgstr ""
-
-#. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_kanban_view
 msgid "delete"
-msgstr ""
+msgstr "xóa"
 
 #. module: account_reports
 #. odoo-javascript
@@ -7045,6 +7225,16 @@ msgstr ""
 #: code:addons/account_reports/static/src/components/multicurrency_revaluation_report/warnings.xml:0
 msgid "⇒ Reset to Odoo’s Rate"
 msgstr "⇒ Đặt lại về tỷ giá của Odoo"
+
+#~ msgid "Currencies"
+#~ msgstr "Tiền tệ"
+
+#~ msgid ""
+#~ "'Open General Ledger' caret option is only available form report lines "
+#~ "targetting accounts."
+#~ msgstr ""
+#~ "Tùy chọn dấu mũ 'Mở sổ cái chung' chỉ khả dụng cho các dòng báo cáo nhắm "
+#~ "mục tiêu tới tài khoản."
 
 #~ msgid ""
 #~ "%s for Transactions(+) imported from your online bank account (dated "

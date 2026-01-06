@@ -489,6 +489,7 @@ class TestReportEngines(TestAccountReportsCommon):
         self.env['account.account'].search([('code', 'in', ('100001', '101001'))]).tag_ids = account_tags[0]
         self.env['account.account'].search([('code', 'in', ('10.20.0', '101002'))]).tag_ids = account_tags[1]
 
+        move.line_ids[5].account_id.active = False
         # Check the values.
         options = self._generate_options(report, '2020-01-01', '2020-01-01', default_options={'unfold_all': True})
         report_lines = report._get_lines(options)

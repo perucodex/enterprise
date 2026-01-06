@@ -215,7 +215,8 @@ class AccountMove(models.Model):
             ext_trade_values['total_usd'] = 0.0
             ext_trade_values['mercancia_list'] = []
             for product, product_values in product_values_map.items():
-                total_usd = usd.round(product_values['total'] * to_usd_rate) if usd else 0.0
+                is_service = product.l10n_mx_edi_umt_aduana_id.l10n_mx_edi_code_aduana == '99' or product.uom_id.unspsc_code_id.code == 'E48'
+                total_usd = usd.round(product_values['total'] * to_usd_rate) if usd and not is_service else 0.0
                 weighted_prices = sum(price_unit * qty for (price_unit, qty) in zip(product_values['price_unit_list'], product_values['quantity_list']))
                 weights = sum(product_values['quantity_list'])
                 if weights != 0:
@@ -224,10 +225,10 @@ class AccountMove(models.Model):
                     amount = sum(product_values['price_unit_list']) / len(product_values['price_unit_list'])
                 ext_trade_values['mercancia_list'].append({
                     'no_identificacion': product.default_code,
-                    'fraccion_arancelaria': product.l10n_mx_edi_tariff_fraction_id.code,
+                    'fraccion_arancelaria': product.l10n_mx_edi_tariff_fraction_id.code if not is_service else None,
                     'cantidad_aduana': sum(product_values['quantity_list']),
                     'unidad_aduana': product.l10n_mx_edi_umt_aduana_id.l10n_mx_edi_code_aduana,
-                    'valor_unitario_udana': float_round(amount * to_usd_rate, precision_digits=6),
+                    'valor_unitario_udana': float_round(amount * to_usd_rate, precision_digits=6) if not is_service else 0.0,
                     'valor_dolares': total_usd,
                 })
                 ext_trade_values['total_usd'] += total_usd

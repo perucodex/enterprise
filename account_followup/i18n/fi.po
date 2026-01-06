@@ -17,13 +17,15 @@
 # Konsta Aavaranta, 2023
 # Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Saara Hakanen <sahak@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:45+0000\n"
-"PO-Revision-Date: 2025-09-16 15:19+0000\n"
-"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:43+0000\n"
+"PO-Revision-Date: 2025-12-06 09:48+0000\n"
+"Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/"
 "account_followup/fi/>\n"
 "Language: fi\n"
@@ -31,19 +33,19 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: account_followup
 #. odoo-python
 #: code:addons/account_followup/models/account_followup_report.py:0
 msgid "%(company)s Payment Reminder - %(partner)s"
-msgstr ""
+msgstr "%(company)s Maksumuistutus - %(partner)s"
 
 #. module: account_followup
 #. odoo-python
 #: code:addons/account_followup/models/account_followup.py:0
 msgid "%(delay)s days (copy of %(name)s)"
-msgstr ""
+msgstr "%(delay)s päivää (kopio %(name)s)"
 
 #. module: account_followup
 #: model:ir.actions.report,print_report_name:account_followup.action_report_followup
@@ -58,7 +60,7 @@ msgstr "15 päivää"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.followup_filter_info_template
 msgid "2023-09-06"
-msgstr ""
+msgstr "2023-09-06"
 
 #. module: account_followup
 #: model:account_followup.followup.line,name:account_followup.demo_followup_line2
@@ -120,6 +122,42 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p>\n"
+"                       <t t-if=\"object.id != "
+"object.commercial_partner_id.id\">Hyvä <t t-out=\"object.name or ''\"/> (<t "
+"t-out=\"object.commercial_partner_id.name or ''\"/>),</t>\n"
+"                       <t t-else=\"\">Hyvä <t t-out=\"object.name or ''\"/>,"
+"</t>\n"
+"                       <br/>\n"
+"                        Useista muistutuksista huolimatta tililtänne ei ole "
+"edelleenkään suoritettu maksuja.\n"
+"                        Ellei täyttä maksua suoriteta seuraavien 8 päivän "
+"aikana, ryhdytään oikeudellisiin toimiin ilman erillistä ilmoitusta velan "
+"perimiseksi.\n"
+"                        Luotamme siihen, että tämä osoittautuu "
+"tarpeettomaksi. Erääntyneitä maksuja koskevat tiedot näkyvät alla.\n"
+"                        Jos teillä on kysyttävää, voitte ottaa yhteyttä "
+"Kirjanpito-osastoomme.\n"
+"                       <br/>\n"
+"                        Ystävällisin terveisin,\n"
+"                       <br/>\n"
+"                        <t t-if=\"not "
+"is_html_empty(object._get_followup_responsible().signature)\">\n"
+"                            <br/>\n"
+"                           <t t-"
+"out=\"object._get_followup_responsible().signature\"/>\n"
+"                        </t>\n"
+"                       <t t-else=\"\">\n"
+"                            <br/>\n"
+"                            --\n"
+"                           <br/>\n"
+"                           <t t-"
+"out=\"object._get_followup_responsible().name\"/>\n"
+"                        </t>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: account_followup
 #: model:mail.template,body_html:account_followup.demo_followup_email_template_2
@@ -165,6 +203,46 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p>\n"
+"                       <t t-if=\"object.id != "
+"object.commercial_partner_id.id\">Hyvä <t t-out=\"object.name or ''\"/> (<t "
+"t-out=\"object.commercial_partner_id.name or ''\"/>),</t>\n"
+"                       <t t-else=\"\">Hyvä <t t-out=\"object.name or ''\"/>,"
+"</t>\n"
+"                       <br/>\n"
+"                        Kirjanpitomme mukaan maksettavat suoritukset ovat "
+"nyt pahasti myöhässä muistutuksen lähettämisestä huolimatta.\n"
+"                       <br/>\n"
+"                        On erittäin tärkeää, että maksu suoritetaan "
+"välittömästi, sillä muutoin joudumme harkitsemaan tilinne sulkemista, mikä "
+"tarkoittaa, että emme voi enää toimittaa yrityksellesi tavaroita/palveluja. "
+"Pyydämme tekemään asianmukaiset toimenpiteet, jotta maksu voidaan suorittaa "
+"seuraavien 8 päivän aikana.\n"
+"                       <br/>\n"
+"                        Jos laskun maksamisessa on ongelmia, joista emme ole "
+"tietoisia, ottakaa yhteyttä Kirjanpito-osastoomme, jotta voimme ratkaista "
+"asian nopeasti.\n"
+"                       <br/>\n"
+"                        Erääntyneiden maksujen tiedot ovat alla.\n"
+"                       <br/>\n"
+"                        Ystävällisin terveisin,\n"
+"                       <t t-if=\"not "
+"is_html_empty(object._get_followup_responsible().signature)\">\n"
+"                            <br/>\n"
+"                           <t t-"
+"out=\"object._get_followup_responsible().signature\"/>\n"
+"                        </t>\n"
+"                       <t t-else=\"\">\n"
+"                            <br/>\n"
+"                            --\n"
+"                           <br/>\n"
+"                           <t t-"
+"out=\"object._get_followup_responsible().name\"/>\n"
+"                        </t>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: account_followup
 #: model:mail.template,body_html:account_followup.email_template_followup_1
@@ -218,6 +296,52 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p>\n"
+"                        <t t-if=\"object.id != "
+"object.commercial_partner_id.id\">Hyvä <t t-out=\"object.name or ''\"/> (<t "
+"t-out=\"object.commercial_partner_id.name or ''\"/>),</t>\n"
+"                        <t t-else=\"\">Hyvä <t t-out=\"object.name or ''\"/>,"
+"</t>\n"
+"                    </p>\n"
+"                    <p>\n"
+"                        Tililläsi näkyy maksamaton saldo: <b><t t-"
+"out=\"format_amount(object.total_overdue_followup, object.currency_id) or "
+"''\"/></b>.\n"
+"                        Pyydämme ystävällisesti maksamaan tämän summan <b>8 "
+"päivän</b> kuluessa.\n"
+"                    </p>\n"
+"                    <p t-if=\"object._show_pay_now_button()\">\n"
+"                        <a t-att-href=\"'/my/invoices/overdue'\" "
+"style=\"padding: 8px 12px; font-size: 12px; color: #FFFFFF; text-decoration: "
+"none !important; font-weight: 400; background-color: #875A7B; border: 0px "
+"solid #875A7B; border-radius:3px\">Maksa nyt</a>\n"
+"                    </p>\n"
+"                    <p>\n"
+"                        Jos maksu on jo tehty, voit jätää tämän viestin "
+"huomioimatta.\n"
+"                        Jos sinulla on kysyttävää tai tarvitset apua, ota "
+"rohkeasti yhteyttä kirjanpito-osastoomme.\n"
+"                    </p>\n"
+"                    <p>\n"
+"                        Arvostamme yhteistyötänne asian ratkaisemiseksi.\n"
+"                    </p>\n"
+"                    <p>\n"
+"                        Terveisin,\n"
+"                    </p>\n"
+"                    <p>\n"
+"                        <t t-if=\"not "
+"is_html_empty(object._get_followup_responsible().signature)\">\n"
+"                            <t t-"
+"out=\"object._get_followup_responsible().signature\"/>\n"
+"                        </t>\n"
+"                        <t t-else=\"\">\n"
+"                            <t t-"
+"out=\"object._get_followup_responsible().name\"/>\n"
+"                        </t>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.res_partner_view_form
@@ -231,6 +355,9 @@ msgid ""
 "                                Pending Invoices\n"
 "                            </strong>"
 msgstr ""
+"<strong>\n"
+"                                Avoinna olevat laskut\n"
+"                            </strong>"
 
 #. module: account_followup
 #: model:ir.model.constraint,message:account_followup.constraint_account_followup_followup_line_uniq_name
@@ -285,12 +412,12 @@ msgstr "Lisää yhteystiedot, joille ilmoitetaan..."
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__additional_follower_ids
 msgid "Add followers"
-msgstr ""
+msgstr "Lisää seuraajia"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.followup_filter_info_template
 msgid "Address"
-msgstr ""
+msgstr "Osoite"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__join_invoices
@@ -313,7 +440,7 @@ msgstr "Automaattinen"
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__body_has_template_value
 msgid "Body content is the same as the template"
-msgstr ""
+msgstr "Tekstin sisältö on sama kuin mallissa"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__can_edit_body
@@ -328,7 +455,7 @@ msgstr "Peruuta"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.missing_information_view_form
 msgid "Close"
-msgstr ""
+msgstr "Sulje"
 
 #. module: account_followup
 #. odoo-python
@@ -359,7 +486,7 @@ msgstr "Sisältö"
 #. module: account_followup
 #: model:ir.model,website_form_label:account_followup.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Luo asiakas"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__create_uid
@@ -450,7 +577,7 @@ msgstr "Määritä seurantatasot ja niihin liittyvät toimet"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.followup_filter_info_template
 msgid "Demo Ref"
-msgstr ""
+msgstr "Demoviite"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__name
@@ -511,7 +638,7 @@ msgstr "Sähköpostin aihe"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.view_account_followup_followup_line_form
 msgid "Email Template"
-msgstr ""
+msgstr "Sähköpostin mallipohja"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__email_recipient_ids
@@ -522,7 +649,7 @@ msgstr "Lisävastaanottajat"
 #. odoo-python
 #: code:addons/account_followup/models/res_partner.py:0
 msgid "Follow-up %(partner)s - %(date)s.pdf"
-msgstr ""
+msgstr "Seuranta %(partner)s - %(date)s.pdf"
 
 #. module: account_followup
 #: model:ir.model,name:account_followup.model_account_followup_followup_line
@@ -567,7 +694,7 @@ msgstr "Seurantatoimenpide, vaiheet"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.report_followup_print_all
 msgid "Follow-up details"
-msgstr ""
+msgstr "Seurantatiedot"
 
 #. module: account_followup
 #. odoo-python
@@ -578,7 +705,7 @@ msgstr "Seurantakirje luotu"
 #. module: account_followup
 #: model:ir.model,name:account_followup.model_account_followup_missing_information_wizard
 msgid "Followup missing information wizard"
-msgstr ""
+msgstr "Ohjattu puuttuvien tietojen seuranta"
 
 #. module: account_followup
 #: model_terms:ir.actions.act_window,help:account_followup.action_account_followup_line_definition_form
@@ -603,7 +730,7 @@ msgstr "Neljäs muistutus seurannasta"
 #: model:ir.model.fields,field_description:account_followup.field_res_partner__has_moves
 #: model:ir.model.fields,field_description:account_followup.field_res_users__has_moves
 msgid "Has Moves"
-msgstr ""
+msgstr "Sisältää siirtoja"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__id
@@ -623,6 +750,9 @@ msgid ""
 "notifications about any email reply made by the partner on the reminder "
 "email."
 msgstr ""
+"Jos asetettu, käyttäjät lisätään kumppanin seuraajiksi ja he saavat "
+"ilmoitukset kaikista vastauksista, joita kumppani lähetää "
+"muistutussähköpostiin."
 
 #. module: account_followup
 #: model:ir.model.fields.selection,name:account_followup.selection__res_partner__followup_status__in_need_of_action
@@ -632,12 +762,12 @@ msgstr "Edellyttää toimenpiteitä"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.view_partner_property_form_followup
 msgid "Invoice Follow-ups"
-msgstr ""
+msgstr "Laskujen seurantatoimenpiteet"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.template_followup_report
 msgid "Invoices Analysis"
-msgstr ""
+msgstr "Laskuanalyysi"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__is_mail_template_editor
@@ -654,7 +784,7 @@ msgstr "Päiväkirjamerkintä"
 #: code:addons/account_followup/models/res_partner.py:0
 #: model_terms:ir.ui.view,arch_db:account_followup.view_partner_property_form_followup
 msgid "Journal Items"
-msgstr ""
+msgstr "Päiväkirjamerkinnät"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.manual_reminder_view_form
@@ -702,12 +832,12 @@ msgstr "Manuaalinen"
 #: code:addons/account_followup/models/res_partner.py:0
 #: code:addons/account_followup/wizard/followup_missing_information.py:0
 msgid "Missing information"
-msgstr ""
+msgstr "Puuttuvat tiedot"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.line_template
 msgid "Name"
-msgstr ""
+msgstr "Nimi"
 
 #. module: account_followup
 #. odoo-python
@@ -734,6 +864,9 @@ msgid ""
 "                Sending a reminder will set this date depending on the "
 "levels configuration, and you can change it manually."
 msgstr ""
+"Jatkotoimia ei tehdä ennen tätä päivämäärää.\n"
+"Muistutuksen lähettäminen asettaa tämän päivämäärän tasojen asetusten "
+"mukaan, ja voit muuttaa sitä manuaalisesti."
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__activity_note
@@ -753,6 +886,10 @@ msgid ""
 "usually be a placeholder expression that provides the appropriate language, "
 "e.g. {{ object.partner_id.lang }}."
 msgstr ""
+"Valinnainen käännöskieli (ISO-koodi) sähköpostia lähetettäessä. Jos sitä ei "
+"ole määritetty, käytetään pääyhteistyökumppanin kieltä. Tämän pitäisi "
+"yleensä olla sopivan kielen tarjoava paikkamerkki, esim. "
+"{{ object.partner_id.lang }}."
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.view_account_followup_followup_line_form
@@ -767,9 +904,13 @@ msgid "Origin"
 msgstr "Lähde"
 
 #. module: account_followup
+#: model_terms:ir.ui.view,arch_db:account_followup.customer_statements_search_view
+msgid "Overdue Customer Invoices"
+msgstr ""
+
+#. module: account_followup
 #. odoo-python
 #: code:addons/account_followup/models/res_partner.py:0
-#: model_terms:ir.ui.view,arch_db:account_followup.customer_statements_search_view
 msgid "Overdue Invoices"
 msgstr "Erääntyneet laskut"
 
@@ -797,13 +938,13 @@ msgstr "Tulosta seurantakirje"
 #. module: account_followup
 #: model:ir.actions.server,name:account_followup.action_account_reports_customer_statements_do_followup
 msgid "Process Follow-ups"
-msgstr ""
+msgstr "Prosessin seurantatoimenpiteet"
 
 #. module: account_followup
 #. odoo-python
 #: code:addons/account_followup/models/account_followup_report.py:0
 msgid "Reference"
-msgstr ""
+msgstr "Viite"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.view_account_followup_followup_line_form
@@ -824,12 +965,12 @@ msgstr "Renderöintimalli"
 #. module: account_followup
 #: model:ir.model,name:account_followup.model_ir_actions_report
 msgid "Report Action"
-msgstr ""
+msgstr "Raporttitoimet"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.customer_statements_search_view
 msgid "Requires Follow-up"
-msgstr ""
+msgstr "Vaatii seurantaa"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_followup_line__activity_default_responsible_type
@@ -883,12 +1024,12 @@ msgstr "Lähetä ja tulosta"
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__show_print_button
 msgid "Show Print Button"
-msgstr ""
+msgstr "Näytä Tulosta-painike"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__show_send_button
 msgid "Show Send Button"
-msgstr ""
+msgstr "Näytä Lähetä-painike"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_account_followup_manual_reminder__sms
@@ -924,12 +1065,12 @@ msgstr "Yhteenveto"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.table_header_template_followup_report
 msgid "Table Header"
-msgstr ""
+msgstr "Otsikkorivi"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.line_template
 msgid "Table Value"
-msgstr ""
+msgstr "Taulukon arvo"
 
 #. module: account_followup
 #: model:ir.model.fields,help:account_followup.field_account_move_line__invoice_origin
@@ -965,13 +1106,13 @@ msgstr "Yhteensä"
 #: model:ir.model.fields,field_description:account_followup.field_res_partner__total_all_due
 #: model:ir.model.fields,field_description:account_followup.field_res_users__total_all_due
 msgid "Total All Due"
-msgstr ""
+msgstr "Kaikki erääntyvät yhteensä"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_res_partner__total_all_overdue
 #: model:ir.model.fields,field_description:account_followup.field_res_users__total_all_overdue
 msgid "Total All Overdue"
-msgstr ""
+msgstr "Kaikki erääntyneet yhteensä"
 
 #. module: account_followup
 #. odoo-python
@@ -993,7 +1134,7 @@ msgstr "Erääntynyt yhteensä"
 #: model:ir.model.fields,field_description:account_followup.field_res_partner__total_overdue_followup
 #: model:ir.model.fields,field_description:account_followup.field_res_users__total_overdue_followup
 msgid "Total Overdue Followup"
-msgstr ""
+msgstr "Erääntyneet seurattavat yhteensä"
 
 #. module: account_followup
 #: model:ir.model.fields,field_description:account_followup.field_res_partner__unpaid_invoice_ids
@@ -1016,7 +1157,7 @@ msgstr "Täsmäyttämätön rahanpesun torjunta"
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.missing_information_view_form
 msgid "View partners"
-msgstr ""
+msgstr "Näytä kumppanit"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.missing_information_view_form
@@ -1024,6 +1165,8 @@ msgid ""
 "We were not able to process some of the automated follow-up actions due to "
 "missing information on the partners."
 msgstr ""
+"Emme pystyneet käsittelemään joitakin automaattisia seurantatoimia, koska "
+"kumppaneiden tiedot puuttuivat."
 
 #. module: account_followup
 #: model:ir.model.fields.selection,name:account_followup.selection__res_partner__followup_status__with_overdue_invoices
@@ -1064,7 +1207,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_followup/models/res_partner.py:0
 msgid "commercial_partner_id"
-msgstr ""
+msgstr "commercial_partner_id"
 
 #. module: account_followup
 #: model_terms:ir.ui.view,arch_db:account_followup.view_account_followup_followup_line_form

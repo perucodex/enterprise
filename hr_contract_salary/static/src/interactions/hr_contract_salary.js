@@ -113,7 +113,7 @@ export class SalaryPackage extends Interaction {
         // Create a wrapper div to ensure the working schedule selection appears directly below the label TODO: remove master
         const workingScheduleSelect = this.el.querySelector("#hr_contract_salary select[name='simulation_working_schedule']");
         if (workingScheduleSelect) {
-            const wrapperDiv = workingScheduleSelect.parentNode.insertBefore(this.el.createElement("div"), workingScheduleSelect);
+            const wrapperDiv = workingScheduleSelect.parentNode.insertBefore(this.el.ownerDocument.createElement("div"), workingScheduleSelect);
             wrapperDiv.append(workingScheduleSelect);
         }
 
@@ -510,6 +510,9 @@ export class SalaryPackage extends Interaction {
 
     checkInputSelected(benefit) {
         const target = $("input[name='" + benefit + "']").toArray();
+        if (!target.length) {
+            return false;
+        }
         let type = target[0].type;
         let newValue;
         if (type === "radio") {
@@ -621,7 +624,7 @@ export class SalaryPackage extends Interaction {
         // For example, we don't want to require driving license
         // when it is not displayed. As it will be conditionally hidden if car advantage is not set.
         const requiredEmptyInput = $("input:required").toArray().find(input => input.value === "" && input.name !== "" && input.type !== "checkbox" && input.offsetParent !== null);
-        const requiredEmptySelect = $("select:required").toArray().find(select => $(select).val() === "");
+        const requiredEmptySelect = $("select:required").toArray().find(select => $(select).val() === "" && select.offsetParent !== null);
         const requiredEmptyTextArea = $("textarea:required").toArray().find(textarea => textarea.value === "" && textarea.offsetParent !== null);
         const email = $("input[name='private_email']").val();
         const atpos = email.indexOf("@");

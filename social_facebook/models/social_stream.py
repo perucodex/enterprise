@@ -50,7 +50,8 @@ class SocialStream(models.Model):
             self.FACEBOOK_REACTIONS_FIELDS,
         ]
         if endpoint_name == 'published_posts':
-            facebook_fields.append('insights.metric(post_impressions)')
+            # used for `facebook_reach`
+            facebook_fields.append('insights.metric(post_media_view)')
 
         posts_endpoint_url = url_join(
             self.env['social.media']._FACEBOOK_ENDPOINT_VERSIONED,

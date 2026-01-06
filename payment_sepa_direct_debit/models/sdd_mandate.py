@@ -51,7 +51,7 @@ class SddMandate(models.Model):
         res = super().write(vals)
         if vals.get('state') in ['closed', 'revoked']:
             linked_tokens = self.env['payment.token'].search([('sdd_mandate_id', 'in', self.ids)])
-            linked_tokens.active = False
+            linked_tokens.sudo().active = False  # In sudo mode to write on payment.token.
         return res
 
     def _confirm(self):

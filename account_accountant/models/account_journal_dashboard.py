@@ -61,6 +61,7 @@ class AccountJournal(models.Model):
                 'search_default_journal_id': self.id,
                 'search_default_invalid_statement': True,
             },
+            kanban_first=False,
         )
 
     def open_action(self):

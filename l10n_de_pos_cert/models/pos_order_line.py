@@ -18,7 +18,9 @@ class PosOrderLine(models.Model):
         vat_id = self.tax_ids_after_fiscal_position[0].l10n_de_vat_definition_export_identifier if self.tax_ids_after_fiscal_position else 5  # no tax -> considered as non taxable
 
         # For settlement or deposit we will have qty 0 so won't get from the price_subtotal/price_subtotal_incl
-        settlement_products = [self.order_id.config_id.settle_due_product_id.id, self.order_id.config_id.settle_invoice_product_id.id, self.order_id.config_id.deposit_product_id.id]
+        settlement_products = []
+        if hasattr(self.order_id.config_id, "settle_due_product_id"):
+            settlement_products = [self.order_id.config_id.settle_due_product_id.id, self.order_id.config_id.settle_invoice_product_id.id, self.order_id.config_id.deposit_product_id.id]
         incl_vat = self.price_unit if self.product_id.id in settlement_products else self.price_subtotal_incl
         excl_vat = self.price_unit if self.product_id.id in settlement_products else self.price_subtotal
 
@@ -30,7 +32,7 @@ class PosOrderLine(models.Model):
             },
             "lineitem_export_id": str(line_export_id),  # It should be unique and start over for each order from 1
             "storno": False,
-            "text": self.full_product_name,
+            "text": self.full_product_name[:255],
             "item": {
                 "number": str(self.product_id.id),
                 "quantity": float_repr(self.qty or 1, precision),  # for settlement products qty comes 0
@@ -45,10 +47,9 @@ class PosOrderLine(models.Model):
 
         # line discounts applied using numpad
         if self.discount:
-            gross_discount = float_repr(round(self.price_subtotal_incl / (1 - self.discount / 100), 2) - self.price_subtotal_incl, precision)
             line_data["item"]["discounts_per_vat_id"] = [{
                 "vat_definition_export_id": vat_id,
-                "incl_vat": gross_discount,
+                "incl_vat": float_repr(self._get_discount_amount(), precision),
             }]
         return line_data, is_adjusted
 

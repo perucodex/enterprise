@@ -1,6 +1,7 @@
 from . import test_account_fiscal_year
 from . import test_account_bank_statement
 from . import test_account_bank_statement_tour
+from . import test_account_payment
 from . import test_prediction
 from . import test_reconciliation_matching_rules
 from . import test_account_auto_reconcile_wizard

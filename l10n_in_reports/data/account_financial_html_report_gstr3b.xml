@@ -10,6 +10,10 @@
                 <field name="name">Base</field>
                 <field name="expression_label">tax_base</field>
             </record>
+            <record id="account_report_gstr3b_igst_column" model="account.report.column">
+                <field name="name">IGST</field>
+                <field name="expression_label">tax_igst</field>
+            </record>
             <record id="account_report_gstr3b_cgst_column" model="account.report.column">
                 <field name="name">CGST</field>
                 <field name="expression_label">tax_cgst</field>
@@ -17,10 +21,6 @@
             <record id="account_report_gstr3b_sgst_column" model="account.report.column">
                 <field name="name">SGST/UTGST</field>
                 <field name="expression_label">tax_sgst</field>
-            </record>
-            <record id="account_report_gstr3b_igst_column" model="account.report.column">
-                <field name="name">IGST</field>
-                <field name="expression_label">tax_igst</field>
             </record>
             <record id="account_report_gstr3b_cess_column" model="account.report.column">
                 <field name="name">CESS</field>
@@ -38,6 +38,11 @@
                         <field name="engine">aggregation</field>
                         <field name="formula">3_1_A.tax_base + 3_1_B.tax_base + 3_1_C.tax_base + 3_1_D.tax_base + 3_1_E.tax_base</field>
                     </record>
+                    <record id="account_report_gstr3b_3_1_expression_tax_igst" model="account.report.expression">
+                        <field name="label">tax_igst</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">3_1_A.tax_igst + 3_1_B.tax_igst + 3_1_D.tax_igst</field>
+                    </record>
                     <record id="account_report_gstr3b_3_1_expression_tax_cgst" model="account.report.expression">
                         <field name="label">tax_cgst</field>
                         <field name="engine">aggregation</field>
@@ -47,11 +52,6 @@
                         <field name="label">tax_sgst</field>
                         <field name="engine">aggregation</field>
                         <field name="formula">3_1_A.tax_sgst + 3_1_D.tax_sgst</field>
-                    </record>
-                    <record id="account_report_gstr3b_3_1_expression_tax_igst" model="account.report.expression">
-                        <field name="label">tax_igst</field>
-                        <field name="engine">aggregation</field>
-                        <field name="formula">3_1_A.tax_igst + 3_1_B.tax_igst + 3_1_D.tax_igst</field>
                     </record>
                     <record id="account_report_gstr3b_3_1_expression_tax_cess" model="account.report.expression">
                         <field name="label">tax_cess</field>
@@ -70,6 +70,12 @@
                                     <field name="formula">b2b.tax_base + b2cl.tax_base + b2cs.tax_base + de.tax_base + cdnr_b2b_regular.tax_base + cdnr_b2b_reverse_charge.tax_base + cdnr_de.tax_base + cdnur_b2cl.tax_base</field>
                                     <field name="subformula">cross_report(l10n_in_reports.account_report_gstr1)</field>
                                 </record>
+                                <record id="account_report_gstr3b_3_1_a_tax_igst" model="account.report.expression">
+                                    <field name="label">tax_igst</field>
+                                    <field name="engine">aggregation</field>
+                                    <field name="formula">b2b.tax_igst + b2cl.tax_igst + b2cs.tax_igst + de.tax_igst + cdnr_b2b_regular.tax_igst + cdnr_de.tax_igst + cdnur_b2cl.tax_igst</field>
+                                    <field name="subformula">cross_report(l10n_in_reports.account_report_gstr1)</field>
+                                </record>
                                 <record id="account_report_gstr3b_3_1_a_tax_cgst" model="account.report.expression">
                                     <field name="label">tax_cgst</field>
                                     <field name="engine">aggregation</field>
@@ -80,12 +86,6 @@
                                     <field name="label">tax_sgst</field>
                                     <field name="engine">aggregation</field>
                                     <field name="formula">b2b.tax_sgst + b2cs.tax_sgst + de.tax_sgst + cdnr_b2b_regular.tax_sgst + cdnr_de.tax_sgst</field>
-                                    <field name="subformula">cross_report(l10n_in_reports.account_report_gstr1)</field>
-                                </record>
-                                <record id="account_report_gstr3b_3_1_a_tax_igst" model="account.report.expression">
-                                    <field name="label">tax_igst</field>
-                                    <field name="engine">aggregation</field>
-                                    <field name="formula">b2b.tax_igst + b2cl.tax_igst + b2cs.tax_igst + de.tax_igst + cdnr_b2b_regular.tax_igst + cdnr_de.tax_igst + cdnur_b2cl.tax_igst</field>
                                     <field name="subformula">cross_report(l10n_in_reports.account_report_gstr1)</field>
                                 </record>
                                 <record id="account_report_gstr3b_3_1_a_tax_cess" model="account.report.expression">
@@ -142,7 +142,13 @@
                                 <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_rcm', 'purchase_b2c_rcm', 'purchase_cdnr_rcm', 'purchase_cdnur_rcm']), ('display_type', '=', 'product')]"/>
                                 <field name="subformula">sum</field>
                             </record>
-                             <record id="account_report_gstr3b_3_1_d_tax_cgst" model="account.report.expression">
+                            <record id="account_report_gstr3b_3_1_d_tax_igst" model="account.report.expression">
+                                <field name="label">tax_igst</field>
+                                <field name="engine">domain</field>
+                                <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_rcm', 'purchase_b2c_rcm', 'purchase_cdnr_rcm', 'purchase_cdnur_rcm']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
+                                <field name="subformula">-sum</field>
+                            </record>
+                            <record id="account_report_gstr3b_3_1_d_tax_cgst" model="account.report.expression">
                                 <field name="label">tax_cgst</field>
                                 <field name="engine">domain</field>
                                 <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_rcm', 'purchase_b2c_rcm', 'purchase_cdnr_rcm', 'purchase_cdnur_rcm']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_cgst'))]"/>
@@ -152,12 +158,6 @@
                                 <field name="label">tax_sgst</field>
                                 <field name="engine">domain</field>
                                 <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_rcm', 'purchase_b2c_rcm', 'purchase_cdnr_rcm', 'purchase_cdnur_rcm']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
-                                <field name="subformula">-sum</field>
-                            </record>
-                            <record id="account_report_gstr3b_3_1_d_tax_igst" model="account.report.expression">
-                                <field name="label">tax_igst</field>
-                                <field name="engine">domain</field>
-                                <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_rcm', 'purchase_b2c_rcm', 'purchase_cdnr_rcm', 'purchase_cdnur_rcm']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
                                 <field name="subformula">-sum</field>
                             </record>
                             <record id="account_report_gstr3b_3_1_d_tax_cess" model="account.report.expression">
@@ -198,6 +198,12 @@
                                 <field name="formula">sum</field>
                                 <field name="subformula">editable</field>
                             </record>
+                            <record id="account_report_gstr3b_3_1_1_a_tax_igst" model="account.report.expression">
+                                <field name="label">tax_igst</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable</field>
+                            </record>
                             <record id="account_report_gstr3b_3_1_1_a_tax_cgst" model="account.report.expression">
                                 <field name="label">tax_cgst</field>
                                 <field name="engine">external</field>
@@ -206,12 +212,6 @@
                             </record>
                             <record id="account_report_gstr3b_3_1_1_a_tax_sgst" model="account.report.expression">
                                 <field name="label">tax_sgst</field>
-                                <field name="engine">external</field>
-                                <field name="formula">sum</field>
-                                <field name="subformula">editable</field>
-                            </record>
-                            <record id="account_report_gstr3b_3_1_1_a_tax_igst" model="account.report.expression">
-                                <field name="label">tax_igst</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
                                 <field name="subformula">editable</field>
@@ -2422,6 +2422,12 @@
                                 <field name="name">(3) Inward supplies liable to reverse charge (other than 1 &amp; 2 above)</field>
                                 <field name="code">4_A_3</field>
                                 <field name="expression_ids">
+                                    <record id="account_report_gstr3b_4_a_3_tax_igst" model="account.report.expression">
+                                        <field name="label">tax_igst</field>
+                                        <field name="engine">domain</field>
+                                        <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_rcm', 'purchase_b2c_rcm', 'purchase_cdnr_rcm', 'purchase_cdnur_rcm']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
+                                        <field name="subformula">-sum</field>
+                                    </record>
                                     <record id="account_report_gstr3b_4_a_3_tax_cgst" model="account.report.expression">
                                         <field name="label">tax_cgst</field>
                                         <field name="engine">domain</field>
@@ -2432,12 +2438,6 @@
                                         <field name="label">tax_sgst</field>
                                         <field name="engine">domain</field>
                                         <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_rcm', 'purchase_b2c_rcm', 'purchase_cdnr_rcm', 'purchase_cdnur_rcm']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
-                                        <field name="subformula">-sum</field>
-                                    </record>
-                                    <record id="account_report_gstr3b_4_a_3_tax_igst" model="account.report.expression">
-                                        <field name="label">tax_igst</field>
-                                        <field name="engine">domain</field>
-                                        <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_rcm', 'purchase_b2c_rcm', 'purchase_cdnr_rcm', 'purchase_cdnur_rcm']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
                                         <field name="subformula">-sum</field>
                                     </record>
                                     <record id="account_report_gstr3b_4_a_3_tax_cess" model="account.report.expression">
@@ -2452,6 +2452,12 @@
                                 <field name="name">(4) Inward supplies from ISD (Manual)</field>
                                 <field name="code">4_A_4</field>
                                 <field name="expression_ids">
+                                    <record id="account_report_gstr3b_4_a_4_tax_igst" model="account.report.expression">
+                                        <field name="label">tax_igst</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable</field>
+                                    </record>
                                     <record id="account_report_gstr3b_4_a_4_tax_cgst" model="account.report.expression">
                                         <field name="label">tax_cgst</field>
                                         <field name="engine">external</field>
@@ -2460,12 +2466,6 @@
                                     </record>
                                     <record id="account_report_gstr3b_4_a_4_tax_sgst" model="account.report.expression">
                                         <field name="label">tax_sgst</field>
-                                        <field name="engine">external</field>
-                                        <field name="formula">sum</field>
-                                        <field name="subformula">editable</field>
-                                    </record>
-                                    <record id="account_report_gstr3b_4_a_4_tax_igst" model="account.report.expression">
-                                        <field name="label">tax_igst</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
                                         <field name="subformula">editable</field>
@@ -2482,28 +2482,28 @@
                                 <field name="name">(5) All other ITC</field>
                                 <field name="code">4_A_5</field>
                                 <field name="expression_ids">
+                                    <record id="account_report_gstr3b_4_a_5_tax_igst" model="account.report.expression">
+                                        <field name="label">tax_igst</field>
+                                        <field name="engine">domain</field>
+                                        <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_regular', 'purchase_cdnr_regular', 'purchase_cdnur_regular']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
+                                        <field name="subformula">sum</field>
+                                    </record>
                                     <record id="account_report_gstr3b_4_a_5_tax_cgst" model="account.report.expression">
                                         <field name="label">tax_cgst</field>
                                         <field name="engine">domain</field>
-                                        <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_regular', 'purchase_b2c_regular', 'purchase_cdnr_regular', 'purchase_cdnur_regular']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_cgst'))]"/>
+                                        <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_regular', 'purchase_cdnr_regular', 'purchase_cdnur_regular']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_cgst'))]"/>
                                         <field name="subformula">sum</field>
                                     </record>
                                     <record id="account_report_gstr3b_4_a_5_tax_sgst" model="account.report.expression">
                                         <field name="label">tax_sgst</field>
                                         <field name="engine">domain</field>
-                                        <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_regular', 'purchase_b2c_regular', 'purchase_cdnr_regular', 'purchase_cdnur_regular']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
-                                        <field name="subformula">sum</field>
-                                    </record>
-                                    <record id="account_report_gstr3b_4_a_5_tax_igst" model="account.report.expression">
-                                        <field name="label">tax_igst</field>
-                                        <field name="engine">domain</field>
-                                        <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_regular', 'purchase_b2c_regular', 'purchase_cdnr_regular', 'purchase_cdnur_regular']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_igst'))]"/>
+                                        <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_regular', 'purchase_cdnr_regular', 'purchase_cdnur_regular']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_sgst'))]"/>
                                         <field name="subformula">sum</field>
                                     </record>
                                     <record id="account_report_gstr3b_4_a_5_tax_cess" model="account.report.expression">
                                         <field name="label">tax_cess</field>
                                         <field name="engine">domain</field>
-                                        <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_regular', 'purchase_b2c_regular', 'purchase_cdnr_regular', 'purchase_cdnur_regular']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_cess'))]"/>
+                                        <field name="formula" eval="[('l10n_in_gstr_section', 'in', ['purchase_b2b_regular', 'purchase_cdnr_regular', 'purchase_cdnur_regular']), ('tax_tag_ids', '=', ref('l10n_in.tax_tag_cess'))]"/>
                                         <field name="subformula">sum</field>
                                     </record>
                                 </field>
@@ -2512,6 +2512,11 @@
                                 <field name="name">TOTAL</field>
                                 <field name="code">4_A_T</field>
                                 <field name="expression_ids">
+                                    <record id="account_report_gstr3b_4_a_total_tax_igst" model="account.report.expression">
+                                        <field name="label">tax_igst</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">4_A_1.tax_igst + 4_A_2.tax_igst + 4_A_3.tax_igst + 4_A_4.tax_igst + 4_A_5.tax_igst</field>
+                                    </record>
                                     <record id="account_report_gstr3b_4_a_total_tax_cgst" model="account.report.expression">
                                         <field name="label">tax_cgst</field>
                                         <field name="engine">aggregation</field>
@@ -2521,11 +2526,6 @@
                                         <field name="label">tax_sgst</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">4_A_3.tax_sgst + 4_A_4.tax_sgst + 4_A_5.tax_sgst</field>
-                                    </record>
-                                    <record id="account_report_gstr3b_4_a_total_tax_igst" model="account.report.expression">
-                                        <field name="label">tax_igst</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">4_A_1.tax_igst + 4_A_2.tax_igst + 4_A_3.tax_igst + 4_A_4.tax_igst + 4_A_5.tax_igst</field>
                                     </record>
                                     <record id="account_report_gstr3b_4_a_total_tax_cess" model="account.report.expression">
                                         <field name="label">tax_cess</field>
@@ -2543,6 +2543,12 @@
                                 <field name="name">(1) As per rules 38,42 &amp; 43 of CGST Rules and section 17(5)</field>
                                 <field name="code">4_B_1</field>
                                 <field name="expression_ids">
+                                    <record id="account_report_gstr3b_4_b_1_tax_igst" model="account.report.expression">
+                                        <field name="label">tax_igst</field>
+                                        <field name="engine">domain</field>
+                                        <field name="formula" eval="[('move_id.move_type', 'in', ['entry', 'in_invoice', 'in_receipt', 'in_refund']), ('tax_tag_ids','=', ref('l10n_in.tax_tag_non_itc')), ('tax_tag_ids','=', ref('l10n_in.tax_tag_igst'))]"/>
+                                        <field name="subformula">sum</field>
+                                    </record>
                                     <record id="account_report_gstr3b_4_b_1_tax_cgst" model="account.report.expression">
                                         <field name="label">tax_cgst</field>
                                         <field name="engine">domain</field>
@@ -2553,12 +2559,6 @@
                                         <field name="label">tax_sgst</field>
                                         <field name="engine">domain</field>
                                         <field name="formula" eval="[('move_id.move_type', 'in', ['entry', 'in_invoice', 'in_receipt', 'in_refund']), ('tax_tag_ids','=', ref('l10n_in.tax_tag_non_itc')), ('tax_tag_ids','=', ref('l10n_in.tax_tag_sgst'))]"/>
-                                        <field name="subformula">sum</field>
-                                    </record>
-                                    <record id="account_report_gstr3b_4_b_1_tax_igst" model="account.report.expression">
-                                        <field name="label">tax_igst</field>
-                                        <field name="engine">domain</field>
-                                        <field name="formula" eval="[('move_id.move_type', 'in', ['entry', 'in_invoice', 'in_receipt', 'in_refund']), ('tax_tag_ids','=', ref('l10n_in.tax_tag_non_itc')), ('tax_tag_ids','=', ref('l10n_in.tax_tag_igst'))]"/>
                                         <field name="subformula">sum</field>
                                     </record>
                                     <record id="account_report_gstr3b_4_b_1_tax_cess" model="account.report.expression">
@@ -2573,6 +2573,12 @@
                                 <field name="name">(2) Others</field>
                                 <field name="code">4_B_2</field>
                                 <field name="expression_ids">
+                                    <record id="account_report_gstr3b_4_b_2_tax_igst" model="account.report.expression">
+                                        <field name="label">tax_igst</field>
+                                        <field name="engine">domain</field>
+                                        <field name="formula" eval="[('move_id.move_type', 'in', ['entry', 'in_invoice', 'in_receipt', 'in_refund']), ('tax_tag_ids','=', ref('l10n_in.tax_tag_other_non_itc')), ('tax_tag_ids','=', ref('l10n_in.tax_tag_igst'))]"/>
+                                        <field name="subformula">sum</field>
+                                    </record>
                                     <record id="account_report_gstr3b_4_b_2_tax_cgst" model="account.report.expression">
                                         <field name="label">tax_cgst</field>
                                         <field name="engine">domain</field>
@@ -2583,12 +2589,6 @@
                                         <field name="label">tax_sgst</field>
                                         <field name="engine">domain</field>
                                         <field name="formula" eval="[('move_id.move_type', 'in', ['entry', 'in_invoice', 'in_receipt', 'in_refund']), ('tax_tag_ids','=', ref('l10n_in.tax_tag_other_non_itc')), ('tax_tag_ids','=', ref('l10n_in.tax_tag_sgst'))]"/>
-                                        <field name="subformula">sum</field>
-                                    </record>
-                                    <record id="account_report_gstr3b_4_b_2_tax_igst" model="account.report.expression">
-                                        <field name="label">tax_igst</field>
-                                        <field name="engine">domain</field>
-                                        <field name="formula" eval="[('move_id.move_type', 'in', ['entry', 'in_invoice', 'in_receipt', 'in_refund']), ('tax_tag_ids','=', ref('l10n_in.tax_tag_other_non_itc')), ('tax_tag_ids','=', ref('l10n_in.tax_tag_igst'))]"/>
                                         <field name="subformula">sum</field>
                                     </record>
                                     <record id="account_report_gstr3b_4_b_2_tax_cess" model="account.report.expression">
@@ -2603,6 +2603,11 @@
                                 <field name="name">TOTAL</field>
                                 <field name="code">4_B_T</field>
                                 <field name="expression_ids">
+                                    <record id="account_report_gstr3b_4_b_total_tax_igst" model="account.report.expression">
+                                        <field name="label">tax_igst</field>
+                                        <field name="engine">aggregation</field>
+                                        <field name="formula">4_B_1.tax_igst + 4_B_2.tax_igst</field>
+                                    </record>
                                     <record id="account_report_gstr3b_4_b_total_tax_cgst" model="account.report.expression">
                                         <field name="label">tax_cgst</field>
                                         <field name="engine">aggregation</field>
@@ -2612,11 +2617,6 @@
                                         <field name="label">tax_sgst</field>
                                         <field name="engine">aggregation</field>
                                         <field name="formula">4_B_1.tax_sgst + 4_B_2.tax_sgst</field>
-                                    </record>
-                                    <record id="account_report_gstr3b_4_b_total_tax_igst" model="account.report.expression">
-                                        <field name="label">tax_igst</field>
-                                        <field name="engine">aggregation</field>
-                                        <field name="formula">4_B_1.tax_igst + 4_B_2.tax_igst</field>
                                     </record>
                                     <record id="account_report_gstr3b_4_b_total_tax_cess" model="account.report.expression">
                                         <field name="label">tax_cess</field>
@@ -2630,6 +2630,11 @@
                     <record id="account_report_gstr3b_4_c" model="account.report.line">
                         <field name="name">(C) Net ITC available (A-B)</field>
                         <field name="expression_ids">
+                            <record id="account_report_gstr3b_4_c_tax_igst" model="account.report.expression">
+                                <field name="label">tax_igst</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">4_A_T.tax_igst - 4_B_T.tax_igst</field>
+                            </record>
                             <record id="account_report_gstr3b_4_c_tax_cgst" model="account.report.expression">
                                 <field name="label">tax_cgst</field>
                                 <field name="engine">aggregation</field>
@@ -2639,11 +2644,6 @@
                                 <field name="label">tax_sgst</field>
                                 <field name="engine">aggregation</field>
                                 <field name="formula">4_A_T.tax_sgst - 4_B_T.tax_sgst</field>
-                            </record>
-                            <record id="account_report_gstr3b_4_c_tax_igst" model="account.report.expression">
-                                <field name="label">tax_igst</field>
-                                <field name="engine">aggregation</field>
-                                <field name="formula">4_A_T.tax_igst - 4_B_T.tax_igst</field>
                             </record>
                             <record id="account_report_gstr3b_4_c_tax_cess" model="account.report.expression">
                                 <field name="label">tax_cess</field>
@@ -2659,6 +2659,12 @@
                             <record id="account_report_gstr3b_4_d_1" model="account.report.line">
                                 <field name="name">(1) ITC reclaimed which was reversed under Table 4(B)(2) in earlier tax period (Manual)</field>
                                 <field name="expression_ids">
+                                    <record id="account_report_gstr3b_4_d_1_tax_igst" model="account.report.expression">
+                                        <field name="label">tax_igst</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable</field>
+                                    </record>
                                     <record id="account_report_gstr3b_4_d_1_tax_cgst" model="account.report.expression">
                                         <field name="label">tax_cgst</field>
                                         <field name="engine">external</field>
@@ -2667,12 +2673,6 @@
                                     </record>
                                     <record id="account_report_gstr3b_4_d_1_tax_sgst" model="account.report.expression">
                                         <field name="label">tax_sgst</field>
-                                        <field name="engine">external</field>
-                                        <field name="formula">sum</field>
-                                        <field name="subformula">editable</field>
-                                    </record>
-                                    <record id="account_report_gstr3b_4_d_1_tax_igst" model="account.report.expression">
-                                        <field name="label">tax_igst</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
                                         <field name="subformula">editable</field>
@@ -2689,6 +2689,12 @@
                                 <field name="name">(2) Ineligible ITC under section 16(4) &amp; ITC restricted due to Pos rules (Manual)</field>
                                 <field name="code">4_D_2</field>
                                 <field name="expression_ids">
+                                    <record id="account_report_gstr3b_4_d_2_tax_igst" model="account.report.expression">
+                                        <field name="label">tax_igst</field>
+                                        <field name="engine">external</field>
+                                        <field name="formula">sum</field>
+                                        <field name="subformula">editable</field>
+                                    </record>
                                     <record id="account_report_gstr3b_4_d_2_tax_cgst" model="account.report.expression">
                                         <field name="label">tax_cgst</field>
                                         <field name="engine">external</field>
@@ -2697,12 +2703,6 @@
                                     </record>
                                     <record id="account_report_gstr3b_4_d_2_tax_sgst" model="account.report.expression">
                                         <field name="label">tax_sgst</field>
-                                        <field name="engine">external</field>
-                                        <field name="formula">sum</field>
-                                        <field name="subformula">editable</field>
-                                    </record>
-                                    <record id="account_report_gstr3b_4_d_2_tax_igst" model="account.report.expression">
-                                        <field name="label">tax_igst</field>
                                         <field name="engine">external</field>
                                         <field name="formula">sum</field>
                                         <field name="subformula">editable</field>
@@ -2792,6 +2792,12 @@
                         <field name="name">Interest (Manual)</field>
                         <field name="code">5_1_A</field>
                         <field name="expression_ids">
+                            <record id="account_report_gstr3b_5_1_a_tax_igst" model="account.report.expression">
+                                <field name="label">tax_igst</field>
+                                <field name="engine">external</field>
+                                <field name="formula">sum</field>
+                                <field name="subformula">editable</field>
+                            </record>
                             <record id="account_report_gstr3b_5_1_a_tax_cgst" model="account.report.expression">
                                 <field name="label">tax_cgst</field>
                                 <field name="engine">external</field>
@@ -2800,12 +2806,6 @@
                             </record>
                             <record id="account_report_gstr3b_5_1_a_tax_sgst" model="account.report.expression">
                                 <field name="label">tax_sgst</field>
-                                <field name="engine">external</field>
-                                <field name="formula">sum</field>
-                                <field name="subformula">editable</field>
-                            </record>
-                            <record id="account_report_gstr3b_5_1_a_tax_igst" model="account.report.expression">
-                                <field name="label">tax_igst</field>
                                 <field name="engine">external</field>
                                 <field name="formula">sum</field>
                                 <field name="subformula">editable</field>

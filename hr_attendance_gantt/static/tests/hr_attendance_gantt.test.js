@@ -2,7 +2,14 @@ import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import { click, queryOne } from "@odoo/hoot-dom";
 import { animationFrame, mockDate, advanceTime, runAllTimers } from "@odoo/hoot-mock";
-import { defineModels, defineParams, fields, models, onRpc, contains } from "@web/../tests/web_test_helpers";
+import {
+    defineModels,
+    defineParams,
+    fields,
+    models,
+    onRpc,
+    contains,
+} from "@web/../tests/web_test_helpers";
 import {
     getCell,
     getGridContent,
@@ -397,7 +404,7 @@ test("Future Open ended record not shown before it happens and appears after sta
                     title: "Attendance 5",
                 },
             ],
-            title: "User 1", 
+            title: "User 1",
         },
     ]);
     mockDate("2018-11-02 17:00:00", +0);
@@ -502,7 +509,7 @@ test("Dragging half column in week scale preserves checkout context", async () =
             </form>
         `,
     };
-    onRpc("onchange", ({kwargs}) => {
+    onRpc("onchange", ({ kwargs }) => {
         expect(kwargs.context.check_out).not.toBeEmpty();
         expect(kwargs.context.default_check_out).not.toBeEmpty();
     });
@@ -514,9 +521,9 @@ test("Dragging half column in week scale preserves checkout context", async () =
             default_stop_date: "2025-08-07",
         },
     });
-    const {moveTo, drop} = await contains(getCell("Friday 1", "Week 31, Jul 27 - Aug 2")).drag();
-    moveTo(getCell("Friday 1", "Week 31, Jul 27 - Aug 2"));
+    const { moveTo, drop } = await contains(getCell("Friday 1", "Week 31, Jul 27 - Aug 2")).drag();
+    await moveTo(getCell("Friday 1", "Week 31, Jul 27 - Aug 2"));
     await runAllTimers(); // Pointer move is subjected to throttleForAnimation in gantt
-    drop();
+    await drop();
     await animationFrame();
 });

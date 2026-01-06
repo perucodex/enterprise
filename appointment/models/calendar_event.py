@@ -336,7 +336,7 @@ class CalendarEvent(models.Model):
                 if event.appointment_type_manage_capacity and capacity_to_reserve:
                     raise UserError(_(
                         "%(capacity)d seats are missing to be able to book the %(appointment_name)s: %(event_name)s (%(event_id)s)",
-                        capacity=capacity_to_reserve, appointment_name=event.appointment_type_id,
+                        capacity=capacity_to_reserve, appointment_name=event.appointment_type_id.name,
                         event_name=event.name, event_id=repr(event.id),
                     ))
             elif event.appointment_type_schedule_based_on == 'users':
@@ -349,7 +349,7 @@ class CalendarEvent(models.Model):
                     raise UserError(_(
                         "%(capacity)d seats are missing to be able to book the %(appointment_name)s: %(event_name)s (%(event_id)s)",
                         capacity=capacity_to_reserve - event.appointment_type_id.user_capacity,
-                        appointment_name=event.appointment_type_id, event_name=event.display_name, event_id=repr(event.id)
+                        appointment_name=event.appointment_type_id.name, event_name=event.display_name, event_id=repr(event.id)
                     ))
                 booking_lines_to_delete += event.booking_line_ids
                 booking_lines.append({

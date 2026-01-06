@@ -65,10 +65,10 @@ class HrContractSalaryOffer(models.Model):
             if self.simulation_employee_id:
                 version = self.simulation_employee_id.version_id.with_context(version.env.context)
             version_vals.update({
-                'resource_calendar_id': self.resource_calendar_id.id or self._get_default_resource_calendar_id().id,
                 'structure_type_id': self.structure_id.type_id.id,
             })
         version_vals.update({
+            'resource_calendar_id': version.resource_calendar_id.id or self.resource_calendar_id.id or self._get_default_resource_calendar_id().id,
             version._get_contract_wage_field(): self.monthly_wage,
             'wage_with_holidays': self.monthly_wage,
         })
@@ -94,59 +94,73 @@ class HrContractSalaryOffer(models.Model):
 
     @api.depends('final_yearly_costs')
     def _compute_monthly_wage(self):
-        for offer in self:
-            self.env.flush_all()
-            with self.env.cr.savepoint(flush=False) as sp:
+        monthly_wage_by_offer = {}
+        self.env.flush_all()
+        with self.env.cr.savepoint(flush=False) as sp:
+            for offer in self.with_context(salary_simulation=True):
                 version = offer._get_version()
-                monthly_wage = version._get_gross_from_employer_costs(offer.final_yearly_costs)
-                self.env.cr.precommit.data.pop('mail.tracking.hr.version', {})
-                self.env.flush_all()
-                sp.rollback()
-            # Invalidating the model is needed to be sure that the contract_template_id has the correct data. Even with
-            # the rollback, the recordset in cache could still hold some wrong values that were rollbacked
-            self.env['hr.version'].invalidate_model()
-            offer.monthly_wage = monthly_wage
+                monthly_wage_by_offer[offer] = version._get_gross_from_employer_costs(offer.final_yearly_costs)
+
+            self.env.cr.precommit.data.pop('mail.tracking.hr.version', {})
+            self.env.flush_all()
+            sp.rollback()
+
+        # Invalidating the model is needed to be sure that the contract_template_id has the correct data. Even with
+        # the rollback, the recordset in cache could still hold some wrong values that were rollbacked
+        self.env['hr.version'].invalidate_model()
+
+        for offer in self:
+            offer.monthly_wage = monthly_wage_by_offer[offer]
 
     @api.depends('monthly_wage')
     def _compute_final_yearly_costs(self):
-        for offer in self:
-            self.env.flush_all()
-            with self.env.cr.savepoint(flush=False) as sp:
+        final_yearly_costs_by_offer = {}
+        self.env.flush_all()
+        with self.env.cr.savepoint(flush=False) as sp:
+            for offer in self.with_context(salary_simulation=True):
                 version = offer._get_version()
-                final_yearly_costs = version._get_employer_costs_from_gross(offer.monthly_wage)
-                self.env.cr.precommit.data.pop('mail.tracking.hr.version', {})
-                self.env.flush_all()
-                sp.rollback()
-            # Invalidating the model is needed to be sure that the contract_template_id has the correct data. Even with
-            # the rollback, the recordset in cache could still hold some wrong values that were rollbacked
-            self.env['hr.version'].invalidate_model()
-            offer.final_yearly_costs = final_yearly_costs
+                final_yearly_costs_by_offer[offer] = version._get_employer_costs_from_gross(offer.monthly_wage)
+
+            self.env.cr.precommit.data.pop('mail.tracking.hr.version', {})
+            self.env.flush_all()
+            sp.rollback()
+
+        # Invalidating the model is needed to be sure that the contract_template_id has the correct data. Even with
+        # the rollback, the recordset in cache could still hold some wrong values that were rollbacked
+        self.env['hr.version'].invalidate_model()
+
+        for offer in self:
+            offer.final_yearly_costs = final_yearly_costs_by_offer[offer]
 
     @api.depends('monthly_wage', 'structure_id', 'resource_calendar_id')
     def _compute_salary(self) -> None:
-        for offer in self:
-            self.env.flush_all()
-            with self.env.cr.savepoint(flush=False) as sp:
+        vals_by_offer = {}
+        self.env.flush_all()
+        with self.env.cr.savepoint(flush=False) as sp:
+            for offer in self.with_context(salary_simulation=True):
                 version = offer._get_version()
                 payslip = version._generate_salary_simulation_payslip()
-                is_full_time = float_compare(version.work_time_rate, 1.0, 4) == 0
-                gross_wage = payslip._get_line_values(['BASIC'])['BASIC'][payslip.id]['total']
-                net_wage = payslip._get_line_values(['NET'])['NET'][payslip.id]['total']
-                monthly_benefits, yearly_benefits = self._get_benefits(version)
                 yearly_employer_cost = version._get_employer_costs_from_gross(version._get_contract_wage())
-                self.env.cr.precommit.data.pop('mail.tracking.hr.version', {})
-                self.env.flush_all()
-                sp.rollback()
-            # Invalidating the model is needed to be sure that the contract_template_id has the correct data. Even with
-            # the rollback, the recordset in cache could still hold some wrong values that were rollbacked
-            self.env['hr.version'].invalidate_model()
-            offer.is_full_time = is_full_time
-            offer.gross_wage = gross_wage
-            offer.net_wage = net_wage
-            offer.monthly_benefits = monthly_benefits
-            offer.yearly_benefits = yearly_benefits
-            offer.yearly_employer_cost = yearly_employer_cost
-            offer.monthly_employer_cost = round(yearly_employer_cost / 12, 2)
+                monthly_benefits, yearly_benefits = self._get_benefits(version)
+                vals_by_offer[offer] = {
+                    'is_full_time': float_compare(version.work_time_rate, 1.0, 4) == 0,
+                    'gross_wage': payslip._get_line_values(['BASIC'])['BASIC'][payslip.id]['total'],
+                    'net_wage': payslip._get_line_values(['NET'])['NET'][payslip.id]['total'],
+                    'monthly_benefits': monthly_benefits,
+                    'yearly_benefits': yearly_benefits,
+                    'yearly_employer_cost': yearly_employer_cost,
+                    'monthly_employer_cost': round(yearly_employer_cost / 12, 2),
+                }
+            self.env.cr.precommit.data.pop('mail.tracking.hr.version', {})
+            self.env.flush_all()
+            sp.rollback()
+
+        # Invalidating the model is needed to be sure that the contract_template_id has the correct data. Even with
+        # the rollback, the recordset in cache could still hold some wrong values that were rollbacked
+        self.env['hr.version'].invalidate_model()
+
+        for offer in self:
+            offer.update(vals_by_offer[offer])
 
     def _get_benefits(self, version):
         monthly_benefit_category = self.env.ref('hr_contract_salary.hr_contract_salary_resume_category_monthly_benefits')

@@ -108,6 +108,7 @@ class PosOrder(models.Model):
 
     @api.model
     def retrieve_line_difference(self, ui_orders):
+        """This method is deprecated and will be removed in master (saas-19.1)."""
         res = {}
         for order in ui_orders:
             existing_order = None if not order.get('access_token') else self.search([('access_token', '=', order.get('access_token'))])

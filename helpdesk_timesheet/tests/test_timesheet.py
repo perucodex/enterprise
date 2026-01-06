@@ -430,3 +430,18 @@ class TestTimesheet(TestHelpdeskTimesheetCommon):
         total_hours_spent = sum(ticket.total_hours_spent for ticket in tickets)
         self.assertAlmostEqual(total_hours_spent, 5 / 6, places=2,
                                msg="The total hours spent across all tickets should be 5/6 hours (50 minutes).")
+
+    def test_timesheet_value_conversion_hours_days(self):
+        """
+        Ensure that the timesheet value is correctly converted when changing
+        the encoding unit from hours to days and vice versa.
+        """
+        helpdesk_ticket = self.helpdesk_ticket
+        self.env['account.analytic.line'].create({
+            'name': 'Test Timesheet',
+            'unit_amount': 8,
+            'helpdesk_ticket_id': helpdesk_ticket.id,
+            'employee_id': self.empl_employee.id,
+        })
+        self.env.company.timesheet_encode_uom_id = self.env.ref('uom.product_uom_day')
+        self.assertEqual(helpdesk_ticket.team_id.total_timesheet_time, 1, "Total timesheet time should be 1 day")

@@ -1380,6 +1380,7 @@ class L10nCHEmployeeYearlySnapshot(models.Model):
                             else:
                                 end_avs = max(slips_grouped_by_avs_status[avs_status].filtered(lambda p: not p.l10n_ch_after_departure_payment).mapped('date_to'))
 
+                            avs_base = 0
                             avs_salary = 0
                             avs_open_salary = 0
                             ac_salary = 0
@@ -1387,6 +1388,7 @@ class L10nCHEmployeeYearlySnapshot(models.Model):
                             acc_salary = 0
 
                             for avs_status_slip in slips_status.filtered(lambda p: p.l10n_ch_after_departure_payment if year_delta else True):
+                                avs_base += line_values['AVSBASE'][avs_status_slip.id]['total']
                                 avs_salary += line_values['AVSSALARY'][avs_status_slip.id]['total']
                                 ac_salary += line_values['ACSALARY'][avs_status_slip.id]['total']
                                 acc_salary += line_values['ACCSALARY'][avs_status_slip.id]['total']
@@ -1403,9 +1405,13 @@ class L10nCHEmployeeYearlySnapshot(models.Model):
                                 avs_open=avs_open_salary,
                                 ac_open=ac_open_salary,
                                 splits=avs_splits.get(snapshot.employee_id, False),
-                                ceo_rel=snapshot.employee_id.l10n_ch_relationship_ceo if agricole_company else False
+                                ceo_rel=snapshot.employee_id.l10n_ch_relationship_ceo if agricole_company else False,
                             )
+
                             if ahv_avs_salary:
+                                ahv_avs_salary.update({
+                                    **self.env['l10n.ch.employee.monthly.values']._get_additional_avs_values(avs_base, avs_status)
+                                })
                                 ahv_avs_salaries.append(ahv_avs_salary)
                                 global_avs_institutions += institution
 
@@ -1673,6 +1679,11 @@ class L10nCHEmployeeYearlySnapshot(models.Model):
                                         "ResidenceAbroadCountry": txb_country,
                                         "TaxableEarning": self._amount2str(is_salary),
                                     }
+                                    # ELM 5.3 France - Switzerland convention on declaring teleworking
+                                    if txb_country == "FR":
+                                        txb_salary.update({
+                                            **snapshot.monthly_value_ids[month - 1]._get_additional_txb_values()
+                                        })
                                 global_txb_institutions += mapped_qst_institutions.get(st_canton)
                                 tax_crossborder_salaries.append(txb_salary)
 

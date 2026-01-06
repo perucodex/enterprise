@@ -131,6 +131,7 @@ class HrPayslipRun(models.Model):
                 ('contract_date_end', '=', False),
                 ('contract_date_end', '>=', date_start),
             ('date_version', '<=', date_end),
+            ('structure_type_id', '!=', False),
         ])
         if structure:
             version_domain &= Domain([('structure_type_id', '=', structure.type_id.id)])

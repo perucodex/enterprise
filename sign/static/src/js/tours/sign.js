@@ -65,9 +65,26 @@ registry.category("web_tour.tours").add("sign_tour", {
             run: "click",
         },
         {
+            trigger: ".o_field_signer_x2many .o-autocomplete--input",
+            run: "edit admin",
+        },
+        {
+            trigger: ".o-autocomplete--dropdown-item:first-child",
+            run: "click",
+        },
+        {
+            trigger: ".o_field_signer_x2many .o-autocomplete--input",
+            run: "click",
+        },
+        {
             trigger: 'button[name="send_request"]',
             content: _t("Let's send the request by email."),
             tooltipPosition: "bottom",
+            run: "click",
+        },
+        {
+            trigger: ".o_list_table tbody tr.o_data_row:first td:nth-child(2)",
+            content: "Open first record",
             run: "click",
         },
         {

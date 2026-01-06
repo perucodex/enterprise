@@ -177,7 +177,7 @@ export async function selectCustomRange({ startDate, stopDate }) {
 export async function selectRange(label) {
     await click(SELECTORS.scaleSelectorToggler);
     await animationFrame();
-    await click(`${SELECTORS.scaleSelectorMenu} .dropdown-item:contains(/^${label}$/i)`);
+    await click(`${SELECTORS.scaleSelectorMenu} .dropdown-item:text(${label})`);
     await ganttControlsChanges();
 }
 
@@ -582,4 +582,20 @@ export function getPill(text, options) {
 /** @type {PillHelper<HTMLElement>} */
 export function getPillWrapper(text, options) {
     return getPill(text, options).closest(SELECTORS.pillWrapper);
+}
+
+/**
+ * For each cell of a specific column, checks whether the cell has the class in
+ * its' classList and returns as a list of booleans.
+ *
+ * @param {string} cssClass
+ * @param {string[]} columnHeaders
+ * @returns {boolean[]}
+ */
+export function cssClassPresencePerCellInColumn(cssClass, columnHeaders) {
+    const columnIndex = findColumnFromHeader(...columnHeaders);
+    const cells = queryAll(`${SELECTORS.cell}[data-col='${columnIndex}']`);
+    return cells.map((el) => {
+        return el.classList.contains(cssClass);
+    });
 }

@@ -19,6 +19,10 @@
         'data/pos_settle_due_data.xml',
     ],
     'assets': {
+        'web.assets_unit_tests': [
+            'pos_settle_due/static/tests/unit/**/*',
+            ('remove', 'pos_settle_due/static/tests/unit/utils.js'),
+        ],
         'point_of_sale._assets_pos': [
             'pos_settle_due/static/src/**/*',
         ],

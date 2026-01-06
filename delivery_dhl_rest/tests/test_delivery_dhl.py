@@ -5,8 +5,9 @@ import requests
 from contextlib import contextmanager
 from unittest.mock import patch
 
-from odoo import fields
+from odoo import fields, Command
 from odoo.tests import Form, TransactionCase, tagged
+from ..models.dhl_request import DHLProvider
 
 
 class TestDeliveryDHLCommon(TransactionCase):
@@ -832,3 +833,48 @@ class TestMockedDeliveryDHL(TestDeliveryDHLCommon):
     def test_04_dhl_flow_from_delivery_order(self):
         with _mock_request_call():
             super().dhl_flow_from_delivery_order()
+
+    def test_05_dhl_test_export_declaration_rounding(self):
+        """Test that the rounding respects the DHL requirements"""
+
+        picking = self.env['stock.picking'].create({
+            'partner_id': self.delta_pc.id,
+            'picking_type_id': self.env.ref('stock.picking_type_out').id,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'carrier_id': self.delivery_carrier_dhl_eu_intl.id,
+            'move_ids': [
+            Command.create({
+                'product_id': self.iPadMini.id,
+                'product_uom_qty': 7,
+                'location_id': self.stock_location.id,
+                'location_dest_id': self.customer_location.id,
+            }),
+            Command.create({
+                'product_id': self.large_desk.id,
+                'product_uom_qty': 7,
+                'location_id': self.stock_location.id,
+                'location_dest_id': self.customer_location.id,
+            })
+            ]
+        })
+        picking.action_confirm()
+        picking.move_line_ids[0].sale_price = 11.43
+        picking.move_line_ids[1].sale_price = 6.666666600000001
+        dhl_provider = DHLProvider(self.delivery_carrier_dhl_eu_intl)
+        export_declaration = dhl_provider._get_export_declaration_vals(self.delivery_carrier_dhl_eu_intl, picking)
+        item_1, item_2 = export_declaration['lineItems']
+
+        self.assertEqual(item_1['price'], 1.633)
+        self.assertEqual(item_2['price'], 0.952)
+
+    def test_06_dhl_weight_conversion_rounding(self):
+        """Test that the weight conversion method correctly rounds according to DHL requirements"""
+
+        weight_with_precision_issue = 0.7000000000000001
+        rounded_weight_metric = self.delivery_carrier_dhl_eu_intl._dhl_rest_convert_weight(weight_with_precision_issue)
+        self.assertEqual(rounded_weight_metric, 0.7)
+
+        weight_needs_rounding = 1.23456789
+        rounded_weight_precise = self.delivery_carrier_dhl_eu_intl._dhl_rest_convert_weight(weight_needs_rounding)
+        self.assertEqual(rounded_weight_precise, 1.235)

@@ -20,8 +20,5 @@ This module provides the link between quality steps and IoT devices.
         'web.assets_backend': [
             'quality_iot/static/src/**/*',
         ],
-        'web.assets_unit_tests': [
-            'quality_iot/static/tests/**/*',
-        ]
     }
 }

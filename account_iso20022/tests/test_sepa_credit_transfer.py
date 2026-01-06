@@ -2,17 +2,20 @@ import base64
 from lxml import etree
 
 from odoo import Command
-from odoo.addons.account_iso20022.tests.test_iso20022_common import TestISO20022CommonCreditTransfer
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.account_batch_payment.models.sepa_mapping import sanitize_communication
 from odoo.tests.common import test_xsd
 from odoo.tests import tagged, Form
 
 
-class TestSEPACreditTransferCommon(TestISO20022CommonCreditTransfer):
+class TestSEPACreditTransferCommon(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.env.ref('base.EUR').active = True
+
+        cls.env.user.group_ids |= cls.env.ref('account.group_validate_bank_account')
+
         # tests doesn't go through the sanitization (_ is invalid)
         cls.partner_a.name = sanitize_communication(cls.partner_a.name)
         cls.partner_b.name = sanitize_communication(cls.partner_b.name)
@@ -159,6 +162,31 @@ class TestSEPACreditTransfer(TestSEPACreditTransferCommon):
         self.assertEqual(name, "AIN.N")
         self.assertEqual(street, "icekthN")
         self.assertEqual(len(InstrId), 31, "InstrId should be trimmed to 31 characters: `35 - len('amp;')`")
+
+    def test_sepa_with_no_end_to_end_id(self):
+        """
+        Test to make sure the end-to-end ID is generated and added to the XML even if end_to_end_uuid is empty.
+        """
+
+        payment = self.createPayment(self.partner_a, 500)
+        payment.end_to_end_uuid = False
+        payment.action_post()
+
+        self.bank_journal.bank_id.bic = "BBRUBEBB"
+        self.bank_journal.sepa_pain_version = 'pain.001.001.03'
+        batch = self.env['account.batch.payment'].create({
+            'journal_id': self.bank_journal.id,
+            'payment_ids': [Command.set([payment.id])],
+            'payment_method_id': self.sepa_ct_method.id,
+            'batch_type': 'outbound',
+        })
+
+        batch.validate_batch()
+
+        ct_doc = etree.fromstring(base64.b64decode(batch.export_file))
+        namespaces = {'ns': 'urn:iso:std:iso:20022:tech:xsd:pain.001.001.03'}
+        EndToEndId = ct_doc.findtext('.//ns:EndToEndId', namespaces=namespaces)
+        self.assertEqual(len(EndToEndId), 32, "A 32 character UUID hex value should have been generated")
 
     def _check_structured_reference(self, country_code, payment):
         if country_code == 'ch':

@@ -352,3 +352,9 @@ class TestAccountAvalaraSalesTaxItemsIntegration(TestAccountAvataxSaleCommon):
             orders.action_confirm()
             orders._create_invoices()
         self.assertEqual(len(orders.invoice_ids), 2, "Different invoices should be created")
+
+    def test_empty_sale_order(self):
+        self.sale_order.order_line = False
+        with self._capture_request({'lines': [], 'summary': []}) as capture:
+            self.sale_order.button_external_tax_calculation()
+            self.assertIsNone(capture.val, 'Should not call Avatax without lines')

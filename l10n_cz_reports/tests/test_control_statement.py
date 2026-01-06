@@ -136,6 +136,18 @@ class CzechControlStatementTest(CzechReportsCommon):
                 {'price_unit': 11000, 'tax_ids': self.l10n_cz_21_domestic_supplies.ids},
             ]],
         }).action_post()
+        # code A4 for invoice in foreign currency with converted amount > 10000 CZK
+        foreign_currency = self.setup_other_currency("EUR", rates=[('2024-01-04', 0.01)])
+        self.env['account.move'].create({
+            'invoice_date': '2024-01-04',
+            'taxable_supply_date': '2024-01-04',
+            'move_type': 'out_invoice',
+            'currency_id': foreign_currency.id,
+            'partner_id': self.partner_cz_1.id,
+            'invoice_line_ids': [Command.create({'quantity': 1, **line_data}) for line_data in [
+                {'price_unit': 1000, 'tax_ids': self.l10n_cz_21_domestic_supplies.ids},
+            ]],
+        }).action_post()
 
         report = self.env.ref('l10n_cz_reports.control_statement_report')
         options = self._generate_options(report, '2024-01-01', '2024-01-31')
@@ -154,8 +166,9 @@ class CzechControlStatementTest(CzechReportsCommon):
                 ('BILL/2024/01/0001 (ABC)',                                                       'FR',     '23334175221',   'ABC',                 '09.01.2024',   1200,        252,           2000,        240,           ''),
                 ('A.3. Realized supplies in the special regime of investment gold',               '',       '',              '',                    '',             1000,        '',            '',          '',            ''),
                 ('INV/2024/00003',                                                                'CZ',     '11111119',      'INV/2024/00003',      '07.01.2024',   1000,        '',            '',          '',            ''),
-                ('A.4. Realized taxable supplies and received payments above CZK 10,000',         '',       '',              '',                    '',             9500,        1995,          900,         108,           ''),
+                ('A.4. Realized taxable supplies and received payments above CZK 10,000',         '',       '',              '',                    '',             109500,      22995,         900,         108,           ''),
                 ('INV/2024/00002',                                                                '',       '11111119',      'INV/2024/00002',      '06.01.2024',   9500,        1995,          900,         108,           '0'),
+                ('INV/2024/00006',                                                                '',       '00000001',      'INV/2024/00006',      '04.01.2024',   100000,      21000,         0,           0,             '0'),
                 ('A.5. Other realized taxable supplies and received payments up to CZK 10,000',   '',       '',              '',                    '',             23000,       4830,          1000,        120,           ''),
                 ('B. Received taxable supplies with the place of supply in the country',          '',       '',              '',                    '',             '',          '',            '',          '',            ''),
                 ('B.1. Received taxable supplies in the domestic reverse charge regime',          '',       '',              '',                    '',             1400,        294,           700,         84,            ''),
@@ -165,7 +178,7 @@ class CzechControlStatementTest(CzechReportsCommon):
                 ('BILL/2024/01/0005',                                                             '',       '00000001',      'BILL/2024/01/0005',   '15.01.2024',   20459.23,    4296.44,       500,         60,            ''),
                 ('B.3. Received taxable supplies and provided payments up to CZK 10,000',         '',       '',              '',                    '',             2000,        420,           1000,        120,           ''),
                 ('C. Control lines towards VAT return',                                           '',       '',              '',                    '',             '',          '',            '',          '',            ''),
-                ('A.4. + A.5. Total tax bases at the basic VAT rate',                             '',       '',              '',                    '',             32500,       '',            '',          '',            ''),
+                ('A.4. + A.5. Total tax bases at the basic VAT rate',                             '',       '',              '',                    '',             132500,      '',            '',          '',            ''),
                 ('A.4. + A.5. Total tax bases at the reduced VAT rate',                           '',       '',              '',                    '',             1900,        '',            '',          '',            ''),
                 ('B.2. + B.3. Total tax bases at the basic VAT rate',                             '',       '',              '',                    '',             32459.23,    '',            '',          '',            ''),
                 ('B.2. + B.3. Total tax bases at the reduced VAT rate',                           '',       '',              '',                    '',             1500,        '',            '',          '',            ''),
@@ -195,13 +208,14 @@ class CzechControlStatementTest(CzechReportsCommon):
                 <VetaA2 k_stat="FR" vatid_dod="23334175221" c_evid_dd="ABC" dppd="09.01.2024" zakl_dane1="1200.00" dan1="252.00" zakl_dane2="2000.00" dan2="240.00"/>
                 <VetaA3 k_stat="CZ" vatid_odb="11111119" c_evid_dd="INV/2024/00003" dup="07.01.2024" osv_filling="1000.00"/>
                 <VetaA4 zdph_44="N" dic_odb="11111119" c_evid_dd="INV/2024/00002" dppd="06.01.2024" zakl_dane1="9500.00" dan1="1995.00" zakl_dane2="900.00" dan2="108.00" kod_rezim_pl="0"/>
+                <VetaA4 zakl_dane1= "100000.00" c_evid_dd= "INV/2024/00006" dppd= "04.01.2024" dic_odb= "00000001" dan1= "21000.00" kod_rezim_pl= "0" zdph_44= "N"/>
                 <VetaA5 zakl_dane1="23000.00" dan1="4830.00" zakl_dane2="1000.00" dan2="120.00"/>
                 <VetaB1 dic_dod="00000001" duzp="13.01.2024" zakl_dane1="500.00" dan1="105.00" zakl_dane2="700.00" dan2="84.00" kod_pred_pl="12"/>
                 <VetaB1 dic_dod="00000001" duzp="13.01.2024" zakl_dane1="900.00" dan1="189.00" kod_pred_pl="13"/>
                 <VetaB2 pomer="N" zdph_44="N" dic_dod="00000001" c_evid_dd="XXX" dppd="15.01.2024" zakl_dane1="10000.00" dan1="2100.00"/>
                 <VetaB2 pomer="N" zdph_44="N" dic_dod="00000001" c_evid_dd="BILL/2024/01/0005" dppd="15.01.2024" zakl_dane1="20459.23" dan1="4296.44" zakl_dane2="500.00" dan2="60.00"/>
                 <VetaB3 zakl_dane1="2000.00" dan1="420.00" zakl_dane2="1000.00" dan2="120.00"/>
-                <VetaC celk_zd_a2="24500.00" obrat23="32500.00" obrat5="1900.00" pln23="32459.23" pln5="1500.00" pln_rez_pren="800.00" rez_pren23="1400.00" rez_pren5="700.00"/>
+                <VetaC celk_zd_a2="24500.00" obrat23="132500.00" obrat5="1900.00" pln23="32459.23" pln5="1500.00" pln_rez_pren="800.00" rez_pren23="1400.00" rez_pren5="700.00"/>
             </DPHKH1>
         </Pisemnost>
         """

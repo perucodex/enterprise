@@ -8,3 +8,4 @@ from . import product
 from . import stock_move
 from . import stock_picking
 from . import template_ke
+from . import ir_ui_view

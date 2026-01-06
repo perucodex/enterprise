@@ -20,6 +20,9 @@
         'point_of_sale._assets_pos': [
             'l10n_ec_edi_pos/static/src/**/*',
         ],
+        'web.assets_tests': [
+            'l10n_ec_edi_pos/static/tests/tours/**/*',
+        ],
     },
     'installable': True,
     'auto_install': True,

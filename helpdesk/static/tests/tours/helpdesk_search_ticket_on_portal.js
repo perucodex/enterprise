@@ -1,4 +1,7 @@
+import HelpdeskSearchTicketSteps from "@helpdesk/../tests/tours/helpdesk_search_ticket_steps";
 import { registry } from "@web/core/registry";
+
+const helpdeskSearchTicketSteps = new HelpdeskSearchTicketSteps();
 
 registry.category("web_tour.tours").add("helpdesk_search_ticket_on_portal_tour", {
     url: "/my/tickets",
@@ -18,11 +21,7 @@ registry.category("web_tour.tours").add("helpdesk_search_ticket_on_portal_tour",
             trigger: 'form input[name="search"]',
             run: "edit lamp stand",
         },
-        {
-            content: "search Ticket",
-            trigger: ".oi-search",
-            run: "click",
-        },
+        helpdeskSearchTicketSteps._searchTickets(),
         {
             trigger: "table > tbody > tr a:has(span:contains(lamp stand))",
             content: "click on ticket.",

@@ -195,7 +195,7 @@ class SignRequestCommon(TransactionCase):
             'email': 'laurie.poiret.a@example.com',
         })
 
-        cls.user_2 = new_test_user(cls.env, login="user_2", groups='sign.group_sign_user')
+        cls.user_2 = new_test_user(cls.env, login="user_2", password='user_2!user_2', groups='sign.group_sign_user')
         cls.partner_2 = cls.user_2.partner_id
         cls.partner_2.write({
             'name': 'Bernardo Ganador',

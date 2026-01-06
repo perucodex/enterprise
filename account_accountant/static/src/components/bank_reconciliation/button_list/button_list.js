@@ -23,14 +23,12 @@ export class BankRecButtonList extends Component {
     static props = {
         statementLineRootRef: { type: Object },
         statementLine: { type: Object },
-        isTopLine: { type: Boolean, optional: true },
         suspenseAccountLine: { type: Object, optional: true },
         reconcileLineCount: { type: [Number, { value: null }], optional: true },
         reconcileModels: Array,
         preSelectedReconciliationModel: { type: Object, optional: true },
     };
     static defaultProps = {
-        isTopLine: false,
         reconcileLineCount: 0,
     };
 
@@ -116,6 +114,16 @@ export class BankRecButtonList extends Component {
                 title: _t("Search: Account"),
                 noCreate: true,
                 multiSelect: false,
+                domain: [
+                    [
+                        "id",
+                        "not in",
+                        [
+                            this.statementLineData.journal_id.suspense_account_id.id,
+                            this.statementLineData.journal_id.default_account_id.id,
+                        ],
+                    ],
+                ],
                 context: context,
                 resModel: "account.account",
                 onSelected: async (account) => {
@@ -168,8 +176,8 @@ export class BankRecButtonList extends Component {
      */
     async setAccountReceivableOnReconcileLine() {
         let accountId;
-        if (this.props.statementLine.data.partner_id.property_account_receivable_id.id) {
-            accountId = this.props.statementLine.data.partner_id.property_account_receivable_id.id;
+        if (this.statementLineData.partner_id.property_account_receivable_id.id) {
+            accountId = this.statementLineData.partner_id.property_account_receivable_id.id;
         } else {
             accountId = await this.orm.webSearchRead("account.account", [
                 ["account_type", "=", "asset_receivable"],
@@ -186,7 +194,7 @@ export class BankRecButtonList extends Component {
     async setAccountPayableOnReconcileLine() {
         let accountId;
         if (this.statementLineData.partner_id.property_account_payable_id.id) {
-            accountId = this.props.statementLine.data.partner_id.property_account_payable_id.id;
+            accountId = this.statementLineData.partner_id.property_account_payable_id.id;
         } else {
             accountId = await this.orm.webSearchRead("account.account", [
                 ["account_type", "=", "liability_payable"],
@@ -525,13 +533,13 @@ export class BankRecButtonList extends Component {
         return this.props.reconcileLineCount === null || this.props.reconcileLineCount;
     }
 
-    get extraReconcileModelsToShow() {
+    get reconcileModelsInDropdown() {
         if (this.ui.isSmall) {
             return this.props.reconcileModels;
         }
-        return this.props.reconcileModels
-            .filter((model) => model.id !== this.props?.preSelectedReconciliationModel?.id)
-            .slice(3);
+        return this.props.reconcileModels.filter(
+            (model) => model.id !== this.props?.preSelectedReconciliationModel?.id
+        );
     }
 
     /**
@@ -547,6 +555,17 @@ export class BankRecButtonList extends Component {
                 action: this.setPartnerOnReconcileLine.bind(this),
                 classes: "set-partner-btn",
             };
+        } else {
+            buttonsToDisplay.receivable = {
+                label: _t("Receivable"),
+                action: this.setAccountReceivableOnReconcileLine.bind(this),
+                classes: "set-receivable-btn",
+            };
+            buttonsToDisplay.payable = {
+                label: _t("Payable"),
+                action: this.setAccountPayableOnReconcileLine.bind(this),
+                classes: "set-payable-btn",
+            };
         }
 
         if (this.isReconcileButtonShown) {
@@ -558,20 +577,6 @@ export class BankRecButtonList extends Component {
             };
         }
 
-        if (this.isSetReceivableButtonShown) {
-            buttonsToDisplay.receivable = {
-                label: _t("Receivable"),
-                action: this.setAccountReceivableOnReconcileLine.bind(this),
-                classes: "set-receivable-btn",
-            };
-        } else if (this.isSetPayableButtonShown) {
-            buttonsToDisplay.payable = {
-                label: _t("Payable"),
-                action: this.setAccountPayableOnReconcileLine.bind(this),
-                classes: "set-payable-btn",
-            };
-        }
-
         if (this.isSetAccountButtonShown) {
             buttonsToDisplay.account = {
                 label: _t("Set Account"),
@@ -580,26 +585,12 @@ export class BankRecButtonList extends Component {
             };
         }
 
-        if (this.props.statementLine.data.is_reconciled && !this.props.statementLine.data.checked) {
+        if (this.statementLineData.is_reconciled && !this.statementLineData.checked) {
             buttonsToDisplay.toReview = {
                 label: _t("Reviewed"),
                 action: this.setStatementLineAsReviewed.bind(this),
                 toReview: true,
             };
-        }
-
-        if (!this.ui.isSmall) {
-            const models = this.props.reconcileModels
-                .filter((model) => model.id !== this.props?.preSelectedReconciliationModel?.id)
-                .slice(0, 3)
-                .entries();
-            for (const [index, model] of models) {
-                buttonsToDisplay[`model_${model.id}`] = {
-                    label: model.display_name,
-                    action: this.triggerReconciliationModel.bind(this, model.id),
-                    classes: `reconciliation-model-btn-${index}`,
-                };
-            }
         }
 
         return buttonsToDisplay;
@@ -613,45 +604,38 @@ export class BankRecButtonList extends Component {
     get buttonsToDisplay() {
         const buttons = this.buttons || {};
 
-        if (buttons.toReview) {
-            return [buttons.toReview];
-        }
-
-        // This ensures that all buttons are visible in secondary when reco model is primary
-        if (this.props.preSelectedReconciliationModel && !this.props.isTopLine) {
-            return Object.values(buttons);
-        }
-
         let primaryButtonKeys = [];
-
+        let secondaryButtonKeys = [];
         if (buttons?.partner && buttons?.account) {
             primaryButtonKeys = ["partner", "account"];
         } else if (buttons?.reconcile && !!buttons.reconcile?.count) {
             primaryButtonKeys = ["reconcile"];
-        } else if (buttons?.receivable) {
+            if (this.isSetReceivableButtonShown) {
+                secondaryButtonKeys = ["receivable"];
+            } else {
+                secondaryButtonKeys = ["payable"];
+            }
+        } else if (this.isSetReceivableButtonShown) {
             primaryButtonKeys = ["receivable"];
-        } else if (buttons?.payable) {
+        } else if (this.isSetPayableButtonShown) {
             primaryButtonKeys = ["payable"];
         }
 
-        // Handle top line
-        if (this.props.isTopLine) {
-            return primaryButtonKeys.map((key) => ({ ...buttons[key], primary: true }));
-        }
-
-        // Get all other buttons excluding primary ones
-        const otherButtons = Object.keys(buttons)
-            .filter((key) => !primaryButtonKeys.includes(key))
-            .map((key) => buttons[key]);
-
-        if (this.ui.isSmall) {
-            return Object.values(buttons).slice(0, 3);
-        }
-        return otherButtons;
+        return [
+            ...primaryButtonKeys.map((key) => ({ ...buttons[key], primary: true })),
+            ...secondaryButtonKeys.map((key) => ({ ...buttons[key] })),
+        ];
     }
 
-    get mobileButtonsToDisplay() {
-        const buttons = Object.values(this.buttonsToDisplay);
-        return buttons.slice(3);
+    get buttonsInDropdown() {
+        const buttons = this.buttons || {};
+        if (this.props.preSelectedReconciliationModel) {
+            return Object.values(buttons);
+        }
+        const buttonToDisplayClasses = this.buttonsToDisplay.map((button) => button.classes) || [];
+        // Get all other buttons excluding primary ones
+        return Object.values(buttons).filter(
+            (button) => !buttonToDisplayClasses.includes(button.classes)
+        );
     }
 }

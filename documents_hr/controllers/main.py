@@ -10,7 +10,12 @@ class SignContract(Sign):
 
     @http.route()
     def sign(self, sign_request_id, token, sms_token=False, signature=None, **kwargs):
+        """ Generate documents when a sign Request is fully completed
+        and the hr_contract_sign is installed.
+        """
         result = super().sign(sign_request_id, token, sms_token=sms_token, signature=signature, **kwargs)
+        if 'sign_request_ids' not in request.env['hr.employee']:
+            return result
         request_item = request.env['sign.request.item'].sudo().search([('access_token', '=', token)])
         is_completed = all(state == 'completed' for state in request_item.sign_request_id.request_item_ids.mapped('state'))
         signature_request_tag = request.env.ref('documents_hr.document_tag_signature_request', raise_if_not_found=False)

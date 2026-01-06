@@ -32,8 +32,11 @@ We have implemented all this using Fiskaly.
         'wizard/pos_fiskaly_details.xml'
     ],
     'assets': {
+        'web.assets_unit_tests': [
+            'l10n_at_pos/static/tests/unit/**/*',
+        ],
         'point_of_sale._assets_pos': [
-            'l10n_at_pos/static/**/*',
+            'l10n_at_pos/static/src/**/*',
         ],
     },
     'author': 'Odoo S.A.',

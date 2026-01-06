@@ -130,6 +130,34 @@ function patchReportEditorModelForSilentSave() {
     };
 }
 
+registry
+    .category("web_tour.tours")
+    .add("web_studio.test_disable_fields_commands_when_unavailable", {
+        steps: () => [
+            {
+                trigger: ".o-web-studio-report-editor-wysiwyg :iframe .odoo-editor-editable p",
+                async run(helpers) {
+                    const el = this.anchor;
+                    openEditorPowerBox(el);
+                },
+            },
+            {
+                trigger: ".o-we-powerbox .o-we-command-name",
+                run: (target) => {
+                    const commands = Array.from(
+                        document.querySelectorAll(".o-we-command-name")
+                    ).map((e) => e.textContent);
+
+                    if (commands.includes("Field") || commands.includes("Dynamic Table")) {
+                        throw new Error(
+                            "`Field`|`Dynamic Table` shouldn't be present when we don't have a record"
+                        );
+                    }
+                },
+            },
+        ],
+    });
+
 let silentPatch;
 registry.category("web_tour.tours").add("web_studio.test_basic_report_edition", {
     steps: () => [

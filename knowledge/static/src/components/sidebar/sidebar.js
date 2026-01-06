@@ -239,6 +239,7 @@ export class KnowledgeSidebar extends Component {
         onWillStart(async () => {
             this.isInternalUser = await user.hasGroup('base.group_user');
             this.isPortalUser = await user.hasGroup('base.group_portal');
+            this.canCreateArticle = await user.checkAccessRight('knowledge.article', 'create');
         });
 
         useRecordObserver(async (record) => {
@@ -678,7 +679,7 @@ export class KnowledgeSidebar extends Component {
                 throw error;
             }
             // Reload the current article as the move will impact its data
-            await this.props.record.model.load();
+            await this.props.record.load();
         };
 
         // Move the article in the sidebar

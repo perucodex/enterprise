@@ -221,7 +221,7 @@ class QualityCheck(models.Model):
     note = fields.Html('Note', compute="_compute_note", store=True, readonly=False)
     test_type_id = fields.Many2one(
         'quality.point.test_type', 'Test Type', store=True, copy=True, compute="_compute_test_type_id",
-        required=True, default=_get_default_test_type_id)
+        required=True, readonly=False, precompute=True)
     test_type = fields.Char(related='test_type_id.technical_name')
     picture = fields.Binary('Picture', attachment=True)
     additional_note = fields.Text(
@@ -257,6 +257,8 @@ class QualityCheck(models.Model):
         for check in self:
             if check.point_id:
                 check.test_type_id = check.point_id.test_type_id.id
+            else:
+                check.test_type_id = check._get_default_test_type_id()
 
     def _is_pass_fail_applicable(self):
         """ Return true if do_fail and do_pass can be applied."""

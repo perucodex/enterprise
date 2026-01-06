@@ -1,4 +1,4 @@
-from odoo import api, fields, models, Command, _
+from odoo import api, models, Command, _
 from odoo.addons.iap.tools import iap_tools
 
 OCR_VERSION = 100
@@ -45,7 +45,7 @@ class AccountBankStatement(models.Model):
         self.balance_end = balance_end_ocr
         self.date = date_ocr
         self._compute_name()
-        self.line_ids = [Command.create({
+        self.with_context(auto_statement_processing=True).line_ids = [Command.create({
             'amount': line['amount'],
             'date': line['date'],
             'journal_id': self.journal_id.id,
@@ -57,8 +57,6 @@ class AccountBankStatement(models.Model):
             body=_("Statement and transactions have been updated using Artificial Intelligence."),
             author_id=odoobot.id
         )
-
-        self.env.ref('account_accountant.auto_reconcile_bank_statement_line')._trigger()
 
     def _message_set_main_attachment_id(self, attachments, force=False, filter_xml=True):
         res = super()._message_set_main_attachment_id(attachments, force=force, filter_xml=filter_xml)

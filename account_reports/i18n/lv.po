@@ -1,6 +1,6 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* account_reports
+# * account_reports
 #
 # Translators:
 # InfernalLV <karlisdreizis@gmail.com>, 2022
@@ -12,21 +12,22 @@
 # Martin Trigaux, 2022
 # Arnis Putniņš <arnis@allegro.lv>, 2022
 # Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2023
-#
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:45+0000\n"
-"PO-Revision-Date: 2022-09-22 05:45+0000\n"
-"Last-Translator: Armīns Jeltajevs <armins.jeltajevs@gmail.com>, 2023\n"
-"Language-Team: Latvian (https://app.transifex.com/odoo/teams/41243/lv/)\n"
+"POT-Creation-Date: 2025-12-30 18:43+0000\n"
+"PO-Revision-Date: 2025-11-17 03:27+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"Language-Team: Latvian <https://translate.odoo.com/projects/odoo-19/"
+"account_reports/lv/>\n"
 "Language: lv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : "
-"2);\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
+"X-Generator: Weblate 5.12.2\n"
 
 #. module: account_reports
 #. odoo-javascript
@@ -38,19 +39,31 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_journal_report.py:0
 msgid "%(journal)s - %(account)s"
+msgstr "%(journal)s - %(account)s"
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_report.py:0
+msgid "%(line_name)s - %(company)s"
+msgstr ""
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_report.py:0
+msgid "%(line_name)s - %(company_name)s"
 msgstr ""
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "%(names)s and %(remaining)s others"
-msgstr ""
+msgstr "%(names)s un %(remaining)s citi"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "%(names)s and one other"
-msgstr ""
+msgstr "%(names)s un viens cits"
 
 #. module: account_reports
 #. odoo-python
@@ -63,19 +76,19 @@ msgstr ""
 #: code:addons/account_reports/models/account_return.py:0
 #: code:addons/account_reports/models/budget.py:0
 msgid "%s (copy)"
-msgstr ""
+msgstr "%s (kopija)"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "%s is not a numeric value"
-msgstr ""
+msgstr "%s nav skaitliska vērtība"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
 msgid "%s selected"
-msgstr ""
+msgstr "%s izvēlēts"
 
 #. module: account_reports
 #. odoo-python
@@ -98,7 +111,7 @@ msgstr ""
 #: code:addons/account_reports/models/account_report.py:0
 msgid ""
 "'Open General Ledger' caret option is only available form report lines "
-"targetting accounts."
+"targetting accounts or Undistributed Profits/Losses."
 msgstr ""
 
 #. module: account_reports
@@ -119,7 +132,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "(%s lines)"
-msgstr ""
+msgstr "(%s rindas)"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.outstanding_receipts
@@ -135,7 +148,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "(1 line)"
-msgstr ""
+msgstr "(1 rinda)"
 
 #. module: account_reports
 #. odoo-python
@@ -206,6 +219,27 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p style=\"margin: 0px; padding: 0px;\">\n"
+"                    <t t-if=\"object.id != "
+"object.commercial_partner_id.id\">Sveicināti <t t-out=\"object.name or ''\"/"
+"> (<t t-out=\"object.commercial_partner_id.name or ''\"/>),</t>\n"
+"                    <t t-else=\"\">Sveicināti <t t-out=\"object.name or ''\"/"
+">,</t>\n"
+"                    <br/>\n"
+"                    Pielikumā skatiet sava konta izrakstu.\n"
+"                    <br/>\n"
+"                    Nevilcinieties sazināties ar mums, ja Jums ir kādi "
+"jautājumi.\n"
+"                    <br/>\n"
+"                    Ar cieņu,\n"
+"                    <br/>\n"
+"\t                <t t-out=\"object._get_followup_responsible().name if "
+"is_html_empty(object._get_followup_responsible().signature) else "
+"object._get_followup_responsible().signature\"/>\n"
+"                </p>\n"
+"            </div>\n"
+"        "
 
 #. module: account_reports
 #: model:mail.template,body_html:account_reports.email_template_generic_tax_instructions
@@ -264,6 +298,9 @@ msgid ""
 "title=\"The email address is unknown on the partner\" invisible=\"not "
 "send_mail_readonly\"/>"
 msgstr ""
+"<i class=\"fa fa-question-circle ml4\" role=\"img\" aria-"
+"label=\"Brīdinājums\" title=\"E-pasta adrese nav pazīstama partnerim\" "
+"invisible=\"not send_mail_readonly\"/>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_report_file_download_error_wizard_form
@@ -314,6 +351,11 @@ msgid ""
 "                            <span invisible=\"not "
 "show_warning_existing_return\" class=\"fa fa-exclamation-triangle text-"
 "danger pb-2\" title=\"A return already exists for the selected period.\"/>"
+msgstr ""
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_form_view
+msgid "<span style=\"width: 85%\">days after tax period</span>"
 msgstr ""
 
 #. module: account_reports
@@ -405,7 +447,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_reports.field_account_return_payment_wizard__partner_id
 #: model:ir.model.fields,field_description:account_reports.field_qr_code_payment_wizard__partner_id
 msgid "Account Holder"
-msgstr ""
+msgstr "Konta īpašnieks"
 
 #. module: account_reports
 #. odoo-python
@@ -422,7 +464,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "Account Name"
-msgstr ""
+msgstr "Konta nosaukums"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_report_annotation
@@ -474,12 +516,12 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_account_balances_search_view
 msgid "Account Type"
-msgstr ""
+msgstr "Konta veids"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_account_balances_search_view
 msgid "Account with Entries"
-msgstr ""
+msgstr "Konts ar ierakstiem"
 
 #. module: account_reports
 #. odoo-javascript
@@ -490,13 +532,13 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_res_company__account_representative_id
 msgid "Accounting Firm"
-msgstr ""
+msgstr "Grāmatvedības firma"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
 msgid "Accounting Periods"
-msgstr ""
+msgstr "Grāmatvedības periodi"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_audit_accounting_process
@@ -521,17 +563,17 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_report_expression
 msgid "Accounting Report Expression"
-msgstr ""
+msgstr "Grāmatvedības atskaites izteikums"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_report_external_value
 msgid "Accounting Report External Value"
-msgstr ""
+msgstr "Grāmatvedības atskaites ārējā vērtība"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_report_line
 msgid "Accounting Report Line"
-msgstr ""
+msgstr "Grāmatvedības atskaites rinda"
 
 #. module: account_reports
 #: model:ir.actions.act_window,name:account_reports.action_account_report_tree
@@ -589,7 +631,7 @@ msgstr "Darbība"
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_needaction
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__message_needaction
 msgid "Action Needed"
-msgstr ""
+msgstr "Nepieciešama darbība"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__action_id
@@ -605,13 +647,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_reports.field_account_return__active
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__is_return_active
 msgid "Active"
-msgstr ""
+msgstr "Aktīvs"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__activity_ids
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__activity_type
 msgid "Activities"
-msgstr ""
+msgstr "Aktivitātes"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_mail_activity
@@ -621,28 +663,28 @@ msgstr "Aktivitāte"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr ""
+msgstr "Aktivitātes izņēmuma noformējums"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__activity_state
 msgid "Activity State"
-msgstr ""
+msgstr "Aktivitātes stāvoklis"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__activity_type_icon
 msgid "Activity Type Icon"
-msgstr ""
+msgstr "Aktivitātes tipa ikona"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/widgets/account_report_x2many/account_report_x2many.xml:0
 msgid "Add a line"
-msgstr ""
+msgstr "Pievienot rindu"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_send_form
 msgid "Add contacts to notify..."
-msgstr ""
+msgstr "Pievienojiet kontaktpersonas, ko informēt..."
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_res_company__totals_below_sections
@@ -674,7 +716,7 @@ msgstr "Ieregulēšana"
 #. odoo-python
 #: code:addons/account_reports/models/account_multicurrency_revaluation_report.py:0
 msgid "Adjustment Entry"
-msgstr ""
+msgstr "Pielāgojums"
 
 #. module: account_reports
 #. odoo-python
@@ -893,7 +935,7 @@ msgstr ""
 #: code:addons/account_reports/static/src/components/account_report/filters/filter_analytic.xml:0
 #: code:addons/account_reports/static/src/components/account_report/filters/filter_analytic_groupby.xml:0
 msgid "Analytic"
-msgstr ""
+msgstr "Analītika"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report__filter_analytic_groupby
@@ -959,7 +1001,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__default_deadline_periodicity__year
 #: model:ir.model.fields.selection,name:account_reports.selection__res_company__account_return_periodicity__year
 msgid "Annually"
-msgstr ""
+msgstr "Reizi gadā"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_account__audit_status__anomaly
@@ -978,12 +1020,12 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/widgets/many2many_approvers/many2many_approvers.xml:0
 msgid "Approve"
-msgstr ""
+msgstr "Apstiprināt"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__approver_ids
 msgid "Approved By"
-msgstr ""
+msgstr "Apstiprināja"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__approver_supervisor_ids
@@ -994,13 +1036,19 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_kanban_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 msgid "Archive"
-msgstr ""
+msgstr "Arhīvs"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
 msgid "Archived"
+msgstr "Arhivēts"
+
+#. module: account_reports
+#. odoo-javascript
+#: code:addons/account_reports/static/src/views/accrual_list_view.xml:0
+msgid "As of"
 msgstr ""
 
 #. module: account_reports
@@ -1013,7 +1061,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
 msgid "Ascending"
-msgstr ""
+msgstr "Augošs"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_audit_assets_listing
@@ -1027,21 +1075,27 @@ msgid "At Date"
 msgstr "Datumā"
 
 #. module: account_reports
+#. odoo-javascript
+#: code:addons/account_reports/static/src/views/accrual_list_view.xml:0
+msgid "At the date of"
+msgstr ""
+
+#. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_send_form
 msgid "Attach a file"
-msgstr ""
+msgstr "Pievienot failu"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__attachment_ids
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__attachment_ids
 msgid "Attachment"
-msgstr ""
+msgstr "Pielikums"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_attachment_count
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__message_attachment_count
 msgid "Attachment Count"
-msgstr ""
+msgstr "Pielikumu skaits"
 
 #. module: account_reports
 #. odoo-javascript
@@ -1230,7 +1284,7 @@ msgstr "Bankas darbību saskaņošana;"
 #. module: account_reports
 #: model:account.report,name:account_reports.bank_reconciliation_report
 msgid "Bank Reconciliation Report"
-msgstr ""
+msgstr "Bankas saskaņošanas atskaite"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_bank_reconciliation_report_handler
@@ -1240,12 +1294,12 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__model__account_bank_statement_line
 msgid "Bank Statement Line"
-msgstr ""
+msgstr "Bankas konta izraksta rinda"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_bank_statements
 msgid "Bank Statements"
-msgstr ""
+msgstr "Bankas Izraksti"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_bank_view0
@@ -1257,6 +1311,11 @@ msgstr ""
 #: code:addons/account_reports/models/account_return.py:0
 msgid ""
 "Bank matching isn’t required for VAT returns but helps spot missing bills."
+msgstr ""
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.bank_information_customer_report
+msgid "Bank:"
 msgstr ""
 
 #. module: account_reports
@@ -1272,13 +1331,13 @@ msgstr "Pamatsumma"
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/aged_partner_balance/filter_aging.xml:0
 msgid "Based on"
-msgstr ""
+msgstr "Bāzēts uz"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_deferred_reports.py:0
 msgid "Before"
-msgstr ""
+msgstr "Pirms"
 
 #. module: account_reports
 #. odoo-python
@@ -1297,7 +1356,7 @@ msgstr ""
 #: code:addons/account_reports/static/src/components/account_report/filters/filter_budgets.xml:0
 #: model:ir.model.fields,field_description:account_reports.field_account_report_budget_item__budget_id
 msgid "Budget"
-msgstr ""
+msgstr "Budžets"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__budget_item_ids
@@ -1376,7 +1435,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "Carryover lines for: %s"
-msgstr ""
+msgstr "Pārnesuma pozīcijas: %s"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_cash0
@@ -1393,7 +1452,7 @@ msgstr ""
 #: model:ir.actions.client,name:account_reports.action_account_report_cs
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_cash_flow
 msgid "Cash Flow Statement"
-msgstr ""
+msgstr "Skaidrās naudas plūsma"
 
 #. module: account_reports
 #. odoo-python
@@ -1479,12 +1538,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__category
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_search_view
 msgid "Category"
-msgstr ""
+msgstr "Kategorija"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_change_lock_date
 msgid "Change Lock Date"
-msgstr ""
+msgstr "Mainīt aizslēgšanas datumu"
 
 #. module: account_reports
 #. odoo-javascript
@@ -1497,7 +1556,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__type__check
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__type__check
 msgid "Check"
-msgstr ""
+msgstr "Pārbaudīt"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__code
@@ -1539,7 +1598,7 @@ msgstr ""
 #: model:ir.ui.menu,name:account_reports.menu_action_return_check_templates
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_kanban_view
 msgid "Checks"
-msgstr ""
+msgstr "Pārbaudes"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__check_count
@@ -1560,7 +1619,7 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_report_file_download_error_wizard_form
 msgid "Close"
-msgstr ""
+msgstr "Aizvērt"
 
 #. module: account_reports
 #. odoo-python
@@ -1614,7 +1673,7 @@ msgstr ""
 #: model:account.report.column,name:account_reports.journal_report_code
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__code
 msgid "Code"
-msgstr ""
+msgstr "Kods"
 
 #. module: account_reports
 #. odoo-javascript
@@ -1673,7 +1732,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "Company Currency"
-msgstr ""
+msgstr "Uzņēmuma valūta"
 
 #. module: account_reports
 #. odoo-javascript
@@ -1686,7 +1745,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "Company Settings"
-msgstr ""
+msgstr "Uzņēmuma uzstādījumi"
 
 #. module: account_reports
 #. odoo-python
@@ -1712,7 +1771,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filter_comparison.xml:0
 msgid "Comparison"
-msgstr ""
+msgstr "Salīdzināšana"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_review_of_guaranteed
@@ -1777,6 +1836,12 @@ msgid ""
 msgstr ""
 
 #. module: account_reports
+#. odoo-javascript
+#: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
+msgid "Consolidation"
+msgstr ""
+
+#. module: account_reports
 #: model:ir.model,name:account_reports.model_res_partner
 msgid "Contact"
 msgstr "Kontakts"
@@ -1784,17 +1849,17 @@ msgstr "Kontakts"
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.duplicated_vat_partner_tree_view
 msgid "Contacts"
-msgstr ""
+msgstr "Kontakti"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__mail_body
 msgid "Contents"
-msgstr ""
+msgstr "Saturs"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_direct_costs0
 msgid "Cost of Revenue"
-msgstr ""
+msgstr "Ieņēmumu izmaksas"
 
 #. module: account_reports
 #. odoo-python
@@ -1827,7 +1892,7 @@ msgstr "Valsts Kods"
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filter_budgets.xml:0
 msgid "Create"
-msgstr ""
+msgstr "Izveidot"
 
 #. module: account_reports
 #: model:ir.actions.server,name:account_reports.action_create_composite_report_list
@@ -1837,7 +1902,7 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_multicurrency_revaluation_wizard
 msgid "Create Entry"
-msgstr ""
+msgstr "Izveidot ierakstu"
 
 #. module: account_reports
 #: model:ir.actions.server,name:account_reports.action_create_report_menu
@@ -1917,11 +1982,6 @@ msgid "Credit"
 msgstr "Kredīts"
 
 #. module: account_reports
-#: model:ir.ui.menu,name:account_reports.menu_action_account_report_multicurrency_revaluation
-msgid "Currencies"
-msgstr ""
-
-#. module: account_reports
 #: model:account.report.column,name:account_reports.aged_payable_report_currency
 #: model:account.report.column,name:account_reports.aged_receivable_report_currency
 #: model:account.report.column,name:account_reports.bank_reconciliation_report_currency
@@ -1950,19 +2010,19 @@ msgstr ""
 #: model:account.report.column,name:account_reports.deferred_expense_current
 #: model:account.report.column,name:account_reports.deferred_revenue_current
 msgid "Current"
-msgstr ""
+msgstr "Tekošais"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_current_assets0
 #: model:account.report.line,name:account_reports.account_financial_report_current_assets_view0
 msgid "Current Assets"
-msgstr ""
+msgstr "Apgrozāmie aktīvi"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_current_liabilities0
 #: model:account.report.line,name:account_reports.account_financial_report_current_liabilities1
 msgid "Current Liabilities"
-msgstr ""
+msgstr "Īstermiņa saistības"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_retained_earnings_line_1
@@ -2009,7 +2069,7 @@ msgstr ""
 #: model:ir.actions.client,name:account_reports.action_account_report_customer_statement
 #: model:mail.template,name:account_reports.email_template_customer_statement
 msgid "Customer Statement"
-msgstr ""
+msgstr "Klienta pārskats"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_customer_statement_report_handler
@@ -2045,13 +2105,13 @@ msgstr "Datums"
 #: model:ir.model.fields,field_description:account_reports.field_account_return__date_from
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__date_from
 msgid "Date From"
-msgstr ""
+msgstr "Sākuma datums"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__date_to
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__date_to
 msgid "Date To"
-msgstr ""
+msgstr "Beigu datums"
 
 #. module: account_reports
 #. odoo-javascript
@@ -2067,13 +2127,13 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.return_creation_wizard_form
 msgid "Dates"
-msgstr ""
+msgstr "Datumi"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/aged_partner_balance/filter_aging.xml:0
 msgid "Days"
-msgstr ""
+msgstr "Dienas"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__days_to_deadline
@@ -2084,9 +2144,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_reports.field_account_return__date_deadline
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__date_deadline
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__deadline_days_delay
+#: model:ir.model.fields,field_description:account_reports.field_res_config_settings__account_return_reminder_day
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
+#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
 msgid "Deadline"
-msgstr ""
+msgstr "Termiņš"
 
 #. module: account_reports
 #. odoo-python
@@ -2142,12 +2204,12 @@ msgstr ""
 #: code:addons/account_reports/models/account_report.py:0
 #: code:addons/account_reports/models/account_return.py:0
 msgid "Deferred Entries"
-msgstr ""
+msgstr "Atliktie ieraksti"
 
 #. module: account_reports
 #: model:ir.actions.client,name:account_reports.action_account_report_deferred_expense
 msgid "Deferred Expense"
-msgstr ""
+msgstr "Atliktie izdevumi"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_deferred_expense_report_handler
@@ -2172,7 +2234,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.actions.client,name:account_reports.action_account_report_deferred_revenue
 msgid "Deferred Revenue"
-msgstr ""
+msgstr "Atliktie ieņēmumi"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_deferred_revenue_report_handler
@@ -2182,7 +2244,7 @@ msgstr ""
 #. module: account_reports
 #: model:account.report,name:account_reports.deferred_revenue_report
 msgid "Deferred Revenue Report"
-msgstr ""
+msgstr "Atlikto ieņēmumu atskaite"
 
 #. module: account_reports
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_deferred_revenue
@@ -2197,26 +2259,26 @@ msgstr "Definīcija"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_res_company__account_return_periodicity
 msgid "Delay units"
-msgstr ""
+msgstr "Aizkavējuma vienība"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_kanban_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 msgid "Delete"
-msgstr ""
+msgstr "Izdzēst"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
 msgid "Descending"
-msgstr ""
+msgstr "Dilstošs"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__message
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__description
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_form_view
 msgid "Description"
-msgstr ""
+msgstr "Apraksts"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return_type__states_workflow
@@ -2234,7 +2296,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_reports.return_generic_payment_wizard_form
 #: model_terms:ir.ui.view,arch_db:account_reports.return_submission_wizard_form
 msgid "Discard"
-msgstr ""
+msgstr "Atmest"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_line__display_custom_groupby_warning
@@ -2244,7 +2306,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__display_mail_composer
 msgid "Display Mail Composer"
-msgstr ""
+msgstr "Rādīt pasta komponistu"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__display_name
@@ -2326,7 +2388,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_journal_report.py:0
 msgid "Document"
-msgstr ""
+msgstr "Document"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_search_view
@@ -2336,6 +2398,11 @@ msgstr ""
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_audit_accounting_process
 msgid "Document current accounting processes (especially if done in-house)."
+msgstr ""
+
+#. module: account_reports
+#: model:account.report.column,name:account_reports.journal_report_count
+msgid "Documents"
 msgstr ""
 
 #. module: account_reports
@@ -2354,12 +2421,12 @@ msgstr "Filtrs"
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
 msgid "Done"
-msgstr ""
+msgstr "Gatavs"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__checkbox_download
 msgid "Download"
-msgstr ""
+msgstr "Download"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_report_file_download_error_wizard_form
@@ -2375,6 +2442,11 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
 msgid "Draft Entries"
+msgstr "Ierakstu melnraksti"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.view_journal_report_audit_move_line_search
+msgid "Draft To Review"
 msgstr ""
 
 #. module: account_reports
@@ -2391,7 +2463,7 @@ msgstr ""
 #: code:addons/account_reports/static/src/components/journal_report/line/line.xml:0
 #: model_terms:ir.ui.view,arch_db:account_reports.pdf_journal_report_taxes_summary
 msgid "Due"
-msgstr ""
+msgstr "Nav apmaksāts"
 
 #. module: account_reports
 #. odoo-javascript
@@ -2461,17 +2533,17 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__checkbox_send_mail
 msgid "Email"
-msgstr ""
+msgstr "E-pasts"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_mail_compose_message
 msgid "Email composition wizard"
-msgstr ""
+msgstr "E-pasta sastādīšanas vednis"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__mail_template_id
 msgid "Email template"
-msgstr ""
+msgstr "E-pasta sagatave"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_audit_empty_suspense_accounts
@@ -2481,7 +2553,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__enable_download
 msgid "Enable Download"
-msgstr ""
+msgstr "Iespējot lejupielādi"
 
 #. module: account_reports
 #. odoo-python
@@ -2492,7 +2564,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__enable_send_mail
 msgid "Enable Send Mail"
-msgstr ""
+msgstr "Iespējot nosūtīt epastu"
 
 #. module: account_reports
 #. odoo-javascript
@@ -2528,7 +2600,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/line/popover/debug_popover.xml:0
 msgid "Engine"
-msgstr ""
+msgstr "Dzinējs"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_clear_internal_transfer_account
@@ -2575,7 +2647,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__equity
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__equity
 msgid "Equity"
-msgstr ""
+msgstr "Pašu kapitāls"
 
 #. module: account_reports
 #. odoo-python
@@ -2640,7 +2712,7 @@ msgstr ""
 #: model:ir.actions.client,name:account_reports.action_account_report_exec_summary
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_exec_summary
 msgid "Executive Summary"
-msgstr ""
+msgstr "Izpildu kopsavilkums"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_multicurrency_revaluation_wizard__expense_provision_account_id
@@ -2751,7 +2823,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_file_download_error_wizard__file_name
 msgid "File Name"
-msgstr ""
+msgstr "Faila nosaukums"
 
 #. module: account_reports
 #. odoo-python
@@ -2771,7 +2843,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:account_reports.action_account_report_budget_tree
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_budget_tree
 msgid "Financial Budgets"
-msgstr ""
+msgstr "Finanšu budžeti"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_financial_provisions_review
@@ -2781,7 +2853,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_fiscal_position
 msgid "Fiscal Position"
-msgstr ""
+msgstr "Nodokļu Profils"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_tax_unit__fpos_synced
@@ -2830,18 +2902,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_follower_ids
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__message_follower_ids
 msgid "Followers"
-msgstr ""
+msgstr "Sekotāji"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_partner_ids
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__message_partner_ids
 msgid "Followers (Partners)"
-msgstr ""
+msgstr "Sekotāji (Partneri)"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr ""
+msgstr "Fonts awesome ikona, piem., fa-tasks"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_aged_receivable_followup
@@ -2872,7 +2944,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/line/popover/debug_popover.xml:0
 msgid "Formula"
-msgstr ""
+msgstr "Formula"
 
 #. module: account_reports
 #. odoo-python
@@ -2896,7 +2968,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
 msgid "Future Activities"
-msgstr ""
+msgstr "Nākotnes aktivitātes"
 
 #. module: account_reports
 #. odoo-javascript
@@ -2938,7 +3010,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/wizard/report_export_wizard.py:0
 msgid "Generated Documents"
-msgstr ""
+msgstr "Izveidotie dokumenti"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_qr_code_payment_wizard
@@ -2991,7 +3063,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_sales_report.py:0
 msgid "Goods"
-msgstr ""
+msgstr "Produkti"
 
 #. module: account_reports
 #. odoo-python
@@ -3043,7 +3115,7 @@ msgstr "Grupas Nosaukums"
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/deferred_reports/groupby.xml:0
 msgid "Group by"
-msgstr ""
+msgstr "Group by"
 
 #. module: account_reports
 #. odoo-python
@@ -3055,7 +3127,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_reports.field_account_return__has_message
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__has_message
 msgid "Has Message"
-msgstr ""
+msgstr "ir ziņojums"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__has_move_entries
@@ -3071,7 +3143,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
 msgid "Hide lines at 0"
-msgstr ""
+msgstr "Paslēpt līnijas pie 0"
 
 #. module: account_reports
 #. odoo-javascript
@@ -3123,7 +3195,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_reports.field_account_return_payment_wizard__acc_number
 #: model:ir.model.fields,field_description:account_reports.field_qr_code_payment_wizard__acc_number
 msgid "IBAN"
-msgstr ""
+msgstr "IBAN"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__id
@@ -3196,12 +3268,12 @@ msgstr "ID"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__activity_exception_icon
 msgid "Icon"
-msgstr ""
+msgstr "Ikona"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr ""
+msgstr "Ikona izņēmuma aktivitātes identificēšanai."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_investigate_unusual_supplier_balances
@@ -3239,7 +3311,7 @@ msgstr ""
 #: model:ir.model.fields,help:account_reports.field_account_return__message_needaction
 #: model:ir.model.fields,help:account_reports.field_account_return_type__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr ""
+msgstr "Ja atzīmēts, jums jāpievērš uzmanība jauniem ziņojumiem."
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__message_has_error
@@ -3247,7 +3319,7 @@ msgstr ""
 #: model:ir.model.fields,help:account_reports.field_account_return_type__message_has_error
 #: model:ir.model.fields,help:account_reports.field_account_return_type__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "Ja atzīmēts, dažiem ziņojumiem ir piegādes kļūda."
 
 #. module: account_reports
 #. odoo-javascript
@@ -3269,18 +3341,18 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
 msgid "In %s"
-msgstr ""
+msgstr "%s"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_return_dashboard_list.js:0
 msgid "In %s days"
-msgstr ""
+msgstr "Pēc %s dienām"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_report_search
 msgid "Inactive"
-msgstr ""
+msgstr "Neaktīvs"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_account_balances_search_view
@@ -3306,13 +3378,13 @@ msgstr ""
 #: model:account.report.line,name:account_reports.no_statement_unreconciled_payments
 #: model:account.report.line,name:account_reports.unreconciled_last_statement_payments
 msgid "Including Unreconciled Payments"
-msgstr ""
+msgstr "Iekļaujot nesaskaņotos maksājumus"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.no_statement_unreconciled_receipt
 #: model:account.report.line,name:account_reports.unreconciled_last_statement_receipts
 msgid "Including Unreconciled Receipts"
-msgstr ""
+msgstr "Iekļaujot nesaskaņotos čekus"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_multicurrency_revaluation_wizard__income_provision_account_id
@@ -3422,7 +3494,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__inventory
 #: model:ir.ui.menu,name:account_reports.account_audit_inventory_entries_menu
 msgid "Inventory"
-msgstr ""
+msgstr "Krājumi"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_inventory_analytical_review
@@ -3443,18 +3515,18 @@ msgstr ""
 #: model:account.report.column,name:account_reports.followup_report_invoicing_date
 #: model:account.report.column,name:account_reports.partner_ledger_report_invoicing_date
 msgid "Invoice Date"
-msgstr ""
+msgstr "Rēķina datums"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_journal_report_audit_move_line_search
 msgid "Invoice lines"
-msgstr ""
+msgstr "Rēķina rindas"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
 msgid "Invoices"
-msgstr ""
+msgstr "Rēķini"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report__is_account_coverage_report_available
@@ -3470,7 +3542,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_is_follower
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__message_is_follower
 msgid "Is Follower"
-msgstr ""
+msgstr "Ir sekotājs"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__is_main_company_active
@@ -3525,7 +3597,7 @@ msgstr "Reģistrs"
 #: model:ir.actions.client,name:account_reports.action_account_report_ja
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_ja
 msgid "Journal Audit"
-msgstr ""
+msgstr "Žurnāla revīzija"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_move
@@ -3543,6 +3615,7 @@ msgstr "Kontējums"
 #. odoo-javascript
 #. odoo-python
 #: code:addons/account_reports/models/account_deferred_reports.py:0
+#: code:addons/account_reports/models/account_general_ledger.py:0
 #: code:addons/account_reports/models/account_report.py:0
 #: code:addons/account_reports/models/account_return.py:0
 #: code:addons/account_reports/models/account_trial_balance_report.py:0
@@ -3581,7 +3654,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "Journals"
-msgstr ""
+msgstr "Žurnāli"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.pdf_export_filters
@@ -3615,7 +3688,7 @@ msgstr "Uzraksts"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__mail_lang
 msgid "Lang"
-msgstr ""
+msgstr "Valoda"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.pdf_export_main_table_header
@@ -3689,17 +3762,22 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
 msgid "Late Activities"
-msgstr ""
+msgstr "Pēdējās aktivitātes"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_deferred_reports.py:0
 msgid "Later"
-msgstr ""
+msgstr "Vēlāk"
 
 #. module: account_reports
 #: model:ir.ui.menu,name:account_reports.account_reports_audit_menu
 msgid "Ledgers"
+msgstr ""
+
+#. module: account_reports
+#: model:account.report.line,name:account_reports.account_financial_report_allocations_withdrawals0
+msgid "Less Allocations and Plus Withdrawals"
 msgstr ""
 
 #. module: account_reports
@@ -3740,7 +3818,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/account_report.xml:0
 msgid "Loading..."
-msgstr ""
+msgstr "Notiek ielāde..."
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__date_lock
@@ -3750,22 +3828,22 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.company_information
 msgid "Logo"
-msgstr ""
+msgstr "Logo"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__mail_attachments_widget
 msgid "Mail Attachments Widget"
-msgstr ""
+msgstr "Sūtījumu pielikumu logrīks"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_mail_tracking_value
 msgid "Mail Tracking Value"
-msgstr ""
+msgstr "Ziņojuma izsekošanas vērtība"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_main_attachment_id
 msgid "Main Attachment"
-msgstr ""
+msgstr "Galvenais pielikums"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_tax_unit__main_company_id
@@ -3799,7 +3877,7 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_search_view
 msgid "Manual"
-msgstr ""
+msgstr "Manuālā"
 
 #. module: account_reports
 #. odoo-python
@@ -3848,7 +3926,7 @@ msgstr ""
 #. module: account_reports
 #: model:account.report.column,name:account_reports.partner_ledger_report_matching_number
 msgid "Matching"
-msgstr ""
+msgstr "Atbilstošs"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_tax_unit__company_ids
@@ -3858,25 +3936,25 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_ir_ui_menu
 msgid "Menu"
-msgstr ""
+msgstr "Izvēlne"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_mail_message
 #: model:ir.model.fields,field_description:account_reports.field_account_report_annotation__message_id
 msgid "Message"
-msgstr ""
+msgstr "Ziņojums"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_has_error
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__message_has_error
 msgid "Message Delivery error"
-msgstr ""
+msgstr "Ziņojuma piegādes kļūda"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_ids
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__message_ids
 msgid "Messages"
-msgstr ""
+msgstr "Ziņojumi"
 
 #. module: account_reports
 #. odoo-python
@@ -3908,7 +3986,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__mode
 msgid "Mode"
-msgstr ""
+msgstr "Mode"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_horizontal_group_rule__res_model_name
@@ -3921,19 +3999,19 @@ msgstr "Modelis"
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
 msgid "Month"
-msgstr ""
+msgstr "Mēnesis"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__deadline_periodicity__monthly
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__default_deadline_periodicity__monthly
 #: model:ir.model.fields.selection,name:account_reports.selection__res_company__account_return_periodicity__monthly
 msgid "Monthly"
-msgstr ""
+msgstr "Ikmēneša"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_budget_form
 msgid "Months"
-msgstr ""
+msgstr "Mēneši"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.pdf_export_filters
@@ -3965,12 +4043,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
 msgid "My Activities"
-msgstr ""
+msgstr "Manas aktivitātes"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__my_activity_date_deadline
 msgid "My Activity Deadline"
-msgstr ""
+msgstr "Manas aktivitātes izpildes termiņš"
 
 #. module: account_reports
 #. odoo-python
@@ -4018,6 +4096,11 @@ msgid "Net Profit"
 msgstr ""
 
 #. module: account_reports
+#: model:account.report.line,name:account_reports.account_financial_report_net_profit_after_allocations0
+msgid "Net Profit Left After Allocations and Withdrawals"
+msgstr ""
+
+#. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_net_assets0
 msgid "Net assets"
 msgstr ""
@@ -4039,27 +4122,27 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_review_submit__new
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_tax_report__new
 msgid "New"
-msgstr ""
+msgstr "Jauns"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
-msgstr ""
+msgstr "Nākamās darbības kalendāra pasākums"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__activity_date_deadline
 msgid "Next Activity Deadline"
-msgstr ""
+msgstr "Nākamās aktivitātes beigu termiņš"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__activity_summary
 msgid "Next Activity Summary"
-msgstr ""
+msgstr "Nākamās darbības kopsavilkums"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__activity_type_id
 msgid "Next Activity Type"
-msgstr ""
+msgstr "Nākamās darbības veids"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__next_state
@@ -4072,7 +4155,7 @@ msgstr ""
 #: code:addons/account_reports/models/account_report.py:0
 #: code:addons/account_reports/static/src/components/account_report/line_cell/popover/edit_popover.xml:0
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. module: account_reports
 #. odoo-javascript
@@ -4148,13 +4231,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "Non Trade Payable"
-msgstr ""
+msgstr "Pārējie kreditoru parādi"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "Non Trade Receivable"
-msgstr ""
+msgstr "Pārējie debitoru parādi"
 
 #. module: account_reports
 #. odoo-javascript
@@ -4190,25 +4273,25 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_needaction_counter
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__message_needaction_counter
 msgid "Number of Actions"
-msgstr ""
+msgstr "Darbību skaits"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_has_error_counter
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__message_has_error_counter
 msgid "Number of errors"
-msgstr ""
+msgstr "Kļūdu skaits"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__message_needaction_counter
 #: model:ir.model.fields,help:account_reports.field_account_return_type__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "Ziņojumu, kuriem nepieciešama darbība, skaits"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__message_has_error_counter
 #: model:ir.model.fields,help:account_reports.field_account_return_type__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr ""
+msgstr "Ziņojumu, kas satur piegādes kļūdu, skaits"
 
 #. module: account_reports
 #. odoo-javascript
@@ -4271,7 +4354,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__audit_status__ongoing
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 msgid "Ongoing"
-msgstr ""
+msgstr "Ongoing"
 
 #. module: account_reports
 #. odoo-python
@@ -4318,7 +4401,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_return_check_attachment_viewer.xml:0
 msgid "Open Document"
-msgstr ""
+msgstr "Atvērt dokumentu"
 
 #. module: account_reports
 #: model:ir.actions.server,name:account_reports.action_server_open_view_account_return
@@ -4328,7 +4411,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_financial_year_op
 msgid "Opening Balance of Financial Year"
-msgstr ""
+msgstr "Finanšu gada bilance uz sākumu"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_operating_expenses_review
@@ -4381,7 +4464,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_followup_report.py:0
 msgid "Overdue"
-msgstr ""
+msgstr "Nokavēts"
 
 #. module: account_reports
 #. odoo-python
@@ -4467,7 +4550,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/wizard/account_report_send.py:0
 msgid "Partner(s) should have an email address."
-msgstr ""
+msgstr "Parnerim(-iem) jābūt e-pasta adresei."
 
 #. module: account_reports
 #. odoo-javascript
@@ -4508,7 +4591,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__resolved_check_count
 msgid "Passed"
-msgstr ""
+msgstr "Nokārtots"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__audit_status__paused
@@ -4523,7 +4606,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 #: model_terms:ir.ui.view,arch_db:account_reports.return_generic_payment_wizard_form
 msgid "Pay"
-msgstr ""
+msgstr "Maksāt"
 
 #. module: account_reports
 #. odoo-python
@@ -4542,7 +4625,7 @@ msgstr ""
 #: model:account.report.line,name:account_reports.account_financial_report_current_liabilities_payable
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_creditors0
 msgid "Payables"
-msgstr ""
+msgstr "Kreditoru parādi"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_payables_settlement
@@ -4553,7 +4636,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
 msgid "Payment"
-msgstr ""
+msgstr "Maksājums"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__payment_partner_id
@@ -4568,13 +4651,13 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__model__account_payment
 msgid "Payments"
-msgstr ""
+msgstr "Maksājumi"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__payroll
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__payroll
 msgid "Payroll"
-msgstr ""
+msgstr "Algu saraksts"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_performance0
@@ -4585,7 +4668,7 @@ msgstr "Izpilde"
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
 msgid "Period"
-msgstr ""
+msgstr "Periods"
 
 #. module: account_reports
 #: model:account.report.column,name:account_reports.aged_payable_report_period1
@@ -4660,7 +4743,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filter_analytic_groupby.xml:0
 msgid "Plans"
-msgstr ""
+msgstr "Plāni"
 
 #. module: account_reports
 #. odoo-javascript
@@ -4694,13 +4777,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_deferred_reports.py:0
 msgid "Please set the deferred accounts in the accounting settings."
-msgstr ""
+msgstr "Lūdzu, iestatiet atlikto kontus grāmatvedības uzstādījumos."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_deferred_reports.py:0
 msgid "Please set the deferred journal in the accounting settings."
-msgstr ""
+msgstr "Lūdzu, iestatiet atlikto žurnālu grāmatvedības uzstādījumos."
 
 #. module: account_reports
 #. odoo-python
@@ -4716,7 +4799,7 @@ msgstr ""
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_non_current_assets_view0
 msgid "Plus Non-current Assets"
-msgstr ""
+msgstr "Plus ilgtermiņa aktīvi"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_non_current_liabilities0
@@ -4743,7 +4826,7 @@ msgstr "Grāmatot"
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
 msgid "Posted Entries"
-msgstr ""
+msgstr "Grāmatotie ieraksti"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_subsidaries_and_investments_summary
@@ -4755,12 +4838,12 @@ msgstr ""
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_prepayements0
 msgid "Prepayments"
-msgstr ""
+msgstr "Priekšapmaksas"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_multicurrency_revaluation_wizard__preview_data
 msgid "Preview Data"
-msgstr ""
+msgstr "Priekšskatījuma dati"
 
 #. module: account_reports
 #. odoo-javascript
@@ -4778,7 +4861,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filter_comparison.xml:0
 msgid "Previous Year"
-msgstr ""
+msgstr "Iepriekšējais gads"
 
 #. module: account_reports
 #. odoo-javascript
@@ -4820,13 +4903,13 @@ msgstr ""
 #: code:addons/account_reports/models/account_deferred_reports.py:0
 #: code:addons/account_reports/static/src/components/deferred_reports/groupby.xml:0
 msgid "Product"
-msgstr ""
+msgstr "Produkts"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/deferred_reports/groupby.xml:0
 msgid "Product Category"
-msgstr ""
+msgstr "Preces kategorija"
 
 #. module: account_reports
 #: model:account.report,name:account_reports.profit_and_loss
@@ -4855,7 +4938,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__purchases
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__purchases
 msgid "Purchases"
-msgstr ""
+msgstr "Pirkumi"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_qr_code_payment_wizard__qr_code
@@ -4866,26 +4949,26 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
 msgid "Quarter"
-msgstr ""
+msgstr "Ceturksnis"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__deadline_periodicity__trimester
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__default_deadline_periodicity__trimester
 #: model:ir.model.fields.selection,name:account_reports.selection__res_company__account_return_periodicity__trimester
 msgid "Quarterly"
-msgstr ""
+msgstr "Reizi ceturksnī"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/multicurrency_revaluation_report/line_name.xml:0
 msgid "Rates"
-msgstr ""
+msgstr "Rates"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__rating_ids
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__rating_ids
 msgid "Ratings"
-msgstr ""
+msgstr "Reitingi"
 
 #. module: account_reports
 #. odoo-python
@@ -4904,13 +4987,13 @@ msgstr ""
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_debtors0
 #: model:account.report.line,name:account_reports.account_financial_report_receivable0
 msgid "Receivables"
-msgstr ""
+msgstr "Debitoru parādi"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__mail_partner_ids
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_send_form
 msgid "Recipients"
-msgstr ""
+msgstr "Saņēmēji"
 
 #. module: account_reports
 #. odoo-python
@@ -4938,7 +5021,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/views/refresh_returns_cog_menu.xml:0
 msgid "Refresh"
-msgstr ""
+msgstr "Atsvaidzināt"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__refresh_result
@@ -4958,10 +5041,8 @@ msgstr ""
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_year_op__account_return_reminder_day
-#: model:ir.model.fields,field_description:account_reports.field_res_config_settings__account_return_reminder_day
-#: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
 msgid "Reminder"
-msgstr ""
+msgstr "Atgādinājums"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__account_report_id
@@ -4973,13 +5054,13 @@ msgstr "Atskaite"
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_line_form
 msgid "Report Line"
-msgstr ""
+msgstr "Ziņojuma līnija"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__report_name
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_form
 msgid "Report Name"
-msgstr ""
+msgstr "Atskaites Nosaukums"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__report_opened_once
@@ -5012,7 +5093,7 @@ msgstr "Atskaites"
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_kanban_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 msgid "Reset"
-msgstr ""
+msgstr "Atiestatīt"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_line_form
@@ -5022,7 +5103,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__activity_user_id
 msgid "Responsible User"
-msgstr ""
+msgstr "Atbildīgie lietotāji"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__result
@@ -5039,7 +5120,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_reports.field_account_return_submission_wizard__return_id
 #: model:ir.model.fields,field_description:account_reports.field_qr_code_payment_wizard__return_id
 msgid "Return"
-msgstr ""
+msgstr "Atgriezt"
 
 #. module: account_reports
 #. odoo-python
@@ -5124,7 +5205,7 @@ msgstr ""
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_income0
 #: model:account.report.line,name:account_reports.account_financial_report_revenue0
 msgid "Revenue"
-msgstr ""
+msgstr "Ieņēmumi"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_revenue_receivables_review
@@ -5134,7 +5215,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_multicurrency_revaluation_wizard__reversal_date
 msgid "Reversal Date"
-msgstr ""
+msgstr "Atgriešanas datums"
 
 #. module: account_reports
 #. odoo-python
@@ -5146,7 +5227,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/wizard/multicurrency_revaluation.py:0
 msgid "Reversal of: %s"
-msgstr ""
+msgstr "Atgriezeniskā virziena maiņa: %s"
 
 #. module: account_reports
 #. odoo-python
@@ -5155,12 +5236,14 @@ msgid "Reverse charge mention"
 msgstr ""
 
 #. module: account_reports
+#. odoo-javascript
+#: code:addons/account_reports/static/src/components/journal_report/line_name.xml:0
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_review__reviewed
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_review_submit__reviewed
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_tax_report__reviewed
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__states_workflow__generic_state_review
 msgid "Review"
-msgstr ""
+msgstr "Apskats"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_foreign_exchange_differences
@@ -5268,7 +5351,7 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_report_search
 msgid "Root Report"
-msgstr ""
+msgstr "Pamata ziņojums"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_horizontal_group__rule_ids
@@ -5279,13 +5362,13 @@ msgstr "Noteikumi"
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_has_sms_error
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr ""
+msgstr "SMS piegādes kļūda"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__sales
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__sales
 msgid "Sales"
-msgstr ""
+msgstr "Pārdošana"
 
 #. module: account_reports
 #. odoo-javascript
@@ -5297,30 +5380,30 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/wizard/qr_code_payment_wizard.py:0
 msgid "Scan me with your banking app."
-msgstr ""
+msgstr "Noskenējiet mani ar savu bankas lietotni."
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_mail_scheduled_message
 msgid "Scheduled Message"
-msgstr ""
+msgstr "Plānotais ziņojums"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/search_bar/search_bar.xml:0
 msgid "Search..."
-msgstr ""
+msgstr "Meklēt..."
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_form
 msgid "Sections"
-msgstr ""
+msgstr "Sadaļas"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__deadline_periodicity__semester
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__default_deadline_periodicity__semester
 #: model:ir.model.fields.selection,name:account_reports.selection__res_company__account_return_periodicity__semester
 msgid "Semi-annually"
-msgstr ""
+msgstr "Reizi pusgadā"
 
 #. module: account_reports
 #. odoo-python
@@ -5328,7 +5411,7 @@ msgstr ""
 #: code:addons/account_reports/models/account_followup_report.py:0
 #: model_terms:ir.ui.view,arch_db:account_reports.return_generic_payment_wizard_form
 msgid "Send"
-msgstr ""
+msgstr "Nosūtīt"
 
 #. module: account_reports
 #. odoo-python
@@ -5345,7 +5428,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report__send_and_print_values
 msgid "Send And Print Values"
-msgstr ""
+msgstr "Vērtību nosūtīšana un drukāšana"
 
 #. module: account_reports
 #. odoo-python
@@ -5356,7 +5439,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__send_mail_readonly
 msgid "Send Mail Readonly"
-msgstr ""
+msgstr "Sūtīt pastu tikai lasāmā režīmā"
 
 #. module: account_reports
 #. odoo-python
@@ -5378,7 +5461,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_budget__sequence
 msgid "Sequence"
-msgstr ""
+msgstr "Secība"
 
 #. module: account_reports
 #. odoo-python
@@ -5400,7 +5483,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
 msgid "Set your company data"
-msgstr ""
+msgstr "Iestatiet sava uzņēmuma datus"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_settlement_in_subsequent_period
@@ -5530,7 +5613,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__deadline_start_date
 msgid "Start Date"
-msgstr ""
+msgstr "Sākuma datums"
 
 #. module: account_reports
 #: model:ir.actions.act_window,name:account_reports.action_create_account_audit
@@ -5546,18 +5629,18 @@ msgstr "Sākt no"
 #. odoo-python
 #: code:addons/account_reports/models/account_journal_report.py:0
 msgid "Starting Balance"
-msgstr ""
+msgstr "Sākuma bilance"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__state
 msgid "State"
-msgstr ""
+msgstr "Posmi"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/aged_partner_balance/line_name/line_name.xml:0
 msgid "Statement"
-msgstr ""
+msgstr "Izraksts"
 
 #. module: account_reports
 #. odoo-python
@@ -5568,13 +5651,13 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__states_workflow
 msgid "States"
-msgstr ""
+msgstr "Valstis"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__audit_status
 #: model:ir.model.fields,field_description:account_reports.field_account_audit_account_status__status
 msgid "Status"
-msgstr ""
+msgstr "Statuss"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__activity_state
@@ -5584,22 +5667,26 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
+"Statuss balstīts uz darbībām\n"
+"Kavēts: termiņš jauy ir pagājis\n"
+"Šodien: darbības datums ir šodien\n"
+"Plānots: nākotnes aktivitātes."
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/line/popover/debug_popover.xml:0
 msgid "Subformula"
-msgstr ""
+msgstr "Apakšformula"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__mail_subject
 msgid "Subject"
-msgstr ""
+msgstr "Priekšmets"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_send_form
 msgid "Subject..."
-msgstr ""
+msgstr "Temats..."
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__date_submission
@@ -5618,7 +5705,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 #: model_terms:ir.ui.view,arch_db:account_reports.return_submission_wizard_form
 msgid "Submit"
-msgstr ""
+msgstr "Iesniegt"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_subsidaries_and_investments_summary
@@ -5674,7 +5761,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/models/account_journal_report.py:0
 msgid "Tax Grids"
-msgstr ""
+msgstr "Nodokļu režģi"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_tax_unit__vat
@@ -5683,6 +5770,7 @@ msgstr "Tax ID"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.company_information
+#: model_terms:ir.ui.view,arch_db:account_reports.tax_information_customer_report
 msgid "Tax ID:"
 msgstr ""
 
@@ -5722,7 +5810,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.view_move_form_vat_return
 msgid "Tax Return"
-msgstr ""
+msgstr "Nodokļu deklarācija"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
@@ -5785,7 +5873,7 @@ msgstr "Nodokļi"
 #: code:addons/account_reports/models/account_journal_report.py:0
 #: code:addons/account_reports/static/src/components/journal_report/line/line.xml:0
 msgid "Taxes Applied"
-msgstr ""
+msgstr "Nodokļi pielietoti"
 
 #. module: account_reports
 #. odoo-python
@@ -5808,13 +5896,13 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__template_id
 msgid "Template"
-msgstr ""
+msgstr "Sagatave"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/ellipsis/ellipsis.js:0
 msgid "Text copied"
-msgstr ""
+msgstr "Teksts kopēts"
 
 #. module: account_reports
 #. odoo-python
@@ -6078,14 +6166,15 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__name
 msgid "Title"
-msgstr ""
+msgstr "Nosaukums"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
 msgid "To Do"
-msgstr ""
+msgstr "Veicamais darbs"
 
 #. module: account_reports
+#: model:account.report.column,name:account_reports.journal_report_to_review
 #: model:ir.model.fields.selection,name:account_reports.selection__account_account__audit_status__todo
 #: model:ir.model.fields.selection,name:account_reports.selection__account_audit_account_status__status__todo
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__result__todo
@@ -6104,13 +6193,13 @@ msgstr "Šodien"
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
 msgid "Today Activities"
-msgstr ""
+msgstr "Šodienas aktivitātes"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_return_dashboard_list.js:0
 msgid "Tomorrow"
-msgstr ""
+msgstr "Rīt"
 
 #. module: account_reports
 #. odoo-python
@@ -6129,7 +6218,7 @@ msgstr "Summa"
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "Total %s"
-msgstr ""
+msgstr "Kopā %s"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__total_amount_to_pay
@@ -6231,7 +6320,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_list_view
 msgid "Type"
-msgstr ""
+msgstr "Veids"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__type_external_id
@@ -6241,7 +6330,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr ""
+msgstr "Reģistrētās izņēmuma aktivitātes tips."
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_unaffected_earnings0
@@ -6252,19 +6341,25 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_kanban_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 msgid "Unarchive"
-msgstr ""
+msgstr "Atarhivēt"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "Undefined"
+msgstr "Nav definēts"
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_report.py:0
+msgid "Undistributed Profits/Losses"
 msgstr ""
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
 msgid "Unfold All"
-msgstr ""
+msgstr "Izvērst visu"
 
 #. module: account_reports
 #. odoo-python
@@ -6292,6 +6387,11 @@ msgid "Unknown date scope: %s"
 msgstr ""
 
 #. module: account_reports
+#: model:ir.ui.menu,name:account_reports.menu_action_account_report_multicurrency_revaluation
+msgid "Unrealized Currencies"
+msgstr ""
+
+#. module: account_reports
 #: model:account.report,name:account_reports.multicurrency_revaluation_report
 #: model:ir.actions.client,name:account_reports.action_account_report_multicurrency_revaluation
 msgid "Unrealized Currency Gains/Losses"
@@ -6304,24 +6404,24 @@ msgstr ""
 #: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
 #: model_terms:ir.ui.view,arch_db:account_reports.pdf_export_filter_extra_options_template
 msgid "Unreconciled Entries"
-msgstr ""
+msgstr "Nesaskaņotie ieraksti"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__type__file
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__type__file
 msgid "Upload Document"
-msgstr ""
+msgstr "Augšupielādēt dokumentu"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_return_check_file_uploader.xml:0
 msgid "Upload File"
-msgstr ""
+msgstr "Augšupielādēt failu"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_financial_year_op__vat_label
 msgid "Use this field if you want to change vat label."
-msgstr ""
+msgstr "Lietojiet šo lauku, ja vēlaties mainīt PVN marķējumu."
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return_type__deadline_start_date
@@ -6348,7 +6448,7 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
 msgid "Validate"
-msgstr ""
+msgstr "Pārbaudīt"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_financial_provisions_review
@@ -6361,7 +6461,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/line/popover/debug_popover.xml:0
 msgid "Value"
-msgstr ""
+msgstr "Vērtība"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__audit_var_percentage
@@ -6376,7 +6476,7 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_year_op__vat_label
 msgid "Vat Label"
-msgstr ""
+msgstr "PVN marķējums"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_settlement_in_subsequent_period
@@ -6411,7 +6511,7 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_journal_report_audit_move_line_tree
 msgid "View"
-msgstr ""
+msgstr "Skatīt"
 
 #. module: account_reports
 #. odoo-python
@@ -6449,7 +6549,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_reports/wizard/account_report_send.py:0
 msgid "View Partner(s)"
-msgstr ""
+msgstr "Skatīt partneri(-us)"
 
 #. module: account_reports
 #. odoo-python
@@ -6465,19 +6565,19 @@ msgstr ""
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__warnings
 msgid "Warnings"
-msgstr ""
+msgstr "Brīdinājumi"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__website_message_ids
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__website_message_ids
 msgid "Website Messages"
-msgstr ""
+msgstr "Tīmekļa vietnes ziņojumi"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__website_message_ids
 #: model:ir.model.fields,help:account_reports.field_account_return_type__website_message_ids
 msgid "Website communication history"
-msgstr ""
+msgstr "Tīmekļa vietnes saziņas vēsture"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
@@ -6535,7 +6635,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
 msgid "Year"
-msgstr ""
+msgstr "Gads"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_year_end_revenue_cutoff_analysis
@@ -6548,13 +6648,13 @@ msgstr ""
 #: code:addons/account_reports/models/account_report.py:0
 #: code:addons/account_reports/static/src/components/account_report/line_cell/popover/edit_popover.xml:0
 msgid "Yes"
-msgstr ""
+msgstr "Jā"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_return_dashboard_list.js:0
 msgid "Yesterday"
-msgstr ""
+msgstr "Vakardien"
 
 #. module: account_reports
 #. odoo-python
@@ -6664,6 +6764,7 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.journal_report_pdf_export_main
 #: model_terms:ir.ui.view,arch_db:account_reports.pdf_export_main
+#: model_terms:ir.ui.view,arch_db:account_reports.pdf_export_main_customer_report
 msgid "[Draft]"
 msgstr ""
 
@@ -6688,11 +6789,6 @@ msgstr ""
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
 msgid "days after period"
-msgstr ""
-
-#. module: account_reports
-#: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_form_view
-msgid "days after tax period"
 msgstr ""
 
 #. module: account_reports
@@ -6729,13 +6825,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/sales_report/warnings.xml:0
 msgid "invoices"
-msgstr ""
+msgstr "rēķini"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/bank_reconciliation_report/warnings.xml:0
 msgid "journal items"
-msgstr ""
+msgstr "žurnāla ieraksti"
 
 #. module: account_reports
 #. odoo-javascript
@@ -6819,7 +6915,7 @@ msgstr ""
 #: code:addons/account_reports/static/src/components/account_report/filters/filter_comparison.xml:0
 #: code:addons/account_reports/static/src/components/account_report/filters/filter_date.xml:0
 msgid "to"
-msgstr ""
+msgstr "līdz"
 
 #. module: account_reports
 #. odoo-javascript
@@ -6878,12 +6974,18 @@ msgid ""
 "object._get_followup_responsible().company_id).name }} Statement - "
 "{{ object.commercial_company_name }}"
 msgstr ""
+"{{ (object.company_id or "
+"object._get_followup_responsible().company_id).name }} Izraksts - "
+"{{ object.commercial_company_name }}"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/multicurrency_revaluation_report/warnings.xml:0
 msgid "⇒ Reset to Odoo’s Rate"
 msgstr ""
+
+#~ msgid "Currencies"
+#~ msgstr "Valūtas"
 
 #~ msgid "Account Chart Template"
 #~ msgstr "Konta plāna veidne"

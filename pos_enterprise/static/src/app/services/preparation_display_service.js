@@ -29,8 +29,9 @@ export class PrepDisplay extends WithLazyGetterTrap {
         this.selectedStageId = this.data.models["pos.prep.stage"].getFirst().id;
         this.selectedCategoryIds = new Set();
         this.selectedProductIds = new Set();
+        this.selectedPresetIds = new Set();
+        this.selectedTimeIds = new Set();
         this.showCategoryFilter = false;
-        this.selectedTime = "all";
         this.posHasProducts = await this.loadPosHasProducts();
         this.loadingProducts = false;
         this.ringTheBell = debounce(() => {
@@ -39,6 +40,10 @@ export class PrepDisplay extends WithLazyGetterTrap {
 
         this.restoreFilterFromLocalStorage();
         this.getPreparationDisplayOrder(null);
+
+        this.orderCountPresets = {};
+        this.orderDays = {};
+        this.computeOrderCounts();
 
         this.onNotified = getOnNotified(this.bus, odoo.preparation_display.access_token);
         this.onNotified("LOAD_ORDERS", async (data) => {
@@ -61,6 +66,7 @@ export class PrepDisplay extends WithLazyGetterTrap {
             if (data.notification) {
                 this.notification.add(data.notification);
             }
+            this.computeOrderCounts();
         });
         this.onNotified("CHANGE_STATE_STAGE", (data) => {
             for (const stage of data["pdis_state_stages"]) {
@@ -82,6 +88,7 @@ export class PrepDisplay extends WithLazyGetterTrap {
                 }
                 order.completion_time = completion_time;
             }
+            this.computeOrderCounts();
         });
         this.onNotified("CHANGE_STATE_STATUS", (lineStatus) => {
             for (const status of lineStatus) {
@@ -94,6 +101,7 @@ export class PrepDisplay extends WithLazyGetterTrap {
                     this.filterHistory(state);
                 }
             }
+            this.computeOrderCounts();
         });
         this.onNotified("NOTIFICATION", async (data) => {
             if (data.sound) {
@@ -102,6 +110,7 @@ export class PrepDisplay extends WithLazyGetterTrap {
             if (data.notification) {
                 this.notification.add(data.notification);
             }
+            this.computeOrderCounts();
         });
         this.bus.addEventListener("BUS:RECONNECT", () => {
             this.ringTheBell();
@@ -127,15 +136,17 @@ export class PrepDisplay extends WithLazyGetterTrap {
     }
     selectStage(stageId) {
         this.selectedStageId = stageId;
+        this.computeOrderCounts();
     }
     saveFilterToLocalStorage() {
         const localStorageName = `preparation_display_${this.id}.db_${session.db}.user_${user.userId}`;
-
         localStorage.setItem(
             localStorageName,
             JSON.stringify({
                 products: Array.from(this.selectedProductIds),
                 categories: Array.from(this.selectedCategoryIds),
+                times: Array.from(this.selectedTimeIds),
+                presets: Array.from(this.selectedPresetIds),
             })
         );
     }
@@ -146,6 +157,8 @@ export class PrepDisplay extends WithLazyGetterTrap {
         if (localStorageData) {
             this.selectedCategoryIds = new Set(localStorageData.categories);
             this.selectedProductIds = new Set(localStorageData.products);
+            this.selectedTimeIds = new Set(localStorageData.times);
+            this.selectedPresetIds = new Set(localStorageData.presets);
         }
     }
     toggleSelection(id, selectedIdsSet, relatedIds, relatedIdsSet) {
@@ -183,12 +196,22 @@ export class PrepDisplay extends WithLazyGetterTrap {
         );
     }
     toggleTime(time) {
-        this.selectedTime = time;
+        this.selectedTimeIds.has(time)
+            ? this.selectedTimeIds.delete(time)
+            : this.selectedTimeIds.add(time);
+        this.saveFilterToLocalStorage();
+    }
+    togglePreset(presetId) {
+        this.selectedPresetIds.has(presetId)
+            ? this.selectedPresetIds.delete(presetId)
+            : this.selectedPresetIds.add(presetId);
+        this.saveFilterToLocalStorage();
     }
     checkStateVisibility(state) {
         const selectedCategoryIds = this.selectedCategoryIds;
         const selectedProductIds = this.selectedProductIds;
-        const selectedTime = this.selectedTime;
+        const selectedPresetIds = this.selectedPresetIds;
+        const selectedTimeIds = this.selectedTimeIds;
         const now = DateTime.now().startOf("day");
         const timeMap = {
             today: now,
@@ -197,30 +220,35 @@ export class PrepDisplay extends WithLazyGetterTrap {
         };
         let timeCheck = true;
 
-        if (selectedTime !== "all") {
+        if (selectedTimeIds.size) {
             const orderDate = state.prep_line_id.prep_order_id.pos_order_id.preset_time;
             if (!orderDate) {
-                timeCheck = selectedTime === "today";
+                timeCheck = selectedTimeIds.has("today");
             } else {
                 timeCheck =
-                    (selectedTime === "today" && orderDate.hasSame(timeMap.today, "day")) ||
-                    (selectedTime === "tomorrow" && orderDate.hasSame(timeMap.tomorrow, "day")) ||
-                    (selectedTime === "next_days" && orderDate >= timeMap.nextDays);
+                    (selectedTimeIds.has("today") && orderDate.hasSame(timeMap.today, "day")) ||
+                    (selectedTimeIds.has("tomorrow") &&
+                        orderDate.hasSame(timeMap.tomorrow, "day")) ||
+                    (selectedTimeIds.has("next_days") && orderDate >= timeMap.nextDays);
             }
         }
 
-        const categoryMatch = state.categories.some((category) =>
-            selectedCategoryIds.has(category.id)
-        );
-        const productMatch = selectedProductIds.has(state.product.id);
-        const noFilter = selectedCategoryIds.size === 0 && selectedProductIds.size === 0;
+        const categoryMatch =
+            selectedCategoryIds.size === 0 ||
+            state.categories.some((category) => selectedCategoryIds.has(category.id));
+        const productMatch =
+            selectedProductIds.size === 0 || selectedProductIds.has(state.product.id);
+        const presetId = state.prep_line_id.prep_order_id.pos_order_id.preset_id;
+        const presetMatch =
+            selectedPresetIds.size === 0 || Boolean(presetId && selectedPresetIds.has(presetId.id));
         const notDoneOrLastStage = state.todo || state.stage_id.id !== this.lastStage.id;
 
         return (
             notDoneOrLastStage &&
-            (categoryMatch || productMatch || noFilter) &&
-            timeCheck &&
-            state.timeToShow === 0
+            categoryMatch &&
+            productMatch &&
+            presetMatch &&
+            (timeCheck || (state.timeToShow === 0 && selectedTimeIds.has("now")))
         );
     }
     orderNextStage(stageId, direction = 1) {
@@ -233,8 +261,8 @@ export class PrepDisplay extends WithLazyGetterTrap {
 
         return stages[currentStagesIdx + direction] ?? false;
     }
-    get orderDays() {
-        const orderDays = { all: 0, today: 0, tomorrow: 0, next_days: 0 };
+    computeOrderDays() {
+        const orderDays = { now: 0, today: 0, tomorrow: 0, next_days: 0 };
         const now = DateTime.now().startOf("day");
         const tomorrow = now.plus({ days: 1 });
         const nextDays = now.plus({ days: 2 });
@@ -244,11 +272,11 @@ export class PrepDisplay extends WithLazyGetterTrap {
             const prepOrder = state.prep_line_id.prep_order_id;
             if (
                 (!this.selectedStageId || state.stage_id.id === this.selectedStageId) &&
-                !countedOrders.has(prepOrder)
+                !countedOrders.has(prepOrder.id) &&
+                !state.isStageDone(this.lastStage.id)
             ) {
-                countedOrders.add(prepOrder);
+                countedOrders.add(prepOrder.id);
                 const orderDate = prepOrder.pos_order_id.preset_time;
-                orderDays.all++;
                 if (!orderDate || orderDate.hasSame(now, "day")) {
                     orderDays.today++;
                 }
@@ -258,9 +286,42 @@ export class PrepDisplay extends WithLazyGetterTrap {
                 if (orderDate && orderDate >= nextDays) {
                     orderDays.next_days++;
                 }
+                if (!orderDate || state.timeToShow === 0) {
+                    orderDays.now++;
+                }
             }
         });
-        return orderDays;
+        orderDays[0] = countedOrders.size;
+        this.orderDays = orderDays;
+    }
+    computeOrderCountPresets() {
+        const allStates = this.data.models["pos.prep.state"].getAll();
+        const orderPresets = {};
+        this.data.models["pos.preset"].getAll().forEach((preset) => {
+            orderPresets[preset.id] = 0;
+        });
+        const countedOrders = new Set();
+        allStates.forEach((state) => {
+            const prepOrder = state.prep_line_id.prep_order_id;
+            const presetId = prepOrder.pos_order_id.preset_id;
+            if (
+                (!this.selectedStageId || state.stage_id.id === this.selectedStageId) &&
+                presetId &&
+                !countedOrders.has(prepOrder.id) &&
+                !state.isStageDone(this.lastStage.id)
+            ) {
+                countedOrders.add(prepOrder.id);
+                orderPresets[presetId.id] += 1;
+            }
+        });
+        orderPresets[0] = countedOrders.size;
+        this.orderCountPresets = orderPresets;
+    }
+    computeOrderCounts() {
+        if (this.showCategoryFilter) {
+            this.computeOrderDays();
+            this.computeOrderCountPresets();
+        }
     }
     get filteredOrders() {
         const ordersToDisplay = new Map();
@@ -369,9 +430,13 @@ export class PrepDisplay extends WithLazyGetterTrap {
         );
         const missingRecords = await this.data.missingRecursive(orders);
         this.data.models.loadConnectedData(missingRecords);
+        this.computeOrderCounts();
     }
     exit() {
         redirect("/odoo/action-pos_enterprise.action_preparation_display");
+    }
+    get displayPresetsFilter() {
+        return this.data.models["pos.config"].some((config) => config.use_presets);
     }
 }
 

@@ -114,7 +114,7 @@ class L10n_HkIr56b(models.Model):
                 code: sum(all_line_values[code][p.id]['total'] for p in payslips)
                 for code in line_codes}
 
-            start_date = self.start_period if self.start_period > employee.contract_date_start else employee.contract_date_start
+            start_date = self.start_period if self.start_period > employee._get_first_version_date() else employee._get_first_version_date()
 
             rental_ids = employee.l10n_hk_rental_ids.filtered_domain([
                 ('state', 'in', ['open', 'close']),

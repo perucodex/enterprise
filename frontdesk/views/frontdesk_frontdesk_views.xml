@@ -33,7 +33,7 @@
                         <group>
                             <field name="responsible_ids" widget="many2many_avatar_user" domain="[('company_ids', 'in', company_id)]"/>
                             <field name="host_ids" widget="many2many_avatar_employee" placeholder="All Employees" invisible="not host_selection"/>
-                            <field name="company_id"  groups="base.group_multi_company"/>
+                            <field name="company_id"  groups="base.group_multi_company" domain="[('id', 'in', allowed_company_ids)]"/>
                             <field name="access_token" groups="base.group_no_one"/>
                             <field name="kiosk_url" widget="CopyClipboardChar"/>
                         </group>

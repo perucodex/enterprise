@@ -4,6 +4,7 @@ from odoo.addons.l10n_ar.tests.common import TestAr
 from odoo.addons.account_reports.tests.common import TestAccountReportsCommon
 from odoo.tests import Form, tagged
 from odoo.tools import file_open
+from odoo.fields import Command
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -386,6 +387,65 @@ class TestReports(TestAr, TestAccountReportsCommon):
                 ('DI 0001-00000001000', 'BEST PARTNER', '30714295698', -1000,  -210,     -1210),
                 ('DI 0001-00000002000', 'BEST PARTNER', '30714295698', -500,   -105,     -605),
                 ('DI 0001-00000003000', 'BEST PARTNER', '30714295698', -800,   -168,     -968),
+            ],
+            options,
+        )
+
+    def test_vat_book_report_price_tax_included_plus_IIBB_taxes(self):
+        purchase_journal = self.env["account.journal"].search([('type', '=', 'purchase'), ('company_id', '=', self.env.company.id)])
+        self.tax_21.price_include = True
+        self.tax_21.include_base_amount = True
+        iibb_group = self.env['account.tax.group'].create({
+            'name': "IIBB Group",
+            'l10n_ar_tribute_afip_code': '07',
+        })
+
+        iibb_tax_1 = self.env['account.tax'].create({
+            'name': "IIBB Córdoba",
+            'amount_type': 'percent',
+            'amount': 1,
+            'tax_group_id': iibb_group.id,
+        })
+
+        iibb_tax_2 = self.env['account.tax'].create({
+            'name': "IIBB Buenos Aires",
+            'amount_type': 'percent',
+            'amount': 1,
+            'tax_group_id': iibb_group.id,
+        })
+
+        test_product = self.env['product.product'].create({
+            'name': "Test Product",
+            'lst_price': 100.0,
+            'standard_price': 10.0,
+            'property_account_income_id': self.company_data["default_account_revenue"].id,
+            'property_account_expense_id': self.company_data["default_account_expense"].id,
+        })
+        invoices = self.env['account.move'].create([
+            {
+                'move_type': 'in_invoice',
+                'partner_id': self.res_partner_adhoc.id,
+                'invoice_date': '2025-05-30',
+                "journal_id": purchase_journal.id,
+                "l10n_latam_document_number": "0001-00000001",
+                'invoice_line_ids': [
+                    Command.create({
+                        'product_id': test_product.id,
+                        'price_unit': 1210.0,
+                        'tax_ids': [Command.set([self.tax_21.id, iibb_tax_1.id, iibb_tax_2.id])],
+                    })],
+            },
+        ])
+        invoices.action_post()
+        options = self._generate_options(self.report, date_from=fields.Date.from_string('2025-05-29'), date_to=fields.Date.from_string('2025-05-31'))
+        lines = self.report._get_lines(options)
+        self.assertLinesValues(
+            # pylint: disable=C0326
+            lines,
+            #    Move Name              Partner Name    VAT            Taxed   VAT 21% Others Total
+            [    0,                     2,              4,             5,         8,     11,    15],
+            [
+                ('FA-A 00001-00000001', 'ADHOC SA', '30714295698', -1000,      -210, -24.20, -1234.20),
             ],
             options,
         )

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2025-10-08 18:43+0000\n"
+"POT-Creation-Date: 2026-01-02 18:40+0000\n"
+"PO-Revision-Date: 2026-01-02 18:40+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -85,13 +85,13 @@ msgstr ""
 
 #. module: documents
 #: model:documents.tag,name:documents.documents_tag_year_previous
-msgid "2024"
+msgid "2025"
 msgstr ""
 
 #. module: documents
 #: model:documents.document,name:documents.document_finance_annual_closing_year_current_folder
 #: model:documents.tag,name:documents.documents_tag_year_current
-msgid "2025"
+msgid "2026"
 msgstr ""
 
 #. module: documents
@@ -372,7 +372,7 @@ msgid ""
 "                                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
 "                                    <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
 "                                        <div>\n"
-"                                            Hello <t t-out=\"object.owner_id.name or ''\">OdooBot</t>,\n"
+"                                            Hello <t t-out=\"object.requestee_partner_id.name or ''\">OdooBot</t>,\n"
 "                                            <br/><br/>\n"
 "                                            <t t-out=\"object.create_uid.name or ''\">OdooBot</t> (<t t-out=\"object.create_uid.email or ''\">odoobot@example.com</t>) asks you to provide the following document:\n"
 "                                            <br/><br/>\n"
@@ -474,7 +474,7 @@ msgid ""
 "                                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" style=\"min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
 "                                    <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
 "                                        <div>\n"
-"                                            Hello <t t-out=\"object.owner_id.name or ''\">OdooBot</t>,\n"
+"                                            Hello <t t-out=\"object.requestee_partner_id.name or ''\">OdooBot</t>,\n"
 "                                            <br/><br/>\n"
 "                                            This is a friendly reminder to upload your requested document:\n"
 "                                            <br/><br/>\n"
@@ -900,11 +900,6 @@ msgid "Allowed Access"
 msgstr ""
 
 #. module: documents
-#: model:res.groups,comment:documents.group_documents_user
-msgid "Allows you to manage his documents."
-msgstr ""
-
-#. module: documents
 #. odoo-python
 #: code:addons/documents/models/documents_document.py:0
 msgid "Already linked Documents: %s"
@@ -1073,6 +1068,13 @@ msgid "Can add, modify, and delete files within this folder."
 msgstr ""
 
 #. module: documents
+#: model:res.groups,comment:documents.group_documents_manager
+msgid ""
+"Can configure folders, manage access rights, and oversee all documents "
+"within their areas."
+msgstr ""
+
+#. module: documents
 #. odoo-python
 #: code:addons/documents/wizard/documents_sharing.py:0
 msgid "Can modify, delete, and rename."
@@ -1095,6 +1097,11 @@ msgstr ""
 #. odoo-python
 #: code:addons/documents/wizard/documents_sharing.py:0
 msgid "Can only view. Cannot rename, move, or delete."
+msgstr ""
+
+#. module: documents
+#: model:res.groups,comment:documents.group_documents_user
+msgid "Can view or edit, upload, and share their own or shared documents."
 msgstr ""
 
 #. module: documents
@@ -1754,6 +1761,8 @@ msgid "Documents: Access Tracking"
 msgstr ""
 
 #. module: documents
+#. odoo-javascript
+#: code:addons/documents/static/src/views/widget/documents_operation_confirmation.js:0
 #: model_terms:ir.ui.view,arch_db:documents.documents_sharing_view_form
 msgid "Done"
 msgstr ""
@@ -2090,6 +2099,11 @@ msgid "Font awesome icon e.g. fa-tasks"
 msgstr ""
 
 #. module: documents
+#: model_terms:ir.ui.view,arch_db:documents.document_view_search
+msgid "Future Activities"
+msgstr ""
+
+#. module: documents
 #. odoo-javascript
 #: code:addons/documents/static/src/owl/components/pdf_exit_dialog/pdf_exit_dialog.xml:0
 msgid "Gather in one document"
@@ -2144,6 +2158,13 @@ msgstr ""
 #. module: documents
 #: model:ir.model.fields,field_description:documents.field_documents_sharing__has_warning_partners_without_access
 msgid "Has Warning Partners Without Access"
+msgstr ""
+
+#. module: documents
+#: model:res.groups,comment:documents.group_documents_system
+msgid ""
+"Has full control over all document settings, folders, and user rights across"
+" the application."
 msgstr ""
 
 #. module: documents
@@ -2493,6 +2514,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:documents.field_documents_sharing_access__write_date
 #: model:ir.model.fields,field_description:documents.field_documents_tag__write_date
 msgid "Last Updated on"
+msgstr ""
+
+#. module: documents
+#: model_terms:ir.ui.view,arch_db:documents.document_view_search
+msgid "Late Activities"
 msgstr ""
 
 #. module: documents
@@ -3087,6 +3113,31 @@ msgstr ""
 
 #. module: documents
 #. odoo-javascript
+#: code:addons/documents/static/src/views/documents_renderer_mixin.js:0
+msgid "Only current page items can be dragged."
+msgstr ""
+
+#. module: documents
+#. odoo-python
+#: code:addons/documents/models/documents_document.py:0
+msgid ""
+"Only one string or number value can be searched for documents `child_of`."
+msgstr ""
+
+#. module: documents
+#. odoo-python
+#: code:addons/documents/models/documents_document.py:0
+msgid "Only one value can be searched for child of `folder_id`."
+msgstr ""
+
+#. module: documents
+#. odoo-python
+#: code:addons/documents/models/documents_document.py:0
+msgid "Only one value can be searched for children of `user_folder_id`"
+msgstr ""
+
+#. module: documents
+#. odoo-javascript
 #. odoo-python
 #: code:addons/documents/static/src/owl/components/access_update_confirmation_dialog/access_update_confirmation_dialog.xml:0
 #: code:addons/documents/wizard/documents_sharing.py:0
@@ -3644,6 +3695,11 @@ msgid "Shortcuts created in %(folder_name)s!"
 msgstr ""
 
 #. module: documents
+#: model_terms:ir.ui.view,arch_db:documents.document_view_search
+msgid "Show all records whose next activity date is past"
+msgstr ""
+
+#. module: documents
 #: model:ir.model.fields,field_description:documents.field_documents_operation__destination_children_ids
 msgid "Siblings"
 msgstr ""
@@ -4027,6 +4083,11 @@ msgid "Today"
 msgstr ""
 
 #. module: documents
+#: model_terms:ir.ui.view,arch_db:documents.document_view_search
+msgid "Today Activities"
+msgstr ""
+
+#. module: documents
 #. odoo-javascript
 #: code:addons/documents/static/src/views/kanban/documents_kanban_renderer.js:0
 msgid "Toggle favorite"
@@ -4361,6 +4422,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/documents/models/documents_document.py:0
 msgid "You cannot change the owner of documents you do not own."
+msgstr ""
+
+#. module: documents
+#. odoo-python
+#: code:addons/documents/models/documents_document.py:0
+msgid ""
+"You cannot copy a folder into itself or into one of its own descendants."
 msgstr ""
 
 #. module: documents

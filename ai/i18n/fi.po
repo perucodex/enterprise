@@ -3,20 +3,22 @@
 # * ai
 #
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Saara Hakanen <sahak@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:45+0000\n"
-"PO-Revision-Date: 2025-09-16 15:30+0000\n"
-"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:43+0000\n"
+"PO-Revision-Date: 2026-01-02 13:07+0000\n"
+"Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/ai/fi/>\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_read_group
@@ -28,6 +30,12 @@ msgid ""
 "must be in valid JSON format.\n"
 "        "
 msgstr ""
+"\n"
+"            **Työkalun nimi: Lue ryhmä**\n"
+"\n"
+"            Etsii tietyn mallin käyttäen domainia. Tarjotun domainin täytyy "
+"olla kelvollisessa JSON-muodossa.\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_search
@@ -39,6 +47,12 @@ msgid ""
 "must be in valid JSON format.\n"
 "        "
 msgstr ""
+"\n"
+"            **Työkalun nimi: haku**\n"
+"\n"
+"            Hakee tiettyä mallia domainia käyttäen. Domainin tulee olla "
+"kelvollisessa JSON  -muodossa.\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_get_fields
@@ -81,6 +95,41 @@ msgid ""
 "Make 3 parallel calls.\n"
 "        "
 msgstr ""
+"\n"
+"            Listaa VAIN haettavat kentät yhdelle mallille, jota voi käyttää "
+"domain-suodattimissa ja ryhmittelyssä\n"
+"            Välttämätön kelpuutettavien domainien rakentamiseksi - jos "
+"kenttää ei ole listattu täällä, sitä EI VOI käyttää.\n"
+"\n"
+"            Palautusmuoto:\n"
+"            ```\n"
+"            field_name|display_name|type|sortable|groupable|kuvaus\n"
+"            partner_id|Customer|many2one(res.partner)|true|true|tämän "
+"tilauksen asiakas\n"
+"            date_order|Order Date|datetime|true|true|tilauspäivämäärä\n"
+"            order_line|Order Lines|one2many(sale.order.line)|false|false|"
+"tilausrivit\n"
+"            state|Status|selection|true|true|Tilauksen tila\n"
+"            ```\n"
+"\n"
+"            Pääkohdat:\n"
+"            - ⚠️ Palauttaa vain HAETTAVIA kenttiä - muita ei voi käyttää "
+"domaineissa\n"
+"            - Suhteet: Näyttää siihen liittyvän mallin sukeissa (many2one, "
+"one2many, many2many)\n"
+"            - Vain suhdekenttiä voi käyttää toisiin malleihin siirtymiseen\n"
+"            - Kirjaimellisia kenttiä, kuten char/text/float EI VOI käyttää "
+"siirtymiseen\n"
+"            - 'sortable' ilmaisee, voiko kenttää käyttää order_by "
+"-parametrissa\n"
+"            - 'groupable' ilmaisee, voiko kenttää käyttää ryhmittelyyn, kun "
+"se ei ole saatavilla hakunäkymässä\n"
+"\n"
+"            💡 Suorituskykyvinkki: Tutkiessasi useita malleja, kutsu tätä "
+"työkalua useita kertoja YHDESSÄ viestissä\n"
+"            Esimerkki: Tutkitko sale.order, product.product, ja res.partner? "
+"Tee 3 rinnakkaista kutsua.\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_compute_report_measures
@@ -109,6 +158,29 @@ msgid ""
 "            - Call multiple times in parallel if comparing different menus\n"
 "        "
 msgstr ""
+"\n"
+"            Listaa numeeriset kentät (mitat), jotka ovat käytettävissä "
+"aggregointiin pivot- ja kaavionäkymissä.\n"
+"            TÄYTYY kutsua ennen open_menu_pivot() tai open_menu_graph() "
+"-mittojen käyttämistä.\n"
+"\n"
+"            Palauttaa CSV-tiedoston, jossa on putkimerkki (|) erottimena:\n"
+"            ```\n"
+"            field_name|display_name|type|aggregator|sortable\n"
+"            __count|Count|integer||true\n"
+"            amount_total|Total|monetary|sum|true\n"
+"            margin|Margin|float|sum|true\n"
+"            quantity|Quantity|float|sum|true\n"
+"            ```\n"
+"\n"
+"            Avainkohdat:\n"
+"            - __count on aina saatavilla (laskee tietueet)\n"
+"            - Vain numeeriset kentät aggregaattoreilla palautetaan\n"
+"            - Käytä field_name mitat-parametreissä\n"
+"            - Pivot-rankingissa: Lisää tilaaminen (esim. \"amount_total "
+"desc\")\n"
+"            - Kutsu useita kertoja rinnakkain, jos vertailet eri valikoita\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_graph
@@ -137,6 +209,32 @@ msgid ""
 "            ⚠️ Order must be exactly 'ASC' or 'DESC'\n"
 "        "
 msgstr ""
+"\n"
+"            Avaa kaavio-/taulukkonäkymän käyttämällä hakunäkymän "
+"elementtejä.\n"
+"Sopii parhaiten: Trendeille, vertailuille, jakaumille, visuaalisille "
+"suorituskykymittareille.\n"
+"\n"
+"Tuetut kaaviotyypit:\n"
+"- 'pylväs': Vertaa arvoja eri kategorioiden välillä\n"
+"- 'viiva': Näytä trendit ajan kuluessa\n"
+"- 'ympyrä': Näytä osuudet kokonaisuudesta\n"
+"\n"
+"            Ominaisuudet:\n"
+"- Suodattimien soveltaminen valikon käytettävissä olevista vaihtoehdoista\n"
+"- Yhden mittarin visualisointi\n"
+"- Ryhmittely yhden kentän perusteella kaavion akselille\n"
+"- Haku tietyissä kentissä\n"
+"- Pinonta- ja kertymisvaihtoehdot\n"
+"- Järjestyksen hallinta (ASC/DESC)\n"
+"\n"
+"            💡 Kutsu ensin compute_report_measures() löytääksesi kelvolliset "
+"mitat\n"
+"⚠️ Jokaisen hakumerkkijonon on käytettävä muotoa 'field=text'. Taulukko voi "
+"sisältää useita hakumerkkijonoja tai olla tyhjä []\n"
+"⚠️ Tilaksi on asetettava tarkalleen 'bar', 'line' tai 'pie'\n"
+"⚠️ Järjestykseksi on asetettava tarkalleen 'ASC' tai 'DESC'\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_kanban
@@ -158,6 +256,24 @@ msgid ""
 "contain multiple search strings or be empty []\n"
 "        "
 msgstr ""
+"\n"
+"            Avaa kanban-näkymän (korttipohjainen) hakunäkymäelementtien "
+"avulla.\n"
+"Sopii parhaiten: Vaiheen/tilan visualisointiin, putkinäkymiin, työnkulun "
+"hallintaan.\n"
+"\n"
+"Tärkeimmät ominaisuudet:\n"
+"- Näyttää tietueet kortteina sarakkeissa\n"
+"- Käyttää suodattimia valikon käytettävissä olevista vaihtoehdoista\n"
+"- Ryhmittelee työnkulun vaiheiden tai muiden kenttien mukaan\n"
+"- Hakee tietyistä kentistä\n"
+"- Ihanteellinen CRM-myyntiputkille, tehtävätauluille ja projektien "
+"työnkuluille\n"
+"\n"
+"⚠️ Käytä ainoastaan suodattimen nimiä ja ryhmittelykenttiä valikkotiedoista\n"
+"⚠️ Jokaisen hakumerkkijonon on käytettävä muotoa 'field=text'. Taulukko voi "
+"sisältää useita hakumerkkijonoja tai olla tyhjä []\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_list
@@ -181,6 +297,26 @@ msgid ""
 "contain multiple search strings or be empty []\n"
 "        "
 msgstr ""
+"\n"
+"            Avaa luettelonäkymän (taulukko) käyttäen hakunäkymän "
+"elementtejä.\n"
+"Sopii parhaiten: \"Näytä minulle\", \"Luettele kaikki\", yksityiskohtaisten "
+"tietueiden katselu, tietojen lajittelu.\n"
+"\n"
+"Tärkeimmät ominaisuudet:\n"
+"- Useiden suodattimien soveltaminen nimen perusteella (valikon "
+"hakunäkymästä)\n"
+"- Tietueiden ryhmittely käytettävissä olevien kenttien perusteella\n"
+"- Tekstin haku tietyistä kentistä\n"
+"- Tietueiden näyttäminen lajiteltavassa taulukkomuodossa\n"
+"- Ihanteellinen tietojen tarkasteluun, suodattamiseen ja viemiseen\n"
+"\n"
+"💡 Käytä hakuparametria suodattaaksesi minkä tahansa haettavan kentän "
+"perusteella ENNEN mukautettujen domainien harkitsemista\n"
+"⚠️ Käytä vain suodattimen nimiä ja ryhmittelykenttiä valikkotiedoista\n"
+"⚠️ Jokaisen hakumerkkijonon on käytettävä muotoa 'field=text'. Taulukko voi "
+"sisältää useita hakumerkkijonoja tai olla tyhjä []\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_pivot
@@ -216,6 +352,37 @@ msgid ""
 "needs\n"
 "        "
 msgstr ""
+"\n"
+"            Avaa pivot-taulukon edistyksellisillä haku- ja "
+"suodatusominaisuuksilla.\n"
+"Sopii parhaiten: \"Top N\" -kyselyihin, rankingeihin, ristitaulukointeihin "
+"ja suorituskykymittareihin.\n"
+"\n"
+"Tärkeimmät ominaisuudet:\n"
+"- Tukee hakunäkymän suodattimia\n"
+"- Ryhmittelee tiedot samanaikaisesti riveittäin JA sarakkeittain\n"
+"- Aggregoi mittarit (summa, keskiarvo, lukumäärä)\n"
+"- Tukee tekstihakua haettavissa kentissä\n"
+"- Excel-tyyppinen pivot-taulukon toiminnallisuus\n"
+"\n"
+"💡 Kutsu AINA ensin compute_report_measures() saadaksesi kelvolliset "
+"mittaukset\n"
+"💡 Rankingit: Lisää järjestys mittoihin (esim. [\"amount_total desc\"])\n"
+"💡 Käytä hakuparametria minkä tahansa haettavan kentän perusteella "
+"suodattamiseksi ENNEN mukautettujen domainien harkitsemista\n"
+"⚠️ Suosi \"Raportointi\"-sovelluksen valikoita parhaan pivot-kokemuksen "
+"saamiseksi\n"
+"⚠️ Jokaisen hakumerkkijonon on käytettävä muotoa 'field=text'. Taulukko voi "
+"sisältää useita hakumerkkijonoja tai olla tyhjä []\n"
+"⚠️ Huomio: Käyttää row_groupbys/col_groupbys (taulukoita) selected_groupbys "
+"sijaan\n"
+"\n"
+"            Esimerkki: \"Parhaat toimistotuotteiden myyjät\":\n"
+"            - Käytä search=[\"categ_id\", \"office\"], jos categ_id on "
+"haettavissa\n"
+"            - Käytä custom_domain vain, jos mikään haettava kenttä ei vastaa "
+"tarpeitasi\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_get_menu_details
@@ -246,6 +413,33 @@ msgid ""
 "            ⚠️ Always validate the returned model matches your expectations\n"
 "        "
 msgstr ""
+"\n"
+"            Noutaa yksityiskohtaista tietoa (konteksti, domain, search_view) "
+"tietyille valikoille.\n"
+"            TÄYTYY käyttää ennen open_menu_* -työkalun käyttämistä "
+"valikkokohtaisen tiedon saamiseksi.\n"
+"\n"
+"            Palauttaa CSV-tiedoston putkimerkkierottimella (|):\n"
+"            ```\n"
+"            menu_id|model_name|context|domain|search_view\n"
+"            389|sale.order|{\"search_default_my_quotation\": 1}|[]|"
+"<search><fields>...</fields></search>\n"
+"            172|account.move|{\"search_default_draft\": 1}|[[\"type\", "
+"\"=\", \"out_invoice\"]]|<search>...</search>\n"
+"            ```\n"
+"\n"
+"            Tärkeää tietoa:\n"
+"            - Konteksti: Oletussuodattimia/-ryhmittelyjä sovelletaan valikon "
+"auetessa\n"
+"            - Domain: Pysyvät suodattimet, joita käyttäjät eivät voi "
+"poistaa\n"
+"            - Search_view: Täysi XML-rakenne saatavilla olevilla "
+"suodattimilla, ryhmittelyillä ja haettavilla kentillä\n"
+"\n"
+"            💡 Suoritusvinkki: Pyydä useita valikkoyksityiskohtia yhdellä "
+"soitolla vaihtoehtoja vertaillessa\n"
+"            ⚠️ Vahvista aina, että palautettu malli vastaa odotuksiasi\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_adjust_search
@@ -291,12 +485,52 @@ msgid ""
 "the current view info.\n"
 "        "
 msgstr ""
+"\n"
+"            Käyttäjä voi jatkaa kysymysten esittämistä. Sinä voit jatkaa "
+"tämän työkalun käyttämistä, jos uskot, että tämänhetkistä hakua voi muokata "
+"ilman erillisen valikon avaamista.\n"
+"\n"
+"            Kehotus <session_info_context> on tämänhetkisen näkymän tieto, "
+"joka sisältää aktiiviset hakufasetit.\n"
+"            Fasetti voi olla ryhmä `OR`-suodattimia, ryhmä ryhmittelyjä, tai "
+"ryhmä `OR`-hakutermejä.\n"
+"\n"
+"            **Parametrien ymmärtäminen**:\n"
+"            - `remove_facets` - Fasetin poistaminen poistaa koko suodatin-/"
+"ryhmittely-/hakutermiryhmän. Suodattimen tai hakutermin poistaminen vähentää "
+"rajoituksia.\n"
+"            - `toggle_filters` - Suodattimen vaihtaminen lisää/poistaa "
+"suodattimen aktiivisesta suodatinfasetista.\n"
+"            - `toggle_groupbys` - Ryhmittelyn vaihtaminen lisää/poistaa "
+"ryhmittelyn aktiivisesta ryhmittelyfasetista.\n"
+"            - `apply_searches` - Haun soveltaminen johtaa hakutermin `OR` "
+"-toimintoon aktiivisessa hakufasetissa, joka sisältää saman kentän. Esim. "
+"jos on olemassa kenttäfasetti \"name=John\" ja toteutat haun \"name=Jane\", "
+"tuloksena on haku \"name=John OR name=Jane\".\n"
+"            - `measures` - Mittojen määrittäminen aktivoi valitut mitat "
+"tämänhetkisessä näkymässä, jos se on pivot- tai kaavionäkymä.\n"
+"            - `mode` - Vain kaavionäkymässä: Tämä on kaaviotyyppi. Valitse "
+"\"viiva\", \"pylväs\", or \"ympyrä\" vaihtaaksesi kaaviotyyppiä nykyisessä "
+"kaavionäkymässä.\n"
+"            - `order` - Vain kaavionäkymässä: Järjestyksen määrittäminen "
+"muuttaa tulosten lajittelua nykyisessä kaavionäkymässä.\n"
+"            - `stacked` - Vain kaavionäkymässä: Pinonnan määrittäminen "
+"muuttaa tulosten pinontaa nykyisessä kaavionäkymässä.\n"
+"            - `cumulated` - Vain kaavionäkymässä: Kertymän määrittäminen "
+"muuttaa tulosten kertymistä nykyisessä kaavionäkymässä\n"
+"            - `custom_domain` - Hakunäkymän elementit eivät välttämättä "
+"riitä tarvitun domainin ilmaisemiseen. Siinä tapauksessa annat mukautetun "
+"domainin JSON-merkkijonona.\n"
+"            - `switch_view_type` - Näkymätyypin vaihtaminen muuttaa "
+"tämänhetkisen näkymän määritetyn tyyppiseksi. Valitse saatavilla olevista "
+"näkymätyypeistä tämänhetkisen näkymän tiedoista.\n"
+"        "
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0 code:addons/ai/models/ai_composer.py:0
 msgid "%s (copy)"
-msgstr ""
+msgstr "%s (kopio)"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
@@ -304,6 +538,8 @@ msgid ""
 "<br/>\n"
 "            It used the following tools:"
 msgstr ""
+"<br/>\n"
+"            Se käytti seuraavia työkaluja:"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
@@ -312,11 +548,14 @@ msgid ""
 "ai_tool_show_warning\" aria-hidden=\"true\" title=\"The AI will not be "
 "limited by the groups defined on tools\"/>"
 msgstr ""
+"<i class=\"fa fa-warning text-warning me-2\" invisible=\"not "
+"ai_tool_show_warning\" aria-hidden=\"true\" title=\"Tekoälyä ei rajoiteta "
+"työkaluissa määritetyillä ryhmillä\"/>"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
 msgid "<span>with arguments</span>"
-msgstr ""
+msgstr "<span>argumenteilla</span>"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_agent__topic_ids
@@ -340,7 +579,7 @@ msgstr "Tekoäly"
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_action_prompt
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_action_prompt
 msgid "AI Action Prompt"
-msgstr ""
+msgstr "Tekoälyn toimintakehote"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_agent
@@ -350,17 +589,17 @@ msgstr "Tekoäly-agentti"
 #. module: ai
 #: model:ir.model,name:ai.model_ai_agent_source
 msgid "AI Agent Source"
-msgstr ""
+msgstr "Tekoälyagentin lähde"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_cron_process_sources_ir_actions_server
 msgid "AI Agent Sources: Process Sources"
-msgstr ""
+msgstr "Tekoälyagentin lähteet: Lähteiden käsittely"
 
 #. module: ai
 #: model:ir.model.constraint,message:ai.constraint_discuss_channel_ai_channel_type_check
 msgid "AI Agent can only be set for ai_chat or livechat channels."
-msgstr ""
+msgstr "Tekoälyagentin voi asettaa vain ai_chat tai livechat-kanaville."
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_cron_generate_embedding_ir_actions_server
@@ -370,25 +609,25 @@ msgstr "Tekoälyn upottaminen: Luo upotuksia"
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_prompt_button__name
 msgid "AI Prompt"
-msgstr ""
+msgstr "Tekoälykehote"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "AI Prompt Tools"
-msgstr ""
+msgstr "Tekoälyn kehotteiden työkalut"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_schema
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_schema
 msgid "AI Schema"
-msgstr ""
+msgstr "Tekoäly-schema"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_description
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_description
 msgid "AI Tool Description"
-msgstr ""
+msgstr "Tekoälytyökalun kuvaus"
 
 #. module: ai
 #. odoo-javascript
@@ -407,13 +646,13 @@ msgstr "AI-keskustelu"
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
 msgid "AI is listening..."
-msgstr ""
+msgstr "Tekoäly kuuntelee..."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/discuss/typing_patch.js:0
 msgid "AI is thinking..."
-msgstr ""
+msgstr "Tekoäly ajattelee..."
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_composer
@@ -494,7 +733,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ai_composer__interface_key
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
 msgid "Action"
-msgstr ""
+msgstr "Toiminto"
 
 #. module: ai
 #. odoo-python
@@ -506,7 +745,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ai_agent__active
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__is_active
 msgid "Active"
-msgstr ""
+msgstr "Aktiivinen"
 
 #. module: ai
 #. odoo-python
@@ -518,7 +757,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Add"
-msgstr ""
+msgstr "Lisää"
 
 #. module: ai
 #. odoo-javascript
@@ -536,7 +775,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid "Add a Link"
-msgstr ""
+msgstr "Lisää linkki"
 
 #. module: ai
 #. odoo-javascript
@@ -605,12 +844,6 @@ msgid "An error occured"
 msgstr ""
 
 #. module: ai
-#. odoo-javascript
-#: code:addons/ai/static/src/discuss/core/common/thread_model_patch.js:0
-msgid "An error occurred while generating the AI response."
-msgstr ""
-
-#. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent__response_style__analytical
 msgid "Analytical"
 msgstr "Analyyttinen"
@@ -649,7 +882,7 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__avatar_128
 msgid "Avatar"
-msgstr ""
+msgstr "Avatar"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent__response_style__balanced
@@ -684,7 +917,7 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__checksum
 msgid "Checksum/SHA1"
-msgstr ""
+msgstr "Checksum/SHA1"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__content
@@ -696,7 +929,7 @@ msgstr "Tietolohkojen sisältö"
 #: code:addons/ai/static/src/ai_natural_language_service.js:0
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Close"
-msgstr ""
+msgstr "Sulje"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_prompt_button__composer_id
@@ -802,7 +1035,7 @@ msgstr ""
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
 msgid "Discard"
-msgstr ""
+msgstr "Hylkää"
 
 #. module: ai
 #: model:ir.model,name:ai.model_discuss_channel
@@ -833,13 +1066,13 @@ msgstr "Näyttönimi"
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Edit"
-msgstr ""
+msgstr "Muokkaa"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_prompt.xml:0
 msgid "Edit Field Prompt"
-msgstr ""
+msgstr "Muokkaa kentän kehotetta"
 
 #. module: ai
 #. odoo-javascript
@@ -855,7 +1088,7 @@ msgstr "Sähköpostimallit"
 #. module: ai
 #: model:ir.model,name:ai.model_mail_thread
 msgid "Email Thread"
-msgstr ""
+msgstr "Sähköpostiviestiketju"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__embedding_model
@@ -891,6 +1124,12 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__failed
 msgid "Failed"
+msgstr "Epäonnistui"
+
+#. module: ai
+#. odoo-python
+#: code:addons/ai/models/ai_agent_source.py:0
+msgid "Failed to fetch the content of the source."
 msgstr ""
 
 #. module: ai
@@ -903,17 +1142,17 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "Field Selector"
-msgstr ""
+msgstr "Kentän valitsin"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__type__binary
 msgid "File"
-msgstr ""
+msgstr "Tiedosto"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__file_size
 msgid "File Size"
-msgstr ""
+msgstr "Tiedostokoko"
 
 #. module: ai
 #. odoo-javascript
@@ -939,7 +1178,7 @@ msgstr "Google AI API-avain"
 #. module: ai
 #: model:ir.model,name:ai.model_ir_http
 msgid "HTTP Routing"
-msgstr ""
+msgstr "HTTP-reititys"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__has_embedding_generation_failed
@@ -990,20 +1229,20 @@ msgstr "Kuva"
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__indexed
 msgid "Indexed"
-msgstr ""
+msgstr "Indeksoitu"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_model_field_selector/ai_model_field_selector_popover.xml:0
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
 msgid "Insert"
-msgstr ""
+msgstr "Lisää"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "Insert a field"
-msgstr ""
+msgstr "Lisää kenttä"
 
 #. module: ai
 #. odoo-javascript
@@ -1015,7 +1254,7 @@ msgstr "Lisää AI-kehote"
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_records_selector_plugin.js:0
 msgid "Insert records"
-msgstr ""
+msgstr "Lisää tietueita"
 
 #. module: ai
 #. odoo-javascript
@@ -1081,7 +1320,7 @@ msgstr ""
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.res_config_settings_view_form
 msgid "Key"
-msgstr ""
+msgstr "Avain"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__llm_model
@@ -1110,7 +1349,7 @@ msgstr "Viimeksi päivitetty"
 
 #. module: ai
 #. odoo-javascript
-#: code:addons/ai/static/src/web/systray_action.js:0
+#: code:addons/ai/static/src/ai_chat_launcher_service.js:0
 msgid "Log Note"
 msgstr "Loki Huomautus"
 
@@ -1139,7 +1378,7 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__mimetype
 msgid "Mime Type"
-msgstr ""
+msgstr "Mime-tyyppi"
 
 #. module: ai
 #. odoo-python
@@ -1150,7 +1389,7 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__focused_models
 msgid "Models"
-msgstr ""
+msgstr "Mallit"
 
 #. module: ai
 #. odoo-javascript
@@ -1169,6 +1408,12 @@ msgstr "API-avainta ei ole asetettu palveluntarjoajalle '%s'"
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
 msgid "No configured Ask AI agent. Please contact your administrator."
+msgstr ""
+
+#. module: ai
+#. odoo-python
+#: code:addons/ai/utils/llm_providers.py:0
+msgid "No embedding configuration found for the provider"
 msgstr ""
 
 #. module: ai
@@ -1204,7 +1449,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid ""
-"No valid files to upload. Only PDF, Word, PowerPoint, Excel, Text, and "
+"No valid files to upload. Only PDF, Word, PowerPoint, Excel, Text, CSV, and "
 "OpenDocument files are allowed."
 msgstr ""
 
@@ -1213,7 +1458,7 @@ msgstr ""
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Notes"
-msgstr ""
+msgstr "Muistiinpanot"
 
 #. module: ai
 #. odoo-javascript
@@ -1225,6 +1470,12 @@ msgstr "Saatavilla"
 #. odoo-python
 #: code:addons/ai/models/ai_agent_source.py:0
 msgid "Only administrators can create sources from URLs."
+msgstr ""
+
+#. module: ai
+#. odoo-python
+#: code:addons/ai/models/ai_agent.py:0
+msgid "Oops, it looks like our AI is unreachable"
 msgstr ""
 
 #. module: ai
@@ -1257,13 +1508,13 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__processing
 msgid "Processing"
-msgstr ""
+msgstr "Käsittelyssä"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Processing..."
-msgstr ""
+msgstr "Prosessoidaan..."
 
 #. module: ai
 #. odoo-javascript
@@ -1294,19 +1545,19 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
 msgid "Record"
-msgstr ""
+msgstr "Tietue"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_records_selector_plugin.js:0
 msgid "Records Selector"
-msgstr ""
+msgstr "Tietuevalitsin"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Required"
-msgstr ""
+msgstr "Vaadittu"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__response_style
@@ -1326,19 +1577,19 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__name
 msgid "Rule Name"
-msgstr ""
+msgstr "Säännön nimi"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
 msgid "Save"
-msgstr ""
+msgstr "Tallenna"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_prompt.xml:0
 msgid "Save & Generate"
-msgstr ""
+msgstr "Tallenna & luo"
 
 #. module: ai
 #. odoo-javascript
@@ -1348,7 +1599,7 @@ msgstr ""
 
 #. module: ai
 #. odoo-javascript
-#: code:addons/ai/static/src/web/systray_action.js:0
+#: code:addons/ai/static/src/ai_chat_launcher_service.js:0
 msgid "Send Message"
 msgstr "Lähetä viesti"
 
@@ -1399,7 +1650,7 @@ msgstr ""
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
 msgid ""
 "Some files have invalid formats and were skipped: %s. Only PDF, Word, "
-"PowerPoint, Excel, Text, and OpenDocument files are allowed."
+"PowerPoint, Excel, Text, CSV, and OpenDocument files are allowed."
 msgstr ""
 
 #. module: ai
@@ -1433,20 +1684,20 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__status
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Stop Recording"
-msgstr ""
+msgstr "Lopeta tallennus"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Summary"
-msgstr ""
+msgstr "Yhteenveto"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__voice_transcription_component
@@ -1572,7 +1823,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_ids
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_ids
 msgid "Tools"
-msgstr ""
+msgstr "Työkalut"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__topic_ids
@@ -1599,7 +1850,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__state
 #: model:ir.model.fields,field_description:ai.field_ir_cron__state
 msgid "Type"
-msgstr ""
+msgstr "Tyyppi"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ir_actions_server__state
@@ -1618,18 +1869,27 @@ msgid ""
 "- 'Multi Actions': define an action that triggers several other server "
 "actions\n"
 msgstr ""
+"Palvelintoiminnon tyyppi. Saatavilla seuraavat arvot:\n"
+"- 'Päivitä kirjaus': päivitä kirjauksen arvot\n"
+"- 'Luo toiminta': luo toiminnan (Viestintä)\n"
+"- 'Lähetä sähköposti': lähettää viestin, huomautuksen tai sähköpostin "
+"(Viestintä)\n"
+"- 'Lähetä tekstiviesti': lähetä tekstiviestejä, kirjaa ne asiakirjoihin "
+"(Tekstiviesti)\n"
+"- 'Lisää/poista seuraajia': lisää tai poista seuraajia kirjaukseen "
+"(Viestintä)\n"
+"- 'Luo kirjaus': luo uusi kirjaus uusilla arvoilla\n"
+"- 'Suorita koodi': Python-koodin pätkä, joka suoritetaan\n"
+"- 'Lähetä Webhook-ilmoitus': lähetä POST-pyyntö ulkoiseen järjestelmään, "
+"joka tunnetaan myös nimellä Webhook\n"
+"- 'Suorita useita toimintoja': Määritä toiminto, joka käynnistää useita "
+"muita palvelintoimintoja\n"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__url
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__type__url
 msgid "URL"
-msgstr ""
-
-#. module: ai
-#. odoo-python
-#: code:addons/ai/models/ai_agent_source.py:0
-msgid "URL content cannot be extracted."
-msgstr ""
+msgstr "URL"
 
 #. module: ai
 #. odoo-javascript
@@ -1764,4 +2024,4 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "fa-hashtag"
-msgstr ""
+msgstr "fa-hashtag"

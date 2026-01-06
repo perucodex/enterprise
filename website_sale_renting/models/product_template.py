@@ -175,7 +175,7 @@ class ProductTemplate(models.Model):
         if start_date and end_date and start_date >= end_date:
             raise UserError(_("Please choose a return date that is after the pickup date."))
 
-        if (start_date or end_date) and not (pickup_time or return_time):
+        if start_date or end_date:
             return start_date, end_date
 
         default_start_dt = self._get_default_start_date(pickup_time)

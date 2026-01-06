@@ -1,7 +1,7 @@
 import { PosData } from "@point_of_sale/app/services/data_service";
 import { patch } from "@web/core/utils/patch";
 
-patch(PosData.prototype, {
+export const unpatchPrepDataService = patch(PosData.prototype, {
     async loadInitialData() {
         const pdisId = odoo.preparation_display.id;
         return await this.orm.call("pos.prep.display", "load_preparation_data", [parseInt(pdisId)]);

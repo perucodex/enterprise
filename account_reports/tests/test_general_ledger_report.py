@@ -19,10 +19,6 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
         cls.company_data_2['default_account_payable'].with_context(context).code = '211010'
         cls.company_data_2['default_account_revenue'].with_context(context).code = '400010'
         cls.company_data_2['default_account_expense'].with_context(context).code = '600010'
-        cls.env['account.account'].search([
-            ('company_ids', '=', cls.company_data_2['company'].id),
-            ('account_type', '=', 'equity_unaffected')
-        ]).with_context(context).code = '999989'
 
         # Entries in 2016 for company_1 to test the initial balance.
         cls.move_2016_1 = cls.env['account.move'].create({
@@ -131,14 +127,14 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
 
         self.assertLinesValues(
             self.report._get_lines(options),
-            #   Name                                    Debit           Credit          Balance
-            [   0,                                      3,              4,              5],
+            #   Name                                              Debit           Credit          Balance
+            [   0,                                                     3,              4,              5],
             [
-                ('211000 Account Payable',              2100.0,         0.0,            2100.0),
-                ('400000 Product Sales',                0.0,            3300.0,         -3300.0),
-                ('600000 Expenses',                     2200.0,         0.0,            2200.0),
-                ('999999 Undistributed Profits/Losses', 2000.0,         3000.0,         -1000.0),
-                ('Total General Ledger',                6300.0,         6300.0,         0.0),
+                ('211000 Account Payable',                        2100.0,            0.0,          2100.0),
+                ('400000 Product Sales',                             0.0,         3300.0,         -3300.0),
+                ('600000 Expenses',                               2200.0,            0.0,          2200.0),
+                ('Undistributed Profits/Losses - company_1_data', 2000.0,         3000.0,         -1000.0),
+                ('Total General Ledger',                          6300.0,         6300.0,             0.0),
             ],
             options,
         )
@@ -181,14 +177,14 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
         lines = self.report._get_lines(options)
         self.assertLinesValues(
             lines,
-            #   Name                                    Debit           Credit          Balance
-            [   0,                                      3,              4,              5],
+            #   Name                                              Debit           Credit          Balance
+            [   0,                                                3,              4,              5],
             [
-                ('211000 Account Payable',              2100.0,         0.0,             2100.0),
-                ('400000 Product Sales',                0.0,            3300.0,         -3300.0),
-                ('600000 Expenses',                     2200.0,         0.0,             2200.0),
-                ('999999 Undistributed Profits/Losses', 2000.0,         3000.0,         -1000.0),
-                ('Total General Ledger',                6300.0,         6300.0,         0.0),
+                ('211000 Account Payable',                        2100.0,            0.0,          2100.0),
+                ('400000 Product Sales',                             0.0,         3300.0,         -3300.0),
+                ('600000 Expenses',                               2200.0,            0.0,          2200.0),
+                ('Undistributed Profits/Losses - company_1_data', 2000.0,         3000.0,         -1000.0),
+                ('Total General Ledger',                          6300.0,         6300.0,             0.0),
             ],
             options,
         )
@@ -199,19 +195,19 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
 
         self.assertLinesValues(
             self.report._get_lines(options),
-            #   Name                                    Debit           Credit          Balance
-            [   0,                                      3,              4,              5],
+            #   Name                                             Debit           Credit        Balance
+            [   0,                                               3,              4,            5],
             [
-                ('121000 Account Receivable',           1000.0,         0.0,            1000.0),
-                ('211000 Account Payable',              100.0,          0.0,            100.0),
-                ('211010 Account Payable',              50.0,           0.0,            50.0),
-                ('400000 Product Sales',                20000.0,        0.0,            20000.0),
-                ('400010 Product Sales',                0.0,            200.0,          -200.0),
-                ('600000 Expenses',                     0.0,            21000.0,        -21000.0),
-                ('600010 Expenses',                     200.0,          0.0,            200.0),
-                ('999989 Undistributed Profits/Losses', 0.0,            50.0,           -50.0),
-                ('999999 Undistributed Profits/Losses', 200.0,          300.0,          -100.0),
-                ('Total General Ledger',                21550.0,        21550.0,        0.0),
+                ('121000 Account Receivable',                    1000.0,         0.0,          1000.0),
+                ('211000 Account Payable',                        100.0,         0.0,           100.0),
+                ('211010 Account Payable',                         50.0,         0.0,            50.0),
+                ('400000 Product Sales',                        20000.0,         0.0,         20000.0),
+                ('400010 Product Sales',                            0.0,       200.0,          -200.0),
+                ('600000 Expenses',                                 0.0,     21000.0,        -21000.0),
+                ('600010 Expenses',                               200.0,         0.0,           200.0),
+                ('Undistributed Profits/Losses - company_1_data', 200.0,       300.0,          -100.0),
+                ('Undistributed Profits/Losses - company_2',        0.0,        50.0,           -50.0),
+                ('Total General Ledger',                        21550.0,     21550.0,             0.0),
             ],
             options,
         )
@@ -219,39 +215,39 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
         options['unfold_all'] = True
         self.assertLinesValues(
             self.report._get_lines(options),
-            #   Name                                    Debit           Credit          Balance
-            [   0,                                      3,              4,              5],
+            #   Name                                             Debit           Credit   Balance
+            [   0,                                               3,              4,       5],
             [
-                ('121000 Account Receivable',           1000.0,         0.0,            1000.0),
-                ('INV/2017/00001 2017_1_1',             1000.0,         0.0,            1000.0),
-                ('Total 121000 Account Receivable',     1000.0,         0.0,            1000.0),
-                ('211000 Account Payable',              100.0,          0.0,            100.0),
-                ('Initial Balance',                     100.0,          0.0,            100.0),
-                ('Total 211000 Account Payable',        100.0,          0.0,            100.0),
-                ('211010 Account Payable',              50.0,           0.0,            50.0),
-                ('Initial Balance',                     50.0,           0.0,            50.0),
-                ('Total 211010 Account Payable',        50.0,           0.0,            50.0),
-                ('400000 Product Sales',                20000.0,        0.0,            20000.0),
-                ('INV/2017/00001 2017_1_2',             2000.0,         0.0,            2000.0),
-                ('INV/2017/00001 2017_1_3',             3000.0,         0.0,            5000.0),
-                ('INV/2017/00001 2017_1_4',             4000.0,         0.0,            9000.0),
-                ('INV/2017/00001 2017_1_5',             5000.0,         0.0,            14000.0),
-                ('INV/2017/00001 2017_1_6',             6000.0,         0.0,            20000.0),
-                ('Total 400000 Product Sales',          20000.0,        0.0,            20000.0),
-                ('400010 Product Sales',                0.0,            200.0,          -200.0),
-                ('BNK1/2017/00001 2017_2_2',            0.0,            200.0,          -200.0),
-                ('Total 400010 Product Sales',          0.0,            200.0,          -200.0),
-                ('600000 Expenses',                     0.0,            21000.0,        -21000.0),
-                ('INV/2017/00001 2017_1_7',             0.0,            6000.0,         -6000.0),
-                ('INV/2017/00001 2017_1_8',             0.0,            7000.0,         -13000.0),
-                ('INV/2017/00001 2017_1_9',             0.0,            8000.0,         -21000.0),
-                ('Total 600000 Expenses',               0.0,            21000.0,        -21000.0),
-                ('600010 Expenses',                     200.0,          0.0,            200.0),
-                ('BNK1/2017/00001 2017_2_1',            200.0,          0.0,            200.0),
-                ('Total 600010 Expenses',               200.0,          0.0,            200.0),
-                ('999989 Undistributed Profits/Losses', 0.0,            50.0,           -50.0),
-                ('999999 Undistributed Profits/Losses', 200.0,          300.0,          -100.0),
-                ('Total General Ledger',                21550.0,        21550.0,        0.0),
+                ('121000 Account Receivable',                    1000.0,         0.0,     1000.0),
+                ('INV/2017/00001 2017_1_1',                      1000.0,         0.0,     1000.0),
+                ('Total 121000 Account Receivable',              1000.0,         0.0,     1000.0),
+                ('211000 Account Payable',                        100.0,         0.0,      100.0),
+                ('Initial Balance',                               100.0,         0.0,      100.0),
+                ('Total 211000 Account Payable',                  100.0,         0.0,      100.0),
+                ('211010 Account Payable',                         50.0,         0.0,       50.0),
+                ('Initial Balance',                                50.0,         0.0,       50.0),
+                ('Total 211010 Account Payable',                   50.0,         0.0,       50.0),
+                ('400000 Product Sales',                        20000.0,         0.0,    20000.0),
+                ('INV/2017/00001 2017_1_2',                      2000.0,         0.0,     2000.0),
+                ('INV/2017/00001 2017_1_3',                      3000.0,         0.0,     5000.0),
+                ('INV/2017/00001 2017_1_4',                      4000.0,         0.0,     9000.0),
+                ('INV/2017/00001 2017_1_5',                      5000.0,         0.0,    14000.0),
+                ('INV/2017/00001 2017_1_6',                      6000.0,         0.0,    20000.0),
+                ('Total 400000 Product Sales',                  20000.0,         0.0,    20000.0),
+                ('400010 Product Sales',                            0.0,       200.0,     -200.0),
+                ('BNK1/2017/00001 2017_2_2',                        0.0,       200.0,     -200.0),
+                ('Total 400010 Product Sales',                      0.0,       200.0,     -200.0),
+                ('600000 Expenses',                                 0.0,     21000.0,   -21000.0),
+                ('INV/2017/00001 2017_1_7',                         0.0,      6000.0,    -6000.0),
+                ('INV/2017/00001 2017_1_8',                         0.0,      7000.0,   -13000.0),
+                ('INV/2017/00001 2017_1_9',                         0.0,      8000.0,   -21000.0),
+                ('Total 600000 Expenses',                           0.0,     21000.0,   -21000.0),
+                ('600010 Expenses',                               200.0,         0.0,      200.0),
+                ('BNK1/2017/00001 2017_2_1',                      200.0,         0.0,      200.0),
+                ('Total 600010 Expenses',                         200.0,         0.0,      200.0),
+                ('Undistributed Profits/Losses - company_1_data', 200.0,       300.0,     -100.0),
+                ('Undistributed Profits/Losses - company_2',        0.0,        50.0,      -50.0),
+                ('Total General Ledger',                        21550.0,     21550.0,        0.0),
             ],
             options,
         )
@@ -273,19 +269,19 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
         options = self._generate_options(self.report, fields.Date.from_string('2017-01-01'), fields.Date.from_string('2017-12-31'))
         self.assertLinesValues(
             self.report._get_lines(options),
-            #   Name                                    Debit           Credit          Balance
-            [   0,                                      3,              4,              5],
+            #   Name                                               Debit           Credit         Balance
+            [   0,                                                 3,              4,             5],
             [
-                ('121000 Account Receivable',           1000.0,         0.0,            1000.0),
-                ('211000 Account Payable',              200.0,          0.0,            200.0),
-                ('211010 Account Payable',              50.0,           0.0,            50.0),
-                ('400000 Product Sales',                20000.0,        0.0,            20000.0),
-                ('400010 Product Sales',                0.0,            200.0,          -200.0),
-                ('600000 Expenses',                     0.0,            21000.0,        -21000.0),
-                ('600010 Expenses',                     200.0,          0.0,            200.0),
-                ('999989 Undistributed Profits/Losses', 0.0,            50.0,           -50.0),
-                ('999999 Undistributed Profits/Losses', 400.0,          600.0,          -200.0),
-                ('Total General Ledger',                21850.0,        21850.0,        0.0),
+                ('121000 Account Receivable',                      1000.0,              0.0,      1000.0),
+                ('211000 Account Payable',                          200.0,              0.0,       200.0),
+                ('211010 Account Payable',                           50.0,              0.0,        50.0),
+                ('400000 Product Sales',                          20000.0,              0.0,     20000.0),
+                ('400010 Product Sales',                              0.0,            200.0,      -200.0),
+                ('600000 Expenses',                                   0.0,          21000.0,    -21000.0),
+                ('600010 Expenses',                                 200.0,              0.0,       200.0),
+                ('Undistributed Profits/Losses - company_1_data',   400.0,            600.0,      -200.0),
+                ('Undistributed Profits/Losses - company_2',          0.0,             50.0,       -50.0),
+                ('Total General Ledger',                          21850.0,          21850.0,         0.0),
             ],
             options,
         )
@@ -294,39 +290,39 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
 
         self.assertLinesValues(
             self.report._get_lines(options),
-            #   Name                                    Debit           Credit          Balance
-            [   0,                                      3,              4,              5],
+            #   Name                                               Debit           Credit      Balance
+            [   0,                                                 3,              4,          5],
             [
-                ('121000 Account Receivable',           1000.0,         0.0,            1000.0),
-                ('INV/2017/00001 2017_1_1',             1000.0,         0.0,            1000.0),
-                ('Total 121000 Account Receivable',     1000.0,         0.0,            1000.0),
-                ('211000 Account Payable',              200.0,          0.0,            200.0),
-                ('Initial Balance',                     200.0,          0.0,            200.0),
-                ('Total 211000 Account Payable',        200.0,          0.0,            200.0),
-                ('211010 Account Payable',              50.0,           0.0,            50.0),
-                ('Initial Balance',                     50.0,           0.0,            50.0),
-                ('Total 211010 Account Payable',        50.0,           0.0,            50.0),
-                ('400000 Product Sales',                20000.0,        0.0,            20000.0),
-                ('INV/2017/00001 2017_1_2',             2000.0,         0.0,            2000.0),
-                ('INV/2017/00001 2017_1_3',             3000.0,         0.0,            5000.0),
-                ('INV/2017/00001 2017_1_4',             4000.0,         0.0,            9000.0),
-                ('INV/2017/00001 2017_1_5',             5000.0,         0.0,            14000.0),
-                ('INV/2017/00001 2017_1_6',             6000.0,         0.0,            20000.0),
-                ('Total 400000 Product Sales',          20000.0,        0.0,            20000.0),
-                ('400010 Product Sales',                0.0,            200.0,          -200.0),
-                ('BNK1/2017/00001 2017_2_2',            0.0,            200.0,          -200.0),
-                ('Total 400010 Product Sales',          0.0,            200.0,          -200.0),
-                ('600000 Expenses',                     0.0,            21000.0,        -21000.0),
-                ('INV/2017/00001 2017_1_7',             0.0,            6000.0,         -6000.0),
-                ('INV/2017/00001 2017_1_8',             0.0,            7000.0,         -13000.0),
-                ('INV/2017/00001 2017_1_9',             0.0,            8000.0,         -21000.0),
-                ('Total 600000 Expenses',               0.0,            21000.0,        -21000.0),
-                ('600010 Expenses',                     200.0,          0.0,            200.0),
-                ('BNK1/2017/00001 2017_2_1',            200.0,          0.0,            200.0),
-                ('Total 600010 Expenses',               200.0,          0.0,            200.0),
-                ('999989 Undistributed Profits/Losses', 0.0,            50.0,           -50.0),
-                ('999999 Undistributed Profits/Losses', 400.0,          600.0,          -200.0),
-                ('Total General Ledger',              21850.0,        21850.0,             0.0),
+                ('121000 Account Receivable',                      1000.0,         0.0,        1000.0),
+                ('INV/2017/00001 2017_1_1',                        1000.0,         0.0,        1000.0),
+                ('Total 121000 Account Receivable',                1000.0,         0.0,        1000.0),
+                ('211000 Account Payable',                          200.0,         0.0,         200.0),
+                ('Initial Balance',                                 200.0,         0.0,         200.0),
+                ('Total 211000 Account Payable',                    200.0,         0.0,         200.0),
+                ('211010 Account Payable',                           50.0,         0.0,          50.0),
+                ('Initial Balance',                                  50.0,         0.0,          50.0),
+                ('Total 211010 Account Payable',                     50.0,         0.0,          50.0),
+                ('400000 Product Sales',                          20000.0,         0.0,       20000.0),
+                ('INV/2017/00001 2017_1_2',                        2000.0,         0.0,        2000.0),
+                ('INV/2017/00001 2017_1_3',                        3000.0,         0.0,        5000.0),
+                ('INV/2017/00001 2017_1_4',                        4000.0,         0.0,        9000.0),
+                ('INV/2017/00001 2017_1_5',                        5000.0,         0.0,       14000.0),
+                ('INV/2017/00001 2017_1_6',                        6000.0,         0.0,       20000.0),
+                ('Total 400000 Product Sales',                    20000.0,         0.0,       20000.0),
+                ('400010 Product Sales',                              0.0,       200.0,        -200.0),
+                ('BNK1/2017/00001 2017_2_2',                          0.0,       200.0,        -200.0),
+                ('Total 400010 Product Sales',                        0.0,       200.0,        -200.0),
+                ('600000 Expenses',                                   0.0,     21000.0,      -21000.0),
+                ('INV/2017/00001 2017_1_7',                           0.0,      6000.0,       -6000.0),
+                ('INV/2017/00001 2017_1_8',                           0.0,      7000.0,      -13000.0),
+                ('INV/2017/00001 2017_1_9',                           0.0,      8000.0,      -21000.0),
+                ('Total 600000 Expenses',                             0.0,     21000.0,      -21000.0),
+                ('600010 Expenses',                                 200.0,         0.0,         200.0),
+                ('BNK1/2017/00001 2017_2_1',                        200.0,         0.0,         200.0),
+                ('Total 600010 Expenses',                           200.0,         0.0,         200.0),
+                ('Undistributed Profits/Losses - company_1_data',   400.0,       600.0,        -200.0),
+                ('Undistributed Profits/Losses - company_2',          0.0,        50.0,         -50.0),
+                ('Total General Ledger',                          21850.0,     21850.0,           0.0),
             ],
             options,
         )
@@ -357,25 +353,25 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
 
         options = self._generate_options(self.report, fields.Date.from_string('2017-01-02'), fields.Date.from_string('2017-12-31'))
         parent_line_id = self.report._get_generic_line_id(model_name='account.report.line', value=self.env.ref("account_reports.general_ledger_custom_engine_line").id)
-        account_revenue_line_id = self.report._get_generic_line_id(model_name='account.account', value=self.company_data['default_account_revenue'].id, markup={'groupby': 'account_or_unaff_id'}, parent_line_id=parent_line_id)
+        account_revenue_line_id = self.report._get_generic_line_id(model_name='account.account', value=self.company_data['default_account_revenue'].id, markup={'groupby': 'account_id'}, parent_line_id=parent_line_id)
         options['unfolded_lines'] = [account_revenue_line_id]
         report_lines = self.report._get_lines(options)
 
         self.assertLinesValues(
             report_lines,
-            #   Name                                    Debit           Credit          Balance
-            [   0,                                      3,              4,              5],
+            #   Name                                    Debit      Credit     Balance
+            [   0,                                      3,         4,         5],
             [
-                ('121000 Account Receivable',           2000.0,         0.0,            2000.0),
-                ('211000 Account Payable',              100.0,          0.0,            100.0),
-                ('400000 Product Sales',                40000.0,        0.0,            40000.0),
-                ('Initial Balance',                     20000.0,        0.0,            20000.0),
-                ('INV/2017/00002 2017_3_2',             2000.0,         0.0,            22000.0),
-                ('Load more...',                        '',             '',             ''),
-                ('Total 400000 Product Sales',          40000.0,        0.0,            40000.0),
-                ('600000 Expenses',                     0.0,            42000.0,        -42000.0),
-                ('999999 Undistributed Profits/Losses', 200.0,          300.0,          -100.0),
-                ('Total General Ledger',                42300.0,        42300.0,        0.0),
+                ('121000 Account Receivable',        2000.0,         0.0,     2000.0),
+                ('211000 Account Payable',            100.0,         0.0,      100.0),
+                ('400000 Product Sales',            40000.0,         0.0,    40000.0),
+                ('Initial Balance',                 20000.0,         0.0,    20000.0),
+                ('INV/2017/00002 2017_3_2',          2000.0,         0.0,    22000.0),
+                ('Load more...',                         '',          '',         ''),
+                ('Total 400000 Product Sales',      40000.0,         0.0,    40000.0),
+                ('600000 Expenses',                     0.0,     42000.0,   -42000.0),
+                ('Undistributed Profits/Losses',      200.0,       300.0,     -100.0),
+                ('Total General Ledger',            42300.0,     42300.0,        0.0),
             ],
             options,
         )
@@ -490,27 +486,27 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
         # Init options.
         options = self._generate_options(self.report, fields.Date.from_string('2017-01-01'), fields.Date.from_string('2017-12-31'))
         parent_line_id = self.report._get_generic_line_id(model_name='account.report.line', value=self.env.ref("account_reports.general_ledger_custom_engine_line").id)
-        account_revenue_line_id = self.report._get_generic_line_id(model_name='account.account', value=foreign_curr_account.id, markup={'groupby': 'account_or_unaff_id'}, parent_line_id=parent_line_id)
+        account_revenue_line_id = self.report._get_generic_line_id(model_name='account.account', value=foreign_curr_account.id, markup={'groupby': 'account_id'}, parent_line_id=parent_line_id)
         options['unfolded_lines'] = [account_revenue_line_id]
         self.assertLinesValues(
             self.report._get_lines(options),
-            #   Name                                    Amount_currency Debit           Credit          Balance
-            [   0,                                      3,              4,              5,              6],
+            #   Name                                              Amount_currency   Debit           Credit   Balance
+            [   0,                                                3,                4,              5,       6],
             [
-                ('121000 Account Receivable',           '',             2100.0,         0.0,            2100.0),
-                ('211000 Account Payable',              '',             100.0,          0.0,            100.0),
-                ('211010 Account Payable',              '',             50.0,           0.0,            50.0),
-                ('400000 Product Sales',                '',             20000.0,        0.0,            20000.0),
-                ('400010 Product Sales',                '',             0.0,            200.0,          -200.0),
-                ('600000 Expenses',                     '',             0.0,            21000.0,        -21000.0),
-                ('600010 Expenses',                     '',             200.0,          0.0,            200.0),
-                ('999989 Undistributed Profits/Losses', '',             0.0,            50.0,           -50.0),
-                ('999999 Undistributed Profits/Losses', '',             200.0,          300.0,          -100.0),
-                ('test foreign_curr_account',           -2300.0,        0.0,            1100.0,         -1100.0),
-                ('Initial Balance',                     -300.0,         0.0,            100.0,          -100.0),
-                ('INV/2017/00002 curr_2',               -2000.0,        0.0,            1000.0,         -1100.0),
-                ('Total test foreign_curr_account',     -2300.0,        0.0,            1100.0,         -1100.0),
-                ('Total General Ledger',                '',             22650.0,        22650.0,        0.0),
+                ('121000 Account Receivable',                        '',             2100.0,         0.0,     2100.0),
+                ('211000 Account Payable',                           '',              100.0,         0.0,      100.0),
+                ('211010 Account Payable',                           '',               50.0,         0.0,       50.0),
+                ('400000 Product Sales',                             '',            20000.0,         0.0,    20000.0),
+                ('400010 Product Sales',                             '',                0.0,       200.0,     -200.0),
+                ('600000 Expenses',                                  '',                0.0,     21000.0,   -21000.0),
+                ('600010 Expenses',                                  '',              200.0,         0.0,      200.0),
+                ('test foreign_curr_account',                    -2300.0,               0.0,      1100.0,    -1100.0),
+                ('Initial Balance',                               -300.0,               0.0,       100.0,     -100.0),
+                ('INV/2017/00002 curr_2',                        -2000.0,               0.0,      1000.0,    -1100.0),
+                ('Total test foreign_curr_account',              -2300.0,               0.0,      1100.0,    -1100.0),
+                ('Undistributed Profits/Losses - company_1_data',     '',             200.0,       300.0,     -100.0),
+                ('Undistributed Profits/Losses - company_2',          '',               0.0,        50.0,      -50.0),
+                ('Total General Ledger',                              '',           22650.0,     22650.0,        0.0),
             ],
             options,
             currency_map={3: {'currency': self.other_currency}},
@@ -542,16 +538,16 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
             options,
         )
 
-        options['filter_search_bar'] = '999'
+        options['filter_search_bar'] = 'undistribut'
         lines = self.report._get_lines(options)
         self.assertLinesValues(
             lines,
-            #   Name                                          Debit           Credit          Balance
-            [   0,                                            3,              4,              5],
+            #   Name                                                Debit           Credit          Balance
+            [   0,                                                  3,              4,              5],
             [
-                ('999989 Undistributed Profits/Losses',         0.0,           50.0,           -50.0),
-                ('999999 Undistributed Profits/Losses',       200.0,          300.0,          -100.0),
-                ('Total General Ledger',                      200.0,          350.0,          -150.0),
+                ('Undistributed Profits/Losses - company_1_data',   200.0,          300.0,          -100.0),
+                ('Undistributed Profits/Losses - company_2',          0.0,           50.0,           -50.0),
+                ('Total General Ledger',                            200.0,          350.0,          -150.0),
             ],
             options,
         )
@@ -577,7 +573,7 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
         # Init options.
         options = self._generate_options(self.report, '2017-02-01', '2017-03-01')
         parent_line_id = self.report._get_generic_line_id(model_name='account.report.line', value=self.env.ref("account_reports.general_ledger_custom_engine_line").id)
-        account_revenue_line_id = self.report._get_generic_line_id(model_name='account.account', value=self.company_data['default_account_revenue'].id, markup={'groupby': 'account_or_unaff_id'}, parent_line_id=parent_line_id)
+        account_revenue_line_id = self.report._get_generic_line_id(model_name='account.account', value=self.company_data['default_account_revenue'].id, markup={'groupby': 'account_id'}, parent_line_id=parent_line_id)
         options['unfolded_lines'] = [account_revenue_line_id]
         lines = self.report._get_lines(options)
         self.assertLinesValues(
@@ -592,7 +588,7 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
                 ('INV/2017/00002 2017_3_2',                 0.0,        1000.0,          19000.0),
                 ('Total 400000 Product Sales',          20000.0,        1000.0,          19000.0),
                 ('600000 Expenses',                         0.0,       21000.0,         -21000.0),
-                ('999999 Undistributed Profits/Losses',   200.0,         300.0,           -100.0),
+                ('Undistributed Profits/Losses',          200.0,         300.0,           -100.0),
                 ('Total General Ledger',                22300.0,       22300.0,              0.0),
             ],
             options,
@@ -627,11 +623,13 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
 
         self.assertLinesValues(
             self.report._get_lines(options),
-            #   Name                     Date           Partner
-            [0,                             1,                2],
+            #   Name                                                    Date   Partner
+            [0,                                                         1,     2],
             [
-                ('(No Group)',             '',               ''),
-                ('Total General Ledger',   '',               ''),
+                ('(No Group)',                                          '',    ''),
+                ('Undistributed Profits/Losses - company_1_data',       '',    ''),
+                ('Undistributed Profits/Losses - company_2',            '',    ''),
+                ('Total General Ledger',                                '',    ''),
             ],
             options,
         )
@@ -701,13 +699,13 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
         self.env.company.totals_below_sections = False
         self.assertLinesValues(
             report._get_lines(options),
-            #   Name                                          Debit       Credit      Balance
-            [   0,                                               3,           4,          5],
+            #   Name                                              Debit       Credit      Balance
+            [   0,                                                3,           4,         5],
             [
-                ('121000 Account Receivable',               2500.0,         0.0,     2500.0),
-                ("Initial Balance",                         2500.0,         0.0,     2500.0),
-                ('999999 Undistributed Profits/Losses',        0.0,      2500.0,    -2500.0),
-                ('Total General Ledger',                    2500.0,      2500.0,        0.0),
+                ('121000 Account Receivable',                     2500.0,        0.0,     2500.0),
+                ("Initial Balance",                               2500.0,        0.0,     2500.0),
+                ('Undistributed Profits/Losses - company_1_data',    0.0,     2500.0,    -2500.0),
+                ('Total General Ledger',                          2500.0,     2500.0,        0.0),
             ],
             options
         )
@@ -767,3 +765,46 @@ class TestGeneralLedgerReport(TestAccountReportsCommon, odoo.tests.HttpCase):
         self.assertEqual(len(non_batched_report_lines), len(batched_report_lines), "Different number of lines of batched report and non batched report")
         for line_batched, line_non_batched in zip(batched_report_lines, non_batched_report_lines):
             self.assertDictEqual(line_batched, line_non_batched)
+
+    def test_general_ledger_deprecated_account_with_transactions(self):
+        """Test that deprecated accounts still appear in General Ledger."""
+        test_account = self.env['account.account'].create({
+            'code': 'TEST237000',
+            'name': 'Test Office Supplies',
+            'account_type': 'expense',
+            'active': True,
+        })
+
+        move = self.env['account.move'].create({
+            'move_type': 'entry',
+            'date': fields.Date.from_string('2024-01-15'),
+            'journal_id': self.company_data['default_journal_misc'].id,
+            'line_ids': [
+                (0, 0, {
+                    'debit': 10000.0,
+                    'credit': 0.0,
+                    'name': 'Office Supplies Purchase',
+                    'account_id': test_account.id,
+                }),
+                (0, 0, {
+                    'debit': 0.0,
+                    'credit': 10000.0,
+                    'name': 'Payment',
+                    'account_id': self.company_data['default_account_payable'].id,
+                }),
+            ],
+        })
+        move.action_post()
+
+        test_account.active = False
+
+        options = self._generate_options(
+            self.report,
+            fields.Date.from_string('2024-01-01'),
+            fields.Date.from_string('2024-12-31')
+        )
+        lines = self.report._get_lines(options)
+
+        account_line = [l for l in lines if l.get('name', '').startswith('TEST237000')]
+
+        self.assertTrue(account_line, "Deprecated account should appear in report")

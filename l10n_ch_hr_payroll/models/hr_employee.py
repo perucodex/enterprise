@@ -78,6 +78,22 @@ class HrEmployee(models.Model):
             if employee.birthday and employee.birthday > today:
                 raise ValidationError(_("Employee's Birthday cannot be greater than today."))
 
+    @api.onchange('private_country_id')
+    def _onchange_private_country_id(self):
+        self.version_id._onchange_private_country_id()
+
+    @api.onchange('l10n_ch_has_monthly')
+    def _onchange_l10n_ch_has_monthly(self):
+        self.version_id._onchange_l10n_ch_has_monthly()
+
+    @api.onchange('l10n_ch_has_hourly')
+    def _onchange_l10n_ch_has_hourly(self):
+        self.version_id._onchange_l10n_ch_has_hourly()
+
+    @api.onchange('l10n_ch_has_lesson')
+    def _onchange_l10n_ch_has_lesson(self):
+        self.version_id._onchange_l10n_ch_has_lesson()
+
     @api.model_create_multi
     def create(self, vals_list):
         employees = super().create(vals_list)

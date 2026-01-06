@@ -265,7 +265,7 @@ else:
         <field name="l10n_ch_lpp_retroactive" eval="True"/>
         <field name="l10n_ch_source_tax_included" eval="True"/>
         <field name="l10n_ch_salary_certificate">1</field>
-        <field name="l10n_ch_is_periodic" eval="True"/>
+        <field name="l10n_ch_is_periodic" eval="False"/>
         <field name="l10n_ch_yearly_statement">P</field>
         <field name="l10n_ch_13th_month_included" eval="False"/>
         <field name="struct_id" ref="l10n_ch_hr_payroll.hr_payroll_structure_ch_elm"/>
@@ -301,7 +301,43 @@ else:
         <field name="l10n_ch_lpp_retroactive" eval="True"/>
         <field name="l10n_ch_source_tax_included" eval="True"/>
         <field name="l10n_ch_salary_certificate">1</field>
-        <field name="l10n_ch_is_periodic" eval="True"/>
+        <field name="l10n_ch_is_periodic" eval="False"/>
+        <field name="l10n_ch_yearly_statement">P</field>
+        <field name="l10n_ch_13th_month_included" eval="False"/>
+        <field name="struct_id" ref="l10n_ch_hr_payroll.hr_payroll_structure_ch_elm"/>
+    </record>
+
+    <record id="l10n_ch_elm_rule_1066" model="hr.salary.rule">
+        <field name="category_id" ref="hr_payroll.ALW"/>
+        <field name="name">Overtime 150%</field>
+        <field name="code">WT_1066</field>
+        <field name="l10n_ch_code">1066</field>
+        <field name="sequence">20</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = ch_wage_components['CH_1066']['total'] > 0 or 'WT_1066' in inputs</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+if 'WT_1066' in inputs:
+    result = inputs['WT_1066'].amount
+    result_name = inputs['WT_1066'].name
+else:
+    if ch_wage_components['CH_1066']['base'] and ch_wage_components['CH_1066']['rate']:
+        result = ch_wage_components['CH_1066']['base']
+        result_rate = ch_wage_components['CH_1066']['rate']
+    else:
+        result = ch_wage_components['CH_1066']['total']
+        </field>
+        <field name="l10n_ch_gross_included" eval="True"/>
+        <field name="l10n_ch_aanp_included" eval="True"/>
+        <field name="l10n_ch_laac_included" eval="True"/>
+        <field name="l10n_ch_ac_included" eval="True"/>
+        <field name="l10n_ch_ijm_included" eval="True"/>
+        <field name="l10n_ch_lpp_forecast" eval="False"/>
+        <field name="l10n_ch_lpp_factor" eval="0"/>
+        <field name="l10n_ch_lpp_retroactive" eval="True"/>
+        <field name="l10n_ch_source_tax_included" eval="True"/>
+        <field name="l10n_ch_salary_certificate">1</field>
+        <field name="l10n_ch_is_periodic" eval="False"/>
         <field name="l10n_ch_yearly_statement">P</field>
         <field name="l10n_ch_13th_month_included" eval="False"/>
         <field name="struct_id" ref="l10n_ch_hr_payroll.hr_payroll_structure_ch_elm"/>
@@ -939,11 +975,18 @@ result_name = inputs['WT_1070'].name
         <field name="l10n_ch_code">1071</field>
         <field name="sequence">20</field>
         <field name="condition_select">python</field>
-        <field name="condition_python">result = 'WT_1071' in inputs</field>
+        <field name="condition_python">result = ch_wage_components['CH_1071']['total'] > 0 or 'WT_1071' in inputs</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
-result = inputs['WT_1071'].amount
-result_name = inputs['WT_1071'].name
+if 'WT_1071' in inputs:
+    result = inputs['WT_1071'].amount
+    result_name = inputs['WT_1071'].name
+else:
+    if ch_wage_components['CH_1071']['base'] and ch_wage_components['CH_1071']['rate']:
+        result = ch_wage_components['CH_1071']['base']
+        result_rate = ch_wage_components['CH_1071']['rate']
+    else:
+        result = ch_wage_components['CH_1071']['total']
         </field>
         <field name="l10n_ch_gross_included" eval="True"/>
         <field name="l10n_ch_ac_included" eval="True"/>
@@ -1055,11 +1098,18 @@ result_name = inputs['WT_1074'].name
         <field name="l10n_ch_code">1075</field>
         <field name="sequence">20</field>
         <field name="condition_select">python</field>
-        <field name="condition_python">result = 'WT_1075' in inputs</field>
+        <field name="condition_python">result = ch_wage_components['CH_1075']['total'] > 0 or 'WT_1075' in inputs</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
-result = inputs['WT_1075'].amount
-result_name = inputs['WT_1075'].name
+if 'WT_1075' in inputs:
+    result = inputs['WT_1075'].amount
+    result_name = inputs['WT_1075'].name
+else:
+    if ch_wage_components['CH_1075']['base'] and ch_wage_components['CH_1075']['rate']:
+        result = ch_wage_components['CH_1075']['base']
+        result_rate = ch_wage_components['CH_1075']['rate']
+    else:
+        result = ch_wage_components['CH_1075']['total']
         </field>
         <field name="l10n_ch_gross_included" eval="True"/>
         <field name="l10n_ch_ac_included" eval="True"/>
@@ -4517,6 +4567,111 @@ result_rate = -inputs['AVS.GENERIC'].amount
 result = result_rules['AVSSALARY']['total']
 result_name = inputs['AVS.GENERIC.COMP'].name
 result_rate = inputs['AVS.GENERIC.COMP'].amount
+        </field>
+        <field name="appears_on_payslip" eval="False"/>
+        <field name="struct_id" ref="l10n_ch_hr_payroll.hr_payroll_structure_ch_elm"/>
+    </record>
+
+        <record id="l10n_ch_elm_rule_5401" model="hr.salary.rule">
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="name">General AVS Deduction in % (2)</field>
+        <field name="code">AVS.GENERIC.2</field>
+        <field name="l10n_ch_code">5401</field>
+        <field name="sequence">131</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = payslip.l10n_ch_social_insurance_id and 'AVS.GENERIC.2' in inputs</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = result_rules['AVSSALARY']['total']
+result_name = inputs['AVS.GENERIC.2'].name
+result_rate = -inputs['AVS.GENERIC.2'].amount
+        </field>
+        <field name="struct_id" ref="l10n_ch_hr_payroll.hr_payroll_structure_ch_elm"/>
+    </record>
+
+    <record id="l10n_ch_elm_rule_7401" model="hr.salary.rule">
+        <field name="category_id" ref="l10n_ch_hr_payroll.l10n_ch_elm_company_contributions"/>
+        <field name="name">General AVS Deduction in % Employer (2)</field>
+        <field name="code">AVS.GENERIC.COMP.2</field>
+        <field name="l10n_ch_code">7401</field>
+        <field name="sequence">132</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = payslip.l10n_ch_social_insurance_id and 'AVS.GENERIC.COMP.2' in inputs</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = result_rules['AVSSALARY']['total']
+result_name = inputs['AVS.GENERIC.COMP.2'].name
+result_rate = inputs['AVS.GENERIC.COMP.2'].amount
+        </field>
+        <field name="appears_on_payslip" eval="False"/>
+        <field name="struct_id" ref="l10n_ch_hr_payroll.hr_payroll_structure_ch_elm"/>
+    </record>
+
+    <record id="l10n_ch_elm_rule_5402" model="hr.salary.rule">
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="name">General AVS Deduction in % (3)</field>
+        <field name="code">AVS.GENERIC.3</field>
+        <field name="l10n_ch_code">5402</field>
+        <field name="sequence">131</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = payslip.l10n_ch_social_insurance_id and 'AVS.GENERIC.3' in inputs</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = result_rules['AVSSALARY']['total']
+result_name = inputs['AVS.GENERIC.3'].name
+result_rate = -inputs['AVS.GENERIC.3'].amount
+        </field>
+        <field name="struct_id" ref="l10n_ch_hr_payroll.hr_payroll_structure_ch_elm"/>
+    </record>
+
+    <record id="l10n_ch_elm_rule_7402" model="hr.salary.rule">
+        <field name="category_id" ref="l10n_ch_hr_payroll.l10n_ch_elm_company_contributions"/>
+        <field name="name">General AVS Deduction in % Employer (3)</field>
+        <field name="code">AVS.GENERIC.COMP.3</field>
+        <field name="l10n_ch_code">7402</field>
+        <field name="sequence">132</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = payslip.l10n_ch_social_insurance_id and 'AVS.GENERIC.COMP.3' in inputs</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = result_rules['AVSSALARY']['total']
+result_name = inputs['AVS.GENERIC.COMP.3'].name
+result_rate = inputs['AVS.GENERIC.COMP.3'].amount
+        </field>
+        <field name="appears_on_payslip" eval="False"/>
+        <field name="struct_id" ref="l10n_ch_hr_payroll.hr_payroll_structure_ch_elm"/>
+    </record>
+
+    <record id="l10n_ch_elm_rule_5403" model="hr.salary.rule">
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="name">General AVS Deduction in % (4)</field>
+        <field name="code">AVS.GENERIC.4</field>
+        <field name="l10n_ch_code">5403</field>
+        <field name="sequence">131</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = payslip.l10n_ch_social_insurance_id and 'AVS.GENERIC.4' in inputs</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = result_rules['AVSSALARY']['total']
+result_name = inputs['AVS.GENERIC.4'].name
+result_rate = -inputs['AVS.GENERIC.4'].amount
+        </field>
+        <field name="struct_id" ref="l10n_ch_hr_payroll.hr_payroll_structure_ch_elm"/>
+    </record>
+
+    <record id="l10n_ch_elm_rule_7403" model="hr.salary.rule">
+        <field name="category_id" ref="l10n_ch_hr_payroll.l10n_ch_elm_company_contributions"/>
+        <field name="name">General AVS Deduction in % Employer (4)</field>
+        <field name="code">AVS.GENERIC.COMP.4</field>
+        <field name="l10n_ch_code">7403</field>
+        <field name="sequence">132</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = payslip.l10n_ch_social_insurance_id and 'AVS.GENERIC.COMP.4' in inputs</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = result_rules['AVSSALARY']['total']
+result_name = inputs['AVS.GENERIC.COMP.4'].name
+result_rate = inputs['AVS.GENERIC.COMP.4'].amount
         </field>
         <field name="appears_on_payslip" eval="False"/>
         <field name="struct_id" ref="l10n_ch_hr_payroll.hr_payroll_structure_ch_elm"/>

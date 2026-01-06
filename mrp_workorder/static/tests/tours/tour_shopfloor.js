@@ -417,7 +417,8 @@ registry.category("web_tour.tours").add("test_shop_floor_my_wo_filter_with_pin_u
         ...stepUtils.clickOnWorkcenterButton("My WO"),
         // Check the right WO is displayed.
         {
-            trigger: ".o_mrp_display_content",
+            trigger:
+                ".o_mrp_display_content:not(:has(.o_mrp_display_record:contains(TWH/MO/00001)))",
             run: () => {
                 const currentEmployeeEl = document.querySelector(".o_admin_user div span.fw-bold");
                 assert(currentEmployeeEl.innerText, "John Snow");
@@ -439,8 +440,9 @@ registry.category("web_tour.tours").add("test_shop_floor_my_wo_filter_with_pin_u
         // Select the second employee and check only the right WO is shown.
         { trigger: ".o_mrp_employees_panel li:contains(Queen Elsa)", run: "click" },
         ...stepUtils.enterPIN("41213"),
+        { trigger: ".o_admin_user:contains(Queen Elsa)" },
         {
-            trigger: ".o_admin_user:contains(Queen Elsa)",
+            trigger: ".o_mrp_display_record:contains(TWH/MO/00001)",
             run: () => {
                 const currentEmployeeEl = document.querySelector(".o_admin_user div span.fw-bold");
                 assert(currentEmployeeEl.innerText, "Queen Elsa");
@@ -461,8 +463,9 @@ registry.category("web_tour.tours").add("test_shop_floor_my_wo_filter_with_pin_u
         },
         // Select again the first employee and check again only its WO is displayed.
         { trigger: ".o_mrp_employees_panel li:contains(John Snow)", run: "click" },
+        { trigger: ".o_admin_user:contains(John Snow)" },
         {
-            trigger: ".o_admin_user:contains(John Snow)",
+            trigger: ".o_mrp_display_record:contains(TWH/MO/00002)",
             run: () => {
                 const currentEmployeeEl = document.querySelector(".o_admin_user div span.fw-bold");
                 assert(currentEmployeeEl.innerText, "John Snow");
@@ -541,19 +544,29 @@ registry.category("web_tour.tours").add("test_generate_serials_in_shopfloor", {
     ],
 });
 
-registry.category("web_tour.tours").add("test_canceled_wo", {
+registry.category("web_tour.tours").add("test_partial_backorder_with_multiple_operations", {
     steps: () => [
         // Make sure workcenter is available.
         ...stepUtils.openWorkcentersSelector(),
         ...stepUtils.addWorkcenterToDisplay("Assembly Line"),
         ...stepUtils.confirmWorkcentersSelection(),
         {
-            content: "Check MO",
+            content: "Select workcenter",
             trigger: 'button.btn-light:contains("Assembly Line")',
-            run: () => {
-                const mo = helper.getRecord();
-                helper.assertProductionWorkorderCount(mo, 1);
-            },
+            run: "click",
+        },
+        {
+            trigger:
+                ".o_mrp_display_record:has(.card-title:contains(MOBACK-002)) .o_quantity:contains(3 Units)",
+        },
+        {
+            trigger:
+                ".o_mrp_display_record:has(.card-title:contains(MOBACK-002)) button:contains(Mark as Done)",
+            run: "click",
+        },
+        {
+            trigger:
+                ".o_mrp_display_record:has(.card-title:contains(MOBACK-002)) .o_quantity:contains(5 Units)",
         },
     ],
 });
@@ -955,3 +968,31 @@ registry.category("web_tour.tours").add("test_shop_floor_unsynced_bom", {
         },
     ],
 });
+
+registry.category("web_tour.tours").add("test_product_consumption", {
+    steps: () => [
+        ...stepUtils.openWorkcentersSelector(),
+        ...stepUtils.addWorkcenterToDisplay("Workcenter1"),
+        ...stepUtils.confirmWorkcentersSelection(),
+        ...stepUtils.clickOnWorkcenterButton("Workcenter1"),
+        {
+            content: "Click on consumption button",
+            trigger: '.o_mrp_record_line button.btn .fa-plus',
+            run: "click",
+        },
+        {
+            content: "Select first lot",
+            trigger: '.o_data_row .o_data_cell[data-tooltip="Lot 1"]',
+            run: "click",
+        },
+        {
+            content: "Close the production order",
+            trigger: 'button.btn-primary:contains("Close Production")',
+            run: "click",
+        },
+        {
+            content: "Check that there are no open work orders",
+            trigger: ".o_nocontent_help",
+        },
+    ]
+})

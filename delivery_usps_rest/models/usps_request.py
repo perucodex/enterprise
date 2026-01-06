@@ -28,16 +28,17 @@ def split_zip(zipcode):
 class USPSRequest:
 
     def __init__(self, carrier):
+        super_carrier = carrier.sudo()
         self.base_url = PROD_BASE_URL if carrier.prod_environment else TEST_BASE_URL
         self.logger = carrier.log_xml
-        self.client_id = carrier.usps_api_key
-        self.client_secret = carrier.usps_api_secret
-        self.eps_account_number = carrier.usps_eps_account_number
-        self.crid = carrier.usps_crid
-        self.mid = carrier.usps_mid
-        self.manifest_mid = carrier.usps_manifest_mid
-        self.access_token = carrier.usps_access_token
-        self.payment_token = carrier.usps_payment_token
+        self.client_id = super_carrier.usps_api_key
+        self.client_secret = super_carrier.usps_api_secret
+        self.eps_account_number = super_carrier.usps_eps_account_number
+        self.crid = super_carrier.usps_crid
+        self.mid = super_carrier.usps_mid
+        self.manifest_mid = super_carrier.usps_manifest_mid
+        self.access_token = super_carrier.usps_access_token
+        self.payment_token = super_carrier.usps_payment_token
         self.carrier = carrier
         self.session = requests.Session()
 
@@ -66,13 +67,13 @@ class USPSRequest:
         if attach_payment_token:
             self.payment_token = None
             self.payment_token = self._get_new_payment_token()
-            self.carrier.usps_payment_token = self.payment_token
+            self.carrier.sudo().usps_payment_token = self.payment_token
 
         res = _request_call(headers)
         if res.status_code == 401 and auth is None and 'oauth' not in url:
             self.access_token = None
             self.access_token = self._get_new_access_token()
-            self.carrier.usps_access_token = self.access_token
+            self.carrier.sudo().usps_access_token = self.access_token
             res = _request_call(None)
         elif res.status_code == 401 and 'oauth' in url:
             raise UserError(_("Your USPS API Key and Secret are invalid."))

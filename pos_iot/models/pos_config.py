@@ -45,6 +45,8 @@ class PosConfig(models.Model):
             else:
                 config.iot_device_ids = config.printer_ids.mapped('device_id') or False
 
+            config.iot_device_ids += config.payment_method_ids.mapped('iot_device_id')
+
     @api.depends('payment_method_ids', 'payment_method_ids.iot_device_id')
     def _compute_payment_terminal_device_ids(self):
         for config in self:

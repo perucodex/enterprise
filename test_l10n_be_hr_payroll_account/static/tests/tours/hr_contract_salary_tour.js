@@ -175,6 +175,9 @@ registry.category("web_tour.tours").add("hr_contract_salary_tour", {
             run: "click",
         },
         {
+            trigger: "input[name='public_transport_reimbursed_amount']:not([value])",
+        },
+        {
             trigger: 'span[name="Gross"][value="3000"]',
         },
         {
@@ -191,9 +194,12 @@ registry.category("web_tour.tours").add("hr_contract_salary_tour", {
             trigger: 'span[name="Gross"][value="3000"]',
         },
         {
-            content: "Unchoose Public Transportation",
+            content: "Unchoose Train Transportation",
             trigger: "input[name=fold_train_transport_reimbursed_amount]:not(:visible)",
             run: "click",
+        },
+        {
+            trigger: "input[name='train_transport_reimbursed_amount']:not([value])",
         },
         {
             trigger: 'span[name="Gross"][value="3000"]',
@@ -463,6 +469,11 @@ registry.category("web_tour.tours").add("hr_contract_salary_tour", {
             content: "Bank Account",
             trigger: 'input[name="acc_number"]',
             run: "edit BE10 3631 0709 4104",
+        },
+        {
+            content: "Account Holder Name",
+            trigger: 'input[name="acc_holder_name"]',
+            run: "edit Mitchell Admin 2"
         },
         {
             content: "Private License Plate",
@@ -746,6 +757,14 @@ registry.category("web_tour.tours").add("hr_contract_salary_tour", {
         },
         {
             trigger: 'span[name="Gross"][value="2671.14"]',
+        },
+        {
+            content: "Take Extra-Legal Leaves",
+            trigger: 'input[list="holidays_range"]',
+            run: "range 3",
+        },
+        {
+            trigger: 'span[name="Gross"][value="2629.19"]',
         },
         {
             content: "submit",
@@ -1236,6 +1255,11 @@ registry.category("web_tour.tours").add("hr_contract_salary_tour_2", {
             content: "Bank Account",
             trigger: 'input[name="acc_number"]',
             run: "edit BE10 3631 0709 4104",
+        },
+        {
+            content: "Account Holder Name",
+            trigger: 'input[name="acc_holder_name"]',
+            run: "edit Mitchell Admin 2"
         },
         {
             content: "Bank Account",

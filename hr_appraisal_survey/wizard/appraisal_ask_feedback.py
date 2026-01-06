@@ -12,7 +12,7 @@ _logger = logging.getLogger(__name__)
 
 class AppraisalAskFeedback(models.TransientModel):
     _name = 'appraisal.ask.feedback'
-    _inherit = ['mail.composer.mixin']
+    _inherit = ['mail.composer.mixin', 'hr.mixin']
     _description = "Ask Feedback for Appraisal"
 
     def _default_appraisal_id(self):
@@ -38,7 +38,7 @@ class AppraisalAskFeedback(models.TransientModel):
         default=lambda self: self.env.user.partner_id.id,
     )
     allowed_survey_template_ids = fields.Many2many('survey.survey', compute='_compute_allowed_survey_template_ids')
-    survey_template_id = fields.Many2one('survey.survey', required=True, compute='_compute_survey_template_id', store=True,
+    survey_template_id = fields.Many2one('survey.survey', required=True, compute='_compute_survey_template_id', compute_sudo=False, store=True,
                                          readonly=False, domain="[('id', 'in', allowed_survey_template_ids)]")
     employee_ids = fields.Many2many(
         'hr.employee', string="Recipients", required=True)

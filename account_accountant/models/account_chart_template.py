@@ -52,3 +52,12 @@ class AccountChartTemplate(models.AbstractModel):
             )
 
         return data
+
+    def _post_load_data(self, template_code, company, template_data):
+        super()._post_load_data(template_code, company, template_data)
+
+        sepa_countries = self.env.ref('base.sepa_zone').country_ids
+        if company.country_id in sepa_countries:
+            sepa_module = self.env['ir.module.module'].sudo().search([('name', '=', 'account_iso20022')], limit=1)
+            if sepa_module and sepa_module.state != 'installed':
+                sepa_module.button_install()

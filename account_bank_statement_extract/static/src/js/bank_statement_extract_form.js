@@ -24,7 +24,7 @@ export class AccountBankStatementFormRenderer extends ExtractMixinFormRenderer(F
             // Find the date boxes that are aligned
             let dateVal = undefined;
             const pageNumber = line.page;
-            const dateBoxes = this.unskewBoxes(this.boxes['date'][pageNumber], this.skewAngles[pageNumber]);
+            const dateBoxes = this.unskewBoxes(this.boxes['date'][pageNumber] || [], this.skewAngles[pageNumber]);
             const matchingDateBoxes = dateBoxes.filter((dateBox) => {
                 return this.isPartOfLine(line, dateBox);
             });

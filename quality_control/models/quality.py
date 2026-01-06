@@ -172,6 +172,7 @@ class QualityPoint(models.Model):
                     'measure_on': point.measure_on,
                     'team_id': point.team_id.id,
                     'product_id': product.id,
+                    'company_id': company_id,
                 })
                 quality_points_list.append(point_key)
 
@@ -596,6 +597,23 @@ class QualityCheck(models.Model):
         domain = super()._get_type_default_domain()
         domain.append(('technical_name', '=', 'passfail'))
         return domain
+
+    def _is_to_do(self, checkable_products, check_picked=False):
+        self.ensure_one()
+        if self.quality_state != 'none':
+            return False
+        if self.measure_on != 'operation':
+            if self.product_id not in checkable_products:
+                return False
+            if self.move_line_id:
+                if not self.move_line_id._is_checkable(check_picked):
+                    return False
+        # Only process qc related to tracked product if its lot is set
+        if self.move_line_id and self.product_id.tracking in ["serial", "lot"]:
+            if self.move_line_id.picking_type_use_create_lots or self.move_line_id.picking_type_use_existing_lots:
+                if not self.move_line_id.lot_id and not self.move_line_id.lot_name:
+                    return False
+        return True
 
 
 class QualityAlert(models.Model):

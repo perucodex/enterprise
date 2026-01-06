@@ -31,24 +31,43 @@
                                 </span>
                             </div>
                             <i t-if="!props.hasSignRequests" class="fa fa-pencil mx-1" t-on-click="() => this.onDocumentNameTextClick(document.id)"/>
-                            <div t-if="this.props.documents.filter((doc) => !doc.deleted).length > 1">
+                            <div t-if="!props.hasSignRequests">
                                 <Dropdown>
                                     <button class="btn o_sign_sidebar_icon">
                                         <i class="oi oi-ellipsis-v"/>
                                     </button>
                                     <t t-set-slot="content">
-                                        <DropdownItem onSelected="() => this.onMoveDocumentUp(document.id)">
-                                            <i class="fa fa-arrow-up fa-fw"/>
-                                            Move Up
+                                        <t t-if="this.props.documents.filter((doc) => !doc.deleted).length > 1">
+                                            <DropdownItem onSelected="() => this.onMoveDocumentUp(document.id)">
+                                                <i class="fa fa-arrow-up fa-fw"/>
+                                                Move Up
+                                            </DropdownItem>
+                                            <DropdownItem onSelected="() => this.onMoveDocumentDown(document.id)">
+                                                <i class="fa fa-arrow-down fa-fw"/>
+                                                Move Down
+                                            </DropdownItem>
+                                        </t>
+                                        <DropdownItem onSelected="() => {}">
+                                            <div class="position-relative d-flex align-items-center">
+                                                <i class="fa fa-upload fa-fw me-1"/>
+                                                Update Document
+                                                <input type="file" t-att-id="'replaceDocument_' + document.id"
+                                                    accept="application/pdf"
+                                                    class="o_input_file position-absolute opacity-0"
+                                                    style="left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;"
+                                                    title=""
+                                                    multiple="false"
+                                                    t-on-click.stop="() => {}"
+                                                    t-on-change.stop="(ev) => this.onUpdateDocument(document.id, ev)"
+                                                />
+                                            </div>
                                         </DropdownItem>
-                                        <DropdownItem onSelected="() => this.onMoveDocumentDown(document.id)">
-                                            <i class="fa fa-arrow-down fa-fw"/>
-                                            Move Down
-                                        </DropdownItem>
-                                        <DropdownItem onSelected="() => this.onRemoveDocument(document.id)">
-                                            <i class="fa fa-trash-o fa-fw text-danger"/>
-                                            Delete
-                                        </DropdownItem>
+                                        <t t-if="this.props.documents.filter((doc) => !doc.deleted).length > 1">
+                                            <DropdownItem onSelected="() => this.onRemoveDocument(document.id)">
+                                                <i class="fa fa-trash-o fa-fw"/>
+                                                Delete
+                                            </DropdownItem>
+                                        </t>
                                     </t>
                                 </Dropdown>
                             </div>

@@ -41,6 +41,14 @@ class HrPayrollAllocPaidLeave(models.TransientModel):
 
     @api.depends('structure_type_id', 'year', 'holiday_status_id', 'department_id')
     def _compute_alloc_employee_ids(self):
+        def _get_days_per_week(calendar):
+            days_in_week = sum(calendar._get_global_attendances()
+                .filtered(lambda a: a.week_type if calendar.two_weeks_calendar else not a.week_type)
+                .mapped('duration_days'))
+            if calendar.two_weeks_calendar:
+                days_in_week /= 2
+            return days_in_week
+
         if not self.env.user.has_group('hr_payroll.group_hr_payroll_user'):
             raise UserError(_("You don't have the right to do this. Please contact your administrator!"))
         self.alloc_employee_ids = False
@@ -77,8 +85,10 @@ class HrPayrollAllocPaidLeave(models.TransientModel):
              WHERE v.contract_date_start <= %(stop)s
                AND (v.contract_date_end IS NULL OR v.contract_date_end >= %(start)s)
                AND e.active IS TRUE
+               AND e.company_id IN %(company)s
                AND v.employee_type = 'employee'
                AND v.company_id IN %(company)s
+               AND v.active IS TRUE
                    {where_structure}
                    {where_employee_in_department}
         """.format(where_structure=structure, where_employee_in_department=employee_check)
@@ -120,8 +130,8 @@ class HrPayrollAllocPaidLeave(models.TransientModel):
 
         for employee_id, (paid_time_off, version_id) in alloc_employees.items():
             employee = employees.browse(employee_id)
-
-            if self.year == employee._get_first_version_date().year:
+            first_version_date = employee._get_first_version_date()
+            if first_version_date and self.year == first_version_date.year:
                 for double_pay_line in employee.double_pay_line_n_ids:
                     work_months_ratio = double_pay_line.months_count / 12
                     work_months_rate = double_pay_line.occupation_rate / 100
@@ -152,23 +162,21 @@ class HrPayrollAllocPaidLeave(models.TransientModel):
             else:
                 contract_next_period = self.env['hr.version'].browse(contract_next_period)
 
+            max_days = 24
             if contract_next_period.id:
                 calendar = self.env.context.get('forced_calendar', contract_next_period.resource_calendar_id)
-                allocation_hours = max_hours_to_allocate
                 # An employee should never have more than 4 weeks of annual time off.
                 allocation_hours = min(max_hours_to_allocate, 4 * calendar.hours_per_week)
                 paid_time_off_to_allocate = allocation_hours / calendar_of_company.hours_per_day if calendar_of_company.hours_per_day else 0
                 # Make sure we do not give more time than we should due to rounding
                 # (example: 2020 fulltime and starts 2021 with a part time contract would have 10.5 days which is not right)
-                # * 4 for weeks, * 2 for two week calendars, / 2 for 2 half days composing a full day (morning, afternoon)
-                max_days_for_calendar = (len(calendar.attendance_ids) * 4) / 2 if not calendar.two_weeks_calendar\
-                    else (len(calendar.attendance_ids) * 2 / 2)
-                if paid_time_off_to_allocate > max_days_for_calendar:
-                    paid_time_off_to_allocate = max_days_for_calendar
-                else:
-                    paid_time_off_to_allocate = float_round(paid_time_off_to_allocate, precision_rounding=0.5)
+                days_in_week = _get_days_per_week(calendar)
+                paid_time_off_to_allocate = float_round(min(paid_time_off_to_allocate, days_in_week * 4), precision_rounding=0.5)
+                max_days = 20 if days_in_week <= 5 else 24
 
             paid_time_off = float_round(max_hours_to_allocate / calendar_of_company.hours_per_day if calendar_of_company.hours_per_day else 0, 0)
+            days_in_week = _get_days_per_week(employees.browse(employee_id).resource_calendar_id)
+            paid_time_off = min(paid_time_off, 20 if days_in_week <= 5 else 24, max_days)
 
             alloc_employee_ids.append((0, 0, {
                 'employee_id': employee_id,

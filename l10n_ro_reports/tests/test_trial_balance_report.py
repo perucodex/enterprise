@@ -41,10 +41,10 @@ class TestL10nROTrialBalanceReport(TestAccountReportsCommon):
             #                                                                    Debit      Credit      Debit       Credit       Debit     Credit        Debit      Credit
             [    0,                                                                 1,          2,         3,           4,          5,          6,          7,          8],
             [
-                ("121000 Profit and loss",                                      2000.0,     3000.0,       0.0,         0.0,      2000.0,     3000.0,         0.0,     1000.0),
                 ("401100 Providers - resumed in a period of up to one year",    2000.0,        0.0,     100.0,         0.0,      2100.0,        0.0,      2100.0,        0.0),
                 ("601000 Raw material expenses",                                2000.0,        0.0,     200.0,         0.0,      2200.0,        0.0,      2200.0,        0.0),
                 ("701500 Revenue from the sale of finished products",              0.0,     3000.0,       0.0,       300.0,         0.0,     3300.0,         0.0,     3300.0),
+                ('Undistributed Profits/Losses - company_1_data',               2000.0,     3000.0,       0.0,         0.0,      2000.0,     3000.0,         0.0,     1000.0),
                 ("Total",                                                       6000.0,     6000.0,     300.0,       300.0,      6300.0,     6300.0,      4300.0,     4300.0),
             ],
             options,
@@ -65,10 +65,10 @@ class TestL10nROTrialBalanceReport(TestAccountReportsCommon):
             #                                                                    Debit      Credit       Debit      Credit       Debit      Credit       Debit      Credit
             [    0,                                                                1,           2,          3,          4,          5,          6,          7,          8],
             [
-                ("121000 Profit and loss",                                    2000.0,      3000.0,        0.0,        0.0,     2000.0,     3000.0,        0.0,     1000.0),
                 ("401100 Providers - resumed in a period of up to one year",  1000.0,         0.0,     1000.0,        0.0,     2000.0,        0.0,     2000.0,        0.0),
                 ("601000 Raw material expenses",                                 0.0,         0.0,     2000.0,        0.0,     2000.0,        0.0,     2000.0,        0.0),
                 ("701500 Revenue from the sale of finished products",            0.0,         0.0,        0.0,     3000.0,        0.0,     3000.0,        0.0,     3000.0),
+                ("Undistributed Profits/Losses - company_1_data",             2000.0,      3000.0,        0.0,        0.0,     2000.0,     3000.0,        0.0,     1000.0),
                 ("Total",                                                     3000.0,      3000.0,     3000.0,     3000.0,     6000.0,     6000.0,     4000.0,     4000.0),
             ],
             options,
@@ -86,10 +86,10 @@ class TestL10nROTrialBalanceReport(TestAccountReportsCommon):
             #                                                                   Debit       Credit       Debit      Credit      Debit       Credit       Debit      Credit       Debit      Credit
             [    0,                                                                1,           2,          3,          4,         5,           6,          7,          8,          9,         10],
             [
-                ("121000 Profit and loss",                                    2000.0,      3000.0,        0.0,        0.0,       0.0,         0.0,     2000.0,     3000.0,        0.0,     1000.0),
                 ("401100 Providers - resumed in a period of up to one year",  1000.0,         0.0,     2100.0,        0.0,    1000.0,         0.0,     4100.0,        0.0,     4100.0,        0.0),
                 ("601000 Raw material expenses",                                 0.0,         0.0,     4200.0,        0.0,    2000.0,         0.0,     6200.0,        0.0,     6200.0,        0.0),
                 ("701500 Revenue from the sale of finished products",            0.0,         0.0,        0.0,     6300.0,       0.0,      3000.0,        0.0,     9300.0,        0.0,     9300.0),
+                ("Undistributed Profits/Losses - company_1_data",             2000.0,      3000.0,        0.0,        0.0,       0.0,         0.0,     2000.0,     3000.0,        0.0,     1000.0),
                 ("Total",                                                     3000.0,      3000.0,     6300.0,     6300.0,    3000.0,      3000.0,    12300.0,    12300.0,    10300.0,    10300.0),
             ],
             options,

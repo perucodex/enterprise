@@ -261,8 +261,8 @@ class TestAccountReportsJournalFilter(AccountTestInvoicingCommon):
             (j3, False),
             (j4, True),
             {'id': 'divider'},
-            (j5, True),
-            (j6, True),
+            (j5, False),
+            (j6, False),
         ])
 
         # Check g2.
@@ -273,10 +273,10 @@ class TestAccountReportsJournalFilter(AccountTestInvoicingCommon):
             (g1, False),
             (g2, True),
             {'id': 'divider'},
-            (j1, True),
-            (j2, True),
-            (j3, True),
-            (j4, True),
+            (j1, False),
+            (j2, False),
+            (j3, False),
+            (j4, False),
             {'id': 'divider'},
             (j5, True),
             (j6, False),
@@ -315,8 +315,8 @@ class TestAccountReportsJournalFilter(AccountTestInvoicingCommon):
             (j1, True),
             (j2, False),
             {'id': 'divider'},
-            (j3, True),
-            (j4, True),
+            (j3, False),
+            (j4, False),
         ])
 
         # Remove g1.
@@ -356,24 +356,24 @@ class TestAccountReportsJournalFilter(AccountTestInvoicingCommon):
             (j1, True),
             (j2, False),
             {'id': 'divider'},
-            (j3, True),
-            (j4, True),
+            (j3, False),
+            (j4, False),
         ])
 
-        self._press_journal_filter(options, j3)  # Uncheck j3
+        self._press_journal_filter(options, j3)  # Check j3
         options = self.report.get_options(previous_options=options)
-        self._assert_filter_journal(options, "j1, j4", [
+        self._assert_filter_journal(options, "j1, j3", [
             {'id': 'divider'},
             (g1, False),
             {'id': 'divider'},
             (j1, True),
             (j2, False),
             {'id': 'divider'},
-            (j3, False),
-            (j4, True),
+            (j3, True),
+            (j4, False),
         ])
 
-        self._press_journal_filter(options, j3)  # Check j3
+        self._press_journal_filter(options, j3)  # Uncheck j3
         options = self.report.get_options(previous_options=options)
         self._assert_filter_journal(options, "g1", [
             {'id': 'divider'},
@@ -382,8 +382,8 @@ class TestAccountReportsJournalFilter(AccountTestInvoicingCommon):
             (j1, True),
             (j2, False),
             {'id': 'divider'},
-            (j3, True),
-            (j4, True),
+            (j3, False),
+            (j4, False),
         ])
 
     def test_journal_filter_with_groups_cash_flow_statement(self):
@@ -579,8 +579,8 @@ class TestAccountReportsJournalFilter(AccountTestInvoicingCommon):
         j4 = self._quick_create_journal("j4", self.vanilla_company2)
         j5 = self._quick_create_journal("j5", self.vanilla_company2)
 
-        # g1 has journals of company 1 and 2, even though visible only for company 1
-        g1 = self._quick_create_journal_group("g1", self.vanilla_company1, j1 + j4)
+        # g1 has journals of company1 only as it's visible only for company 1
+        g1 = self._quick_create_journal_group("g1", self.vanilla_company1, j1)
 
         # g2 has no company set, therefore implying that this multi-ledger is visible for all companies
         g2 = self._quick_create_journal_group("g2", False, j2 + j5)
@@ -618,7 +618,7 @@ class TestAccountReportsJournalFilter(AccountTestInvoicingCommon):
             (j3, True),
             {'id': 'divider'},
             (j4, False),
-            (j5, True),
+            (j5, False),
         ])
 
         # Check g2

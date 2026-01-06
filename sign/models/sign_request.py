@@ -186,7 +186,9 @@ class SignRequest(models.Model):
         for item in self.template_id.sign_item_ids:
             if item.constant:
                 sign_values_by_role[item.responsible_id][str(item.id)] = {
-                    "name": item.name,
+                    # For constant strikethrough items, use "striked" instead of item name,
+                    # since item name returns "strikethrough" but we need "striked" to set the value correctly.
+                    "name": item.name if item.type_id.item_type != 'strikethrough' else 'striked',
                     "type_id": item.type_id.id,
                     "auto_field": item.type_id.sudo().auto_field
                 }

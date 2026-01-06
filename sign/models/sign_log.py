@@ -84,7 +84,11 @@ class SignLog(models.Model):
             vals.update(self._prepare_vals_from_item(sign_request_item))
         for vals, sign_request in zip(vals_list_request, sign_requests):
             vals.update(self._prepare_vals_from_request(sign_request))
-        user_id = self.env.user.id if not self.env.user._is_public() else None
+        if self.env.context.get('logged_user_id'):
+            user_id = self.env.context['logged_user_id']
+        else:
+            user_id = self.env.user.id if not self.env.user._is_public() else None
+
         ip = request.httprequest.remote_addr if request else '0.0.0.0'
         now = datetime.now()
         for vals in vals_list:

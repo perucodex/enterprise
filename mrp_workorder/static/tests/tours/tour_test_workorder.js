@@ -195,14 +195,6 @@ registry.category("web_tour.tours").add("test_add_component_from_shop_floor", {
             run: "click",
         },
         {
-            trigger: ".modal-content input.o_searchview_input.o_input",
-            run: "edit Super Wood",
-        },
-        {
-            trigger: ".dropdown-item:contains('Super Wood')",
-            run: "click",
-        },
-        {
             trigger: ".modal-content .o_kanban_record:has(span:contains('Super Wood'))",
             run: "click",
         },
@@ -252,14 +244,6 @@ registry.category("web_tour.tours").add("test_add_component_from_shop_floor", {
         },
         {
             trigger: "button:contains('Add Component')",
-            run: "click",
-        },
-        {
-            trigger: ".modal-content input.o_searchview_input.o_input",
-            run: "edit Courage",
-        },
-        {
-            trigger: ".dropdown-item:contains('Courage')",
             run: "click",
         },
         {
@@ -331,14 +315,6 @@ registry
                 run: "click",
             },
             {
-                trigger: ".modal-content input.o_searchview_input.o_input",
-                run: "edit Courage",
-            },
-            {
-                trigger: ".dropdown-item:contains(Courage)",
-                run: "click",
-            },
-            {
                 trigger: ".modal-content .o_kanban_record:has(span:contains('Courage'))",
                 run: "click",
             },
@@ -369,14 +345,6 @@ registry
             },
             {
                 trigger: "button:contains(Add Component)",
-                run: "click",
-            },
-            {
-                trigger: ".modal-content input.o_searchview_input.o_input",
-                run: "edit Courage",
-            },
-            {
-                trigger: ".dropdown-item:contains(Courage)",
                 run: "click",
             },
             {

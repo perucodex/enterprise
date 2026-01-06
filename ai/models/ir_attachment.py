@@ -1,8 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import base64
 import contextlib
+import csv
 import io
-import importlib.util
 import logging
 import re
 
@@ -18,94 +18,51 @@ class IrAttachment(models.Model):
     _inherit = 'ir.attachment'
 
     AI_MAX_PDF_PAGES = 5
-
-    def _compute_pdf_content(self):
-        """Compute the content of the PDF attachment."""
-        self.ensure_one()
-
-        def _has_pdfminer_six():
-            return importlib.util.find_spec("pdfminer.high_level") is not None
-
-        try:
-            if not _has_pdfminer_six():
-                _logger.warning("Attention: 'pdfminer.six' is not installed. PDF text extraction and AI sources context may not work properly.")
-                return None
-
-            from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter  # noqa: PLC0415
-            from pdfminer.converter import TextConverter  # noqa: PLC0415
-            from pdfminer.layout import LAParams  # noqa: PLC0415
-            from pdfminer.pdfpage import PDFPage  # noqa: PLC0415
-            logging.getLogger("pdfminer").setLevel(logging.CRITICAL)
-        except ImportError:
-            return None
-
-        f = io.BytesIO(self.raw)
-        resource_manager = PDFResourceManager()
-        laparams = LAParams(
-            line_margin=0.5,
-            char_margin=2.0,
-            word_margin=0.1,
-            boxes_flow=0.5,
-            detect_vertical=True,
-        )
-
-        with io.StringIO() as content, TextConverter(
-            resource_manager,
-            content,
-            laparams=laparams
-        ) as device:
-            interpreter = PDFPageInterpreter(resource_manager, device)
-            for page in PDFPage.get_pages(f):
-                interpreter.process_page(page)
-
-            buf = content.getvalue()
-
-        return self._clean_pdf_content(buf)
+    TABULAR_FILE_TYPES = [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',  # xlsx
+        'application/vnd.ms-excel',  # xls
+        'application/vnd.oasis.opendocument.spreadsheet',  # ods
+        'text/csv',  # csv
+    ]
 
     def _get_attachment_content(self):
         """
-        Get the content of the attachment.
-        For PDFs, prioritize content extracted via _compute_pdf_content over index_content.
-        For other file types, use index_content.
-        :return: The content of the attachment or None if the content is invalid
-        :rtype: str
+        Get the indexing-processed content of the attachment
         """
         self.ensure_one()
-        # For PDF files, try to get content via _compute_pdf_content first
-        if self.mimetype in ['application/pdf', 'application/pdf;base64'] and self.raw and self.raw.startswith(b'%PDF-'):
-            pdf_content = self._compute_pdf_content()
-            if pdf_content:
-                content = pdf_content
-            else:
-                # Fallback to index_content if PDF extraction fails
-                content = self.index_content
+        attachment_content = ''
+        if self.mimetype in self.TABULAR_FILE_TYPES:
+            sheets = self.index_content.split('\n\n')
+            for sheet in sheets:
+                if sheet:
+                    rows_list = self._process_csv_text(sheet)
+                    if rows_list:
+                        result = '\n'.join(str(row) for row in rows_list)
+                        attachment_content += result + '\n'
         else:
-            # For non-PDF files, use index_content
-            content = self.index_content
+            attachment_content = self.index_content
 
-        # Validate the content
-        if not content or len(content.split()) <= 2:
-            return False
+        if not attachment_content:
+            return None
+
         # Check for reasonable content length and word variety
-        words = content.split()
-        if len(content.strip()) >= 10 and len({w.lower() for w in words}) >= 2:
-            return content
-        return None
+        if len(attachment_content.strip()) <= 10:
+            return None
 
-    def _clean_pdf_content(self, buf):
-        """
-        Clean the PDF content by removing unwanted characters and formatting.
-        """
-        # Remove NUL characters that can cause PostgreSQL insertion errors
-        buf = buf.replace('\x00', '')
-        buf = buf.replace('\r\n', '\n').replace('\r', '\n')
-        paragraphs = re.split(r'\n\s*\n', buf)
-        paragraphs = [re.sub(r'[ \t]+', ' ', p.strip()) for p in paragraphs]
-        return '\n'.join(paragraphs)
+        unique_words = {w.lower() for w in attachment_content.split()}
+        if len(unique_words) < 2:
+            return None
+
+        return attachment_content
 
     def _setup_attachment_chunks(self, embedding_model, content=None):
         self.ensure_one()
-        chunks = self._chunk_text(content)
+        # If the attachment is a tabular file, return each row as a separate chunk
+        if self.mimetype in self.TABULAR_FILE_TYPES:
+            chunks = content.split('\n')
+        else:
+            chunks = self._chunk_text(content)
+
         vals_list = []
         for chunk in chunks:
             if self.name:
@@ -117,6 +74,53 @@ class IrAttachment(models.Model):
             })
 
         self.env['ai.embedding'].create(vals_list)
+
+    @staticmethod
+    def _process_csv_text(csv_text):
+        """
+        Process CSV text into a list of dictionaries with headers as keys.
+        :return: List of row dictionaries or None if invalid
+        :rtype: list[dict] or None
+        """
+
+        lines = csv_text.strip().split('\n')
+        if not lines:
+            return None
+
+        # Detect delimiter and header
+        sample = '\n'.join(lines[:min(10, len(lines))])
+
+        delimiter = ','
+        has_header = False
+        try:
+            sniffer = csv.Sniffer()
+            delimiter = sniffer.sniff(sample).delimiter
+            has_header = sniffer.has_header(sample)
+        except csv.Error:
+            pass
+
+        # Generate headers from first row or create generic ones
+        if has_header:
+            first_row = next(csv.reader(io.StringIO(lines[0]), delimiter=delimiter))
+            headers = [h.strip() if h else f"Column_{i}" for i, h in enumerate(first_row)]
+        else:
+            first_row = next(csv.reader(io.StringIO(lines[0]), delimiter=delimiter))
+            headers = [f"Column_{i}" for i in range(len(first_row))]
+
+        # Parse CSV with safety nets for ragged rows
+        reader = csv.DictReader(
+            io.StringIO(csv_text),
+            delimiter=delimiter,
+            fieldnames=headers,
+            restkey='_extra_fields',  # Extra columns to be added as extra fields key
+            restval=None  # Missing columns will be added as None
+        )
+
+        if has_header:
+            next(reader, None)
+
+        rows = list(reader)
+        return rows
 
     @staticmethod
     def _clean_text(text):

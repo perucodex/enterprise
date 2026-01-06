@@ -31,13 +31,21 @@ class TestClFetchmailServer(TestL10nClEdiCommon):
         sale_journal.write({'l10n_cl_point_of_sale_type': 'online', 'l10n_latam_use_documents': True})
 
     def test_get_dte_recipient_company_incoming_supplier_document(self):
-        with file_open('l10n_cl_edi/tests/fetchmail_dtes/incoming_supplier_dte.xml', 'rb') as f:
-            incoming_supplier_dte = f.read()
-        xml_content = etree.fromstring(incoming_supplier_dte)
+        # setting the secondary company as the dte recipient
+        self.company_data['company'].vat = '22060449-7'
+        self.company_data_2['company'].vat = '76201224-3'
+        att_name = 'incoming_supplier_dte.xml'
+        from_address = 'incoming_dte@test.com'
+        with file_open(f'l10n_cl_edi/tests/fetchmail_dtes/{att_name}', 'rb') as f:
+            content = f.read()
+        file_data = {'name': att_name, 'raw': content, 'xml_tree': etree.fromstring(content)}
+        origin_type = self.env['fetchmail.server']._get_xml_origin_type(file_data['xml_tree'])
+        company = self.env['fetchmail.server']._get_dte_recipient_company(file_data['xml_tree'], origin_type)
         self.assertEqual(
-            self.env['fetchmail.server']._get_dte_recipient_company(xml_content, 'incoming_supplier_document'),
-            self.company_data['company']
+            company,
+            self.company_data_2['company'],
         )
+        self.env['fetchmail.server']._process_incoming_supplier_document(file_data, from_address, company.id)
 
     def test_get_dte_recipient_company_incoming_sii_dte_result(self):
         with file_open('l10n_cl_edi/tests/fetchmail_dtes/incoming_sii_dte_result.xml', 'rb') as f:
@@ -560,3 +568,14 @@ class TestClFetchmailServer(TestL10nClEdiCommon):
             self.company_data['company'].id, file_data, origin_type='incoming_commercial_reject')
 
         self.assertEqual(move.l10n_cl_dte_acceptation_status, 'claimed')
+
+    def test_process_incoming_invoice_currency_code(self):
+        att_name = 'incoming_invoice_33_currency_code.xml'
+        from_address = 'incoming_dte@test.com'
+        with file_open(f'l10n_cl_edi/tests/fetchmail_dtes/{att_name}', 'rb', filter_ext=('.xml',)) as f:
+            content = f.read()
+            file_data = {'name': att_name, 'raw': content, 'xml_tree': etree.fromstring(content)}
+        move = self.env['fetchmail.server']._process_incoming_supplier_document(
+            file_data, from_address, self.company_data['company'].id
+        )
+        self.assertEqual(move.currency_id.name, 'USD')

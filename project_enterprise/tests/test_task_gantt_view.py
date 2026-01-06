@@ -296,3 +296,15 @@ class TestTaskGanttView(TestProjectCommon):
             'user_ids': [(6, 0, [no_schedule_user.id])],
         })
         task._compute_allocated_hours()
+
+    def test_gantt_view_company_calendar_flexible_hours(self):
+        """Ensure the Gantt view handles correctly company calendars with flexible hours"""
+
+        company_calendar = self.env.company.resource_calendar_id
+        company_calendar.write({'flexible_hours': True})
+
+        Task = self.env['project.task']
+        group_by = ['user_ids']
+        start_date, stop_date = Datetime.now().strftime('%Y-%m-%d 00:00:00'), (Datetime.now() + relativedelta(days=30)).strftime('%Y-%m-%d 23:59:59')
+        gantt_data = Task.get_gantt_data([], group_by, {'display_name': {}}, unavailability_fields=group_by, progress_bar_fields=group_by, start_date=start_date, stop_date=stop_date, scale='month')
+        self.assertEqual(gantt_data["unavailabilities"]['user_ids'][False], [], 'There should be no unavailability intervals when the company calendar has flexible hours.')

@@ -187,3 +187,54 @@ class TestCaseDocumentsBridgeProduct(TransactionCase):
         self.assertEqual(document_gif.res_model, 'product.template')
         self.assertEqual(document_gif.res_id, new_product.id)
         self.assertEqual(new_product.image_1920, document_gif.datas)
+
+    def test_sync_product_document_with_document(self):
+        """
+        When a document sharing a common attachment with a product/template gets a new
+        version, the related product.document should sync its attachment; when that
+        version is deleted, it should fall back to the previous one.
+        """
+        self.company_test.documents_product_settings = True
+        base_vals = {"name": "specs_v1.gif", "datas": GIF}
+        product_docs = self.env["product.document"].create([
+            base_vals | {
+                "res_model": "product.product",
+                "res_id": self.product_test.id,
+            },
+            base_vals | {
+                "res_model": "product.template",
+                "res_id": self.product_test.product_tmpl_id.id,
+            },
+        ])
+        doc_documents = self.env["documents.document"].search([
+            ("attachment_id", "in", product_docs.ir_attachment_id.ids)
+        ])
+        self.assertEqual(
+            len(doc_documents),
+            2,
+            "Two documents.document should have been created by the bridge.",
+        )
+        for product_doc in product_docs:
+            doc_document = doc_documents.filtered(
+                lambda d: d.attachment_id == product_doc.ir_attachment_id
+            )
+            old_attachment = product_doc.ir_attachment_id
+            new_attachment = self.env["ir.attachment"].create({
+                "name": "specs_v2.gif",
+                "datas": GIF,
+                "mimetype": "image/gif",
+            })
+            doc_document.attachment_id = new_attachment
+
+            self.assertEqual(
+                product_doc.ir_attachment_id,
+                new_attachment,
+                "product.document should sync to the new attachment.",
+            )
+            # Remove current attachment
+            doc_document.action_delete_from_history(new_attachment.id)
+            self.assertEqual(
+                product_doc.ir_attachment_id,
+                old_attachment,
+                "product.document should sync back to previous attachment.",
+            )

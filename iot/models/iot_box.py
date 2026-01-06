@@ -20,6 +20,7 @@ class IotBox(models.Model):
     ip = fields.Char('Domain Address', readonly=True)
     drivers_auto_update = fields.Boolean('Automatic drivers update', help='Automatically update drivers when the IoT Box boots', default=True)
     version = fields.Char('Image Version', readonly=True)
+    version_commit_url = fields.Html(readonly=True, compute='_compute_commit_url')
     company_id = fields.Many2one('res.company', 'Company')
     ssl_certificate_end_date = fields.Datetime('SSL Certificate End Date', readonly=True)
     must_install_fdm_module = fields.Boolean(
@@ -113,3 +114,15 @@ class IotBox(models.Model):
             }
         _logger.warning("pos_blackbox_be module is already installed or not found.")
         return None
+
+    @api.depends('version')
+    def _compute_commit_url(self):
+        base_url = "https://www.github.com/odoo/odoo/commit/"
+        for box in self:
+            if box.version and "#" in box.version:
+                image_version, commit_hash = box.version.split("#", 1)
+                box.version_commit_url = (
+                    f'<span>{image_version}#<a href="{base_url}{commit_hash}" target="_blank">{commit_hash}</a></span>'
+                )
+            else:
+                box.version_commit_url = f'<span>{box.version}</span>' if box.version else False

@@ -4,15 +4,18 @@ from base64 import b64decode
 from lxml import etree
 
 from odoo import Command
-from odoo.addons.account_iso20022.tests.test_iso20022_common import TestISO20022CommonCreditTransfer
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
 from odoo.tests.common import test_xsd
 
 
-class TestSEPACreditTransferUpdateCommon(TestISO20022CommonCreditTransfer):
+class TestSEPACreditTransferUpdateCommon(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+
+        cls.env.user.group_ids |= cls.env.ref('account.group_validate_bank_account')
+
         cls.company_data['company'].write({
             'country_id': cls.env.ref('base.be').id,
             'vat': 'BE0477472701',

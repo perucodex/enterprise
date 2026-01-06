@@ -37,7 +37,7 @@ class PosSelfOrderControllerIot(PosSelfOrderController):
         iot_data = pos_config.env["iot.box"].sudo().browse(iot_box_id)
         if not iot_data:
             return {"error": "Self Order: No IoT Box found"}
-        return iot_data.read(["ip", "identifier"])
+        return iot_data.read(["ip", "identifier", "version"])
 
     @http.route("/pos-self-order/iot-box-websocket-channel/", auth="public", type="jsonrpc")
     def iot_box_websocket_channel(self, access_token, message=None, message_type="iot_action"):

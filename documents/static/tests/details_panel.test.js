@@ -1,4 +1,4 @@
-import { contains, defineModels, onRpc, serverState } from "@web/../tests/web_test_helpers";
+import { contains, defineModels, mountView, onRpc, serverState } from "@web/../tests/web_test_helpers";
 import { omit } from "@web/core/utils/objects";
 
 import { describe, expect, test } from "@odoo/hoot";
@@ -15,6 +15,7 @@ import {
     basicDocumentsKanbanArch,
     mountDocumentsKanbanView,
 } from "@documents/../tests/helpers/views/kanban";
+import { getEnrichedSearchArch } from "@documents/../tests/helpers/views/search";
 
 const archWithTags = basicDocumentsKanbanArch.replace(
     '<field name="name"/>',
@@ -294,6 +295,30 @@ test("All models should be displayed in the details panel", async function () {
     await animationFrame();
     expect(dp("div ul li")).toHaveCount(9);
     expect(dp("div ul li:contains('Start typing...')")).toHaveCount(0);
+});
+
+test("Details panel rendering", async function () {
+    const serverData = getDocumentsTestServerModelsData([
+        makeDocumentRecordData(2, "Testing container", {
+            folder_id: 1,
+            ...folderTestedValues,
+            user_permission: "edit",
+        }),
+    ]);
+    await makeDocumentsMockEnv({ serverData });
+    await mountView({
+        type: "list",
+        resModel: "documents.document",
+        arch: `<list js_class="documents_list">
+        <field name="active"/>
+        <field name="id"/>
+        </list>`,
+        searchViewArch: getEnrichedSearchArch(),
+    });
+    await contains(`.o_data_row td[name="id"]:contains(2)`).click();
+    await contains(".o_control_panel_navigation .fa-info-circle").click();
+    expect(dp(".o_documents_details_panel_name input")).toHaveValue("Testing container");
+    expect(dp(".fa-envelope + div .o_field_char input")).toHaveValue("alias");
 });
 
 test("Add from document from log a note", async () => {

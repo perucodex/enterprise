@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from . import ai_citation
 from . import ai_logging
 from . import llm_api_service
 from . import llm_providers

@@ -58,7 +58,7 @@ class TestNZEFT(AccountTestInvoicingCommon):
         cls.inbound_payments = cls.env['account.payment'].create([{
             'amount': 250,
             'partner_id': cls.partner_a.id,
-            'memo': 'Payment for noodles',
+            'memo': 'Payment for noodles,',
             'date': '2024-05-23',
             'l10n_nz_dd_account_id': cls.partner_a.bank_ids[0].id,
             'l10n_nz_payer_particulars': '#123#',
@@ -69,7 +69,7 @@ class TestNZEFT(AccountTestInvoicingCommon):
         }, {
             'amount': 150,
             'partner_id': cls.partner_b.id,
-            'memo': 'Payment for boat',
+            'memo': 'Payment for boat,',
             'date': '2024-05-24',
             'l10n_nz_dd_account_id': cls.partner_a.bank_ids[0].id,
             'l10n_nz_payer_particulars': '#123#',
@@ -105,7 +105,7 @@ class TestNZEFT(AccountTestInvoicingCommon):
         cls.outbound_payments = cls.env['account.payment'].create([{
             'amount': 250,
             'partner_id': cls.partner_a.id,
-            'memo': 'Purchase of cups',
+            'memo': 'Purchase of cups,',
             'date': '2024-05-23',
             'l10n_nz_payer_particulars': '#123#',
             'l10n_nz_payer_code': '#234#',
@@ -115,7 +115,7 @@ class TestNZEFT(AccountTestInvoicingCommon):
         }, {
             'amount': 150,
             'partner_id': cls.partner_b.id,
-            'memo': 'Purchase of water bottles',
+            'memo': 'Purchase of water bottles,',
             'date': '2024-05-24',
             'l10n_nz_payer_particulars': '#123#',
             'l10n_nz_payer_code': '#234#',

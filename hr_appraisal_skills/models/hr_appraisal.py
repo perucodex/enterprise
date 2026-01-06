@@ -89,7 +89,7 @@ class HrAppraisal(models.Model):
                 deleted_skills_name = deleted_skills.mapped('skill_id.name')
                 added_skills = appraisal_skills.filtered(lambda a: a.skill_id not in employee_skills.skill_id).mapped('skill_id.name')
 
-                appraisal.employee_id.write({
+                appraisal.employee_id.sudo().write({
                     'employee_skill_ids': [[0, 0, {
                         'employee_id': appraisal.employee_id.id,
                         'skill_id': skill.skill_id.id,

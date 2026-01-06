@@ -10,7 +10,6 @@
         <field name="filter_journals" eval="True"/>
         <field name="country_id" ref="base.fr"/>
         <field name="filter_multi_company">selector</field>
-        <field name="allow_account_audit_status_on_lines" eval="True"/>
         <field name="column_ids">
             <record id="account_financial_report_l10n_fr_bilan_column00" model="account.report.column">
                 <field name="name">Gross</field>
@@ -1200,6 +1199,18 @@
                                                 <field name="formula">total_all.balance</field>
                                                 <field name="date_scope">to_beginning_of_fiscalyear</field>
                                             </record>
+                                            <record id="account_financial_report_line_02_0_6_fr_bilan_passif_deprecated_income" model="account.report.expression">
+                                                <field name="label">deprecated_income</field>
+                                                <field name="engine">account_codes</field>
+                                                <field name="formula">-771 - 774 - 775 - 777 - 791 - 796 - 797</field>
+                                                <field name="date_scope">to_beginning_of_fiscalyear</field>
+                                            </record>
+                                            <record id="account_financial_report_line_02_0_6_fr_bilan_passif_deprecated_expense" model="account.report.expression">
+                                                <field name="label">deprecated_expense</field>
+                                                <field name="engine">account_codes</field>
+                                                <field name="formula">671 + 674 + 675 + 6812</field>
+                                                <field name="date_scope">to_beginning_of_fiscalyear</field>
+                                            </record>
                                             <record id="account_financial_report_line_02_0_6_fr_bilan_passif_accounts" model="account.report.expression">
                                                 <field name="label">accounts</field>
                                                 <field name="engine">domain</field>
@@ -1209,7 +1220,7 @@
                                             <record id="account_financial_report_line_02_0_6_fr_bilan_passif_net" model="account.report.expression">
                                                 <field name="label">net</field>
                                                 <field name="engine">aggregation</field>
-                                                <field name="formula">REPORT_NOUVEAU.past_pnl + REPORT_NOUVEAU.accounts</field>
+                                                <field name="formula">REPORT_NOUVEAU.past_pnl + REPORT_NOUVEAU.deprecated_income - REPORT_NOUVEAU.deprecated_expense + REPORT_NOUVEAU.accounts</field>
                                             </record>
                                         </field>
                                     </record>

@@ -8,6 +8,7 @@ import {
     startServer,
 } from "@mail/../tests/mail_test_helpers";
 import { describe, test } from "@odoo/hoot";
+import { waitFor } from "@odoo/hoot-dom";
 import { Command, serverState } from "@web/../tests/web_test_helpers";
 import { defineWhatsAppModels } from "@whatsapp/../tests/whatsapp_test_helpers";
 
@@ -16,18 +17,28 @@ defineWhatsAppModels();
 
 test("Basic topbar rendering for whatsapp channels", async () => {
     const pyEnv = await startServer();
+    const whatasspUser = pyEnv["res.partner"].create({ name: "Branden Freeman" });
     const channelId = pyEnv["discuss.channel"].create({
-        name: "WhatsApp 1",
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId }),
+            Command.create({ partner_id: whatasspUser }),
+        ],
         channel_type: "whatsapp",
+        name: "WhatsApp 1",
+        whatsapp_partner_id: whatasspUser,
     });
     await start();
     await openDiscuss(channelId);
     await contains(".o-mail-DiscussContent-header .o-mail-ThreadIcon .fa-whatsapp");
     await contains(".o-mail-DiscussContent-threadName", { value: "WhatsApp 1" });
-    await contains(".o-mail-DiscussContent-header button[title='Invite People']");
-    await contains(".o-mail-DiscussContent-header button[name='member-list']");
-    await contains(".o-mail-DiscussContent-header button[name='call']", { count: 0 });
-    await contains(".o-mail-DiscussContent-header button[name='settings']", { count: 0 });
+    await waitFor(".o-mail-DiscussContent-header button:count(7)");
+    await contains(".o-mail-DiscussContent-header button:eq(0)[title='Notification Settings']");
+    await contains(".o-mail-DiscussContent-header button:eq(1)[title='Invite People']");
+    await contains(".o-mail-DiscussContent-header button:eq(2)[title='Search Messages']");
+    await contains(".o-mail-DiscussContent-header button:eq(3)[title='Attachments']");
+    await contains(".o-mail-DiscussContent-header button:eq(4)[title='Pinned Messages']");
+    await contains(".o-mail-DiscussContent-header button:eq(5)[title='Members']");
+    await contains(".o-mail-DiscussContent-header button:eq(6)[title='View Contact']");
 });
 
 test("Invite users into whatsapp channel", async () => {

@@ -22,7 +22,7 @@ class TestNacha(CommonTestPayslips):
             "nacha_immediate_destination": "111111118",
             "nacha_immediate_origin": "IMM_ORIG",
             "nacha_destination": "DESTINATION",
-            "nacha_company_identification": "COMPANY_ID",
+            "nacha_company_identification": "COMPANY",
             "nacha_origination_dfi_identification": "ORIGINATION_DFI",
         })
         cls.default_journal_bank.bank_account_id = cls.env["res.partner.bank"].create({
@@ -119,13 +119,13 @@ class TestNacha(CommonTestPayslips):
             # header
             f"101 111111118  IMM_ORIG2011301945A094101DESTINATION            {self.env.company.name:23.23}{self.payslip_run_id.id:8d}",
             # batch header
-            f"5220{self.env.company.name:16.16}Payslip Run         COMPANY_IDCCDBATCH 0   201130201130   1ORIGINAT0000000",
+            f"5220{self.env.company.name:16.16}Payslip Run         COMPANY   CCDBATCH 0   201130201130   1ORIGINAT0000000",
         ]
         entry_detail_records = self.generate_batch_entry_detail_records()
         total_payslips_amount_in_cents = self.get_payslips_total_amount_cents()
         control_records = [
             # batch control record
-            f"82200000020024691356000000000000{total_payslips_amount_in_cents:012d}COMPANY_ID                         ORIGINAT0000000",
+            f"82200000020024691356000000000000{total_payslips_amount_in_cents:012d}COMPANY                            ORIGINAT0000000",
             # file control record
             f"9000001000001000000020024691356000000000000{total_payslips_amount_in_cents:012d}                                       ",
         ]
@@ -142,7 +142,7 @@ class TestNacha(CommonTestPayslips):
             # header
             f"101 111111118  IMM_ORIG2011301945A094101DESTINATION            {self.env.company.name:23.23}{self.payslip_run_id.id:8d}",
             # batch header
-            f"5200{self.env.company.name:16.16}00000000000123456789COMPANY_IDCCDBATCH 0   201130201130   1ORIGINAT0000000",
+            f"5200{self.env.company.name:16.16}00000000000123456789COMPANY   CCDBATCH 0   201130201130   1ORIGINAT0000000",
         ]
         entry_detail_records = self.generate_batch_entry_detail_records()
         # Add the offset entry detail record to the entry detail records
@@ -158,7 +158,7 @@ class TestNacha(CommonTestPayslips):
         total_payslips_amount_in_cents = self.get_payslips_total_amount_cents()
         control_records = [
             # batch control record
-            f"82000000030037037034{total_payslips_amount_in_cents:012d}{total_payslips_amount_in_cents:012d}COMPANY_ID                         ORIGINAT0000000",
+            f"82000000030037037034{total_payslips_amount_in_cents:012d}{total_payslips_amount_in_cents:012d}COMPANY                            ORIGINAT0000000",
             # file control record
             f"9000001000001000000030037037034{total_payslips_amount_in_cents:012d}{total_payslips_amount_in_cents:012d}                                       ",
         ]

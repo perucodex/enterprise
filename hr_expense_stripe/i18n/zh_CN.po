@@ -3,12 +3,13 @@
 # * hr_expense_stripe
 #
 # "Chloe Wang (chwa)" <chwa@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:44+0000\n"
-"PO-Revision-Date: 2025-09-30 02:41+0000\n"
+"POT-Creation-Date: 2025-12-30 18:43+0000\n"
+"PO-Revision-Date: 2025-12-17 17:59+0000\n"
 "Last-Translator: \"Chloe Wang (chwa)\" <chwa@odoo.com>\n"
 "Language-Team: Chinese (Simplified Han script) <https://translate.odoo.com/"
 "projects/odoo-19/hr_expense_stripe/zh_Hans/>\n"
@@ -17,37 +18,39 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/private_card_view_action.js:0
 msgid "(Fetching...)"
-msgstr ""
+msgstr "（正在获取...）"
 
 #. module: hr_expense_stripe
-#: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_kanban
+#: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
 msgid ""
-"<span class=\"card_cvc w-50 text-end stripe_card_text_sm\" invisible=\"state "
-"in ('draft', 'pending')\">\n"
-"                                                        ****\n"
-"                                                    </span>"
+"<i class=\"fa fa-warning ms-1 text-warning\"/>\n"
+"                                <span class=\"text-warning\"> Stripe issuing "
+"is not yet supported for your localization.</span>"
 msgstr ""
+"<i class=\"fa fa-warning ms-1 text-warning\"/>\n"
+"                                <span class=\"text-warning\"> 您的本地化尚不"
+"支持 Stripe 发行。</span>"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.account_journal_form_inherit_expense_stripe
 msgid "<span class=\"o_stat_text\">Cards</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">卡</span>"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "<span class=\"o_stat_text\">Employee</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">员工</span>"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_view_form_inherits_stripe
 msgid "<span class=\"ps-2\">Cards</span>"
-msgstr ""
+msgstr "<span class=\"ps-2\">卡</span>"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_receive_wizard_form
@@ -56,6 +59,8 @@ msgid ""
 "triangle text-danger pb-2\" title=\"Entered digits don't match the last 4 "
 "digits of the card.\"/>"
 msgstr ""
+"<span invisible=\"not show_warning_wrong_last_4\" class=\"fa fa-exclamation-"
+"triangle text-danger pb-2\" title=\"输入的数字与卡的最后 4 位数字不匹配。\"/>"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.account_journal_dashboard_kanban_view_inherit_expense_stripe
@@ -65,7 +70,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "<span>and</span>"
-msgstr ""
+msgstr "<span>和</span>"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
@@ -75,7 +80,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "<span>per</span>"
-msgstr ""
+msgstr "<span>每</span>"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_topup_wizard_form
@@ -83,6 +88,226 @@ msgid ""
 "<strong>Top up your Stripe Issuing account to ensure your balance covers "
 "upcoming expenses.</strong>"
 msgstr ""
+"<strong>记得为您的 Stripe Issuing 账户增值，以确保余额足够支付即将产生的开"
+"支。</strong>"
+
+#. module: hr_expense_stripe
+#: model:mail.template,body_html:hr_expense_stripe.email_template_hr_expense_stripe_card_assigned
+msgid ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"padding: 16px; background-color: white; color: "
+"#454748; border-collapse:separate;\">\n"
+"            <tbody>\n"
+"            <!-- HEADER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\">\n"
+"                    <t t-set=\"company\" t-value=\"object.company_id\"/>\n"
+"                    <span style=\"font-size: 10px;\">Card Shipment "
+"Notification</span><br/>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\">Your "
+"Card Has Been Assigned</span>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"right\" t-if=\"not "
+"company.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?company={{ company.id }}\" "
+"style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-"
+"alt=\"company.name\"/>\n"
+"                    </td></tr>\n"
+"                    <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- CONTENT -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    Hi <t t-out=\"ctx.get('recipient_name', "
+"object.user_id.name)\">[Recipient Name]</t>,<br/><br/>\n"
+"                    We have assigned a company expense card to you.\n"
+"                    You can view and manage it anytime by going to My "
+"Profile and selecting the Cards section.<br/><br/>\n"
+"                    If you have any questions, feel free to reach out.<br/"
+"><br/>\n"
+"                    Best regards,<br/>\n"
+"                    <t t-out=\"object.ordered_by.name or ''\">[Expense "
+"Administrator]</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- FOOTER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\" align=\"left\">\n"
+"                        <t t-out=\"company.name or ''\">YourCompany</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"left\" "
+"style=\"opacity: 0.7;\">\n"
+"                    <t t-if=\"company.phone\">\n"
+"                        <t t-out=\"company.phone or ''\">+1 650-123-4567</t> "
+"|\n"
+"                    </t>\n"
+"                    <t t-if=\"company.email\">\n"
+"                        <a t-attf-href=\"'mailto:%s' % {{ company.email }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.email or "
+"''\">info@yourcompany.com</a> |\n"
+"                    </t>\n"
+"                    <t t-if=\"company.website\">\n"
+"                        <a t-attf-href=\"'%s' % {{ company.website }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.website or "
+"''\">http://www.example.com</a>\n"
+"                    </t>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            </tbody>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            <!-- POWERED BY -->\n"
+"            <tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: "
+"#454748; padding: 8px; border-collapse:separate;\">\n"
+"            <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"                Powered by <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{company.email_secondary_color or '#875A7B'}};\">Odoo</a>\n"
+"            </td></tr>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            </table>\n"
+"        "
+msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"padding: 16px; background-color: white; color: "
+"#454748; border-collapse:separate;\">\n"
+"            <tbody>\n"
+"            <!-- HEADER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\">\n"
+"                    <t t-set=\"company\" t-value=\"object.company_id\"/>\n"
+"                    <span style=\"font-size: 10px;\">卡片寄送通知</span><br/"
+">\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\">您的"
+"卡片已分配完成</span>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"right\" t-if=\"not "
+"company.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?company={{ company.id }}\" "
+"style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-"
+"alt=\"company.name\"/>\n"
+"                    </td></tr>\n"
+"                    <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- CONTENT -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    您好<t t-out=\"ctx.get('recipient_name', "
+"object.user_id.name)\">[收件人姓名]</t>，<br/><br/>\n"
+"                    我们已为您分配一张企业费用卡。\n"
+"                    您可随时进入“我的个人资料”，选择“卡片”板块查看并管理该卡"
+"片。<br/><br/>\n"
+"                    若有任何疑问，欢迎随时联系我们。<br/><br/>\n"
+"                    顺祝商祺！<br/>\n"
+"                    <t t-out=\"object.ordered_by.name or ''\">[费用管理员]</"
+"t>\n"
+"                    </td></tr>\n"
+"                    <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- FOOTER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\" align=\"left\">\n"
+"                        <t t-out=\"company.name or ''\">YourCompany</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"left\" "
+"style=\"opacity: 0.7;\">\n"
+"                    <t t-if=\"company.phone\">\n"
+"                        <t t-out=\"company.phone or ''\">+1 650-123-4567</t> "
+"|\n"
+"                    </t>\n"
+"                    <t t-if=\"company.email\">\n"
+"                        <a t-attf-href=\"'mailto:%s' % {{ company.email }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.email or "
+"''\">info@yourcompany.com</a> |\n"
+"                    </t>\n"
+"                    <t t-if=\"company.website\">\n"
+"                        <a t-attf-href=\"'%s' % {{ company.website }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.website or "
+"''\">http://www.example.com</a>\n"
+"                    </t>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            </tbody>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            <!-- POWERED BY -->\n"
+"            <tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: "
+"#454748; padding: 8px; border-collapse:separate;\">\n"
+"            <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"                由 <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{company.email_secondary_color or '#875A7B'}};\">Odoo</a>驱动\n"
+"            </td></tr>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            </table>\n"
+"        "
 
 #. module: hr_expense_stripe
 #: model:mail.template,body_html:hr_expense_stripe.email_template_hr_expense_stripe_card_canceled
@@ -409,6 +634,109 @@ msgid ""
 "            </table>\n"
 "        "
 msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"padding: 16px; background-color: white; color: "
+"#454748; border-collapse:separate;\">\n"
+"            <tbody>\n"
+"            <!-- HEADER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\">\n"
+"                    <t t-set=\"company\" t-value=\"object.company_id\"/>\n"
+"                    <span style=\"font-size: 10px;\">开支卡送货通知</"
+"span><br/>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\">您的"
+"开支卡已订购</span>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"right\" t-if=\"not "
+"company.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?company={{ company.id }}\" "
+"style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-"
+"alt=\"company.name\"/>\n"
+"                    </td></tr>\n"
+"                    <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- CONTENT -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    <t t-out=\"ctx.get('recipient_name', object.user_id.name)"
+"\">[收件人名称]</t> 您好！<br/><br/>\n"
+"                    已下单订购您的公司开支卡。\n"
+"                    开支卡寄出后，我们会立即通知您。<br/><br/>\n"
+"                    顺祝  安康<br/>\n"
+"                    <t t-out=\"company.name or ''\">[公司名称]</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- FOOTER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\" align=\"left\">\n"
+"                        <t t-out=\"company.name or ''\">YourCompany</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"left\" "
+"style=\"opacity: 0.7;\">\n"
+"                    <t t-if=\"company.phone\">\n"
+"                        <t t-out=\"company.phone or ''\">+1 650-123-4567</t> "
+"|\n"
+"                    </t>\n"
+"                    <t t-if=\"company.email\">\n"
+"                        <a t-attf-href=\"'mailto:%s' % {{ company.email }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.email or "
+"''\">info@yourcompany.com</a> |\n"
+"                    </t>\n"
+"                    <t t-if=\"company.website\">\n"
+"                        <a t-attf-href=\"'%s' % {{ company.website }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.website or "
+"''\">http://www.example.com</a>\n"
+"                    </t>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            </tbody>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            <!-- POWERED BY -->\n"
+"            <tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: "
+"#454748; padding: 8px; border-collapse:separate;\">\n"
+"            <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"                <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{company.email_secondary_color or '#875A7B'}};\">Odoo</a> 技术驱动\n"
+"            </td></tr>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            </table>\n"
+"        "
 
 #. module: hr_expense_stripe
 #: model:mail.template,body_html:hr_expense_stripe.email_template_hr_expense_stripe_card_shipped
@@ -536,187 +864,308 @@ msgid ""
 "            </table>\n"
 "        "
 msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"padding: 16px; background-color: white; color: "
+"#454748; border-collapse:separate;\">\n"
+"            <tbody>\n"
+"            <!-- HEADER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\">\n"
+"                    <t t-set=\"company\" t-value=\"object.company_id\"/>\n"
+"                    <span style=\"font-size: 10px;\">开支卡送货通知</"
+"span><br/>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\">你的"
+"开支卡已寄出</span>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"right\" t-if=\"not "
+"company.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?company={{ company.id }}\" "
+"style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-"
+"alt=\"company.name\"/>\n"
+"                    </td></tr>\n"
+"                    <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- CONTENT -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    <t t-out=\"ctx.get('recipient_name', object.user_id.name)"
+"\">[持卡人]</t> 您好！<br/><br/>\n"
+"                    您的开支卡已寄出，正在送货途中。<br/><br/>\n"
+"                    <t t-if=\"object.tracking_number\">\n"
+"                        <strong>追踪码</strong>：<t t-"
+"out=\"object.tracking_number\">TRACK123</t><br/>\n"
+"                    </t>\n"
+"                    <t t-if=\"object.tracking_url\">\n"
+"                        <strong>追踪送货进度</strong>：\n"
+"                        <a t-att-href=\"object.tracking_url\" style=\"color: "
+"#875A7B; text-decoration: underline;\"><t t-out=\"object.tracking_url\">[链"
+"接]</t></a><br/>\n"
+"                    </t>\n"
+"                    <t t-if=\"ctx.get('shipping_estimated_delivery', '')\">\n"
+"                        <strong>预计送达时间</strong>：\n"
+"                        <t t-out=\"ctx.get('shipping_estimated_delivery', '')"
+"\">[2025-12-24]</t><br/><br/>\n"
+"                    </t>\n"
+"                    收到后，请按照下列步骤启用开支卡：<br/><br/>\n"
+"                    1) 前往<a t-attf-href=\"{{ website_url }}/odoo/cards\">查"
+"看您的开支卡</a>。<br/>\n"
+"                    2) 点击需要启用的卡，然后依照指示操作。<br/><br/>\n"
+"                    顺祝  安康<br/>\n"
+"                    <t t-out=\"company.name or ''\">[公司名称]</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            <!-- FOOTER -->\n"
+"            <tr>\n"
+"                <td align=\"center\" style=\"min-width: 590px;\">\n"
+"                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                    <tr><td valign=\"middle\" align=\"left\">\n"
+"                        <t t-out=\"company.name or ''\">YourCompany</t>\n"
+"                    </td></tr>\n"
+"                    <tr><td valign=\"middle\" align=\"left\" "
+"style=\"opacity: 0.7;\">\n"
+"                    <t t-if=\"company.phone\">\n"
+"                        <t t-out=\"company.phone or ''\">+1 650-123-4567</t> "
+"|\n"
+"                    </t>\n"
+"                    <t t-if=\"company.email\">\n"
+"                        <a t-attf-href=\"'mailto:%s' % {{ company.email }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.email or "
+"''\">info@yourcompany.com</a> |\n"
+"                    </t>\n"
+"                    <t t-if=\"company.website\">\n"
+"                        <a t-attf-href=\"'%s' % {{ company.website }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.website or "
+"''\">http://www.example.com</a>\n"
+"                    </t>\n"
+"                    </td></tr>\n"
+"                </table>\n"
+"                </td>\n"
+"            </tr>\n"
+"            </tbody>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            <!-- POWERED BY -->\n"
+"            <tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: #F1F1F1; color: "
+"#454748; padding: 8px; border-collapse:separate;\">\n"
+"            <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"                <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{company.email_secondary_color or '#875A7B'}};\">Odoo</a> 技术驱动\n"
+"            </td></tr>\n"
+"            </table>\n"
+"            </td></tr>\n"
+"            </table>\n"
+"        "
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/models/res_company.py:0
 msgid "A Webhook URL already exists for this company."
-msgstr ""
+msgstr "该公司已有 Webhook URL。"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/controllers/main.py:0
 #: code:addons/hr_expense_stripe/models/account_bank_statement_line.py:0
 msgid "A card that doesn't exist on the database was used"
-msgstr ""
+msgstr "使用了数据库中不存在的卡"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_hr_expense_stripe_card_block_wizard
 msgid "A wizard used to block a card"
-msgstr ""
+msgstr "用于阻止卡片的向导"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_hr_expense_stripe_card_receive_wizard
 msgid "A wizard used to first active a card when received"
-msgstr ""
+msgstr "用于在收到卡片时首先激活卡片的向导"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.ac_refrigeration_repair
 msgid "AC Refrigeration Repair"
-msgstr ""
+msgstr "空调制冷维修"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_account_chart_template
 msgid "Account Chart Template"
-msgstr ""
+msgstr "科目表模版"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/open_expense_issuing_terms.xml:0
 msgid "Account Closure"
-msgstr ""
+msgstr "账户关闭"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__account_number
 msgid "Account number"
-msgstr ""
+msgstr "账户号码"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.accounting_bookkeeping_services
 msgid "Accounting Bookkeeping Services"
-msgstr ""
+msgstr "会计簿记服务"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_needaction
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_needaction
 msgid "Action Needed"
-msgstr ""
+msgstr "所需操作"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_receive_wizard_form
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Activate"
-msgstr ""
+msgstr "激活"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__state__active
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 msgid "Active"
-msgstr ""
+msgstr "有效"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.advertising_services
 msgid "Advertising Services"
-msgstr ""
+msgstr "广告服务"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_search
 msgid "Agricultural services"
-msgstr ""
+msgstr "农业服务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.airlines_air_carriers
 msgid "Airlines Air Carriers"
-msgstr ""
+msgstr "航空公司"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.airports_flying_fields
 msgid "Airports Flying Fields"
-msgstr ""
+msgstr "机场"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__spending_policy_interval__all_time
 msgid "All Time"
-msgstr ""
+msgstr "一直"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_list
 msgid "All countries"
-msgstr ""
+msgstr "所有国家/地区"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_list
 msgid "All valid MCCs"
-msgstr ""
+msgstr "所有有效的 MCC 代码"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Allow All"
-msgstr ""
+msgstr "允许全部"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_search
 msgid "Allowed codes"
-msgstr ""
+msgstr "允许的代码"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_form
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_list
 msgid "Always refuse transactions"
-msgstr ""
+msgstr "始终拒绝交易"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.ambulance_services
 msgid "Ambulance Services"
-msgstr ""
+msgstr "救护车服务"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__amount
 msgid "Amount"
-msgstr ""
+msgstr "金额"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.amusement_parks_carnivals
 msgid "Amusement Parks Carnivals"
-msgstr ""
+msgstr "游乐园嘉年华"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/models/hr_expense.py:0
 msgid "An Expense card that doesn't exist on the database was used"
-msgstr ""
+msgstr "使用了数据库中不存在的开支卡"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/utils.py:0
 msgid "An insecure authorization method was used"
-msgstr ""
+msgstr "使用了不安全的授权方法"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.antique_reproductions
 msgid "Antique Reproductions"
-msgstr ""
+msgstr "古董复制品"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.antique_shops
 msgid "Antique Shops"
-msgstr ""
+msgstr "古董店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.aquariums
 msgid "Aquariums"
-msgstr ""
+msgstr "水族馆"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.architectural_surveying_services
 msgid "Architectural Surveying Services"
-msgstr ""
+msgstr "建筑测量服务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.art_dealers_and_galleries
 msgid "Art Dealers and Galleries"
-msgstr ""
+msgstr "艺术品经销商和画廊"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.artists_supply_and_craft_shops
 msgid "Artists Supply and Craft Shops"
-msgstr ""
+msgstr "艺术家用品和工艺品商店"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_attachment_count
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_attachment_count
 msgid "Attachment Count"
-msgstr ""
+msgstr "附件数量"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.auto_body_repair_shops
@@ -761,7 +1210,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__bic
 msgid "BIC"
-msgstr ""
+msgstr "BIC"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.bail_and_bond_payments
@@ -781,7 +1230,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_account_bank_statement_line
 msgid "Bank Statement Line"
-msgstr ""
+msgstr "银行对账单行"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__statement_description
@@ -801,71 +1250,71 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.bicycle_shops
 msgid "Bicycle Shops"
-msgstr ""
+msgstr "自行车店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.billiard_pool_establishments
 msgid "Billiard Pool Establishments"
-msgstr ""
+msgstr "台球室"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card_receive_wizard__billing_country_code
 msgid "Billing Country Code"
-msgstr ""
+msgstr "账单国家/地区代码"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__birthday
 msgid "Birthday"
-msgstr ""
+msgstr "生日"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_block_wizard_form
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Block"
-msgstr ""
+msgstr "阻止"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/models/hr_expense_stripe_card.py:0
 msgid "Block a Card"
-msgstr ""
+msgstr "阻止卡"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__state__canceled
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_kanban
 msgid "Blocked"
-msgstr ""
+msgstr "受阻"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.boat_dealers
 msgid "Boat Dealers"
-msgstr ""
+msgstr "游艇经销商"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.boat_rentals_and_leases
 msgid "Boat Rentals and Leases"
-msgstr ""
+msgstr "船只租赁"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.book_stores
 msgid "Book Stores"
-msgstr ""
+msgstr "书店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.books_periodicals_and_newspapers
 msgid "Books Periodicals and Newspapers"
-msgstr ""
+msgstr "书籍期刊报纸"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.bowling_alleys
 msgid "Bowling Alleys"
-msgstr ""
+msgstr "保龄球馆"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.bus_lines
 msgid "Bus Lines"
-msgstr ""
+msgstr "公交线路"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.business_secretarial_schools
@@ -902,22 +1351,22 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_block_wizard_form
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_cardholder_wizard_form
 msgid "Cancel"
-msgstr ""
+msgstr "取消"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__shipping_status__canceled
 msgid "Canceled"
-msgstr ""
+msgstr "已取消"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__cancellation_reason
 msgid "Cancellation Reason"
-msgstr ""
+msgstr "取消原因"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.candy_nut_and_confectionery_stores
 msgid "Candy Nut and Confectionery Stores"
-msgstr ""
+msgstr "糖果坚果和糖果店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.car_and_truck_dealers_new_used
@@ -933,7 +1382,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense__card_id
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__card_id
 msgid "Card"
-msgstr ""
+msgstr "卡片"
 
 #. module: hr_expense_stripe
 #. odoo-python
@@ -970,7 +1419,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__card_number_public
 msgid "Card Number"
-msgstr ""
+msgstr "卡号"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -1004,7 +1453,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/private_card_view_action.js:0
 msgid "Card number copied to the clipboard."
-msgstr ""
+msgstr "复制到剪贴板的卡号。"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card_receive_wizard__card_id
@@ -1036,23 +1485,23 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/private_card_view_action.js:0
 msgid "Cardholder Name"
-msgstr ""
+msgstr "持卡人姓名"
 
 #. module: hr_expense_stripe
 #: model:mail.message.subtype,name:hr_expense_stripe.mt_stripe_card_received
 msgid "Cardholder Received"
-msgstr ""
+msgstr "持卡人已收到"
 
 #. module: hr_expense_stripe
 #: model:mail.message.subtype,name:hr_expense_stripe.mt_stripe_cardholder_updated
 msgid "Cardholder updated"
-msgstr ""
+msgstr "持卡人已更新"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/models/hr_expense_stripe_card.py:0
 msgid "Cardholders"
-msgstr ""
+msgstr "持卡人"
 
 #. module: hr_expense_stripe
 #: model:ir.actions.act_window,name:hr_expense_stripe.action_hr_expense_stripe_card
@@ -1060,77 +1509,77 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_list
 msgid "Cards"
-msgstr ""
+msgstr "已发送"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 msgid "Cards of Your Team Member"
-msgstr ""
+msgstr "您团队成员的卡"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.carpentry_services
 msgid "Carpentry Services"
-msgstr ""
+msgstr "木工服务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.carpet_upholstery_cleaning
 msgid "Carpet Upholstery Cleaning"
-msgstr ""
+msgstr "地毯内饰清洁"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Categories"
-msgstr ""
+msgstr "类别"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.caterers
 msgid "Caterers"
-msgstr ""
+msgstr "餐饮"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.charitable_and_social_service_organizations_fundraising
 msgid "Charitable and Social Service Organizations Fundraising"
-msgstr ""
+msgstr "慈善和社会服务组织筹资"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.chemicals_and_allied_products
 msgid "Chemicals and Allied Products"
-msgstr ""
+msgstr "化学品及相关产品"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.child_care_services
 msgid "Child Care Services"
-msgstr ""
+msgstr "儿童保育服务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.childrens_and_infants_wear_stores
 msgid "Children and Infant's Wear Stores"
-msgstr ""
+msgstr "儿童及婴儿服装店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.chiropodists_podiatrists
 msgid "Chiropodists Podiatrists"
-msgstr ""
+msgstr "足疗师 足科医生"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.chiropractors
 msgid "Chiropractors"
-msgstr ""
+msgstr "脊医"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_topup_wizard_form
 msgid "Choose any amount — the QR code updates automatically"
-msgstr ""
+msgstr "选择任意金额 - 二维码自动更新"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.cigar_stores_and_stands
 msgid "Cigar Stores and Stands"
-msgstr ""
+msgstr "雪茄店和雪茄摊"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__billing_city
 msgid "City"
-msgstr ""
+msgstr "城市"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.civic_social_fraternal_associations
@@ -1149,7 +1598,7 @@ msgstr ""
 #: code:addons/hr_expense_stripe/static/src/components/private_card_view_action.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_topup_wizard_form
 msgid "Close"
-msgstr ""
+msgstr "关闭"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.clothing_rental
@@ -1165,7 +1614,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_mcc_stripe_tag__code
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_search
 msgid "Code"
-msgstr ""
+msgstr "代码"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.colleges_universities
@@ -1175,7 +1624,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_mcc_stripe_tag__color
 msgid "Color Index"
-msgstr ""
+msgstr "颜色指标"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.commercial_equipment
@@ -1200,7 +1649,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_res_company
 msgid "Companies"
-msgstr ""
+msgstr "公司"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__company_id
@@ -1208,79 +1657,79 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__company_id
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 msgid "Company"
-msgstr ""
+msgstr "公司"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__company_country_id
 msgid "Company Country"
-msgstr ""
+msgstr "公司所在国家/地区"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__company_partner_id
 msgid "Company Partner"
-msgstr ""
+msgstr "公司合作伙伴"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/open_expense_issuing_terms.xml:0
 msgid "Compliance Obligation"
-msgstr ""
+msgstr "合规义务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.computer_network_services
 msgid "Computer Network Services"
-msgstr ""
+msgstr "计算机网络服务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.computer_programming
 msgid "Computer Programming"
-msgstr ""
+msgstr "计算机编程"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.computer_repair
 msgid "Computer Repair"
-msgstr ""
+msgstr "电脑维修"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.computer_software_stores
 msgid "Computer Software Stores"
-msgstr ""
+msgstr "计算机软件商店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.computers_peripherals_and_software
 msgid "Computers Peripherals and Software"
-msgstr ""
+msgstr "计算机外设和软件"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.concrete_work_services
 msgid "Concrete Work Services"
-msgstr ""
+msgstr "混凝土工程服务"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_res_config_settings
 msgid "Config Settings"
-msgstr ""
+msgstr "配置设置"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
 msgid "Configure"
-msgstr ""
+msgstr "配置"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/open_card_receive_terms.xml:0
 msgid "Confirmation"
-msgstr ""
+msgstr "确认"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
 msgid "Connect"
-msgstr ""
+msgstr "连接"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.construction_materials
 msgid "Construction Materials"
-msgstr ""
+msgstr "建筑材料"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.consulting_public_relations
@@ -1310,33 +1759,33 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__spending_policy_country_tag_ids
 msgid "Countries"
-msgstr ""
+msgstr "国家/地区"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__billing_country_id
 msgid "Country"
-msgstr ""
+msgstr "国家/地区"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.country_clubs
 msgid "Country Clubs"
-msgstr ""
+msgstr "乡村俱乐部"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/models/hr_expense_stripe_card.py:0
 msgid "Country not allowed"
-msgstr ""
+msgstr "国家/地区不允许"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.courier_services
 msgid "Courier Services"
-msgstr ""
+msgstr "快递服务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.court_costs
 msgid "Court Costs"
-msgstr ""
+msgstr "法庭费用"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
@@ -1344,13 +1793,15 @@ msgid ""
 "Create prepaid virtual and physical cards for both one-time and recurring "
 "expenses, integrated into Odoo through Stripe Issuing."
 msgstr ""
+"利用整合至 Odoo 的 Stripe Issuing 功能，可为单次及经常性支出，建立预付储值的"
+"虚拟或实体开支卡。"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.actions.act_window,help:hr_expense_stripe.action_hr_expense_stripe_card
 msgid ""
 "Create virtual and physical cards for smooth team spending, whether for "
 "single purchases or ongoing expenses."
-msgstr ""
+msgstr "创建虚拟卡和实体卡，方便团队顺利消费，无论是单笔消费还是持续支出。"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__create_uid
@@ -1360,7 +1811,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__create_uid
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_mcc_stripe_tag__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "创建人"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__create_date
@@ -1370,12 +1821,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__create_date
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_mcc_stripe_tag__create_date
 msgid "Created on"
-msgstr ""
+msgstr "创建日期"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.credit_reporting_agencies
 msgid "Credit Reporting Agencies"
-msgstr ""
+msgstr "信用报告机构"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.cruise_lines
@@ -1385,53 +1836,53 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__currency_id
 msgid "Currency"
-msgstr ""
+msgstr "币别"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/wizard/hr_expense_stripe_topup_wizard.py:0
 msgid "Currency %(name)s is not available in the system. Please activate it"
-msgstr ""
+msgstr "系统中没有货币%(name)s。请激活它"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.dairy_products_stores
 msgid "Dairy Products Stores"
-msgstr ""
+msgstr "乳制品商店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.dance_hall_studios_schools
 msgid "Dance Hall Studios Schools"
-msgstr ""
+msgstr "舞蹈工作室学校"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__spending_policy_interval__daily
 msgid "Day"
-msgstr ""
+msgstr "天"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__shipping_status__delivered
 msgid "Delivered"
-msgstr ""
+msgstr "已发货"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__delivery_address_id
 msgid "Delivery Address"
-msgstr ""
+msgstr "送货地址"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.dentists_orthodontists
 msgid "Dentists Orthodontists"
-msgstr ""
+msgstr "牙医正畸医生"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.department_stores
 msgid "Department Stores"
-msgstr ""
+msgstr "百货公司"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card_block_wizard__other_reason_text
 msgid "Description"
-msgstr ""
+msgstr "描述"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__cancellation_reason__design_rejected
@@ -1518,7 +1969,7 @@ msgstr ""
 #: code:addons/hr_expense_stripe/static/src/components/pause_card_warning_action.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_receive_wizard_form
 msgid "Discard"
-msgstr ""
+msgstr "丢弃"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.discount_stores
@@ -1546,17 +1997,17 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_config_settings__display_name
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_users__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "显示名称"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.doctors
 msgid "Doctors"
-msgstr ""
+msgstr "医生"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_topup_wizard_form
 msgid "Done"
-msgstr ""
+msgstr "已完成"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.door_to_door_sales
@@ -1569,7 +2020,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_kanban
 msgid "Draft"
-msgstr ""
+msgstr "草稿"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.drapery_window_covering_and_upholstery_stores
@@ -1604,83 +2055,83 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.duty_free_stores
 msgid "Duty Free Stores"
-msgstr ""
+msgstr "免税店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.eating_places_restaurants
 msgid "Eating Places Restaurants"
-msgstr ""
+msgstr "餐饮场所餐厅"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.educational_services
 msgid "Educational Services"
-msgstr ""
+msgstr "教育服务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.electric_razor_stores
 msgid "Electric Razor Stores"
-msgstr ""
+msgstr "电动剃须刀商店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.electric_vehicle_charging
 msgid "Electric Vehicle Charging"
-msgstr ""
+msgstr "电动汽车充电"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.electrical_parts_and_equipment
 msgid "Electrical Parts and Equipment"
-msgstr ""
+msgstr "电气零件和设备"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.electrical_services
 msgid "Electrical Services"
-msgstr ""
+msgstr "电力服务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.electronics_repair_shops
 msgid "Electronics Repair Shops"
-msgstr ""
+msgstr "电子产品维修店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.electronics_stores
 msgid "Electronics Stores"
-msgstr ""
+msgstr "电子产品商店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.elementary_secondary_schools
 msgid "Elementary Secondary Schools"
-msgstr ""
+msgstr "小学 中学"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__email
 msgid "Email"
-msgstr ""
+msgstr "电子邮件"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.emergency_services_gcas_visa_use_only
 msgid "Emergency Services GCAS Visa Use Only"
-msgstr ""
+msgstr "紧急服务 GCAS 仅限签证使用"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_hr_employee
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__employee_id
 msgid "Employee"
-msgstr ""
+msgstr "员工"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_hr_expense_stripe_card
 msgid "Employee Expense Card"
-msgstr ""
+msgstr "员工费用卡"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__employee_name
 msgid "Employee Name"
-msgstr ""
+msgstr "员工姓名"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.employment_temp_agencies
 msgid "Employment Temp Agencies"
-msgstr ""
+msgstr "就业临时代理机构"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -1697,7 +2148,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/private_card_view_action.js:0
 msgid "Error"
-msgstr ""
+msgstr "错误"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__shipping_estimated_delivery
@@ -1709,7 +2160,7 @@ msgstr ""
 #: code:addons/hr_expense_stripe/models/hr_expense_stripe_card.py:0
 #: model:ir.model,name:hr_expense_stripe.model_hr_expense
 msgid "Expense"
-msgstr ""
+msgstr "费用"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_account_payment_method_line__card_id
@@ -1736,7 +2187,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_hr_expense_split
 msgid "Expense Split"
-msgstr ""
+msgstr "费用分摊"
 
 #. module: hr_expense_stripe
 #: model:ir.actions.server,name:hr_expense_stripe.hr_expense_stripe_issuing_status_cron_ir_actions_server
@@ -1761,12 +2212,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__expense_ids
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Expenses"
-msgstr ""
+msgstr "费用"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__expenses_count
 msgid "Expenses Count"
-msgstr ""
+msgstr "费用计数"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
@@ -1776,7 +2227,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__expiration
 msgid "Expiration Date"
-msgstr ""
+msgstr "有效期"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.exterminating_services
@@ -1799,7 +2250,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__shipping_status__failure
 msgid "Failure"
-msgstr ""
+msgstr "失败"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.family_clothing_stores
@@ -1829,7 +2280,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__firstname
 msgid "First Name"
-msgstr ""
+msgstr "名字"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.floor_covering_stores
@@ -1850,13 +2301,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_follower_ids
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_follower_ids
 msgid "Followers"
-msgstr ""
+msgstr "关注者"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_partner_ids
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_partner_ids
 msgid "Followers (Partners)"
-msgstr ""
+msgstr "关注者（合作伙伴）"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_product_product__stripe_mcc_ids
@@ -1866,27 +2317,30 @@ msgid ""
 "code occurs.\n"
 " Each MCC code can be linked to only one Expense Category."
 msgstr ""
+"当有交易符合以下 MCC（商户类别代码）时，透过 Stripe 开支卡建立的开支，会自动"
+"套用此开支类别。\n"
+" 每个 MCC 代码只可连结至一个开支类别。"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/utils.py:0
 msgid "Forbidden access to the IAP proxy server"
-msgstr ""
+msgstr "禁止访问 IAP 代理服务器"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.freezer_and_locker_meat_provisioners
 msgid "Freezer and Locker Meat Provisioners"
-msgstr ""
+msgstr "冷藏室和储藏室肉类供应器"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.fuel_dealers_non_automotive
 msgid "Fuel Dealers Non Automotive"
-msgstr ""
+msgstr "非汽车燃料经销商"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_topup_wizard_form
 msgid "Funds go to a prepaid balance used by your expense cards"
-msgstr ""
+msgstr "款项会转至您的开支卡，作为预缴结余使用"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.funeral_services_crematories
@@ -1966,6 +2420,11 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.grocery_stores_supermarkets
 msgid "Grocery Stores Supermarkets"
+msgstr "杂货店 超市"
+
+#. module: hr_expense_stripe
+#: model:mail.template,name:hr_expense_stripe.email_template_hr_expense_stripe_card_assigned
+msgid "HR Expense Stripe Card Assigned"
 msgstr ""
 
 #. module: hr_expense_stripe
@@ -2002,7 +2461,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__has_message
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__has_message
 msgid "Has Message"
-msgstr ""
+msgstr "有消息"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.health_and_beauty_spas
@@ -2059,7 +2518,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__partner_bank_id
 msgid "IBAN"
-msgstr ""
+msgstr "IBAN"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_account_bank_statement_line__id
@@ -2082,13 +2541,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_config_settings__id
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_users__id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card__message_needaction
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr ""
+msgstr "如果勾选此项，则需要查看新消息。"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card__message_has_error
@@ -2096,12 +2555,12 @@ msgstr ""
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_has_error
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "如果勾选此项， 某些消息将出现发送错误。"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_topup_wizard_form
 msgid "If the balance is too low, card payments will be declined"
-msgstr ""
+msgstr "如果余额过低，银行卡支付将被拒绝"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -2113,6 +2572,10 @@ msgid ""
 "fully settled. Odoo and Stripe are not responsible\n"
 "                    for any unwithdrawn funds."
 msgstr ""
+"关闭 Stripe Issuing 账户时，您必须：在账户关闭前，转出所有剩余资金，\n"
+"                    解决所有待处理交易，并确保账户款项已完全清缴。请注意："
+"Odoo 及 Stripe \n"
+"                    对任何未提取的资金概不负责。"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -2122,11 +2585,13 @@ msgid ""
 "card.\n"
 "                    You remain liable for any outstanding charges."
 msgstr ""
+"如果您的账户或卡被关闭，您必须停止使用并销毁该卡。\n"
+"                    您仍需承担任何未结费用。"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__state__inactive
 msgid "Inactive"
-msgstr ""
+msgstr "未启用"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -2163,7 +2628,8 @@ msgstr ""
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/models/hr_expense_stripe_card.py:0
-msgid "Invalid email type, must be 'canceled', 'ordered' or 'shipped'."
+msgid ""
+"Invalid email type, must be 'canceled', 'ordered', 'assigned' or 'shipped'."
 msgstr ""
 
 #. module: hr_expense_stripe
@@ -2178,13 +2644,13 @@ msgstr ""
 msgid ""
 "Invalid or expired signature found in the request. Please check your "
 "configuration"
-msgstr ""
+msgstr "请求中发现无效或过期签名。请检查您的配置"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/utils.py:0
 msgid "Invalid request sent to the Odoo IAP proxy server: %(reason)s"
-msgstr ""
+msgstr "发送到 Odoo IAP 代理服务器的请求无效：%(reason)s"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense__is_card_expense
@@ -2200,7 +2666,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_is_follower
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_is_follower
 msgid "Is Follower"
-msgstr ""
+msgstr "是关注者"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.jewelry_stores_watches_clocks_and_silverware_stores
@@ -2211,7 +2677,7 @@ msgstr ""
 #: model:ir.model,name:hr_expense_stripe.model_account_journal
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
 msgid "Journal"
-msgstr ""
+msgstr "日记账"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
@@ -2237,7 +2703,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__lastname
 msgid "Last Name"
-msgstr ""
+msgstr "姓氏"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__write_uid
@@ -2247,7 +2713,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__write_uid
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_mcc_stripe_tag__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "最后更新人"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__write_date
@@ -2257,32 +2723,33 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__write_date
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_mcc_stripe_tag__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "上次更新日期"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.laundries
 msgid "Laundries"
-msgstr ""
+msgstr "洗衣房"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.laundry_cleaning_services
 msgid "Laundry Cleaning Services"
-msgstr ""
+msgstr "洗衣清洁服务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.legal_services_attorneys
 msgid "Legal Services Attorneys"
-msgstr ""
+msgstr "法律服务律师"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
+#, fuzzy
 msgid "Limit"
-msgstr ""
+msgstr "限制"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__spending_policy_interval
 msgid "Limit Frequency"
-msgstr ""
+msgstr "限制频率"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -2293,13 +2760,13 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__is_live_mode
 msgid "Live Mode"
-msgstr ""
+msgstr "现场模式"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__cancellation_reason__lost
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card_block_wizard__cancellation_reason__lost
 msgid "Lost"
-msgstr ""
+msgstr "丢失"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -2341,7 +2808,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.marketplaces
 msgid "Marketplaces"
-msgstr ""
+msgstr "市场"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.masonry_stonework_and_plaster
@@ -2366,170 +2833,170 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.medical_services
 msgid "Medical Services"
-msgstr ""
+msgstr "医疗服务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.medical_and_dental_labs
 msgid "Medical and Dental Labs"
-msgstr ""
+msgstr "医疗和牙科实验室"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.membership_organizations
 msgid "Membership Organizations"
-msgstr ""
+msgstr "会员组织"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.mens_womens_clothing_stores
 msgid "Men and Women's Clothing Stores"
-msgstr ""
+msgstr "男女服装店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.mens_and_boys_clothing_and_accessories_stores
 msgid "Men and boys' Clothing and Accessories Stores"
-msgstr ""
+msgstr "男童服装及配饰店"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_product__stripe_mcc_ids
 msgid "Merchant Category Code (MCC)"
-msgstr ""
+msgstr "商户类别代码（MCC）"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__spending_policy_category_tag_ids
 msgid "Merchant Category Codes"
-msgstr ""
+msgstr "商户类别代码"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_search
 msgid "Merchant codes that will always be refused when used by a vendor"
-msgstr ""
+msgstr "供应商使用时总是被拒绝的商家代码"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_search
 msgid "Merchant codes that will be accepted when used by a vendor"
-msgstr ""
+msgstr "供应商使用时可接受的商家代码"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_has_error
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_has_error
 msgid "Message Delivery error"
-msgstr ""
+msgstr "消息发送错误"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_ids
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_ids
 msgid "Messages"
-msgstr ""
+msgstr "消息"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.metal_service_centers
 msgid "Metal Service Centers"
-msgstr ""
+msgstr "金属服务中心"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.miscellaneous_apparel_and_accessory_shops
 msgid "Miscellaneous Apparel and Accessory Shops"
-msgstr ""
+msgstr "杂项服装和配件商店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.miscellaneous_auto_dealers
 msgid "Miscellaneous Auto Dealers"
-msgstr ""
+msgstr "杂项汽车经销商"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.miscellaneous_business_services
 msgid "Miscellaneous Business Services"
-msgstr ""
+msgstr "杂项商业服务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.miscellaneous_food_stores
 msgid "Miscellaneous Food Stores"
-msgstr ""
+msgstr "杂项食品商店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.miscellaneous_general_merchandise
 msgid "Miscellaneous General Merchandise"
-msgstr ""
+msgstr "杂项百货"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.miscellaneous_general_services
 msgid "Miscellaneous General Services"
-msgstr ""
+msgstr "杂项总务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.miscellaneous_home_furnishing_specialty_stores
 msgid "Miscellaneous Home Furnishing Specialty Stores"
-msgstr ""
+msgstr "杂项家居用品专卖店"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.miscellaneous_publishing_and_printing
 msgid "Miscellaneous Publishing and Printing"
-msgstr ""
+msgstr "杂项出版和印刷"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.miscellaneous_recreation_services
 msgid "Miscellaneous Recreation Services"
-msgstr ""
+msgstr "杂项娱乐服务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.miscellaneous_specialty_retail
 msgid "Miscellaneous Specialty Retail"
-msgstr ""
+msgstr "杂项专业零售"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_search
 msgid "Miscellaneous shops"
-msgstr ""
+msgstr "杂项商店"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/utils.py:0
 msgid "Missing Cardholder on IAP proxy server"
-msgstr ""
+msgstr "IAP 代理服务器上缺少持卡人"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.mobile_home_dealers
 msgid "Mobile Home Dealers"
-msgstr ""
+msgstr "移动房屋经销商"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__spending_policy_interval__monthly
 msgid "Month"
-msgstr ""
+msgstr "月"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.motion_picture_theaters_cinema
 msgid "Motion Picture Theaters Cinema"
-msgstr ""
+msgstr "电影院"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.motor_freight_carriers_and_trucking
 msgid "Motor Freight Carriers and Trucking"
-msgstr ""
+msgstr "汽车货运公司和卡车运输"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.motor_homes_dealers
 msgid "Motor Homes Dealers"
-msgstr ""
+msgstr "房车经销商"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.motor_vehicle_supplies_and_new_parts
 msgid "Motor Vehicle Supplies and New Parts"
-msgstr ""
+msgstr "汽车用品和新零件"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.motorcycle_shops_dealers
 msgid "Motorcycle Shops Dealers"
-msgstr ""
+msgstr "摩托车店经销商"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.motorcycle_shops_and_dealers
 msgid "Motorcycle Shops and Dealers"
-msgstr ""
+msgstr "摩托车商店和经销商"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.music_stores_musical_instruments_pianos_and_sheet_music
 msgid "Music Stores Musical Instruments Pianos and Sheet Music"
-msgstr ""
+msgstr "音乐商店 乐器 钢琴和乐谱"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -2545,7 +3012,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 msgid "My Team"
-msgstr ""
+msgstr "我的团队"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
@@ -2558,7 +3025,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_search
 msgid "Name"
-msgstr ""
+msgstr "名称"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_account_journal__nb_stripe_card
@@ -2574,7 +3041,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:mail.activity.type,name:hr_expense_stripe.mail_act_expense_add_receipt
 msgid "New card payment expense"
-msgstr ""
+msgstr "新卡支付费用"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.news_dealers_and_newsstands
@@ -2638,25 +3105,25 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_needaction_counter
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_needaction_counter
 msgid "Number of Actions"
-msgstr ""
+msgstr "操作数目"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_has_error_counter
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_has_error_counter
 msgid "Number of errors"
-msgstr ""
+msgstr "错误数目"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card__message_needaction_counter
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "需要采取行动的消息数量"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card__message_has_error_counter
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr ""
+msgstr "传送错误的信息数量"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.nurseries_lawn_and_garden_supply_stores
@@ -2708,18 +3175,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense_stripe/utils.py:0
 msgid "Only licenses databases can use Odoo Stripe Issuing services."
-msgstr ""
+msgstr "Odoo 的 Stripe Issuing 服务，只限已获许可证的数据库使用。"
 
 #. module: hr_expense_stripe
 #: model:ir.model.constraint,message:hr_expense_stripe.constraint_account_bank_statement_line_check_unique_stripe_id
 msgid "Only one bank statement can be created from a single stripe transaction"
-msgstr ""
+msgstr "单条交易只能创建一份银行对账单"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/models/hr_expense_stripe_card.py:0
 msgid "Operation only allowed for expense administrators."
-msgstr ""
+msgstr "仅允许费用管理员操作。"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.opticians_eyeglasses
@@ -2734,7 +3201,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Order"
-msgstr ""
+msgstr "订单"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__ordered_by
@@ -2760,7 +3227,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__cancellation_reason__none
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card_block_wizard__cancellation_reason__none
 msgid "Other"
-msgstr ""
+msgstr "其他"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -2793,7 +3260,7 @@ msgstr ""
 #: code:addons/hr_expense_stripe/static/src/components/pause_card_warning_action.xml:0
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "Pause"
-msgstr ""
+msgstr "暂停"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -2805,13 +3272,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_kanban
 msgid "Paused"
-msgstr ""
+msgstr "已暂停"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/pause_card_warning_action.xml:0
 msgid ""
-"Pausing your card will make it unactive. Only Expense Administrators can "
+"Pausing your card will disable it. Only Expense Administrators can "
 "reactivate it."
 msgstr ""
 
@@ -2823,29 +3290,29 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_account_payment_register
 msgid "Pay"
-msgstr ""
+msgstr "支付"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__payment_method_line_id
 msgid "Payment Method Line"
-msgstr ""
+msgstr "付款方式行"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_account_payment_method_line
 msgid "Payment Methods"
-msgstr ""
+msgstr "付款方式"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_account_payment
 msgid "Payments"
-msgstr ""
+msgstr "支付"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__shipping_status__pending
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__state__pending
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_kanban
 msgid "Pending"
-msgstr ""
+msgstr "待办的"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.pet_shops_pet_food_and_supplies
@@ -2860,7 +3327,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__phone_number
 msgid "Phone Number"
-msgstr ""
+msgstr "电话号码"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.photo_developing
@@ -2870,7 +3337,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.photographic_photocopy_microfilm_equipment_and_supplies
 msgid "Photographic Photocopy Microfilm Equipment and Supplies"
-msgstr ""
+msgstr "照相、复印、缩微胶片设备和用品"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.photographic_studios
@@ -2935,17 +3402,17 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_product_mcc_stripe_tag__product_name
 msgid "Product Name"
-msgstr ""
+msgstr "产品名称"
 
 #. module: hr_expense_stripe
 #: model:ir.model,name:hr_expense_stripe.model_product_product
 msgid "Product Variant"
-msgstr ""
+msgstr "产品变体"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.professional_services
 msgid "Professional Services"
-msgstr ""
+msgstr "专业服务"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_search
@@ -2970,7 +3437,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__qr_code
 msgid "QR Code URL"
-msgstr ""
+msgstr "二维码网址"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.quick_copy_repro_and_blueprint
@@ -2986,7 +3453,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__rating_ids
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__rating_ids
 msgid "Ratings"
-msgstr ""
+msgstr "点评"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.real_estate_agents_and_managers_rentals
@@ -2996,7 +3463,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card_block_wizard__cancellation_reason
 msgid "Reason"
-msgstr ""
+msgstr "原因"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.record_stores
@@ -3011,12 +3478,12 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
 msgid "Refresh"
-msgstr ""
+msgstr "刷新"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card__user_id
 msgid "Related user name for the resource to manage its access."
-msgstr ""
+msgstr "管理资源访问权限的相关用户名."
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.religious_goods_stores
@@ -3044,12 +3511,17 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr_expense_stripe/static/src/components/private_card_view_action.xml:0
 msgid "Resend"
+msgstr "重发"
+
+#. module: hr_expense_stripe
+#: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_view_form_inherits_stripe
+msgid "Reserved"
 msgstr ""
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__res_company__stripe_account_issuing_status__restricted
 msgid "Restricted"
-msgstr ""
+msgstr "受限"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_product_mcc_stripe_tag_search
@@ -3059,12 +3531,12 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__shipping_status__returned
 msgid "Returned"
-msgstr ""
+msgstr "已归还"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_kanban
 msgid "Reveal"
-msgstr ""
+msgstr "显示"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.roofing_siding_sheet_metal
@@ -3075,18 +3547,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__message_has_sms_error
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__message_has_sms_error
 msgid "SMS Delivery error"
-msgstr ""
+msgstr "短信发送错误"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_cardholder_wizard_form
 msgid "Save"
-msgstr ""
+msgstr "保存"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/wizard/hr_expense_stripe_topup_wizard.py:0
 msgid "Scan me with your banking app."
-msgstr ""
+msgstr "从您的银行应用程序扫描."
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.secretarial_support_services
@@ -3106,6 +3578,11 @@ msgid "Sent to the person that will handle the reception of the card"
 msgstr ""
 
 #. module: hr_expense_stripe
+#: model:mail.template,description:hr_expense_stripe.email_template_hr_expense_stripe_card_assigned
+msgid "Sent to the person that will use the card"
+msgstr ""
+
+#. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.service_stations
 msgid "Service Stations"
 msgstr ""
@@ -3118,7 +3595,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__shipping_status__shipped
 msgid "Shipped"
-msgstr ""
+msgstr "已发货"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__shipping_status
@@ -3153,7 +3630,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_topup_wizard__bic
 msgid "Sometimes called BIC or Swift."
-msgstr ""
+msgstr "有时也称为BIC或Swift。"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.special_trade_services
@@ -3198,7 +3675,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__billing_state_id
 msgid "State"
-msgstr ""
+msgstr "状态"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.stationery_stores_office_and_school_supply_stores
@@ -3211,7 +3688,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_config_settings__stripe_account_issuing_status
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_view_search
 msgid "Status"
-msgstr ""
+msgstr "状态"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__cancellation_reason__stolen
@@ -3222,12 +3699,12 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__billing_street
 msgid "Street"
-msgstr ""
+msgstr "街道"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__billing_street2
 msgid "Street 2"
-msgstr ""
+msgstr "街道2"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_res_company__stripe_id
@@ -3427,6 +3904,12 @@ msgstr ""
 
 #. module: hr_expense_stripe
 #. odoo-python
+#: code:addons/hr_expense_stripe/models/account_journal.py:0
+msgid "Stripe issuing is not supported for your localization"
+msgstr ""
+
+#. module: hr_expense_stripe
+#. odoo-python
 #: code:addons/hr_expense_stripe/utils.py:0
 msgid ""
 "Stripe timed-out or encountered an error when communicating with the card "
@@ -3441,7 +3924,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__shipping_status__submitted
 msgid "Submitted"
-msgstr ""
+msgstr "发送"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.swimming_pools_sales
@@ -3489,7 +3972,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.telecommunication_services
 msgid "Telecommunication Services"
-msgstr ""
+msgstr "电信服务"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.telegraph_services
@@ -3750,7 +4233,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense_stripe/wizard/hr_expense_stripe_cardholder_wizard.py:0
 msgid "The phone number is invalid."
-msgstr ""
+msgstr "电话号码无效。"
 
 #. module: hr_expense_stripe
 #. odoo-python
@@ -3890,12 +4373,12 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__tracking_number
 msgid "Tracking Number"
-msgstr ""
+msgstr "物流追踪单号"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__tracking_url
 msgid "Tracking URL"
-msgstr ""
+msgstr "追踪 URL"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.trailer_parks_campgrounds
@@ -3970,7 +4453,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__card_type
 msgid "Type"
-msgstr ""
+msgstr "类型"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.typesetting_plate_making_and_related_services
@@ -4003,12 +4486,18 @@ msgstr ""
 #: code:addons/hr_expense_stripe/controllers/main.py:0
 #: code:addons/hr_expense_stripe/wizard/hr_expense_stripe_topup_wizard.py:0
 msgid "Unknown"
-msgstr ""
+msgstr "未知"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/utils.py:0
 msgid "Unknown Error Code"
+msgstr ""
+
+#. module: hr_expense_stripe
+#. odoo-javascript
+#: code:addons/hr_expense_stripe/static/src/fields/monetary_blank_if_zero.xml:0
+msgid "Unlimited"
 msgstr ""
 
 #. module: hr_expense_stripe
@@ -4025,7 +4514,7 @@ msgstr ""
 #: model:ir.model,name:hr_expense_stripe.model_res_users
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__user_id
 msgid "User"
-msgstr ""
+msgstr "用户"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.utilities
@@ -4070,7 +4559,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.view_hr_expense_stripe_card_form
 msgid "View Details"
-msgstr ""
+msgstr "查看详情"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card_receive_wizard__phone_number
@@ -4084,7 +4573,7 @@ msgstr ""
 #: code:addons/hr_expense_stripe/static/src/components/private_card_view_action.js:0
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__card_type__virtual
 msgid "Virtual"
-msgstr ""
+msgstr "虚拟"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.vocational_trade_schools
@@ -4094,7 +4583,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__has_limit_higher_than_stripe_warning
 msgid "Warning"
-msgstr ""
+msgstr "警告"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card__has_limit_higher_than_stripe_warning
@@ -4146,18 +4635,18 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_card__website_message_ids
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__website_message_ids
 msgid "Website Messages"
-msgstr ""
+msgstr "网站消息"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_card__website_message_ids
 #: model:ir.model.fields,help:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__website_message_ids
 msgid "Website communication history"
-msgstr ""
+msgstr "网站沟通记录"
 
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__spending_policy_interval__weekly
 msgid "Week"
-msgstr ""
+msgstr "周"
 
 #. module: hr_expense_stripe
 #: model:product.mcc.stripe.tag,name:hr_expense_stripe.welding_repair
@@ -4220,7 +4709,7 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields.selection,name:hr_expense_stripe.selection__hr_expense_stripe_card__spending_policy_interval__yearly
 msgid "Year"
-msgstr ""
+msgstr "年"
 
 #. module: hr_expense_stripe
 #. odoo-javascript
@@ -4303,7 +4792,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_expense_stripe/models/hr_expense.py:0
 msgid "You cannot edit the security fields of an expense manually"
-msgstr ""
+msgstr "无法手动编辑费用的安全字段"
 
 #. module: hr_expense_stripe
 #: model:ir.model.constraint,message:hr_expense_stripe.constraint_res_company_constraint_journal_stripe_activated
@@ -4317,6 +4806,22 @@ msgstr ""
 msgid ""
 "You cannot set a cost on a product that is used as an Expense card category. "
 "Please duplicate it instead."
+msgstr ""
+
+#. module: hr_expense_stripe
+#. odoo-python
+#: code:addons/hr_expense_stripe/models/hr_expense.py:0
+msgid ""
+"You cannot split an expense that is reserved. Please wait for the "
+"transaction to be captured."
+msgstr ""
+
+#. module: hr_expense_stripe
+#. odoo-python
+#: code:addons/hr_expense_stripe/models/hr_expense.py:0
+msgid ""
+"You cannot submit an expense that is reserved. Please wait for the "
+"transaction to be captured."
 msgstr ""
 
 #. module: hr_expense_stripe
@@ -4382,6 +4887,11 @@ msgid "Your Expense Card Has Been Shipped"
 msgstr ""
 
 #. module: hr_expense_stripe
+#: model:mail.template,subject:hr_expense_stripe.email_template_hr_expense_stripe_card_assigned
+msgid "Your Expense Card has been Assigned"
+msgstr ""
+
+#. module: hr_expense_stripe
 #: model:mail.template,subject:hr_expense_stripe.email_template_hr_expense_stripe_card_ordered
 msgid "Your Expense Card has been Ordered"
 msgstr ""
@@ -4411,17 +4921,29 @@ msgstr ""
 #. module: hr_expense_stripe
 #: model:ir.model.fields,field_description:hr_expense_stripe.field_hr_expense_stripe_cardholder_wizard__billing_zip
 msgid "Zip"
-msgstr ""
+msgstr "邮政编码"
 
 #. module: hr_expense_stripe
 #. odoo-python
 #: code:addons/hr_expense_stripe/models/hr_expense.py:0
 #: code:addons/hr_expense_stripe/models/hr_expense_stripe_card.py:0
 msgid "id"
-msgstr ""
+msgstr "id"
 
 #. module: hr_expense_stripe
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.hr_expense_stripe_card_receive_wizard_form
 #: model_terms:ir.ui.view,arch_db:hr_expense_stripe.res_config_settings_view_form
 msgid "terms and conditions"
 msgstr ""
+
+#, fuzzy
+#~ msgid ""
+#~ "<span class=\"card_cvc w-50 text-end stripe_card_text_sm\" "
+#~ "invisible=\"state in ('draft', 'pending')\">\n"
+#~ "                                                        ****\n"
+#~ "                                                    </span>"
+#~ msgstr ""
+#~ "<span class=\"card_cvc w-50 text-end stripe_card_text_sm\" "
+#~ "invisible=\"state in ('draft', 'pending')\">\n"
+#~ "                                                        ****\n"
+#~ "                                                    </span>"

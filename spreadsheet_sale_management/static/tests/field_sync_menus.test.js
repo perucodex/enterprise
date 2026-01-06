@@ -22,47 +22,45 @@ before(() => {
     addSpreadsheetFieldSyncExtensionWithCleanUp();
 });
 
-describe("field sync menus", () => {
-    test("add a field sync at the selected cell", async () => {
-        const { model } = await createSaleOrderSpreadsheetModel();
-        const env = {
-            ...model.config.custom.env,
-            model,
-            openSidePanel(tag) {
-                expect.step(tag);
-            },
-        };
-        selectCell(model, "B2");
-        await doMenuAction(cellMenuRegistry, ["add_field_sync"], env);
-        const fieldSync = getFieldSync(model, "B2");
-        expect(fieldSync).toEqual({
-            listId: model.getters.getMainSaleOrderLineList().id,
-            indexInList: 0,
-            fieldName: "product_uom_qty",
-        });
-        expect.verifySteps(["FieldSyncSidePanel"]);
+test("add a field sync at the selected cell", async () => {
+    const { model } = await createSaleOrderSpreadsheetModel();
+    const env = {
+        ...model.config.custom.env,
+        model,
+        openSidePanel(tag) {
+            expect.step(tag);
+        },
+    };
+    selectCell(model, "B2");
+    await doMenuAction(cellMenuRegistry, ["add_field_sync"], env);
+    const fieldSync = getFieldSync(model, "B2");
+    expect(fieldSync).toEqual({
+        listId: model.getters.getMainSaleOrderLineList().id,
+        indexInList: 0,
+        fieldName: "product_uom_qty",
     });
+    expect.verifySteps(["FieldSyncSidePanel"]);
+});
 
-    test("delete a field sync at the selected cell", async () => {
-        const { model } = await createSaleOrderSpreadsheetModel();
-        addFieldSync(model, "B2", "product_uom_qty", 0);
-        const env = {
-            ...model.config.custom.env,
-            model,
-        };
-        selectCell(model, "B2");
-        await doMenuAction(cellMenuRegistry, ["delete_field_syncs"], env);
-        expect(getFieldSync(model, "B2")).toBe(undefined);
-    });
+test("delete a field sync at the selected cell", async () => {
+    const { model } = await createSaleOrderSpreadsheetModel();
+    addFieldSync(model, "B2", "product_uom_qty", 0);
+    const env = {
+        ...model.config.custom.env,
+        model,
+    };
+    selectCell(model, "B2");
+    await doMenuAction(cellMenuRegistry, ["delete_field_syncs"], env);
+    expect(getFieldSync(model, "B2")).toBe(undefined);
+});
 
-    test("delete is not visible if there's nothing to delete", async () => {
-        const { model } = await createSaleOrderSpreadsheetModel();
-        const env = {
-            ...model.config.custom.env,
-            model,
-        };
-        selectCell(model, "B2");
-        const menu = getActionMenu(cellMenuRegistry, ["delete_field_syncs"], env);
-        expect(await menu.isVisible(env)).toBe(false);
-    });
+test("delete is not visible if there's nothing to delete", async () => {
+    const { model } = await createSaleOrderSpreadsheetModel();
+    const env = {
+        ...model.config.custom.env,
+        model,
+    };
+    selectCell(model, "B2");
+    const menu = getActionMenu(cellMenuRegistry, ["delete_field_syncs"], env);
+    expect(await menu.isVisible(env)).toBe(false);
 });

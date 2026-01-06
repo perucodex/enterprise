@@ -81,6 +81,18 @@ class StockReturnPicking(models.TransientModel):
 
     def _prepare_picking_default_values(self):
         if not self.picking_id and self.ticket_id:
+            # Take return picking type of outgoing type if found, else take the incoming type
+            picking_type = self.env['stock.picking.type'].search([
+                ('company_id', '=', self.ticket_id.company_id.id),
+                ('code', '=', 'outgoing'),
+            ], limit=1).return_picking_type_id
+
+            if not picking_type:
+                picking_type = self.env['stock.picking.type'].search([
+                    ('company_id', '=', self.ticket_id.company_id.id),
+                    ('code', '=', 'incoming'),
+                ], limit=1)
+
             return {
                 'move_ids': [],
                 'state': 'draft',
@@ -88,10 +100,7 @@ class StockReturnPicking(models.TransientModel):
                 'origin': self.env._('Ticket: %(ticket_name)s', ticket_name=self.ticket_id.name),
                 'partner_id': self.ticket_id.partner_id.address_get(['delivery'])['delivery'],
                 'ticket_id': self.ticket_id.id,
-                'picking_type_id': self.env['stock.picking.type'].search([
-                    ('company_id', '=', self.ticket_id.company_id.id),
-                    ('code', '=', 'incoming'),
-                ], limit=1).id,
+                'picking_type_id': picking_type.id,
             }
         return super()._prepare_picking_default_values()
 

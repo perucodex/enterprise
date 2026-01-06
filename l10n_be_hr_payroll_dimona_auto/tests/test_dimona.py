@@ -200,6 +200,7 @@ class TestDimona(TransactionCase):
         self.assertFalse(self.version.l10n_be_last_dimona_declaration_id.state)
 
     def test_dimona_flow_classic(self):
+        # pylint: disable=function-redefined
         self.version.date_version = date(2025, 9, 26)
         self.version.contract_date_start = date(2025, 9, 26)
 

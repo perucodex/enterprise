@@ -92,10 +92,15 @@ class L10n_PhSlspReportHandler(models.AbstractModel):
                 """
                   SELECT %(column_group_key)s                                                                   AS column_group_key,
                          p.vat                                                                                  AS partner_vat,
-                         CASE WHEN p.last_name IS NOT NULL THEN p.name ELSE '' END                              AS register_name,
+                         COALESCE(
+                             NULLIF(TRIM(CONCAT_WS(' ', p.last_name, p.first_name, p.middle_name)), ''),
+                             p.name
+                         )                                                                                      AS register_name,
                          p.id                                                                                   AS partner_id,
-                         CASE WHEN p.last_name IS NULL THEN p.name ELSE '' END                                  AS partner_name,
-                         p.last_name || ' ' || p.first_name || ' ' || p.middle_name                             AS formatted_partner_name,
+                         COALESCE(
+                             NULLIF(TRIM(CONCAT_WS(' ', p.first_name, p.middle_name, p.last_name)), ''),
+                             p.name
+                         )                                                                                      AS partner_name,
                          p.last_name                                                                            AS last_name,
                          %(account_tag_name)s                                                                   AS tag_name,
                          SUM(%(balance_select)s
@@ -136,7 +141,7 @@ class L10n_PhSlspReportHandler(models.AbstractModel):
             # Initialise the move values
             if values['partner_id'] not in lines_values:
                 lines_values[values['partner_id']] = {
-                    'name': values['formatted_partner_name'] or values['partner_name'],
+                    'name': values['partner_name'],
                     'register_name': values['register_name'],
                     'is_company': values['last_name'],
                     values['column_group_key']: {

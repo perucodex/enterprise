@@ -3,8 +3,9 @@
 from pytz import timezone
 from dateutil.relativedelta import relativedelta, MO, SU
 from dateutil import rrule
+from calendar import monthrange
 from collections import defaultdict, Counter
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from itertools import chain
 
 from odoo import api, Command, models, fields, _
@@ -336,27 +337,26 @@ class HrPayslip(models.Model):
         # this public holiday should be taken into account in the worked days lines
         if self.version_id.date_end and self.date_from <= self.version_id.date_end <= self.date_to:
             # If the contract is followed by another one (eg. after an appraisal)
-            if self.version_id.employee_id.version_ids.filtered(lambda v: v.date_start > self.version_id.date_end):
-                return res
-            public_holiday_type = self.env.ref('hr_work_entry.l10n_be_work_entry_type_bank_holiday')
-            public_leaves = self.version_id.resource_calendar_id.global_leave_ids.filtered(
-                lambda l: l.work_entry_type_id == public_holiday_type)
-            # If less than 15 days under contract, the public holidays is not reimbursed
-            public_leaves = public_leaves.filtered(
-                lambda l: (l.date_from.date() - self.employee_id.contract_date_start).days >= 15)
-            # If less than 15 days of occupation -> no payment of the time off after contract
-            # If less than 1 month of occupation -> payment of the time off occurring within 15 days after contract.
-            # Occupation = duration since the start of the contract, from date to date
-            public_leaves = public_leaves.filtered(
-                lambda l: 0 < (l.date_from.date() - self.version_id.date_end).days <= (30 if self.employee_id.contract_date_start + relativedelta(months=1) <= self.version_id.date_end else 15))
-            if public_leaves:
-                input_type_id = self.env.ref('l10n_be_hr_payroll.cp200_other_input_after_contract_public_holidays').id
-                if input_type_id not in self.input_line_ids.mapped('input_type_id').ids:
-                    self.write({'input_line_ids': [(0, 0, {
-                        'name': _('After Contract Public Holidays'),
-                        'amount': 0.0,
-                        'input_type_id': self.env.ref('l10n_be_hr_payroll.cp200_other_input_after_contract_public_holidays').id,
-                    })]})
+            if not self.version_id.employee_id.version_ids.filtered(lambda v: v.date_start > self.version_id.date_end):
+                public_holiday_type = self.env.ref('hr_work_entry.l10n_be_work_entry_type_bank_holiday')
+                public_leaves = self.version_id.resource_calendar_id.global_leave_ids.filtered(
+                    lambda l: l.work_entry_type_id == public_holiday_type)
+                # If less than 15 days under contract, the public holidays is not reimbursed
+                public_leaves = public_leaves.filtered(
+                    lambda l: (l.date_from.date() - self.employee_id.contract_date_start).days >= 15)
+                # If less than 15 days of occupation -> no payment of the time off after contract
+                # If less than 1 month of occupation -> payment of the time off occurring within 15 days after contract.
+                # Occupation = duration since the start of the contract, from date to date
+                public_leaves = public_leaves.filtered(
+                    lambda l: 0 < (l.date_from.date() - self.version_id.date_end).days <= (30 if self.employee_id.contract_date_start + relativedelta(months=1) <= self.version_id.date_end else 15))
+                if public_leaves:
+                    input_type_id = self.env.ref('l10n_be_hr_payroll.cp200_other_input_after_contract_public_holidays').id
+                    if input_type_id not in self.input_line_ids.mapped('input_type_id').ids:
+                        self.write({'input_line_ids': [(0, 0, {
+                            'name': _('After Contract Public Holidays'),
+                            'amount': 0.0,
+                            'input_type_id': self.env.ref('l10n_be_hr_payroll.cp200_other_input_after_contract_public_holidays').id,
+                        })]})
         # Handle loss on commissions
         if self._get_last_year_average_variable_revenues():
             we_types_ids = (
@@ -374,8 +374,6 @@ class HrPayslip(models.Model):
         return res
 
     def _get_last_year_average_variable_revenues(self):
-        if not self.version_id.commission_on_target:
-            return 0
         date_from = self.env.context.get('variable_revenue_date_from', self.date_from)
         first_version_date = self.employee_id._get_first_version_date()
         if not first_version_date:
@@ -455,40 +453,226 @@ class HrPayslip(models.Model):
                     months += 1
         return months
 
-    def _compute_presence_prorata(self, date_from, date_to, contracts):
-        unpaid_work_entry_types = self.struct_id.unpaid_work_entry_type_ids
-        paid_work_entry_types = self.env['hr.work.entry.type'].search([]) - unpaid_work_entry_types
-        hours = contracts.get_work_hours(date_from, date_to)
-        paid_hours = sum(v for k, v in hours.items() if k in paid_work_entry_types.ids)
-        unpaid_hours = sum(v for k, v in hours.items() if k in unpaid_work_entry_types.ids)
-        # Take 60 unpaid sick open days as paid time off
-        if self.struct_id.code == 'CP200THIRTEEN':
-            unpaid_sick_codes = ['LEAVE280', 'LEAVE214']
-            date_from = datetime.combine(date_from, datetime.min.time())
-            date_to = datetime.combine(date_to, datetime.max.time())
-            work_entries = self.env['hr.work.entry'].search([
-                ('state', 'in', ['validated', 'draft']),
-                ('employee_id', '=', self.employee_id.id),
-                ('date', '>=', date_from),
-                ('date', '<=', date_to),
-                ('work_entry_type_id.code', 'in', unpaid_sick_codes),
-            ], order="date asc")
-            days_count, valid_sick_hours = 0, 0
-            valid_days = set()
-            for work_entry in work_entries:
-                work_entry_date = work_entry.date
-                if work_entry_date in valid_days:
-                    valid_sick_hours += work_entry.duration
-                elif days_count < 60:
-                    valid_days.add(work_entry_date)
-                    days_count += 1
-                    valid_sick_hours += work_entry.duration
-            paid_hours += valid_sick_hours
-            unpaid_hours -= valid_sick_hours
-        return paid_hours / (paid_hours + unpaid_hours) if paid_hours or unpaid_hours else 0
+    def _compute_presence_prorated_fixed_wage(self, date_from, date_to, versions):
+        self.ensure_one()
+
+        def _get_calendar_days(leave, date_min, date_max):
+            date_from = max(date_min, leave.date_from.date())
+            date_to = min(date_max, leave.date_to.date())
+            days = (date_to - date_from).days + 1
+            if leave.request_unit_half:
+                if leave.request_date_from_period == leave.request_date_to_period:
+                    return days - 0.5
+                elif leave.request_date_from_period == 'pm' and leave.request_date_to_period == 'am':
+                    return days - 1
+            return days
+
+        def round_half_days(duration):
+            return round(duration * 2) / 2
+
+        work_entries = self.env['hr.work.entry'].search([
+            ('state', 'in', ['validated', 'draft']),
+            ('employee_id', '=', self.employee_id.id),
+            ('date', '>=', date_from),
+            ('date', '<=', date_to),
+        ], order="date asc")
+        work_entries_by_date = work_entries.grouped('date')
+        unpaid_work_entry_types = self.env['hr.work.entry.type']
+        unpaid_leave_type = self.env.ref('hr_work_entry.work_entry_type_unpaid_leave', raise_if_not_found=False)
+        if unpaid_leave_type:
+            unpaid_work_entry_types += unpaid_leave_type
+        unjustified_reason_type = self.env.ref('hr_work_entry.l10n_be_work_entry_type_unjustified_reason', raise_if_not_found=False)
+        if unjustified_reason_type:
+            unpaid_work_entry_types += unjustified_reason_type
+        is_PFA = self.struct_id.code == 'CP200THIRTEEN'
+        fte_basic = self.version_id._get_contract_wage() * 1 / self.version_id.work_time_rate if self.version_id.work_time_rate else 0
+        company_avg_hours_per_day = self.company_id.resource_calendar_id.hours_per_day
+
+        version_by_date = defaultdict(lambda: defaultdict(dict))
+        for day in rrule.rrule(rrule.DAILY, dtstart=date_from + relativedelta(day=1), until=date_to + relativedelta(day=31)):
+            version_by_date[day.year][day.month][day.date()] = None
+
+        full_unpaid_months = set()
+        for version in versions:
+            working_days = version.resource_calendar_id._get_working_hours()
+
+            # As version changes can go from friday to monday, we need to extend the search to the previous monday/next sunday
+            # We only check for next sunday for the last version otherwise we would write the wrong version
+            previous_week_start = max(version.date_start + relativedelta(weeks=-1, weekday=MO(-1)), date_from + relativedelta(day=1))
+            if version == versions[-1]:
+                date_end = min(version.date_end + relativedelta(weeks=+1, weekday=SU(+1)) if version.date_end else date.max, date_to)
+            else:
+                date_end = min(version.date_end or date.max, date_to)
+            days_to_check = rrule.rrule(rrule.DAILY, dtstart=previous_week_start, until=date_end)
+
+            for day in days_to_check:
+                day = day.date()
+                work_entries_date = work_entries_by_date.get(day)
+
+                if version_by_date[day.year][day.month][day] or day.month in full_unpaid_months:
+                    continue
+
+                dayofweek = str(day.weekday())
+                if version.resource_calendar_id.two_weeks_calendar:
+                    weektype = str(self.env['resource.calendar.attendance'].get_week_type(day))
+                    is_calendar_day = working_days[weektype][dayofweek]
+                else:
+                    is_calendar_day = working_days[False][dayofweek]
+
+                if is_calendar_day and (not work_entries_date or (is_PFA and all(we.work_entry_type_id in unpaid_work_entry_types for we in work_entries_date))):
+                    full_unpaid_months.add(day.month)
+                else:
+                    version_by_date[day.year][day.month][day] = version
+
+        full_time_months = 0
+        payslip_amount = 0
+
+        ### PFA STUFF ###
+        sick_work_entry_type_codes = [
+            'LEAVE110',  # Sick Time Off
+            'LEAVE280',  # Long Term Sick
+            'LEAVE214',  # Sick Time Off (Without Guaranteed Salary)
+            'LEAVE281',  # Partial Incapacity
+        ]
+        covered_time_offs = self.env['hr.leave']
+        pfa_calendar_sick_days_remaining = 60
+        pfa_sick_calendar_days_to_defer = 0  # used to report time off to deduct to next month
+        pfa_unpredictable_days_remaining = 10
+        sick_work_entries = work_entries.filtered_domain([
+            ('work_entry_type_id.code', 'in', sick_work_entry_type_codes)
+        ])
+        unpredictable_work_entries = work_entries.filtered_domain([
+            ('work_entry_type_id.code', '=', 'LEAVE250')
+        ])
+
+        if is_PFA:
+            # If the first work entry of the year is a sick work entry, check for last year work entries
+            # If already sick in december last year, we should deduct these days, except if there is a period of 14 calendar days of work
+            if work_entries and work_entries[0].work_entry_type_id.code in sick_work_entry_type_codes:
+                last_year_work_entries = self.env['hr.work.entry'].search([
+                    ('state', 'in', ['draft', 'validated']),
+                    ('employee_id', '=', self.employee_id.id),
+                    ('date', '>=', date_from - relativedelta(years=1)),
+                    ('date', '<=', date_to - relativedelta(years=1)),
+                ], order="date asc")
+                if last_year_work_entries and last_year_work_entries[-1].work_entry_type_id.code in sick_work_entry_type_codes:
+                    last_year_sick_work_entries = last_year_work_entries.filtered_domain([
+                        ('work_entry_type_id.code', 'in', sick_work_entry_type_codes)
+                    ])
+                    # Check if has worked for 14 consecutive days. If yes, then do not deduct last year sick days
+                    # We ignore half days of sickness, as sick time off are not taken in half days in Belgium
+                    has_worked_consecutive_14_days = False
+                    consecutive_work_days_counter = 0
+                    current_date = date_from
+                    while current_date < date_to:
+                        work_entries = work_entries_by_date.get(current_date)
+                        if not work_entries or any(we.work_entry_type_id.code not in sick_work_entry_type_codes for we in work_entries):
+                            consecutive_work_days_counter += 1
+                        else:
+                            consecutive_work_days_counter = 0
+                            if leave_work_entries := work_entries.filtered('leave_id'):
+                                current_date = max(leave_work_entries.leave_id.mapped('date_to')).date() + relativedelta(days=1)
+                                continue
+
+                        # If worked 14 calendar consecutive days, counter is set to 60 days for the year
+                        if consecutive_work_days_counter >= 14:
+                            has_worked_consecutive_14_days = True
+                            break
+                        current_date += relativedelta(days=1)
+
+                    if not has_worked_consecutive_14_days:
+                        last_year_sick_calendar_days = 0
+                        last_year_covered_time_offs = self.env['hr.leave']
+                        for sick_wes in last_year_sick_work_entries.grouped('date').values():
+                            for sick_we in sick_wes:
+                                if sick_we.leave_id and not sick_we.leave_id in last_year_covered_time_offs:
+                                    last_year_sick_calendar_days += _get_calendar_days(
+                                       sick_we.leave_id, date_from - relativedelta(years=1), date_to - relativedelta(years=1)
+                                    )
+                                    last_year_covered_time_offs |= sick_we.leave_id
+                                elif not sick_we.leave_id:
+                                    last_year_sick_calendar_days += round_half_days(sick_we.duration / company_avg_hours_per_day)
+
+                        pfa_calendar_sick_days_remaining = max(0, pfa_calendar_sick_days_remaining - last_year_sick_calendar_days)
+
+        for year, versions_by_month in version_by_date.items():
+            for month, version_by_day in versions_by_month.items():
+                days_by_version_counter = Counter(version_by_day.values())
+                if None in days_by_version_counter or month in full_unpaid_months:
+                    continue
+
+                full_time_months += 1
+                days_in_month = monthrange(year, month)[1]
+                monthly_calendar_sick_time_off_days = 0
+                monthly_covered_time_offs = self.env['hr.leave']
+                for version, n_days in days_by_version_counter.items():
+                    if is_PFA:
+                        month_sick_work_entries = sick_work_entries.filtered(
+                            lambda we: we.date.month == month and we.version_id == version
+                        )
+                        calendar_sick_time_off_days = 0
+                        for sick_wes in month_sick_work_entries.grouped('date').values():
+                            for sick_we in sick_wes:
+                                if sick_we.leave_id and not sick_we.leave_id in covered_time_offs:
+                                    calendar_sick_time_off_days += _get_calendar_days(
+                                       sick_we.leave_id, date_from, date_to
+                                    )
+                                    covered_time_offs |= sick_we.leave_id
+                                elif not sick_we.leave_id:
+                                    calendar_sick_time_off_days += round_half_days(sick_we.duration / company_avg_hours_per_day)
+
+                                # Used to know how many days worked in month
+                                if sick_we.leave_id and not sick_we.leave_id in monthly_covered_time_offs:
+                                    monthly_calendar_sick_time_off_days += _get_calendar_days(
+                                       sick_we.leave_id, date(year, month, 1), date(year, month, days_in_month)
+                                    )
+                                    monthly_covered_time_offs |= sick_we.leave_id
+                                elif not sick_we.leave_id:
+                                    monthly_calendar_sick_time_off_days += round_half_days(sick_we.duration / company_avg_hours_per_day)
+
+                        month_unpredictable_work_entries = unpredictable_work_entries.filtered(lambda we: we.date.month == month)
+                        unpredictable_days = len(month_unpredictable_work_entries.mapped('date'))
+
+                        max_sick_days_to_remove = min(monthly_calendar_sick_time_off_days, calendar_sick_time_off_days)
+                        sick_days_to_remove = min(n_days, pfa_sick_calendar_days_to_defer + max_sick_days_to_remove)
+                        if calendar_sick_time_off_days > sick_days_to_remove:
+                            pfa_sick_calendar_days_to_defer += calendar_sick_time_off_days - sick_days_to_remove
+                        else:
+                            pfa_sick_calendar_days_to_defer -= max(0, sick_days_to_remove - max_sick_days_to_remove)
+
+                        # Remove sick days
+                        non_assimilated_days = max(0, sick_days_to_remove - pfa_calendar_sick_days_remaining)
+                        pfa_calendar_sick_days_remaining = max(0, pfa_calendar_sick_days_remaining - sick_days_to_remove)
+
+                        # Remove unpredictable days
+                        non_assimilated_days += max(0, unpredictable_days - pfa_unpredictable_days_remaining)
+                        pfa_unpredictable_days_remaining = max(0, pfa_unpredictable_days_remaining - unpredictable_days)
+
+                        n_days -= non_assimilated_days
+
+                    work_time_rate = version.work_time_rate
+                    # Compute the real work time rate if partial incapacity. Partial incapacity should count in the work time rate in the PFA
+                    if is_PFA and version.l10n_be_time_credit:
+                        global_attendances = version.resource_calendar_id._get_global_attendances()
+                        partial_incapacity_attendances = version.resource_calendar_id.attendance_ids.filtered_domain([
+                            ('display_type', '=', False),
+                            ('day_period', '!=', 'lunch'),
+                            ('work_entry_type_id.code', '=', 'LEAVE281')
+                        ])
+                        hours_per_week_ref = version.resource_calendar_id.full_time_required_hours
+                        hours_per_week = sum(att.hour_to - att.hour_from for att in global_attendances + partial_incapacity_attendances)
+                        work_time_rate = hours_per_week / hours_per_week_ref if hours_per_week_ref else 1
+
+                    payslip_amount += ((n_days / days_in_month) / 12) * (fte_basic * work_time_rate)
+
+        if is_PFA:
+            first_version_date = self.employee_id._get_first_version_date()
+            if first_version_date.year == self.date_from.year and first_version_date.month >= 7:
+                return 0, full_time_months
+        return payslip_amount, full_time_months
 
     def _get_paid_amount_13th_month(self):
-        versions = self.employee_id.version_ids.filtered(lambda v: v.structure_type_id == self.struct_id.type_id).sorted(key=lambda v: v.date_start)
+        versions = self.employee_id.version_ids.filtered(lambda v: v.structure_type_id == self.struct_id.type_id)
         first_version_date = self.employee_id._get_first_version_date(no_gap=False)
         if not versions or not first_version_date:
             return 0.0
@@ -499,31 +683,14 @@ class HrPayslip(models.Model):
         date_from = max(first_version_date, self.date_from + relativedelta(day=1, month=1))
         date_to = self.date_to + relativedelta(day=31)
 
-        basic = self.version_id._get_contract_wage()
-
         force_months = self.input_line_ids.filtered(lambda l: l.code == 'MONTHS')
-        work_time_rates = [c.resource_calendar_id.work_time_rate for c in versions if c.resource_calendar_id.work_time_rate]
-        if not work_time_rates:
-            return 0.0
-        current_work_rate = work_time_rates[-1] / 100.0
-
         if force_months:
             n_months = force_months[0].amount
             if n_months < 6:
                 return 0.0
-            fixed_salary = basic * n_months / 12
+            fixed_salary = self.version_id._get_contract_wage() * n_months / 12
         else:
-            # Number of complete months (any work rate)
-            months_worked = self._compute_number_complete_months_of_work(date_from, date_to, versions)
-            if months_worked < 6:
-                return 0.0
-
-            # Quantity of months worked equivalently in full-time
-            full_time_months = self._compute_number_complete_months_of_work(date_from, date_to, versions, True)
-            # Deduct absences
-            presence_prorata = self._compute_presence_prorata(date_from, date_to, versions)
-
-            fixed_salary = basic * full_time_months / 12 * presence_prorata / current_work_rate
+            fixed_salary, _ = self._compute_presence_prorated_fixed_wage(date_from, date_to, versions)
 
         force_avg_variable_revenues = self.input_line_ids.filtered(lambda l: l.code == 'VARIABLE')
         if force_avg_variable_revenues:
@@ -541,8 +708,8 @@ class HrPayslip(models.Model):
 
     def _get_paid_double_holiday(self):
         self.ensure_one()
-        contracts = self.employee_id.version_ids.filtered(lambda v: v.structure_type_id == self.struct_id.type_id)
-        if not contracts:
+        versions = self.employee_id.version_ids.filtered(lambda v: v.structure_type_id == self.struct_id.type_id)
+        if not versions:
             return 0.0
 
         basic = self.version_id._get_contract_wage()
@@ -556,12 +723,7 @@ class HrPayslip(models.Model):
             n_months = force_months[0].amount
             fixed_salary = basic * n_months / 12
         else:
-            # 1. Number of months
-            n_months = self._compute_number_complete_months_of_work(date_from, date_to, contracts)
-            # 2. Deduct absences
-            presence_prorata = self._compute_presence_prorata(date_from, date_to, contracts)
-            fixed_salary = basic * n_months / 12 * presence_prorata
-            # 3. Previous Year occupation
+            fixed_salary, n_months = self._compute_presence_prorated_fixed_wage(date_from, date_to, versions)
             if year == int(self.employee_id.first_contract_year_n1):
                 for line in self.employee_id.double_pay_line_n1_ids:
                     fixed_salary += basic * line.months_count * line.occupation_rate / 100 / 12

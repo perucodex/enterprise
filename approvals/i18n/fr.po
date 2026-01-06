@@ -8,13 +8,15 @@
 # Jolien De Paepe, 2023
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # "Cécile Collart (cco)" <cco@odoo.com>, 2025.
+# Sylvain Albasser <pandraghon@outlook.com>, 2025.
+# "Manon Rondou (ronm)" <ronm@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:43+0000\n"
-"PO-Revision-Date: 2025-10-23 09:45+0000\n"
-"Last-Translator: \"Cécile Collart (cco)\" <cco@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:42+0000\n"
+"PO-Revision-Date: 2025-12-10 10:26+0000\n"
+"Last-Translator: \"Manon Rondou (ronm)\" <ronm@odoo.com>\n"
 "Language-Team: French <https://translate.odoo.com/projects/odoo-19/approvals/"
 "fr/>\n"
 "Language: fr\n"
@@ -23,7 +25,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
 "1000000 == 0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #. module: approvals
 #. odoo-python
@@ -62,15 +64,15 @@ msgid "<i class=\"fa fa-times text-danger me-1\"/>Refuse"
 msgstr "<i class=\"fa fa-times text-danger me-1\"/>Refuser"
 
 #. module: approvals
+#: model_terms:ir.ui.view,arch_db:approvals.report_aprroval_request_document
+msgid "<span class=\"col-2 fw-bold\">Description:</span>"
+msgstr "<span class=\"col-2 fw-bold\">Description :</span>"
+
+#. module: approvals
 #: model_terms:ir.ui.view,arch_db:approvals.approval_category_view_form
 msgid "<span class=\"fa fa-warning\" title=\"Invalid minimum approvals\"/>"
 msgstr ""
 "<span class=\"fa fa-warning\" title=\"Validations minimales invalides\"/>"
-
-#. module: approvals
-#: model_terms:ir.ui.view,arch_db:approvals.report_aprroval_request_document
-msgid "<span class=\"fw-bold\">Description:</span>"
-msgstr "<span class=\"fw-bold\">Description :</span>"
 
 #. module: approvals
 #: model_terms:ir.ui.view,arch_db:approvals.report_aprroval_request_document
@@ -170,7 +172,8 @@ msgstr "Une référence supplémentaire qui doit être précisée sur la demande
 #. module: approvals
 #: model:ir.model.constraint,message:approvals.constraint_approval_approver_unique_request_user
 msgid "An approver with the same user already exists for this request."
-msgstr "Un approbateur avec le même utilisateur existe déjà pour cette demande."
+msgstr ""
+"Un approbateur avec le même utilisateur existe déjà pour cette demande."
 
 #. module: approvals
 #. odoo-python
@@ -622,6 +625,11 @@ msgid "From:"
 msgstr "De :"
 
 #. module: approvals
+#: model_terms:ir.ui.view,arch_db:approvals.approval_search_view_search
+msgid "Future Activities"
+msgstr "Activités futures"
+
+#. module: approvals
 #: model:approval.category,name:approvals.approval_category_data_general_approval
 msgid "General Approval"
 msgstr "Validation générale"
@@ -817,6 +825,11 @@ msgstr "Mis à jour par"
 #: model:ir.model.fields,field_description:approvals.field_approval_request__write_date
 msgid "Last Updated on"
 msgstr "Mis à jour le"
+
+#. module: approvals
+#: model_terms:ir.ui.view,arch_db:approvals.approval_search_view_search
+msgid "Late Activities"
+msgstr "Activités en retard"
 
 #. module: approvals
 #: model_terms:ir.actions.act_window,help:approvals.approval_request_action
@@ -1179,7 +1192,7 @@ msgstr "Demandé par :"
 #: model:ir.model.fields,field_description:approvals.field_approval_request__request_owner_id
 #: model_terms:ir.ui.view,arch_db:approvals.approval_search_view_search
 msgid "Request Owner"
-msgstr "Solliciter un propriétaire"
+msgstr "Demandeur"
 
 #. module: approvals
 #: model_terms:ir.ui.view,arch_db:approvals.approval_request_view_tree
@@ -1398,6 +1411,11 @@ msgid "To Submit"
 msgstr "À soumettre"
 
 #. module: approvals
+#: model_terms:ir.ui.view,arch_db:approvals.approval_search_view_search
+msgid "Today Activities"
+msgstr "Activités du jour"
+
+#. module: approvals
 #: model:ir.model.fields,help:approvals.field_approval_request__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Type d'activité d'exception enregistrée."
@@ -1477,6 +1495,12 @@ msgstr "Vous ne pouvez pas approuver avant l'approbateur précédent."
 
 #. module: approvals
 #. odoo-python
+#: code:addons/approvals/models/approval_approver.py:0
+msgid "You cannot change approval request."
+msgstr "Vous ne pouvez pas modifier la demande de validation."
+
+#. module: approvals
+#. odoo-python
 #: code:addons/approvals/models/ir_attachment.py:0
 msgid ""
 "You cannot unlink an attachment which is linked to a validated, refused or "
@@ -1525,7 +1549,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/approvals/models/approval_category.py:0
 msgid "Your minimum approval exceeds the total of default approvers."
-msgstr "Votre validation minimale dépasse le total des approbateurs par défaut"
+msgstr ""
+"Votre validation minimale dépasse le total des approbateurs par défaut."
 
 #. module: approvals
 #: model_terms:ir.ui.view,arch_db:approvals.approval_request_view_form
@@ -1553,6 +1578,9 @@ msgstr "nouvelle demande"
 #: model_terms:ir.ui.view,arch_db:approvals.approval_request_view_form
 msgid "to:"
 msgstr "à :"
+
+#~ msgid "<span class=\"fw-bold\">Description:</span>"
+#~ msgstr "<span class=\"fw-bold\">Description :</span>"
 
 #~ msgid "<span>From: </span>"
 #~ msgstr "<span>De : </span>"

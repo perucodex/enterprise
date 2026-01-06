@@ -140,7 +140,7 @@ class HrExpenseStripeTopupWizard(models.TransientModel):
                 free_communication=_("Top up payment"),
                 structured_communication=False,
                 currency=wizard.currency_id,
-                debtor_partner=bank,
+                debtor_partner=bank.partner_id,
             )
             if b64_qr:
                 wizard.qr_code = (

@@ -135,3 +135,23 @@ class TestSLSPGeneration(TestAccountReportsCommon, TestPhCommon):
                 ['D', 'S', '789456123', '"Test Partner Company"', '""', '""', '""', '"10 Super Street"', '"Super City False"', '0.00', '100.00', '800.00', '96.00', '123456789', '03/31/2024'],
             ]
         )
+
+    def test_registered_name_display_slsp(self):
+        report = self.env.ref('l10n_ph_reports.sls_report')
+        options = self._generate_options(report, '2024-01-01', '2024-03-31', {'unfold_all': True})
+        lines = report._get_lines(options)
+
+        # Find lines for partners
+        partner_lines = {}
+        for line in lines:
+            if line.get('caret_options') == 'res.partner':
+                partner_id = report._get_res_id_from_line_id(line['id'], 'res.partner')
+                partner_lines[partner_id] = line
+
+        line_a = partner_lines[self.partner_a.id]
+        self.assertEqual(line_a['name'], 'John Doe Smith')  # check partner_name
+        self.assertEqual(line_a['columns'][1]['name'], 'Smith John Doe')  # check register_name
+
+        line_b = partner_lines[self.partner_b.id]
+        self.assertEqual(line_b['name'], 'Test Partner Company')  # check partner_name
+        self.assertEqual(line_b['columns'][1]['name'], 'Test Partner Company')  # check register_name

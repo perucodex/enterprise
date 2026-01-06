@@ -381,6 +381,9 @@ def _get_and_write_studio_view(view, values=None, should_create=True, view_key_t
     if values is None:
         return studio_view
 
+    if "arch" in values:
+        values["arch"] = values["arch"].strip() or "<data />"
+
     if studio_view:
         vals = {"active": True, **values}
         studio_view.write(vals)
@@ -780,10 +783,12 @@ class WebStudioReportController(main.WebStudioController):
             is_subtree=is_subtree,
             xpath_with_meta=True)
         studio_view_arch = differ.diff_xpath(etree.tostring(original), etree.tostring(new_arch))
-        studio_view_arch = etree.fromstring(studio_view_arch)
-        for node in studio_view_arch.iter(etree.Element):
-            node.attrib.pop(DIFF_ATTRIBUTE, None)
-        _get_and_write_studio_view(view, {"arch": etree.tostring(studio_view_arch)})
+        if studio_view_arch:
+            studio_view_arch = etree.fromstring(studio_view_arch)
+            for node in studio_view_arch.iter(etree.Element):
+                node.attrib.pop(DIFF_ATTRIBUTE, None)
+            studio_view_arch = etree.tostring(studio_view_arch)
+        _get_and_write_studio_view(view, {"arch": studio_view_arch or "<data/>"})
 
     @http.route("/web_studio/reset_report_archs", type="jsonrpc", auth="user")
     def reset_report_archs(self, report_id, include_web_layout=True):

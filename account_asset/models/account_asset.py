@@ -294,7 +294,7 @@ class AccountAsset(models.Model):
     @api.depends('original_move_line_ids')
     def _compute_related_purchase_value(self):
         for asset in self:
-            related_purchase_value = sum(asset.original_move_line_ids.mapped('balance'))
+            related_purchase_value = sum(line.balance * line.deductible_amount / 100 for line in asset.original_move_line_ids)
             if asset.account_asset_id.multiple_assets_per_line and len(asset.original_move_line_ids) == 1:
                 related_purchase_value /= max(1, int(asset.original_move_line_ids.quantity))
             asset.related_purchase_value = related_purchase_value
@@ -349,6 +349,7 @@ class AccountAsset(models.Model):
                     auto_create_multi = account.create_asset != 'no' and account.multiple_assets_per_line
                     quantity = line.quantity if auto_create_multi else 1
                     converted_non_deductible_tax_value = line.currency_id._convert(line.non_deductible_tax_value / quantity, record.currency_id, record.company_id, line.date)
+                    converted_non_deductible_tax_value *= line.deductible_amount / 100
                     record.non_deductible_tax_value += record.currency_id.round(converted_non_deductible_tax_value)
 
     @api.depends('depreciation_move_ids.state', 'parent_id')

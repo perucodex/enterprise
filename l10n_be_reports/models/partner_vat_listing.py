@@ -102,7 +102,7 @@ class L10n_BePartnerVatHandler(models.AbstractModel):
         trl_49 = self.env['account.tax.repartition.line'].search([('tag_ids', 'in', tag_49_ids), ('document_type', '=', 'refund')])
         tag_47_ids = self.env.ref('l10n_be.tax_report_line_47').expression_ids._get_matching_tags().ids
         trl_47 = self.env['account.tax.repartition.line'].search([('tag_ids', 'in', tag_47_ids), ('document_type', '=', 'invoice')])
-        return trl_47.tax_id & trl_49.tax_id
+        return trl_47.tax_id & trl_49.tax_id | self.env['account.tax'].search([('ubl_cii_tax_category_code', '=', 'E')])
 
     def _get_query_fun_params(self, report, options, remove_forced_domain=False):
         # Remove the forced_domain possibly used in the options to force the value of the groupby being unfolded/horizontal group. Indeed, we want

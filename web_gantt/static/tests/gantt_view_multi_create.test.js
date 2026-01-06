@@ -4,7 +4,13 @@ import { animationFrame, disableAnimations, mockDate, mockTimeZone } from "@odoo
 
 import { contains, defineParams, onRpc } from "@web/../tests/web_test_helpers";
 import { Tasks, defineGanttModels } from "./gantt_mock_models";
-import { getCell, getGridContent, hoverCell, mountGanttView } from "./web_gantt_test_helpers";
+import {
+    dragPill,
+    getCell,
+    getGridContent,
+    hoverCell,
+    mountGanttView,
+} from "./web_gantt_test_helpers";
 
 import { Domain } from "@web/core/domain";
 
@@ -760,4 +766,157 @@ test(`multi_create: no plan button if plan="1" and more that one cell selected`,
 
     expect(".o_multi_selection_buttons > button").toHaveCount(1);
     expect(".o_multi_selection_buttons > button:first").toHaveText("Add");
+});
+
+test("multi_create: can start selection over locked pills", async () => {
+    await mountGanttView({
+        resModel: "tasks",
+        arch: `
+            <gantt
+                date_start="start"
+                date_stop="stop"
+                precision="{'day':'hour:full', 'week':'day:full', 'month':'day:full'}"
+                multi_create_view="multi_create_form"
+                disable_drag_drop="1"
+            >
+                <field name="progress"/>
+            </gantt>
+        `,
+        groupBy: ["stage_id"],
+    });
+    let gridContent = getGridContent();
+    expect(gridContent.rows).toEqual([
+        {
+            pills: [
+                {
+                    colSpan: "01 December 2018 -> 04 December 2018",
+                    level: 0,
+                    title: "Task 5",
+                },
+            ],
+            title: "todo",
+        },
+        {
+            title: "in_progress",
+            pills: [
+                { level: 0, colSpan: "01 December 2018 -> Out of bounds (32) ", title: "Task 1" },
+                {
+                    level: 1,
+                    colSpan: "20 December 2018 -> 20 December 2018",
+                    title: "Task 7",
+                },
+            ],
+        },
+        {
+            title: "done",
+            pills: [
+                {
+                    level: 0,
+                    colSpan: "17 December 2018 -> 22 December 2018",
+                    title: "Task 2",
+                },
+            ],
+        },
+        {
+            title: "cancel",
+            pills: [
+                {
+                    level: 0,
+                    colSpan: "20 December 2018 -> 20 December 2018",
+                    title: "Task 4",
+                },
+                { level: 0, colSpan: "27 December 2018 -> Out of bounds (35) ", title: "Task 3" },
+            ],
+        },
+    ]);
+
+    // Equivalent to select from 01 December todo to 02 December done
+    const { drop } = await dragPill("Task 5");
+    await drop({ row: "done", columnHeader: "02", groupHeader: "December 2018" });
+
+    expect(".o_selection_box").toHaveText("2\nselected");
+
+    await multiCreateClickAddButton();
+    expect(".o_multi_create_popover").toHaveCount(1);
+    await click(".o_multi_create_popover .o_form_view [name='name'] input");
+    await edit("Time off");
+    await multiCreatePopoverClickAddButton();
+
+    expect(".o_multi_create_popover").toHaveCount(0);
+
+    gridContent = getGridContent();
+    expect(gridContent.rows).toEqual([
+        {
+            pills: [
+                {
+                    colSpan: "01 December 2018 -> 04 December 2018",
+                    level: 0,
+                    title: "Task 5",
+                },
+                {
+                    title: "Time off",
+                    colSpan: "01 December 2018 -> 01 December 2018",
+                    level: 1,
+                },
+                {
+                    title: "Time off",
+                    colSpan: "02 December 2018 -> 02 December 2018",
+                    level: 1,
+                },
+            ],
+            title: "todo",
+        },
+        {
+            title: "in_progress",
+            pills: [
+                { level: 0, colSpan: "01 December 2018 -> Out of bounds (32) ", title: "Task 1" },
+                {
+                    title: "Time off",
+                    colSpan: "01 December 2018 -> 01 December 2018",
+                    level: 1,
+                },
+                {
+                    title: "Time off",
+                    colSpan: "02 December 2018 -> 02 December 2018",
+                    level: 1,
+                },
+                {
+                    level: 1,
+                    colSpan: "20 December 2018 -> 20 December 2018",
+                    title: "Task 7",
+                },
+            ],
+        },
+        {
+            title: "done",
+            pills: [
+                {
+                    title: "Time off",
+                    colSpan: "01 December 2018 -> 01 December 2018",
+                    level: 0,
+                },
+                {
+                    title: "Time off",
+                    colSpan: "02 December 2018 -> 02 December 2018",
+                    level: 0,
+                },
+                {
+                    title: "Task 2",
+                    level: 0,
+                    colSpan: "17 December 2018 -> 22 December 2018",
+                },
+            ],
+        },
+        {
+            title: "cancel",
+            pills: [
+                {
+                    level: 0,
+                    colSpan: "20 December 2018 -> 20 December 2018",
+                    title: "Task 4",
+                },
+                { level: 0, colSpan: "27 December 2018 -> Out of bounds (35) ", title: "Task 3" },
+            ],
+        },
+    ]);
 });

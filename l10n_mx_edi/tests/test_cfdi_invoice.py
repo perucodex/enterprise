@@ -202,6 +202,14 @@ class TestCFDIInvoice(TestMxEdiCommon):
             self._assert_invoice_payment_cfdi(payment.move_id, 'test_invoice_taxes_ieps_payment')
 
     def test_invoice_taxes_local(self):
+        local_fixed_tax = self.env['account.tax'].create({
+            'name': 'local fixed tax',
+            'amount': 5.0,
+            'amount_type': 'fixed',
+            'l10n_mx_tax_type': 'local',
+            'l10n_mx_factor_type': 'Cuota',
+            'tax_group_id': self.local_tax_group.id,
+        })
         with self.mx_external_setup(self.frozen_today):
             # Test the invoice CFDI.
             invoice = self._create_invoice(
@@ -225,6 +233,12 @@ class TestCFDIInvoice(TestMxEdiCommon):
                         'product_id': self.product.id,
                         'price_unit': 4000.0,
                         'tax_ids': [Command.set(self.tax_16.ids)],
+                    }),
+                    Command.create({
+                        'product_id': self.product.id,
+                        'price_unit': 2500.0,
+                        'quantity': 2.0,
+                        'tax_ids': [Command.set(local_fixed_tax.ids)],
                     }),
                 ],
             )
@@ -698,6 +712,29 @@ class TestCFDIInvoice(TestMxEdiCommon):
                 'state': 'invoice_sent_failed',
             }])
 
+    def test_invoice_negative_lines_on_multiple_lines(self):
+        with self.mx_external_setup(self.frozen_today):
+            invoice = self._create_invoice(
+                invoice_line_ids=[
+                    Command.create({
+                        'product_id': self.product.id,
+                        'quantity': quantity,
+                        'price_unit': price_unit,
+                        'tax_ids': [Command.set(self.tax_0.ids)],
+                    })
+                    for quantity, price_unit in (
+                        (1.0, 326.4),
+                        (1.0, 24.0),
+                        (1.0, 172.8),
+                        (1.0, 691.2),
+                        (-1.0, 1149.6),
+                    )
+                ],
+            )
+            with self.with_mocked_pac_sign_success():
+                invoice._l10n_mx_edi_cfdi_invoice_try_send()
+            self._assert_invoice_cfdi(invoice, 'test_invoice_negative_lines_on_multiple_lines')
+
     def test_invoice_payment_policy(self):
         """ Ensure the invoice payment policy isn't override by the partner payment policy. """
         with self.mx_external_setup(self.frozen_today):
@@ -947,12 +984,42 @@ class TestCFDIInvoice(TestMxEdiCommon):
             branch.l10n_mx_edi_certificate_ids = certificate
             self.cr.precommit.run()  # load the CoA
 
-            branch = self.env.company.child_ids
+            self.assertRecordValues(self.env.company, [{
+                'l10n_mx_edi_global_invoice_sequence_id': False,
+                'l10n_mx_edi_global_invoice_sequence_prefix': 'GINV/',
+            }])
+
+            self.assertRecordValues(branch, [{
+                'l10n_mx_edi_global_invoice_sequence_id': False,
+                'l10n_mx_edi_global_invoice_sequence_prefix': 'GINV/',
+            }])
+
             self.product.company_id = branch
+
+            # Invoice.
             invoice = self._create_invoice(company_id=branch.id)
             with self.with_mocked_pac_sign_success():
                 invoice._l10n_mx_edi_cfdi_invoice_try_send()
-            self._assert_invoice_cfdi(invoice, 'test_invoice_company_branch')
+            self._assert_invoice_cfdi(invoice, 'test_invoice_company_branch_inv')
+
+            # Global invoice using the sequence of the root company.
+            invoice = self._create_invoice(company_id=branch.id, l10n_mx_edi_cfdi_to_public=True)
+            with self.with_mocked_pac_sign_success():
+                invoice._l10n_mx_edi_cfdi_global_invoice_try_send()
+            self._assert_global_invoice_cfdi_from_invoices(invoice, 'test_invoice_company_branch_ginvoice_1')
+
+            # Global invoice with a custom global invoice sequence on the branch.
+            branch.l10n_mx_edi_global_invoice_sequence_prefix = "SAL/"
+
+            self.assertRecordValues(branch, [{
+                'l10n_mx_edi_global_invoice_sequence_prefix': 'SAL/',
+            }])
+            self.assertTrue(branch.l10n_mx_edi_global_invoice_sequence_id)
+
+            invoice = self._create_invoice(company_id=branch.id, l10n_mx_edi_cfdi_to_public=True)
+            with self.with_mocked_pac_sign_success():
+                invoice._l10n_mx_edi_cfdi_global_invoice_try_send()
+            self._assert_global_invoice_cfdi_from_invoices(invoice, 'test_invoice_company_branch_ginvoice_2')
 
     def test_invoice_then_refund(self):
         # Create an invoice then sign it.
@@ -2178,6 +2245,127 @@ class TestCFDIInvoice(TestMxEdiCommon):
             with self.with_mocked_pac_sign_success():
                 invoice._l10n_mx_edi_cfdi_invoice_try_send()
             self._assert_invoice_cfdi(invoice, 'test_cfdi_rounding_23_inv')
+
+    def test_cfdi_rounding_24(self):
+        self.tax_16.price_include_override = 'tax_excluded'
+
+        with self.mx_external_setup(self.frozen_today):
+            invoice = self._create_invoice(
+                l10n_mx_edi_cfdi_to_public=True,
+                invoice_line_ids=[
+                    Command.create({
+                        'product_id': self.product.id,
+                        'price_unit': 47.25,
+                        'tax_ids': [Command.set(self.tax_16.ids)],
+                        'discount': 50,
+                    }),
+                ],
+            )
+            with self.with_mocked_pac_sign_success():
+                invoice._l10n_mx_edi_cfdi_global_invoice_try_send()
+            self._assert_global_invoice_cfdi_from_invoices(invoice, 'test_cfdi_rounding_24_inv')
+
+    def test_cfdi_rounding_25(self):
+        self.env['decimal.precision'].search([('name', '=', 'Product Price')]).digits = 6
+        with self.mx_external_setup(self.frozen_today):
+            invoice = self._create_invoice(
+                invoice_line_ids=[
+                    Command.create({
+                        'product_id': self.product.id,
+                        'price_unit': 100.032,
+                        'discount': 50.0,
+                        'tax_ids': [Command.set(self.tax_16.ids)],
+                    })
+                ])
+            with self.with_mocked_pac_sign_success():
+                invoice._l10n_mx_edi_cfdi_invoice_try_send()
+            self._assert_invoice_cfdi(invoice, 'test_cfdi_rounding_25_inv')
+
+    def test_cfdi_rounding_26(self):
+        self.tax_16.price_include_override = 'tax_included'
+
+        def create_invoice():
+            return self._create_invoice(
+                invoice_line_ids=[
+                    Command.create({
+                        'product_id': self.product.id,
+                        'price_unit': price_unit,
+                        'quantity': quantity,
+                        'discount': discount,
+                        'tax_ids': [Command.set(self.tax_16.ids)],
+                    })
+                    for price_unit, quantity, discount in (
+                        (64.99,     6.60,   10.0),
+                        (220.01,    1.0,    10.0),
+                        (1.0,       12.0,   0.0),
+                        (151.99,    1.0,    10.0),
+                    )
+                ])
+
+        with self.mx_external_setup(self.frozen_today):
+            invoice = create_invoice()
+            with self.with_mocked_pac_sign_success():
+                invoice._l10n_mx_edi_cfdi_invoice_try_send()
+            self._assert_invoice_cfdi(invoice, 'test_cfdi_rounding_26_inv')
+
+            invoice = create_invoice()
+            with self.with_mocked_pac_sign_success():
+                invoice._l10n_mx_edi_cfdi_global_invoice_try_send()
+            self._assert_global_invoice_cfdi_from_invoices(invoice, 'test_cfdi_rounding_26_ginvoice')
+
+    def test_cfdi_rounding_27(self):
+        self.tax_16.price_include_override = 'tax_included'
+
+        def create_invoice():
+            return self._create_invoice(
+                invoice_line_ids=[
+                    Command.create({
+                        'product_id': self.product.id,
+                        'price_unit': price_unit,
+                        'tax_ids': [Command.set(self.tax_16.ids)],
+                    })
+                    for price_unit in (
+                        1999.0, 1999.0, 1999.0,
+                        1799.0, 1799.0,
+                        649.0, 649.0, 649.0, 649.0, 649.0,
+                    )
+                ])
+
+        with self.mx_external_setup(self.frozen_today):
+            invoice = create_invoice()
+            with self.with_mocked_pac_sign_success():
+                invoice._l10n_mx_edi_cfdi_invoice_try_send()
+            self._assert_invoice_cfdi(invoice, 'test_cfdi_rounding_27_inv')
+
+            invoice = create_invoice()
+            with self.with_mocked_pac_sign_success():
+                invoice._l10n_mx_edi_cfdi_global_invoice_try_send()
+            self._assert_global_invoice_cfdi_from_invoices(invoice, 'test_cfdi_rounding_27_ginvoice')
+
+    def test_cfdi_rounding_28(self):
+        self.tax_16.price_include_override = 'tax_included'
+
+        def create_invoice():
+            return self._create_invoice(
+                invoice_line_ids=[
+                    Command.create({
+                        'product_id': self.product.id,
+                        'price_unit': price_unit,
+                        'tax_ids': [Command.set(self.tax_16.ids)],
+                    })
+                    for price_unit in (99.0, 99.0, 99.0, 399.0)
+                ])
+
+        with self.mx_external_setup(self.frozen_today):
+            invoice = create_invoice()
+            with self.with_mocked_pac_sign_success():
+                invoice._l10n_mx_edi_cfdi_invoice_try_send()
+            self._assert_invoice_cfdi(invoice, 'test_cfdi_rounding_28_inv')
+
+            invoice = create_invoice()
+            with self.with_mocked_pac_sign_success():
+                invoice._l10n_mx_edi_cfdi_global_invoice_try_send()
+            self._assert_global_invoice_cfdi_from_invoices(invoice, 'test_cfdi_rounding_28_ginvoice')
 
     def test_partial_payment_1(self):
         date1 = self.frozen_today - relativedelta(days=2)

@@ -65,7 +65,7 @@ export function useSignViewButtons() {
             if (Array.from(files).filter((file) => file.type !== "application/pdf").length) {
                 dialog.add(TemplateAlertDialog, {
                     title: _t("File Error"),
-                    message: _t("Only PDF files are allowed."),
+                    body: _t("Only PDF files are allowed."),
                 });
                 return;
             }

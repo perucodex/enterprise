@@ -1,20 +1,20 @@
+import { BaseOptionComponent } from "@html_builder/core/utils";
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { BuilderAction } from "@html_builder/core/builder_action";
 
+export class RentalSearchOption extends BaseOptionComponent {
+    static template = "website_sale_renting.RentalSearchOption";
+    static selector = ".s_rental_search";
+}
+
 class RentalSearchOptionPlugin extends Plugin {
     static id = "rentalSearchOption";
-    static dependencies = ["cachedModel"];
 
     resources = {
         so_content_addition_selector: [".s_rental_search"],
-        builder_options: [
-            {
-                template: "website_sale_renting.RentalSearchOption",
-                selector: ".s_rental_search",
-            },
-        ],
+        builder_options: [RentalSearchOption],
         builder_actions: {
             SetRentalSearchTimingAction,
             SetRentalSearchProductAttributeAction,

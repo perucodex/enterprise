@@ -139,13 +139,6 @@ class HrPayslip(models.Model):
                 continue
             payslip.l10n_lu_deduction_ds_daily = payslip.employee_id.l10n_lu_deduction_ds_daily
 
-    @api.depends('employee_id.l10n_lu_deduction_ds_daily', 'state')
-    def _compute_l10n_lu_deduction_ds_daily(self):
-        for payslip in self:
-            if payslip.company_id.country_id.code != "LU" or payslip.state in ['paid', 'validated']:
-                continue
-            payslip.l10n_lu_deduction_ds_daily = payslip.employee_id.l10n_lu_deduction_ds_daily
-
     @api.depends('employee_id.l10n_lu_deduction_fo_daily', 'state')
     def _compute_l10n_lu_deduction_fo_daily(self):
         for payslip in self:

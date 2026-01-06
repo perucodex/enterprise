@@ -18,6 +18,16 @@
                 <field name="expression_label">code</field>
                 <field name="figure_type">string</field>
             </record>
+            <record id="journal_report_count" model="account.report.column">
+                <field name="name">Documents</field>
+                <field name="expression_label">count</field>
+                <field name="figure_type">integer</field>
+            </record>
+            <record id="journal_report_to_review" model="account.report.column">
+                <field name="name">To Review</field>
+                <field name="expression_label">to_review</field>
+                <field name="figure_type">integer</field>
+            </record>
             <record id="journal_report_debit" model="account.report.column">
                 <field name="name">Debit</field>
                 <field name="expression_label">debit</field>
@@ -37,6 +47,18 @@
                 <field name="groupby">journal_id, account_id</field>
                 <field name="hierarchy_level">0</field>
                 <field name="expression_ids">
+                    <record id="journal_report_line_count" model="account.report.expression">
+                        <field name="label">count</field>
+                        <field name="engine">custom</field>
+                        <field name="formula">_report_custom_engine_journal_report</field>
+                        <field name="subformula">count</field>
+                    </record>
+                    <record id="journal_report_line_to_review" model="account.report.expression">
+                        <field name="label">to_review</field>
+                        <field name="engine">custom</field>
+                        <field name="formula">_report_custom_engine_journal_report</field>
+                        <field name="subformula">to_review</field>
+                    </record>
                     <record id="journal_report_line_code" model="account.report.expression">
                         <field name="label">code</field>
                         <field name="engine">custom</field>

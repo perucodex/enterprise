@@ -1,5 +1,4 @@
 import requests
-import re
 from odoo import _, fields, models
 from odoo.exceptions import UserError
 from odoo.addons.l10n_be_codabox.const import get_error_msg
@@ -17,7 +16,7 @@ class L10n_Be_CodaboxConnectionWizard(models.TransientModel):
         default=lambda self: self.env.company,
     )
     company_vat = fields.Char(
-        string='Company ID',
+        string='Company VAT/ID',
         compute='_compute_company_vat',
         readonly=True,
     )
@@ -39,7 +38,7 @@ class L10n_Be_CodaboxConnectionWizard(models.TransientModel):
 
     def _compute_company_vat(self):
         for wizard in self:
-            wizard.company_vat = re.sub(r'[^0-9]', '', wizard.company_id.vat or wizard.company_id.company_registry or '')
+            wizard.company_vat = wizard.company_id.l10n_be_codabox_company_vat
 
     def _compute_show_fidu_password(self):
         for wizard in self:

@@ -33,7 +33,7 @@ export class SignerX2Many extends X2ManyField {
     }
 }
 
-const signerX2Many = {
+export const signerX2Many = {
     component: SignerX2Many,
     displayName: _t("Signer One 2 Many"),
     additionalClasses: ["o_required_modifier"],

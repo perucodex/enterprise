@@ -6,20 +6,15 @@ import { before } from "@html_builder/utils/option_sequence";
 import { WEBSITE_BACKGROUND_OPTIONS } from "@website/builder/option_sequence";
 import { AILivechatOption } from "./ai_livechat_option";
 
-async function update_website_snippet_agent ({ ormService, newAgentId=null, oldAgentId=null }) {
-    let agent_ids = {}
-    if(newAgentId){
+async function update_website_snippet_agent({ ormService, newAgentId = null, oldAgentId = null }) {
+    const agent_ids = {};
+    if (newAgentId) {
         agent_ids.new_agent_id = parseInt(newAgentId);
     }
-    if(oldAgentId){
+    if (oldAgentId) {
         agent_ids.old_agent_id = parseInt(oldAgentId);
     }
-    await ormService.call(
-        "ai.agent",
-        "update_website_snippet_agent",
-        [],
-        agent_ids,
-    );
+    await ormService.call("ai.agent", "update_website_snippet_agent", [], agent_ids);
 }
 
 class AILivechatOptionPlugin extends Plugin {
@@ -27,13 +22,7 @@ class AILivechatOptionPlugin extends Plugin {
 
     resources = {
         so_content_addition_selector: [".s_ai_livechat"],
-        builder_options: [
-            withSequence(before(WEBSITE_BACKGROUND_OPTIONS), {
-                OptionComponent: AILivechatOption,
-                template: "ai_website_livechat.AILivechatOption",
-                selector: ".s_ai_livechat",
-            }),
-        ],
+        builder_options: [withSequence(before(WEBSITE_BACKGROUND_OPTIONS), AILivechatOption)],
         builder_actions: {
             SetChatStyleAction,
             SetAIAgentAction,
@@ -48,15 +37,19 @@ class AILivechatOptionPlugin extends Plugin {
     };
 
     async onSnippetDropped({ snippetEl }) {
-        if (snippetEl.matches('.s_ai_livechat')) {
-            snippetEl.querySelector('.s_ai_livechat_preview').remove();
+        if (snippetEl.matches(".s_ai_livechat:has(.s_ai_livechat_preview)")) {
+            snippetEl.querySelector(".s_ai_livechat_preview").remove();
 
             const aiAgentId = await this.services.orm.search(
                 "ai.agent",
-                ["|", ["livechat_channel_rule_ids", "!=", false], ["used_on_website_snippet", "=", true]],
+                [
+                    "|",
+                    ["livechat_channel_rule_ids", "!=", false],
+                    ["used_on_website_snippet", "=", true],
+                ],
                 { limit: 1 }
             );
-            if(aiAgentId){;
+            if (aiAgentId) {
                 snippetEl.dataset.agentId = aiAgentId;
             }
         }
@@ -65,8 +58,11 @@ class AILivechatOptionPlugin extends Plugin {
     async onWillRemove(toRemoveEl) {
         if (toRemoveEl.matches(".s_ai_livechat")) {
             const aiAgentId = toRemoveEl.dataset.agentId;
-            if (aiAgentId){
-                await update_website_snippet_agent({ ormService: this.services.orm, oldAgentId: aiAgentId });
+            if (aiAgentId) {
+                await update_website_snippet_agent({
+                    ormService: this.services.orm,
+                    oldAgentId: aiAgentId,
+                });
             }
         }
     }
@@ -75,7 +71,7 @@ class AILivechatOptionPlugin extends Plugin {
 export class SetAIAgentAction extends BuilderAction {
     static id = "setAIAgent";
 
-    getValue ({ editingElement }) {
+    getValue({ editingElement }) {
         const agentId = editingElement.dataset.agentId;
         if (!agentId) {
             return undefined;
@@ -83,27 +79,30 @@ export class SetAIAgentAction extends BuilderAction {
         return JSON.stringify({ id: parseInt(agentId) });
     }
 
-    async apply ({ editingElement, value }) {
+    async apply({ editingElement, value }) {
         const id = value ? JSON.parse(value).id : "";
         editingElement.dataset.agentId = id;
         await update_website_snippet_agent({
             ormService: this.services.orm,
             newAgentId: id,
-            oldAgentId: editingElement.dataset.agentId
-        })
+            oldAgentId: editingElement.dataset.agentId,
+        });
     }
 
     async clean({ editingElement }) {
         const oldAgentId = editingElement.dataset.agentId;
         editingElement.dataset.agentId = "";
-        await update_website_snippet_agent({ ormService: this.services.orm, oldAgentId: oldAgentId })
+        await update_website_snippet_agent({
+            ormService: this.services.orm,
+            oldAgentId: oldAgentId,
+        });
     }
 }
 
 export class SetLivechatChannelAction extends BuilderAction {
     static id = "setLivechatChannel";
 
-    getValue ({ editingElement }) {
+    getValue({ editingElement }) {
         const livechatChannelId = editingElement.dataset.livechatChannelId;
         if (!livechatChannelId) {
             return undefined;
@@ -111,7 +110,7 @@ export class SetLivechatChannelAction extends BuilderAction {
         return JSON.stringify({ id: parseInt(livechatChannelId) });
     }
 
-    apply ({ editingElement, value }) {
+    apply({ editingElement, value }) {
         const id = value ? JSON.parse(value).id : "";
         editingElement.dataset.livechatChannelId = id;
     }
@@ -124,14 +123,14 @@ export class SetLivechatChannelAction extends BuilderAction {
 export class SetChatStyleAction extends BuilderAction {
     static id = "setChatStyle";
 
-    isApplied ({ editingElement, params: { mainParam: chatStyle } }) {
+    isApplied({ editingElement, params: { mainParam: chatStyle } }) {
         if (!editingElement.dataset.chatStyle) {
             editingElement.dataset.chatStyle = "fullscreen";
         }
         return editingElement.dataset.chatStyle === chatStyle;
     }
 
-    apply ({ editingElement, params: { mainParam: chatStyle } }) {
+    apply({ editingElement, params: { mainParam: chatStyle } }) {
         editingElement.dataset.chatStyle = chatStyle;
     }
 }
@@ -139,7 +138,7 @@ export class SetChatStyleAction extends BuilderAction {
 export class SetPromptPlaceholderAction extends BuilderAction {
     static id = "setPromptPlaceholder";
 
-    getValue ({ editingElement }) {
+    getValue({ editingElement }) {
         const promptPlaceholder = editingElement.dataset.promptPlaceholder;
         if (!promptPlaceholder) {
             return "";
@@ -147,7 +146,7 @@ export class SetPromptPlaceholderAction extends BuilderAction {
         return promptPlaceholder;
     }
 
-    apply ({ editingElement, value }) {
+    apply({ editingElement, value }) {
         editingElement.dataset.promptPlaceholder = value;
     }
 }
@@ -155,11 +154,11 @@ export class SetPromptPlaceholderAction extends BuilderAction {
 export class ToggleHasFallbackButtonAction extends BuilderAction {
     static id = "toggleHasFallbackButton";
 
-    isApplied ({ editingElement }) {
+    isApplied({ editingElement }) {
         return editingElement.dataset.hasFallbackButton === "true";
     }
 
-    apply ({ editingElement }) {
+    apply({ editingElement }) {
         const value = editingElement.dataset.hasFallbackButton === "true" ? false : true;
         editingElement.dataset.hasFallbackButton = value;
     }
@@ -168,7 +167,7 @@ export class ToggleHasFallbackButtonAction extends BuilderAction {
 export class SetFallbackButtonTextAction extends BuilderAction {
     static id = "setFallbackButtonText";
 
-    getValue ({ editingElement }) {
+    getValue({ editingElement }) {
         const fallbackButtonText = editingElement.dataset.fallbackButtonText;
         if (!fallbackButtonText) {
             return "";
@@ -176,7 +175,7 @@ export class SetFallbackButtonTextAction extends BuilderAction {
         return fallbackButtonText;
     }
 
-    apply ({ editingElement, value }) {
+    apply({ editingElement, value }) {
         editingElement.dataset.fallbackButtonText = value;
     }
 }
@@ -184,7 +183,7 @@ export class SetFallbackButtonTextAction extends BuilderAction {
 export class SetFallbackButtonURLAction extends BuilderAction {
     static id = "setFallbackButtonURL";
 
-    getValue ({ editingElement }) {
+    getValue({ editingElement }) {
         const fallbackButtonURL = editingElement.dataset.fallbackButtonURL;
         if (!fallbackButtonURL) {
             return "";
@@ -192,7 +191,7 @@ export class SetFallbackButtonURLAction extends BuilderAction {
         return fallbackButtonURL;
     }
 
-    apply ({ editingElement, value }) {
+    apply({ editingElement, value }) {
         editingElement.dataset.fallbackButtonURL = value;
     }
 }

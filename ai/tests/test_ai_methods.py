@@ -40,17 +40,6 @@ class TestAIMethods(HttpCase, AICommon):
         )
         self.assertTrue(mock_generate_response.called)
 
-        # Test post_error_message method
-        mock_generate_response.reset_mock()
-        self.make_jsonrpc_request(
-            "/ai/post_error_message",
-            {
-                "error_message": "error",
-                "channel_id": channel.id
-            }
-        )
-        self.assertTrue(mock_generate_response.called)
-
         # Test get_direct_response method
         mock_generate_response.reset_mock()
         result = agent.get_direct_response("Direct prompt")

@@ -20,7 +20,7 @@ class HrPayslipInputType(models.Model):
     )
     country_code = fields.Char(related='country_id.code')
     active = fields.Boolean('Active', default=True)
-    available_in_attachments = fields.Boolean(string="Available in attachments")
+    available_in_attachments = fields.Boolean(string="Available in adjustments")
     is_quantity = fields.Boolean(default=False, string="Is quantity?", help="If set, hide currency and consider the manual input as a quantity for every rule computation using this input.")
     default_no_end_date = fields.Boolean("No end date by default")
 

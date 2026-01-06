@@ -6,7 +6,7 @@ class HrDepartureReason(models.Model):
     _inherit = "hr.departure.reason"
 
     l10n_hk_ir56f_code = fields.Selection(
-        string="Reason for cessation",
+        string="Reason For Cessation (IR56F)",
         selection=[
             ("1", "Resignation"),
             ("2", "Retirement"),

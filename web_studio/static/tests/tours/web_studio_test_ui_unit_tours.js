@@ -1199,6 +1199,13 @@ registry.category("web_tour.tours").add("web_studio_field_group_studio_no_fetch"
                 );
             },
         },
+        {
+            trigger: ".o_web_studio_views_icons a[title='Calendar']",
+            run: "click",
+        },
+        {
+            trigger: ".o_web_studio_view_renderer .o_calendar_view",
+        },
     ],
 });
 

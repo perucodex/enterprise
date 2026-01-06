@@ -52,21 +52,10 @@ class CrmLead(models.Model):
 
     def _get_action_rental_context(self):
         self.ensure_one()
-        rental_quotation_context = {
-            "search_default_opportunity_id": self.id,
-            "default_opportunity_id": self.id,
-            "default_partner_id": self.partner_id.id,
-            "default_team_id": self.team_id.id,
-            "default_campaign_id": self.campaign_id.id,
-            "default_medium_id": self.medium_id.id,
-            "default_origin": self.name,
-            "default_source_id": self.source_id.id,
-            "default_company_id": self.company_id.id or self.env.company.id,
-            "in_rental_app": True,
-        }
-        if self.user_id:
-            rental_quotation_context['default_user_id'] = self.user_id.id
-        return rental_quotation_context
+        return dict(
+            self._prepare_opportunity_quotation_context(),
+            in_rental_app=True,
+        )
 
     def action_new_rental_quotation(self):
         return {

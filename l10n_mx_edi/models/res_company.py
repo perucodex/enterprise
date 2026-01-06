@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from odoo import _, fields, models
+from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class ResCompany(models.Model):
 
     # == PAC web-services ==
     l10n_mx_edi_pac = fields.Selection(
-        selection=[('finkok', 'Quadrum (formerly finkok)'), ('solfact', 'Solucion Factible'),
+        selection=[('finkok', 'Quadrum'), ('solfact', 'Solucion Factible'),
                    ('sw', 'SW sapien-SmarterWEB')],
         string='PAC',
         help='The PAC that will sign/cancel the invoices',
@@ -65,6 +65,72 @@ class ResCompany(models.Model):
         string="Fiscal Regime",
         help="It is used to fill Mexican XML CFDI required field "
         "Comprobante.Emisor.RegimenFiscal.")
+    l10n_mx_edi_global_invoice_sequence_id = fields.Many2one(
+        string="Global Invoice Sequence",
+        comodel_name='ir.sequence',
+        compute='_compute_l10n_mx_edi_global_invoice_sequence_id',
+    )
+    l10n_mx_edi_global_invoice_sequence_prefix = fields.Char(
+        string="Global Invoice Serie",
+        compute='_compute_l10n_mx_edi_global_invoice_sequence_prefix',
+        inverse='_inverse_l10n_mx_edi_global_invoice_sequence_prefix',
+    )
+
+    @api.depends('account_fiscal_country_id')
+    def _compute_l10n_mx_edi_global_invoice_sequence_id(self):
+        for company in self:
+            if company.account_fiscal_country_id.code == 'MX':
+                company.l10n_mx_edi_global_invoice_sequence_id = self.env['ir.sequence'].sudo().search(
+                    [('code', '=', 'l10n_mx_global_invoice_cfdi'), ('company_id', '=', company.id)],
+                    limit=1,
+                )
+            else:
+                company.l10n_mx_edi_global_invoice_sequence_id = None
+
+    def _create_l10n_mx_edi_global_invoice_sequence(self):
+        self.ensure_one()
+        return self.env['ir.sequence'].sudo().create({
+            'name': f"Global Invoice CFDI ({self.name})",
+            'code': 'l10n_mx_global_invoice_cfdi',
+            'company_id': self.id,
+            'prefix': self.l10n_mx_edi_global_invoice_sequence_prefix,
+            'implementation': 'standard',
+            'use_date_range': True,
+            'padding': 5,
+        })
+
+    @api.depends('account_fiscal_country_id')
+    def _compute_l10n_mx_edi_global_invoice_sequence_prefix(self):
+        for company in self:
+            if company.account_fiscal_country_id.code == 'MX':
+                if sequence := company.l10n_mx_edi_global_invoice_sequence_id:
+                    company.l10n_mx_edi_global_invoice_sequence_prefix = sequence.prefix
+                else:
+                    company.l10n_mx_edi_global_invoice_sequence_prefix = 'GINV/'
+            else:
+                company.l10n_mx_edi_global_invoice_sequence_prefix = None
+
+    def _inverse_l10n_mx_edi_global_invoice_sequence_prefix(self):
+        for company in self:
+            if (
+                company.account_fiscal_country_id.code == 'MX'
+                and company.l10n_mx_edi_global_invoice_sequence_prefix
+            ):
+                if sequence := company.l10n_mx_edi_global_invoice_sequence_id:
+                    # Update an existing sequence.
+                    if sequence.prefix != company.l10n_mx_edi_global_invoice_sequence_prefix:
+                        sequence.prefix = company.l10n_mx_edi_global_invoice_sequence_prefix
+                else:
+                    # Create a specific sequence for the branch only.
+                    # By default, only the sequence of the root company is used (GINV/).
+                    # The sequence for the root company will be created the first time a global invoice is created.
+                    cfdi_values = self.env['l10n_mx_edi.document']._get_company_cfdi_values(company)
+                    if (
+                        company != cfdi_values['root_company']
+                        and company.l10n_mx_edi_global_invoice_sequence_prefix != cfdi_values['root_company'].l10n_mx_edi_global_invoice_sequence_prefix
+                    ):
+                        company._create_l10n_mx_edi_global_invoice_sequence()
+                        company.invalidate_recordset(fnames=['l10n_mx_edi_global_invoice_sequence_id'])
 
     def _l10n_mx_edi_get_foreign_customer_fiscal_position(self):
         """Return the fiscal position for foreign customers from the mexican chart template.

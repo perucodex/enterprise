@@ -51,7 +51,7 @@ registry.category("web_tour.tours").add("test_sign_flow_tour", {
         {
             content: "Fill the sign item",
             trigger: ":iframe input.o_sign_sign_item",
-            run: "edit Mitchell Admin",
+            run: "edit Laurie Poiret",
         },
         {
             content: "Click next 1",

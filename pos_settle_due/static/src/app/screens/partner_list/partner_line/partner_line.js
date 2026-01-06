@@ -3,8 +3,6 @@ import { patch } from "@web/core/utils/patch";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { CustomSelectCreateDialog } from "@pos_settle_due/app/views/view_dialogs/select_create_dialog";
 import { useService } from "@web/core/utils/hooks";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { _t } from "@web/core/l10n/translation";
 
 patch(PartnerLine.prototype, {
     setup() {
@@ -19,6 +17,10 @@ patch(PartnerLine.prototype, {
         this.props.close();
         const partnerId = this.props.partner.id;
         const commercialPartnerId = this.props.partner.raw.commercial_partner_id;
+        const settleDueLinesIds = this.pos
+            .getOrder()
+            .lines.filter((line) => line.isSettleDueLine())
+            .map((line) => line.settled_order_id.id);
         this.dialog.add(CustomSelectCreateDialog, {
             resModel: "pos.order",
             noCreate: true,
@@ -28,22 +30,10 @@ patch(PartnerLine.prototype, {
             ).id,
             domain: [
                 ["commercial_partner_id", "=", commercialPartnerId],
-                ["customer_due_total", ">", 0],
+                ["customer_due_total", "!=", 0],
+                ["id", "not in", settleDueLinesIds],
             ],
             onSelected: async (orderIds) => {
-                const settleDueLinesIds = this.pos
-                    .getOrder()
-                    .lines.filter((line) => line.isSettleDueLine())
-                    .map((line) => line.settled_order_id.id);
-                const isAnyOrderAlreadySettled = orderIds.some((orderId) =>
-                    settleDueLinesIds.includes(orderId)
-                );
-                if (isAnyOrderAlreadySettled) {
-                    return this.dialog.add(AlertDialog, {
-                        title: _t("Error"),
-                        body: _t("One of the selected orders is already being settled."),
-                    });
-                }
                 this.pos.onClickSettleDue(orderIds, partnerId, commercialPartnerId);
             },
         });
@@ -63,6 +53,10 @@ patch(PartnerLine.prototype, {
         this.props.close();
         const partnerId = this.props.partner.id;
         const commercialPartnerId = this.props.partner.raw.commercial_partner_id;
+        const settleInvoiceLinesIds = this.pos
+            .getOrder()
+            .lines.filter((line) => line.isSettleInvoiceLine())
+            .map((line) => line.settled_invoice_id.id);
         this.dialog.add(CustomSelectCreateDialog, {
             resModel: "account.move",
             noCreate: true,
@@ -72,7 +66,8 @@ patch(PartnerLine.prototype, {
             ).id,
             domain: [
                 ["commercial_partner_id", "=", commercialPartnerId],
-                ["pos_amount_unsettled", ">", 0],
+                ["pos_amount_unsettled", "!=", 0],
+                ["id", "not in", settleInvoiceLinesIds],
             ],
             onSelected: async (invoiceIds) => {
                 this.pos.onClickSettleInvoices(invoiceIds, partnerId, commercialPartnerId);

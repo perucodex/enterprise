@@ -2,6 +2,7 @@
 
 from . import common
 from . import test_average_daily_wage
+from . import test_empf
 from . import test_hsbc_autopay_file
 from . import test_severance_payment
 from . import test_salary_rules

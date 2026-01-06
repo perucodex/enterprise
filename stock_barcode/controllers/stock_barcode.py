@@ -26,13 +26,15 @@ class StockBarcodeController(http.Controller):
         if parsed_results and nomenclature.is_gs1_nomenclature:
             # search with the last feasible rule
             for result in parsed_results[::-1]:
-                if result['rule'].type in ['product', 'package', 'location', 'dest_location']:
-                    barcode_type = result['rule'].type
+                if result['type'] in ['product', 'package', 'location', 'dest_location']:
+                    barcode_type = result['type']
                     break
 
         # Alias support
         elif parsed_results:
-            barcode = parsed_results.get('code', barcode)
+            for res in parsed_results if isinstance(parsed_results, list) else [parsed_results]:
+                barcode = res.get('code', barcode)
+                break
 
         if not barcode_type:
             ret_open_picking = self._try_open_picking(barcode)
@@ -296,12 +298,13 @@ class StockBarcodeController(http.Controller):
                 'action': {
                     'name': product_display_name,
                     'res_model': 'stock.quant',
-                    'views': [(kanban_view_id, 'kanban'), (tree_view_id, 'list')],
+                    'views': [(tree_view_id, 'list'), (kanban_view_id, 'kanban')],
                     'type': 'ir.actions.act_window',
                     'domain': [('product_id', '=', product_id)],
                     'context': {
                         'search_default_internal_loc': True,
                     },
+                    'mobile_view_mode': 'kanban',
                 }
             }
 

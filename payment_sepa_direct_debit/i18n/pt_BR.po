@@ -7,13 +7,14 @@
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # "Maitê Dietze (madi)" <madi@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:51+0000\n"
-"PO-Revision-Date: 2025-10-13 15:00+0000\n"
-"Last-Translator: \"Maitê Dietze (madi)\" <madi@odoo.com>\n"
+"POT-Creation-Date: 2025-12-30 18:49+0000\n"
+"PO-Revision-Date: 2025-11-16 17:53+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Portuguese (Brazil) <https://translate.odoo.com/projects/"
 "odoo-19/payment_sepa_direct_debit/pt_BR/>\n"
 "Language: pt_BR\n"
@@ -47,17 +48,17 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:payment_sepa_direct_debit.sdd_mandate_form
 #: model_terms:ir.ui.view,arch_db:payment_sepa_direct_debit.sepa_state_header
 msgid "<strong>Amount: </strong>"
-msgstr ""
+msgstr "<strong>Valor: </strong>"
 
 #. module: payment_sepa_direct_debit
 #: model_terms:ir.ui.view,arch_db:payment_sepa_direct_debit.sdd_mandate_form
 msgid "<strong>Date: </strong>"
-msgstr ""
+msgstr "<strong>Data: </strong>"
 
 #. module: payment_sepa_direct_debit
 #: model_terms:ir.ui.view,arch_db:payment_sepa_direct_debit.sdd_mandate_form
 msgid "<strong>Label: </strong>"
-msgstr ""
+msgstr "<strong>Rótulo: </strong>"
 
 #. module: payment_sepa_direct_debit
 #: model:mail.template,body_html:payment_sepa_direct_debit.mail_template_sepa_notify_validation
@@ -172,16 +173,123 @@ msgid ""
 "</table>\n"
 "            "
 msgstr ""
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"padding-top: "
+"16px; background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; "
+"color: #454748; width: 100%; border-collapse:separate;\"><tr><td "
+"align=\"center\">\n"
+"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"padding: 16px; background-color: white; color: #454748; border-"
+"collapse:separate;\">\n"
+"<tbody>\n"
+"    <!-- HEADER -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\">\n"
+"                    <t t-set=\"company\" t-value=\"object.company_id\"/>\n"
+"                    <span style=\"font-size: 10px;\">Sua autorização de "
+"débito direto SEPA</span><br/>\n"
+"                    <span style=\"font-size: 20px; font-weight: bold;\" t-"
+"out=\"object.partner_bank_id.acc_number or ''\">BE15001559627230</span>\n"
+"                </td></tr>\n"
+"                <tr><td valign=\"middle\" align=\"right\" t-if=\"not "
+"company.uses_default_logo\">\n"
+"                    <img t-attf-src=\"/logo.png?company={{ company.id }}\" "
+"style=\"padding: 0px; margin: 0px; height: auto; width: 80px;\" t-att-"
+"alt=\"company.name\"/>\n"
+"                </td></tr>\n"
+"                <tr><td colspan=\"2\" style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin:16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"    <!-- CONTEÚDO -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; padding: "
+"0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"top\" style=\"font-size: 13px;\">\n"
+"                    Olá, <t t-out=\"object.partner_id.name or ''\">Brandon "
+"Freeman</t>,<br/><br/>\n"
+"\n"
+"                    <p>Uma autorização de débito direto SEPA foi validada "
+"para uso pela <t t-out=\"company.name or ''\">YourCompany</t>.</p>\n"
+"\n"
+"                    <p>Segue em anexo uma cópia da validação da autorização."
+"</p>\n"
+"\n"
+"                    <p>Em caso de dúvidas, entre em contato conosco.</p>\n"
+"                </td></tr>\n"
+"                <tr><td style=\"text-align:center;\">\n"
+"                    <hr width=\"100%\" style=\"background-"
+"color:rgb(204,204,204);border:medium none;clear:both;display:block;font-"
+"size:0px;min-height:1px;line-height:0; margin: 16px 0px 16px 0px;\"/>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"   <!-- FOOTER -->\n"
+"    <tr>\n"
+"        <td align=\"center\" style=\"min-width: 590px;\">\n"
+"            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" "
+"width=\"590\" style=\"min-width: 590px; background-color: white; font-size: "
+"11px; padding: 0px 8px 0px 8px; border-collapse:separate;\">\n"
+"                <tr><td valign=\"middle\" align=\"left\">\n"
+"                    <t t-out=\"company.name or ''\">YourCompany</t>\n"
+"                </td></tr>\n"
+"                <tr><td valign=\"middle\" align=\"left\" style=\"opacity: "
+"0.7;\">\n"
+"                    <t t-if=\"company.phone\">\n"
+"                        <t t-out=\"company.phone or ''\">+1 650-123-4567</t> "
+"|\n"
+"                    </t>\n"
+"                    <t t-if=\"company.email\">\n"
+"                        <a t-attf-href=\"'mailto:%s' % {{ company.email }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.email or "
+"''\">info@yourcompany.com</a> |\n"
+"                    </t>\n"
+"                    <t t-if=\"company.website\">\n"
+"                        <a t-attf-href=\"'%s' % {{ company.website }}\" "
+"style=\"text-decoration:none; color: #454748;\" t-out=\"company.website or "
+"''\">http://www.example.com</a>\n"
+"                    </t>\n"
+"                </td></tr>\n"
+"            </table>\n"
+"        </td>\n"
+"    </tr>\n"
+"</tbody>\n"
+"</table>\n"
+"</td></tr>\n"
+"<!-- DESENVOLVIDO POR -->\n"
+"<tr><td align=\"center\" style=\"min-width: 590px;\">\n"
+"    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"590\" "
+"style=\"min-width: 590px; background-color: #F1F1F1; color: #454748; "
+"padding: 8px; border-collapse:separate;\">\n"
+"      <tr><td style=\"text-align: center; font-size: 13px;\">\n"
+"        Desenvolvido por <a target=\"_blank\" href=\"https://www.odoo.com?"
+"utm_source=db&amp;utm_medium=mail\" t-attf-style=\"color: "
+"{{company.email_secondary_color or '#875A7B'}};\">Odoo</a>\n"
+"      </td></tr>\n"
+"    </table>\n"
+"</td></tr>\n"
+"</table>\n"
+"            "
 
 #. module: payment_sepa_direct_debit
 #: model_terms:ir.ui.view,arch_db:payment_sepa_direct_debit.sdd_mandate_form
 msgid "Bank Statement"
-msgstr ""
+msgstr "Extrato Bancário"
 
 #. module: payment_sepa_direct_debit
 #: model:ir.model,name:payment_sepa_direct_debit.model_account_bank_statement_line
 msgid "Bank Statement Line"
-msgstr ""
+msgstr "Linha de extrato bancário"
 
 #. module: payment_sepa_direct_debit
 #: model_terms:ir.ui.view,arch_db:payment_sepa_direct_debit.sdd_mandate_form
@@ -190,6 +298,9 @@ msgid ""
 "you\n"
 "                authorize (A)"
 msgstr ""
+"Ao concluir a transferência bancária inicial com o valor e a referência "
+"especificados, você\n"
+"autoriza (A)"
 
 #. module: payment_sepa_direct_debit
 #: model:ir.model,name:payment_sepa_direct_debit.model_res_partner
@@ -199,12 +310,12 @@ msgstr "Contato"
 #. module: payment_sepa_direct_debit
 #: model:ir.model,website_form_label:payment_sepa_direct_debit.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Criar cliente"
 
 #. module: payment_sepa_direct_debit
 #: model:ir.model.fields,field_description:payment_sepa_direct_debit.field_payment_provider__custom_mode
 msgid "Custom Mode"
-msgstr ""
+msgstr "Modo personalizado"
 
 #. module: payment_sepa_direct_debit
 #: model:ir.model.fields,field_description:payment_sepa_direct_debit.field_account_bank_statement_line__display_name
@@ -215,7 +326,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:payment_sepa_direct_debit.field_res_partner__display_name
 #: model:ir.model.fields,field_description:payment_sepa_direct_debit.field_sdd_mandate__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "Exibir nome"
 
 #. module: payment_sepa_direct_debit
 #: model_terms:ir.ui.view,arch_db:payment_sepa_direct_debit.inline_form
@@ -231,17 +342,17 @@ msgstr "IBAN"
 #: model:ir.model.fields,field_description:payment_sepa_direct_debit.field_res_partner__id
 #: model:ir.model.fields,field_description:payment_sepa_direct_debit.field_sdd_mandate__id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: payment_sepa_direct_debit
 #: model:ir.model.fields,field_description:payment_sepa_direct_debit.field_sdd_mandate__is_online_payment
 msgid "Is Online Payment"
-msgstr ""
+msgstr "É pagamento on-line"
 
 #. module: payment_sepa_direct_debit
 #: model:ir.model.fields,field_description:payment_sepa_direct_debit.field_payment_transaction__mandate_id
 msgid "Mandate"
-msgstr ""
+msgstr "Mandato"
 
 #. module: payment_sepa_direct_debit
 #. odoo-python
@@ -252,12 +363,12 @@ msgstr "IBAN inválido ou ausente."
 #. module: payment_sepa_direct_debit
 #: model:ir.model.fields,field_description:payment_sepa_direct_debit.field_sdd_mandate__payment_transaction_count
 msgid "No. of Payment Transactions"
-msgstr ""
+msgstr "Nº de transações de pagamento"
 
 #. module: payment_sepa_direct_debit
 #: model_terms:ir.ui.view,arch_db:payment_sepa_direct_debit.sdd_mandate_form
 msgid "Odoo PVT LTD"
-msgstr ""
+msgstr "Odoo PVT LTD"
 
 #. module: payment_sepa_direct_debit
 #: model:ir.model,name:payment_sepa_direct_debit.model_account_payment_method
@@ -282,19 +393,19 @@ msgstr "Transação do pagamento"
 #. module: payment_sepa_direct_debit
 #: model:ir.model.fields,field_description:payment_sepa_direct_debit.field_sdd_mandate__payment_transaction_ids
 msgid "Payment Transactions"
-msgstr ""
+msgstr "Transações de pagamento"
 
 #. module: payment_sepa_direct_debit
 #. odoo-javascript
 #: code:addons/payment_sepa_direct_debit/static/src/interactions/payment_form.js:0
 msgid "Payment processing failed"
-msgstr ""
+msgstr "Falha no processamento do pagamento"
 
 #. module: payment_sepa_direct_debit
 #. odoo-python
 #: code:addons/payment_sepa_direct_debit/models/sdd_mandate.py:0
 msgid "Payments Transactions"
-msgstr ""
+msgstr "Transações de pagamento"
 
 #. module: payment_sepa_direct_debit
 #. odoo-python
@@ -325,7 +436,7 @@ msgstr "Autorização de débito direto SEPA"
 #. module: payment_sepa_direct_debit
 #: model:ir.actions.server,name:payment_sepa_direct_debit.cron_auto_confirm_paid_sepa_txs_ir_actions_server
 msgid "SEPA Direct Debit: Confirm paid transactions"
-msgstr ""
+msgstr "Débito direto SEPA: confirmar transações pagas"
 
 #. module: payment_sepa_direct_debit
 #: model:mail.template,name:payment_sepa_direct_debit.mail_template_sepa_notify_validation
@@ -370,21 +481,23 @@ msgid ""
 "This mandate was created from an online payment. Do you want to manually "
 "validate it?"
 msgstr ""
+"Essa autorização foi criada a partir de um pagamento on-line. Quer validá-la "
+"manualmente?"
 
 #. module: payment_sepa_direct_debit
 #: model_terms:ir.ui.view,arch_db:payment_sepa_direct_debit.sdd_mandate_form_view
 msgid "Transactions"
-msgstr ""
+msgstr "Transações"
 
 #. module: payment_sepa_direct_debit
 #: model_terms:ir.ui.view,arch_db:payment_sepa_direct_debit.sdd_mandate_form_view
 msgid "Validate"
-msgstr ""
+msgstr "Validar"
 
 #. module: payment_sepa_direct_debit
 #: model:mail.template,subject:payment_sepa_direct_debit.mail_template_sepa_notify_validation
 msgid "Your SEPA Direct Debit Mandate with {{ object.company_id.name }}"
-msgstr ""
+msgstr "Seu mandato de débito direto SEPA com {{ object.company_id.name }}"
 
 #. module: payment_sepa_direct_debit
 #. odoo-python
@@ -401,7 +514,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/payment_sepa_direct_debit/models/sdd_mandate.py:0
 msgid "id"
-msgstr ""
+msgstr "id"
 
 #. module: payment_sepa_direct_debit
 #: model_terms:ir.ui.view,arch_db:payment_sepa_direct_debit.sdd_mandate_form
@@ -411,6 +524,9 @@ msgid ""
 "bank to debit your\n"
 "                account in accordance with the instructions from"
 msgstr ""
+"para enviar instruções\n"
+"ao banco para debitar sua conta e (B) seu banco para debitar sua conta\n"
+"de acordo com as instruções de"
 
 #~ msgid "+32123456789"
 #~ msgstr "+32123456789"

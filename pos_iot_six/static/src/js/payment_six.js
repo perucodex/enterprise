@@ -8,12 +8,12 @@ export class PaymentSix extends PaymentInterfaceIot {
         const paymentLine = this.pos.getOrder().getPaymentlineByUuid(uuid);
         return {
             messageType: "Transaction",
-            transactionType: "Payment",
-            amount: Math.round(paymentLine.amount * 100),
+            transactionType: paymentLine.amount >= 0 ? "Payment" : "Refund",
+            amount: Math.abs(Math.round(paymentLine.amount * 100)),
             currency: this.pos.currency.name,
             cid: uuid,
-            posId: this.pos.session.name,
-            userId: this.pos.user.id,
+            posId: this.pos.session.id,
+            userId: this.pos.session.user_id.id,
         };
     }
 
@@ -79,6 +79,59 @@ export class PaymentSix extends PaymentInterfaceIot {
         if (data.Card) {
             line.card_type = data.Card;
         }
+    }
+
+    _onBalanceComplete(data) {
+        if (data.Error || !data.Ticket) {
+            const error_msg =
+                data.Error && data.Error != ""
+                    ? data.Error
+                    : _t("Failed to get balance report from the terminal. Please retry.");
+            this.env.services.dialog.add(AlertDialog, {
+                title: _t("Six balance report error"),
+                body: error_msg,
+            });
+            return;
+        }
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = `<div class='pos-receipt'>
+                <div class='pos-payment-terminal-receipt' style='font-size: 32px;'>
+                    ${data.Ticket.replace(/\n/g, "<br>")}
+                </div>
+            </div>`;
+        const element = wrapper.firstElementChild;
+        this.pos.hardwareProxy.printer.printReceipt(element);
+    }
+
+    async sendBalance() {
+        var self = this;
+        if (!self.terminal) {
+            this._showErrorConfig();
+            return false;
+        }
+        const printer = this.pos.hardwareProxy.printer;
+        if (!printer) {
+            this.env.services.dialog.add(AlertDialog, {
+                title: _t("No printer configured"),
+                body: _t(
+                    "You must select a printer in your POS config to print Six balance report"
+                ),
+            });
+            return false;
+        }
+        const data = {
+            messageType: "Balance",
+            posId: self.pos.session.id,
+            userId: self.pos.session.user_id.id,
+        };
+
+        return this.pos.iotHttp.action(
+            this.terminal.iotId,
+            this.terminal.identifier,
+            data,
+            (e) => this._onBalanceComplete(e.result),
+            (e) => this._onBalanceComplete(e)
+        );
     }
 }
 

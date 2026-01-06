@@ -92,5 +92,5 @@ class AccountOnlineLink(models.Model):
                 }
             }
         except UserError as e:
-            _logger.error("Non-blocking error during payment activation: %s", e)
+            _logger.warning("Non-blocking error during payment activation: %s", e)
             return action

@@ -14,6 +14,7 @@ class HrLeave(models.Model):
     l10n_ch_continued_pay_percentage = fields.Float("Continued Pay %", default=1)
     l10n_ch_disability_percentage = fields.Float("Disability %", default=1)
     l10n_ch_swissdec_work_interruption = fields.Boolean(compute="_compute_l10n_ch_swissdec_work_interruption")
+    l10n_ch_swissdec_payroll_impact = fields.Boolean(related='holiday_status_id.l10n_ch_swissdec_payroll_impact')
 
     @api.constrains('date_from', 'date_to', 'holiday_status_id')
     def _check_work_interruption(self):

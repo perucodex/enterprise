@@ -4,6 +4,7 @@ export class AddButtonAction extends Component {
     static props = {};
     static template = `web_studio.AddButtonAction`;
     onClick(ev) {
+        let nextButtonCount = 1;
         const findHeader =
             this.env.viewEditorModel.xmlDoc.firstChild.querySelector(":scope > header");
         if (!findHeader) {
@@ -11,16 +12,15 @@ export class AddButtonAction extends Component {
                 type: "statusbar",
                 view_id: this.env.viewEditorModel.view.id,
             });
+        } else {
+            nextButtonCount = findHeader.querySelectorAll(":scope > button").length + 1
         }
         this.env.viewEditorModel.doOperation({
             type: "add_header_button",
         });
-        const buttonCount = ev.target.parentElement.querySelectorAll(
-            "button[data-studio-xpath]"
-        ).length;
         this.env.setAutoClick({
-            xpath: `/${this.env.viewEditorModel.viewType}[1]/header[1]/button[${buttonCount + 1}]`,
-        });
+            xpath: `/${this.env.viewEditorModel.viewType}[1]/header[1]/button[${nextButtonCount}]`,
+        }, {});
     }
 }
 

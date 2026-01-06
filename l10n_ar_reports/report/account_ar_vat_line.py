@@ -96,13 +96,39 @@ class AccountArVatLine(models.Model):
 
         query = SQL(
             """
+                WITH tax_lines AS (
+                    SELECT
+                        aml.id AS move_line_id,
+                        aml.move_id,
+                        ntg.l10n_ar_vat_afip_code AS vat_code,
+                        ntg.l10n_ar_tribute_afip_code AS tribute_code,
+                        nt.type_tax_use AS type_tax_use,
+                        aml.balance
+                    FROM account_move_line aml
+                    LEFT JOIN account_tax nt ON aml.tax_line_id = nt.id
+                    LEFT JOIN account_tax_group ntg ON nt.tax_group_id = ntg.id
+                    WHERE aml.tax_line_id IS NOT NULL
+                ),
+                base_lines AS (
+                    SELECT
+                        aml.id AS move_line_id,
+                        aml.move_id,
+                        MAX(btg.l10n_ar_vat_afip_code) AS vat_code, -- MAX is used to avoid duplicates when multiple taxes exist on a line
+                        MAX(bt.type_tax_use) AS type_tax_use,
+                        aml.balance
+                    FROM account_move_line aml
+                    JOIN account_move_line_account_tax_rel amltr ON aml.id = amltr.account_move_line_id
+                    JOIN account_tax bt ON amltr.account_tax_id = bt.id
+                    JOIN account_tax_group btg ON bt.tax_group_id = btg.id
+                    GROUP BY aml.id, aml.move_id, aml.balance
+                )
                 SELECT
                     %(column_group_key)s AS column_group_key,
                     account_move.id,
                     (CASE WHEN lit.l10n_ar_afip_code = '80' THEN rp.vat ELSE NULL END) AS cuit,
                     art.name AS afip_responsibility_type_name,
                     rp.name AS partner_name,
-                    COALESCE(nt.type_tax_use, bt.type_tax_use) AS tax_type,
+                    COALESCE(tax.type_tax_use, base.type_tax_use) AS tax_type,
                     account_move.id AS move_id,
                     account_move.move_type,
                     account_move.date,
@@ -110,56 +136,49 @@ class AccountArVatLine(models.Model):
                     account_move.partner_id,
                     account_move.journal_id,
                     account_move.name AS move_name,
-                    account_move.l10n_ar_afip_responsibility_type_id as afip_responsibility_type_id,
-                    account_move.l10n_latam_document_type_id as document_type_id,
+                    account_move.l10n_ar_afip_responsibility_type_id AS afip_responsibility_type_id,
+                    account_move.l10n_latam_document_type_id AS document_type_id,
                     account_move.state,
                     account_move.company_id,
-                    SUM(CASE WHEN btg.l10n_ar_vat_afip_code in ('4', '5', '6', '8', '9') THEN account_move_line.balance ELSE 0 END) AS taxed,
-                    SUM(CASE WHEN btg.l10n_ar_vat_afip_code = '4' THEN account_move_line.balance ELSE 0 END) AS base_10,
-                    SUM(CASE WHEN ntg.l10n_ar_vat_afip_code = '4' THEN account_move_line.balance ELSE 0 END) AS vat_10,
-                    SUM(CASE WHEN btg.l10n_ar_vat_afip_code = '5' THEN account_move_line.balance ELSE 0 END) AS base_21,
-                    SUM(CASE WHEN ntg.l10n_ar_vat_afip_code = '5' THEN account_move_line.balance ELSE 0 END) AS vat_21,
-                    SUM(CASE WHEN btg.l10n_ar_vat_afip_code = '6' THEN account_move_line.balance ELSE 0 END) AS base_27,
-                    SUM(CASE WHEN ntg.l10n_ar_vat_afip_code = '6' THEN account_move_line.balance ELSE 0 END) AS vat_27,
-                    SUM(CASE WHEN btg.l10n_ar_vat_afip_code = '8' THEN account_move_line.balance ELSE 0 END) AS base_5,
-                    SUM(CASE WHEN ntg.l10n_ar_vat_afip_code = '8' THEN account_move_line.balance ELSE 0 END) AS vat_5,
-                    SUM(CASE WHEN btg.l10n_ar_vat_afip_code = '9' THEN account_move_line.balance ELSE 0 END) AS base_25,
-                    SUM(CASE WHEN ntg.l10n_ar_vat_afip_code = '9' THEN account_move_line.balance ELSE 0 END) AS vat_25,
-                    SUM(CASE WHEN btg.l10n_ar_vat_afip_code in ('0', '1', '2', '3', '7') THEN account_move_line.balance ELSE 0 END) AS not_taxed,
-                    SUM(CASE WHEN ntg.l10n_ar_tribute_afip_code = '06' THEN account_move_line.balance ELSE 0 END) AS vat_per,
-                    SUM(CASE WHEN ntg.l10n_ar_vat_afip_code is NULL and ntg.l10n_ar_tribute_afip_code = '07' THEN account_move_line.balance ELSE 0 END) AS perc_iibb,
-                    SUM(CASE WHEN ntg.l10n_ar_vat_afip_code is NULL and ntg.l10n_ar_tribute_afip_code = '09' THEN account_move_line.balance ELSE 0 END) AS perc_earnings,
-                    SUM(CASE WHEN ntg.l10n_ar_vat_afip_code is NULL and ntg.l10n_ar_tribute_afip_code in ('03', '08') THEN account_move_line.balance ELSE 0 END) AS city_tax,
-                    SUM(CASE WHEN ntg.l10n_ar_vat_afip_code is NULL and ntg.l10n_ar_tribute_afip_code in ('02', '04', '05', '99') THEN account_move_line.balance ELSE 0 END) AS other_taxes,
+                    SUM(CASE WHEN base.vat_code IN ('4', '5', '6', '8', '9') THEN base.balance ELSE 0 END) AS taxed,
+                    SUM(CASE WHEN base.vat_code = '4' THEN base.balance ELSE 0 END) AS base_10,
+                    SUM(CASE WHEN tax.vat_code = '4' THEN tax.balance ELSE 0 END) AS vat_10,
+                    SUM(CASE WHEN base.vat_code = '5' THEN base.balance ELSE 0 END) AS base_21,
+                    SUM(CASE WHEN tax.vat_code = '5' THEN tax.balance ELSE 0 END) AS vat_21,
+                    SUM(CASE WHEN base.vat_code = '6' THEN base.balance ELSE 0 END) AS base_27,
+                    SUM(CASE WHEN tax.vat_code = '6' THEN tax.balance ELSE 0 END) AS vat_27,
+                    SUM(CASE WHEN base.vat_code = '8' THEN base.balance ELSE 0 END) AS base_5,
+                    SUM(CASE WHEN tax.vat_code = '8' THEN tax.balance ELSE 0 END) AS vat_5,
+                    SUM(CASE WHEN base.vat_code = '9' THEN base.balance ELSE 0 END) AS base_25,
+                    SUM(CASE WHEN tax.vat_code = '9' THEN tax.balance ELSE 0 END) AS vat_25,
+                    SUM(CASE WHEN base.vat_code IN ('0', '1', '2', '3', '7') THEN base.balance ELSE 0 END) AS not_taxed,
+                    SUM(CASE WHEN tax.tribute_code = '06' THEN tax.balance ELSE 0 END) AS vat_per,
+                    SUM(CASE WHEN tax.tribute_code = '07' THEN tax.balance ELSE 0 END) AS perc_iibb,
+                    SUM(CASE WHEN tax.tribute_code = '09' THEN tax.balance ELSE 0 END) AS perc_earnings,
+                    SUM(CASE WHEN tax.tribute_code IN ('03','08') THEN tax.balance ELSE 0 END) AS city_tax,
+                    SUM(CASE WHEN tax.tribute_code IN ('02','04','05','99') THEN tax.balance ELSE 0 END) AS other_taxes,
                     SUM(account_move_line.balance) AS total
                 FROM
                     %(table_references)s
-                    JOIN
-                        account_move ON account_move_line.move_id = account_move.id
-                    LEFT JOIN
-                        -- nt = net tax
-                        account_tax AS nt ON account_move_line.tax_line_id = nt.id
-                    LEFT JOIN
-                        account_move_line_account_tax_rel AS amltr ON account_move_line.id = amltr.account_move_line_id
-                    LEFT JOIN
-                        -- bt = base tax
-                        account_tax AS bt ON amltr.account_tax_id = bt.id
-                    LEFT JOIN
-                        account_tax_group AS btg ON btg.id = bt.tax_group_id
-                    LEFT JOIN
-                        account_tax_group AS ntg ON ntg.id = nt.tax_group_id
-                    LEFT JOIN
-                        res_partner AS rp ON rp.id = account_move.commercial_partner_id
-                    LEFT JOIN
-                        l10n_latam_identification_type AS lit ON rp.l10n_latam_identification_type_id = lit.id
-                    LEFT JOIN
-                        l10n_ar_afip_responsibility_type AS art ON account_move.l10n_ar_afip_responsibility_type_id = art.id
+                JOIN
+                    account_move ON account_move_line.move_id = account_move.id
+                LEFT JOIN
+                    tax_lines tax ON tax.move_line_id = account_move_line.id
+                LEFT JOIN
+                    base_lines base ON base.move_line_id = account_move_line.id
+                LEFT JOIN
+                    res_partner rp ON rp.id = account_move.commercial_partner_id
+                LEFT JOIN
+                    l10n_latam_identification_type lit ON rp.l10n_latam_identification_type_id = lit.id
+                LEFT JOIN
+                    l10n_ar_afip_responsibility_type art ON account_move.l10n_ar_afip_responsibility_type_id = art.id
                 WHERE
-                    (account_move_line.tax_line_id is not NULL OR btg.l10n_ar_vat_afip_code is not NULL)
-                    AND (nt.type_tax_use in %(tax_types)s OR bt.type_tax_use in %(tax_types)s)
-                    %(search_condition)s
+                    (account_move_line.tax_line_id IS NOT NULL OR base.vat_code IS NOT NULL)
+                        AND (tax.type_tax_use IN %(tax_types)s OR base.type_tax_use IN %(tax_types)s)
+                %(search_condition)s
                 GROUP BY
-                    account_move.id, art.name, rp.id, lit.id,  COALESCE(nt.type_tax_use, bt.type_tax_use)
+                    account_move.id, art.name, rp.id, lit.id, COALESCE(tax.type_tax_use, base.type_tax_use)
+
                 ORDER BY
                     account_move.invoice_date, account_move.name
             """,

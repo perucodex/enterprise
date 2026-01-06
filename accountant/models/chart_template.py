@@ -9,3 +9,4 @@ class AccountChartTemplate(models.AbstractModel):
 
         company = company or self.env.company
         company._get_tax_closing_journal()
+        company._initiate_account_onboardings()

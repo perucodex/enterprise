@@ -130,7 +130,12 @@ class AccountTestFecImport(AccountTestInvoicingCommon):
         self._import_fec_file('fec_crlf_tab_utf8bom_large.json')
 
         new = self.env['account.move'].search([('id', '>', last.id)])
-        new.action_post()
+        # We delay one move to be sure the FEC matching number is not lost
+        # when performing the first posting/auto matching
+        delayed_move = self.env['account.move.line'].search([('matching_number', '=', 'IAA')], limit=1).move_id
+
+        (new - delayed_move).action_post()
+        delayed_move.action_post()
 
         # Verify move_lines presence
         move_names = ('ACH000001', 'ACH000002', 'ACH000003')

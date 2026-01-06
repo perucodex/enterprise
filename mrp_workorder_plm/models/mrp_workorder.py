@@ -51,7 +51,7 @@ class QualityCheck(models.Model):
         # Would need 'quality.group_quality_manager' otherwise, but we want this to be available for MRP basic users.
         point = self.env['quality.point'].sudo().create(quality_point_data)
         self.point_id = point
-        # Resequence quality points according to checks
+        # Resequence quality points according to checks, starting from first check
         current_sequence = 10
         points = self.env['quality.point'].search([('operation_id', '=', operation.id)])
         check = self.env['quality.check'].search([
@@ -59,7 +59,7 @@ class QualityCheck(models.Model):
             ('previous_check_id', '=', False), ('production_id', '=', self.production_id.id)
         ])
         while check:
-            point = check.point_id if check.point_id.operation_id == operation else points.filtered(lambda p: p._get_sync_values() == check.point_id._get_sync_values())[0]
+            point = check.point_id if check.point_id.operation_id == operation else points.filtered(lambda p: p._get_sync_values() == check.point_id._get_sync_values())[:1]
             points -= point
             if point.sequence != current_sequence:
                 point.sequence = current_sequence

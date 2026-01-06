@@ -182,14 +182,16 @@ class ShareRoute(http.Controller):
             if document.type == 'url':
                 raise ValueError("cannot create a zip item out of an url")
             if document.type == 'folder':
+                document_name = document.name.replace('/', '_')
                 # it is the ending slash that makes it appears as a
                 # folder inside the zip file.
-                return Item(unique(f'{folder.path}{document.name}') + '/', '')
+                return Item(unique(f'{folder.path}{document_name}') + '/', '')
             try:
                 stream = self._documents_content_stream(document.shortcut_document_id or document)
+                download_name = stream.download_name.replace('/', '_')
             except (ValueError, MissingError):
                 return None  # skip
-            return Item(unique(f'{folder.path}{stream.download_name}'), stream.read())
+            return Item(unique(f'{folder.path}{download_name}'), stream.read())
 
         def generate_zip_items(documents_sudo, folder):
             documents_sudo = documents_sudo.sorted(lambda d: d.id)

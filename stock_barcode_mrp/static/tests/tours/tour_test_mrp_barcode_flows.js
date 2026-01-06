@@ -179,7 +179,7 @@ registry.category("web_tour.tours").add("test_process_confirmed_mo", {
     ],
 });
 
-registry.category("web_tour.tours").add('test_scrap_done_mo', {
+registry.category("web_tour.tours").add("test_scrap_done_mo", {
     steps: () => [
         {
             trigger: "button.o_barcode_actions",
@@ -196,7 +196,8 @@ registry.category("web_tour.tours").add('test_scrap_done_mo', {
         },
         {
             content: "Select the product from the dropdown",
-            trigger: '.o_field_many2one_selection .dropdown-item:not([id$=_loading]):contains("Final Product")',
+            trigger:
+                '.o_field_many2one_selection .dropdown-item:not([id$=_loading]):contains("Final Product")',
             run: "click",
         },
         {
@@ -570,19 +571,6 @@ registry.category("web_tour.tours").add("test_barcode_production_generate_serial
                 helper.assertLineLot(0, "0000134, 0000135, 0000136, …, 0000143");
             },
         },
-        // Correct the Compo Lot consumption lines.
-        { trigger: ".o_barcode_line button.o_toggle_sublines", run: "click" },
-        {
-            content: "Delete the second Comp Lot line (line with no lot.)",
-            trigger: ".o_barcode_line.o_selected button.o_line_button.o_delete_line",
-            run: "click",
-        },
-        {
-            content: "Increase qty for 5/10 to 10/10 for the Comp Lot line with a lot.",
-            trigger: ".o_barcode_line[data-barcode='compo_lot'] button.o_add_remaining_quantity",
-            run: "click",
-        },
-        { trigger: ".o_barcode_line.o_line_completed.o_selected" },
         ...stepUtils.validateBarcodeOperation(),
     ],
 });
@@ -750,22 +738,11 @@ registry.category("web_tour.tours").add("test_barcode_production_scan_other_than
             trigger: ".o_barcode_client_action",
             run: "scan lot_02",
         },
-
-        // Unfold grouped lines for tracked component
         {
-            trigger: ".o_line_button.o_toggle_sublines",
-            run: "click",
-        },
-        {
-            trigger: '.o_barcode_client_action:contains("lot_01")',
+            trigger:
+                ".o_barcode_lines .o_barcode_line:has(.o_line_lot_name:contains(lot_02)) .qty-done:contains(2)",
             run: function () {
                 helper.assertLinesCount(3);
-                helper.assertSublinesCount(2);
-                const [line1, line2] = helper.getSublines();
-                helper.assert(line1.querySelector(".o_line_lot_name").innerText, "lot_01");
-                helper.assert(line1.querySelector(".qty-done").innerText, "0");
-                helper.assert(line2.querySelector(".o_line_lot_name").innerText, "lot_02");
-                helper.assert(line2.querySelector(".qty-done").innerText, "2");
             },
         },
         // scan the not tracked component from a different location (shelf1) than the reserved
@@ -1190,6 +1167,35 @@ registry.category("web_tour.tours").add("test_picking_product_with_kit_and_packa
     steps: () => [{ trigger: ".btn.o_validate_page", run: "click" }],
 });
 
+registry.category("web_tour.tours").add("test_delivery_kit_with_tracked_compo", {
+    steps: () => [
+        {
+            trigger: ".o_stock_barcode_main_menu",
+            run: "scan WH/OUT/DKWTC",
+        },
+        // scan the unreserved LOT003
+        {
+            trigger: ".o_barcode_client_action",
+            run: "scan LOT003",
+        },
+        {
+            trigger: ".o_barcode_line:contains(LOT003)",
+            run: "scan LOT004",
+        },
+        {
+            trigger: ".o_barcode_line:contains(LOT004)",
+            run: () => {
+                const [classicLine, kitLine] = helper.getLines();
+                helper.assertLineQty(classicLine, "1/1");
+                helper.assertLineTrackingNumber(classicLine, "LOT004");
+                helper.assertLineQty(kitLine, "1/1");
+                helper.assertLineTrackingNumber(kitLine, "LOT003");
+            }
+        },
+        ...stepUtils.validateBarcodeOperation(),
+    ],
+});
+
 registry.category("web_tour.tours").add("test_multi_company_manufacture_creation_in_barcode", {
     steps: () => [
         // test scan
@@ -1315,14 +1321,6 @@ registry.category("web_tour.tours").add("test_backorder_partial_completion_save_
         { trigger: "input", run: "clear" },
         { trigger: "input", run: "edit 5" },
         { trigger: ".o_save", run: "click" },
-        {
-            trigger:
-                '.o_barcode_line:has(.o_barcode_line_title .o_product_label:contains("Compo 01")) .o_edit',
-            run: "click",
-        },
-        { trigger: "input", run: "clear" },
-        { trigger: "input", run: "edit 5" },
-        { trigger: ".o_save", run: "click" },
         { trigger: ".o_barcode_line" },
         { trigger: ".o_exit", run: "click" },
         { trigger: ".o_stock_barcode_main_menu", run: "scan TBPCSNS mo" },
@@ -1400,16 +1398,16 @@ registry.category("web_tour.tours").add("test_no_split_uncompleted_done_move", {
     steps: () => [
         { trigger: ".o_stock_barcode_main_menu", run: "scan TBPCSNS mo" },
         {
-            trigger:
-                '.o_barcode_line:has(.o_barcode_line_title .o_product_label:contains("Final Product")) .o_edit',
+            trigger: '.o_barcode_line:has(.o_barcode_line_title:text("Final Product")) .o_edit',
             run: "click",
         },
         { trigger: "input", run: "clear" },
         { trigger: "input", run: "edit 1" },
         { trigger: ".o_save", run: "click" },
+        { trigger: ".o_barcode_line" },
+        { trigger: '.o_barcode_line:has(.o_barcode_line_title:text("Compo 01")) .o_edit' },
         {
-            trigger:
-                '.o_barcode_line:has(.o_barcode_line_title .o_product_label:contains("Compo 01")) .o_edit',
+            trigger: '.o_barcode_line:has(.o_barcode_line_title:text("Compo 01")) .o_edit',
             run: "click",
         },
         { trigger: "input", run: "clear" },
@@ -1666,17 +1664,19 @@ registry.category("web_tour.tours").add("test_select_mo_component_line_scan_pack
     ],
 });
 
-registry.category("web_tour.tours").add("test_create_all_transfers_for_3_step_manufacturing", {steps: () => [
-    { trigger: "div[name='o_kanban_record_title']:contains('Manufacturing')", run: "click" },
-    { trigger: ".o-kanban-button-new", run: "click" },
-    { trigger: "button.o_add_line", run: "click" },
-    { trigger: "input#product_id_0", run: "edit Final" },
-    { trigger: ".ui-autocomplete a:contains('Final Product')", run: "click" },
-    { trigger: "div[name=product_id] .o_external_button", run() {} },
-    { trigger: "button.o_save", run: "click" },
-    { trigger: "button.o_validate_page:enabled", run: "click" },
-    { trigger: ".o_notification_bar.bg-success", run() {} },
-]});
+registry.category("web_tour.tours").add("test_create_all_transfers_for_3_step_manufacturing", {
+    steps: () => [
+        { trigger: "div[name='o_kanban_record_title']:contains('Manufacturing')", run: "click" },
+        { trigger: ".o-kanban-button-new", run: "click" },
+        { trigger: "button.o_add_line", run: "click" },
+        { trigger: "input#product_id_0", run: "edit Final" },
+        { trigger: ".ui-autocomplete a:contains('Final Product')", run: "click" },
+        { trigger: "div[name=product_id] .o_external_button", run() {} },
+        { trigger: "button.o_save", run: "click" },
+        { trigger: "button.o_validate_page:enabled", run: "click" },
+        { trigger: ".o_notification_bar.bg-success", run() {} },
+    ],
+});
 
 registry.category("web_tour.tours").add("test_quant_selection_mrp", {
     steps: () => [
@@ -1808,7 +1808,7 @@ registry.category("web_tour.tours").add("test_quant_selection_mrp", {
     ],
 });
 
-registry.category("web_tour.tours").add('test_picking_product_with_kit_and_component', {
+registry.category("web_tour.tours").add("test_picking_product_with_kit_and_component", {
     steps: () => [
         {
             trigger: ".o_barcode_client_action",
@@ -1817,7 +1817,7 @@ registry.category("web_tour.tours").add('test_picking_product_with_kit_and_compo
                 helper.assertLineQty(0, "0/1");
                 helper.assertLineQty(1, "0/1");
                 helper.assertLineQty(2, "0/1");
-            }
+            },
         },
     ],
 });

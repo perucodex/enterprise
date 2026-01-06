@@ -446,7 +446,18 @@ class TestShopFloor(HttpCase):
         self.assertEqual(mo.move_byproduct_ids.lot_ids.name, "00001")
 
     @users('test_without_hr_right')
-    def test_canceled_wo(self):
+    def test_partial_backorder_with_multiple_operations(self):
+        """
+        Create an MO for 10 units and 3 operations: op1, op2, op3. Process:
+        - 10 units in op1
+        - 7 units in op2
+        - 5 units in op3
+        Validate the MO for these 5 units and create a backorder. Check that each operation of the
+        backorder displays the appropriate remaining quantity in the backend and in the shopfloor:
+        - op1 shall be cancelled
+        - op2 shall be processed for 3 units
+        - op3 shall be processed for 5 units
+        """
         finished = self.env['product.product'].create({
             'name': 'finish',
             'is_storable': True,
@@ -460,32 +471,28 @@ class TestShopFloor(HttpCase):
             'operation_ids': [
                 Command.create({'name': 'op1', 'workcenter_id': workcenter.id}),
                 Command.create({'name': 'op2', 'workcenter_id': workcenter.id}),
+                Command.create({'name': 'op3', 'workcenter_id': workcenter.id}),
             ],
         })
 
         # Cancel previous MOs and create a new one
-        self.env['mrp.production'].search([]).action_cancel()
+        self.env['mrp.production'].search([('state', 'not in', ('cancel', 'done'))]).action_cancel()
         mo = self.env['mrp.production'].create({
+            'name': 'MOBACK',
             'product_id': finished.id,
-            'product_qty': 2,
+            'product_qty': 10,
             'bom_id': bom.id,
         })
         mo.action_confirm()
         mo.action_assign()
         mo.button_plan()
 
-        # wo_1 completely finished
-        mo_form = Form(mo)
-        mo_form.qty_producing = 2
-        mo = mo_form.save()
-        mo.workorder_ids[0].button_start()
-        mo.workorder_ids[0].button_finish()
-
-        # wo_2 partially finished
-        mo_form.qty_producing = 1
-        mo = mo_form.save()
-        mo.workorder_ids[1].button_start()
-        mo.workorder_ids[1].button_finish()
+        # wo_1 completely finished, wo_2 and wo_3 partially finished
+        for wo, qty in zip(mo.workorder_ids, (10, 7, 5)):
+            wo.button_start()
+            with Form(mo) as fmo:
+                fmo.qty_producing = qty
+            wo.button_finish()
 
         # Create a backorder
         action = mo.button_mark_done()
@@ -498,7 +505,7 @@ class TestShopFloor(HttpCase):
         self.assertEqual(mo_backorder.workorder_ids[0].state, 'cancel')
         self.assertEqual(mo_backorder.workorder_ids[1].state, 'ready')
 
-        self.start_tour("odoo/shop-floor", "test_canceled_wo", login='test_without_hr_right')
+        self.start_tour("odoo/shop-floor", "test_partial_backorder_with_multiple_operations", login='test_without_hr_right')
 
     @users('test_without_hr_right')
     def test_change_qty_produced(self):
@@ -811,3 +818,64 @@ class TestShopFloor(HttpCase):
             if move.product_id.id == comp2.id:
                 self.assertEqual(move.quantity, 2)
                 self.assertTrue(move.picked)
+
+    def test_product_consumption(self):
+        """ Test that we generate the correct move when completing from the shopfloor
+        a MO with component consumption. The component is tracked by lot, and use kg
+        as its default UoM.
+        BoM: component 50g => product 1 Unit
+        """
+        # user need to be in the production lot group to be able to see the lot id in the quant selection view.
+        self.env.user.write({'group_ids': [Command.link(self.ref('stock.group_production_lot'))]})
+
+        workcenter = self.env['mrp.workcenter'].create({'name': 'Workcenter1'})
+        component, product = self.env["product.product"].create([
+                {
+                    "name": "component",
+                    "is_storable": True,
+                    "tracking": "lot",
+                    "uom_id": self.ref("uom.product_uom_kgm"),
+                },
+                {
+                    "name": "product",
+                    "is_storable": True,
+                },
+        ])
+        bom = self.env['mrp.bom'].create({
+            'product_id': product.id,
+            'product_tmpl_id': product.product_tmpl_id.id,
+            'product_qty': 1,
+            'operation_ids': [
+                Command.create({'name': 'consumption', 'workcenter_id': workcenter.id}),
+            ],
+            'bom_line_ids': [
+                Command.create({
+                    'product_id': component.id,
+                    'product_qty': 50,
+                    'product_uom_id': self.ref('uom.product_uom_gram'),
+                }),
+            ],
+        })
+        lot_1, lot_2 = self.env['stock.lot'].create([
+            {'name': 'Lot 1', 'product_id': component.id},
+            {'name': 'Lot 2', 'product_id': component.id},
+        ])
+        bom.bom_line_ids.operation_id = bom.operation_ids.id
+        self.env['stock.quant']._update_available_quantity(component, self.warehouse.lot_stock_id, quantity=100, lot_id=lot_1)
+        self.env['stock.quant']._update_available_quantity(component, self.warehouse.lot_stock_id, quantity=100, lot_id=lot_2)
+        mo = self.env['mrp.production'].create({
+            'product_id': product.id,
+            'bom_id': bom.id,
+        })
+        mo.action_confirm()
+        self.start_tour('/odoo/shop-floor', 'test_product_consumption', login='admin')
+
+        self.assertRecordValues(mo.move_raw_ids, [
+            {
+                'product_id': component.id,
+                'product_qty': 0.05,
+                'product_uom_qty': 50.0,
+                'lot_ids': lot_1.ids,
+                'product_uom': self.ref('uom.product_uom_gram'),
+            },
+        ])

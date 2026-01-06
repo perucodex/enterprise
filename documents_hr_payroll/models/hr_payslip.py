@@ -25,16 +25,17 @@ class HrPayslip(models.Model):
 
         if not self.env.user.has_group('hr_payroll.group_hr_payroll_user'):
             raise UserError(_('You can not send the documents link to the employee.'))
-        if any(payslip.state not in ['validated', 'paid'] for payslip in self):
+        payslips_sudo = self.sudo()
+        if any(payslip.state not in ['validated', 'paid'] for payslip in payslips_sudo):
             return show_notification('warning', _('A payslip should be validated or paid to be sent to the employee.'))
-        invalid_employees = self.employee_id.filtered(lambda e: not (e.private_email or e.work_email))
+        invalid_employees = payslips_sudo.employee_id.filtered(lambda e: not (e.private_email or e.work_email))
         if invalid_employees:
             raise UserError(
                 _('Employee\'s private or work email must be set to use "Send By Email" function:\n%s',
                   '\n'.join(invalid_employees.mapped('name'))))
 
-        payslip_without_documents = self.filtered(lambda p: not p.document_access_url)
-        for payslip in (self - payslip_without_documents):
+        payslip_without_documents = payslips_sudo.filtered(lambda p: not p.document_access_url)
+        for payslip in (payslips_sudo - payslip_without_documents):
             template = payslip._get_email_template()
             template.send_mail(payslip.id, email_layout_xmlid='mail.mail_notification_light')
             payslip.message_post(body=_('The payslip has been re-sent to the employee.'))
@@ -44,7 +45,7 @@ class HrPayslip(models.Model):
 
         message = _("Some payslips could not be resend as they do not have related document") \
             if payslip_without_documents else (
-            _("%s Payslip(s) correctly sent.", len(self)))
+            _("%s Payslip(s) correctly sent.", len(payslips_sudo)))
         notification_type = "warning" if payslip_without_documents else "success"
         return show_notification(notification_type, message)
 

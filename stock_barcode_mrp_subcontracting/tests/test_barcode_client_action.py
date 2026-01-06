@@ -13,10 +13,7 @@ class TestSubcontractingBarcodeClientAction(TestBarcodeClientAction):
     def setUp(self):
         super(TestSubcontractingBarcodeClientAction, self).setUp()
 
-        self.subcontractor_partner = self.env['res.partner'].create({
-            'name': 'Pastry Cook',
-            'company_id': self.env.ref('base.main_company').id
-        })
+        self.subcontractor_partner = self.env['res.partner'].create({'name': 'Pastry Cook'})
         self.subcontracted_product = self.env['product.product'].create({
             'name': 'Chocolate Eclairs',
             'is_storable': True,
@@ -104,7 +101,7 @@ class TestSubcontractingBarcodeClientAction(TestBarcodeClientAction):
             'name': 'TRSBPMASL picking',
             'location_id': self.supplier_location.id,
             'location_dest_id': self.stock_location.id,
-            'picking_type_id': self.env.ref('stock.picking_type_in').id,
+            'picking_type_id': self.picking_type_in.id,
             'partner_id': self.subcontractor_partner.id,
             'move_ids': [Command.create({
                 'location_id': self.supplier_location.id,

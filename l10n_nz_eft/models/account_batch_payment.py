@@ -425,7 +425,7 @@ class AccountBatchPayment(models.Model):
         if not string:
             return ''
 
-        string = string.strip()
+        string = string.replace(',', '').strip()
         if from_left:
             string = string[:max_length]
         else:

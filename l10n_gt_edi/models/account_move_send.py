@@ -41,6 +41,32 @@ class AccountMoveSend(models.AbstractModel):
         return alerts
 
     # -------------------------------------------------------------------------
+    # ATTACHMENTS
+    # -------------------------------------------------------------------------
+
+    @api.model
+    def _get_invoice_extra_attachments(self, move):
+        # EXTENDS 'account'
+        return super()._get_invoice_extra_attachments(move) + move.l10n_gt_edi_attachment_id
+
+    @api.model
+    def _get_placeholder_mail_attachments_data(self, move, invoice_edi_format=None, extra_edis=None, pdf_report=None):
+        # EXTENDS 'account'
+        res = super()._get_placeholder_mail_attachments_data(move, invoice_edi_format=invoice_edi_format, extra_edis=extra_edis, pdf_report=pdf_report)
+
+        if not move.l10n_gt_edi_attachment_id and 'gt_edi' in extra_edis:
+            attachment_name = move._l10n_gt_edi_get_sat_xml_name()
+            res.append(
+                {
+                    'id': f'placeholder_{attachment_name}',
+                    'name': attachment_name,
+                    'mimetype': 'application/xml',
+                    'placeholder': True,
+                }
+            )
+        return res
+
+    # -------------------------------------------------------------------------
     # SENDING METHOD
     # -------------------------------------------------------------------------
 

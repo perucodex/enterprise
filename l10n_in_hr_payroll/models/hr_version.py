@@ -121,15 +121,13 @@ class HrVersion(models.Model):
     l10n_in_esic = fields.Boolean(related='company_id.l10n_in_esic', groups="hr_payroll.group_hr_payroll_user")
     l10n_in_esic_employee_amount = fields.Monetary(groups="hr_payroll.group_hr_payroll_user",
         compute="_compute_l10n_in_esic_employee_amount", store=True, readonly=False, tracking=True,
-        help='Employee contributions towards ESIC (Employees’ State Insurance Corporation) are\
-        calculated based on their gross wages.')
+        help='Employee contributions apply when the gross wage is below ₹21,000')
     l10n_in_esic_employee_percentage = fields.Float(string='Employee ESIC Percentage',
         compute="_compute_l10n_in_esic_employee_percentage", store=True, readonly=False,
         groups="hr_payroll.group_hr_payroll_user")
     l10n_in_esic_employer_amount = fields.Monetary(groups="hr_payroll.group_hr_payroll_user",
         compute="_compute_l10n_in_esic_employer_amount", store=True, readonly=False, tracking=True,
-        help='Employer contributions towards ESIC (Employees’ State Insurance Corporation) are calculated\
-        based on the employee’s gross wages.')
+        help='Employer contributions apply when the gross wage is below ₹21,000')
     l10n_in_esic_employer_percentage = fields.Float(string='Employer ESIC Percentage',
         compute="_compute_l10n_in_esic_employer_percentage", store=True, readonly=False,
         groups="hr_payroll.group_hr_payroll_user")
@@ -142,7 +140,7 @@ class HrVersion(models.Model):
         Welfare Fund.')
 # ----- end of deductions -----
     l10n_in_gross_salary = fields.Monetary(string="Gross Salary", compute="_compute_l10n_in_gross_salary", store=True,
-        groups="hr.group_hr_payroll_user")
+        groups="hr_payroll.group_hr_payroll_user")
     _check_l10n_in_hra_percentage = models.Constraint(
         'CHECK(l10n_in_hra_percentage >= 0 and l10n_in_hra_percentage <= 1)',
         'House-Rent Allowance Percentage should be between 0% and 100%!'
@@ -190,6 +188,8 @@ class HrVersion(models.Model):
     )
     def _check_l10n_in_total_allowance_below_wage(self):
         for version in self:
+            if version.company_id.country_code != 'IN':
+                continue
             monthly_wage = version._l10n_in_get_montly_wage()
             total_allowance = sum([
                 version.l10n_in_basic_salary_amount,
@@ -214,12 +214,20 @@ class HrVersion(models.Model):
 
     @api.depends('l10n_in_basic_salary_amount', 'wage', 'hourly_wage', 'wage_type', 'resource_calendar_id.hours_per_day')
     def _compute_l10n_in_basic_percentage(self):
+        default_percentage = self.env['hr.rule.parameter']._get_parameter_from_code('l10n_in_basic_percent', raise_if_not_found=False)
+        is_hr_payroll = self.env.context.get('is_hr_payroll')
+        salary_simulation = self.env.context.get('salary_simulation')
         for version in self:
+            if version.company_id.country_code != 'IN':
+                continue
             monthly_wage = version._l10n_in_get_montly_wage()
             if not monthly_wage:
                 version.l10n_in_basic_percentage = 0.0
                 continue
             if self.env.context.get('skip_percentage_calc'):
+                continue
+            if (not version.l10n_in_basic_salary_amount and not is_hr_payroll and salary_simulation):
+                version.l10n_in_basic_percentage = default_percentage
                 continue
             version.l10n_in_basic_percentage = version.l10n_in_basic_salary_amount / monthly_wage
 
@@ -459,7 +467,6 @@ class HrVersion(models.Model):
                 "l10n_in_esic_employee_percentage", "l10n_in_esic_employer_amount", "l10n_in_esic_employer_percentage",
                 "l10n_in_labour_welfare", "l10n_in_lwf_employer_contribution", "l10n_in_lwf_employee_contribution",
                 "pt_rule_parameter_id", "l10n_in_pf_employee_type", "l10n_in_pf_employer_type",
-                "overtime_from_attendance",
             ]
         return whitelisted_fields
 

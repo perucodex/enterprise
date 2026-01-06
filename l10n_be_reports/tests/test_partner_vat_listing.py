@@ -330,6 +330,56 @@ class BelgiumPartnerVatListingTest(TestAccountReportsCommon):
             options,
         )
 
+    def test_invoice_with_refund_less_than_250(self):
+        self.env = self.env(context=dict(self.env.context, allowed_company_ids=self.env.company.ids))
+        options = self._generate_options(self.report, '2022-06-01', '2022-06-30')
+        self.create_and_post_account_move('out_invoice', self.partner_a_be.id, '2022-06-01', product_quantity=2, product_price_unit=100)
+        self.create_and_post_account_move('out_refund', self.partner_a_be.id, '2022-06-02', product_quantity=1, product_price_unit=100)
+
+        self.assertLinesValues(
+            self.report._get_lines(options),
+            #   Name                        VAT number          Turnover            VAT amount
+            [   0,                          1,                  2,                  3],
+            [
+                ('Partner VAT Listing',     '',                 100.0,              21.0),
+                ('Partner A (BE)',          'BE0246697724',     100.0,              21.0),
+            ],
+            options,
+        )
+
+    def test_exempted_tax(self):
+        self.env = self.env(context=dict(self.env.context, allowed_company_ids=self.env.company.ids))
+        options = self._generate_options(self.report, '2022-06-01', '2022-06-30')
+        self.tax_sale_a.ubl_cii_tax_category_code = 'E'
+        self.init_invoice('out_invoice', partner=self.partner_a_be, post=True, amounts=[1000], taxes=[self.tax_sale_a], invoice_date='2022-06-29')
+
+        self.assertLinesValues(
+            self.report._get_lines(options),
+            #   Name                        VAT number          Turnover            VAT amount
+            [   0,                          1,                  2,                  3],
+            [
+                ('Partner VAT Listing',     '',                 0.0,            0.0),
+            ],
+            options,
+        )
+
+    def test_invoice_with_refund_less_than_250_with_exempt(self):
+        self.env = self.env(context=dict(self.env.context, allowed_company_ids=self.env.company.ids))
+        options = self._generate_options(self.report, '2022-06-01', '2022-06-30')
+        self.tax_sale_a.ubl_cii_tax_category_code = 'E'
+
+        self.create_and_post_account_move('out_invoice', self.partner_a_be.id, '2022-06-01', product_quantity=2, product_price_unit=100)
+        self.create_and_post_account_move('out_refund', self.partner_a_be.id, '2022-06-02', product_quantity=1, product_price_unit=100)
+        self.assertLinesValues(
+            self.report._get_lines(options),
+            #   Name                        VAT number          Turnover            VAT amount
+            [   0,                          1,                  2,                  3],
+            [
+                ('Partner VAT Listing',     '',                 0.0,              0.0),
+            ],
+            options,
+        )
+
     def test_turnover_custom_groupby(self):
         def get_base_line_name(invoice):
             return invoice.line_ids.filtered(lambda x: x.account_id.internal_group == 'income').display_name

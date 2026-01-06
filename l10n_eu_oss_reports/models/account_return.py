@@ -11,17 +11,29 @@ class AccountReturnType(models.Model):
     def _generate_all_returns(self, country_code, main_company, tax_unit=None):
         rslt = super()._generate_all_returns(country_code, main_company, tax_unit=tax_unit)
 
-        # Only do that when instantiating the domestic returns, to avoid double computation in case of multivat
-        oss_tax_exists = self.env['account.tax'].search_count([
+        oss_tax_domain = [
             ('repartition_line_ids.tag_ids', 'in', self.env.ref('l10n_eu_oss.tag_oss').ids),
-            ('type_tax_use', '=', 'sale'),
             ('country_id.code', '=', country_code),
             *self.env['account.tax']._check_company_domain(main_company),
-        ], limit=1)
-        if oss_tax_exists:
+        ]
+
+        # Only do that when instantiating the domestic returns, to avoid double computation in case of multivat
+        if self.env['account.tax'].search_count([*oss_tax_domain, ('type_tax_use', '=', 'sale')], limit=1):
             self.env.ref('l10n_eu_oss_reports.eu_oss_sales_tax_return_type')._try_create_returns_for_fiscal_year(main_company, tax_unit=tax_unit)
 
+        if self.env['account.tax'].search_count([*oss_tax_domain, ('type_tax_use', '=', 'purchase')], limit=1):
+            self.env.ref('l10n_eu_oss_reports.eu_oss_imports_tax_return_type')._try_create_returns_for_fiscal_year(main_company, tax_unit=tax_unit)
+
         return rslt
+
+    def _can_return_exist(self, company, tax_unit=False):
+        can_exist = super()._can_return_exist(company, tax_unit=tax_unit)
+        if tax_unit and self in (
+            self.env.ref('l10n_eu_oss_reports.eu_oss_sales_tax_return_type'),
+            self.env.ref('l10n_eu_oss_reports.eu_oss_imports_tax_return_type'),
+        ):
+            can_exist &= tax_unit.main_company_id == company
+        return can_exist
 
 
 class AccountReturn(models.Model):
@@ -76,9 +88,7 @@ class AccountReturn(models.Model):
             checks.append({
                 'code': 'check_oss_currency',
                 'name': _lt("EUR Currency"),
-                'message': _lt("""
-                    OSS reports must be submitted in euros.
-                """),
+                'message': _lt("OSS reports must be submitted in euros."),
                 'result': 'reviewed' if self.company_id.currency_id.name == 'EUR' else 'anomaly',
             })
 
@@ -86,9 +96,7 @@ class AccountReturn(models.Model):
             checks.append({
                 'code': 'check_oss_only_intra_eu_transactions',
                 'name': _lt("Only intra-EU transactions"),
-                'message': _lt("""
-                    Exclude any domestic or extra-EU sales from the OSS report.
-                """),
+                'message': _lt("Exclude any domestic or extra-EU sales from the OSS report."),
                 'result': 'reviewed',
             })
 
@@ -120,9 +128,7 @@ class AccountReturn(models.Model):
             checks.append({
                 'code': 'check_oss_only_b2c_customer',
                 'name': _lt("Only B2C transactions"),
-                'message': _lt("""
-                    Only B2C transactions should be included in the OSS report.
-                """),
+                'message': _lt("Only B2C transactions should be included in the OSS report."),
                 'records_count': business_partners_count,
                 'records_model': self.env['ir.model']._get('res.partner').id,
                 'action': review_action if business_partner_ids else False,

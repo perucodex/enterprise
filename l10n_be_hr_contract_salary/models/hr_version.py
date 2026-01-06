@@ -3,6 +3,8 @@ import ast
 from markupsafe import Markup
 
 from odoo import api, fields, models, _
+from odoo.fields import Domain
+from odoo.tools.float_utils import float_compare
 
 
 class HrVersion(models.Model):
@@ -53,17 +55,28 @@ class HrVersion(models.Model):
         minimum_wage = self.env['hr.rule.parameter']._get_parameter_from_code('cp200_min_gross_wage', fields.Date.today(), raise_if_not_found=False)
         for version in self:
             if version.l10n_be_mobility_budget:
-                base = version.wage_with_holidays
+                base = self.env.context.get(
+                    'salary_simulation_full_time_wage_on_holidays',
+                    version.wage_with_holidays
+                )
                 raw_mb = min(mobility_budget_max, base * 13.0 / 5.0)
 
-                # Iteratively find the right budget to not get under the minimum wage
-                current_yearly_cost = version._get_yearly_cost_from_wage_with_holidays() if version._is_salary_sacrifice() else version.final_yearly_costs
-                wage_with_mobility_budget = version._get_gross_from_employer_costs(current_yearly_cost - raw_mb)
-                while wage_with_mobility_budget < minimum_wage and minimum_wage:
-                    raw_mb -= 10
-                    wage_with_mobility_budget = version._get_gross_from_employer_costs(current_yearly_cost - raw_mb)
+                # find the right budget to not get under the minimum wage
+                current_yearly_cost = self.env.context.get(
+                    'salary_simulation_full_time_yearly_cost',
+                    version._get_yearly_cost_from_wage_with_holidays() if version._is_salary_sacrifice() else version.final_yearly_costs
+                )
+                version_mobility_budget_min = mobility_budget_min
+                version_mobility_budget_max = raw_mb
+                while float_compare(version_mobility_budget_min, version_mobility_budget_max, precision_digits=2) == -1:
+                    version_mobility_budget = (version_mobility_budget_max + version_mobility_budget_min) / 2
+                    wage_with_mobility_budget = version._get_gross_from_employer_costs(current_yearly_cost - version_mobility_budget)
+                    if wage_with_mobility_budget < minimum_wage and minimum_wage:
+                        version_mobility_budget_max = version_mobility_budget
+                    else:
+                        version_mobility_budget_min = version_mobility_budget
 
-                raw_mb = max(raw_mb, mobility_budget_min)
+                raw_mb = version_mobility_budget_min
                 version.l10n_be_mobility_budget_amount = raw_mb
             else:
                 version.l10n_be_mobility_budget_amount = 0.0
@@ -290,3 +303,11 @@ class HrVersion(models.Model):
             'ip': benefits['ip_value'] and ast.literal_eval(benefits['ip_value']),
             'ip_wage_rate': version_vals.get('ip_wage_rate')
         }
+
+    def _get_available_cars_domain(self):
+        return Domain.AND(
+            [
+                super()._get_available_cars_domain(),
+                Domain('state_id.hide_in_offer', '=', False),
+            ],
+        )

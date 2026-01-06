@@ -12,6 +12,7 @@ class HrVersion(models.Model):
     wage_on_signature = fields.Monetary(groups="hr_payroll.group_hr_payroll_user")
     final_yearly_costs = fields.Monetary(groups="hr_payroll.group_hr_payroll_user")
     monthly_yearly_costs = fields.Monetary(groups="hr_payroll.group_hr_payroll_user")
+    salary_offer_ids = fields.One2many(groups="hr_payroll.group_hr_payroll_manager")
 
     # DO NOT CALL THIS FUNCTION OUTSIDE OF A ROLLBACK SAVEPOINT
     def _generate_salary_simulation_payslip(self):
@@ -44,6 +45,7 @@ class HrVersion(models.Model):
         if self.env.context.get("simulation_working_schedule"):
             working_schedule = self.env.context.get("simulation_working_schedule", '100')
             old_calendar = payslip.version_id.company_id.resource_calendar_id
+            new_calendar = self.env['resource.calendar']
             if working_schedule == '100':
                 pass
             elif working_schedule == '90':
@@ -98,6 +100,8 @@ class HrVersion(models.Model):
         payslip = payslip.with_context(
             salary_simulation=True,
             salary_simulation_full_time=is_full_time,
+            salary_simulation_full_time_wage_on_holidays=self.wage_with_holidays,
+            salary_simulation_full_time_yearly_cost=self.final_yearly_costs,
             origin_version_id=self.env.context.get('origin_version_id', False),
             lang=None
         )

@@ -153,3 +153,38 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         picking.move_ids.write({'quantity': 1})
         url = self._get_client_action_url(picking.id)
         self.start_tour(url, 'test_picking_product_with_kit_and_component', login='admin', timeout=180)
+
+    def test_delivery_kit_with_tracked_compo(self):
+        """
+        Test that unreserved scanned component lots overrides the initial reservation.
+        """
+        grp_lot = self.env.ref('stock.group_production_lot')
+        self.env.user.group_ids |= grp_lot
+        self.picking_type_out.show_reserved_sns = True
+        self.bom_kit_lot.bom_line_ids = self.bom_kit_lot.bom_line_ids[-1]
+        lots = self.env['stock.lot'].create([
+            {
+                'name': f"LOT00{i + 1}",
+                'product_id': self.component_lot.id,
+                'company_id': self.env.company.id
+            } for i in range(4)
+        ])
+        for lot in lots:
+            self.env['stock.quant']._update_available_quantity(product_id=self.component_lot, location_id=self.stock_location, quantity=1, lot_id=lot)
+        delivery = self.env['stock.picking'].create({
+            'name': 'WH/OUT/DKWTC',
+            'picking_type_id': self.picking_type_out.id,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'move_ids': [
+                Command.create({
+                    'product_id': product.id,
+                    'product_uom_qty': 1.0,
+                    'product_uom': product.uom_id.id,
+                    'location_id': self.stock_location.id,
+                    'location_dest_id': self.customer_location.id,
+                }) for product in [self.kit_lot, self.component_lot]
+            ],
+        })
+        delivery.action_confirm()
+        self.start_tour('/odoo/barcode', 'test_delivery_kit_with_tracked_compo', login='admin')

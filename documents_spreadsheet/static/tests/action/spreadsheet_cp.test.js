@@ -202,6 +202,32 @@ test("Share spreadsheet from control panel", async function () {
     expect.verifySteps(["open_share"]);
 });
 
+test("Share button is hidden when document is archived (Trash)", async function () {
+    const spreadsheetId = 789;
+    const model = new Model();
+    const serverData = getBasicServerData();
+    serverData.models["documents.document"].records = [
+        { id: 1, type: "folder" },
+        {
+            name: "My spreadsheet",
+            id: spreadsheetId,
+            spreadsheet_data: JSON.stringify(model.exportData()),
+            folder_id: 1,
+            active: false,
+        },
+    ];
+
+    await createSpreadsheet({ serverData, spreadsheetId });
+
+    expect("o-spreadsheet-topbar button:contains(Share)").toHaveCount(0, {
+        message: "Share button should be hidden for archived spreadsheets",
+    });
+    await contains(".o-topbar-menu[data-id=file]").click();
+    expect(".o-menu-item[data-name=share]").toHaveCount(0, {
+        message: "Share menu should be hidden for archived spreadsheets",
+    });
+});
+
 test("toggle favorite", async function () {
     await createSpreadsheet({
         spreadsheetId: 2,

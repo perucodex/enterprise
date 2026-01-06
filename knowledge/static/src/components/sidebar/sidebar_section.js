@@ -38,6 +38,7 @@ export class KnowledgeSidebarSection extends Component {
 
         onWillStart(async () => {
             this.isInternalUser = await user.hasGroup('base.group_user');
+            this.canCreateArticle = await user.checkAccessRight('knowledge.article', 'create');
         });
     }
 

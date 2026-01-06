@@ -26,13 +26,13 @@
         <field name="arch" type="xml">
             <form create="false">
                 <header>
-                    <widget name="test_iot_box" btn_name="Test" btn_class="primary" invisible="version[0] == 'W'"/>
+                    <widget name="test_iot_box" btn_name="Test" btn_class="primary" invisible="not version or 'W' in version"/>
                     <button name="open_homepage" type="object" string="Homepage" class="btn btn-secondary"/>
                     <t groups="base.group_no_one">
                         <widget name="iot_download_logs" btn_name="Download Logs" btn_class="secondary"/>
                         <widget name="iot_restart_odoo" btn_name="Restart Odoo" btn_class="secondary"/>
-                        <widget groups="iot.group_iot_admin" name="iot_reset_password" btn_name="Reset Password" btn_class="secondary"/>
-                        <widget groups="iot.group_iot_admin" name="iot_remote_debug" btn_name="Remote Debug" btn_class="secondary"/>
+                        <widget groups="iot.group_iot_admin" name="iot_reset_password" btn_name="Reset Password" btn_class="secondary" invisible="not version or 'W' in version"/>
+                        <widget groups="iot.group_iot_admin" name="iot_remote_debug" btn_name="Remote Debug" btn_class="secondary" invisible="not version or 'W' in version"/>
                     </t>
                 </header>
                 <sheet>
@@ -69,7 +69,7 @@
                         <page string="Technical Information" groups="base.group_no_one">
                             <group>
                                 <field name="ip"/>
-                                <field name="version"/>
+                                <field name="version_commit_url" string="Image Version"/>
                                 <field name="drivers_auto_update"/>
                                 <field name="ssl_certificate_end_date" invisible="not ssl_certificate_end_date"/>
                             </group>
@@ -253,13 +253,12 @@
         id="view_iot_selected_printer_local_action"
         name="Configuration"
         parent="iot_menu_root"
-        sequence="3"
-        groups="base.group_no_one"/>
+        sequence="3"/>
 
-    <!-- Cache submenu -->
+    <!-- Reporting submenu -->
     <menuitem
         id="iot_settings_menu_action"
-        name="Cache"
+        name="Reporting"
         parent="view_iot_selected_printer_local_action"
         sequence="4"/>
     <menuitem

@@ -122,6 +122,71 @@ test("add column", async () => {
         </q-table>`);
 });
 
+test("add column non-matching conditionals", async () => {
+    const { editor } = await setupEditor(
+        `<div style="width: 100px; margin-top: 50px; margin-left: 50px;">
+        <q-table>
+            <q-thead>
+                <q-tr>
+                    <q-th>HEAD1</q-th>
+                    <q-th t-if="true">HEAD2</q-th>
+                    <q-th t-else="">HEAD3</q-th>
+                    <q-th>HEAD4</q-th>
+                </q-tr>
+            </q-thead>
+            <q-tbody>
+                <t t-if="true">
+                    <q-tr>
+                        <q-td>1</q-td>
+                        <q-td>2</q-td>
+                        <q-td>4</q-td>
+                    </q-tr>
+                </t>
+                <t t-else="">
+                    <q-tr>
+                        <q-td>1</q-td>
+                        <q-td>3</q-td>
+                        <q-td>4</q-td>
+                    </q-tr>
+                </t>
+            </q-tbody>
+        </q-table></div>`,
+        getEditorOptions()
+    );
+
+    await hover(queryFirst(":iframe q-th:last-child"));
+    await contains(".o-overlay-container .o-we-table-menu").click();
+    await contains(".o-dropdown-item:contains(Insert Right)").click();
+
+    expect(getContent(editor.getElContent().firstElementChild)).toBe(`
+        <q-table>
+            <q-thead>
+                <q-tr>
+                    <q-th>HEAD1</q-th>
+                    <q-th t-if="true">HEAD2</q-th>
+                    <q-th t-else="">HEAD3</q-th>
+                    <q-th>HEAD4</q-th><q-th><div><br></div></q-th>
+                </q-tr>
+            </q-thead>
+            <q-tbody>
+                <t t-if="true">
+                    <q-tr>
+                        <q-td>1</q-td>
+                        <q-td>2</q-td>
+                        <q-td>4</q-td><q-td><div><br></div></q-td>
+                    </q-tr>
+                </t>
+                <t t-else="">
+                    <q-tr>
+                        <q-td>1</q-td>
+                        <q-td>3</q-td>
+                        <q-td>4</q-td><q-td><div><br></div></q-td>
+                    </q-tr>
+                </t>
+            </q-tbody>
+        </q-table>`);
+});
+
 test("remove column", async () => {
     const { editor } = await setupEditor(
         `<div style="width: 100px; margin-top: 50px; margin-left: 50px;">
@@ -214,7 +279,7 @@ test("remove column colspan", async () => {
         getEditorOptions()
     );
 
-    expect(getContent(el.firstElementChild)).toBe(`
+    expect(getContent(el.querySelector("div"))).toBe(`
         <q-table class="oe_unbreakable" style="--q-table-col-count: 3;">
             <q-thead class="oe_unbreakable">
                 <q-tr class="oe_unbreakable">
@@ -448,7 +513,7 @@ test("add t-field", async () => {
         getEditorOptions()
     );
     await insertText(editor, "/");
-    await contains(".o-we-powerbox .o-we-command-name:contains(/^Field$/)").click();
+    await contains(".o-we-powerbox .o-we-command-name:text(Field)").click();
 
     await contains(
         ".o-web-studio-report-dynamic-placeholder-popover .o_model_field_selector_value"
@@ -459,7 +524,7 @@ test("add t-field", async () => {
     ).toHaveValue("My little field");
 
     await contains(".o-web-studio-report-dynamic-placeholder-popover button.btn-primary").click();
-    expect(getContent(el.firstElementChild)).toBe(
+    expect(getContent(el.querySelector("div"))).toBe(
         '<span data-oe-expression-readable="My little field" data-oe-demo="My little field" t-field="doc.field" data-oe-protected="true" contenteditable="false">My little field</span>[]'
     );
 });

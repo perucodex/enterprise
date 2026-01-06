@@ -8,7 +8,8 @@ class TestQualityCheck(TransactionCase):
 
     def test_change_quality_point(self):
         """
-        Test that a quality point can be used with an incompatible product.
+        Test that a quality point can be used with an incompatible product and that a change of
+        a quality piont changes the test_type of the quality check accordingly.
         """
         product_a = self.env['product.product'].create({
             'name': 'product a',
@@ -18,9 +19,11 @@ class TestQualityCheck(TransactionCase):
         })
         qp_product_a = self.env['quality.point'].create({
             'product_ids': [(4, product_a.id)],
+            'test_type_id': self.env.ref('quality.test_type_instructions').id,
         })
         qp_product_b = self.env['quality.point'].create({
             'product_ids': [(4, product_b.id)],
+            'test_type_id': self.env.ref('quality.test_type_picture').id,
         })
         qc = self.env['quality.check'].create({
                 'product_id': product_b.id,
@@ -28,9 +31,11 @@ class TestQualityCheck(TransactionCase):
                 'team_id': 1
             })
         qc_form = Form(qc)
+        self.assertEqual(qc.test_type_id, qp_product_b.test_type_id)
         qc_form.point_id = qp_product_a
         qc = qc_form.save()
         self.assertEqual(qc.product_id, product_b)
+        self.assertEqual(qc.test_type_id, qp_product_a.test_type_id)
         self.assertEqual(qc.point_id, qp_product_a)
 
     def test_duplicates_quality_checks(self):

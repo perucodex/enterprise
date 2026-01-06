@@ -61,6 +61,7 @@ for IoT Box config.
             "point_of_sale/static/src/app/models/related_models/**/*",
             "point_of_sale/static/src/app/services/data_service.js",
             "point_of_sale/static/src/app/models/pos_preset.js",
+            "point_of_sale/static/src/app/models/pos_category.js",
         ],
         'pos_preparation_display.assets_tour_tests': [
             ("include", "point_of_sale.base_tests"),
@@ -72,6 +73,19 @@ for IoT Box config.
         'web.assets_backend': [
             'pos_enterprise/static/src/backend/components/fields/duration_field.js',
             'pos_enterprise/static/src/backend/components/fields/duration_field.xml',
+        ],
+        'web.assets_unit_tests_setup': [
+            ('include', 'pos_preparation_display.assets'),
+            ('remove', 'pos_enterprise/static/src/app/root.js'),
+
+            # Remove CSS files since we're not testing the UI with hoot in PoS preparation display
+            # CSS files make html_editor tests fail
+            ('remove', 'pos_enterprise/static/src/**/*.scss'),
+
+            # Re-include debug and router files that were removed in point_of_sale.base_app
+            # but are required for running unit tests
+            'web/static/src/core/debug/**/*',
+            'web/static/src/core/browser/router.js',
         ],
         'web.assets_unit_tests': [
             'pos_enterprise/static/tests/unit/**/*',

@@ -157,7 +157,7 @@ class TestAccountFollowupReports(TestAccountReportsCommon, TestAccountFollowupCo
             with patch.object(self.env.registry['account.report'], 'export_to_pdf', autospec=True, side_effect=lambda *args, **kwargs: {'file_name': 'fake_partner_ledger.pdf', 'file_content': b'', 'file_type': 'pdf'}):
                 self.partner_a.execute_followup(options)
         sent_attachments = self.env['mail.message'].search([('partner_ids', '=', self.partner_a.id)]).attachment_ids
-        self.assertEqual(sent_attachments.mapped('name'), ['some_attachment.pdf', 'some_attachment.pdf', f'{self.partner_a.name} - fake_partner_ledger.pdf'])
+        self.assertEqual(sent_attachments.mapped('name'), [f'{self.partner_a.name} - fake_partner_ledger.pdf', 'some_attachment.pdf', 'some_attachment.pdf'])
 
         options.update(
             attachment_ids=[],
@@ -222,9 +222,9 @@ class TestAccountFollowupReports(TestAccountReportsCommon, TestAccountFollowupCo
             #   Name                                    Date,           Due Date,       Doc.      Total Due
             [   0,                                      1,              2,              3,        5],
             [
-                ('INV/2016/00001',                      '01/01/2016',   '01/01/2016',   '',       '$\xa0500.00'),
-                ('',                                    '',             '',             '',       '$\xa0500.00'),
-                ('',                                    '',             '',             '',       '$\xa0500.00'),
+                ('INV/2016/00001',                      '01/01/2016',   '01/01/2016',   '',       f'{self.env.company.currency_id.symbol}\xa0500.00'),
+                ('',                                    '',             '',             '',       f'{self.env.company.currency_id.symbol}\xa0500.00'),
+                ('',                                    '',             '',             '',       f'{self.env.company.currency_id.symbol}\xa0500.00'),
             ],
             options,
         )
@@ -862,7 +862,7 @@ class TestAccountFollowupReports(TestAccountReportsCommon, TestAccountFollowupCo
             self.partner_a.action_manually_process_automatic_followups()
 
         sent_attachments = self.env['mail.message'].search([('partner_ids', '=', self.partner_a.id)]).attachment_ids
-        self.assertEqual(sent_attachments.mapped('name'), ['some_attachment.pdf', f'{self.partner_a.name} - fake_partner_ledger.pdf'])
+        self.assertEqual(sent_attachments.mapped('name'), [f'{self.partner_a.name} - fake_partner_ledger.pdf', 'some_attachment.pdf'])
 
     def test_manual_followup_report_invoices_removed(self):
         followup_line = self.env['account_followup.followup.line'].create({
@@ -1002,10 +1002,10 @@ class TestAccountFollowupReports(TestAccountReportsCommon, TestAccountFollowupCo
                 #   Name                                    Date,           Due Date,       Doc.      Total Due
                 [   0,                                      1,              2,              3,        5],
                 [
-                    ('MISC/2016/01/0001',                   '01/02/2016',   '',             '',       '$\xa0500.00'),
-                    ('INV/2016/00001',                      '01/01/2016',   '01/01/2016',   '',       '$\xa0300.00'),
-                    ('',                                    '',             '',             '',       '$\xa0800.00'),
-                    ('',                                    '',             '',             '',       '$\xa0300.00'),
+                    ('MISC/2016/01/0001',                   '01/02/2016',   '',             '',       f'{self.env.company.currency_id.symbol}\xa0500.00'),
+                    ('INV/2016/00001',                      '01/01/2016',   '01/01/2016',   '',       f'{self.env.company.currency_id.symbol}\xa0300.00'),
+                    ('',                                    '',             '',             '',       f'{self.env.company.currency_id.symbol}\xa0800.00'),
+                    ('',                                    '',             '',             '',       f'{self.env.company.currency_id.symbol}\xa0300.00'),
                 ],
                 options,
             )
@@ -1039,3 +1039,62 @@ class TestAccountFollowupReports(TestAccountReportsCommon, TestAccountFollowupCo
         with patch.object(self.env.registry['ir.actions.report'], '_run_wkhtmltopdf', _run_wkhtmltopdf):
             followup_letter = self.env['ir.actions.report'].with_context(force_report_rendering=True)._render_qweb_pdf('account_followup.report_followup_print_all', self.partner_a.id)[0]
         self.assertTrue(followup_letter)
+
+    def test_automatic_followup_report_attachments_from_template(self):
+        mail_template = self.env['mail.template'].create({
+            'name': 'reminder',
+            'model_id': self.env['ir.model']._get_id('res.partner'),
+            'email_cc': 'john.carmac@example.me',
+        })
+        template_attachment = self.env['ir.attachment'].create({
+            'name': 'template_attachment.pdf',
+            'res_id': mail_template.id,
+            'res_model': 'mail.template',
+            'datas': 'test',
+            'type': 'binary',
+        })
+        mail_template.attachment_ids = [template_attachment.id]
+
+        dynamic_report = self.env['ir.actions.report'].create({
+            'name': 'Test Report Partner',
+            'model': 'res.partner',
+            'report_name': 'account_followup.report_followup_print_all',
+            'print_report_name': "'followup_dynamic_report'",
+        })
+        mail_template.report_template_ids = [dynamic_report.id]
+
+        followup_line = self.env['account_followup.followup.line'].create({
+            'company_id': self.env.company.id,
+            'name': 'First Reminder',
+            'delay': 15,
+            'send_email': True,
+            'mail_template_id': mail_template.id,
+        })
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2016-01-01',
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [Command.create({
+                'quantity': 1,
+                'price_unit': 500,
+                'tax_ids': [],
+            })]
+        })
+        invoice.action_post()
+        self.assertPartnerFollowup(self.partner_a, 'in_need_of_action', followup_line)
+
+        invoice_attachment = self.env['ir.attachment'].create({
+            'name': 'invoice_attachment.pdf',
+            'res_id': invoice.id,
+            'res_model': 'account.move',
+            'datas': 'test',
+            'type': 'binary',
+        })
+        invoice._message_set_main_attachment_id(invoice_attachment)
+
+        self.partner_a._compute_unpaid_invoices()
+        with patch.object(self.env.registry['account.report'], 'export_to_pdf', autospec=True, side_effect=lambda *args, **kwargs: {'file_name': 'fake_partner_ledger.pdf', 'file_content': b'', 'file_type': 'pdf'}):
+            self.partner_a.action_manually_process_automatic_followups()
+
+        sent_attachments = self.env['mail.message'].search([('partner_ids', '=', self.partner_a.id)]).attachment_ids
+        self.assertEqual(sent_attachments.mapped('name'), [f'{self.partner_a.name} - fake_partner_ledger.pdf', 'template_attachment.pdf', 'followup_dynamic_report.html', 'invoice_attachment.pdf'])

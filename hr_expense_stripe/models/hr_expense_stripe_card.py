@@ -312,7 +312,12 @@ class HrExpenseStripeCard(models.Model):
                 'currency': currency_name or False,
                 'cardholder': self.employee_id.private_stripe_id,
             })
-        if self.card_type == 'physical' and self.shipping_status in (False, 'pending') and self.state in ('draft', 'pending'):
+        if (
+            self.card_type == 'physical'
+            and self.shipping_status in {False, 'pending'}
+            and self.state in {'draft', 'pending'}
+            and state in {'draft', 'inactive'}
+        ):
             payload.update({
                 "shipping[name]": self.delivery_address_id.name or self.employee_id.name,
                 "shipping[address][line1]": self.delivery_address_id.street,
@@ -361,6 +366,9 @@ class HrExpenseStripeCard(models.Model):
             # It's possible through the stripe dashboard but shouldn't happen through Odoo.
             elif self.card_type == 'virtual' or self.state != 'pending' or stripe_object['status'] != 'inactive':
                 new_vals['state'] = stripe_object['status']
+                if self.state == 'draft':
+                    # Only possible for virtual cards as physical cards are set to pending when draft
+                    emails_to_send.append('assigned')
         if not self.cancellation_reason:
             new_vals['cancellation_reason'] = stripe_object['cancellation_reason']
         if not self.last_4:
@@ -371,11 +379,15 @@ class HrExpenseStripeCard(models.Model):
             new_vals['expiration'] = f'{exp_month:02}/{exp_year:02}'
         if self.card_type == 'physical':
             if stripe_object['shipping']['status'] != self.shipping_status:
-                new_vals['shipping_status'] = stripe_object['shipping']['status']
-                if new_vals['shipping_status'] in ('canceled', 'failure', 'returned'):
-                    emails_to_send.append('canceled')
-                elif new_vals['shipping_status'] == 'shipped':
-                    emails_to_send.append('shipped')
+                # Since it's not possible to go back in shipping status, we only update it if it's a progression.
+                # In case the webhooks are received out of order.
+                states = {False: 0, 'submitted': 1, 'pending': 2, 'shipped': 3, 'delivered': 4, 'failure': 4, 'returned': 4, 'canceled': 4}
+                if states[stripe_object['shipping']['status']] > states[self.shipping_status]:
+                    new_vals['shipping_status'] = stripe_object['shipping']['status']
+                    if new_vals['shipping_status'] in {'canceled', 'failure', 'returned'}:
+                        emails_to_send.append('canceled')
+                    elif new_vals['shipping_status'] == 'shipped':
+                        emails_to_send.append('shipped')
             if not self.tracking_url:
                 new_vals['tracking_url'] = stripe_object['shipping']['tracking_url']
             if not self.tracking_number:
@@ -394,8 +406,8 @@ class HrExpenseStripeCard(models.Model):
         :param str email_type: ordered | shipped, type of the mail to send
         """
         self.ensure_one()
-        if email_type not in {'canceled', 'ordered', 'shipped'}:
-            raise UserError(self.env._("Invalid email type, must be 'canceled', 'ordered' or 'shipped'."))
+        if email_type not in {'canceled', 'ordered', 'assigned', 'shipped'}:
+            raise UserError(self.env._("Invalid email type, must be 'canceled', 'ordered', 'assigned' or 'shipped'."))
         template_ref = f'hr_expense_stripe.email_template_hr_expense_stripe_card_{email_type}'
 
         template_context = {
@@ -406,11 +418,19 @@ class HrExpenseStripeCard(models.Model):
             ),
         }
         delivery_address = self.delivery_address_id
-        if delivery_address and (delivery_address.is_company or delivery_address.parent_id.is_company or delivery_address.company_name):
+        if (
+            email_type in {'canceled', 'shipped'}
+            and delivery_address
+            and (delivery_address.is_company or delivery_address.parent_id.is_company or delivery_address.company_name)
+        ):
             # If we're delivering to a company building
             email_to = self.ordered_by.email_formatted
             email_cc = None
             template_context['recipient_name'] = self.ordered_by.name
+        elif email_type == 'assigned':
+            email_to = self.employee_id.work_email
+            email_cc = None
+            template_context['recipient_name'] = self.employee_id.name
         else:
             email_to = self.employee_id.work_email
             email_cc = self.ordered_by.email_formatted

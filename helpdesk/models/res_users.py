@@ -74,7 +74,7 @@ class ResUsers(models.Model):
         users_per_calendar = defaultdict(lambda: self.env['res.users'])
         company_calendar = self.env.company.resource_calendar_id
         for user in self:
-            calendar = user.resource_calendar_id or company_calendar
+            calendar = user.resource_ids.calendar_id[:1] or company_calendar
             users_per_calendar[calendar] |= user
         for calendar, users in users_per_calendar.items():
             work_intervals_per_resource = users._get_working_user_interval(start_dt, end_dt, calendar)

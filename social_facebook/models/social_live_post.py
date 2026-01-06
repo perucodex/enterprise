@@ -30,7 +30,7 @@ class SocialLivePost(models.Model):
             result = requests.get(posts_endpoint_url,
                 params={
                     'access_token': account.facebook_access_token,
-                    'fields': 'id,shares,insights.metric(post_impressions),likes.limit(1).summary(true),comments.summary(true)'
+                    'fields': 'id,shares,likes.limit(1).summary(true),comments.summary(true)'
                 },
                 timeout=5
             )

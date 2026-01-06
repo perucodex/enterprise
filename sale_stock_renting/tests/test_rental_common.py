@@ -14,7 +14,6 @@ class TestRentalCommon(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Switch to admin user
         cls.rental_start_date = Datetime.today() + timedelta(days=1)
         cls.rental_return_date = Datetime.today() + timedelta(days=7)
         cls.warehouse_id = cls.env.user._get_default_warehouse_id()
@@ -132,3 +131,7 @@ class TestRentalCommon(common.TransactionCase):
             'price_unit': 250,
         })
         cls.order_line_id3.update({'is_rental': True})
+
+    @classmethod
+    def get_default_groups(cls):
+        return super().get_default_groups() + cls.quick_ref('sales_team.group_sale_manager')

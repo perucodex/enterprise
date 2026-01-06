@@ -657,3 +657,31 @@ test("Selection and scroll are preserved when switching revision", async functio
     expect(model.getters.getActivePosition()).toEqual({ sheetId: sheetIds[2], row: 5, col: 5 });
     expect(model.getters.getActiveSheetScrollInfo()).toEqual({ scrollX: 30, scrollY: 30 });
 });
+
+
+test("Default currency is provided to the model", async function () {
+    const default_currency = {
+        id: 1,
+        name: "Euro",
+        symbol: "€",
+        position: "after",
+        decimalPlaces: 2,
+    };
+    const { action } = await createSpreadsheetTestAction("action_open_spreadsheet_history", {
+        mockRPC: async function (route, args) {
+            if (args.method === "get_spreadsheet_history") {
+                const revisions = [];
+                revisions.push(createRevision(revisions, "REMOTE_REVISION"));
+                revisions.push(createRevision(revisions, "REMOTE_REVISION"));
+                revisions.push(createRevision(revisions, "REMOTE_REVISION"));
+                return { data: {}, name: "test", revisions, default_currency };
+            }
+            if (args.method === "get_company_currency_for_spreadsheet") {
+                expect.step("get_default_currency");
+            }
+        },
+    });
+    const model = actionModel(action);
+    expect(model.getters.getCompanyCurrencyFormat()).toEqual("#,##0.00[$€]");
+    expect.verifySteps([]);
+});

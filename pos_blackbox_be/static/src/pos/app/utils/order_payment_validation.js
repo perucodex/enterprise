@@ -3,7 +3,8 @@ import { patch } from "@web/core/utils/patch";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
 import { BlackboxError } from "@pos_blackbox_be/pos/app/utils/blackbox_error";
-const EMPTY_SIGNATURE = "                                        ";
+import { ConnectionLostError } from "@web/core/network/rpc";
+import { EMPTY_SIGNATURE } from "@pos_blackbox_be/pos/app/services/pos_store";
 
 patch(OrderPaymentValidation.prototype, {
     async validateOrder(isForceValidate) {
@@ -22,7 +23,14 @@ patch(OrderPaymentValidation.prototype, {
     },
     async afterOrderValidation() {
         if (!this.order.blackbox_signature || this.order.blackbox_signature == EMPTY_SIGNATURE) {
-            await this.pos.syncAllOrders({ orders: [this.order], throw: true });
+            try {
+                await this.pos.syncAllOrders({ orders: [this.currentOrder], throw: true });
+            } catch (error) {
+                if (error instanceof BlackboxError || error instanceof ConnectionLostError) {
+                    this.currentOrder.state = "draft";
+                    throw error;
+                }
+            }
         }
         return super.afterOrderValidation();
     },
@@ -32,7 +40,7 @@ patch(OrderPaymentValidation.prototype, {
         } catch (e) {
             if (e instanceof BlackboxError) {
                 this.order.state = "draft";
-                e.retry = this.finalizeValidation.bind(this);
+                e.retry ??= this.finalizeValidation.bind(this);
             }
             throw error;
         }
