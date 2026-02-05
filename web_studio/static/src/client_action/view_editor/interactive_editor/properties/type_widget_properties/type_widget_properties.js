@@ -283,7 +283,7 @@ export class TypeWidgetProperties extends Component {
             }
         }
         value = props.node.attrs.options?.[property.name];
-        if (property.type === "string") {
+        if (property.type === "string" && value && typeof value !== "string") {
             value = JSON.stringify(value);
         }
         if (property.type === "boolean" && value !== undefined) {

@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from typing import NamedTuple
 
+from odoo.api import Environment
 from odoo.exceptions import UserError
 
 
@@ -29,7 +30,7 @@ PROVIDERS = [
             ("gpt-4.1", "GPT-4.1"),
             ("gpt-4.1-mini", "GPT-4.1 Mini"),
             ("gpt-5", "GPT-5"),
-            ("gpt-5-mini", "GPT-5 Mini")
+            ("gpt-5-mini", "GPT-5 Mini"),
         ],
     ),
     Provider(
@@ -50,6 +51,7 @@ PROVIDERS = [
     ),
 ]
 
+DEPRECATED_MODELS = ["gemini-1.5-pro", "gemini-1.5-flash"]
 
 EMBEDDING_MODELS_SELECTION = [
     (provider.embedding_model, provider.display_name) for provider in PROVIDERS
@@ -75,3 +77,11 @@ def get_embedding_config(env, provider):
         if p.name == provider:
             return p.embedding_config
     raise UserError(env._("No embedding configuration found for the provider"))
+
+
+def check_model_depreciation(env: Environment, model: str) -> None:
+    if model in DEPRECATED_MODELS:
+        for provider in PROVIDERS:
+            for name, label in provider.llms:
+                if name == model:
+                    raise UserError(env._("%s is no longer available. Please select a newer model.", label))

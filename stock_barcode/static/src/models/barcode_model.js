@@ -838,6 +838,27 @@ export default class BarcodeModel extends EventBus {
         }
     }
 
+    async deleteLines(lines) {
+        const lineIds = [];
+        for (const line of lines) {
+            if (!line.id) {
+                // The line doesn't exist in the DB yet => Delete it only in the frontend.
+                const index = this.currentState.lines.findIndex(
+                    (l) => l.virtual_id === line.virtual_id
+                );
+                this.currentState.lines.splice(index, 1);
+                this.linesToSave = this.linesToSave.filter((vId) => vId !== line.virtual_id);
+            } else {
+                lineIds.push(line.id);
+            }
+        }
+        if (lineIds.length) {
+            await this.save();
+            await this.orm.call(this.lineModel, this.deleteLineMethod, [lineIds]);
+            this.trigger("refresh");
+        }
+    }
+
     _shouldCreateLineOnExceed(line) {
         return true;
     }
@@ -1103,7 +1124,12 @@ export default class BarcodeModel extends EventBus {
             const packageType = recordByData.get("stock.package.type");
             const stockPackage = recordByData.get("stock.package");
             if (stockPackage) {
-                // TODO: should take packages only in current (sub)location.
+                if (stockPackage && stockPackage.package_type_id) {
+                    stockPackage.package_type_id = await this.cache.getRecord(
+                        "stock.package.type",
+                        stockPackage.package_type_id
+                    );
+                }
                 result.package = stockPackage;
                 result.match = true;
             }

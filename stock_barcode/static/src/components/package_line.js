@@ -5,7 +5,7 @@ export default class PackageLineComponent extends LineComponent {
     static template = "stock_barcode.PackageLineComponent";
 
     get isComplete() {
-        return this.qtyDone == this.qtyDemand;
+        return this.qtyDemand ? this.qtyDone == this.qtyDemand : this.qtyDone > 0;
     }
 
     get isSelected() {
@@ -25,28 +25,39 @@ export default class PackageLineComponent extends LineComponent {
         return doneQuantity > 0 ? 1 : 0;
     }
 
+    get packageDataAttribute() {
+        return this.hasSameSourceAndResultPackage()
+            ? this.line.package_id.parent_package_id.name
+            : this.line.package_id.name;
+    }
+
     get packageLabel() {
-        if (this.line.isPackageLine && this.line.package_id.parent_package_id) {
-            // Need to recompute the result package "complete_name" since it is not recomputed when unpack.
-            const currentResultFullPackageName = `${this.line.package_id.parent_package_id.name} > ${this.line.result_package_id.name}`;
-            if (
-                this.line.package_id.complete_name === currentResultFullPackageName &&
-                this.line.outermost_result_package_id
-            ) {
-                return this.line.package_id.parent_package_id.name;
-            }
-        }
-        return super.packageLabel;
+        return this.hasSameSourceAndResultPackage()
+            ? this.line.package_id.parent_package_id.name
+            : super.packageLabel;
     }
 
     get resultPackageLabel() {
-        if (this.line.isPackageLine) {
-            if (this.line.outermost_result_package_id) {
-                return this.line.outermost_result_package_id.name;
+        return this.hasSameSourceAndResultPackage()
+            ? this.line.outermost_result_package_id.name
+            : super.resultPackageLabel;
+    }
+
+    hasSameSourceAndResultPackage() {
+        if (this.line.package_id.parent_package_id && this.line.outermost_result_package_id) {
+            // Need to recompute the result package "complete_name" since it is not recomputed when unpack.
+            const currentResultFullPackageName = `${this.line.outermost_result_package_id.name} > ${this.line.result_package_id.name}`;
+            if (this.line.package_id.complete_name === currentResultFullPackageName) {
+                return true;
             }
-            return this.line.result_package_id.name;
         }
-        return super.resultPackageLabel;
+        return false;
+    }
+
+    delete(ev) {
+        ev.stopPropagation();
+        this.env.model.deleteLines(this.line.lines);
+        this.env.model.trigger("update");
     }
 
     select(ev) {
@@ -63,8 +74,7 @@ export default class PackageLineComponent extends LineComponent {
         return this.props.openPackage(packageIds);
     }
 
-    unpack() {
-        this.env.model.unpack(this.line.lines);
-        this.env.model.trigger("update");
+    async unpack() {
+        await this.env.model.unpack(this.line.lines);
     }
 }

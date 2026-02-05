@@ -13,6 +13,7 @@ from odoo.api import Environment
 from odoo.exceptions import UserError
 
 from .ai_logging import ai_response_logging, api_call_logging, get_ai_logging_session
+from .llm_providers import check_model_depreciation
 
 _logger = getLogger(__name__)
 
@@ -105,6 +106,7 @@ class LLMApiService:
         encoding_format: str | None = None,
         user: str | None = None,
     ) -> EmbeddingResponse:
+        check_model_depreciation(self.env, model)
         body = {
             'input': input,
             'model': model
@@ -150,6 +152,7 @@ class LLMApiService:
             text = service.get_transcription(audio_bytes, mimetype="audio/ogg")
             ```
         """
+        check_model_depreciation(self.env, model)
         if response_format not in ['json', 'verbose_json']:  # limitation of using response.json() in _request function
             raise NotImplementedError(f"Response format '{response_format}' is not supported. Request must return json!")
 
@@ -506,6 +509,9 @@ class LLMApiService:
         return response, to_call, next_inputs
 
     def _request_llm(self, *args, **kwargs):
+        model = kwargs.get("llm_model") or args[0]
+        check_model_depreciation(self.env, model)
+
         if self.provider == 'openai':
             return self._request_llm_openai(*args, **kwargs)
 
@@ -538,6 +544,7 @@ class LLMApiService:
         >>> }
         > https://json-schema.org/
         """
+        check_model_depreciation(self.env, llm_model)
         with ai_response_logging(llm_model):
             return self._request_llm_silent(
                 llm_model=llm_model,

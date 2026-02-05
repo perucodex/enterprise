@@ -875,12 +875,14 @@ class HrPayslip(models.Model):
         reference_calendar = self._get_out_of_contract_calendar()
         if self.date_from < version.date_start:
             start = fields.Datetime.to_datetime(self.date_from)
-            stop = fields.Datetime.to_datetime(version.date_start) + relativedelta(days=-1, hour=23, minute=59)
+            stop = min(fields.Datetime.to_datetime(version.date_start) + relativedelta(days=-1, hour=23, minute=59),
+                fields.Datetime.to_datetime(self.date_to) + relativedelta(hour=23, minute=59))
             out_time = reference_calendar.get_work_duration_data(start, stop, compute_leaves=False, domain=['|', ('work_entry_type_id', '=', False), ('work_entry_type_id.is_leave', '=', False)])
             out_days += out_time['days']
             out_hours += out_time['hours']
         if version.date_end and version.date_end < self.date_to:
-            start = fields.Datetime.to_datetime(version.date_end) + relativedelta(days=1)
+            start = max(fields.Datetime.to_datetime(version.date_end) + relativedelta(days=1),
+                fields.Datetime.to_datetime(self.date_from))
             stop = fields.Datetime.to_datetime(self.date_to) + relativedelta(hour=23, minute=59)
             out_time = reference_calendar.get_work_duration_data(start, stop, compute_leaves=False, domain=['|', ('work_entry_type_id', '=', False), ('work_entry_type_id.is_leave', '=', False)])
             out_days += out_time['days']

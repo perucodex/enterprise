@@ -62,26 +62,8 @@ class HrExpense(models.Model):
         super(HrExpense, self - expenses_from_stripe)._do_approve(check)
 
     def _fetch_create_partner_from_stripe(self, merchant_data):
-        """ Helper to create/get a partner from the payload Stripe sent, if there are no tax_id we ignore it as relying on other fields is
-            deemed unreliable.
-        """
-        vendor = False
-        if merchant_data['tax_id']:  # Only create vendor if there is a tax_id, which is only in France for now
-            vendor = self.env['res.partner'].search(
-                domain=[('vat', 'ilike', merchant_data['tax_id'])],
-                limit=1,
-            )
-            if not vendor:
-                vendor = self.env['res.partner'].create([{
-                    'vat': merchant_data['tax_id'],
-                    'name': merchant_data['name'],
-                    'zip': merchant_data['postal_code'],
-                    'city': merchant_data['city'].capitalize(),
-                    'country_id': self.env['res.country'].search([('code', 'ilike', merchant_data['country'])], limit=1).id,
-                    'state_id': self.env['res.country.state'].search([('code', 'ilike', merchant_data['state'])], limit=1).id,
-                    # We're not setting the website, as it's a potential security risk
-                }])
-        return vendor
+        """ DEPRECATED  """
+        return False
 
     @api.model
     def _create_from_stripe_authorization(self, auth_object, refusal_reason=None):
@@ -102,7 +84,6 @@ class HrExpense(models.Model):
         product = self.env['product.product'].search(domain, limit=1) or default_product
         if not product:
             raise UserError(_("There is no product available for this expense. Please contact your administrator."))
-        vendor = self._fetch_create_partner_from_stripe(merchant_data)
 
         amount_company_currency = amount_currency = format_amount_from_stripe(amount_object['amount'], card.currency_id)
         merchant_currency = (
@@ -134,7 +115,6 @@ class HrExpense(models.Model):
             'currency_id': merchant_currency.id,
             'journal_id': card.journal_id.id,
             'payment_method_line_id': card.payment_method_line_id.id,
-            'vendor_id': vendor and vendor.id,
         }
         new_expense = self.env['hr.expense'].with_company(card.company_id).create([create_dict])
         if refusal_reason:
@@ -194,11 +174,6 @@ class HrExpense(models.Model):
             if merchant_currency.compare_amounts(amount_currency, all_expenses_total_amount_currency) != 0:
                 update_vals['total_amount_currency'] = amount_currency - sum(older_expenses.mapped('total_amount_currency'))
 
-        if not self.vendor_id:
-            new_vendor = self._fetch_create_partner_from_stripe(auth_object['merchant_data'])
-            if new_vendor:
-                update_vals['vendor_id'] = new_vendor.id
-
         if update_vals:
             most_recent_expense.write(update_vals)
 
@@ -219,8 +194,6 @@ class HrExpense(models.Model):
             self.env['product.product'].search(domain)
             or self.env.ref('hr_expense.product_product_no_cost', raise_if_not_found=False)
         )
-
-        vendor = self._fetch_create_partner_from_stripe(tr_object['merchant_data'])
 
         amount_currency = amount_company_currency = -format_amount_from_stripe(tr_object['amount'], card.currency_id)
         merchant_currency = (
@@ -254,7 +227,6 @@ class HrExpense(models.Model):
             'product_id': product.id,
             'total_amount': amount_company_currency,
             'total_amount_currency': amount_currency,
-            'vendor_id': vendor and vendor.id,
             'split_expense_origin_id': split_id,
         }
         new_expense = self.env['hr.expense'].with_company(card.company_id).create([create_dict])
@@ -289,11 +261,6 @@ class HrExpense(models.Model):
 
         if merchant_currency.compare_amounts(amount_currency, self.total_amount_currency) != 0:
             update_vals['total_amount_currency'] = amount_currency
-
-        if not self.vendor_id:
-            new_vendor = self._fetch_create_partner_from_stripe(tr_object['merchant_data'])
-            if new_vendor:
-                update_vals['vendor_id'] = new_vendor.id
 
         if not self.stripe_transaction_id:
             update_vals['stripe_transaction_id'] = tr_object['id']

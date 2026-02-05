@@ -32,11 +32,19 @@ export class MailComposerChatGPT extends Component {
         });
     }
 
+    get originalRecordModel() {
+        return this.props.record.data.model;
+    }
+
+    get originalRecordId() {
+        return Number(this.props.record.data.res_ids.slice(1, -1));
+    }
+
     async onOpenChatGPTPromptDialogBtnClick() {
         await this.aiChatLauncher.launchAIChat({
             callerComponentName: "mail_composer",
-            recordModel: this.props.record.data.model,
-            recordId: Number(this.props.record.data.res_ids.slice(1, -1)),
+            recordModel: this.originalRecordModel,
+            recordId: this.originalRecordId,
             originalRecordData: this.props.record.data,
             aiSpecialActions: {
                 insert: (content) => {

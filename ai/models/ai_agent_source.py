@@ -345,6 +345,14 @@ class AIAgentSource(models.Model):
             if source.name != current_name:
                 self.name = current_name
 
+    def _get_internal_domains(self):
+        """
+        To be overridden in ai_website
+        :return: list of internal domains
+        :rtype: list of str
+        """
+        return []
+
     def _cron_process_sources(self):
         """
         Scrape and process all sources that require content retrieval.
@@ -397,12 +405,22 @@ class AIAgentSource(models.Model):
         :rtype: dict or None
         """
         if source.type == 'url' and source.url:
-            extractor = HTMLExtractor()
+            internal_domains = self._get_internal_domains()
+
+            """
+            Add the agent creator's language explicitly to self environment
+            because it is missing inside cron jobs and thus translations
+            are not possible
+            """
+            lang = source.agent_id.create_uid.lang or 'en_US'
+            env = self.with_context(lang=lang).env
+
+            extractor = HTMLExtractor(env, internal_domains=internal_domains)
             result = extractor.scrap(source.url)
             if not result or not result['content']:
-                return {"content": None, "error": result.get('error', _("Failed to fetch the content of the source."))}
+                return {"content": None, "error": result.get('error', env._("Failed to fetch the content of the source."))}
             return result
-        return {'error': _("Failed to fetch the content of the source.")}
+        return {'error': env._("Failed to fetch the content of the source.")}
 
     def _get_sources_indexing_state(self, sources, updated_checksum):
         """

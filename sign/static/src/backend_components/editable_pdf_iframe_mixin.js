@@ -623,7 +623,6 @@ export const EditablePDFIframeMixin = (pdfClass) =>
          * @param {KeyboardEvent} event
         */
         handleKeyDown(event) {
-            event.preventDefault();
             if ((event.ctrlKey || event.metaKey) && event.key == 'c' && this.selectedElements) {
                 this.onCopyItems();
             } else if ((event.ctrlKey || event.metaKey) && event.key == 'v' && this.copiedItems) {

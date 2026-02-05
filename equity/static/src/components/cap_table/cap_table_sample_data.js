@@ -5,7 +5,7 @@ export function useCapTableSampleData() {
         const company = user.activeCompany;
 
         const partnerHolderData = {};
-        partnerHolderData[company.id] = {
+        partnerHolderData["1"] = {
             "2": {
                 "classes": {
                     "1": 5,
@@ -52,7 +52,7 @@ export function useCapTableSampleData() {
             }
         };
         const partnerClassesIds = {};
-        partnerClassesIds[company.id] = [1, 2, 3, 4, 5];
+        partnerClassesIds["1"] = [1, 2, 3, 4, 5];
         return {
             "partner_holder_data": partnerHolderData,
             "partner_classes_ids": partnerClassesIds,

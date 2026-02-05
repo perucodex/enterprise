@@ -78,7 +78,7 @@ class StockBarcodeController(http.Controller):
         if not res_id:
             return request.env[model].barcode_write(write_vals)
         target_record = request.env[model].browse(res_id)
-        target_record.write({write_field: write_vals})
+        target_record.with_context(avoid_putaway_rules=True).write({write_field: write_vals})
         return target_record._get_stock_barcode_data()
 
     @http.route('/stock_barcode/get_barcode_data', type='jsonrpc', auth='user')

@@ -650,6 +650,45 @@ test("field selection when editing a suboption", async () => {
     expect(".o_web_studio_property_suboption .o_select_menu").toHaveCount(1);
 });
 
+test("option of type 'string' are correctly saved and displayed", async () => {
+    patchWithCleanup(charField, {
+        supportedOptions: [
+            {
+                label: "Suboption A",
+                name: "suboption_a",
+                type: "string",
+            },
+        ],
+    });
+
+    onRpc("/web_studio/edit_view", async (request) => {
+        const { params } = await request.json();
+        expect(params.operations[0].type).toBe("attributes");
+        expect(params.operations[0].new_attrs).toEqual({
+            options: JSON.stringify({ suboption_a: "overriden" }),
+        });
+
+        const newArch =
+            "<form><group><field name='display_name' options='{\"suboption_a\": \"Noice\"}'/></group></form>";
+        return editView(request, "form", newArch);
+    });
+
+    const arch = `<form><group>
+        <field name="display_name" options='{\"suboption_a\": \"cool cool\"}'/>
+    </group></form>`;
+    await mountViewEditor({
+        type: "form",
+        resModel: "coucou",
+        arch,
+    });
+    await contains('.o_cell:has([name="display_name"])').click();
+    await waitFor("input[id=suboption_a]:value(cool cool)");
+    expect("input[id=suboption_a]").toHaveValue("cool cool");
+    await contains("input[id=suboption_a]").edit("overriden"); // value overriden in route to make the assert relevant
+    await waitFor("input[id=suboption_a]:value(Noice)");
+    expect("input[id=suboption_a]").toHaveValue("Noice");
+});
+
 test("'class' attribute is editable in the sidebar with a tooltip", async () => {
     const arch = `<form>
         <header>

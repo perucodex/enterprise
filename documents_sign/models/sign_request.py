@@ -79,9 +79,13 @@ class SignRequestItem(models.Model):
         completed_documents_sudo = self.env['documents.document'].search([
             ('attachment_id', 'in', self.sign_request_id.completed_document_attachment_ids.ids)
         ])
-        # Add view permission to the signer if he has not already inherited a larger permission from the folder
-        if not completed_documents_sudo.access_ids.filtered(
-                lambda access: access.partner_id == self.partner_id and access.role == 'edit'):
-            completed_documents_sudo.action_update_access_rights(partners={self.partner_id: ('view', False)})
+        # Add view permission to the signer and requester if they not already have a larger permission
+        partners = self.partner_id | self.create_uid.partner_id
+        existing_editors = completed_documents_sudo.access_ids.filtered(
+            lambda access: access.partner_id in partners and access.role == 'edit'
+        ).partner_id | self.env.ref('base.user_root').partner_id  # root user has access to everything
+        if partners_to_update := partners - existing_editors:
+            partners = {partner: ('view', False) for partner in partners_to_update}
+            completed_documents_sudo.action_update_access_rights(partners=partners)
 
         completed_documents_sudo.partner_id = self.partner_id

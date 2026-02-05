@@ -4,7 +4,7 @@ import { registry } from "@web/core/registry";
 export class WebsiteSaleSubscriptionChangeProductPrice extends Interaction {
     static selector = ".on_change_plan_table";
     dynamicContent = {
-        ".plan_select": { "t-on-change": this._onPlanChange },
+        ".subscription_plan_select": { "t-on-change": this._onPlanChange },
         "#allow_one_time_sale": { "t-on-change": this._onBuyOnceSelected },
     };
 

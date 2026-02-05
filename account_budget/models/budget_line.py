@@ -57,7 +57,7 @@ class BudgetLine(models.Model):
             line.is_above_budget = line.achieved_amount > line.budget_amount
 
     def _compute_all(self):
-        grouped = dict(self.env['budget.report']._read_group(
+        grouped = dict(self.env['budget.report'].with_context(budget_report_budget_line_ids=self.ids)._read_group(
             domain=[('budget_line_id', 'in', self.ids)],
             groupby=['budget_line_id'],
             aggregates=['achieved:sum'],

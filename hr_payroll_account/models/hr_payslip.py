@@ -287,11 +287,13 @@ class HrPayslip(models.Model):
             raise UserError(self.env._('An employee bank account is untrusted'))
         if any(m.state != 'posted' for m in self.move_id):
             raise UserError(self.env._("You can only register payment for posted journal entries."))
-
         return self.move_id.line_ids.action_register_payment(
-            ctx={"default_partner_id": self.employee_id.work_contact_id.id,
-                 "default_partner_bank_id": self.employee_id.primary_bank_account_id.id,
-                 "default_company_id": self.company_id.id})
+            ctx={
+                "default_partner_id": self.employee_id.work_contact_id.id,
+                "default_partner_bank_id": self.employee_id.primary_bank_account_id.id,
+                "default_company_id": self.company_id.id,
+                "payment_consider_partner": True,
+            })
 
     def action_open_move(self):
         return {

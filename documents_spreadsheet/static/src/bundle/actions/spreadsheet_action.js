@@ -137,7 +137,7 @@ registry.category("actions").add("action_open_spreadsheet", SpreadsheetAction, {
 topbarMenuRegistry.addChild("move_to_trash", ["file"], {
     name: _t("Move to trash"),
     sequence: 80,
-    isVisible: (env) => env.moveToTrash,
+    isVisible: (env) => env.isArchived && !env.isArchived() && !!env.moveToTrash,
     execute: (env) => env.moveToTrash(),
     icon: "o-spreadsheet-Icon.TRASH_FILLED",
 });

@@ -49,7 +49,7 @@ class Starshipit:
                 message = res['errors'][0]['details']
             elif res.get('message'):
                 message = res['message']
-            raise UserError(_('Starshipit returned an error: %(message)s', message=message))
+            raise UserError('Starshipit returned an error: %(message)s' % {'message': message})  # pylint: disable=E8507
 
         return res
 
@@ -94,10 +94,21 @@ class Starshipit:
         """ Creates the orders in starshipit using the provided pickings. One order will be created for each picking.
         Orders are returned as a dict with the order_number being the keys.
         """
-        orders = []
+        orders_to_import = []
+        existing_orders = {}
 
         for picking in pickings:
             starshipit_picking_number = self._get_starshipit_order_number(picking)
+
+            try:
+                existing_order_result = self._get_created_order(starshipit_picking_number)
+            except UserError:
+                existing_order_result = None
+
+            if existing_order_result and existing_order_result.get('order'):
+                existing_orders[starshipit_picking_number] = existing_order_result['order']
+                continue
+
             if len(starshipit_picking_number) > 50:  # Very unlikely to happen, simply a security measure.
                 raise UserError(_("The picking %(picking_name)s sequence is too long for Starshipit. "
                                   "Please update your pickings sequence in order to use at most 50 characters.",
@@ -129,14 +140,19 @@ class Starshipit:
                 'items': items,
                 'packages': shipping_packages,
             }
-            orders.append(order)
+            orders_to_import.append(order)
 
-        result = self._send_request('orders/import', method='POST', data={
-            'orders': orders
-        })
+        newly_created_orders = {}
+        if orders_to_import:
+            result = self._import_order(orders_to_import)
+            newly_created_orders = {order['order_number']: order for order in result['orders']}
+
+        all_orders = existing_orders
+        all_orders.update(newly_created_orders)
+
         return {
-            'success': result['success'],
-            'orders': {order['order_number']: order for order in result['orders']},
+            'success': len(all_orders) == len(pickings),
+            'orders': all_orders,
         }
 
     @staticmethod
@@ -171,6 +187,15 @@ class Starshipit:
             }
         )
 
+    def _import_order(self, orders_to_import):
+        return self._send_request(
+            'orders/import',
+            method='POST',
+            data={
+                'orders': orders_to_import,
+            }
+        )
+
     def _delete_order(self, order_id):
         self._send_request(
             'orders/delete',
@@ -195,6 +220,14 @@ class Starshipit:
             method='GET',
             params={
                 'order_id': order_id,
+            })
+
+    def _get_created_order(self, order_number):
+        return self._send_request(
+            'orders',
+            method='GET',
+            params={
+                'order_number': order_number,
             })
 
     def _manifest_orders(self, order_ids):

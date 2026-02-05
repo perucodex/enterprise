@@ -12,7 +12,7 @@ class PosPaymentMethod(models.Model):
     tyro_mode = fields.Selection([("prod", "Production Mode"), ("test", "Test Mode"), ("simulator", "Simulator Mode")], default="prod")
     tyro_merchant_id = fields.Char("Tyro Merchant ID")
     tyro_terminal_id = fields.Char("Tyro Terminal ID")
-    tyro_integration_key = fields.Char("Integration Key")
+    tyro_integration_key = fields.Char("Integration Key", groups="base.group_user")
     tyro_integrated_receipts = fields.Boolean("Integrated Receipts", default=True, help="If enabled, the Tyro receipt will be embedded in the Odoo receipt. Otherwise the terminal will print a separate payment receipt.")
     tyro_always_print_merchant_receipt = fields.Boolean("Always print merchant receipts", help="By default, merchant copies are only printed when a signature is required. Enable this setting to always print the merchant copy.")
     tyro_surcharge_product_id = fields.Many2one("product.product", string="Surcharge Product", default=lambda self: self._get_default_tyro_surcharge_product())
@@ -53,7 +53,7 @@ class PosPaymentMethod(models.Model):
                 "tyro_mode": self.tyro_mode,
                 "merchant_id": self.tyro_merchant_id,
                 "terminal_id": self.tyro_terminal_id,
-                "integration_key": self.tyro_integration_key,
+                "integration_key": self.sudo().tyro_integration_key,
             },
             "context": {
                 "footer": False,

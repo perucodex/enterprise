@@ -1528,6 +1528,18 @@ class DocumentsDocument(models.Model):
 
         raise UserError(_("Unavailable action."))
 
+    def _embed_action(self, action_id):
+        """Embed a server action on the current folder(s) if not already done."""
+        IrEmbeddedActions = self.env['ir.embedded.actions']
+        embedded_actions = self._get_folder_embedded_actions(self.ids)
+
+        new_embedding_folders = self.env['documents.document']
+        for folder in self:
+            if action_id not in embedded_actions.get(folder.id, IrEmbeddedActions).action_id.ids:
+                folder.action_folder_embed_action(folder.id, action_id)
+                new_embedding_folders |= folder
+        return new_embedding_folders
+
     def action_link_to_record(self, model=False):
         """Open the `link_to_record_wizard` to choose a record to link to the current documents.
 

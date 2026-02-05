@@ -175,6 +175,21 @@ registry.category("web_tour.tours").add("sign_template_creation_tour", {
             content: "Verify items are selected",
             trigger: ":iframe .o_sign_sign_item.multi_selected",
         },
+        // Testing if search works by searching for letter 'a'.
+        {
+            content: "Click on the find button",
+            trigger: ":iframe #viewFindButton",
+            run: "click",
+        },
+        {
+            content: "Search for letter 'a'",
+            trigger: ":iframe #findInput",
+            run: "fill a",
+        },
+        {
+            content: "Verify the letter is highlighted",
+            trigger: ":iframe .highlight",
+        },
         {
             content: "Click on document name text to make it editable",
             trigger: ".o_sign_sidebar_document_name_text",

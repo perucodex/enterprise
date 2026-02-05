@@ -27,6 +27,14 @@ class TestSaleAvalara(TestTaxCommonSale, TestAccountAvataxSaleCommon):
             'amount_type': 'percent',
         })
 
+        cls.downpayment_account = cls.env['account.account'].sudo().create({
+            'name': 'Customers - Payments on account received on orders',
+            'account_type': 'liability_current',
+            'code': '419100',
+            'reconcile': True,
+        })
+        cls.env.user.company_id.downpayment_account_id = cls.downpayment_account
+
         cls.sales_user = cls.env['res.users'].create({
             'name': 'Sales user',
             'login': 'sales',
@@ -152,6 +160,8 @@ class TestSaleAvalara(TestTaxCommonSale, TestAccountAvataxSaleCommon):
             downpayment_invoice.sudo().action_post()
 
         self.assertIsNone(capture.val, "Shouldn't call Avatax when posting a down payment invoice.")
+        self.assertEqual(downpayment_invoice.invoice_line_ids[0].account_id.id, self.downpayment_account.id, "Down payment has wrong account.")
+
         wizard = (
             self.env["sale.advance.payment.inv"]
                 .with_context(**payment_ctx)
@@ -310,7 +320,7 @@ class TestAccountAvalaraSalesTaxItemsIntegration(TestAccountAvataxSaleCommon):
 
         with self._capture_request({'lines': [], 'summary': []}) as capture:
             invoice.action_post()
-        self.assertTrue(capture.val['json']['commit'])
+        self.assertTrue(capture.val['json']['createTransactionModel']['commit'])
 
     def test_commit_tax(self):
         """Ensure that invoices are committed/posted for reporting appropriately."""
@@ -319,7 +329,7 @@ class TestAccountAvalaraSalesTaxItemsIntegration(TestAccountAvataxSaleCommon):
             self.sale_order.action_confirm()
             invoice = self.sale_order._create_invoices()
             invoice.action_post()
-        self.assertTrue(capture.val['json']['commit'])
+        self.assertTrue(capture.val['json']['createTransactionModel']['commit'])
 
     def test_merge_sale_orders(self):
         """Ensure sale orders with different shipping partner are not merged

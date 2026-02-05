@@ -112,7 +112,7 @@ class SaleCommissionReport(models.Model):
             notes = vals.get('notes')
             for line in self:
                 if line.forecast_id:
-                    if forecast:
+                    if forecast is not None:
                         line.sudo().forecast_id.amount = forecast
                     if notes:
                         line.sudo().forecast_id.notes = notes

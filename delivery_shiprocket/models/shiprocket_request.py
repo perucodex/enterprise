@@ -58,7 +58,7 @@ class ShipRocket:
         """
         data = {
             'email': self.carrier.shiprocket_email,
-            'password': self.carrier.shiprocket_password,
+            'password': self.carrier.sudo().shiprocket_password,
         }
         return self._make_api_request('external/auth/login', 'POST', data)
 
@@ -67,7 +67,7 @@ class ShipRocket:
         Generate an access token for shiprocket.
         The token is automatically generates after 9 days as it expires.
         """
-        if not (self.carrier.shiprocket_email and self.carrier.shiprocket_password):
+        if not (self.carrier.shiprocket_email and self.carrier.sudo().shiprocket_password):
             action = self.carrier.env.ref('delivery.action_delivery_carrier_form')
             raise RedirectWarning(
                 _("Please configure Shiprocket credentials in the shipping method"), action.id,

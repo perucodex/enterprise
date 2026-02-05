@@ -61,23 +61,26 @@ patch(PosStore.prototype, {
                 : this.user.insz_or_bis_number;
         }
         if (!this.clock_disabled) {
+            const currentOrder = this.getOrder();
             try {
+                this.ui.block({ message: _t("Clocking %s...", clock_in ? "in" : "out") });
                 this.clock_disabled = true;
                 for (const insz of Object.entries(inszs)) {
                     const order = await this.createOrderForClocking(insz, clock_in);
                     await this.printReceipt({ order });
-                    this.removeClockOrder(order);
+                    this.removeOrder(order, false);
                 }
                 await this.setUserSessionStatus(employee, clock_in, automaticClock);
             } finally {
+                this.setOrder(currentOrder);
                 this.clock_disabled = false;
+                this.ui.unblock();
             }
         }
-        this.removeEmptyOrders();
     },
     async createOrderForClocking(insz, status) {
         const order = this.addNewOrder();
-        this.addLineToOrder(
+        await this.addLineToOrder(
             {
                 product_tmpl_id: status
                     ? this.config.work_in_product.product_tmpl_id
@@ -99,24 +102,16 @@ patch(PosStore.prototype, {
             const result = await this.syncAllOrders({ throw: true, orders: [order] });
             return result[0];
         } catch (error) {
-            const order = this.getOrder();
-            this.removeClockOrder(order);
+            this.removeOrder(order, false);
             throw error;
         }
     },
-    removeClockOrder(order) {
-        this.removeOrder(order, false);
-        this.selectedOrderUuid = null;
-        const screen = this.defaultPage;
-        this.navigate(screen.page, screen.params);
-    },
-    removeEmptyOrders() {
-        const orders = this.models["pos.order"].filter((o) => !o.finalized);
-        for (const order of orders) {
-            if (order.isEmpty()) {
-                this.removeOrder(order, false);
-            }
+    removeOrderShouldRedirect(order, hasBeenRemoved) {
+        if (order.uiState.clock) {
+            // stay on the current order if auto clock in clicking on product
+            return false;
         }
+        return super.removeOrderShouldRedirect(...arguments);
     },
     //#region Override
     get printOptions() {
@@ -133,24 +128,18 @@ patch(PosStore.prototype, {
             vals.qty = order.preset_id?.is_return ? -1 : 1;
         }
         if (this.useBlackBoxBe()) {
-            if (product.taxes_id.length === 0 && !product.isCombo()) {
-                this.dialog.add(AlertDialog, {
-                    title: _t("POS error"),
-                    body: _t("Product has no tax associated with it."),
-                });
-                return;
-            } else if (
+            if (
                 !this.userSessionStatus &&
                 product !== this.config.work_in_product.product_tmpl_id &&
                 !opt.force
             ) {
+                await this.clock(true);
+            }
+
+            if (product.taxes_id.length === 0 && !product.isCombo()) {
                 this.dialog.add(AlertDialog, {
                     title: _t("POS error"),
-                    body: _t(
-                        "The government's Fiscal Data Module requires every user to Clock In before " +
-                            "sending an order.\n" +
-                            "You can Clock In from the top-right menu (\u2261)."
-                    ),
+                    body: _t("Product has no tax associated with it."),
                 });
                 return;
             } else if (!product.taxes_id.every((tax) => tax?.tax_group_id.pos_receipt_label)) {

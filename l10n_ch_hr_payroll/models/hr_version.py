@@ -345,23 +345,16 @@ class HrVersion(models.Model):
 
         return super(HrVersion, self - swiss_contracts).generate_work_entries(date_start, date_stop, force)
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        contracts = super().create(vals_list)
-        swissdec_structure = self.env.ref("l10n_ch_hr_payroll.structure_type_employee_ch", raise_if_not_found=False)
-        employees = contracts.filtered(lambda c: c.sudo().structure_type_id.id == swissdec_structure.id).mapped("employee_id")
-        if not employees:
-            return contracts
-        employees._create_or_update_snapshot()
-        return contracts
-
     def write(self, vals):
         res = super().write(vals)
         swissdec_structure = self.env.ref("l10n_ch_hr_payroll.structure_type_employee_ch", raise_if_not_found=False)
-        employees = self.filtered(lambda c: c.sudo().structure_type_id.id == swissdec_structure.id).mapped("employee_id")
-        if not employees:
-            return res
-        employees._create_or_update_snapshot()
+        swiss_employees = self.filtered(lambda c: c.structure_type_id.id == swissdec_structure.id).mapped("employee_id")
+        if swiss_employees:
+            pending_computation_slips = swiss_employees.slip_ids.filtered(lambda p: p.state == 'draft' and p.struct_id.code == "CHMONTHLYELM")
+            if pending_computation_slips:
+                pending_computation_slips.action_refresh_from_work_entries()
+            else:
+                swiss_employees._create_or_update_snapshot()
         return res
 
     @api.depends("contract_date_end")

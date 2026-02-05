@@ -366,12 +366,13 @@ class AccountBatchPayment(models.Model):
         specificities in the payments he's put in the batch. He will be able to
         ignore them.
 
-        :return:    A list of dictionaries, each one corresponding to a distinct
-                    warning and containing the following keys:
-                    - 'title': A short name for the warning (mandatory)
-                    - 'records': The recordset of payments concerned by this warning (mandatory)
-                    - 'help': A help text to give the user further information
-                              on the reason this warning exists (optional)
+        :return: A list of dictionaries, each one corresponding to a distinct
+            warning and containing the following keys:
+
+            - ``'title'``: A short name for the warning (mandatory)
+            - ``'records'``: The recordset of payments concerned by this warning (mandatory)
+            - ``'help'``: A help text to give the user further information
+              on the reason this warning exists (optional)
         """
         return []
 
@@ -383,12 +384,13 @@ class AccountBatchPayment(models.Model):
         extension for modules making a specific use of batch payments, such as SEPA
         ones.
 
-        :return:    A list of dictionaries, each one corresponding to a distinct
-                    error and containing the following keys:
-                    - 'title': A short name for the error (mandatory)
-                    - 'records': The recordset of payments facing this error (mandatory)
-                    - 'help': A help text to give the user further information
-                              on how to solve the error (optional)
+        :return: A list of dictionaries, each one corresponding to a distinct
+            error and containing the following keys:
+
+            - ``'title'``: A short name for the error (mandatory)
+            - ``'records'``: The recordset of payments facing this error (mandatory)
+            - ``'help'``: A help text to give the user further information
+              on how to solve the error (optional)
         """
         self.ensure_one()
         #We first try to post all the draft batch payments

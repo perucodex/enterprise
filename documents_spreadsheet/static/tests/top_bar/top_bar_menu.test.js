@@ -82,6 +82,26 @@ test("Can move a spreadsheet to trash from File menu", async function () {
     expect.verifySteps(["deletion_delay_requested", "spreadsheet_archived"]);
 });
 
+test("Move to trash is hidden for archived spreadsheet", async function () {
+    const spreadsheetId = 43;
+    const serverData = getBasicServerData();
+    serverData.models["documents.document"].records = [
+        {
+            id: spreadsheetId,
+            name: "Archived sheet",
+            spreadsheet_data: "{}",
+            active: false,
+        },
+    ];
+
+    await createSpreadsheet({ spreadsheetId, serverData });
+
+    await contains(".o-topbar-menu[data-id=file]").click();
+    expect(".o-menu-item[data-name=move_to_trash]").toHaveCount(0, {
+        message: "Move to trash should be hidden for archived spreadsheets",
+    });
+});
+
 test("Action action_download_spreadsheet is correctly fired with topbar menu", async function () {
     onRpc("/spreadsheet/xlsx", () => {});
     let actionParam;

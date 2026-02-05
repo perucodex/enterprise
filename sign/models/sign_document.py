@@ -116,7 +116,7 @@ class SignDocument(models.Model):
     def get_radio_sets_dict(self):
         """
         :return: dict radio_sets_dict that maps each radio set that belongs to
-        this template to a dictionary containing num_options and radio_item_ids.
+            this template to a dictionary containing num_options and radio_item_ids.
         """
         radio_sets = self.sign_item_ids.filtered(lambda item: item.radio_set_id).radio_set_id
         radio_sets_dict = {
@@ -139,11 +139,13 @@ class SignDocument(models.Model):
         Updates the attachment's name. If the provided name is empty or None,
         the current name is retained. This forced update prevents the creation
         of duplicate sign items during simultaneous RPC requests.
+
         :param name: The new name for the attachment.
         :return:
+
             - True: Indicates the attachment name was successfully updated.
             - False: Indicates the update was skipped because a sign request linked
-                    to the template already exists
+              to the template already exists
         """
         self.ensure_one()
         sign_requests = self.env['sign.request'].search([('template_id', '=', self.template_id.id)], limit=1)

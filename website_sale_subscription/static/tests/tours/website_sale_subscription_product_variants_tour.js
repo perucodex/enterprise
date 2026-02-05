@@ -34,7 +34,10 @@ registry.category("web_tour.tours").add("sale_subscription_add_to_cart", {
         {
             content: "Trigger a variant",
             trigger: "input[title='White']",
-            run: "check",
+            run: "click",
+        },
+        {
+            trigger: "input[title='White']:checked",
         },
         {
             content: "click on add to cart",
@@ -44,8 +47,8 @@ registry.category("web_tour.tours").add("sale_subscription_add_to_cart", {
         wsTourUtils.goToCart(),
         {
             content: "Check the price of the product that has been added",
-            trigger: "h6[name='website_sale_cart_line_price'] .oe_currency_value:contains(\"100.00\"):visible",
-            run: "click",
+            trigger:
+                "h6[name='website_sale_cart_line_price'] .oe_currency_value:contains(\"100.00\"):visible",
         },
     ],
 });

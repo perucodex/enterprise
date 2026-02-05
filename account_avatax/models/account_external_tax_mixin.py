@@ -63,7 +63,7 @@ class AccountExternalTaxMixin(models.AbstractModel):
             'unique_code': self.avatax_unique_code,
             'reference': self.name,
             'currency': self.currency_id,
-            'commit': commit and self._find_avatax_credentials_company(self.company_id).avalara_commit,
+            'commit': commit and self._find_avatax_credentials_company(self.company_id).avalara_commit,  # TODO master: remove commit parameter from method
             'fiscal_position': self.fiscal_position_id,
 
             # To be filled by specific models

@@ -31,7 +31,7 @@ class HrEmployee(models.Model):
 
     def _get_appraisal_plan_starting_date(self):
         self.ensure_one()
-        return self.create_date
+        return self.contract_date_start or self.date_version
 
     def action_send_appraisal_request(self):
         return {

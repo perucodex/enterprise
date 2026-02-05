@@ -294,13 +294,18 @@ class SignTemplate(models.Model):
 
     def update_from_pdfviewer(self, sign_items=None, deleted_sign_item_ids=None, name=None, document_id=None):
         """ Update a sign.template from the pdfviewer
-        :param dict sign_items: {id (str): values (dict)}
-            id: positive: sign.item's id in database (the sign item is already in the database and should be update)
-                negative: negative random itemId(transaction_id) in pdfviewer (the sign item is new created in the pdfviewer and should be created in database)
-            values: values to update/create
-        :param list(str) deleted_sign_item_ids: list of ids of deleted sign items. These deleted ids may be
-            positive: the sign item exists in the database
-            negative: the sign item is new created in pdfviewer but removed before a successful transaction
+
+        :param dict sign_items: ``{id (str): values (dict)}``
+
+            * id: positive: sign.item's id in database (the sign item is already in the database and should be update)
+            * negative: negative random itemId(transaction_id) in pdfviewer (the sign item is new created in the pdfviewer and should be created in database)
+            * values: values to update/create
+
+        :param list[str] deleted_sign_item_ids: list of ids of deleted sign items. These deleted ids may be
+
+            * positive: the sign item exists in the database
+            * negative: the sign item is new created in pdfviewer but removed before a successful transaction
+
         :return: dict new_id_to_item_id_map: {negative itemId(transaction_id) in pdfviewer (str): positive id in database (int)}
         """
         self.ensure_one()

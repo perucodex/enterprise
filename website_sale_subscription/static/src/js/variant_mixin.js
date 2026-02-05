@@ -18,6 +18,7 @@ VariantMixin._onChangeCombinationSubscription = function (ev, parent, combinatio
     const pricingSelect =
         parent.querySelector(".js_main_product h5:has(.o_subscription_price)") ||
         parent.querySelector(".js_main_product .plan_select");
+    const oneTimePrice = parent.querySelector(".one_time_price .oe_currency_value");
 
     if (pricingSelect) {
         const disabledPlanIds = Array.from(
@@ -34,7 +35,7 @@ VariantMixin._onChangeCombinationSubscription = function (ev, parent, combinatio
                 combination_info: combination,
             })
         );
-    } else {
+    } else if (!combination.allow_one_time_sale) {
         // we don't find the element in the dom which means there was no pricings in the previous combination so there is no `Radio buttons` or `h5` elements to replace then we append one.
         const nodeToAppend = parent.querySelector(".js_main_product div div");
         nodeToAppend.append(
@@ -43,7 +44,11 @@ VariantMixin._onChangeCombinationSubscription = function (ev, parent, combinatio
             })
         );
     }
-    if (combination.allow_one_time_sale) {
+    if (combination.allow_one_time_sale && oneTimePrice) {
+        // update the one time price dynamically when changing variants.
+        oneTimePrice.textContent = combination["list_price"].toFixed(
+            combination.currency_precision
+        );
         parent.querySelector('.product_price')?.classList?.remove('d-inline-block');
     }
 

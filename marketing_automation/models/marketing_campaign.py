@@ -192,16 +192,20 @@ class MarketingCampaign(models.Model):
         synchronization aka it mainly creates and updates 'marketing.trace'
         records. It is done in 2 steps:
 
-         * update traces related to activities requiring sync, based on their
-           ``require_sync`` field. For those we update ``schedule date``.
-         * create traces for new activities added in the workflow, aka created
-           after campaign ``last_sync_date``:
-          * 'begin' activities: create traces for all running participants;
-          * other activities: create child for traces linked to the parent of
-            the newly created activity
-          * for 'not' triggers take into account brother traces that are already
-            processed e.g. do not schedule 'mail_not_open' if 'mail_open' is
-            already processed;
+        * update traces related to activities requiring sync, based on their
+          ``require_sync`` field. For those we update ``schedule date``.
+
+        * create traces for new activities added in the workflow, aka created
+          after campaign ``last_sync_date``:
+
+        * 'begin' activities: create traces for all running participants;
+
+        * other activities: create child for traces linked to the parent of
+          the newly created activity
+
+        * for 'not' triggers take into account brother traces that are already
+          processed e.g. do not schedule 'mail_not_open' if 'mail_open' is
+          already processed;
 
         Note that scheduling is done right after parent processing independently
         of other time considerations.

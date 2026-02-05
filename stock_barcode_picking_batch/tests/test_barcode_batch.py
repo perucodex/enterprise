@@ -703,10 +703,7 @@ class TestBarcodeBatchClientAction(TestBarcodeClientAction):
         batch_delivery.action_confirm()
         self.assertEqual(len(batch_delivery.move_ids), 5)
         self.assertEqual(len(batch_delivery.move_line_ids), 5)
-
-        # Resets package sequence to be sure we'll have the attended packages name.
-        seq = self.env['ir.sequence'].search([('code', '=', 'stock.package')])
-        seq.number_next_actual = 1
+        self._reset_package_sequence()
 
         url = self._get_batch_client_action_url(batch_delivery.id)
         self.start_tour(url, 'test_put_in_pack_scan_suggested_package', login='admin', timeout=180)

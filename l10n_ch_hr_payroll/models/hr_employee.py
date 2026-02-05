@@ -94,15 +94,14 @@ class HrEmployee(models.Model):
     def _onchange_l10n_ch_has_lesson(self):
         self.version_id._onchange_l10n_ch_has_lesson()
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        employees = super().create(vals_list)
-        employees._create_or_update_snapshot()
-        return employees
-
     def write(self, vals):
         vals = super().write(vals)
-        self._create_or_update_snapshot()
+        # Recompute open payslips automatically on each update since almost all fields cause a change in computation
+        pending_computation_slips = self.slip_ids.filtered(lambda p: p.state == 'draft' and p.struct_id.code == "CHMONTHLYELM")
+        if pending_computation_slips:
+            pending_computation_slips.action_refresh_from_work_entries()
+        else:
+            self._create_or_update_snapshot()
         return vals
 
     def _get_certificate_selection(self):
@@ -143,9 +142,12 @@ class HrEmployee(models.Model):
             return
 
         self.env.flush_all()
-        now = fields.Datetime.now().date()
-        month = now.month
-        year = now.year
+
+        ref_date = self.env.context.get('l10n_ch_reference_date') or fields.Date.context_today(self)
+
+        month = ref_date.month
+        year = ref_date.year
+
         existing_snapshots = self.sudo().env["l10n.ch.employee.yearly.values"].search([
             ('year', '=', year),
             ('employee_id', 'in', swiss_employees.ids)
@@ -195,11 +197,6 @@ class HrEmployee(models.Model):
 
         if self.env.context.get('unlock_pay_period'):
             existing_snapshots._toggle_pay_period_lock(lock=False)
-
-        # Recompute open payslips automatically on each update since almost all fields cause a change in computation
-        pending_computation_slips = self.sudo().slip_ids.filtered(lambda p: p.state == 'draft' and p.struct_id.code == "CHMONTHLYELM")
-        if pending_computation_slips:
-            pending_computation_slips.action_refresh_from_work_entries()
 
     def action_absence_swiss_employee(self):
         return {

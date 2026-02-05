@@ -209,7 +209,6 @@ class TestDianMoves(TestCoDianCommon):
         self._assert_document_dian(xml, "l10n_co_dian/tests/attachments/invoice_plastic_bags.xml")
 
     def test_invoice_plastic_bags_new(self):
-        self.env['ir.config_parameter'].sudo().set_param('account_edi_ubl_cii.use_new_dict_to_xml_helpers', True)
         self.test_invoice_plastic_bags()
 
     def test_multicurrency(self):

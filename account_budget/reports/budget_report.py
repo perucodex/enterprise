@@ -24,6 +24,7 @@ class BudgetReport(models.Model):
     budget_line_id = fields.Many2one('budget.line', 'Budget Line', readonly=True)
 
     def _get_bl_query(self, plan_fnames):
+        budget_line_ids = self.env.context.get('budget_report_budget_line_ids')
         return SQL(
             """
             SELECT CONCAT('bl', bl.id::TEXT) AS id,
@@ -49,11 +50,14 @@ class BudgetReport(models.Model):
                    %(plan_fields)s
               FROM budget_line bl
               JOIN budget_analytic ba ON ba.id = bl.budget_analytic_id
+              %(budget_line_ids_condition)s
             """,
-            plan_fields=SQL(', ').join(self.env['budget.line']._field_to_sql('bl', fname) for fname in plan_fnames)
+            plan_fields=SQL(', ').join(self.env['budget.line']._field_to_sql('bl', fname) for fname in plan_fnames),
+            budget_line_ids_condition=SQL('WHERE bl.id = ANY(%(budget_line_ids)s)', budget_line_ids=budget_line_ids) if budget_line_ids else SQL(''),
         )
 
     def _get_aal_query(self, plan_fnames):
+        budget_line_ids = self.env.context.get('budget_report_budget_line_ids')
         return SQL(
             """
             SELECT CONCAT('aal', aal.id::TEXT) AS id,
@@ -92,13 +96,15 @@ class BudgetReport(models.Model):
                        ELSE TRUE
                    END
                    AND (SPLIT_PART(aa.account_type, '_', 1) IN ('income', 'expense') OR aa.account_type IS NULL)
+                   %(budget_line_ids_condition)s
             """,
             analytic_fields=SQL(', ').join(self.env['account.analytic.line']._field_to_sql('aal', fname) for fname in plan_fnames),
             condition=SQL(' AND ').join(SQL(
                 "(%(bl)s IS NULL OR %(aal)s = %(bl)s)",
                 bl=self.env['budget.line']._field_to_sql('bl', fname),
                 aal=self.env['budget.line']._field_to_sql('aal', fname),
-            ) for fname in plan_fnames)
+            ) for fname in plan_fnames),
+            budget_line_ids_condition=SQL('AND bl.id = ANY(%(budget_line_ids)s)', budget_line_ids=budget_line_ids) if budget_line_ids else SQL(''),
         )
 
     @property

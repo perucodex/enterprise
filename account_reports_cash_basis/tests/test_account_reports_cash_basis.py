@@ -8,7 +8,7 @@ from odoo import fields, Command
 from odoo.addons.account_reports.tests.common import TestAccountReportsCommon
 
 
-@tagged('post_install', '-at_install')
+@tagged('post_install_l10n', 'post_install', '-at_install')
 class TestAccountReports(TestAccountReportsCommon):
     @classmethod
     def _reconcile_on(cls, lines, account):
@@ -326,7 +326,7 @@ class TestAccountReports(TestAccountReportsCommon):
                 ('121000 Account Receivable',          500,            500,              0),
                 ('400000 Product Sales',                 0,             60,            -60),
                 ('499000 Other Income',                  0,            150,           -150),
-                ('999999 Undistributed Profits/Losses',  0,            140,           -140),
+                ('Undistributed Profits/Losses - company_1_data',  0,            140,           -140),
                 # Report Total.
                 ('Total General Ledger',               850,            850,              0),
             ],
@@ -1066,7 +1066,7 @@ class TestAccountReports(TestAccountReportsCommon):
                 ('121000 Account Receivable',           460.0,      460.0,      0.0),
                 (receivable_account_2.display_name,     70.0,       70.0,       0.0),
                 ('400000 Product Sales',                0.0,        70.0,     -70.0),
-                ('999999 Undistributed Profits/Losses', 0.0,        460.0,   -460.0),
+                ('Undistributed Profits/Losses - company_1_data', 0.0,        460.0,   -460.0),
                 # Report Total.
                 ('Total General Ledger',                1060.0,     1060.0,     0.0),
             ],
@@ -1112,7 +1112,7 @@ class TestAccountReports(TestAccountReportsCommon):
                 (receivable_account_2.display_name,     70.0,       70.0,       0.0),
                 (receivable_account_3.display_name,     80.0,       80.0,       0.0),
                 ('400000 Product Sales',                0.0,        150.0,   -150.0),
-                ('999999 Undistributed Profits/Losses', 0.0,        460.0,   -460.0),
+                ('Undistributed Profits/Losses - company_1_data', 0.0,        460.0,   -460.0),
                 # Report Total.
                 ('Total General Ledger',                1220.0,     1220.0,     0.0),
             ],

@@ -1,4 +1,4 @@
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 
 from odoo.addons.ai.utils.html_extractor import HTMLExtractor
 
@@ -97,7 +97,15 @@ class AIAgentSource(models.Model):
         if source.type != 'knowledge_article':
             return super()._fetch_content(source)
 
-        extractor = HTMLExtractor()
+        """
+        Add the agent creator's language explicitly to self environment
+        because it is missing inside cron jobs and thus translations
+        are not possible
+        """
+        lang = source.agent_id.create_uid.lang or 'en_US'
+        env = self.with_context(lang=lang).env
+        extractor = HTMLExtractor(env)
+
         parent_article = source.article_id
         article_descendants = parent_article._get_descendants()
         all_articles = article_descendants | parent_article
@@ -107,5 +115,5 @@ class AIAgentSource(models.Model):
             if result and result['content']:
                 content += result['content'] + '\n'
             else:
-                return {"content": None, "error": result.get('error', _("Failed to extract content from the articles."))}
+                return {"content": None, "error": result.get('error', env._("Failed to extract content from the articles."))}
         return {"content": content, "error": None}

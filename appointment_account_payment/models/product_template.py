@@ -11,5 +11,5 @@ class ProductTemplate(models.Model):
             'appointment_account_payment.default_booking_product',
             raise_if_not_found=False
         )
-        if default_booking_product and default_booking_product.product_tmpl_id in self:
+        if default_booking_product and default_booking_product.sudo().product_tmpl_id in self:
             raise UserError(_("You cannot delete the default booking product"))

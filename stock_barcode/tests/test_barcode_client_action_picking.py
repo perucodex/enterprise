@@ -122,10 +122,17 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         self.start_tour(url, 'test_picking_scan_package_confirmation', login='admin', timeout=180)
 
     def test_internal_picking_from_scratch_with_package(self):
-        """ Opens an empty internal picking, scans the source (shelf1), then scans
-        the products (product1 and product2), scans a existing empty package to
-        assign it as the result package, and finally scans the destination (shelf2).
-        Checks the dest location is correctly set on the lines.
+        """ This test ensures different flows regarding immediate transfers and packages:
+
+        1. Scan different products, put them in an existing empty package and scan a destination;
+
+        2. Scan a package and move it into another location;
+
+        3. Scan two packages, pack them into a palet and move the palet into a sublocation;
+
+        4. Scan a palet containing two packages and check we can't scan it multiple times.
+
+        For each case, check that the lines' destination is correcly set.
         """
         self.env.user.write({
             'group_ids': [
@@ -134,14 +141,20 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             ],
         })
         self.picking_type_internal.active = True
+        self.env['stock.package.type'].create([
+            {'name': 'Palet', 'sequence_code': 'PAL-', 'barcode': 'PT_PALET'},
+        ])
         # Creates a new package and add some quants.
-        package2 = self.env['stock.package'].create({'name': 'P00002'})
+        package2, package3, package4 = self.env['stock.package'].create([{'name': f'P0000{i}'} for i in range(2, 5)])
         self.env['stock.quant']._update_available_quantity(self.product1, self.stock_location, 1, package_id=package2)
         self.env['stock.quant']._update_available_quantity(self.product2, self.stock_location, 2, package_id=package2)
+        self.env['stock.quant']._update_available_quantity(self.product1, self.stock_location, 1, package_id=package3)
+        self.env['stock.quant']._update_available_quantity(self.product2, self.stock_location, 1, package_id=package4)
         self.assertEqual(package2.location_id.id, self.stock_location.id)
 
         self.start_tour("/odoo/barcode", 'test_internal_picking_from_scratch_with_package', login='admin')
 
+        # Check first package's content.
         self.assertEqual(len(self.package.quant_ids), 2)
         self.assertEqual(self.package.location_id.id, self.shelf2.id)
         self.assertRecordValues(self.package.quant_ids, [
@@ -149,10 +162,20 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             {'product_id': self.product2.id, 'quantity': 1, 'location_id': self.shelf2.id},
         ])
 
+        # Check second package's content.
         self.assertEqual(package2.location_id.id, self.shelf2.id)
         self.assertRecordValues(package2.quant_ids, [
             {'product_id': self.product1.id, 'quantity': 1, 'location_id': self.shelf2.id},
             {'product_id': self.product2.id, 'quantity': 2, 'location_id': self.shelf2.id},
+        ])
+
+        # Check palet's content.
+        self.assertEqual(package3.parent_package_id.id, package4.parent_package_id.id)
+        self.assertTrue(package3.location_id.id == package4.location_id.id == self.shelf1.id)
+        palet = package3.parent_package_id
+        self.assertRecordValues(palet.contained_quant_ids.sorted(lambda q: q.product_id.id), [
+            {'product_id': self.product1.id, 'quantity': 1, 'location_id': self.shelf1.id, 'package_id': package3.id},
+            {'product_id': self.product2.id, 'quantity': 1, 'location_id': self.shelf1.id, 'package_id': package4.id},
         ])
 
     def test_internal_picking_reserved_1(self):
@@ -202,6 +225,50 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
                 ml.location_dest_id = self.shelf4.id
 
         self.start_tour(url, 'test_internal_picking_reserved_1', login='admin', timeout=180)
+
+    def test_internal_picking_reserved_move_packages_into_new_palet(self):
+        """ Check we can unpack two palets then pack all the content (which is
+        packed in boxes) into a new one.
+        Also check the source and destination packages' labels use the right value.
+        """
+        self.env.user.group_ids = [
+            Command.link(self.env.ref('stock.group_tracking_lot').id),
+            Command.link(self.env.ref('stock.group_stock_multi_locations').id),
+        ]
+        self.picking_type_internal.active = True
+        self.picking_type_internal.show_entire_packs = True
+        box_type, palet_type = self.env['stock.package.type'].create([
+            {'name': 'Box', 'sequence_code': 'BOX-'},
+            {'name': 'Palet', 'sequence_code': 'PAL-', 'barcode': 'PT_PALET'},
+        ])
+        # Create 6 boxes : 4 boxes to pack into 2 palets, and 2 stand-alone boxes.
+        packages = self.env['stock.package'].create([{
+            'name': f'BOX-0{i}',
+            'package_type_id': box_type.id,
+        } for i in range(1, 7)])
+        for i, package in enumerate(packages):
+            product = self.product1 if (i % 2 == 0) else self.product2
+            self.env['stock.quant']._update_available_quantity(product, self.stock_location, 5, package_id=package)
+
+        palets = self.env['stock.package'].create([{
+            'name': f'PAL-0{i}',
+            'package_type_id': palet_type.id,
+        } for i in range(1, 4)])
+        packages[:2].parent_package_id = palets[0]
+        packages[2:4].parent_package_id = palets[1]
+
+        # Create and confirm an internal transfer where we move both palets.
+        internal_pickings = self.env['stock.picking'].create([{
+            'name': f'TEST/INT/000{i}',
+            'location_id': self.picking_type_internal.default_location_src_id.id,
+            'location_dest_id': self.picking_type_internal.default_location_dest_id.id,
+            'picking_type_id': self.picking_type_internal.id,
+        } for i in (1, 2)])
+        internal_pickings[0].action_add_entire_packs(palets.ids)
+        internal_pickings[1].action_add_entire_packs(packages[4:].ids)
+        internal_pickings.action_confirm()
+
+        self.start_tour('/odoo/barcode', 'test_internal_picking_reserved_move_packages_into_new_palet', login='admin')
 
     def test_receipt_from_scratch_with_lots_1(self):
         self.env.user.write({
@@ -402,10 +469,8 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         receipt_picking.action_confirm()
         receipt_picking.action_assign()
         receipt_picking.name = "receipt_test"
-
         # Set packages' sequence to 1000 to find it easily during the tour.
-        package_sequence = self.env['ir.sequence'].search([('code', '=', 'stock.package')], limit=1)
-        package_sequence.write({'number_next_actual': 1000})
+        self._reset_package_sequence(1000)
 
         # Opens the barcode main menu to be able to open the pickings by scanning their name.
         self.start_tour("/odoo/barcode", "test_receipt_reserved_2_partial_put_in_pack", login="admin", timeout=180)
@@ -426,6 +491,52 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         self.assertRecordValues(receipt_backorder.move_ids, [
             {'product_id': self.product2.id, 'product_uom_qty': 2, 'quantity': 2, 'picked': False},
         ])
+
+    def test_receipt_reserved_put_in_pack_after_interruption(self):
+        """This test creates two receipts to ensure that:
+            1. We can pack move lines together even if the user leaves the operation between
+               scanning the products and scanning the package type.
+            2. When a package type is scanned, it's assigned to the last scanned package,
+               even if the selected line's product is packed into a package which
+               uses the last scanned package as its container.
+        """
+        group_package = self.env.ref('stock.group_tracking_lot')
+        self.env.user.write({'group_ids': [Command.link(group_package.id)]})
+        self.picking_type_in.restrict_scan_product = True
+        self._reset_package_sequence()
+        # Create box and palet package types.
+        self.env['stock.package.type'].create([
+            {'name': 'Box', 'sequence_code': 'BOX-', 'barcode': 'PT_BOX'},
+            {'name': 'Palet', 'sequence_code': 'PAL-', 'barcode': 'PT_PALET'},
+        ])
+        # Create two additional products.
+        product3, product4 = self.env['product.product'].create([{
+            'name': f'product{i}',
+            'is_storable': True,
+            'barcode': f'product{i}',
+        } for i in [3, 4]])
+        # Create and confirm a picking, then open it in the Barcode app.
+        receipts = self.env['stock.picking'].create([
+            {
+                'name': f'TEST/IN/000{i}',
+                'location_id': self.picking_type_in.default_location_src_id.id,
+                'location_dest_id': self.picking_type_in.default_location_dest_id.id,
+                'picking_type_id': self.picking_type_in.id,
+                'move_ids': [
+                    Command.create({
+                        'location_id': self.picking_type_in.default_location_src_id.id,
+                        'location_dest_id': self.picking_type_in.default_location_dest_id.id,
+                        'product_id': product.id,
+                        'quantity': 1,
+                    }) for product in products
+                ],
+            } for (i, products) in [
+                (1, [self.product1, self.product2, product3, product4]),
+                (2, [self.product1, self.product2]),
+            ]
+        ])
+        receipts.action_confirm()
+        self.start_tour('/odoo/barcode', 'test_receipt_reserved_put_in_pack_after_interruption', login='admin')
 
     def test_receipt_product_not_consecutively(self):
         """ Check that there is no new line created when scanning the same product several times but not consecutively."""
@@ -1598,6 +1709,43 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         self.assertEqual(len(pack.quant_ids), 2)
         self.assertEqual(sum(pack.quant_ids.mapped('quantity')), 4)
 
+    def test_put_in_pack_in_new_created_package(self):
+        """ Ensures when the user puts in pack a product in a new package, they can
+        scan the created package's barcode to put a second product in this package.
+        """
+        group_package = self.env.ref('stock.group_tracking_lot')
+        self.env.user.write({'group_ids': [Command.link(group_package.id)]})
+        self._reset_package_sequence()
+        # Create a receipt for two products.
+        receipt = self.env['stock.picking'].create({
+            'location_id': self.picking_type_in.default_location_src_id.id,
+            'location_dest_id': self.picking_type_in.default_location_dest_id.id,
+            'name': "TEST/IN/0001",
+            'picking_type_id': self.picking_type_in.id,
+            'move_ids': [
+                Command.create({
+                    'location_id': self.picking_type_in.default_location_src_id.id,
+                    'location_dest_id': self.picking_type_in.default_location_dest_id.id,
+                    'product_id': self.product1.id,
+                    'product_uom_qty': 1,
+                }),
+                Command.create({
+                    'location_id': self.picking_type_in.default_location_src_id.id,
+                    'location_dest_id': self.picking_type_in.default_location_dest_id.id,
+                    'product_id': self.product2.id,
+                    'product_uom_qty': 1,
+                }),
+            ],
+        })
+        receipt.action_confirm()
+        self.start_tour('/odoo/barcode', 'test_put_in_pack_in_new_created_package', login='admin')
+        self.assertEqual(receipt.move_ids.move_line_ids.result_package_id.name, "PACK0000001")
+        self.assertEqual(
+            receipt.move_ids[0].move_line_ids.result_package_id.id,
+            receipt.move_ids[1].move_line_ids.result_package_id.id,
+            "The two receipt's moves must go into the same package"
+        )
+
     def test_put_in_pack_no_freeze(self):
         """ Test that the page doesn't freeze when clicking on put in pack """
         self.env['res.config.settings'].create({'group_stock_tracking_lot': True}).execute()
@@ -1655,6 +1803,37 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             {'product_id': self.product2.id, 'quantity': 8, 'package_id': palet2.id},
         ])
         self.assertEqual((box1.quant_ids | box2.quant_ids | palet1.quant_ids).ids, [])
+
+    def test_unpack_palet_then_pack_another_palet(self):
+        """ Ensure we can unpack a palet than scan the palet barcode to pack
+        all lines in a new palet."""
+        group_package = self.env.ref('stock.group_tracking_lot')
+        group_location = self.env.ref('stock.group_stock_multi_locations')
+        self.env.user.write({'group_ids': [Command.link(group_location.id), Command.link(group_package.id)]})
+        self.picking_type_internal.active = True
+        self.picking_type_internal.restrict_scan_source_location = 'no'
+        self.picking_type_internal.restrict_scan_dest_location = 'optional'
+        self.picking_type_internal.show_entire_packs = True
+        self.picking_type_out.restrict_scan_source_location = 'no'
+        self.picking_type_out.show_entire_packs = True
+        # Create some packages and add packed quantities in stock.
+        box, palet = self.env['stock.package.type'].create([
+            {'name': 'Box', 'sequence_code': 'BOX-'},
+            {'name': 'Palet', 'sequence_code': 'PAL-', 'barcode': 'PT_PALET'},
+        ])
+        box1, box2, palet1 = self.env['stock.package'].create([
+            {'name': "BOX01", 'package_type_id': box.id},
+            {'name': "BOX02", 'package_type_id': box.id},
+            {'name': "PAL01", 'package_type_id': palet.id},
+        ])
+        self.env['stock.quant']._update_available_quantity(self.product1, self.stock_location, 4, package_id=box1)
+        self.env['stock.quant']._update_available_quantity(self.product2, self.stock_location, 4, package_id=box1)
+        self.env['stock.quant']._update_available_quantity(self.product1, self.stock_location, 4, package_id=box2)
+        self.env['stock.quant']._update_available_quantity(self.product2, self.stock_location, 4, package_id=box2)
+        # Pack boxes into a palet.
+        box1.parent_package_id = palet1
+        box2.parent_package_id = palet1
+        self.start_tour('/odoo/barcode', 'test_unpack_palet_then_pack_another_palet', login='admin')
 
     def test_reload_flow(self):
         self.env.user.write({'group_ids': [Command.link(self.env.ref('stock.group_stock_multi_locations').id)]})
@@ -1773,6 +1952,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         self.picking_type_internal.active = True
         self.picking_type_internal.restrict_scan_source_location = 'no'
         self.picking_type_internal.restrict_scan_dest_location = 'optional'
+        self._reset_package_sequence()
         self.env['stock.quant']._update_available_quantity(self.product1, self.shelf1, 1)
         self.env['stock.quant']._update_available_quantity(self.product2, self.shelf3, 1)
 
@@ -1797,9 +1977,6 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             'product_uom_qty': 1,
             'picking_id': internal_picking.id,
         })
-        # Resets package sequence to be sure we'll have the attended packages name.
-        seq = self.env['ir.sequence'].search([('code', '=', 'stock.package')])
-        seq.number_next_actual = 1
 
         url = self._get_client_action_url(internal_picking.id)
         internal_picking.action_confirm()
@@ -1866,13 +2043,10 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
                 Command.link(self.env.ref('stock.group_tracking_lot').id),
             ],
         })
+        self._reset_package_sequence()
         self.env['stock.quant']._update_available_quantity(self.product1, self.shelf1, 1)
         self.env['stock.quant']._update_available_quantity(self.product1, self.shelf2, 1)
         self.env['stock.quant']._update_available_quantity(self.product2, self.shelf1, 1)
-
-        # Resets package sequence to be sure we'll have the attended packages name.
-        seq = self.env['ir.sequence'].search([('code', '=', 'stock.package')])
-        seq.number_next_actual = 1
 
         # Creates a delivery with three move lines: two from Section 1 and one from Section 2.
         delivery_form = Form(self.env['stock.picking'])
@@ -2260,9 +2434,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
             'name': 'cluster-pack-02',
             'package_type_id': reusable_type.id,
         })
-        # Resets package sequence to be sure we'll have the attended packages name.
-        seq = self.env['ir.sequence'].search([('code', '=', 'stock.package')])
-        seq.number_next_actual = 1
+        self._reset_package_sequence()
 
         # Configures the picking type's scan settings.
         # Receipt: no put in pack, can not be directly validate.
@@ -2927,8 +3099,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         # Enables package to check the split after a put in pack.
         self.env.user.write({'group_ids': [Command.link(self.env.ref('stock.group_tracking_lot').id)]})
         # Set packages' sequence to 1000 to find it easily during the tour.
-        package_sequence = self.env['ir.sequence'].search([('code', '=', 'stock.package')], limit=1)
-        package_sequence.write({'number_next_actual': 1000})
+        self._reset_package_sequence(1000)
 
         # Creates a receipt for 4x product1 and 4x product2.
         receipt = self.env['stock.picking'].create({
@@ -4160,8 +4331,7 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         self.env.company.nomenclature_id = self.env.ref('barcodes_gs1_nomenclature.default_gs1_nomenclature')
 
         # Set package's sequence to 123 to generate always the same package's name in the tour.
-        sequence = self.env['ir.sequence'].search([('code', '=', 'stock.package')], limit=1)
-        sequence.write({'number_next_actual': 123})
+        self._reset_package_sequence(123)
 
         # Creates two products and two package's types.
         product1, product2 = self.env['product.product'].create([{
@@ -4315,51 +4485,6 @@ class TestPickingBarcodeClientAction(TestBarcodeClientAction):
         self.assertEqual(len(pack1.quant_ids), 1)
         self.assertEqual(len(pack2.quant_ids), 1)
         self.assertEqual(len(delivery_with_move.move_line_ids), 2)
-
-    def test_scan_line_splitting_preserve_destination(self):
-        """
-        This test ensures that move lines, when assigned a new destination
-        while scanning, properly preserve destination info after scanning
-        a package
-        """
-        self.env.user.write({
-            'group_ids': [
-                Command.link(self.env.ref('stock.group_tracking_lot').id),
-                Command.link(self.env.ref('stock.group_stock_multi_locations').id),
-            ],
-        })
-        # Create two empty packs
-        pack1 = self.env['stock.package'].create({
-            'name': 'THEPACK1',
-        })
-        pack2 = self.env['stock.package'].create({
-            'name': 'THEPACK2',
-        })
-
-        # Create a receipt and confirm it.
-        receipt_form = Form(self.env['stock.picking'])
-        receipt_form.picking_type_id = self.picking_type_in
-        with receipt_form.move_ids.new() as move:
-            move.product_id = self.product2
-            move.product_uom_qty = 5
-        receipt_picking = receipt_form.save()
-        receipt_picking.action_confirm()
-        receipt_picking.action_assign()
-
-        url = self._get_client_action_url(receipt_picking.id)
-        self.start_tour(url, 'test_scan_line_splitting_preserve_destination', login='admin', timeout=180)
-
-        self.assertEqual(len(pack1.quant_ids), 1)
-        self.assertEqual(pack1.location_id.id, self.shelf3.id)
-        self.assertRecordValues(pack1.quant_ids, [
-            {'product_id': self.product2.id, 'quantity': 2, 'location_id': self.shelf3.id},
-        ])
-
-        self.assertEqual(len(pack2.quant_ids), 1)
-        self.assertEqual(pack2.location_id.id, self.shelf4.id)
-        self.assertRecordValues(pack2.quant_ids, [
-            {'product_id': self.product2.id, 'quantity': 3, 'location_id': self.shelf4.id},
-        ])
 
     def test_barcode_signature_flow(self):
         """

@@ -9,7 +9,7 @@ class QualitySpreadsheetTemplate(models.Model):
     _description = "Quality check template spreadsheet"
     _inherit = ['spreadsheet.mixin']
 
-    name = fields.Char(required=True)
+    name = fields.Char(required=True, default=lambda self: self.env._('Untitled spreadsheet'))
     company_id = fields.Many2one(
         'res.company',
         default=lambda self: self.env.company

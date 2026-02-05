@@ -548,7 +548,7 @@ export class SalaryPackage extends Interaction {
     }
 
     async onchangeDocument(input) {
-        if (input.target.files) {
+        if (input.target.files && input.target.files.length > 0) {
             const testString = await getDataURLFromFile(input.target.files[0]);
             const regex = new RegExp(",(.{0,})", "g");
             const img_src = regex.exec(testString)[1];

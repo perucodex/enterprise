@@ -24,6 +24,7 @@ class DeliveryCarrier(models.Model):
     shiprocket_email = fields.Char(string="Shiprocket Email",
                                    help="Enter your Username from Shiprocket account (API).")
     shiprocket_password = fields.Char(string="Shiprocket Password",
+                                      groups='base.group_system',
                                       help="Enter your Password from Shiprocket account (API).")
     shiprocket_access_token = fields.Text(
         string="Shiprocket Access Token",

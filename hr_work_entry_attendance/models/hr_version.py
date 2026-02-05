@@ -140,39 +140,6 @@ class HrVersion(models.Model):
         mapped_intervals.update(super()._get_attendance_intervals(
             start_dt, end_dt))
 
-        working_schedule_versions = self.filtered(lambda v: v.work_entry_source == 'calendar')
-        if working_schedule_versions:
-            working_schedule_search_domain = [
-                ('employee_id', 'in', working_schedule_versions.employee_id.ids),
-                ('check_in', '<', end_naive),
-                ('check_out', '>', start_naive),
-            ]
-            working_schedule_attendances = self.env['hr.attendance'].sudo().search(working_schedule_search_domain)
-
-            for attendance in working_schedule_attendances:
-                if not attendance.overtime_hours or not attendance.employee_id.version_id.overtime_from_attendance:
-                    continue
-                version = working_schedule_versions.filtered(
-                    lambda v: v.employee_id == attendance.employee_id
-                    and v.contract_date_start <= attendance.check_out.date()
-                    and (not v.contract_date_end or v.contract_date_end >= attendance.check_in.date()))
-                if not version:
-                    continue
-                version = version[0]  # take the first one
-                tz = timezone(version.resource_calendar_id.tz or attendance.employee_id.tz or resource.tz)
-                check_in_tz = attendance.check_in.astimezone(tz)
-                check_out_tz = attendance.check_out.astimezone(tz)
-                schedule_intervals = mapped_intervals[version.employee_id.resource_id.id]
-                if schedule_intervals:
-                    items = list(schedule_intervals)
-                    matching_interval = next((interval for interval in items if interval[0].date() == check_in_tz.date()), None)
-                    if matching_interval:
-                        start, stop, recs = matching_interval
-                        if check_in_tz < start:
-                            idx = items.index(matching_interval)
-                            items[idx] = (check_in_tz, stop, recs)
-                            mapped_intervals[version.employee_id.resource_id.id] = Intervals(items, keep_distinct=True)
-
         overtime_intervals = {r: Intervals(keep_distinct=True) for r in mapped_intervals}
         overtime_intervals.update(overtime_contracts._get_overtime_intervals(start_dt, end_dt))
         overtime_attendances = all_attendances.filtered_domain([('employee_id.ruleset_id', '!=', False)])

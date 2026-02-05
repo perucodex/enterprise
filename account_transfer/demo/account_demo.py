@@ -22,7 +22,7 @@ class AccountChartTemplate(models.AbstractModel):
             },
         })
         demo_data['account.transfer.model'] = {
-            'monthly_model': {
+            self.company_xmlid('monthly_model'): {
                 'name': _("IFRS rent expense transfer"),
                 'date_start': time.strftime('%Y-01-01'),
                 'frequency': 'month',
@@ -39,7 +39,7 @@ class AccountChartTemplate(models.AbstractModel):
                     }),
                 ],
             },
-            'yearly_model': {
+            self.company_xmlid('yearly_model'): {
                 'name': _("Yearly liabilites auto transfers"),
                 'date_start': time.strftime('%Y-01-01'),
                 'frequency': 'year',

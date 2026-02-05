@@ -709,6 +709,12 @@ export class GanttRenderer extends Component {
             );
         };
 
+        /**
+         * Variable used to indicate whether the "dragend" event should invoke cleanups
+         * on the current selection. This can be the case in multi-select when the
+         * "drop" event was called, since we want to keep the selection in that case.
+         */
+        let shouldCleanupOnDragEnd = true;
         // Cells selection
         const selectState = useGanttSelectable({
             enable: () =>
@@ -717,7 +723,8 @@ export class GanttRenderer extends Component {
                 (this.model.metaData.canCellCreate || this.model.hasMultiCreate),
             ref: this.gridRef,
             hoveredCell: this.cellForDrag,
-            elements: ".o_gantt_cell",
+            elements: ".o_gantt_cells",
+            ignore: ".o_gantt_pill_wrapper,.o_gantt_connector",
             edgeScrolling: {
                 speed: 40,
                 threshold: 150,
@@ -734,12 +741,24 @@ export class GanttRenderer extends Component {
             onDrop: ({ rowId, startCol, endCol, startRow, endRow }) => {
                 if (this.model.hasMultiCreate) {
                     this.updateMultiSelection({ startCol, endCol, startRow, endRow }, action);
+                    shouldCleanupOnDragEnd = false;
                 } else {
-                    this.removeCellGhost();
-                    this.clearBadges();
                     this.onCreate(rowId, startCol, endCol - 1);
                 }
                 action = null;
+            },
+            onDragEnd: () => {
+                if (!shouldCleanupOnDragEnd) {
+                    shouldCleanupOnDragEnd = true;
+                    return;
+                }
+                if (this.model.hasMultiCreate) {
+                    this.removeCellGhosts();
+                    this.cleanMultiSelection();
+                } else {
+                    this.removeCellGhost();
+                }
+                this.clearBadges();
             },
         });
 
@@ -2867,9 +2886,9 @@ export class GanttRenderer extends Component {
      * @returns {boolean}: whether one of the "groupedBy" fields of the model is readonly
      */
     containsReadonlyGroup() {
-        return this.model.metaData.groupedBy.some((groupedByField) => {
-            return this.model.metaData.fields[groupedByField].readonly;
-        });
+        return this.model.metaData.groupedBy.some(
+            (groupedByField) => this.model.metaData.fields[groupedByField].readonly
+        );
     }
 
     /**

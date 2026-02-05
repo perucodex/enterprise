@@ -490,7 +490,7 @@ export class SignablePDFIframe extends PDFIframe {
 
     getSignatureValueFromElement(item) {
         let textArea = item.el.textContent;
-        if (!item.data.constant) {
+        if (!item.data.constant && item.data.type === "textarea") {
             // remove line breaks, it may update the item value, we can't use it on constant items
             // Moreover, item.el.value is empty for constant items.
             textArea = this.textareaApplyLineBreak(item.el);

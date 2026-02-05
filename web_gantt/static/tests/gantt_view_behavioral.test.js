@@ -188,6 +188,23 @@ test("select cells to create a task", async () => {
     expect.verifySteps(["[dialog] Create"]);
 });
 
+test("can cancel selection", async () => {
+    await mountGanttView({
+        resModel: "tasks",
+        arch: '<gantt date_start="start" date_stop="stop"/>',
+    });
+    const { cancel, moveTo } = await contains(getCell("19", "December 2018")).drag();
+    await moveTo(getCell("21", "December 2018"), { position: { x: 30 }, relative: true });
+    await animationFrame();
+
+    expect(".o_cell_ghost").toHaveCount();
+
+    await cancel();
+    await animationFrame();
+
+    expect(".o_cell_ghost").not.toHaveCount();
+});
+
 test("drag and drop on the same cell to create a task", async () => {
     mockService("dialog", {
         add(_, props) {

@@ -51,7 +51,7 @@ class TestAccountAvalaraRefunds(TestAccountAvataxCommon):
 
         with cls._capture_request(return_value={'lines': [], 'summary': []}) as capture:
             reverse_move.action_post()
-        cls.refund_commit_captured_arguments = capture.val['json']
+        cls.refund_commit_captured_arguments = capture.val['json']['createTransactionModel']
         return res
 
     def test_post_tax_credit_memento(self):

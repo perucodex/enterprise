@@ -897,23 +897,28 @@ class StudioApprovalRule(models.Model):
         visible in the view while you edit them.
 
         :param list args_list: A list of dictionaries containing the following keys:
+
             - model (str): Technical name of the model for the requested spec.
             - method (str): Method for the spec.
             - action_id (int): Database ID of the ir.actions.action record for the spec.
             - res_id (int): Database ID of the record for which the spec must be checked.
-                Defaults to False.
+              Defaults to False.
+
         :return: a dict containing all rules that are used by by records.
-                records are contained under their model's key, under the form of a list of tuples
-                So doing dict(get_approval_spec[model_name]) gives all the records keyed by (res_id, method, action_id)
+            records are contained under their model's key, under the form of a list of tuples
+            So doing dict(get_approval_spec[model_name]) gives all the records keyed by (res_id, method, action_id)::
+
                 {
                     "all_rules": { [id]: rule },
                     [model_name]: [((res_id, method, action_id), { rules: [], entries: [] }), ... ]
                 }
+
         :rtype: dict
         :raise: UserError if action_id and method are both truthy (rules can only apply to a method
-                or an action, not both)
+            or an action, not both)
+
         :raise: AccessError if the user does not have read access to the underlying model (and record
-                if res_id is specified)
+            if res_id is specified)
         """
         self = self._clean_context()
         # First, group all arguments to get a dictionary of the form

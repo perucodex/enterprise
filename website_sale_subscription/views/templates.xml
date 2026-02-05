@@ -119,7 +119,7 @@
                     class="form-check-input me-2 allow_one_time_sale"
                 />
                 <span>Buy Once</span>
-                <span class="fw-bold ms-3" t-out="combination_info.get('list_price')" t-options="{'widget': 'monetary', 'display_currency': combination_info.get('currency')}"/>
+                <span class="fw-bold ms-3 one_time_price" t-out="combination_info.get('list_price')" t-options="{'widget': 'monetary', 'display_currency': combination_info.get('currency')}"/>
             </label>
         </div>
         <div
@@ -127,8 +127,8 @@
             class="on_change_plan_table regular-delivery"
         >
             <input type="radio" name="purchase_type" id="regular_delivery" required="1" class="form-check-input d-none"/>
-            <div class="align-items-center mt-2">
-                <div t-if="combination_info['subscription_pricing_select']" class="table-responsive border rounded-2">
+            <div class="align-items-center mt-2 subscription_plan_select">
+                <div t-if="combination_info['subscription_pricing_select']" class="table-responsive border rounded-2 plan_select">
                     <table class="table align-middle mb-0">
                         <tbody>
                             <t t-foreach="combination_info['pricings']" t-as="pricing" t-key="pricing['plan_id']">

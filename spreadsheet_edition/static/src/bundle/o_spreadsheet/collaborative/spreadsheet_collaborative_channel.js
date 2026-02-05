@@ -1,3 +1,6 @@
+import { ConnectionLostError } from "@web/core/network/rpc";
+import { ClientDisconnectedError } from "@odoo/o-spreadsheet";
+
 /**
  * This class implements the `TransportService` interface defined
  * by o-spreadsheet. Its purpose is to communicate with other clients
@@ -12,6 +15,7 @@
  */
 export class SpreadsheetCollaborativeChannel {
     static dependencies = ["bus_service", "orm"];
+
     /**
      * @param {Env} env
      * @param {string} resModel model linked to the spreadsheet
@@ -65,13 +69,22 @@ export class SpreadsheetCollaborativeChannel {
      * @param {Object} message
      */
     async sendMessage(message) {
-        const isAccepted = await this.orm.call(this.resModel, "dispatch_spreadsheet_message", [
-            this.resId,
-            message,
-            this.accessToken,
-        ]);
-        if (isAccepted) {
-            this._handleNotification(message);
+        let isAccepted = false;
+        try {
+            isAccepted = await this.orm.call(this.resModel, "dispatch_spreadsheet_message", [
+                this.resId,
+                message,
+                this.accessToken,
+            ]);
+        } catch (e) {
+            if (e instanceof ConnectionLostError) {
+                throw new ClientDisconnectedError("", { cause: e });
+            }
+            throw e;
+        } finally {
+            if (isAccepted) {
+                this._handleNotification(message);
+            }
         }
     }
 

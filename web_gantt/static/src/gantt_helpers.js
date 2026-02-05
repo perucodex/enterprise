@@ -840,6 +840,10 @@ export const useGanttSelectable = makeDraggableHook({
         const { current } = ctx;
         return getResult(current);
     },
+    onDragEnd() {
+        // Needed in order to be used in hook caller
+        return {};
+    },
 });
 
 /**

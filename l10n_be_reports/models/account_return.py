@@ -59,6 +59,16 @@ class AccountReturnType(models.Model):
 class AccountReturn(models.Model):
     _inherit = 'account.return'
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        returns = super().create(vals_list)
+        returns_type_ext_ids = set(returns.mapped('type_external_id'))
+        if 'l10n_be_reports.be_vat_return_type' in returns_type_ext_ids:
+            self.env.ref('l10n_be_reports.partner_fps_belgium').active = True
+        if 'l10n_be_reports.be_isoc_prepayment_return_type' in returns_type_ext_ids:
+            self.env.ref('l10n_be_reports.partner_centre_de_perception_belgium').active = True
+        return returns
+
     @api.model
     def _evaluate_deadline(self, company, return_type, return_type_external_id, date_from, date_to):
         months_per_period = return_type._get_periodicity_months_delay(company)

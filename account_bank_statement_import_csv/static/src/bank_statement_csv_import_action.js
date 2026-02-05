@@ -41,7 +41,7 @@ export class BankStatementImportAction extends ImportAction {
         const statementLines = await this.orm.searchRead(
             "account.bank.statement.line",
             [["id", "in", resIds]],
-            ["statement_id"]
+            ["statement_id", "journal_id"]
         );
         const statementIds = Array.from(
             new Set(statementLines.map((statementLine) => statementLine.statement_id[0]))
@@ -51,7 +51,23 @@ export class BankStatementImportAction extends ImportAction {
                 x2ManyCommands.link(attachment)
             ),
         });
-        super.openRecords(resIds);
+        return this.actionService.doAction({
+            type: "ir.actions.act_window",
+            name: _t("Imported records"),
+            res_model: "account.bank.statement.line",
+            view_mode: "kanban,list",
+            views: [
+                [false, "kanban"],
+                [false, "list"],
+            ],
+            target: "current",
+            path: "imported-records",
+            context: {
+                search_default_imported_statement_lines: 1,
+                search_default_journal_id: statementLines[0].journal_id[0],
+                imported_transaction_ids: resIds,
+            },
+        });
     }
 }
 

@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, tagged
-from odoo.addons.ai.utils.llm_providers import get_provider_for_embedding_model, PROVIDERS
+from odoo.addons.ai.utils.llm_providers import get_provider_for_embedding_model, PROVIDERS, DEPRECATED_MODELS
 
 
 @tagged("-at_install", "post_install")
@@ -18,7 +18,7 @@ class TestGeminiIntegration(TransactionCase):
         self.agent = self.env["ai.agent"].create(
             {
                 "name": "Test Gemini Agent",
-                "llm_model": "gemini-1.5-flash",
+                "llm_model": "gemini-2.5-flash",
                 "response_style": "analytical",
             }
         )
@@ -85,7 +85,7 @@ class TestGeminiIntegration(TransactionCase):
                         "model": "gemini-embedding-001",
                     }
             elif endpoint.startswith("/models/"):
-                self.assertIn("gemini-1.5-flash", endpoint)
+                self.assertIn("gemini-2.5-flash", endpoint)
                 self.assertEqual(body.get("generationConfig", {}).get("temperature"), 0.2)
                 self.assertEqual(headers.get("x-goog-api-key"), "test-gemini-key")
 
@@ -118,12 +118,14 @@ class TestGeminiIntegration(TransactionCase):
         self.assertEqual(len(api_calls), 2)
         self.assertEqual(api_calls[0]["endpoint"], "/embeddings")
         self.assertEqual(api_calls[0]["body"]["input"], "What is Odoo?")
-        self.assertEqual(api_calls[1]["endpoint"], "/models/gemini-1.5-flash:generateContent")
+        self.assertEqual(api_calls[1]["endpoint"], "/models/gemini-2.5-flash:generateContent")
 
     def test_provider_detection_for_gemini(self):
         """Test that Gemini models correctly identify Google as provider and use correct embedding model"""
         google_provider = next(p for p in PROVIDERS if p.name == "google")
         for model, _ in google_provider.llms:
+            if model in DEPRECATED_MODELS:
+                continue
             self.agent.llm_model = model
             self.assertEqual(self.agent._get_provider(), "google")
             self.assertEqual(self.agent._get_embedding_model(), "gemini-embedding-001")

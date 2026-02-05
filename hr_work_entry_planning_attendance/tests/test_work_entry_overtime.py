@@ -333,3 +333,20 @@ class TestPayslipOvertime(HrWorkEntryAttendanceCommon):
         self._test_12_overtime_classic_day_below_threshold(False, [
             (date(2022, 12, 12), 8, self.attendance_type),
         ])
+
+    def test_attendance_creation_with_partially_allocated_planning_slot(self):
+        """Test attendance creation when the work entry source is a planning slot
+           with less than 100% allocation."""
+        self.slots[0].allocated_percentage = 50
+        self.env['hr.attendance'].create({
+            'employee_id': self.employee.id,
+            'check_in': datetime(2022, 12, 1, 5),
+            'check_out': datetime(2022, 12, 1, 12),
+        })
+
+        work_entries = self.contract.generate_work_entries(
+            date(2022, 12, 1), date(2022, 12, 1)).sorted('work_entry_type_id')
+        self._check_work_entries(work_entries, [
+            (date(2022, 12, 1), 6, self.attendance_type),
+            (date(2022, 12, 1), 2, self.overtime_type),
+        ])

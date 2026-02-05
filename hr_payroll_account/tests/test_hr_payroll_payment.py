@@ -82,7 +82,7 @@ class TestHrPayrollPayment(TestHrPayrollAccountCommon):
         action_create_payment = wizard.save().action_create_payments()
         payment = self.env[action_create_payment['res_model']].browse(action_create_payment['res_id'])
         self.assertAlmostEqual(payment.amount, self.hr_payslip_john.move_id.amount_total, 'Payment amount is not correct!')
-        self.assertEqual(payment.partner_bank_id, self.hr_employee_john.bank_account_ids)
+        self.assertEqual(payment.partner_bank_id, self.hr_employee_john.bank_account_ids[0])
 
     def test_hr_payslip_payment_reverse(self):
         payslip = self.hr_payslip_john

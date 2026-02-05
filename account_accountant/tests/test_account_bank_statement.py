@@ -3026,3 +3026,24 @@ class TestAccountBankStatement(TestBankRecWidgetCommon):
         self.assertFalse(inv_line.full_amount_switch_html)
         self.assertTrue(any(line.full_amount_switch_html for line in st_line_50.line_ids))
         self.assertTrue(any(line.full_amount_switch_html for line in st_line_300.line_ids))
+
+    def test_apply_full_amount_html_currencies(self):
+        st_line = self._create_st_line(50.0, update_create_date=False)
+        invoice_line = self._create_invoice_line(
+            'out_invoice',
+            invoice_date='2017-01-1',
+            invoice_payment_term_id=self.early_payment_term.id,
+            invoice_line_ids=[{'price_unit': 150.0}],
+            currency_id=self.other_currency.id,
+        )
+        st_line.set_line_bank_statement_line(invoice_line.id)
+        self.assertRecordValues(st_line.line_ids, [
+            {'account_id': st_line.journal_id.default_account_id.id, 'balance': 50.0, 'amount_currency': 50.0, 'reconciled': False},
+            {'account_id': invoice_line.account_id.id, 'balance': -50.0, 'amount_currency': -100.0, 'reconciled': True},
+        ])
+        st_line.edit_reconcile_line(st_line.line_ids[-1].id, {'balance': -150, 'amount_currency': -300})
+        self.assertRecordValues(st_line.line_ids, [
+            {'account_id': st_line.journal_id.default_account_id.id, 'balance': 50.0, 'amount_currency': 50.0, 'reconciled': False},
+            {'account_id': invoice_line.account_id.id, 'balance': -150.0, 'amount_currency': -300.0, 'reconciled': False},
+            {'account_id': st_line.journal_id.suspense_account_id.id, 'balance': 100.0, 'amount_currency': 100.0, 'reconciled': False},
+        ])

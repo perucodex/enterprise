@@ -667,7 +667,7 @@ class IrUiView(models.Model):
             ('key', '!=', new.key),
             ('key', '=like', '%s_copy_%%' % new.key),
             '!', ('key', '=like', '%s_copy_%%_copy_%%' % new.key)]
-        old_copies = self.search_read(domain, order='key desc')
+        old_copies = self.with_context(active_test=False).search_read(domain, order='key desc')
         nos = [int(old_copy.get('key').split('_copy_').pop()) for old_copy in old_copies]
         copy_no = (nos and max(nos) or 0) + 1
         new_key = '%s_copy_%s' % (new.key, copy_no)

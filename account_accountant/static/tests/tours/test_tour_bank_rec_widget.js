@@ -125,5 +125,36 @@ registry.category("web_tour.tours").add("account_accountant_bank_rec_widget", {
             content: "Statement line is reconciled",
             trigger: "div[name='reconciled_line_name']",
         },
+        // ensure statement can be added for multiple statement lines at once
+        {
+            content: "Switch to list view",
+            trigger: "button.o_switch_view.o_list",
+            run: "click",
+        },
+        {
+            content: "Select the statement lines",
+            trigger: "div.o-checkbox",
+            run: "click",
+        },
+        {
+            content: "Open the Many2One to set statement",
+            trigger: "td.o_bank_rec_list_many2one_multi_id_cell",
+            run: "click",
+        },
+        {
+            content: "Search for the created statement",
+            trigger: "input.o-autocomplete--input",
+            run: "click",
+        },
+        {
+            content: "Select the created statement",
+            trigger: "a.dropdown-item:contains('test')",
+            run: "click",
+        },
+        {
+            content: "Update setting statement on both lines",
+            trigger: "button.btn-primary:contains('Update')",
+            run: "click",
+        },
     ],
 });

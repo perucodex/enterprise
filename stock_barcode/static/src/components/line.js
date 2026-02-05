@@ -169,6 +169,10 @@ export default class LineComponent extends Component {
         this.env.model.completePackage(this.line.virtual_id);
     }
 
+    delete() {
+        return this.env.model.deleteLine(this.line);
+    }
+
     select(ev) {
         ev.stopPropagation();
         this.env.model.selectLine(this.line);

@@ -107,6 +107,7 @@ class StockQuant(models.Model):
         lots = self.lot_id
         owners = self.owner_id
         packages = self.package_id
+        packages |= packages.parent_package_id
         uoms = products.uom_id | products.uom_ids
         # If UoM setting is active, fetch all UoM's data.
         if self.env.user.has_group('uom.group_uom'):

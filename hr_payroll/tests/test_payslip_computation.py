@@ -621,3 +621,47 @@ class TestPayslipComputation(TestPayslipContractBase):
         dup_payslip.action_payslip_cancel()
         self.assertTrue(all(entry.state == 'draft' for entry in work_entries))
         self.assertTrue(all(not entry.has_payslip for entry in work_entries))
+
+    def test_out_of_contract_worked_days(self):
+        self.contract_cdi.write({
+            'contract_date_start': datetime.strptime('2025-06-15', '%Y-%m-%d'),
+            'contract_date_end': datetime.strptime('2025-07-15', '%Y-%m-%d'),
+        })
+        payslips = self.env['hr.payslip'].create([
+            {
+                'name': 'February',  # Before contract
+                'employee_id': self.richard_emp.id,
+                'version_id': self.contract_cdi.id,
+                'struct_id': self.developer_pay_structure.id,
+                'date_from': date(2025, 2, 1),
+                'date_to': date(2025, 2, 28),
+            },
+            {
+                'name': 'June',  # Partial overlap
+                'employee_id': self.richard_emp.id,
+                'version_id': self.contract_cdi.id,
+                'struct_id': self.developer_pay_structure.id,
+                'date_from': date(2025, 6, 1),
+                'date_to': date(2025, 6, 30),
+            },
+            {
+                'name': 'November',  # After contract
+                'employee_id': self.richard_emp.id,
+                'version_id': self.contract_cdi.id,
+                'struct_id': self.developer_pay_structure.id,
+                'date_from': date(2025, 11, 1),
+                'date_to': date(2025, 11, 30),
+            },
+        ])
+        payslips._compute_worked_days_line_ids()
+        expectations = {
+            'February': (20.0, 140.0),
+            'June':     (10.0, 70.0),
+            'November': (20.0, 140.0),
+        }
+        out_of_contract_code = self.env.ref('hr_work_entry.hr_work_entry_type_out_of_contract').code
+        for payslip in payslips:
+            line = payslip.worked_days_line_ids.filtered(lambda l: l.code == out_of_contract_code)
+            exp_days, exp_hours = expectations[payslip.name]
+            self.assertAlmostEqual(line.number_of_days, exp_days, places=2, msg=f"Wrong days for {payslip.name}")
+            self.assertAlmostEqual(line.number_of_hours, exp_hours, places=2, msg=f"Wrong hours for {payslip.name}")

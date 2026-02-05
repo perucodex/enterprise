@@ -50,6 +50,30 @@ export class BankRecButtonList extends Component {
         }
     }
 
+    async _setPartnerOnReconcileLine(partner_id) {
+        await this.orm.call("account.bank.statement.line", "set_partner_bank_statement_line", [
+            this.statementLineData.id,
+            partner_id,
+        ]);
+        const recordsToLoad = [];
+        if (this.statementLineData.partner_name) {
+            // Reload all impacted statement lines if we have a partner_name
+            recordsToLoad.push(
+                ...this.env.model.root.records.filter(
+                    (record) => record.data.partner_name === this.statementLineData.partner_name
+                )
+            );
+        } else {
+            recordsToLoad.push(this.props.statementLine);
+        }
+        await this.bankReconciliation.reloadRecords(recordsToLoad);
+        await this.bankReconciliation.computeReconcileLineCountPerPartnerId(
+            this.env.model.root.records
+        );
+        this.bankReconciliation.reloadChatter();
+        this.restoreFocus();
+    }
+
     /**
      * Displays a search dialog (no create option) for selecting a `res.partner` record.
      */
@@ -62,31 +86,7 @@ export class BankRecButtonList extends Component {
                 multiSelect: false,
                 resModel: "res.partner",
                 context: { default_name: this.statementLineData.partner_name },
-                onSelected: async (partner) => {
-                    await this.orm.call(
-                        "account.bank.statement.line",
-                        "set_partner_bank_statement_line",
-                        [this.statementLineData.id, partner[0]]
-                    );
-                    const recordsToLoad = [];
-                    if (this.statementLineData.partner_name) {
-                        // Reload all impacted statement lines if we have a partner_name
-                        recordsToLoad.push(
-                            ...this.env.model.root.records.filter(
-                                (record) =>
-                                    record.data.partner_name === this.statementLineData.partner_name
-                            )
-                        );
-                    } else {
-                        recordsToLoad.push(this.props.statementLine);
-                    }
-                    await this.bankReconciliation.reloadRecords(recordsToLoad);
-                    await this.bankReconciliation.computeReconcileLineCountPerPartnerId(
-                        this.env.model.root.records
-                    );
-                    this.bankReconciliation.reloadChatter();
-                    this.restoreFocus();
-                },
+                onSelected: async (partner) => await this._setPartnerOnReconcileLine(partner[0]),
             },
             {
                 onClose: () => {

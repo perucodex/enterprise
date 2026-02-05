@@ -1,5 +1,6 @@
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
+import { stepUtils } from "@web_tour/tour_utils";
 
 registry.category("web_tour.tours").add("website_helpdesk_forum_tour", {
     url: "/forum/help-1",
@@ -28,17 +29,11 @@ registry.category("web_tour.tours").add("website_helpdesk_forum_tour", {
             content: _t("Insert tags related to your question."),
             run: "click",
         },
-        {
-            trigger: ".o_select_menu input",
-            run: async function() {
-                this.anchor.value = "Test";
-                this.anchor.dispatchEvent(new InputEvent("input"));
-            }
-        },
+        ...stepUtils.editSelectMenuInput(".o_select_menu input", "Test"),
         {
             content: "Select found select menu item",
             trigger: ".o_popover.o_select_menu_menu .o_select_menu_item:contains('Test')",
-            run: 'click',
+            run: "click",
         },
         {
             trigger: "button:contains(/^Post/)",

@@ -612,6 +612,13 @@
                 Total Quantity
             </th>
         </th>
+        <t t-set="section_name_colspan" position="after">
+            <t
+                t-if="sale_order.subscription_state == '7_upsell'"
+                t-set="section_name_colspan"
+                t-value="section_name_colspan + 1"
+            />
+        </t>
         <td name="td_product_quantity" position="after">
             <td t-if="sale_order.subscription_state == '7_upsell'" class="text-end">
                 <span t-esc="line.upsell_total"/>

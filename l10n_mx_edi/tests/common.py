@@ -40,7 +40,10 @@ class TestMxEdiCommon(TestMxCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.frozen_today = fields.Datetime.now()
+        if EXTERNAL_MODE:
+            cls.frozen_today = fields.Datetime.now()
+        else:
+            cls.frozen_today = fields.Datetime.from_string('2025-06-15')
 
         # Allow to see the full result of AssertionError.
         cls.maxDiff = None

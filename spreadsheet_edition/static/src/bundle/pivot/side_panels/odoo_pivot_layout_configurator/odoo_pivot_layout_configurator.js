@@ -1,9 +1,10 @@
 import { components } from "@odoo/o-spreadsheet";
-import { ODOO_AGGREGATORS } from "@spreadsheet/pivot/pivot_helpers";
+import { ODOO_AGGREGATORS, getRelationalFieldDefinition } from "@spreadsheet/pivot/pivot_helpers";
 import { ModelFieldSelector } from "@web/core/model_field_selector/model_field_selector";
 import { ModelFieldSelectorPopover } from "@web/core/model_field_selector/model_field_selector_popover";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
+import { useService } from "@web/core/utils/hooks";
 const { PivotLayoutConfigurator } = components;
 
 /**
@@ -73,10 +74,35 @@ export class OdooPivotLayoutConfigurator extends PivotLayoutConfigurator {
         ...PivotLayoutConfigurator.components,
         PivotModelFieldSelector,
     };
+    static props = {
+        ...PivotLayoutConfigurator.props,
+        addDraftField: Function,
+    };
 
     setup() {
         super.setup(...arguments);
+        this.fieldService = useService("field");
         this.AGGREGATORS = ODOO_AGGREGATORS;
+    }
+
+    async addColumnDimension(fieldName) {
+        const definition = await getRelationalFieldDefinition(
+            this.props.definition.model,
+            fieldName,
+            this.fieldService
+        );
+        this.props.addDraftField(fieldName, definition);
+        super.addColumnDimension(fieldName);
+    }
+
+    async addRowDimension(fieldName) {
+        const definition = await getRelationalFieldDefinition(
+            this.props.definition.model,
+            fieldName,
+            this.fieldService
+        );
+        this.props.addDraftField(fieldName, definition);
+        super.addRowDimension(fieldName);
     }
 
     get allDimensions() {

@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="stock_barcode.PackageLineComponent">
-        <div t-on-click="select" t-att-data-package="line.package_id.name"
+        <div t-on-click="select" t-att-data-package="packageDataAttribute"
             class="o_barcode_line list-group-item d-flex flex-row flex-nowrap py-3"
             t-attf-class="{{componentClasses}}">
             <div class="o_barcode_line_details flex-grow-1 flex-column flex-nowrap">
@@ -15,7 +15,7 @@
                     </div>
                     <div>
                         <button t-if="isSelected"
-                                t-on-click="unpack"
+                                t-on-click.stop="unpack"
                                 barcode_trigger="UPCK"
                                 class="o_line_button o_unpack btn btn-secondary ms-2">
                                 <span class="fa fa-stack">

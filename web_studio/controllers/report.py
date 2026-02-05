@@ -395,12 +395,14 @@ def _get_and_write_studio_view(view, values=None, should_create=True, view_key_t
 
 @contextmanager
 def deactivate_studio_view(main_view):
+    studio_view = None
     try:
         studio_view = _get_and_write_studio_view(main_view, None, should_create=False, active_test=True)
         studio_view.active = False
         yield studio_view
     finally:
-        studio_view.active = True
+        if studio_view:
+            studio_view.active = True
 
 class WebStudioReportController(main.WebStudioController):
 

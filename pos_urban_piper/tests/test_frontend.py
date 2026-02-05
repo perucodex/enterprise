@@ -82,7 +82,17 @@ class TestFrontend(TestPosUrbanPiperCommon):
             'name': 'Preparation Display',
             'pos_config_ids': [(4, self.urban_piper_config.id)],
         })
-        self.start_pos_tour('OrderFlowTour', pos_config=self.urban_piper_config, login="pos_admin")
+        PosOrder = self.env.registry.models['pos.order']
+
+        def mark_urbanpiper_prep_order_as_printed_patch(self):
+            # Catch the intentionally raised ValueError from the mathod
+            # and return 'False' instead of propagating the exception
+            try:
+                return super(PosOrder, self).mark_urbanpiper_prep_order_as_printed()
+            except ValueError:
+                return False
+        with patch.object(PosOrder, "mark_urbanpiper_prep_order_as_printed", mark_urbanpiper_prep_order_as_printed_patch):
+            self.start_pos_tour('OrderFlowTour', pos_config=self.urban_piper_config, login="pos_admin")
         order_1 = self.env['pos.order'].search([('delivery_identifier', '=', identifier_1)])
         order_2 = self.env['pos.order'].search([('delivery_identifier', '=', identifier_2)])
         self.assertEqual(100.0, order_1.amount_total)

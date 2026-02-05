@@ -175,7 +175,7 @@ class ProductTemplate(models.Model):
             if product_or_template.type == 'consu':
                 # For consumable products, use billing period (e.g., "3 month") instead of plan name
                 value = pricing.plan_id.billing_period_value
-                table_name = f"{value if value != 1 else ''} {pricing.plan_id.billing_period_unit}".strip()
+                table_name = f"{value if value != 1 else ''} {translation_mapping.get(pricing.plan_id.billing_period_unit, pricing.plan_id.billing_period_unit)}".strip()
             else:
                 # For non-consumable products, use plan name with non-breaking spaces
                 table_name = pricing.plan_id.name.replace(" ", "\u00A0")
@@ -226,6 +226,7 @@ class ProductTemplate(models.Model):
             ),
             'allow_one_time_sale': not request.cart.plan_id and self.allow_one_time_sale,
             'allow_recurring': not request.cart._has_one_time_sale(),
+            'product_type': product_or_template.type,  # Used to change pricing text in template based on product type
         }
 
     # Search bar

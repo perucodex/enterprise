@@ -92,7 +92,7 @@ class TestCaseDocumentsBridgeAccount(DocumentsAccountTestCommon):
         """
         folder_test = self.env['documents.document'].create({'name': 'folder_test', 'type': 'folder'})
 
-        for invoice_type in ['in_invoice', 'out_invoice', 'in_refund', 'out_refund']:
+        for invoice_type in ['in_invoice', 'out_invoice', 'in_refund', 'out_refund', 'entry']:
             invoice_test = self.env['account.move'].with_context(default_move_type=invoice_type).create({
                 'name': 'invoice_test',
                 'move_type': invoice_type,
@@ -125,15 +125,18 @@ class TestCaseDocumentsBridgeAccount(DocumentsAccountTestCommon):
                     invoice_test,
                     [{"message_main_attachment_id": main_attachment.id}],
                 )
-                self.assertRecordValues(
-                    document,
-                    [
-                        {
-                            "attachment_id": doc_attachment.id,
-                            "previous_attachment_ids": previous_attachment_ids,
-                        }
-                    ],
-                )
+                self.env["documents.document"].flush_model()
+                if invoice_test.move_type == "entry":
+                    expected = {
+                        "attachment_id": attachments[0].id,
+                        "previous_attachment_ids": [],
+                    }
+                else:
+                    expected = {
+                        "attachment_id": doc_attachment.id,
+                        "previous_attachment_ids": previous_attachment_ids,
+                    }
+                self.assertRecordValues(document, [expected])
 
             # Ensure the main attachment is the first one and ensure the document is correctly linked
             check_main_attachment_and_document(attachments[0], attachments[0], [])

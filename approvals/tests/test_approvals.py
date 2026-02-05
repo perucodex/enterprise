@@ -383,6 +383,7 @@ class TestRequest(common.TransactionCase):
             'date_end': fields.Datetime.now(),
             'location': 'testland'
         })
+
         # As user, try to move your own approver on your own request
         with self.assertRaises(AccessError):
             user_approver_for_admin.with_user(user).request_id = user_approval
@@ -395,3 +396,50 @@ class TestRequest(common.TransactionCase):
         })
         # Move it to a request
         user_approver.request_id = approval.id
+
+    def test_employee_in_user_company(self):
+        '''Ensure that the correct manager is added as an approver.
+        '''
+        user = new_test_user(self.env, login='user1', groups='base.group_user')
+        manager1 = new_test_user(self.env, login='manager1', groups='approvals.group_approval_manager')
+        manager2 = new_test_user(self.env, login='manager2', groups='approvals.group_approval_manager')
+        admin = new_test_user(self.env, login='admin1', groups='approvals.group_approval_manager')
+        admin_env = self.env(user=admin)
+        company2 = self.env['res.company'].create({'name': 'Wrong Company'})
+
+        # When incorrect employee is added first, it is selected first.
+        employee_manager1 = self.env['hr.employee'].create({
+            'user_id': manager1.id,
+        })
+        employee_manager2 = self.env['hr.employee'].create({
+            'user_id': manager2.id,
+        })
+        employee_user_wrong_company = self.env['hr.employee'].create({
+            'user_id': user.id,
+            'parent_id': employee_manager2.id,
+            'company_id': company2.id,
+        })
+        employee_user_correct_company = self.env['hr.employee'].create({
+            'user_id': user.id,
+            'parent_id': employee_manager1.id,
+            'company_id': user.company_id.id,
+        })
+
+        category1 = self.env['approval.category'].create({
+            'name': 'Test category 1',
+            'approver_ids': [
+                Command.create({'user_id': admin.id}),
+            ],
+            'manager_approval': 'approver',
+        })
+        approval = admin_env['approval.request'].create({
+            'name': 'Test request',
+            'request_owner_id': user.id,
+            'category_id': category1.id,
+            'date_start': fields.Datetime.now(),
+            'date_end': fields.Datetime.now(),
+            'location': 'testland'
+        })
+
+        self.assertTrue(employee_user_correct_company.parent_id.user_id in approval.approver_ids.user_id)
+        self.assertTrue(employee_user_wrong_company.parent_id.user_id not in approval.approver_ids.user_id)

@@ -34,13 +34,19 @@ export class StockBarcodeQuantOne2ManyField extends X2ManyField {
     }
 
     async openRecord(record) {
-        if (this.isQuantSelectable) {
+        if (this.isQuantSelectable && record.data.id !== this.state.selectedQuantId) {
             const vals = {
                 location_id: record.data.location_id,
                 lot_id: record.data.lot_id,
                 package_id: record.data.package_id,
                 owner_id: record.data.owner_id,
             };
+            const { package_id, result_package_id } = this.props.record.data;
+            const checkResultPack = result_package_id && package_id?.id === result_package_id.id;
+            if (checkResultPack && record.data.package_id?.id !== result_package_id.id) {
+                vals.result_package_id = false;
+                vals.outermost_result_package_id = false;
+            }
             this.state.selectedQuantId = record.data.id;
             return await this.props.record.update(vals);
         }

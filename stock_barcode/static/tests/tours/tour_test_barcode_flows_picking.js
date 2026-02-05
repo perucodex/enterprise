@@ -400,10 +400,10 @@ registry.category("web_tour.tours").add("test_internal_picking_from_scratch_with
             run: "click",
         },
 
-        // Creates a second internal transfert (WH/Stock -> WH/Stock).
+        // Create a second internal transfert and move package2 from WH/Stock to WH/Stock/Section 2.
         { trigger: ".o_stock_barcode_main_menu", run: "scan WHINT" },
         { trigger: ".o_barcode_client_action", run: () => helper.assertLinesCount(0) },
-        // Scans a package with some quants and checks lines was created for its content.
+        // Scans a package with some quants and checks lines were created for its content.
         { trigger: ".o_barcode_client_action", run: "scan P00002" },
         {
             trigger:
@@ -421,6 +421,78 @@ registry.category("web_tour.tours").add("test_internal_picking_from_scratch_with
         },
         { trigger: ".o_barcode_line:not(.o_selected)", run: "scan OBTVALI" },
         { trigger: ".o_notification_bar.bg-success" },
+
+        // Create a third internal transfer to move two packages into Shelf 1
+        // after packing them into a palet.
+        { trigger: ".o_stock_barcode_main_menu", run: "scan WHINT" },
+        { trigger: ".o_barcode_client_action", run: "scan P00003" },
+        { trigger: ".o_barcode_line", run: "scan P00004" },
+        { trigger: ".o_barcode_line .result-package:contains('P00004')", run: "scan PT_PALET" },
+        {
+            trigger: ".o_barcode_line .result-package:contains('PAL-')",
+            run: function () {
+                helper.assertLinesCount(2);
+                helper.assertLineProduct(0, "product1");
+                helper.assertLinePackage(0, "P00003");
+                helper.assertLineLocations(0, "WH/Stock", "WH/Stock");
+                helper.assertLineResultPackage(0, "PAL-0000001 > P00003");
+                helper.assertLineProduct(1, "product2");
+                helper.assertLinePackage(1, "P00004");
+                helper.assertLineResultPackage(1, "PAL-0000001 > P00004");
+                helper.assertLineLocations(1, "WH/Stock", "WH/Stock");
+            },
+        },
+        { trigger: ".o_barcode_line .result-package", run: "scan LOC-01-01-00" },
+        {
+            trigger: ".o_barcode_line .o_line_destination_location:contains('Section 1')",
+            run: function () {
+                helper.assertLinesCount(2);
+                helper.assertLineProduct(0, "product1");
+                helper.assertLinePackage(0, "P00003");
+                helper.assertLineLocations(0, "WH/Stock", ".../Section 1");
+                helper.assertLineResultPackage(0, "PAL-0000001 > P00003");
+                helper.assertLineProduct(1, "product2");
+                helper.assertLinePackage(1, "P00004");
+                helper.assertLineResultPackage(1, "PAL-0000001 > P00004");
+                helper.assertLineLocations(1, "WH/Stock", ".../Section 1");
+            },
+        },
+        ...stepUtils.validateBarcodeOperation(),
+
+        // Fourth transfer: scan the palet and check it's alright.
+        { trigger: ".o_stock_barcode_main_menu", run: "scan WHINT" },
+        { trigger: ".o_barcode_client_action", run: "scan PAL-0000001" },
+        {
+            content: "Check package lines were correctly added.",
+            trigger: ".o_barcode_line",
+            run: function () {
+                helper.assertLinesCount(2);
+                helper.assertLineProduct(0, "[TEST] product1");
+                helper.assertLinePackages(0, "PAL-0000001 > P00003", "PAL-0000001 > P00003");
+                helper.assertLineLocations(0, "WH/Stock/Section 1", "WH/Stock");
+                helper.assertLineProduct(1, "product2");
+                helper.assertLineLocations(1, "WH/Stock/Section 1", "WH/Stock");
+                helper.assertLinePackages(1, "PAL-0000001 > P00004", "PAL-0000001 > P00004");
+            },
+        },
+        { trigger: ".o_barcode_client_action", run: "scan PAL-0000001" },
+        { trigger: ".o_notification:contains('This package is already scanned.') .bg-danger" },
+        {
+            trigger: ".o_barcode_line",
+            run: function () {
+                helper.assertLinesCount(2);
+                helper.assertLineProduct(0, "[TEST] product1");
+                helper.assertLinePackages(0, "PAL-0000001 > P00003", "PAL-0000001 > P00003");
+                helper.assertLineLocations(0, "WH/Stock/Section 1", "WH/Stock");
+                helper.assertLineProduct(1, "product2");
+                helper.assertLineLocations(1, "WH/Stock/Section 1", "WH/Stock");
+                helper.assertLinePackages(1, "PAL-0000001 > P00004", "PAL-0000001 > P00004");
+            },
+        },
+        { trigger: ".o_barcode_line .result-package", run: "scan LOC-01-01-00" },
+        { trigger: ".o_barcode_line .o_line_destination_location:contains('Section 1')" },
+        ...stepUtils.validateBarcodeOperation(),
+        { trigger: ".o_stock_barcode_main_menu" },
     ],
 });
 
@@ -596,6 +668,101 @@ registry.category("web_tour.tours").add("test_internal_picking_reserved_1", {
         },
     ],
 });
+
+registry
+    .category("web_tour.tours")
+    .add("test_internal_picking_reserved_move_packages_into_new_palet", {
+        steps: () => [
+            // 1st Transfer: unpack two palets and pack their contents into a new one.
+            { trigger: ".o_stock_barcode_main_menu", run: "scan TEST/INT/0001" },
+            {
+                trigger: ".o_barcode_line",
+                run: function () {
+                    helper.assertLinesCount(2);
+                    helper.assertLinePackages(0, "PAL-01", "PAL-01");
+                    helper.assertLinePackages(1, "PAL-02", "PAL-02");
+                },
+            },
+            // Click on the PAL-01 line, complete it then unpack it.
+            { trigger: ".o_barcode_line[data-package='PAL-01']", run: "click" },
+            {
+                trigger: ".o_barcode_line.o_selected button[name='completePackageButton']",
+                run: "click",
+            },
+            {
+                trigger: ".o_barcode_line.o_selected.o_line_completed button.o_unpack",
+                run: "click",
+            },
+            // Click on the PAL-02 line, complete it then unpack it.
+            {
+                trigger: ".o_barcode_line[data-package='PAL-02']",
+                run: "click",
+            },
+            {
+                trigger:
+                    ".o_barcode_line[data-package='PAL-02'].o_selected button[name='completePackageButton']",
+                run: "click",
+            },
+            {
+                trigger: ".o_barcode_line.o_selected.o_line_completed button.o_unpack",
+                run: "click",
+            },
+            {
+                trigger: ".o_barcode_line[data-package='BOX-03']",
+                run: function () {
+                    helper.assertLinesCount(4);
+                    helper.assertLinePackages(0, "PAL-01 > BOX-01", "BOX-01");
+                    helper.assertLinePackages(1, "PAL-01 > BOX-02", "BOX-02");
+                    helper.assertLinePackages(2, "PAL-02 > BOX-03", "BOX-03");
+                    helper.assertLinePackages(3, "PAL-02 > BOX-04", "BOX-04");
+                },
+            },
+            // Scan palet package type barcode to pack all boxes into a new palet.
+            { trigger: "body", run: "scan PT_PALET" },
+            {
+                trigger: ".o_barcode_line .result-package:contains('PAL-0000001')",
+                run: function () {
+                    helper.assertLinesCount(4);
+                    helper.assertLinePackages(0, "PAL-01 > BOX-01", "PAL-0000001 > BOX-01");
+                    helper.assertLinePackages(1, "PAL-01 > BOX-02", "PAL-0000001 > BOX-02");
+                    helper.assertLinePackages(2, "PAL-02 > BOX-03", "PAL-0000001 > BOX-03");
+                    helper.assertLinePackages(3, "PAL-02 > BOX-04", "PAL-0000001 > BOX-04");
+                },
+            },
+            ...stepUtils.validateBarcodeOperation(),
+
+            // 2nd Transfer: scan two boxes and pack them into a palet.
+            { trigger: ".o_stock_barcode_main_menu", run: "scan TEST/INT/0002" },
+            {
+                trigger: ".o_barcode_line",
+                run: function () {
+                    helper.assertLinesCount(2);
+                    helper.assertLinePackages(0, "BOX-05", "BOX-05");
+                    helper.assertLinePackages(1, "BOX-06", "BOX-06");
+                },
+            },
+            { trigger: ".o_barcode_line", run: "scan BOX-05" },
+            {
+                trigger: ".o_barcode_line[data-package='BOX-05'].o_selected.o_line_completed",
+                run: "scan BOX-06",
+            },
+            {
+                trigger: ".o_barcode_line[data-package='BOX-06'].o_selected.o_line_completed",
+                run: "scan PAL-03",
+            },
+            // Check the packages label, since the boxes go into a palet where they don't come from,
+            // we should have their complete name and not only the palet name.
+            {
+                trigger: ".result-package:contains('PAL-03')",
+                run: function () {
+                    helper.assertLinesCount(2);
+                    helper.assertLinePackages(0, "BOX-05", "PAL-03 > BOX-05");
+                    helper.assertLinePackages(1, "BOX-06", "PAL-03 > BOX-06");
+                },
+            },
+            ...stepUtils.validateBarcodeOperation(),
+        ],
+    });
 
 registry.category("web_tour.tours").add("test_procurement_backorder", {
     steps: () => [
@@ -819,6 +986,214 @@ registry.category("web_tour.tours").add("test_receipt_reserved_2_partial_put_in_
         { trigger: ".btn.o_validate_page", run: "click" },
         { trigger: ".modal-dialog button.btn-primary", run: "click" },
         { trigger: ".o_stock_barcode_main_menu" },
+    ],
+});
+
+registry.category("web_tour.tours").add("test_receipt_reserved_put_in_pack_after_interruption", {
+    steps: () => [
+        // 1st receipt: ensure we can put in pack product even if we leave and re-open the operation
+        { trigger: ".o_stock_barcode_main_menu", run: "scan TEST/IN/0001" },
+        {
+            trigger: ".o_barcode_line",
+            run: function () {
+                helper.assertLinesCount(4);
+            },
+        },
+        // Scan product1 and pack it into a box.
+        { trigger: ".o_barcode_line", run: "scan product1" },
+        {
+            trigger: ".o_barcode_line[data-barcode='product1'].o_line_completed",
+            run: "scan PT_BOX",
+        },
+        // Scan product2 but leave the receipt before to pack it.
+        {
+            trigger: ".o_barcode_line[data-barcode='product1'] .result-package",
+            run: "scan product2",
+        },
+        { trigger: ".o_barcode_line[data-barcode='product2'].o_line_completed" },
+        { trigger: "button.o_exit", run: "click" },
+        // Open the operation again.
+        { trigger: ".o_stock_barcode_main_menu", run: "scan TEST/IN/0001" },
+        {
+            trigger: ".o_barcode_line",
+            run: function () {
+                helper.assertLinesCount(4);
+                helper.assertLineProduct(0, "product3");
+                helper.assertLineResultPackage(0, false);
+                helper.assertLineQty(0, "0/1");
+                helper.assertLineProduct(1, "product4");
+                helper.assertLineResultPackage(1, false);
+                helper.assertLineQty(1, "0/1");
+                helper.assertLineProduct(2, "product1");
+                helper.assertLineResultPackage(2, "BOX-0000001");
+                helper.assertLineQty(2, "1/1");
+                helper.assertLineProduct(3, "product2");
+                helper.assertLineResultPackage(3, false);
+                helper.assertLineQty(3, "1/1");
+            },
+        },
+        // Scan box package type barcode -> Only product2 line should be packed.
+        { trigger: ".o_barcode_line", run: "scan PT_BOX" },
+        {
+            trigger: ".o_barcode_line[data-barcode='product2'] .result-package",
+            run: function () {
+                helper.assertLinesCount(4);
+                helper.assertLineProduct(0, "product3");
+                helper.assertLineResultPackage(0, false);
+                helper.assertLineQty(0, "0/1");
+                helper.assertLineProduct(1, "product4");
+                helper.assertLineResultPackage(1, false);
+                helper.assertLineQty(1, "0/1");
+                helper.assertLineProduct(2, "product1");
+                helper.assertLineResultPackage(2, "BOX-0000001");
+                helper.assertLineQty(2, "1/1");
+                helper.assertLineProduct(3, "product2");
+                helper.assertLineResultPackage(3, "BOX-0000002");
+                helper.assertLineQty(3, "1/1");
+            },
+        },
+        // Leave and open the receipt again.
+        { trigger: "button.o_exit", run: "click" },
+        { trigger: ".o_stock_barcode_main_menu", run: "scan TEST/IN/0001" },
+        // Scan palet package type barcode -> product1 and product2 should be packed into it.
+        { trigger: ".o_barcode_line", run: "scan PT_PALET" },
+        {
+            trigger: ".result-package:contains('PAL')",
+            run: function () {
+                helper.assertLinesCount(4);
+                helper.assertLineProduct(0, "product3");
+                helper.assertLineResultPackage(0, false);
+                helper.assertLineQty(0, "0/1");
+                helper.assertLineProduct(1, "product4");
+                helper.assertLineResultPackage(1, false);
+                helper.assertLineQty(1, "0/1");
+                helper.assertLineProduct(2, "product1");
+                helper.assertLineResultPackage(2, "PAL-0000001 > BOX-0000001");
+                helper.assertLineQty(2, "1/1");
+                helper.assertLineProduct(3, "product2");
+                helper.assertLineResultPackage(3, "PAL-0000001 > BOX-0000002");
+                helper.assertLineQty(3, "1/1");
+            },
+        },
+        // Scan product4 and pack it in a box.
+        { trigger: ".o_barcode_line", run: "scan product4" },
+        {
+            trigger: ".o_barcode_line[data-barcode='product4'].o_line_completed",
+            run: "scan PT_BOX",
+        },
+        { trigger: ".o_barcode_line[data-barcode='product4'] .result-package" },
+        // Leave and open again.
+        { trigger: "button.o_exit", run: "click" },
+        { trigger: ".o_stock_barcode_main_menu", run: "scan TEST/IN/0001" },
+        // Scan the existing palet -> Only product4 should be packed into it.
+        { trigger: ".o_barcode_line", run: "scan PAL-0000001" },
+        {
+            trigger: ".o_barcode_line[data-barcode='product4'] .result-package:contains('PAL')",
+            run: function () {
+                helper.assertLinesCount(4);
+                helper.assertLineProduct(0, "product3");
+                helper.assertLineResultPackage(0, false);
+                helper.assertLineQty(0, "0/1");
+                helper.assertLineProduct(1, "product1");
+                helper.assertLineResultPackage(1, "PAL-0000001 > BOX-0000001");
+                helper.assertLineQty(1, "1/1");
+                helper.assertLineProduct(2, "product2");
+                helper.assertLineResultPackage(2, "PAL-0000001 > BOX-0000002");
+                helper.assertLineQty(2, "1/1");
+                helper.assertLineProduct(3, "product4");
+                helper.assertLineResultPackage(3, "PAL-0000001 > BOX-0000003");
+                helper.assertLineQty(3, "1/1");
+            },
+        },
+        // Scan the product3, leave and open again, and try to pack with the "Put in pack" button.
+        { trigger: ".o_barcode_line", run: "scan product3" },
+        { trigger: ".o_barcode_line[data-barcode='product3'].o_selected.o_line_completed" },
+        { trigger: "button.o_exit", run: "click" },
+        { trigger: ".o_stock_barcode_main_menu", run: "scan TEST/IN/0001" },
+        { trigger: "button.o_put_in_pack", run: "click" },
+        {
+            trigger: ".o_barcode_line[data-barcode='product3'] .result-package",
+            run: function () {
+                helper.assertLinesCount(4);
+                helper.assertLineProduct(0, "product1");
+                helper.assertLineResultPackage(0, "PAL-0000001 > BOX-0000001");
+                helper.assertLineQty(0, "1/1");
+                helper.assertLineProduct(1, "product2");
+                helper.assertLineResultPackage(1, "PAL-0000001 > BOX-0000002");
+                helper.assertLineQty(1, "1/1");
+                helper.assertLineProduct(2, "product4");
+                helper.assertLineResultPackage(2, "PAL-0000001 > BOX-0000003");
+                helper.assertLineQty(2, "1/1");
+                helper.assertLineProduct(3, "product3");
+                helper.assertLineResultPackage(3, "PACK0000001");
+                helper.assertLineQty(3, "1/1");
+            },
+        },
+        // Leave/open again then scan the palet, product3 must be packed into it too.
+        { trigger: "button.o_exit", run: "click" },
+        { trigger: ".o_stock_barcode_main_menu", run: "scan TEST/IN/0001" },
+        { trigger: ".o_barcode_line", run: "scan PAL-0000001" },
+        {
+            trigger: ".o_barcode_line[data-barcode='product3'] .result-package:contains('PAL')",
+            run: function () {
+                helper.assertLinesCount(4);
+                helper.assertLineProduct(0, "product1");
+                helper.assertLineResultPackage(0, "PAL-0000001 > BOX-0000001");
+                helper.assertLineQty(0, "1/1");
+                helper.assertLineProduct(1, "product2");
+                helper.assertLineResultPackage(1, "PAL-0000001 > BOX-0000002");
+                helper.assertLineQty(1, "1/1");
+                helper.assertLineProduct(2, "product4");
+                helper.assertLineResultPackage(2, "PAL-0000001 > BOX-0000003");
+                helper.assertLineQty(2, "1/1");
+                helper.assertLineProduct(3, "product3");
+                helper.assertLineResultPackage(3, "PAL-0000001 > PACK0000001");
+                helper.assertLineQty(3, "1/1");
+            },
+        },
+        ...stepUtils.validateBarcodeOperation(),
+
+        // 2nd receipt: ensure we can set a package type after put in pack on the parent package.
+        { trigger: ".o_stock_barcode_main_menu", run: "scan TEST/IN/0002" },
+        { trigger: ".o_barcode_line", run: "scan product1" },
+        {
+            content: "Pack product1",
+            trigger: ".o_barcode_line.o_selected.o_line_completed",
+            run: "scan OBTPACK",
+        },
+        {
+            trigger: ".o_barcode_line[data-barcode='product1'] .result-package",
+            run: "scan product2",
+        },
+        {
+            content: "Pack product2",
+            trigger: ".o_barcode_line[data-barcode='product2'].o_selected.o_line_completed",
+            run: "scan OBTPACK",
+        },
+        {
+            content: "Pack both packages into another package",
+            trigger: ".o_barcode_line[data-barcode='product2'] .result-package",
+            run: "scan OBTPACK",
+        },
+        {
+            content: "Set the palet type to the parent package",
+            trigger: ".result-package:text('PACK0000004 > PACK0000003')",
+            run: "scan PT_PALET",
+        },
+        {
+            trigger:
+                ".o_notification_content:text('Package type Palet applied to the package PACK0000004')",
+            run: function () {
+                helper.assertLinesCount(2);
+                helper.assertLineProduct(0, "product1");
+                helper.assertLineResultPackage(0, "PACK0000004 > PACK0000002");
+                helper.assertLineQty(0, "1/1");
+                helper.assertLineProduct(1, "product2");
+                helper.assertLineResultPackage(1, "PACK0000004 > PACK0000003");
+                helper.assertLineQty(1, "1/1");
+            },
+        },
+        ...stepUtils.validateBarcodeOperation(),
     ],
 });
 
@@ -4094,6 +4469,33 @@ registry.category("web_tour.tours").add("test_put_in_pack_from_multiple_pages", 
     ],
 });
 
+registry.category("web_tour.tours").add("test_put_in_pack_in_new_created_package", {
+    steps: () => [
+        { trigger: ".o_stock_barcode_main_menu", run: "scan TEST/IN/0001" },
+        { trigger: ".o_barcode_line", run: "scan product1" },
+        { trigger: ".o_barcode_line.o_selected.o_line_completed", run: "scan OBTPACK" },
+        {
+            trigger: ".o_barcode_line.o_selected.o_line_completed .result-package",
+            run: "scan product2",
+        },
+        {
+            trigger: ".o_barcode_line:first-child.o_selected.o_line_completed",
+            run: "scan PACK0000001",
+        },
+        {
+            trigger: ".o_barcode_line:first-child .result-package",
+            run: function () {
+                helper.assertLinesCount(2);
+                helper.assertLineProduct(0, "product2");
+                helper.assertLineResultPackage(0, "PACK0000001");
+                helper.assertLineProduct(1, "product1");
+                helper.assertLineResultPackage(1, "PACK0000001");
+            },
+        },
+        ...stepUtils.validateBarcodeOperation(),
+    ],
+});
+
 registry.category("web_tour.tours").add("test_put_in_pack_no_freeze", {
     steps: () => [
         { trigger: "button.o_button_operations", run: "click" },
@@ -4227,6 +4629,55 @@ registry.category("web_tour.tours").add("test_unpack_package_lines", {
                 helper.assertLinePackage(3, "PAL01 > BOX02");
                 helper.assertLineResultPackage(3, "PAL02");
                 helper.assertButtonIsVisible(3, "unpack", false);
+            },
+        },
+        ...stepUtils.validateBarcodeOperation(),
+    ],
+});
+
+registry.category("web_tour.tours").add("test_unpack_palet_then_pack_another_palet", {
+    steps: () => [
+        // Create an internal transfer, scan a palet, unpack it and re-pack all packages into another palet.
+        { trigger: ".o_stock_barcode_main_menu", run: "scan WHINT" },
+        { trigger: ".o_barcode_client_action", run: "scan PAL01" },
+        {
+            trigger: ".o_barcode_line",
+            run: () => {
+                helper.assertLinesCount(1);
+                helper.assertLinePackages(0, "PAL01", "PAL01");
+            },
+        },
+        { trigger: ".o_barcode_line", run: "click" },
+        { trigger: ".o_barcode_line.o_selected", run: "scan OBTUPCK" },
+        { trigger: ".o_barcode_line:nth-child(2)", run: "scan PT_PALET" },
+        {
+            trigger: ".o_barcode_line .result-package:contains('PAL-0000001')",
+            run: () => {
+                helper.assertLinesCount(2);
+                helper.assertLinePackage(0, "PAL01 > BOX01", "PAL-0000001 > BOX01");
+                helper.assertLinePackage(1, "PAL01 > BOX02", "PAL-0000001 > BOX02");
+            },
+        },
+        { trigger: ".o_barcode_line", run: "scan OBTVALI" },
+        // Do the exact same steps for a delivery but use buttons instead of scan for the unpack/put in pack.
+        { trigger: ".o_stock_barcode_main_menu", run: "scan WHOUT" },
+        { trigger: ".o_barcode_client_action", run: "scan PAL-0000001" },
+        {
+            trigger: ".o_barcode_line",
+            run: () => {
+                helper.assertLinesCount(1);
+                helper.assertLinePackages(0, "PAL-0000001", "PAL-0000001");
+            },
+        },
+        { trigger: ".o_barcode_line", run: "click" },
+        { trigger: "button.o_unpack", run: "click" },
+        { trigger: ".o_barcode_line:nth-child(2)", run: "scan PT_PALET" },
+        {
+            trigger: ".o_barcode_line .result-package:contains('PAL-0000002')",
+            run: () => {
+                helper.assertLinesCount(2);
+                helper.assertLinePackage(0, "PAL-0000001 > BOX01", "PAL-0000002 > BOX01");
+                helper.assertLinePackage(1, "PAL-0000001 > BOX02", "PAL-0000002 > BOX02");
             },
         },
         ...stepUtils.validateBarcodeOperation(),
@@ -5943,100 +6394,6 @@ registry.category("web_tour.tours").add("test_split_line_on_exit_for_receipt_wit
                 helper.assertLineQty(0, "3/3");
             },
         },
-    ],
-});
-
-registry.category("web_tour.tours").add("test_scan_line_splitting_preserve_destination", {
-    steps: () => [
-        // Select the first (only) line
-        {
-            trigger: ".o_barcode_line",
-            run: "click",
-        },
-        {
-            trigger: ".o_barcode_line.o_selected",
-            run: function () {
-                helper.assertLinesCount(1);
-                helper.assertLineQty(0, "0/5");
-                helper.assertLineDestinationLocation(0, "WH/Stock");
-            },
-        },
-        // Reassign destination, add product2 x3, then pack it
-        {
-            trigger: ".o_barcode_line",
-            run: "scan shelf3",
-        },
-        {
-            trigger: '.o_barcode_line .o_line_destination_location:contains("Section 3")',
-            run: "scan product2",
-        },
-        {
-            trigger: ".o_barcode_line",
-            run: "scan product2",
-        },
-        {
-            trigger: '.o_barcode_line .qty-done:contains("2")',
-            run: "scan THEPACK1",
-        },
-        // Ensure that packing split the line and preserved the new destination
-        {
-            trigger: ".o_barcode_line.o_selected .qty-done:contains(0)",
-            run: function () {
-                helper.assertLinesCount(2);
-                [0, 1].map((i) => helper.assertLineQty(i, ["0/3", "2/2"][i]));
-                [0, 1].map((i) => helper.assertLineDestinationLocation(i, ".../Section 3"));
-            },
-        },
-        // Add product2 x3, completing the remaining line, then add to a pack, then reassign destination
-        {
-            trigger: ".o_barcode_line",
-            run: "scan product2",
-        },
-        {
-            trigger: ".o_barcode_line",
-            run: "scan product2",
-        },
-        {
-            trigger: ".o_barcode_line",
-            run: "scan product2",
-        },
-        {
-            trigger: ".o_barcode_line.o_selected.o_line_completed",
-            run: "scan THEPACK2",
-        },
-        {
-            trigger: '.o_barcode_line.o_selected .result-package:contains("THEPACK2")',
-            run: "scan shelf4",
-        },
-        {
-            trigger: '.o_barcode_line .o_line_destination_location:contains("Section 4")',
-            run: function () {
-                helper.assertValidateVisible(true);
-                helper.assertValidateIsHighlighted(true);
-                helper.assertValidateEnabled(true);
-                // Check that lines' quantity didn't change.
-                helper.assertLinesCount(2);
-                const lines = helper.getLines({ barcode: "product2" });
-                [0, 1].map((i) =>
-                    helper.assert(
-                        lines[i].querySelector(".result-package").innerText,
-                        ["THEPACK2", "THEPACK1"][i]
-                    )
-                );
-                [0, 1].map((i) => helper.assertLineQty(lines[i], ["3/3", "2/2"][i]));
-                [0, 1].map((i) =>
-                    helper.assertLineDestinationLocation(
-                        lines[i],
-                        [".../Section 4", ".../Section 3"][i]
-                    )
-                );
-            },
-        },
-        {
-            trigger: ".btn.o_validate_page",
-            run: "click",
-        },
-        { trigger: ".o_notification_bar.bg-success" },
     ],
 });
 

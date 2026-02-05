@@ -119,7 +119,6 @@ class TestCaseDocumentsBridgeSign(SignRequestCommon):
                 self.assertEqual(len(documents_signed), 2)
                 self.assertFalse(documents_signed.owner_id,
                                  "Owner of the signed/certificate documents must be false.")
-                # The signed documents inherits from the folder access rights -> cannot access the signed documents
                 for doc in documents_signed:
                     self.assertEqual(doc.access_via_link, "none")
                     self.assertEqual(doc.access_internal, "none")
@@ -249,3 +248,38 @@ class TestCaseDocumentsBridgeSign(SignRequestCommon):
         # Verify template creation
         template = self.env['sign.template'].browse(result['params']['id'])
         self.assertTrue(template.exists(), "Sign template should be created")
+
+    @mute_logger("odoo.addons.documents.models.documents_document")
+    def test_signed_document_requester_access(self):
+        """ Verifies that the requester of a sign request has at least view access to the signed document. """
+        Document = self.env["documents.document"]
+        User = self.env["res.users"]
+
+        signer, requester = User.create([{
+            "name": f"test_sign_{role}",
+            "login": f"test_sign_{role}@ex.com",
+            "email": f"test_sign_{role}@ex.com",
+            "group_ids": [Command.set([self.env.ref("sign.group_sign_manager").id])]
+        } for role in ("signer", "requester")])
+
+        self.template_1_role.folder_id = self.folder_a
+
+        sign_request = self.env['sign.request'].with_user(requester).create({
+            'template_id': self.template_1_role.id,
+            'reference': self.template_1_role.display_name,
+            'request_item_ids': [Command.create({
+                'partner_id': signer.partner_id.id,
+                'role_id': self.role_signer_1.id,
+            })],
+        })
+        sign_request.request_item_ids[0].with_user(signer).sudo().sign(
+            {str(self.template_1_role.sign_item_ids[0].id): "Test Sign"})
+        documents_signed = Document.search(
+            [('res_model', '=', 'sign.request'), ('res_id', '=', sign_request.id)])
+        self.assertEqual(len(documents_signed), 2)
+        for doc in documents_signed:
+            # The requester has view access to the signed document
+            access_by_partner = doc.access_ids.grouped('partner_id')
+            requester_access = access_by_partner[requester.partner_id]
+            self.assertIsNotNone(requester_access, "The requester should have access to the signed document")
+            doc.with_user(requester).check_access('read')

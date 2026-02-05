@@ -45,6 +45,9 @@ Quality Control
         'spreadsheet.o_spreadsheet': [
             'quality_control/static/src/spreadsheet_bundle/**/*',
         ],
+        'web.assets_tests': [
+            'quality_control/static/tests/tours/**/*',
+        ],
         'web.assets_unit_tests': [
             'quality_control/static/tests/**/*',
         ],

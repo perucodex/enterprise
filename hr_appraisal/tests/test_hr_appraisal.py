@@ -100,20 +100,21 @@ class TestHrAppraisal(TransactionCase):
             it means that there is no appraisal plan yet.
             Thus, next_appraisal_date should be empty.
         """
-        self.hr_employee.create_date = date.today()
+        with freeze_time(date.today() - relativedelta(months=6)):
+            self.hr_employee.last_ongoing_appraisal_date = date.today()
 
-        months = self.hr_employee.company_id.duration_after_recruitment
-        upcoming_appraisal_date = date.today() + relativedelta(months=months)
+            months = self.hr_employee.company_id.duration_after_recruitment
+            upcoming_appraisal_date = date.today() + relativedelta(months=months)
 
-        self.assertEqual(self.hr_employee.next_appraisal_date, upcoming_appraisal_date, 'next_appraisal_date is not set properly for an employee that has just started')
+            self.assertEqual(self.hr_employee.next_appraisal_date, upcoming_appraisal_date, 'next_appraisal_date is not set properly for an employee that has just started')
 
-        # create appraisal manually
-        self.HrAppraisal.create({
-            'employee_id': self.hr_employee.id,
-            'date_close': date.today() + relativedelta(months=1),
-            'state': '1_new'
-        })
-        self.assertEqual(self.hr_employee.next_appraisal_date, False, 'There is an ongoing appraisal for an employee, next_appraisal_date should be empty.')
+            # create appraisal manually
+            self.HrAppraisal.create({
+                'employee_id': self.hr_employee.id,
+                'date_close': date.today() + relativedelta(months=1),
+                'state': '1_new'
+            })
+            self.assertEqual(self.hr_employee.next_appraisal_date, False, 'There is an ongoing appraisal for an employee, next_appraisal_date should be empty.')
 
     def test_appraisal_next_appraisal_date_uppcoming_appraisal(self):
         """
@@ -121,13 +122,14 @@ class TestHrAppraisal(TransactionCase):
         appraisal plan generates appraisal at that time.
         """
 
-        self.hr_employee.create_date = date.today()
+        with freeze_time(date.today() - relativedelta(months=6)):
+            self.hr_employee.last_ongoing_appraisal_date = date.today()
 
-        month = self.hr_employee.company_id.duration_after_recruitment
+            months = self.hr_employee.company_id.duration_after_recruitment
 
-        upcoming_appraisal_date = date.today() + relativedelta(months=month)
+            upcoming_appraisal_date = date.today() + relativedelta(months=months)
 
-        self.assertEqual(self.hr_employee.next_appraisal_date, upcoming_appraisal_date, 'next_appraisal_date is not set properly')
+            self.assertEqual(self.hr_employee.next_appraisal_date, upcoming_appraisal_date, 'next_appraisal_date is not set properly')
 
         with freeze_time(self.hr_employee.next_appraisal_date):
             self.env['res.company']._run_employee_appraisal_plans()
@@ -140,11 +142,12 @@ class TestHrAppraisal(TransactionCase):
             less than duration_after_recruitment ago,
             check that appraisal is not set
         """
-        self.hr_employee.create_date = date.today() - relativedelta(months=3)
+        with freeze_time(date.today() - relativedelta(months=3)):
+            self.hr_employee.last_ongoing_appraisal_date = date.today()
 
-        self.env['res.company']._run_employee_appraisal_plans()
-        appraisals = self.HrAppraisal.search([('employee_id', '=', self.hr_employee.id)])
-        self.assertFalse(appraisals, "Appraisal created")
+            self.env['res.company']._run_employee_appraisal_plans()
+            appraisals = self.HrAppraisal.search([('employee_id', '=', self.hr_employee.id)])
+            self.assertFalse(appraisals, "Appraisal created")
 
     def test_09_check_appraisal_after_recruitment(self):
         """
@@ -153,7 +156,7 @@ class TestHrAppraisal(TransactionCase):
             some time (duration_after_recruitment) has evolved
             since recruitment
         """
-        with freeze_time(self.hr_employee.create_date + relativedelta(months=self.duration_after_recruitment)):
+        with freeze_time(self.hr_employee.date_version + relativedelta(months=self.duration_after_recruitment)):
             self.env['res.company']._run_employee_appraisal_plans()
             appraisals = self.HrAppraisal.search([('employee_id', '=', self.hr_employee.id)])
             self.assertTrue(appraisals, "Appraisal not created")
@@ -164,11 +167,17 @@ class TestHrAppraisal(TransactionCase):
             but not enough for the first real appraisal.
             Check that appraisal is not created
         """
-        self.hr_employee.create_date = date.today() - relativedelta(months=self.duration_after_recruitment + 2, days=10)
-
-        self.env['res.company']._run_employee_appraisal_plans()
-        appraisals = self.HrAppraisal.search([('employee_id', '=', self.hr_employee.id)])
-        self.assertFalse(appraisals, "Appraisal created")
+        with freeze_time(self.hr_employee.date_version + relativedelta(months=self.duration_after_recruitment)):
+            self.HrAppraisal.create({
+                'employee_id': self.hr_employee.id,
+                'date_close': date.today(),
+                'state': '3_done',
+            })
+            self.hr_employee.last_ongoing_appraisal_date = date.today()
+        with freeze_time(self.hr_employee.date_version + relativedelta(months=self.duration_after_recruitment + self.duration_first_appraisal - 2)):
+            self.env['res.company']._run_employee_appraisal_plans()
+            appraisals = self.HrAppraisal.search([('employee_id', '=', self.hr_employee.id), ('state', '=', '1_new')])
+            self.assertFalse(appraisals, "Appraisal created")
 
     def test_11_check_first_appraisal_since_recruitment_appraisal(self):
         """
@@ -176,18 +185,20 @@ class TestHrAppraisal(TransactionCase):
             first recruitment appraisal and now it is
             time for a first real appraisal
         """
-        self.hr_employee.create_date = date.today() - relativedelta(months=self.duration_after_recruitment + self.duration_first_appraisal, days=10)
-        # In order to make the second appraisal, cron checks that
-        # there is alraedy one done appraisal for the employee
-        self.HrAppraisal.create({
-            'employee_id': self.hr_employee.id,
-            'date_close': date.today() - relativedelta(months=self.duration_first_appraisal, days=10),
-            'state': '3_done'
-        })
+        with freeze_time(self.hr_employee.date_version + relativedelta(months=self.duration_after_recruitment)):
+            # In order to make the second appraisal, cron checks that
+            # there is alraedy one done appraisal for the employee
+            self.HrAppraisal.create({
+                'employee_id': self.hr_employee.id,
+                'date_close': date.today(),
+                'state': '3_done',
+            })
+            self.hr_employee.last_ongoing_appraisal_date = date.today()
 
-        self.env['res.company']._run_employee_appraisal_plans()
-        appraisals = self.HrAppraisal.search([('employee_id', '=', self.hr_employee.id)])
-        self.assertTrue(appraisals, "Appraisal not created")
+        with freeze_time(self.hr_employee.date_version + relativedelta(months=self.duration_after_recruitment + self.duration_first_appraisal)):
+            self.env['res.company']._run_employee_appraisal_plans()
+            appraisals = self.HrAppraisal.search([('employee_id', '=', self.hr_employee.id)])
+            self.assertTrue(appraisals, "Appraisal not created")
 
     def test_12_check_no_appraisal_after_first_appraisal(self):
         """
@@ -196,45 +207,49 @@ class TestHrAppraisal(TransactionCase):
             for recurring appraisal. Check that
             appraisal is not set
         """
-        self.hr_employee.create_date = date.today() - relativedelta(months=self.duration_after_recruitment + self.duration_first_appraisal + 2, days=10)
-        # In order to make recurring appraisal, cron checks that
-        # there are alraedy two done appraisals for the employee
-        self.HrAppraisal.create({
-            'employee_id': self.hr_employee.id,
-            'date_close': date.today() - relativedelta(months=self.duration_first_appraisal + 2, days=10),
-            'state': '3_done'
-        })
-        self.HrAppraisal.create({
-            'employee_id': self.hr_employee.id,
-            'date_close': date.today() - relativedelta(months=2, days=10),
-            'state': '3_done'
-        })
+        with freeze_time(self.hr_employee.date_version + relativedelta(months=self.duration_after_recruitment + self.duration_first_appraisal)):
+            # In order to make recurring appraisal, cron checks that
+            # there are alraedy two done appraisals for the employee
+            self.HrAppraisal.create({
+                'employee_id': self.hr_employee.id,
+                'date_close': date.today() - relativedelta(months=self.duration_first_appraisal),
+                'state': '3_done',
+            })
+            self.HrAppraisal.create({
+                'employee_id': self.hr_employee.id,
+                'date_close': date.today(),
+                'state': '3_done',
+            })
+            self.hr_employee.last_ongoing_appraisal_date = date.today()
 
-        self.env['res.company']._run_employee_appraisal_plans()
-        appraisals = self.HrAppraisal.search([('employee_id', '=', self.hr_employee.id), ('state', '=', '1_new')])
-        self.assertFalse(appraisals, "Appraisal created")
+        with freeze_time(self.hr_employee.date_version + relativedelta(months=self.duration_after_recruitment + self.duration_first_appraisal + self.duration_next_appraisal - 2)):
+            self.env['res.company']._run_employee_appraisal_plans()
+            appraisals = self.HrAppraisal.search([('employee_id', '=', self.hr_employee.id), ('state', '=', '1_new')])
+            self.assertFalse(appraisals, "Appraisal created")
 
     def test_12_check_recurring_appraisal(self):
         """
             check that recurring appraisal is created
         """
+        with freeze_time(self.hr_employee.date_version + relativedelta(months=self.duration_after_recruitment + self.duration_first_appraisal)):
+            # In order to make recurring appraisal, cron checks that
+            # there are alraedy two done appraisals for the employee
+            self.HrAppraisal.create({
+                'employee_id': self.hr_employee.id,
+                'date_close': date.today() - relativedelta(months=self.duration_first_appraisal),
+                'state': '3_done',
+            })
+            self.HrAppraisal.create({
+                'employee_id': self.hr_employee.id,
+                'date_close': date.today(),
+                'state': '3_done',
+            })
+            self.hr_employee.last_ongoing_appraisal_date = date.today()
 
-        self.hr_employee.create_date = date.today() - relativedelta(months=self.duration_after_recruitment + self.duration_first_appraisal + self.duration_next_appraisal, days=10)
-
-        self.HrAppraisal.create({
-            'employee_id': self.hr_employee.id,
-            'date_close': date.today() - relativedelta(months=self.duration_first_appraisal + self.duration_next_appraisal, days=10),
-            'state': '3_done'
-        })
-        self.HrAppraisal.create({
-            'employee_id': self.hr_employee.id,
-            'date_close': date.today() - relativedelta(months=self.duration_next_appraisal, days=10),
-            'state': '3_done'
-        })
-
-        self.env['res.company']._run_employee_appraisal_plans()
-        appraisals = self.HrAppraisal.search([('employee_id', '=', self.hr_employee.id)])
-        self.assertTrue(appraisals, "Appraisal not created")
+        with freeze_time(self.hr_employee.date_version + relativedelta(months=self.duration_after_recruitment + self.duration_first_appraisal + self.duration_next_appraisal)):
+            self.env['res.company']._run_employee_appraisal_plans()
+            appraisals = self.HrAppraisal.search([('employee_id', '=', self.hr_employee.id)])
+            self.assertTrue(appraisals, "Appraisal not created")
 
     def test_load_scenario(self):
         self.env['hr.appraisal']._load_demo_data()

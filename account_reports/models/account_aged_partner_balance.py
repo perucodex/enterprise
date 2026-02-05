@@ -363,10 +363,12 @@ class AccountAgedPartnerBalanceReportHandler(models.AbstractModel):
 
     def aged_partner_balance_audit(self, options, params, journal_type):
         """ Open a list of invoices/bills and/or deferral entries for the clicked cell
+
         :param dict options: the report's `options`
         :param dict params:  a dict containing:
-                                 `calling_line_dict_id`: line id containing the optional account of the cell
-                                 `expression_label`: the expression label of the cell
+
+             * ``calling_line_dict_id``: line id containing the optional account of the cell
+             * ``expression_label``: the expression label of the cell
         """
         report = self.env['account.report'].browse(options['report_id'])
         action = self.env['ir.actions.actions']._for_xml_id('account.action_amounts_to_settle')

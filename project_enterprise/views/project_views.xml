@@ -53,7 +53,7 @@
             <field name="date_deadline" position="after">
                 <t t-set="cls" t-value="(luxon.DateTime.fromISO(record.date_deadline.raw_value) &lt; luxon.DateTime.local() and !['1_done', '1_canceled'].includes(record.state.raw_value)) ? 'text-danger' : ''"/>
                 <div invisible="not planned_date_begin"  t-attf-class="d-flex align-items-center #{cls}">
-                    <field name="planned_date_begin" widget="daterange" options="{'end_date_field': 'date_deadline'}"/>
+                    <field name="planned_date_begin" widget="daterange" options="{'end_date_field': 'date_deadline'}" class="w-100"/>
                 </div>
                 <field name="planning_overlap" class="text-danger o_planning_overlap"
                     invisible="not context.get('is_form_gantt', False)"/>

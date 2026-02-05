@@ -24,7 +24,7 @@ from odoo.tools.misc import mute_logger, submap
 
 from odoo.addons.ai.utils.ai_citation import apply_numeric_citations, get_attachment_ids_from_text
 from odoo.addons.ai.utils.llm_api_service import LLMApiService
-from odoo.addons.ai.utils.llm_providers import PROVIDERS, get_provider
+from odoo.addons.ai.utils.llm_providers import PROVIDERS, check_model_depreciation, get_provider
 
 _logger = logging.getLogger(__name__)
 
@@ -318,6 +318,7 @@ class AIAgent(models.Model):
         with file_open('ai/static/description/icon.png', 'rb') as f:
             image_placeholder = f.read()
         for vals in vals_list:
+            check_model_depreciation(self.env, vals.get("llm_model"))
             partner = self.env['res.partner'].create({
                 'name': vals.get('name'),
                 'active': False,
@@ -334,6 +335,9 @@ class AIAgent(models.Model):
             raise ValidationError(_("The partner linked to an AI agent can't be changed"))
 
         old_providers = {agent.id: agent._get_provider() for agent in self}
+
+        llm_model = vals.get("llm_model")
+        check_model_depreciation(self.env, llm_model)
         result = super().write(vals)
         for agent in self:
             new_provider = agent._get_provider()

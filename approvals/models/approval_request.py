@@ -312,7 +312,7 @@ class ApprovalRequest(models.Model):
             approver_id_vals = [Command.clear()]
 
             if request.category_id.manager_approval:
-                employee = self.env['hr.employee'].search([('user_id', '=', request.request_owner_id.id)], limit=1)
+                employee = self.env['hr.employee'].search([('user_id', '=', request.request_owner_id.id), ('company_id', '=', self.company_id.id)], limit=1)
                 if employee.parent_id.user_id:
                     manager_user_id = employee.parent_id.user_id.id
                     manager_required = request.category_id.manager_approval == 'required'

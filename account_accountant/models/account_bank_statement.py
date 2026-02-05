@@ -859,7 +859,7 @@ class AccountBankStatementLine(models.Model):
 
         body = _("Matching done")
         if reconcile_model := self.move_id.line_ids.reconcile_model_id:
-            body += _(" - %(reconcile_model_name)s", reconcile_model_name=reconcile_model.name)
+            body += _(" - %(reconcile_model_name)s", reconcile_model_name=", ".join(reconcile_model.mapped("name")))
         self.move_id.message_post(
             body=body,
             author_id=self.env.user.partner_id.id,
@@ -1519,7 +1519,7 @@ class AccountBankStatementLine(models.Model):
         liquidity_lines, _suspense_lines, other_lines = self._seek_for_lines()
 
         # Get the original base lines and tax lines before the edit of the line
-        if any(record_data.get(key) for key in ['tax_ids', 'balance', 'amount_currency']) and not move_line_to_edit.tax_line_id and not exchange_move:
+        if not move_line_to_edit.reconciled_lines_ids and any(record_data.get(key) for key in ['tax_ids', 'balance', 'amount_currency']) and not move_line_to_edit.tax_line_id and not exchange_move:
             original_base_lines, original_tax_lines = self._prepare_for_tax_lines_recomputation()
 
         edited_move_reconciled_line_ids = (move_line_to_edit.reconciled_lines_ids - exchange_line).ids
@@ -1536,7 +1536,7 @@ class AccountBankStatementLine(models.Model):
         edited_line = self.line_ids - (liquidity_lines + other_lines + new_suspense_lines)
 
         # Now that the new line has been added, we can recompute the taxes
-        if any(record_data.get(key) for key in ['tax_ids', 'balance', 'amount_currency']) and not edited_line.tax_line_id and not exchange_move:
+        if not edited_line.reconciled_lines_ids and any(record_data.get(key) for key in ['tax_ids', 'balance', 'amount_currency']) and not edited_line.tax_line_id and not exchange_move:
             self._edit_tax_lines(original_base_lines, original_tax_lines, edited_line, move_line_to_edit)
 
         # Means that we tried to remove the partner

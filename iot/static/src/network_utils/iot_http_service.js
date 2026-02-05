@@ -133,8 +133,8 @@ export class IotHttpService {
             if (data) {
                 const response =
                     await this.longpolling.sendMessage(ip, { device_identifier: deviceIdentifier, data }, messageId, true);
-                if (response?.result === false) {
-                    onFailure({status: "disconnected"}, deviceIdentifier, messageId);
+                if (response?.result === false || response?.result?.status === "disconnected") {  // compat. v19.1+ IoT Boxes
+                    onFailure({ status: "disconnected" }, deviceIdentifier, messageId);
                 }
             }
         } catch (e) {

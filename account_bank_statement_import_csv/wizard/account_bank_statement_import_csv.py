@@ -136,7 +136,7 @@ class Base_ImportImport(models.TransientModel):
     def execute_import(self, fields, columns, options, dryrun=False):
         if options.get('bank_stmt_import'):
             savepoint = self.env.cr.savepoint()
-            res = super().execute_import(fields, columns, options, dryrun=dryrun)
+            res = super(Base_ImportImport, self.with_context(bank_stmt_import=True)).execute_import(fields, columns, options, dryrun=dryrun)
             if not 'statement_id' in fields:
                 self.env['account.bank.statement'].with_context(
                     auto_statement_processing=not dryrun and res.get('ids')

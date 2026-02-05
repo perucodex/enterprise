@@ -3,11 +3,12 @@
 import base64
 
 from lxml import etree
+from datetime import date, datetime, timedelta
 
-from odoo import Command
+from odoo import Command, fields
 from odoo.addons.hr_payroll_account.tests.test_hr_payroll_account import TestHrPayrollAccountCommon
 from odoo.tests.common import test_xsd
-from odoo.tests import tagged
+from odoo.tests import tagged, Form
 
 
 class TestPayrollSEPACreditTransferCommon(TestHrPayrollAccountCommon):
@@ -48,6 +49,169 @@ class TestPayrollSEPACreditTransferCommon(TestHrPayrollAccountCommon):
             'bank_account_id': cls.bank_partner.id,
         })
         cls.bank_journal.sepa_pain_version = 'pain.001.001.09'
+
+        # ============================= MIURA =============================
+        cls.miura_be_company = cls.env['res.company'].create({
+            'name': 'Miura BE company',
+            'country_id': cls.env.ref('base.be').id,
+            'currency_id': cls.env.ref('base.EUR').id,
+            'batch_payroll_move_lines': False,
+        })
+        miura_transfer_account = cls.env['account.account'].create({
+            'name': 'Miura Company Transfer Account',
+            'code': '994987',
+            'reconcile': True,
+            'account_type': 'liability_payable',
+            'company_ids': (cls.miura_be_company.id,),
+        })
+        cls.miura_be_company.transfer_account_id = miura_transfer_account.id
+        cls.bnp_bank = cls.env['res.bank'].create({
+            'name': 'Miura BNP',
+            'bic': 'GEBABEBB',
+        })
+        cls.miura_work_contact = cls.env['res.partner'].create({'name': 'Miura work contact'})
+        cls.miura_partner_bank = cls.env['res.partner.bank'].create({
+            'acc_number': 'BE91073397502076',
+            'partner_id': cls.miura_work_contact.id,
+            'acc_type': 'bank',
+            'bank_id': cls.bnp_bank.id,
+            'allow_out_payment': True,
+        })
+
+        cls.salary_work_contact = cls.env['res.partner'].create({'name': 'Salary work contact'})
+        cls.salary_partner_bank = cls.env['res.partner.bank'].create({
+            'acc_number': 'BE34438537755990',
+            'partner_id': cls.salary_work_contact.id,
+            'acc_type': 'bank',
+            'bank_id': cls.bnp_bank.id,
+            'allow_out_payment': True,
+        })
+
+        cls.miura_work_address = cls.env['res.partner'].create({'name': 'Miura work address'})
+        cls.hr_employee_miura = cls.env['hr.employee'].create({
+           'work_contact_id': cls.miura_work_contact.id,
+            'address_id': cls.miura_work_address.id,
+            'birthday': '1966-07-11',
+            'children': 0.0,
+            'sex': 'male',
+            'marital': 'single',
+            'name': 'Kentaro',
+            'bank_account_ids': [cls.miura_partner_bank.id],
+            'company_id': cls.miura_be_company.id,
+        })
+
+        salary_payable = cls.env['account.account'].create({
+            'name': 'Salary Payable',
+            'code': '2300',
+            'reconcile': True,
+            'account_type': 'liability_payable',
+            'company_ids': (cls.miura_be_company.id,),
+        })
+
+        salary_account = cls.env['account.account'].create({
+            'name': "Salary Expense",
+            'code': "092039",
+            'account_type': "expense",
+            'company_ids': (cls.miura_be_company.id,),
+        })
+
+        cls.miura_salaries_journal = cls.env['account.journal'].create({
+            'name': 'Sepa Test Salaries',
+            'type': 'credit',
+            'code': 'SEPA-SLR-TEST',
+            'default_account_id': salary_account.id,
+            'sepa_pain_version': 'pain.001.001.09',
+            'currency_id': cls.env.ref('base.EUR').id,
+            'company_id': cls.miura_be_company.id,
+            'bank_account_id': cls.salary_partner_bank.id,
+        })
+
+        cls.hr_structure_mangaka = cls.env['hr.payroll.structure'].create({
+            'name': 'Salary Structure for Mangaka',
+            'rule_ids': [
+                (0, 0, {
+                    'name': 'Basic Salary',
+                    'amount_select': 'percentage',
+                    'amount_percentage': 100,
+                    'amount_percentage_base': 'version.wage',
+                    'code': 'BASIC',
+                    'category_id': cls.env.ref('hr_payroll.BASIC').id,
+                    'sequence': 1,
+                }), (0, 0, {
+                    'name': 'Provident Fund',
+                    'amount_select': 'percentage',
+                    'sequence': 120,
+                    'amount_percentage': -12.5,
+                    'amount_percentage_base': 'version.wage',
+                    'code': 'PF',
+                    'category_id': cls.env.ref('hr_payroll.DED').id,
+                }), (0, 0, {
+                    'name': 'Meal Voucher',
+                    'amount_select': 'fix',
+                    'amount_fix': 10,
+                   'quantity': "'WORK100' in worked_days and worked_days['WORK100'].number_of_days",
+                    'code': 'MA',
+                    'category_id': cls.env.ref('hr_payroll.ALW').id,
+                    'sequence': 16,
+                }), (0, 0, {
+                    'name': 'Conveyance Allowance',
+                    'amount_select': 'fix',
+                    'amount_fix': 800,
+                    'code': 'CA',
+                    'category_id': cls.env.ref('hr_payroll.ALW').id,
+                    'sequence': 10,
+                }), (0, 0, {
+                    'name': 'House Rent Allowance',
+                    'amount_select': 'percentage',
+                    'amount_percentage': 40,
+                    'amount_percentage_base': 'version.wage',
+                    'code': 'HRA',
+                    'category_id': cls.env.ref('hr_payroll.ALW').id,
+                    'sequence': 5,
+                }), (0, 0, {
+                    'name': 'Net Salary',
+                    'amount_select': 'code',
+                    'amount_python_compute': 'result = categories["BASIC"] + categories["ALW"] + categories["DED"]',
+                    'code': 'NET',
+                    'category_id': cls.env.ref('hr_payroll.NET').id,
+                    'sequence': 200,
+                    'account_credit': salary_payable.id,
+                    'employee_move_line': True,
+                })
+
+            ],
+            'type_id': cls.env['hr.payroll.structure.type'].create({'name': 'Employee', 'country_id': False}).id,
+            'journal_id': cls.miura_salaries_journal.id,
+        })
+
+        hr_structure_type = cls.env['hr.payroll.structure.type'].create({
+            'name': 'Salary Structure Type',
+            'struct_ids': [(4, cls.hr_structure_mangaka.id)],
+            'default_struct_id': cls.hr_structure_mangaka.id,
+        })
+
+        cls.env['hr.version'].browse(cls.hr_employee_miura.version_id.id).write({
+            'name': 'Miura contract',
+            'contract_date_end': fields.Date.to_string(datetime.now() + timedelta(days=365)),
+            'contract_date_start': date(2010, 1, 1),
+            'wage': 5000.0,
+            'employee_id': cls.hr_employee_miura.id,
+            'structure_type_id': hr_structure_type.id,
+        })
+
+        cls.hr_payslip_miura = cls.env['hr.payslip'].create({
+            'employee_id': cls.hr_employee_miura.id,
+            'struct_id': cls.hr_structure_mangaka.id,
+            'journal_id': cls.miura_salaries_journal.id,
+            'name': 'Test Payslip Miura',
+        })
+
+        sepa_payment_method_line = cls.env['account.payment.method.line'].create({
+            'payment_method_id': cls.env.ref('account_iso20022.account_payment_method_sepa_ct').id,
+            'journal_id': cls.miura_salaries_journal.id,
+        })
+
+        cls.miura_salaries_journal.outbound_payment_method_line_ids |= sepa_payment_method_line
 
 
 @tagged('post_install', '-at_install')
@@ -130,6 +294,32 @@ class TestPayrollSEPACreditTransfer(TestPayrollSEPACreditTransferCommon):
 
         self.assertTrue(file)
         self.assertEqual(self.payslip_run.state, '02_close')
+
+    def test_sepa_payslip_partner_bank_id(self):
+        """ Check that the "partner_bank_id" is set after account_register_payment wizard has
+            been initialized and that the action_create_payments (action launched when the
+            user clicks on "Create Payments" button of the account_register_payment wizard)
+            doesn't raise any error.
+
+            This test is not following any real spec, its only purpose is to check that the payslip
+            sepa payment flow works (so feel free to modify it if you feel like something's wrong)
+        """
+        self.hr_payslip_miura.compute_sheet()
+        self.hr_payslip_miura.action_payslip_done()
+        self.hr_payslip_miura.move_id.action_post()
+
+        sepa_payment_method_line = self.env['account.payment.method.line'].create({
+            'payment_method_id': self.env.ref('account_iso20022.account_payment_method_sepa_ct').id,
+            'journal_id': self.miura_salaries_journal.id,
+        })
+
+        action_register_payment = self.hr_payslip_miura.action_register_payment()
+        register_payment_form = Form.from_action(self.env, action_register_payment)
+        register_payment_form.payment_method_line_id = sepa_payment_method_line
+        saved_form = register_payment_form.save()
+        self.assertEqual(saved_form.partner_bank_id.id, self.miura_partner_bank.id)
+        saved_form.action_create_payments()
+
 
 @tagged('external_l10n', 'post_install', '-at_install', '-standard')
 class TestPayrollSEPACreditTransferXmlValidity(TestPayrollSEPACreditTransferCommon):

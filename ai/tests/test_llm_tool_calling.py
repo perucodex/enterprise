@@ -118,7 +118,7 @@ class TestLLMToolCalling(common.TransactionCase):
 
         service = LLMApiService(self.env, provider='google')
         response = service.request_llm(
-            llm_model='gemini-1.5-flash',
+            llm_model='gemini-2.5-flash',
             system_prompts=[],
             user_prompts=["test prompt"],
             tools=tools

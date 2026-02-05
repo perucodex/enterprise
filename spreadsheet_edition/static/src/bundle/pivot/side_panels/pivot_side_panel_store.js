@@ -4,6 +4,18 @@ const { PivotSidePanelStore } = stores;
 const { deepEquals } = helpers;
 
 patch(PivotSidePanelStore.prototype, {
+    get fields() {
+        const _fields = super.fields;
+        return { ..._fields, ...this.draftFields };
+    },
+
+    addDraftField(fieldName, fieldDef) {
+        this.draftFields = {
+            ...this.draftFields,
+            [fieldName]: fieldDef,
+        };
+    },
+
     update(definitionUpdate) {
         const coreDefinition = this.getters.getPivotCoreDefinition(this.pivotId);
         const definition = {

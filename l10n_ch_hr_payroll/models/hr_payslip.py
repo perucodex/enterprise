@@ -523,6 +523,11 @@ class HrPayslip(models.Model):
         swiss_payslips = self.filtered(lambda p: p.struct_id.code == "CHMONTHLYELM")
         if not swiss_payslips:
             return
+
+        slips_grouped_by_date = swiss_payslips.grouped('date_to')
+        for date_group, slips in slips_grouped_by_date.items():
+            slips.employee_id.with_context(l10n_ch_reference_date=date_group)._create_or_update_snapshot()
+
         mapped_snapshots = self.env['l10n.ch.employee.yearly.values']._get_mapped_snapshots(domain=[('employee_id', 'in', swiss_payslips.mapped('employee_id').ids)])
         for payslip in swiss_payslips:
             month = payslip.date_to.month
@@ -640,6 +645,7 @@ class HrPayslip(models.Model):
         payslips._compute_l10n_ch_is_correction()
         payslips._compute_l10n_ch_is_code()
         payslips._compute_l10n_ch_is_model()
+        payslips._compute_issues()
 
         self.env.flush_all()
         today = fields.Date.today()

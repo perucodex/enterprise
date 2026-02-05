@@ -289,6 +289,11 @@ export function assertLineResultPackage(lineOrIndex, expectedPackageName = false
     }
 }
 
+export function assertLinePackages(lineOrIndex, expectedSrcPackageName, expectedResultPackageName) {
+    assertLinePackage(lineOrIndex, expectedSrcPackageName);
+    assertLineResultPackage(lineOrIndex, expectedResultPackageName);
+}
+
 export function assertLineSourceIsNotVisible(lineOrIndex) {
     const line = _getLineOrFail(lineOrIndex);
     const sourceElement = line.parentNode.querySelector(".o_barcode_location_line");

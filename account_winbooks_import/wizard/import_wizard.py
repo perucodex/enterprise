@@ -671,7 +671,7 @@ class AccountWinbooksImportWizard(models.TransientModel):
                 return tag_ids
             indexes = [i for i, x in enumerate(string) if x in ('+', '-')] + [len(string)]
             for i in range(len(indexes) - 1):
-                tag_name = string[indexes[i]: indexes[i + 1]]
+                tag_name = string[indexes[i] + 1: indexes[i + 1]]
                 tag_id = tags_cache.get(tag_name, False)
                 if not tag_id:
                     tag_id = self.env['account.account.tag'].with_context(lang='en_US').search([('name', '=', tag_name), ('applicability', '=', 'taxes')])

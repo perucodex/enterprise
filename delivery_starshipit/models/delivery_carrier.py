@@ -98,13 +98,14 @@ class DeliveryCarrier(models.Model):
     def starshipit_send_shipping(self, pickings, is_return=False):
         """ For a given picking, this method will execute a few API calls in order to get the order to be sent to the carrier.
         The order of actions is:
-            - Create the order(s) on starshipit side. This will not send them, just register them and return the id(s)
-            - Get the labels for each picking, one at a time. This will return the tracking number(s) and url(s).
-                - The labels are attached to the picking as ir.attachment
-            - If return_label_on_delivery is set, generate the return label(s) for each picking too.
-            - Get the delivery order information from starshipit to fetch the final rate, and whether the order was manifested or not.
-            - Finally either manifest (send) the order(s) or archive them in test mode.
-              If sent, the manifest report is added to the picking as ir.attachment.
+
+        - Create the order(s) on starshipit side. This will not send them, just register them and return the id(s)
+        - Get the labels for each picking, one at a time. This will return the tracking number(s) and url(s).
+        - The labels are attached to the picking as ir.attachment
+        - If return_label_on_delivery is set, generate the return label(s) for each picking too.
+        - Get the delivery order information from starshipit to fetch the final rate, and whether the order was manifested or not.
+        - Finally either manifest (send) the order(s) or archive them in test mode.
+        If sent, the manifest report is added to the picking as ir.attachment.
         """
         starshipit = self._get_starshipit()
         unshipped_orders = starshipit._create_orders(self, pickings, is_return)['orders']
@@ -117,7 +118,7 @@ class DeliveryCarrier(models.Model):
             order_id = order['order_id']
             picking.starshipit_parcel_reference = order_id
 
-            label_data = self._create_label_for_order(order_id)
+            label_data = self._create_label_for_order(order_id, starshipit_order_number)
 
             tracking_number = ', '.join(tracking_number for tracking_number in label_data['tracking_numbers'] if tracking_number is not None)
             picking.carrier_tracking_ref = tracking_number
@@ -311,7 +312,8 @@ class DeliveryCarrier(models.Model):
             order = starshipit._create_orders(self, picking, True)['orders'].get(starshipit_order_number)
 
         order_id = order['order_id']
-        label_data = self._create_label_for_order(order_id)
+        order_number = order['order_number']
+        label_data = self._create_label_for_order(order_id, order_number)
 
         # if picking is not a return means we are pre-generating the return label on delivery
         # thus we save the returned parcel id in a separate field
@@ -371,27 +373,26 @@ class DeliveryCarrier(models.Model):
             self.starshipit_cancel_shipment(picking)
             picking.message_post(body=_('Return order %s was archived.', picking.name))
 
-    def _create_label_for_order(self, order_id):
+    def _create_label_for_order(self, order_id, order_number=None):
         starshipit = self._get_starshipit()
-
-        label_creation_failed = False
-        label_data = False
-        label_creation_errors = []
         try:
-            label_data = starshipit._create_label(order_id)
-        except UserError as e:
-            label_creation_failed = True
-            label_creation_errors.append(_('The shipping label creation failed with the following error:\n%(error)s',
-                                           error=e))
+            return starshipit._create_label(order_id)
 
-        if label_creation_failed:
-            try:
-                starshipit._delete_order(order_id)
-            except UserError:
-                label_creation_errors.append(_('Please delete the order on Starshipit then try again.'))
-            finally:
-                raise UserError('\n'.join(label_creation_errors))
-        return label_data
+        except UserError as e:
+            if order_number:
+                order_info = _("The order '%(order_number)s' has been created!\n", order_number=order_number)
+            else:
+                order_info = _("The order has been created!\n")
+
+            error_message = _(
+                "%(order_info)s"
+                "However, the shipping label creation failed with the following error:\n%(error)s\n\n"
+                "Please either continue the configuration or delete the order in Starshipit "
+                "before trying again.",
+                order_info=order_info,
+                error=e,
+            )
+            raise UserError(error_message)
 
     # API HELPERS #
 

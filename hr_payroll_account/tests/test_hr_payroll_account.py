@@ -8,8 +8,10 @@ from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
 from odoo import fields, Command
+from odoo.tests import Form
 from odoo.addons.hr_payroll.tests.common import TestPayslipContractBase
 from odoo.exceptions import ValidationError
+from odoo.tools.float_utils import float_compare
 
 
 @odoo.tests.tagged('post_install', '-at_install')
@@ -23,16 +25,49 @@ class TestHrPayrollAccountCommon(TestPayslipContractBase):
         cls.env['account.chart.template'].try_loading('generic_coa', company=cls.company_us, install_demo=False)
 
         cls.work_contact = cls.env['res.partner'].create({'name': 'A work contact'})
+        cls.env['res.partner.bank'].create({
+            'acc_number': 'IT22M8576110068R4A56E760901',
+            'partner_id': cls.work_contact.id,
+            'allow_out_payment': True,
+        })
+
         cls.work_address = cls.env['res.partner'].create({'name': 'A work address'})
 
+        partner_john = cls.env['res.partner'].create({
+            'name': 'John',
+            'is_company': True,
+        })
+        john_bank = cls.env['res.bank'].create({'name': 'ING'})
+        partner_bank_john = cls.env['res.partner.bank'].create({
+            'acc_number': 'IT22M8576110068R4A56E760901',
+            'partner_id': partner_john.id,
+            'bank_id': john_bank.id,
+            'allow_out_payment': True,
+        })
+
         cls.hr_employee_john = cls.env['hr.employee'].create({
-            'work_contact_id': cls.work_contact.id,
+            'work_contact_id': partner_john.id,
             'address_id': cls.work_address.id,
             'birthday': '1984-05-01',
             'children': 0.0,
             'sex': 'male',
+            'country_id': cls.env.ref('base.in').id,
             'marital': 'single',
             'name': 'John',
+            'bank_account_ids': [partner_bank_john.id],
+        })
+
+        salary_account = cls.env['account.account'].create({
+            'name': "Salary Expense",
+            'code': "030303",
+            'account_type': "expense",
+        })
+
+        salaries_journal = cls.env['account.journal'].create({
+            'name': 'Test Salaries',
+            'type': 'general',
+            'code': 'SLR-TEST',
+            'default_account_id': salary_account.id,
         })
 
         cls.hr_employee_mark = cls.env['hr.employee'].create({
@@ -41,6 +76,7 @@ class TestHrPayrollAccountCommon(TestPayslipContractBase):
             'birthday': '1984-05-01',
             'children': 0.0,
             'sex': 'male',
+            'country_id': cls.env.ref('base.in').id,
             'marital': 'single',
             'name': 'Mark',
         })
@@ -55,12 +91,13 @@ class TestHrPayrollAccountCommon(TestPayslipContractBase):
             'name': 'Salary Structure for Software Developer Two',
             'rule_ids': [
                 (0, 0, {
-                    'name': 'Professional Tax',
-                    'amount_select': 'fix',
-                    'sequence': 150,
-                    'amount_fix': -200,
-                    'code': 'PT',
-                    'category_id': cls.env.ref('hr_payroll.DED').id,
+                    'name': 'Basic Salary',
+                    'amount_select': 'percentage',
+                    'amount_percentage': 100,
+                    'amount_percentage_base': 'version.wage',
+                    'code': 'BASIC',
+                    'category_id': cls.env.ref('hr_payroll.BASIC').id,
+                    'sequence': 1,
                 }), (0, 0, {
                     'name': 'Provident Fund',
                     'amount_select': 'percentage',
@@ -95,6 +132,17 @@ class TestHrPayrollAccountCommon(TestPayslipContractBase):
                 })
             ],
             'type_id': cls.env['hr.payroll.structure.type'].create({'name': 'Employee', 'country_id': False}).id,
+            'journal_id': salaries_journal.id,
+        })
+
+        cls.professional_tax_rule = cls.env['hr.salary.rule'].create({
+            'name': 'Professional Tax',
+            'amount_select': 'fix',
+            'sequence': 150,
+            'amount_fix': -200,
+            'code': 'PT',
+            'category_id': cls.env.ref('hr_payroll.DED').id,
+            'struct_id': cls.hr_structure_softwaredeveloper.id,
         })
 
         cls.hr_structure_type = cls.env['hr.payroll.structure.type'].create({
@@ -494,6 +542,88 @@ class TestHrPayrollAccount(TestHrPayrollAccountCommon):
         self.assertEqual(invoice_lines[1].amount_currency, line_amount)
         self.assertEqual(invoice_lines[1].credit, 0)
         self.assertEqual(invoice_lines[1].debit, line_amount)
+
+    def _test_bank_account_partner_payment_payslip(self, add_isr_bank):
+        """ Check that the payment generated for Professionnal Tax is made to the correct bank account
+            (previously, the selected account of the payment was always the employee bank account,
+            whatever the partner specified in the payment)
+        """
+        tax_partner = self.env['res.partner'].create({
+            'name': 'Regular Tax partner',
+            'is_company': True,
+        })
+        tax_bank = self.env['res.bank'].create({'name': 'Belfius'})
+        if add_isr_bank:
+            isr_partner_bank = self.env['res.partner.bank'].create({
+                'acc_number': 'IT77H400725028682A0R202P050',
+                'partner_id': tax_partner.id,
+                'bank_id': tax_bank.id,
+            })
+        tax_debit_account = self.env['account.account'].create({
+            'name': "Professional tax",
+            'code': "020202",
+            'account_type': "liability_payable",
+            'reconcile': True,
+        })
+        salary_payable = self.env['account.account'].create({
+            'name': 'Salary Payable',
+            'code': '2300',
+            'reconcile': True,
+            'account_type': 'liability_payable',
+        })
+        self.env['hr.salary.rule'].create({
+            'name': 'Net Salary',
+            'amount_select': 'code',
+            'amount_python_compute': 'result = categories["BASIC"] + categories["ALW"] + categories["DED"]',
+            'code': 'NET',
+            'category_id': self.env.ref('hr_payroll.NET').id,
+            'sequence': 200,
+            'account_credit': salary_payable.id,
+            'struct_id': self.hr_structure_softwaredeveloper.id,
+            'employee_move_line': True,
+        })
+        # Set necessary properties so that 'action_payslip_done' will create lines for the payslip
+        self.professional_tax_rule.account_debit = tax_debit_account.id
+        self.professional_tax_rule.partner_id = tax_partner.id
+
+        self.hr_payslip_john.compute_sheet()
+        self.hr_payslip_john.action_payslip_done()
+
+        # 1. Debit for Salary Expense
+        # 2. Credit for Salary Payable
+        # 3. Credit for Professionnal Tax
+        self.assertEqual(len(self.hr_payslip_john.move_id.line_ids), 3, "3 lines should've been created for John payslip !")
+
+        self.hr_payslip_john.move_id.action_post()
+        payment_register_wizard = Form.from_action(self.env, self.hr_payslip_john.action_register_payment())
+        saved_form = payment_register_wizard.save()
+
+        # Simulate calling `action_create_payments` method from `account.payment.register`
+        payments = saved_form._create_payments()
+        self.assertEqual(len(payments), 2, "2 payments should've been made here (one for each line except for the salary expense associated "
+            "with the salary rule created in this test).")
+        for payment in payments:
+            matching_lines = self.hr_payslip_john.move_id.line_ids.filtered(
+                lambda line: float_compare(abs(line.amount_currency), payment.amount, precision_digits=3) == 0)
+            self.assertEqual(len(matching_lines), 1, "1 line should match the payment here.")
+
+            if payment.partner_id == self.hr_payslip_john.employee_id.work_contact_id:
+                self.assertEqual(payment.partner_bank_id.id, self.hr_payslip_john.employee_id.bank_account_ids[0].id,
+                    "As the partner of the payment is the employee of the payslip, the partner_bank_id of the payment should be "
+                    f"the employee's bank account. Instead, we have the bank account of '{payment.partner_bank_id.partner_id.name}'.")
+            else:
+                if add_isr_bank:
+                    self.assertEqual(payment.partner_bank_id.id, isr_partner_bank.partner_id.bank_ids[0].id, "As the partner of the payment is "
+                        f"'{isr_partner_bank.partner_id.name}', the 'partner_bank_id' should've been set to the bank of '{isr_partner_bank.partner_id.name}' !")
+                else:
+                    self.assertFalse(payment.partner_bank_id.id, f"As the partner of the payment is '{tax_partner.name}', "
+                        "the 'partner_bank_id' shouldn't be set because the partner has no bank account !")
+
+    def test_bank_account_partner_payment_payslip_partner_with_bank_account(self):
+        self._test_bank_account_partner_payment_payslip(True)
+
+    def test_bank_account_partner_payment_payslip_partner_without_bank_account(self):
+        self._test_bank_account_partner_payment_payslip(False)
 
     def test_payslip_cancel_1(self):
         """ Checking if canceling a payslip unlinks the draft associated entry """

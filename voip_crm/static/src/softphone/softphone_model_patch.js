@@ -11,8 +11,6 @@ patch(Softphone.prototype, {
     },
 
     async updateLeadButtonPermissions() {
-        this.shouldShowLeadButton =
-            (await user.hasGroup("sales_team.group_sale_salesman")) ||
-            (await user.hasGroup("sales_team.group_sale_manager"));
+        this.shouldShowLeadButton = await user.hasGroup("sales_team.group_sale_salesman");
     },
 });

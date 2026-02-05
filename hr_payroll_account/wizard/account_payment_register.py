@@ -9,10 +9,16 @@ class AccountPaymentRegister(models.TransientModel):
 
     @api.model
     def _get_line_batch_key(self, line):
-        # OVERRIDE to use the bank account defined on the line, if any.
+        """ OVERRIDE to use the bank account defined on the line, if any.
+            :context payment_consider_partner: (boolean) wether the bank of the `line.partner_id` will be considered for the `partner_bank_id` of the returned dict
+        """
         res = super()._get_line_batch_key(line)
         if line.employee_bank_account_id:
             res['partner_bank_id'] = line.employee_bank_account_id.id
+        elif self.env.context.get('payment_consider_partner') and not res['partner_bank_id'] and line.partner_id:
+            partner_banks = line.partner_id.commercial_partner_id.bank_ids
+            if partner_banks:
+                res['partner_bank_id'] = partner_banks.sorted('sequence')[0].id
         return res
 
     def _reconcile_payments(self, to_process, edit_mode=False):

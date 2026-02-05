@@ -127,7 +127,7 @@ class AppointmentCalendarView(http.Controller):
         # Check if the user is a member of group_user to avoid portal user and the like to create appointment types
         if not user._is_internal():
             raise Forbidden()
-        AppointmentType = request.env['appointment.type']
+        AppointmentType = request.env['appointment.type'].sudo()
         appointment_type = AppointmentType.search([
             ('category', '=', 'anytime'),
             ('staff_user_ids', 'in', user.ids)])
@@ -156,7 +156,7 @@ class AppointmentCalendarView(http.Controller):
     def _get_staff_user_appointment_invite_info(cls, appointment_type, user=None):
         user = user or request.env.user
         appointment_invitation_domain = cls._get_staff_user_appointment_invite_domain(appointment_type, user)
-        appointment_invitation = request.env['appointment.invite'].search(appointment_invitation_domain, limit=1)
+        appointment_invitation = request.env['appointment.invite'].sudo().search(appointment_invitation_domain, limit=1)
         if not appointment_invitation:
             invitation_values = {
                 'appointment_type_ids': appointment_type.ids,
@@ -171,7 +171,7 @@ class AppointmentCalendarView(http.Controller):
                     'resources_choice': 'all_assigned_resources',
                     'staff_user_ids': False,
                 })
-            appointment_invitation = request.env['appointment.invite'].with_context(
+            appointment_invitation = request.env['appointment.invite'].sudo().with_context(
                 request.env['appointment.type']._get_clean_appointment_context()
             ).create(invitation_values)
 

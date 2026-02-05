@@ -2247,7 +2247,7 @@ class SaleOrder(models.Model):
         :param order: the new order
         """
         for follower in self.message_follower_ids:
-            if follower.partner_id not in order.message_follower_ids.partner_id and not follower.partner_id.partner_share:
+            if follower.partner_id not in order.message_follower_ids.partner_id:
                 order.message_subscribe(
                     partner_ids=follower.partner_id.ids,
                     subtype_ids=follower.subtype_ids.ids

@@ -21,6 +21,11 @@ class TestAccountBankStatementTour(TestBankRecWidgetCommon, HttpCase):
         self.partner_a.name = "AAAA"  # To have this partner as the first one in the list
         self._create_invoice_line('out_invoice', partner_id=self.partner_a.id, invoice_line_ids=[{'price_unit': 100.0}])
         self._create_invoice_line('out_invoice', partner_id=self.partner_a.id, invoice_line_ids=[{'price_unit': 150.0}])
+        self.env['account.bank.statement'].create({
+            'name': 'Test Statement',
+            'journal_id': self.company_data['default_journal_bank'].id,
+            'date': '2019-01-01',
+        })
         self.start_tour('/odoo', 'account_accountant_bank_rec_widget', login=self.env.user.login)
 
     def test_tour_bank_reconciliation_widget_reload_activities_when_add_a_new_one(self):

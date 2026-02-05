@@ -1,5 +1,4 @@
 import { ControlButtons } from "@point_of_sale/app/screens/product_screen/control_buttons/control_buttons";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { patch } from "@web/core/utils/patch";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 
@@ -10,14 +9,7 @@ patch(ControlButtons.prototype, {
     },
     clickRefund() {
         if (this.pos.useBlackBoxBe() && !this.pos.userSessionStatus) {
-            this.dialog.add(AlertDialog, {
-                title: this._t("POS error"),
-                body: this._t(
-                    "The government's Fiscal Data Module requires every user to Clock In before " +
-                        "sending an order.\n" +
-                        "You can Clock In from the top-right menu (\u2261)."
-                ),
-            });
+            this.pos.clock(true).then(() => super.clickRefund());
             return;
         }
         super.clickRefund();

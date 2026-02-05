@@ -18,7 +18,7 @@ class IotBox(models.Model):
 
     @api.model
     def _load_pos_data_fields(self, config):
-        return ['ip', 'name', 'identifier']
+        return ['ip', 'name', 'identifier', 'version']
 
     @api.depends('device_ids')
     def _compute_associated_pos_config_ids(self):

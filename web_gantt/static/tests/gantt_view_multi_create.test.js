@@ -920,3 +920,67 @@ test("multi_create: can start selection over locked pills", async () => {
         },
     ]);
 });
+
+test("multi_create: multi-selection remains after drop", async () => {
+    await mountGanttView({
+        resModel: "tasks",
+        arch: `
+            <gantt
+                date_start="start"
+                date_stop="stop"
+                precision="{'day':'hour:full', 'week':'day:full', 'month':'day:full'}"
+                multi_create_view="multi_create_form"
+            >
+                <field name="progress"/>
+            </gantt>
+        `,
+        groupBy: ["stage_id"],
+    });
+
+    const sourceCell = getCell("17", "December 2018", "todo");
+    await hoverCell(sourceCell);
+    const { drop, moveTo } = await contains(sourceCell).drag();
+    await moveTo(getCell("17", "December 2018", "done"));
+    await animationFrame();
+
+    expect(".o_cell_ghost").toHaveCount(3);
+    expect(".o_selection_box").not.toHaveCount();
+
+    await drop();
+    await animationFrame();
+
+    expect(".o_cell_ghost").toHaveCount(3);
+    expect(".o_selection_box").toHaveText("2 selected", { inline: true });
+});
+
+test("multi_create: can cancel multi-selection", async () => {
+    await mountGanttView({
+        resModel: "tasks",
+        arch: `
+            <gantt
+                date_start="start"
+                date_stop="stop"
+                precision="{'day':'hour:full', 'week':'day:full', 'month':'day:full'}"
+                multi_create_view="multi_create_form"
+            >
+                <field name="progress"/>
+            </gantt>
+        `,
+        groupBy: ["stage_id"],
+    });
+
+    const sourceCell = getCell("17", "December 2018", "todo");
+    await hoverCell(sourceCell);
+    const { cancel, moveTo } = await contains(sourceCell).drag();
+    await moveTo(getCell("17", "December 2018", "done"));
+    await animationFrame();
+
+    expect(".o_cell_ghost").toHaveCount(3);
+    expect(".o_selection_box").not.toHaveCount();
+
+    await cancel();
+    await animationFrame();
+
+    expect(".o_cell_ghost").not.toHaveCount();
+    expect(".o_selection_box").not.toHaveCount();
+});

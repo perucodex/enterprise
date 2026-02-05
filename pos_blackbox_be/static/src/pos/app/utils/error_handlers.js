@@ -28,6 +28,9 @@ export function blackboxErrorHandler(env, error, originalError) {
                 : originalError.code === "timeout"
                 ? timeoutError
                 : defaultError;
+        if (env.services.ui.isBlocked) {
+            env.services.ui.unblock();
+        }
         env.services.dialog.add(RetryFdmPopup, {
             title: _t("Fiscal Data Module error: ") + originalError.code,
             message: originalError.message || currentError,

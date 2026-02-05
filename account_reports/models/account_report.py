@@ -5149,53 +5149,55 @@ class AccountReport(models.Model):
 
     @api.model
     def sort_lines(self, lines, options, result_as_index=False):
-        ''' Sort report lines based on the 'order_column' key inside the options.
+        """ Sort report lines based on the 'order_column' key inside the options.
         The value of options['order_column'] is an integer, positive or negative, indicating on which column
         to sort and also if it must be an ascending sort (positive value) or a descending sort (negative value).
         Note that for this reason, its indexing is made starting at 1, not 0.
         If this key is missing or falsy, lines is returned directly.
 
         This method has some limitations:
-        - The selected_column must have 'sortable' in its classes.
-        - All lines are sorted except:
-            - lines having the 'total' class
-            - static lines (lines with model 'account.report.line')
-        - This only works when each line has an unique id.
-        - All lines inside the selected_column must have a 'no_format' value.
 
-        Example:
+            - The selected_column must have 'sortable' in its classes.
+            - All lines are sorted except:
 
-        parent_line_1           balance=11
-            child_line_1        balance=1
-            child_line_2        balance=3
-            child_line_3        balance=2
-            child_line_4        balance=7
-            child_line_5        balance=4
-            child_line_6        (total line)
-        parent_line_2           balance=10
-            child_line_7        balance=5
-            child_line_8        balance=6
-            child_line_9        (total line)
+                - lines having the 'total' class
+                - static lines (lines with model 'account.report.line')
 
+            - This only works when each line has an unique id.
+            - All lines inside the selected_column must have a 'no_format' value.
 
-        The resulting lines will be:
+        Example::
 
-        parent_line_2           balance=10
-            child_line_7        balance=5
-            child_line_8        balance=6
-            child_line_9        (total line)
-        parent_line_1           balance=11
-            child_line_1        balance=1
-            child_line_3        balance=2
-            child_line_2        balance=3
-            child_line_5        balance=4
-            child_line_4        balance=7
-            child_line_6        (total line)
+            parent_line_1           balance=11
+                child_line_1        balance=1
+                child_line_2        balance=3
+                child_line_3        balance=2
+                child_line_4        balance=7
+                child_line_5        balance=4
+                child_line_6        (total line)
+            parent_line_2           balance=10
+                child_line_7        balance=5
+                child_line_8        balance=6
+                child_line_9        (total line)
+
+        The resulting lines will be::
+
+            parent_line_2           balance=10
+                child_line_7        balance=5
+                child_line_8        balance=6
+                child_line_9        (total line)
+            parent_line_1           balance=11
+                child_line_1        balance=1
+                child_line_3        balance=2
+                child_line_2        balance=3
+                child_line_5        balance=4
+                child_line_4        balance=7
+                child_line_6        (total line)
 
         :param lines:   The report lines.
         :param options: The report options.
         :return:        Lines sorted by the selected column.
-        '''
+        """
         def needs_to_be_at_bottom(line_elem):
             return self._get_markup(line_elem.get('id')) in ('total', 'load_more')
 

@@ -139,13 +139,14 @@ class SocialAccount(models.Model):
                 statistics['page_post_engagements'] += sum(v.get('value', 0) for v in values)
             elif metric_name == 'page_follows':
                 page_follows.update({
-                    datetime.fromisoformat(v['end_time']): v['value']
+                    v['end_time']: v['value']
                     for v in values
                     if 'end_time' in v and 'value' in v
                 })
 
         if page_follows:
             # "Newest - Oldest"
+            # Datetime is in "YYYY-MM-dd" format, so min / max work on string
             statistics['page_fans'] = page_follows[max(page_follows)] - page_follows[min(page_follows)]
 
         return statistics

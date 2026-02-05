@@ -368,6 +368,8 @@ test("add column dimension on a related model", async function () {
     await contains(
         ".o_popover_field_selector .o_model_field_selector_popover_item[data-name='active'] button"
     ).click();
+    expect(".fa-exclamation-triangle").toHaveCount(0);
+    expect(".pivot-dimension:first .o-fw-bold").toHaveText("Product > Active");
     await contains(".pivot-defer-update .o-checkbox").click();
     const definition = JSON.parse(JSON.stringify(model.getters.getPivotCoreDefinition(pivotId)));
     expect(definition.columns).toEqual([{ fieldName: "product_id.active", order: "asc" }]);
@@ -391,6 +393,8 @@ test("add row dimension on a related model", async function () {
     await contains(
         ".o_popover_field_selector .o_model_field_selector_popover_item[data-name='active'] button"
     ).click();
+    expect(".fa-exclamation-triangle").toHaveCount(0);
+    expect(".pivot-dimension:first .o-fw-bold").toHaveText("Product > Active");
     await contains(".pivot-defer-update .o-checkbox").click();
     const definition = JSON.parse(JSON.stringify(model.getters.getPivotCoreDefinition(pivotId)));
     expect(definition.columns).toEqual([]);
