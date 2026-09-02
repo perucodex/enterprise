@@ -38,7 +38,11 @@ class HrLeave(models.Model):
                         domain=[
                             ("employee_id.id", "in", l10n_be_leaves.employee_id.ids),
                             ("date_to", "<=", max(l10n_be_leaves.mapped("date_from"))),
-                            ("date_to", ">=", min(l10n_be_leaves.mapped(lambda l: l.date_from + relativedelta(days=-14)))),
+                            ("date_to", ">=", min(l10n_be_leaves.mapped(
+                                lambda l: l.date_from + relativedelta(days=-56)
+                                if l.date_from.year >= 2026
+                                else l.date_from + relativedelta(days=-14)
+                            ))),
                             ("holiday_status_id.work_entry_type_id", "in", sick_work_entry_types.ids),
                             ("state", "=", "validate"),
                         ],

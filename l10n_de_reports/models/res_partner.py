@@ -31,7 +31,7 @@ class ResPartner(models.Model):
     def _check_datev_identifier(self):
         partners = self.filtered('l10n_de_datev_identifier')
         identifiers = partners.mapped('l10n_de_datev_identifier')
-        if not len(partners) == len(set(identifiers)) == self.search_count(
+        if not len(partners) == len(set(identifiers)) == self.with_context(active_test=False).search_count(
                 [('l10n_de_datev_identifier', 'in', identifiers)], limit=len(identifiers) + 1):
             raise ValidationError(_('You have already defined a partner with the same Datev identifier. '))
 
@@ -39,6 +39,6 @@ class ResPartner(models.Model):
     def _check_datev_identifier_customer(self):
         partners = self.filtered('l10n_de_datev_identifier_customer')
         identifiers = partners.mapped('l10n_de_datev_identifier_customer')
-        if not len(partners) == len(set(identifiers)) == self.search_count(
+        if not len(partners) == len(set(identifiers)) == self.with_context(active_test=False).search_count(
                 [('l10n_de_datev_identifier_customer', 'in', identifiers)], limit=len(identifiers) + 1):
             raise ValidationError(_('You have already defined a partner with the same Datev Customer identifier'))

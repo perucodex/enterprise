@@ -1,13 +1,11 @@
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click, queryAll } from "@odoo/hoot-dom";
-import { user } from "@web/core/user";
 import {
     makeDialogMockEnv,
     mountWithCleanup,
     onRpc,
     contains,
-    patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
 import { SignNameAndSignatureDialog } from "@sign/dialogs/dialogs";
 
@@ -57,12 +55,6 @@ test("sign name and signature dialog renders correctly", async () => {
     expect(".o_sign_frame.active p").toHaveAttribute("hash", hash, {
         message: "hash should be in the signature dialog",
     });
-});
-
-test("sign name and signature dialog - frame is hidden when user is not from the sign user group", async () => {
-    patchWithCleanup(user, { hasGroup: () => Promise.resolve(false) });
-    await mountSignNameAndSignatureDialog();
-    expect(".form-check").toHaveClass("d-none", { message: "frame should be hidden" });
 });
 
 test("sign name and signature dialog toggles active class on frame input change", async () => {

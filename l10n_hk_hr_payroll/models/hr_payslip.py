@@ -57,6 +57,20 @@ class HrPayslip(models.Model):
         readonly=False,
     )
 
+    def _get_data_files_to_update(self):
+        # Note: file order should be maintained
+        return super()._get_data_files_to_update() + [(
+            'l10n_hk_hr_payroll', [
+                'data/hr_salary_rule_category_data.xml',
+
+                'data/cap57/employee_long_service_payment_data.xml',
+                'data/cap57/employee_payment_in_lieu_of_notice_data.xml',
+                'data/cap57/employee_salary_data.xml',
+                'data/cap57/employee_severance_payment_data.xml',
+
+                'data/hr_rule_parameters_data.xml',
+            ])]
+
     @api.depends('worked_days_line_ids')
     def _compute_worked_days_leaves_count(self):
         for payslip in self:
@@ -111,7 +125,7 @@ class HrPayslip(models.Model):
         :return: The ADW for the period.
         """
         for slip in self:
-            if slip.country_code != 'HK':
+            if slip.country_code != 'HK' or not (slip.date_from and slip.date_to):
                 slip.l10n_hk_average_daily_wage = 0
                 continue
 
@@ -131,11 +145,12 @@ class HrPayslip(models.Model):
 
             slip.l10n_hk_average_daily_wage = adw
 
-    @api.depends('date_to', 'company_id')
+    @api.depends('date_from', 'date_to', 'company_id')
     def _compute_includes_eoy_pay(self):
         for slip in self.filtered(lambda s: s.country_code == 'HK'):
-            if not slip.company_id.l10n_hk_eoy_pay_month:
+            if not (slip.company_id.l10n_hk_eoy_pay_month and slip.date_from and slip.date_to):
                 slip.l10n_hk_includes_eoy_pay = False
+                continue
 
             last_year_payslips = slip._get_previous_year_payslips(order='date_from desc')
             slip.l10n_hk_includes_eoy_pay = str(slip.date_to.month) == slip.company_id.l10n_hk_eoy_pay_month and last_year_payslips
@@ -144,6 +159,47 @@ class HrPayslip(models.Model):
     def _compute_l10n_hk_use_mpf_offsetting(self):
         for slip in self.filtered(lambda s: s.country_code == 'HK'):
             slip.l10n_hk_use_mpf_offsetting = slip.company_id.l10n_hk_use_mpf_offsetting
+
+    def _get_base_local_dict(self):
+        """
+        In Hong Kong, there are a few rules that are dependent on a monthly amount.
+        While it works well in most cases; there is a case where a change in contract is done in the middle of a period.
+        In this case, the payrun would contain two payslips for the same employee! To avoid counting twice the amounts,
+        we need to know at the time of calculating the rule what has already been registered in these rules.
+        """
+        res = super()._get_base_local_dict()
+        if self.struct_id.country_id.code != 'HK':
+            return res
+
+        # Initialize the dictionary to guarantee the keys exist
+        l10n_hk_payrun_totals = {
+            'MPF_GROSS': 0.0, 'BASIC': 0.0, 'EEMC': 0.0,
+            'ERMC': 0.0, 'EEVC': 0.0, 'ERVC': 0.0,
+            'ERVC2': 0.0, 'HRA': 0.0, 'ALW.INT': 0.0
+        }
+
+        if self.payslip_run_id:
+            # /!\ during the computation of multiple payslips for a same period (split for new contract) the payslips are
+            # draft while we compute the lines. So we need to make sure we do not only pick paid/confirmed payslips like usual.
+            previous_slips = self.payslip_run_id.slip_ids.filtered(
+                lambda p: p.employee_id == self.employee_id and p.version_id.date_start < self.version_id.date_start
+            )
+            if previous_slips:
+                values = previous_slips._get_line_values(list(l10n_hk_payrun_totals.keys()), compute_sum=True)
+                for (code, value) in values.items():
+                    l10n_hk_payrun_totals[code] = value['sum']['total']
+
+        worked_days_prorata_rate = 1
+        total_days = sum(wd.number_of_days for wd in self.worked_days_line_ids)
+        actual_work_days = self._get_number_of_worked_days()
+        if total_days:
+            worked_days_prorata_rate = actual_work_days / total_days
+
+        return {
+            **res,
+            'l10n_hk_payrun_totals': l10n_hk_payrun_totals,
+            'worked_days_prorata_rate': worked_days_prorata_rate,
+        }
 
     def _get_paid_amount(self):
         """

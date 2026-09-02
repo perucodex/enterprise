@@ -946,3 +946,77 @@ class TestPayrollUnusedLeaves(TestPayrollCommon):
             payslip_date_to=contract.date_end,
             termination_type="normal"
         )
+
+    def test_26_unused_leaves_on_batch_payslip_create(self):
+        """Ensure each termination payslip gets its own unused leave when created in batch.
+
+        Creating several payslips at once runs unused-leave computation on a multi-recordset.
+        Each slip must still receive the leave amounts for its employee only.
+        """
+        employee_a, contract_a = self.get_unused_leaves_employee('1995-06-08', '2022-01-03', '2024-03-12')
+        employee_b, contract_b = self.get_unused_leaves_employee('1995-06-08', '2022-01-03', '2024-03-12')
+        self.create_leaves(employee_a, contract_a, {"annual": {"post_1993": 10}})
+        self.create_leaves(employee_b, contract_b, {"annual": {"post_1993": 5}})
+
+        payslips = self.env["hr.payslip"].create([{
+            "name": "payslip",
+            "employee_id": employee.id,
+            "version_id": contract.id,
+            "struct_id": self.default_payroll_structure.id,
+            "date_from": contract.date_end.replace(day=1),
+            "date_to": contract.date_end,
+            "l10n_au_termination_type": "normal",
+        } for employee, contract in ((employee_a, contract_a), (employee_b, contract_b))])
+
+        payslip_a = payslips.filtered(lambda p: p.employee_id == employee_a)
+        payslip_b = payslips.filtered(lambda p: p.employee_id == employee_b)
+        self.assertAlmostEqual(
+            payslip_a._get_input_line_amount('AL'),
+            10 * payslip_a._get_daily_wage(),
+            2,
+            "Employee A should keep their 10 unused annual leave days on the batch-created payslip",
+        )
+        self.assertAlmostEqual(
+            payslip_b._get_input_line_amount('AL'),
+            5 * payslip_b._get_daily_wage(),
+            2,
+            "Employee B should keep their 5 unused annual leave days on the batch-created payslip",
+        )
+
+    def test_27_unused_leaves_on_batch_payslip_create_without_allocation(self):
+        """Ensure a termination payslip whose employee has no allocation does not break the batch.
+
+        Unused leave totals are only keyed on the payslips having a matching allocation, so a
+        batch mixing employees with and without allocations must still resolve to 0 for the latter.
+        """
+        employee_a, contract_a = self.get_unused_leaves_employee('1995-06-08', '2022-01-03', '2024-03-12')
+        employee_b, contract_b = self.get_unused_leaves_employee('1995-06-08', '2022-01-03', '2024-03-12')
+        self.create_leaves(employee_a, contract_a, {"annual": {"post_1993": 10}})
+
+        payslips = self.env["hr.payslip"].create([{
+            "name": "payslip",
+            "employee_id": employee.id,
+            "version_id": contract.id,
+            "struct_id": self.default_payroll_structure.id,
+            "date_from": contract.date_end.replace(day=1),
+            "date_to": contract.date_end,
+            "l10n_au_termination_type": "normal",
+        } for employee, contract in ((employee_a, contract_a), (employee_b, contract_b))])
+
+        payslip_a = payslips.filtered(lambda p: p.employee_id == employee_a)
+        payslip_b = payslips.filtered(lambda p: p.employee_id == employee_b)
+        self.assertAlmostEqual(
+            payslip_a._get_input_line_amount('AL'),
+            10 * payslip_a._get_daily_wage(),
+            2,
+            "Employee A should keep their 10 unused annual leave days on the batch-created payslip",
+        )
+        self.assertFalse(
+            payslip_b.input_line_ids.filtered(lambda x: x.code in ('AL', 'LSL')),
+            "Employee B has no allocation and should not get any unused leave input line",
+        )
+        self.assertEqual(
+            payslips._l10n_au_get_unused_leave_totals()[payslip_b.id],
+            {"annual": 0.0, "long_service": 0.0},
+            "A payslip without allocation should default to 0 instead of being missing from the totals",
+        )

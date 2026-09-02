@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from contextlib import contextmanager
 from datetime import timedelta
 
 from .common import TestMxEdiCommon
@@ -168,7 +169,7 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
 
         # Sat.
         with freeze_time('2017-04-01'), self.with_mocked_sat_call(lambda _x: 'valid'):
-            self.env['l10n_mx_edi.document']._fetch_and_update_sat_status(extra_domain=[('move_id.company_id', '=', self.env.company.id)])
+            invoice.l10n_mx_edi_cfdi_try_sat()
         sent_doc_values2['sat_state'] = 'valid'
         cancel_doc_values['sat_state'] = 'valid'
         self.assertRecordValues(invoice.l10n_mx_edi_invoice_document_ids.sorted(), [
@@ -382,7 +383,7 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
         self.assertRecordValues(invoice, [{'l10n_mx_edi_cfdi_state': 'cancel'}])
 
         with freeze_time('2017-07-12'), self.with_mocked_sat_call(lambda x: 'cancelled' if x.move_id == invoice else 'valid'):
-            self.env['l10n_mx_edi.document']._fetch_and_update_sat_status(extra_domain=[('move_id.company_id', '=', self.env.company.id)])
+            invoice.l10n_mx_edi_cfdi_try_sat()
         cancel_doc_values2['sat_state'] = 'cancelled'
         payment2_doc_values1['sat_state'] = 'valid'
         payment1_doc_values1['sat_state'] = 'valid'
@@ -444,8 +445,8 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
         self.assertRecordValues(invoice, [{'l10n_mx_edi_update_payments_needed': False}])
 
     def test_invoice_advanced_payment_flows(self):
-        invoice = self._create_invoice(invoice_date_due='2017-01-01')
-        self.assertRecordValues(invoice, [{'l10n_mx_edi_payment_policy': 'PUE'}])
+        invoice = self._create_invoice()
+        self.assertRecordValues(invoice, [{'l10n_mx_edi_payment_policy': 'PPD'}])
 
         # Sign.
         with freeze_time('2017-01-07'), self.with_mocked_pac_sign_success():
@@ -470,25 +471,10 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
                 'amount': 100.0,
             })\
             ._create_payments()
-        with freeze_time('2017-06-02'), self.with_mocked_pac_sign_success():
-            invoice.l10n_mx_edi_cfdi_invoice_try_update_payments()
-        self.assertRecordValues(invoice.l10n_mx_edi_invoice_document_ids.sorted(), [
-            {
-                'move_id': payment.move_id.id,
-                'datetime': fields.Datetime.from_string('2017-06-02 00:00:00'),
-                'message': False,
-                'state': 'payment_sent_pue',
-                'sat_state': False,
-                'cancellation_reason': False,
-                'cancel_button_needed': False,
-                'retry_button_needed': False,
-            },
-            sent_doc_values,
-        ])
 
-        # Force sending but force an error.
+        # Try sending payment CFDI but force an error.
         with freeze_time('2017-06-03'), self.with_mocked_pac_sign_error():
-            invoice.l10n_mx_edi_invoice_document_ids.sorted()[0].action_force_payment_cfdi()
+            invoice.l10n_mx_edi_cfdi_invoice_try_update_payments()
         self.assertRecordValues(invoice.l10n_mx_edi_invoice_document_ids.sorted(), [
             {
                 'move_id': payment.move_id.id,
@@ -503,9 +489,8 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
             sent_doc_values,
         ])
 
-        # Retry.
         with freeze_time('2017-06-04'), self.with_mocked_pac_sign_success():
-            invoice.l10n_mx_edi_invoice_document_ids.sorted()[0].action_retry()
+            invoice.l10n_mx_edi_cfdi_invoice_try_update_payments()
         payment_doc_values = {
             'move_id': payment.move_id.id,
             'datetime': fields.Datetime.from_string('2017-06-04 00:00:00'),
@@ -566,7 +551,9 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
         # New payment.
         payment2 = self.env['account.payment.register']\
             .with_context(active_model='account.move', active_ids=invoice.ids)\
-            .create({})\
+            .create({
+                'payment_date': '2017-08-01',
+            })\
             ._create_payments()
         invoice.invalidate_recordset(fnames=['l10n_mx_edi_update_payments_needed'])
         self.assertRecordValues(invoice, [{
@@ -574,7 +561,6 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
         }])
         with freeze_time('2017-08-03'), self.with_mocked_pac_sign_success():
             invoice.l10n_mx_edi_cfdi_invoice_try_update_payments()
-            payment2.l10n_mx_edi_payment_document_ids.action_force_payment_cfdi()
         payment2_doc_values = {
             'move_id': payment2.move_id.id,
             'datetime': fields.Datetime.from_string('2017-08-03 00:00:00'),
@@ -596,11 +582,13 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
         payment2.move_id.line_ids.remove_move_reconcile()
         payment3 = self.env['account.payment.register']\
             .with_context(active_model='account.move', active_ids=invoice.ids)\
-            .create({})\
+            .create({
+                'payment_date': '2017-08-04',
+            })\
             ._create_payments()
+
         with freeze_time('2017-08-04'), self.with_mocked_pac_sign_success():
             invoice.l10n_mx_edi_cfdi_invoice_try_update_payments()
-            payment3.l10n_mx_edi_payment_document_ids.action_force_payment_cfdi()
         payment3_doc_values = {
             'move_id': payment3.move_id.id,
             'datetime': fields.Datetime.from_string('2017-08-04 00:00:00'),
@@ -1382,21 +1370,22 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
             'state': 'draft',
         }])
 
-        # Sign the replacement invoice.
+        # Sign the replacement invoice, which automatically cancels the old invoice.
         new_invoice.action_post()
-        with self.with_mocked_pac_sign_success():
+        with self.with_mocked_pac_sign_success(), self.with_mocked_pac_cancel_success():
             new_invoice._l10n_mx_edi_cfdi_invoice_try_send()
 
         invoice.invalidate_recordset(fnames=['need_cancel_request', 'l10n_mx_edi_cfdi_cancel_id'])
         self.assertRecordValues(invoice, [{
-            'l10n_mx_edi_cfdi_state': 'sent',
-            'l10n_mx_edi_invoice_cancellation_reason': False,
+            'l10n_mx_edi_cfdi_state': 'cancel',
+            'l10n_mx_edi_invoice_cancellation_reason': '01',
             'l10n_mx_edi_cfdi_origin': False,
-            'need_cancel_request': True,
-            'show_reset_to_draft_button': False,
+            'need_cancel_request': False,
+            'show_reset_to_draft_button': True,
             'l10n_mx_edi_cfdi_cancel_id': new_invoice.id,
-            'state': 'posted',
+            'state': 'cancel',
         }])
+
         self.assertRecordValues(new_invoice, [{
             'l10n_mx_edi_cfdi_state': 'sent',
             'l10n_mx_edi_invoice_cancellation_reason': False,
@@ -1413,37 +1402,12 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
                 .create({'cancellation_reason': '02'})\
                 .action_cancel_invoice()
 
-        invoice.invalidate_recordset(fnames=['need_cancel_request', 'l10n_mx_edi_cfdi_cancel_id'])
-        self.assertRecordValues(invoice, [{
-            'l10n_mx_edi_cfdi_state': 'sent',
-            'l10n_mx_edi_invoice_cancellation_reason': False,
-            'l10n_mx_edi_cfdi_origin': False,
-            'need_cancel_request': True,
-            'show_reset_to_draft_button': False,
-            'l10n_mx_edi_cfdi_cancel_id': new_invoice.id,
-            'state': 'posted',
-        }])
         self.assertRecordValues(new_invoice, [{
             'l10n_mx_edi_cfdi_state': 'cancel',
             'l10n_mx_edi_invoice_cancellation_reason': '02',
             'l10n_mx_edi_cfdi_origin': f'04|{invoice.l10n_mx_edi_cfdi_uuid}',
             'need_cancel_request': False,
             'show_reset_to_draft_button': True,
-            'state': 'cancel',
-        }])
-
-        with self.with_mocked_pac_cancel_success():
-            self.env['l10n_mx_edi.invoice.cancel']\
-                .with_context(invoice.button_request_cancel()['context'])\
-                .create({})\
-                .action_cancel_invoice()
-        self.assertRecordValues(invoice, [{
-            'l10n_mx_edi_cfdi_state': 'cancel',
-            'l10n_mx_edi_invoice_cancellation_reason': '01',
-            'l10n_mx_edi_cfdi_origin': False,
-            'need_cancel_request': False,
-            'show_reset_to_draft_button': True,
-            'l10n_mx_edi_cfdi_cancel_id': new_invoice.id,
             'state': 'cancel',
         }])
 
@@ -1499,9 +1463,9 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
             'l10n_mx_edi_cfdi_uuid': sent_doc_values1['attachment_uuid'],
         }])
 
-        # Request a replacement for the global invoice.
+        # Request a replacement for the global invoice, which automatically cancels the original global invoice.
         gi_doc1 = invoices.l10n_mx_edi_invoice_document_ids
-        with self.with_mocked_pac_sign_success():
+        with self.with_mocked_pac_sign_success(), self.with_mocked_pac_cancel_success():
             self.env['l10n_mx_edi.invoice.cancel']\
                 .with_context(gi_doc1.action_request_cancel()['context'])\
                 .create({})\
@@ -1513,21 +1477,6 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
             'attachment_origin': f"04|{sent_doc_values1['attachment_uuid']}",
             'cancellation_reason': False,
         }
-        self.assertRecordValues(invoices.l10n_mx_edi_invoice_document_ids.sorted(), [
-            sent_doc_values2,
-            sent_doc_values1,
-        ])
-        self.assertRecordValues(invoice1, [{
-            'l10n_mx_edi_cfdi_state': 'global_sent',
-            'l10n_mx_edi_cfdi_uuid': sent_doc_values2['attachment_uuid'],
-        }])
-
-        # Cancel the first global invoice.
-        with self.with_mocked_pac_cancel_success():
-            self.env['l10n_mx_edi.invoice.cancel']\
-                .with_context(gi_doc1.action_request_cancel()['context'])\
-                .create({})\
-                .action_cancel_invoice()
         cancel_doc_values = {
             'invoice_ids': invoices.ids,
             'state': 'ginvoice_cancel',
@@ -1588,21 +1537,19 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
         self.assertRecordValues(invoices, [{'l10n_mx_edi_update_sat_needed': True}] * 2)
 
         with self.with_mocked_sat_call(lambda _x: 'valid'):
-            self.env['l10n_mx_edi.document']._fetch_and_update_sat_status(
-                extra_domain=[('id', '=', invoices.l10n_mx_edi_invoice_document_ids.id)]
-            )
+            invoices[0].l10n_mx_edi_cfdi_try_sat()
         sent_doc_values1['sat_state'] = 'valid'
         self.assertRecordValues(invoices.l10n_mx_edi_invoice_document_ids, [sent_doc_values1])
 
-        # Request a replacement for the global invoice.
+        # Request a replacement for the global invoice, automatically try to cancel the original invoice but fail.
         gi_doc1 = invoices.l10n_mx_edi_invoice_document_ids
-        with self.with_mocked_pac_sign_success():
+        with self.with_mocked_pac_sign_success(), self.with_mocked_pac_cancel_error():
             self.env['l10n_mx_edi.invoice.cancel']\
                 .with_context(gi_doc1.action_request_cancel()['context'])\
                 .create({})\
                 .action_create_replacement_invoice()
 
-        gi_doc2 = invoices.l10n_mx_edi_invoice_document_ids.sorted()[0]
+        gi_doc2 = invoices.l10n_mx_edi_invoice_document_ids.sorted()[1]
         self.assertTrue(gi_doc2.attachment_id)
         sent_doc_values2 = {
             'move_id': None,
@@ -1617,30 +1564,18 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
             'retry_button_needed': False,
             'cancel_button_needed': True,
         }
-        self.assertRecordValues(invoices.l10n_mx_edi_invoice_document_ids.sorted(), [
-            sent_doc_values2,
-            sent_doc_values1,
-        ])
-
-        # Request a replacement for the global invoice but it failed.
-        with self.with_mocked_pac_sign_error():
-            self.env['l10n_mx_edi.invoice.cancel']\
-                .with_context(gi_doc2.action_request_cancel()['context'])\
-                .create({})\
-                .action_create_replacement_invoice()
-
         gi_doc3 = invoices.l10n_mx_edi_invoice_document_ids.sorted()[0]
         self.assertTrue(gi_doc3.attachment_id)
         sent_doc_values3 = {
             'move_id': None,
             'invoice_ids': invoices.ids,
             'message': "turlututu",
-            'state': 'ginvoice_sent_failed',
+            'state': 'ginvoice_cancel_failed',
             'sat_state': False,
             'attachment_id': gi_doc3.attachment_id.id,
-            'attachment_uuid': False,
-            'attachment_origin': f'04|{gi_doc2.attachment_uuid}',
-            'cancellation_reason': False,
+            'attachment_uuid': gi_doc3.attachment_uuid,  # In this case, UUID does not become UUID of the invoices
+            'attachment_origin': False,
+            'cancellation_reason': '01',
             'retry_button_needed': True,
             'cancel_button_needed': False,
         }
@@ -1839,7 +1774,7 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
 
     def test_payment_workflow(self):
         """ Test the payment workflow, here is the flow we test :
-                1) create and sign an invoice
+                1) create and sign an invoice (PPD)
                 2) create a first payment and send it
                 3) unreconcile the first payment
                 4) create a second payment with cfdi_origin referring the first payment uuid and send it
@@ -1847,7 +1782,7 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
                 6) cancel the second payment
         """
         # Create invoice
-        invoice = self._create_invoice(invoice_date_due='2017-01-01')
+        invoice = self._create_invoice()
 
         # Sign.
         with freeze_time('2017-01-07'), self.with_mocked_pac_sign_success():
@@ -1873,7 +1808,6 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
 
         with freeze_time('2017-06-02'), self.with_mocked_pac_sign_success():
             invoice.l10n_mx_edi_cfdi_invoice_try_update_payments()
-            payment1.l10n_mx_edi_payment_document_ids.action_force_payment_cfdi()
 
         payment1_doc_values = {
             'move_id': payment1.move_id.id,
@@ -1890,7 +1824,7 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
         # Unreconcile the first payment
         payment1.move_id.line_ids.remove_move_reconcile()
 
-        # Create a new payment with a cfdi origin containing the uuid of the first payment
+        # Create a new payment with a cfdi origin containing the uuid of the first payment, which automatically cancels the first payment
         payment2 = self.env['account.payment.register']\
             .with_context(active_model='account.move', active_ids=invoice.ids)\
             .create({
@@ -1900,9 +1834,8 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
             })\
             ._create_payments()
 
-        with freeze_time('2017-06-02'), self.with_mocked_pac_sign_success():
+        with freeze_time('2017-06-02'), self.with_mocked_pac_sign_success(), self.with_mocked_pac_cancel_success():
             invoice.l10n_mx_edi_cfdi_invoice_try_update_payments()
-            payment2.l10n_mx_edi_payment_document_ids.action_force_payment_cfdi()
 
         payment2_doc_values = {
             'move_id': payment2.move_id.id,
@@ -1911,19 +1844,9 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
             'cancellation_reason': False,
             'attachment_origin': f'04|{payment1.l10n_mx_edi_cfdi_uuid}',
         }
-        self.assertRecordValues(invoice.l10n_mx_edi_invoice_document_ids.sorted(), [
-            payment2_doc_values,
-            payment1_doc_values,
-            sent_doc_values,
-        ])
-
-        # Cancel the first payment, it should apply the cancellation reason '1'
-        with freeze_time('2017-08-05'), self.with_mocked_pac_cancel_success():
-            payment1.l10n_mx_edi_payment_document_ids.action_cancel()
-
         payment1_cancel_doc_values = {
             'move_id': payment1.move_id.id,
-            'datetime': fields.Datetime.from_string('2017-08-05 00:00:00'),
+            'datetime': fields.Datetime.from_string('2017-06-02 00:00:00'),
             'state': 'payment_cancel',
             'cancellation_reason': '01',
             'attachment_origin': False,
@@ -2000,7 +1923,7 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
                 4) cancel the payment
         """
         # Create invoice
-        invoice = self._create_invoice(invoice_date_due='2017-01-01')
+        invoice = self._create_invoice()
 
         # Sign.
         with freeze_time('2017-01-01'), self.with_mocked_pac_sign_success():
@@ -2025,10 +1948,8 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
             })\
             ._create_payments()
 
-        with freeze_time('2017-01-01'), self.with_mocked_pac_sign_success():
-            invoice.l10n_mx_edi_cfdi_invoice_try_update_payments()
         with freeze_time('2017-01-01'), self.with_mocked_pac_sign_error():
-            payment1.l10n_mx_edi_payment_document_ids.action_force_payment_cfdi()
+            invoice.l10n_mx_edi_cfdi_invoice_try_update_payments()
 
         payment1_doc_values = {
             'move_id': payment1.move_id.id,
@@ -2095,35 +2016,217 @@ class TestCFDIInvoiceWorkflow(TestMxEdiCommon):
         self.assertEqual(new_invoice.line_ids[0].name, 'section')
         self.assertEqual(new_invoice.line_ids[1].name, 'note')
 
-    def test_legal_name_sanitization(self):
-        unsanitized_name = "Dinora Güntner Ñúñez Ávila"
-        sanitized_name = self.env['l10n_mx_edi.document']._cfdi_sanitize_to_legal_name(unsanitized_name)
-        self.assertEqual(sanitized_name, 'DINORA GÜNTNER ÑUÑEZ AVILA')
-
-    @freeze_time('2017-01-01')
     def test_cron_update_sat_state_write_date(self):
-        """ Test that the sat_state is not updated on the record when it has not changed for the SAT when using the cron. """
-        # Patching `now` so we can easily check for changes on `write_date`
-        self.patch(self.env.cr, 'now', lambda: fields.Datetime.now() - timedelta(days=1))
-        invoice = self._create_invoice()  # Force PPD
-        with self.with_mocked_pac_sign_success():
+        """ Test that the sat_state write_date is updated on every cron run,
+        retriggering within 4h skips recently checked documents, and vendor
+        bills older than 7 days are excluded.
+        """
+
+        @contextmanager
+        def freeze_now(ref_datetime):
+            with freeze_time(ref_datetime):
+                self.patch(self.env.cr, 'now', lambda: ref_datetime)
+                yield
+
+        ref_datetime = fields.Datetime.from_string('2017-01-01 00:00:00')
+
+        ref_datetime_minus_2 = ref_datetime - timedelta(days=2)
+        with freeze_now(ref_datetime_minus_2):
+            invoice_2 = self._create_invoice()
+            with self.with_mocked_pac_sign_success():
+                invoice_2._l10n_mx_edi_cfdi_invoice_try_send()
+            doc_2 = invoice_2.l10n_mx_edi_invoice_document_ids
+            doc_2.invalidate_recordset()
+
+        ref_datetime_minus_1 = ref_datetime - timedelta(days=1)
+        with freeze_now(ref_datetime_minus_1):
+            invoice_1 = self._create_invoice()
+            with self.with_mocked_pac_sign_success():
+                invoice_1._l10n_mx_edi_cfdi_invoice_try_send()
+            doc_1 = invoice_1.l10n_mx_edi_invoice_document_ids
+            doc_1.invalidate_recordset()
+
+        self.assertRecordValues(doc_1 + doc_2, [
+            {'state': 'invoice_sent', 'write_date': ref_datetime_minus_1, 'sat_state': 'not_defined'},
+            {'state': 'invoice_sent', 'write_date': ref_datetime_minus_2, 'sat_state': 'not_defined'},
+        ])
+
+        # Step 1: Run batch_size=1 where sat_state doesn't change (returns 'not_defined').
+        # doc_2 (oldest create_date) is processed. write_date must update even if sat_state is unchanged.
+        ref_datetime_plus_1 = ref_datetime + timedelta(days=1)
+        with freeze_now(ref_datetime_plus_1), self.with_mocked_sat_call(lambda _x: 'not_defined'):
+            self.env['l10n_mx_edi.document']._fetch_and_update_sat_status(batch_size=1, extra_domain=[('id', 'in', (doc_1 + doc_2).ids)])
+            doc_1.invalidate_recordset()
+            doc_2.invalidate_recordset()
+        self.assertRecordValues(doc_1 + doc_2, [
+            {'state': 'invoice_sent', 'write_date': ref_datetime_minus_1, 'sat_state': 'not_defined'},
+            {'state': 'invoice_sent', 'write_date': ref_datetime_plus_1, 'sat_state': 'not_defined'},
+        ])
+
+        cron = self.env.ref('l10n_mx_edi.ir_cron_update_pac_status_invoice')
+        cron_trigger = self.env['ir.cron.trigger'].search([
+            ('cron_id', '=', cron.id)
+        ])
+        self.assertEqual(
+            cron_trigger.call_at,
+            ref_datetime_plus_1,
+            "The cron hasn't been retriggered for the remaining invoice !"
+        )
+
+        # Step 2: Immediate retrigger (1 minute later, < 4 hours).
+        # doc_2 was updated 1m ago, so it must be skipped by write_date <= now - 4h filter.
+        # doc_1 is processed instead.
+        ref_datetime_plus_1_1m = ref_datetime_plus_1 + timedelta(minutes=1)
+        with freeze_now(ref_datetime_plus_1_1m), self.with_mocked_sat_call(lambda _x: 'valid'):
+            self.env['l10n_mx_edi.document']._fetch_and_update_sat_status(batch_size=1, extra_domain=[('id', 'in', (doc_1 + doc_2).ids)])
+            doc_1.invalidate_recordset()
+            doc_2.invalidate_recordset()
+        self.assertRecordValues(doc_1 + doc_2, [
+            {'state': 'invoice_sent', 'write_date': ref_datetime_plus_1_1m, 'sat_state': 'valid'},
+            {'state': 'invoice_sent', 'write_date': ref_datetime_plus_1, 'sat_state': 'not_defined'},
+        ])
+
+        # Step 3: Retrigger again 2 minutes later (< 4 hours).
+        # doc_2 is skipped (< 4h since write_date), doc_1 is skipped (sat_state is 'valid').
+        # No documents are fetched, so no cron retrigger occurs.
+        cron_trigger.unlink()
+        ref_datetime_plus_1_2m = ref_datetime_plus_1 + timedelta(minutes=2)
+        with freeze_now(ref_datetime_plus_1_2m), self.with_mocked_sat_call(lambda _x: 'valid'):
+            self.env['l10n_mx_edi.document']._fetch_and_update_sat_status(batch_size=1, extra_domain=[('id', 'in', (doc_1 + doc_2).ids)])
+        new_cron_trigger = self.env['ir.cron.trigger'].search([('cron_id', '=', cron.id)])
+        self.assertFalse(new_cron_trigger, "The cron should not retrigger when no remaining documents match domain")
+
+        # Step 4: After > 4 hours (5 hours later), doc_2's write_date is > 4h ago, so it becomes eligible again.
+        ref_datetime_plus_1_5h = ref_datetime_plus_1 + timedelta(hours=5)
+        with freeze_now(ref_datetime_plus_1_5h), self.with_mocked_sat_call(lambda _x: 'valid'):
+            self.env['l10n_mx_edi.document']._fetch_and_update_sat_status(batch_size=1, extra_domain=[('id', 'in', (doc_1 + doc_2).ids)])
+            doc_2.invalidate_recordset()
+        self.assertEqual(doc_2.sat_state, 'valid')
+        self.assertEqual(doc_2.write_date, ref_datetime_plus_1_5h)
+
+        # Step 5: Test vendor bill (invoice_received) 7-day cutoff vs customer invoice 60-day cutoff
+        ref_datetime_minus_10 = ref_datetime - timedelta(days=10)
+        with freeze_now(ref_datetime_minus_10):
+            vendor_bill_doc = self.env['l10n_mx_edi.document'].create({
+                'state': 'invoice_received',
+                'sat_state': 'not_defined',
+                'datetime': ref_datetime_minus_10,
+                'move_id': self._create_invoice().id,
+            })
+            customer_inv_doc = self.env['l10n_mx_edi.document'].create({
+                'state': 'invoice_sent',
+                'sat_state': 'not_defined',
+                'datetime': ref_datetime_minus_10,
+                'move_id': self._create_invoice().id,
+            })
+
+        ref_datetime_check = ref_datetime + timedelta(days=10)
+        with freeze_now(ref_datetime_check), self.with_mocked_sat_call(lambda _x: 'valid'):
+            self.env['l10n_mx_edi.document']._fetch_and_update_sat_status(
+                extra_domain=[('id', 'in', (vendor_bill_doc + customer_inv_doc).ids)]
+            )
+            vendor_bill_doc.invalidate_recordset()
+            customer_inv_doc.invalidate_recordset()
+
+        # Vendor bill created 20 days prior to check date (> 7 days) is NOT updated
+        self.assertEqual(vendor_bill_doc.sat_state, 'not_defined')
+        # Customer invoice created 20 days prior to check date (<= 60 days) IS updated
+        self.assertEqual(customer_inv_doc.sat_state, 'valid')
+
+        # Step 6: Test vendor bill write_date re-check threshold (12 hours) vs customer invoice (4 hours)
+        ref_datetime_vb_create = ref_datetime - timedelta(days=2)
+        with freeze_now(ref_datetime_vb_create):
+            vendor_bill_recent = self.env['l10n_mx_edi.document'].create({
+                'state': 'invoice_received',
+                'sat_state': 'not_defined',
+                'datetime': ref_datetime_vb_create,
+                'move_id': self._create_invoice().id,
+            })
+            customer_inv_recent = self.env['l10n_mx_edi.document'].create({
+                'state': 'invoice_sent',
+                'sat_state': 'not_defined',
+                'datetime': ref_datetime_vb_create,
+                'move_id': self._create_invoice().id,
+            })
+
+        # Initial check at ref_datetime: both are processed and write_date becomes ref_datetime
+        ref_datetime_vb_run = ref_datetime
+        with freeze_now(ref_datetime_vb_run), self.with_mocked_sat_call(lambda _x: 'not_defined'):
+            self.env['l10n_mx_edi.document']._fetch_and_update_sat_status(
+                extra_domain=[('id', 'in', (vendor_bill_recent + customer_inv_recent).ids)]
+            )
+            vendor_bill_recent.invalidate_recordset()
+            customer_inv_recent.invalidate_recordset()
+        self.assertEqual(vendor_bill_recent.write_date, ref_datetime_vb_run)
+        self.assertEqual(customer_inv_recent.write_date, ref_datetime_vb_run)
+
+        # 5 hours later: customer invoice IS re-checked (> 4h), vendor bill IS NOT re-checked (< 12h)
+        ref_datetime_5h_later = ref_datetime_vb_run + timedelta(hours=5)
+        with freeze_now(ref_datetime_5h_later), self.with_mocked_sat_call(lambda _x: 'valid'):
+            self.env['l10n_mx_edi.document']._fetch_and_update_sat_status(
+                extra_domain=[('id', 'in', (vendor_bill_recent + customer_inv_recent).ids)]
+            )
+            vendor_bill_recent.invalidate_recordset()
+            customer_inv_recent.invalidate_recordset()
+
+        self.assertEqual(customer_inv_recent.sat_state, 'valid')
+        self.assertEqual(vendor_bill_recent.sat_state, 'not_defined')
+
+        # 13 hours later (> 12h): vendor bill IS now re-checked
+        ref_datetime_13h_later = ref_datetime_vb_run + timedelta(hours=13)
+        with freeze_now(ref_datetime_13h_later), self.with_mocked_sat_call(lambda _x: 'valid'):
+            self.env['l10n_mx_edi.document']._fetch_and_update_sat_status(
+                extra_domain=[('id', 'in', (vendor_bill_recent + customer_inv_recent).ids)]
+            )
+            vendor_bill_recent.invalidate_recordset()
+
+        self.assertEqual(vendor_bill_recent.sat_state, 'valid')
+
+    def test_payment_cfdi_with_leaked_default_type_context(self):
+        """Test CFDI payment document creation with leaked context (default_type) from account.journal
+        Requires documents_account to be installed (skipped otherwise).
+        """
+        if self.env['ir.module.module']._get('documents_account').state != 'installed':
+            self.skipTest("documents_account is not installed")
+
+        # Journal-folder sync is needed so the CFDI attachment creation triggers document creation
+        bank_journal = self.company_data['default_journal_bank']
+        folder = self.env['documents.document'].sudo().create({'name': 'Test Folder', 'type': 'folder'})
+        if setting := self.env['documents.account.folder.setting'].sudo().search([
+            ('journal_id', '=', bank_journal.id),
+            ('company_id', '=', self.env.company.id)], limit=1):
+            setting.folder_id = folder
+        else:
+            self.env['documents.account.folder.setting'].sudo().create({
+                'folder_id': folder.id,
+                'journal_id': bank_journal.id
+                })
+
+        invoice = self._create_invoice()
+        with freeze_time('2017-01-07'), self.with_mocked_pac_sign_success():
             invoice._l10n_mx_edi_cfdi_invoice_try_send()
 
-        self.env.company.l10n_mx_edi_pac_test_env = False
+        self.env['account.payment.register']\
+            .with_context(active_model='account.move', active_ids=invoice.ids)\
+            .create({
+                'payment_date': '2017-06-01',
+                'amount': 1160.0,
+                'journal_id': bank_journal.id,
+            })\
+            ._create_payments()
 
-        previous_write_date = invoice.l10n_mx_edi_invoice_document_ids.write_date
-        self.patch(self.env.cr, 'now', fields.Datetime.now)
-        with self.with_mocked_sat_call(lambda _x: 'valid'):
-            self.env['l10n_mx_edi.document']._fetch_and_update_sat_status()
+        # Sign the payment CFDI with `default_type='sale'` context
+        with freeze_time('2017-06-02'), self.with_mocked_pac_sign_success():
+            invoice.with_context(default_type='sale').l10n_mx_edi_cfdi_invoice_try_update_payments()
 
-        self.assertEqual(invoice.l10n_mx_edi_invoice_document_ids.sat_state, 'valid')
-        self.assertNotEqual(invoice.l10n_mx_edi_invoice_document_ids.write_date, previous_write_date)
+        payment_doc = invoice.l10n_mx_edi_invoice_document_ids.filtered(lambda d: d.state == 'payment_sent')
+        self.assertTrue(payment_doc, "Payment CFDI document should have been created")
 
-        # Forcing the state to be able to reuse the same document
-        invoice.l10n_mx_edi_invoice_document_ids.sat_state = 'not_defined'
-        previous_write_date = invoice.l10n_mx_edi_invoice_document_ids.write_date
-        self.patch(self.env.cr, 'now', lambda: fields.Datetime.now() + timedelta(days=1))
-        with self.with_mocked_sat_call(lambda _x: 'not_defined'):
-            self.env['l10n_mx_edi.document']._fetch_and_update_sat_status()
-
-        self.assertEqual(invoice.l10n_mx_edi_invoice_document_ids.write_date, previous_write_date)
+        cfdi_attachment = payment_doc.attachment_id
+        self.assertTrue(cfdi_attachment, "Payment CFDI attachment should exist")
+        doc = self.env['documents.document'].search([('attachment_id', '=', cfdi_attachment.id)])
+        self.assertTrue(doc, "A documents.document should have been created for the CFDI attachment")
+        self.assertEqual(
+            doc.type, 'binary',
+            "Document type should be 'binary', not the leaked 'sale' value from the accounting context",
+        )

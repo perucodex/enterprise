@@ -211,6 +211,10 @@ class L10n_Uy_EdiDocument(models.Model):
                 xml_tag=field_name, xml_tag_len=limit, value_len=len(res), value_content=res))
         return errors
 
+    def _get_origin_record(self):
+        self.ensure_one()
+        return self.move_id
+
     @api.model
     def _get_cfe_tag(self, move):
         move.ensure_one()
@@ -239,7 +243,8 @@ class L10n_Uy_EdiDocument(models.Model):
         res = []
         addendas = move_id.l10n_uy_edi_addenda_ids.filtered(lambda x: x.type == addenda_type)
         for addenda in addendas:
-            res.append("{ %s }" % addenda.content if addenda.is_legend else addenda.content)
+            content = addenda.content.strip()
+            res.append("{ %s }" % content if addenda.is_legend else content)
         return "\n".join(res)
 
     @api.model
@@ -289,7 +294,7 @@ class L10n_Uy_EdiDocument(models.Model):
             self.env.ref('l10n_uy.dc_cn_e_inv_exp') |
             self.env.ref('l10n_uy.dc_dn_e_inv_exp')
         )
-        addenda = self.move_id._l10n_uy_edi_get_addenda()
+        addenda = self._get_origin_record()._l10n_uy_edi_get_addenda()
         parameters = {}
 
         if addenda:
@@ -449,14 +454,14 @@ class L10n_Uy_EdiDocument(models.Model):
         now = fields.Datetime.now()
         company = extra_req.get('company') or self.company_id or self.env.company
         data = {
-            "CodComercio": company.l10n_uy_edi_ucfe_commerce_code,
-            "CodTerminal": company.l10n_uy_edi_ucfe_terminal_code,
+            "CodComercio": company.sudo().l10n_uy_edi_ucfe_commerce_code,
+            "CodTerminal": company.sudo().l10n_uy_edi_ucfe_terminal_code,
             "RequestDate": now.replace(microsecond=0).isoformat(),
             "Tout": "30000",
             "Req": {
                 "TipoMensaje": msg_type,
-                "CodComercio": company.l10n_uy_edi_ucfe_commerce_code,
-                "CodTerminal": company.l10n_uy_edi_ucfe_terminal_code,
+                "CodComercio": company.sudo().l10n_uy_edi_ucfe_commerce_code,
+                "CodTerminal": company.sudo().l10n_uy_edi_ucfe_terminal_code,
                 "IdReq": 1,
                 **extra_req,
             },
@@ -520,14 +525,16 @@ class L10n_Uy_EdiDocument(models.Model):
     def _get_partner_from_xml(self, xml_tree, partner_vat_RUC):
         """Select partner if exists or create partner from vendor bill XML data. """
         partner = self.env["res.partner"]._retrieve_partner(vat=partner_vat_RUC, company=self.company_id)
-        state_id = self.env["res.country.state"].search([("name", "ilike", xml_tree.findtext(".//{*}Departamento"))], limit=1)
+        state_id = None
+        if departamento := xml_tree.findtext(".//{*}Departamento"):
+            state_id = self.env["res.country.state"].search([("name", "ilike", departamento), ("country_id.code", "=", "UY")], limit=1)
         return partner or self.env["res.partner"].create({
             "name": xml_tree.findtext(".//{*}RznSoc"),
             "vat": partner_vat_RUC,
             "city": xml_tree.findtext(".//{*}Ciudad"),
             "street": xml_tree.findtext(".//{*}DomFiscal"),
             "state_id": state_id.id if state_id else None,
-            "country_id": state_id.country_id.id if state_id else None,
+            "country_id": self.env.ref("base.uy").id,
             "l10n_latam_identification_type_id": self.env.ref("l10n_uy.it_rut").id,
             "is_company": True
         })

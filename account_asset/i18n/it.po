@@ -8,13 +8,13 @@
 # Luca Carlo, 2023
 # Sergio Zanchetta <primes2h@gmail.com>, 2023
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
-# "Marianna Ciofani (cima)" <cima@odoo.com>, 2025.
+# "Marianna Ciofani (cima)" <cima@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-30 18:42+0000\n"
-"PO-Revision-Date: 2025-10-24 11:22+0000\n"
+"POT-Creation-Date: 2026-08-21 17:44+0000\n"
+"PO-Revision-Date: 2026-08-24 07:15+0000\n"
 "Last-Translator: \"Marianna Ciofani (cima)\" <cima@odoo.com>\n"
 "Language-Team: Italian <https://translate.odoo.com/projects/odoo-19/"
 "account_asset/it/>\n"
@@ -24,7 +24,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 1) ? 0 : ((n != 0 && n % 1000000 == "
 "0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_asset
 #: model:ir.model.fields,field_description:account_asset.field_account_asset__total_depreciation_entries_count
@@ -502,8 +502,8 @@ msgstr "Cespite creato dalla fattura: %s"
 #. module: account_asset
 #. odoo-python
 #: code:addons/account_asset/models/account_asset.py:0
-msgid "Asset disposed. %s"
-msgstr "Cespite dismesso. %s"
+msgid "Asset disposed. %(message)s"
+msgstr "Asset eliminato. %(message)s"
 
 #. module: account_asset
 #: model:account.return.check.template,name:account_asset.account_return_check_template_asset_movement_and_accounting_treatment
@@ -519,8 +519,14 @@ msgstr "Cespite sospeso. %s"
 #. module: account_asset
 #. odoo-python
 #: code:addons/account_asset/models/account_asset.py:0
-msgid "Asset sold. %s"
-msgstr "Cespite venduto. %s"
+msgid "Asset sold. %(message)s See %(invoice_links)s"
+msgstr "Asset venduto. %(message)s Vedi %(invoice_links)s"
+
+#. module: account_asset
+#. odoo-python
+#: code:addons/account_asset/models/account_asset.py:0
+msgid "Asset sold: %s"
+msgstr "Asset venduto: %s"
 
 #. module: account_asset
 #. odoo-python
@@ -1015,6 +1021,21 @@ msgstr ""
 "di durata."
 
 #. module: account_asset
+#: model:account.return.check.template,description:account_asset.account_return_check_template_monitoring_of_depreciation
+msgid ""
+"Ensure compliance with local tax rules on depreciation.\n"
+"Verify that the depreciation methods, depreciation period, and start dates "
+"align with tax requirements (e.g. linear depreciation, pro rata temporis "
+"application, no double declining for tax purposes)."
+msgstr ""
+"Garantisci la conformità alle norme fiscali locali in materia di "
+"ammortamento.\n"
+"Verifica che i metodi di ammortamento, il periodo di ammortamento e le date "
+"di inizio siano in linea con i requisiti fiscali (ad esempio, ammortamento "
+"lineare, applicazione pro rata temporis, nessun doppio declino ai fini "
+"fiscali)."
+
+#. module: account_asset
 #. odoo-python
 #: code:addons/account_asset/controller/asset_template_controller.py:0
 #: model:ir.model.fields,field_description:account_asset.field_account_asset__account_depreciation_expense_id
@@ -1358,6 +1379,11 @@ msgstr "Modifica cespite"
 #: model_terms:ir.ui.view,arch_db:account_asset.view_account_asset_form
 msgid "Modify Depreciation"
 msgstr "Modifica ammortamento"
+
+#. module: account_asset
+#: model:account.return.check.template,name:account_asset.account_return_check_template_monitoring_of_depreciation
+msgid "Monitoring of Depreciation "
+msgstr "Monitoraggio dell'ammortamento "
 
 #. module: account_asset
 #: model:ir.model.fields.selection,name:account_asset.selection__account_asset__method_period__1
@@ -1956,6 +1982,14 @@ msgstr ""
 "Odoo ed essere di tipo ‘Ammortamento’ o “Spesa”."
 
 #. module: account_asset
+#. odoo-javascript
+#: code:addons/account_asset/static/src/components/depreciation_schedule/warnings.xml:0
+msgid "The fixed asset account differs from the account on the bill. Click"
+msgstr ""
+"Il conto immobilizzazioni è diverso dal conto sulla fattura fornitore. Fai "
+"clic"
+
+#. module: account_asset
 #: model:ir.model.fields,help:account_asset.field_account_asset__method_number
 msgid "The number of depreciations needed to depreciate your asset"
 msgstr "Numero di ammortamenti necessari per ammortizzare il cespite"
@@ -2340,6 +2374,12 @@ msgid "gain/loss"
 msgstr "guadagno/perdita"
 
 #. module: account_asset
+#. odoo-javascript
+#: code:addons/account_asset/static/src/components/depreciation_schedule/warnings.xml:0
+msgid "here"
+msgstr "qui"
+
+#. module: account_asset
 #. odoo-python
 #: code:addons/account_asset/controller/asset_template_controller.py:0
 msgid "journal_id"
@@ -2416,6 +2456,12 @@ msgstr "salvage_value"
 #: code:addons/account_asset/wizard/asset_modify.py:0
 msgid "sell"
 msgstr "vendi"
+
+#~ msgid "Asset disposed. %s"
+#~ msgstr "Cespite dismesso. %s"
+
+#~ msgid "Asset sold. %s"
+#~ msgstr "Cespite venduto. %s"
 
 #~ msgid " (%s of %s)"
 #~ msgstr " (%s di %s)"

@@ -76,4 +76,4 @@ class AccountMoveLine(models.Model):
                 for row in data:
                     row[matching_index] = row[matching_index] and f"I{row[matching_index]}"
 
-        return super().load(fields, data)
+        return super(AccountMoveLine, self.with_context(skip_account_deprecation_check=True)).load(fields, data)

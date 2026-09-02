@@ -1,14 +1,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from collections import defaultdict
+from datetime import datetime
+
 from dateutil.relativedelta import relativedelta
-from pytz import timezone, UTC, utc
+from pytz import UTC, utc, timezone
 
 from odoo import api, fields, models
 from odoo.fields import Domain
 from odoo.tools import float_is_zero
-from odoo.tools.intervals import Intervals
-from odoo.tools.date_utils import localized
 
 
 class HrAttendance(models.Model):
@@ -37,6 +36,9 @@ class HrAttendance(models.Model):
         Compute the total work hours of the employee based on the intervals selected on the Gantt view.
         The calculation takes into account the working calendar (flexible or not).
         """
+        user_tz = timezone(self.env.user.tz or 'UTC')
+        start = datetime.combine(start.astimezone(user_tz).date(), datetime.min.time(), tzinfo=UTC)
+        stop = datetime.combine(stop.astimezone(user_tz).date(), datetime.min.time(), tzinfo=UTC)
         return self.env['resource.calendar']._get_attendance_intervals_days_data(employee._employee_attendance_intervals(start, stop))['hours']
 
     def _get_gantt_progress_bar_domain(self, res_ids, start, stop):
@@ -84,7 +86,8 @@ class HrAttendance(models.Model):
                 '&',
                 ('check_out', '<', start_date),
                 ('check_in', '>', fields.Datetime.from_string(start_date) - relativedelta(days=60)),
-                ('employee_id', 'not in', [group['employee_id'][0] for group in open_ended_gantt_data['groups']])
+                ('employee_id', 'not in', [group['employee_id'][0] for group in open_ended_gantt_data['groups']]),
+                ('employee_id.active', '=', True)
             ])
             previously_active_employees = super().get_gantt_data(active_employees_domain, groupby, read_specification, limit=None, offset=0, unavailability_fields=unavailability_fields, progress_bar_fields=progress_bar_fields, start_date=start_date, stop_date=stop_date, scale=scale)
             for group in previously_active_employees['groups']:
@@ -102,108 +105,8 @@ class HrAttendance(models.Model):
         if field != "employee_id":
             return super()._gantt_unavailability(field, res_ids, start, stop, scale)
 
-        employees_by_calendar = defaultdict(lambda: self.env['hr.employee'])
         employees = self.env['hr.employee'].browse(res_ids)
-
-        # Retrieve for each employee, their period linked to their calendars
-        calendar_periods_by_employee = employees._get_calendar_periods(
-            localized(start),
-            localized(stop),
-        )
-
-        full_interval_UTC = Intervals([(
-            start.astimezone(UTC),
-            stop.astimezone(UTC),
-            self.env['resource.calendar'],
-        )])
-
-        # calculate the intervals not covered by employee-specific calendars.
-        # store these uncovered intervals for each employee.
-        # store by calendar, employees involved with them
-        periods_without_calendar_by_employee = defaultdict(list)
-        for employee, calendar_periods in calendar_periods_by_employee.items():
-            employee_interval_UTC = Intervals([])
-            for (start, stop, calendar) in calendar_periods:
-                calendar_periods_interval_UTC = Intervals([(
-                    start.astimezone(UTC),
-                    stop.astimezone(UTC),
-                    self.env['resource.calendar'],
-                )])
-                employee_interval_UTC |= calendar_periods_interval_UTC
-                employees_by_calendar[calendar] |= employee
-            interval_without_calendar = full_interval_UTC - employee_interval_UTC
-            if interval_without_calendar:
-                periods_without_calendar_by_employee[employee.id] = interval_without_calendar
-
-        # retrieve, for each calendar, unavailability periods for employees linked to this calendar
-        unavailable_intervals_by_calendar = {}
-        for calendar, employees in employees_by_calendar.items():
-            # In case the calendar is not set (fully flexible calendar), we consider the employee as always available
-            if not calendar or calendar.flexible_hours:
-                unavailable_intervals_by_calendar[calendar] = {
-                    employee.id: Intervals([])
-                    for employee in employees
-                }
-                continue
-
-            calendar_work_intervals = calendar._work_intervals_batch(
-                localized(start),
-                localized(stop),
-                resources=employees.resource_id,
-                tz=timezone(calendar.tz)
-            )
-            full_interval = Intervals([(
-                start.astimezone(timezone(calendar.tz)),
-                stop.astimezone(timezone(calendar.tz)),
-                calendar
-            )])
-            unavailable_intervals_by_calendar[calendar] = {
-                employee.id: full_interval - calendar_work_intervals[employee.resource_id.id]
-                for employee in employees}
-
-        # calculate employee's unavailability periods based on his calendar's periods
-        # (e.g. calendar A on monday and tuesday and calendar b for the rest of the week)
-        unavailable_intervals_by_employees = {}
-        for employee, calendar_periods in calendar_periods_by_employee.items():
-            employee_unavailable_full_interval = Intervals([])
-            for (start, stop, calendar) in calendar_periods:
-                interval = Intervals([(start, stop, self.env['resource.calendar'])])
-                calendar_unavailable_interval_list = unavailable_intervals_by_calendar[calendar][employee.id]
-                employee_unavailable_full_interval |= interval & calendar_unavailable_interval_list
-            unavailable_intervals_by_employees[employee.id] = employee_unavailable_full_interval
-
-        flexible_employees = self.env['hr.employee']
-        for calendar, employees in employees_by_calendar.items():
-            if calendar.flexible_hours:
-                flexible_employees |= employees
-
-        result = {}
-        for employee_id in res_ids:
-            # When an employee doesn't have any calendar,
-            # he is considered unavailable for the entire interval
-            if employee_id not in unavailable_intervals_by_employees:
-                result[employee_id] = [{
-                    'start': start.astimezone(UTC),
-                    'stop': stop.astimezone(UTC),
-                }]
-                continue
-
-            # When an employee has a flexible calendar,
-            # he is considered available for the entire interval
-            if employee_id in flexible_employees.ids:
-                result[employee_id] = []
-                continue
-
-            # When an employee doesn't have a calendar for a part of the entire interval,
-            # he will be unavailable for this part
-            if employee_id in periods_without_calendar_by_employee:
-                unavailable_intervals_by_employees[employee_id] |= periods_without_calendar_by_employee[employee_id]
-            result[employee_id] = [{
-                'start': interval[0].astimezone(UTC),
-                'stop': interval[1].astimezone(UTC),
-            } for interval in unavailable_intervals_by_employees[employee_id]]
-
-        return result
+        return employees._get_employee_unavailable_intervals(start, stop)
 
     def action_open_details(self):
         self.ensure_one()

@@ -146,7 +146,11 @@ export class QualityCheck extends MrpWorkorder {
 
     async doActionAndNext(action, stateToSet = "pass") {
         const { model, resModel, resId, data, _parentRecord } = this.props.record;
-        const result = await model.orm.call(resModel, action, [resId]);
+        const result = await model.orm.call(resModel, action, [resId], {
+            context: {
+                from_shopfloor: true,
+            },
+        });
         if ("next_check_id" in result) {
             data.quality_state = stateToSet;
             _parentRecord.data.current_quality_check_id = { id: result.next_check_id };
@@ -179,8 +183,8 @@ export class QualityCheck extends MrpWorkorder {
             };
         }
         this.dialog.add(MrpWorksheetDialog, {
-            worksheetText: this.check.note,
             worksheetData,
+            record: this.props.record,
         });
     }
 }

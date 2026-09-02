@@ -17,6 +17,7 @@ export const DocumentsControllerMixin = (component) =>
             });
 
             this.documentService = useService("document.document");
+            this.ui = useService("ui");
             this.firstLoadSelectId = this.documentService.initData?.documentId;
         }
 
@@ -40,6 +41,19 @@ export const DocumentsControllerMixin = (component) =>
                     initData.openPreview = false;
                     doc.onClickPreview(new Event("click"));
                 }
+            }
+        }
+
+        openTrashIfNecessary() {
+            if (this.documentService.archivedDocumentRestored) {
+                if (this.env.searchModel.getSelectedFolderId() !== "TRASH") {
+                    const section = this.env.searchModel.getSections()[0];
+                    this.env.searchModel.toggleCategoryValue(section.id, "TRASH");
+                }
+                this.documentService.updateDocumentURL(undefined, [
+                    { data: this.documentService.archivedDocumentRestored },
+                ]);
+                this.documentService.archivedDocumentRestored = undefined;
             }
         }
 
@@ -199,7 +213,10 @@ export const DocumentsControllerMixin = (component) =>
                 },
                 details: {
                     isAvailable: () =>
-                        userIsInternal && !this.env.searchModel.context.documents_view_secondary,
+                        userIsInternal &&
+                        !this.env.searchModel.context.documents_view_secondary &&
+                        (!this.env.isSmall ||
+                            !this.documentService.rightPanelReactive.previewedDocument),
                     sequence: 75,
                     description: _t("Info & tags"),
                     icon: "fa fa-info-circle",

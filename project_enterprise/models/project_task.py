@@ -11,7 +11,7 @@ from odoo.fields import Domain
 from odoo.exceptions import UserError
 from odoo.tools import _, format_list, topological_sort, get_lang, babel_locale_parse
 from odoo.tools.intervals import Intervals
-from odoo.tools.date_utils import sum_intervals, get_timedelta, weeknumber, weekstart, weekend
+from odoo.tools.date_utils import sum_intervals, get_timedelta, weeknumber, weekstart, weekend, parse_date
 from odoo.tools.sql import SQL
 from odoo.addons.resource.models.utils import filter_domain_leaf
 
@@ -436,6 +436,13 @@ class ProjectTask(models.Model):
             '&', '&', ("planned_date_begin", "=", False), ("date_deadline", "!=", False), ("date_deadline", operator, value),
         ]
 
+    def copy_data(self, default=None):
+        vals_list = super().copy_data(default)
+        if self.env.context.get('convert_to_template'):
+            for task, vals in zip(self, vals_list):
+                vals['planned_date_begin'] = task.planned_date_begin
+        return vals_list
+
     def write(self, vals):
         compute_default_planned_dates = None
         compute_allocated_hours = None
@@ -572,7 +579,8 @@ class ProjectTask(models.Model):
                 ('date_deadline', '<', start_date + delta)
             ])) & domain
         )
-        return self.search(domain_expand).user_ids.filtered(lambda user: user.active) | self.env.user
+        users = self.env['res.users'].search([('task_ids', 'any', domain_expand), ('share', '=', False), ('active', '=', True)])
+        return users | self.env.user
 
     def _group_expand_user_ids_domain(self, domain_expand):
         project_id = self.env.context.get('default_project_id')
@@ -623,7 +631,7 @@ class ProjectTask(models.Model):
         filters = []
         for dom in domain:
             if len(dom) == 3 and dom[0] == 'date_deadline' and dom[1] == '>=':
-                min_date = dom[2] if isinstance(dom[2], datetime) else datetime.strptime(dom[2], '%Y-%m-%d %H:%M:%S')
+                min_date = dom[2] if isinstance(dom[2], datetime) else parse_date(dom[2], self.env)
                 min_date = min_date - get_timedelta(1, self.env.context.get('gantt_scale'))
                 filters.append((dom[0], dom[1], min_date))
             else:
@@ -776,6 +784,19 @@ class ProjectTask(models.Model):
         delta_hours = 160 if scale == "year" else 24 / cell_part
 
         sorted_tasks = topological_sort(self._get_dependencies_dict())
+
+        def update_used_intervals(valid_intervals_per_user, intervals, user_ids):
+            used_intervals = Intervals(intervals)
+            if not user_ids:
+                valid_intervals_per_user[False] -= used_intervals
+            else:
+                for user_id in valid_intervals_per_user:
+                    if not user_id:
+                        continue
+
+                    if set(user_id) & set(user_ids):
+                        valid_intervals_per_user[user_id] -= used_intervals
+
         for task in sorted_tasks:
             hours_to_plan = task._get_hours_to_plan()
 
@@ -799,9 +820,10 @@ class ProjectTask(models.Model):
             if user_ids:
                 hours_to_plan /= len(user_ids)
 
+            temp_valid_intervals_per_user = valid_intervals_per_user.copy()
+            used_intervals = []
             while not compute_date_end or hours_to_plan > 0:
-                used_intervals = []
-                for start_date, end_date, _dummy in valid_intervals_per_user[user_ids]:
+                for start_date, end_date, _dummy in temp_valid_intervals_per_user[user_ids]:
                     if first_possible_start_date:
                         if end_date <= first_possible_start_date:
                             continue
@@ -856,7 +878,9 @@ class ProjectTask(models.Model):
                 if fetch_date_end < end_loop:
                     new_fetch_date_end = min(fetch_date_end + relativedelta(months=1), end_loop)
                     valid_intervals_per_user, flex_user_work_hours_per_day, flex_user_work_hours_per_week = self._web_gantt_get_valid_intervals(fetch_date_end, new_fetch_date_end, users, [], True, valid_intervals_per_user)
+                    temp_valid_intervals_per_user = valid_intervals_per_user.copy()
                     fetch_date_end = new_fetch_date_end
+                    update_used_intervals(temp_valid_intervals_per_user, used_intervals, user_ids)
                 else:
                     if 'no_intervals' not in warnings:
                         warnings['no_intervals'] = _("Some tasks weren't planned because the closest available starting date was too far ahead in the future")
@@ -875,16 +899,7 @@ class ProjectTask(models.Model):
             for next_task in task.dependent_ids:
                 first_possible_date_per_task[next_task.id] = max(first_possible_date_per_task.get(next_task.id, compute_date_end), compute_date_end)
 
-            used_intervals = Intervals(used_intervals)
-            if not user_ids:
-                valid_intervals_per_user[False] -= used_intervals
-            else:
-                for user_id in valid_intervals_per_user:
-                    if not user_id:
-                        continue
-
-                    if set(user_id) & set(user_ids):
-                        valid_intervals_per_user[user_id] -= used_intervals
+            update_used_intervals(valid_intervals_per_user, used_intervals, user_ids)
 
         for task in tasks_to_write:
             old_vals_per_task_id[task.id] = {
@@ -1321,7 +1336,8 @@ class ProjectTask(models.Model):
                     calendar_owner = tuple(self.user_ids.ids) if self.user_ids and self.user_ids == task.user_ids else False
                     seconds_between_tasks = sum_intervals(Intervals([(old_date_deadline.astimezone(utc), task[start_date_field_name].astimezone(utc), self.env['resource.calendar.attendance'])]) & valid_intervals_per_user_for_buffer_computes.get(calendar_owner, Intervals())) * 3600
                     if seconds_between_tasks > 0:
-                        _dummy, buffer_duration, _dummy, buffer_end_date = task._get_new_dates(valid_intervals_per_user, calendar_owner, search_forward, first_possible_start_date_per_candidate, last_possible_end_date_per_candidate, seconds_between_tasks)
+                        base_date = {task.id: compute_end_date}
+                        _dummy, buffer_duration, _dummy, buffer_end_date = task._get_new_dates(valid_intervals_per_user, calendar_owner, search_forward, base_date, last_possible_end_date_per_candidate, seconds_between_tasks)
                         if not buffer_end_date or buffer_duration < seconds_between_tasks:
                             return False
                         first_possible_start_date_per_candidate[task.id] = max(first_possible_start_date_per_candidate[task.id], buffer_end_date)
@@ -1334,7 +1350,8 @@ class ProjectTask(models.Model):
                     seconds_between_tasks = sum_intervals(Intervals([(task[stop_date_field_name].astimezone(utc), old_planned_date_begin.astimezone(utc), self.env['resource.calendar.attendance'])]) & valid_intervals_per_user_for_buffer_computes.get(calendar_owner, Intervals())) * 3600
 
                     if seconds_between_tasks > 0:
-                        _dummy, buffer_duration, buffer_start_date, _dummy = task._get_new_dates(valid_intervals_per_user, calendar_owner, search_forward, first_possible_start_date_per_candidate, last_possible_end_date_per_candidate, seconds_between_tasks)
+                        base_date = {task.id: compute_start_date}
+                        _dummy, buffer_duration, buffer_start_date, _dummy = task._get_new_dates(valid_intervals_per_user, calendar_owner, search_forward, first_possible_start_date_per_candidate, base_date, seconds_between_tasks)
                         if not buffer_start_date or buffer_duration < seconds_between_tasks:
                             return False
                         last_possible_end_date_per_candidate[task.id] = min(last_possible_end_date_per_candidate[task.id], buffer_start_date)
@@ -1370,6 +1387,8 @@ class ProjectTask(models.Model):
 
             old_vals_per_pill_id[self.id]['user_ids'] = old_user_ids or False
 
+        if stop_date_field_name in vals and start_date_field_name not in vals:
+            old_vals_per_pill_id[self.id][start_date_field_name] = self[start_date_field_name]
         result = {
             "errors": [],
             "warnings": [],
@@ -1381,12 +1400,20 @@ class ProjectTask(models.Model):
         valid_intervals_per_user_for_buffer_computes = self._web_gantt_get_valid_intervals_for_buffer(candidates_ids, start_date_field_name, stop_date_field_name, users, consume_buffer)
         self.write(vals)
 
+        if not candidates:
+            return result, old_vals_per_pill_id
+
         if search_forward:
             start_date = self[stop_date_field_name]
             # 53 weeks = 1 year is estimated enough to plan a project (no valid proof)
             end_date = start_date + timedelta(weeks=53)
         else:
-            end_date = self[start_date_field_name]
+            # In the case where we extend the pill thus only change the deadline, the start date of the task before and
+            # after changes will be the same. In that case, the end date should be limited to the latest dependent task.
+            if old_vals_per_pill_id[self.id][start_date_field_name] == self[start_date_field_name]:
+                end_date = max(candidates.mapped(stop_date_field_name))
+            else:
+                end_date = self[start_date_field_name]
             start_date = max(datetime.now(), end_date - timedelta(weeks=53))
             if end_date <= start_date:
                 result["errors"].append("past_error")
@@ -1423,6 +1450,18 @@ class ProjectTask(models.Model):
                 result["errors"].append("no_intervals_error")
                 return result, {}
 
+            # When we set the deadline of a main task backwards, we have to determine the end date of its dependent
+            # tasks (candidates). This end date corresponds to the end date of the main task, where we add
+            # the duration of the candidate task and the gap separating it from the main task.
+            if not search_forward and not last_possible_end_date_per_candidate.get(candidate.id):
+                if self.env.company.resource_calendar_id:
+                    gap = self.env.company.resource_calendar_id.get_work_hours_count(old_vals_per_pill_id[self.id][stop_date_field_name], candidate.planned_date_begin)
+                    last_possible_end_date_per_candidate[candidate.id] = (
+                        self.env.company.resource_calendar_id.plan_hours((gap + candidate_duration / 3600),
+                        self[stop_date_field_name]).astimezone(timezone(tz_info)))
+                else:
+                    gap = (candidate.planned_date_begin - old_vals_per_pill_id[self.id][stop_date_field_name]).total_seconds() / 3600
+                    last_possible_end_date_per_candidate[candidate.id] = (self[stop_date_field_name] + relativedelta(hours=gap) + relativedelta(seconds=candidate_duration)).astimezone(timezone(tz_info))
             used_intervals, intervals_durations, compute_start_date, compute_end_date = candidate._get_new_dates(valid_intervals_per_user, users_ids, search_forward, first_possible_start_date_per_candidate, last_possible_end_date_per_candidate, candidate_duration, move_in_conflicts_users)
 
             if users_ids not in move_in_conflicts_users and candidate_duration == intervals_durations and compute_start_date and compute_end_date:
@@ -1587,8 +1626,12 @@ class ProjectTask(models.Model):
             resources = self.env['resource.resource'].search([('user_id', 'in', res_ids), ('company_id', 'in', self.env.companies.ids)], order='create_date')
         # we reverse sort the resources by date to keep the first one created in the dictionary
         # to anticipate the case of a resource added later for the same employee and company
-        user_resource_mapping = {resource.user_id.id: resource.id for resource in resources}
+        user_leaves_mapping = {}
         leaves_mapping = resources._get_unavailable_intervals(start, stop)
+        for resource in resources:
+            if resource.user_id.id not in user_leaves_mapping:
+                user_leaves_mapping[resource.user_id.id] = []
+            user_leaves_mapping[resource.user_id.id] += leaves_mapping.get(resource.id, [])
         company_calendar = self.env.company.resource_calendar_id
         company_leaves = [] if company_calendar.flexible_hours else company_calendar._unavailable_intervals(start.replace(tzinfo=utc), stop.replace(tzinfo=utc))
 
@@ -1596,8 +1639,7 @@ class ProjectTask(models.Model):
 
         result = {}
         for user_id in res_ids + [False]:
-            resource_id = user_resource_mapping.get(user_id)
-            calendar = leaves_mapping.get(resource_id, company_leaves)
+            calendar = user_leaves_mapping.get(user_id, company_leaves)
             # remove intervals smaller than a cell, as they will cause half a cell to turn grey
             # ie: when looking at a week, a employee start everyday at 8, so there is a unavailability
             # like: 2019-05-22 20:00 -> 2019-05-23 08:00 which will make the first half of the 23's cell grey

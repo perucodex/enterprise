@@ -19,6 +19,7 @@ import {
     getGridContent,
     mountGanttView,
     SELECTORS,
+    selectRange,
 } from "@web_gantt/../tests/web_gantt_test_helpers";
 
 import { Component, onWillStart, useState, xml } from "@odoo/owl";
@@ -260,10 +261,6 @@ test("Open a dialog to schedule a plan using Open Shift", async function () {
         `,
     };
 
-    onRpc("gantt_resource_work_interval", () => [
-        { false: [["2021-10-12 08:00:00", "2022-10-12 12:00:00"]] },
-    ]);
-
     await mountGanttView({
         resModel: "planning.slot",
         arch: '<gantt js_class="planning_gantt" date_start="start_datetime" date_stop="end_datetime" default_scale="week"/>',
@@ -293,4 +290,54 @@ test("Open a dialog to schedule a plan using Open Shift", async function () {
 
     await editPill("Shift-2");
     expect(".o_field_widget[name=resource_id] input").toHaveValue("Jarvo");
+});
+
+test("auto plan on gantt view: default end_datetime should cover full range including last day", async function () {
+    mockTimeZone(0);
+    mockDate("2026-08-14 18:00:00");
+
+    const ranges = [
+        ["Day", "2026-08-14 23:59:59"],
+        ["Week", "2026-08-15 23:59:59"],
+        ["Month", "2026-08-31 23:59:59"],
+        ["Quarter", "2026-09-30 23:59:59"],
+        ["Year", "2026-12-31 23:59:59"],
+    ];
+
+    PlanningSlot._records.push({
+        id: 2,
+        name: "Slot to plan",
+        sale_line_id: 1,
+        resource_id: false,
+    });
+
+    let currentExpectedDate = null;
+    onRpc("auto_plan_ids", function (params) {
+        expect(params.kwargs.context.default_end_datetime).toBe(currentExpectedDate);
+        return { open_shift_assigned: [2] };
+    });
+
+    await mountGanttView({
+        resModel: "planning.slot",
+        arch: `
+            <gantt
+                js_class="planning_gantt"
+                date_start="start_datetime"
+                date_stop="end_datetime"
+                default_group_by="sale_line_id"
+            />
+        `,
+    });
+
+    for (const [label, date] of ranges) {
+        currentExpectedDate = date;
+
+        await selectRange(label);
+
+        await click(".o_control_panel_main_buttons button > i.fa-caret-down");
+        await animationFrame();
+
+        await click(".o_gantt_button_auto_plan");
+        await animationFrame();
+    }
 });

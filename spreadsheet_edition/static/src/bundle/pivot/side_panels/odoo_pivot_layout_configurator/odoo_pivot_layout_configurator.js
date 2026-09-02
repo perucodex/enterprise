@@ -1,4 +1,4 @@
-import { components } from "@odoo/o-spreadsheet";
+import { components, helpers } from "@odoo/o-spreadsheet";
 import { ODOO_AGGREGATORS, getRelationalFieldDefinition } from "@spreadsheet/pivot/pivot_helpers";
 import { ModelFieldSelector } from "@web/core/model_field_selector/model_field_selector";
 import { ModelFieldSelectorPopover } from "@web/core/model_field_selector/model_field_selector_popover";
@@ -6,6 +6,7 @@ import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
 const { PivotLayoutConfigurator } = components;
+const { isDateOrDatetimeField } = helpers;
 
 /**
  * This override prevents following relations for many2many fields.
@@ -26,7 +27,6 @@ export class PivotModelFieldSelectorPopover extends ModelFieldSelectorPopover {
 
     filter(fieldDefs, path) {
         const RELATIONAL_FIELDS = new Set(["many2one", "one2many"]);
-        const DATE_FIELDS = new Set(["date", "datetime"]);
         const result = {};
         for (const key in fieldDefs) {
             const field = fieldDefs[key];
@@ -36,7 +36,7 @@ export class PivotModelFieldSelectorPopover extends ModelFieldSelectorPopover {
             const isFieldAlreadyPresent = this.props.filter(field, path);
             if (RELATIONAL_FIELDS.has(field.type)) {
                 result[key] = { ...field, isFieldAlreadyPresent };
-            } else if (!isFieldAlreadyPresent || DATE_FIELDS.has(field.type)) {
+            } else if (!isFieldAlreadyPresent) {
                 result[key] = field;
             }
         }
@@ -111,6 +111,9 @@ export class OdooPivotLayoutConfigurator extends PivotLayoutConfigurator {
 
     isFieldAlreadyPresent(field, path) {
         const fullField = path ? `${path}.${field.name}` : field.name;
+        if (isDateOrDatetimeField(field)) {
+            return this.props.unusedGranularities[fullField]?.size === 0;
+        }
         return this.allDimensions.some((f) => f.fieldName === fullField);
     }
 }

@@ -3,7 +3,6 @@ import { _t } from "@web/core/l10n/translation";
 /* global html2canvas */
 
 import { Dialog } from "@web/core/dialog/dialog";
-import { user } from "@web/core/user";
 import { loadJS } from "@web/core/assets";
 import { Component, onWillStart, useRef, useState } from "@odoo/owl";
 import { localization } from "@web/core/l10n/localization";
@@ -55,12 +54,7 @@ export class SignNameAndSignature extends NameAndSignature {
 
         onWillStart(() => {
             if (this.props.frame) {
-                return Promise.all([
-                    user.hasGroup("base.group_user").then((isSystemUser) => {
-                        this.showFrameCheck = isSystemUser;
-                    }),
-                    loadJS("/sign/static/lib/html2canvas.js"),
-                ]);
+                return loadJS("/sign/static/lib/html2canvas.js");
             }
         });
     }

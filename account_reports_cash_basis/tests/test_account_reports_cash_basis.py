@@ -160,16 +160,13 @@ class TestAccountReports(TestAccountReportsCommon):
                 ('Plus Non-current Liabilities',                  0.0),
                 ('Total LIABILITIES',                             0.0),
 
-                ('EQUITY',                                      460.0),
-                ('Unallocated Earnings',                        460.0),
+                ('EQUITY (& EARNINGS)',                         460.0),
+                ('Equity',                                        0.0),
+                ('Earnings',                                    460.0),
                 ('Current Year Unallocated Earnings',           460.0),
-                ('Previous Years Unallocated Earnings',           0.0),
-                ('Total Unallocated Earnings',                  460.0),
-                ('Retained Earnings',                             0.0),
-                ('Current Year Retained Earnings',                0.0),
-                ('Previous Years Retained Earnings',              0.0),
-                ('Total Retained Earnings',                       0.0),
-                ('Total EQUITY',                                460.0),
+                ('Previous Years Earnings',                       0.0),
+                ('Total Earnings',                              460.0),
+                ('Total EQUITY (& EARNINGS)',                   460.0),
 
                 ('LIABILITIES + EQUITY',                        460.0),
             ],
@@ -195,6 +192,7 @@ class TestAccountReports(TestAccountReportsCommon):
         report = self.env.ref('account_reports.general_ledger_report')
 
         options = self._generate_options(report, payment_date, payment_date, default_options={'report_cash_basis': True})
+        outstanding_receipts_name = self.inbound_payment_method_line.payment_account_id.display_name
 
         self.assertLinesValues(
             # pylint: disable=C0326
@@ -203,7 +201,7 @@ class TestAccountReports(TestAccountReportsCommon):
             [   0,                                       3,              4,              5],
             [
                 # Accounts.
-                ('101403 Outstanding Receipts',        115,              0,            115),
+                (outstanding_receipts_name,            115,              0,            115),
                 ('121000 Account Receivable',            0,            115,           -115),
                 # Report Total.
                 ('Total General Ledger',               115,            115,             0),
@@ -220,7 +218,7 @@ class TestAccountReports(TestAccountReportsCommon):
             [   0,                                       3,              4,              5],
             [
                 # Accounts.
-                ('101403 Outstanding Receipts',        115,              0,            115),
+                (outstanding_receipts_name,            115,              0,            115),
                 ('121000 Account Receivable',          115,            115,              0),
                 ('251000 Tax Received',                  0,             15,            -15),
                 ('400000 Product Sales',                 0,            100,           -100),
@@ -326,7 +324,7 @@ class TestAccountReports(TestAccountReportsCommon):
                 ('121000 Account Receivable',          500,            500,              0),
                 ('400000 Product Sales',                 0,             60,            -60),
                 ('499000 Other Income',                  0,            150,           -150),
-                ('Undistributed Profits/Losses - company_1_data',  0,            140,           -140),
+                ('Result Brought Forward - company_1_data',  0,            140,           -140),
                 # Report Total.
                 ('Total General Ledger',               850,            850,              0),
             ],
@@ -374,6 +372,7 @@ class TestAccountReports(TestAccountReportsCommon):
         parent_line_id = report._get_generic_line_id(model_name='account.report.line', value=self.env.ref("account_reports.general_ledger_custom_engine_line").id)
         account_revenue_line_id = report._get_generic_line_id(model_name='account.account', value=self.company_data['default_account_revenue'].id, markup={'groupby': 'account_id'}, parent_line_id=parent_line_id)
         options['unfolded_lines'] = [account_revenue_line_id]
+        outstanding_receipts_name = self.inbound_payment_method_line.payment_account_id.display_name
 
         lines = report._get_lines(options)
         self.assertLinesValues(
@@ -383,14 +382,14 @@ class TestAccountReports(TestAccountReportsCommon):
             [
                 # Accounts.
                 ('101401 Bank',                                      460.0,          0,       460.0),
-                ('101403 Outstanding Receipts',                     3000.0,          0,      3000.0),
+                (outstanding_receipts_name,                         3000.0,          0,      3000.0),
                 ('121000 Account Receivable',                       3460.0,     3460.0,         0.0),
                 # Expanded line
                 ('400000 Product Sales',                                 0,     3000.0,     -3000.0),
                 ('INV/2023/00001 test line',                             0,     2000.0,     -2000.0),  # All lines are grouped if they are on the same date with the same id
                 ('INV/2023/00001 test line',                             0,      500.0,     -2500.0),
                 ('Load more...',                                        '',         '',          ''),
-                ('Undistributed Profits/Losses - company_1_data',        0,      460.0,      -460.0),
+                ('Result Brought Forward - company_1_data',              0,      460.0,      -460.0),
                 # Report Total.
                 ('Total General Ledger',                            6920.0,     6920.0,           0),
             ],
@@ -627,16 +626,13 @@ class TestAccountReports(TestAccountReportsCommon):
                 ('Plus Non-current Liabilities', 0, 0),
                 ('Total LIABILITIES', 0, 0),
 
-                ('EQUITY', 230.0, 690.0),
-                ('Unallocated Earnings', 230.0, 690.0),
+                ('EQUITY (& EARNINGS)', 230.0, 690.0),
+                ('Equity', 0, 0),
+                ('Earnings', 230.0, 690.0),
                 ('Current Year Unallocated Earnings', 230.0, 690.0),
-                ('Previous Years Unallocated Earnings', 0, 0),
-                ('Total Unallocated Earnings', 230.0, 690.0),
-                ('Retained Earnings', 0, 0),
-                ('Current Year Retained Earnings', 0, 0),
-                ('Previous Years Retained Earnings', 0, 0),
-                ('Total Retained Earnings', 0, 0),
-                ('Total EQUITY', 230.0, 690.0),
+                ('Previous Years Earnings', 0, 0),
+                ('Total Earnings', 230.0, 690.0),
+                ('Total EQUITY (& EARNINGS)', 230.0, 690.0),
 
                 ('LIABILITIES + EQUITY', 230.0, 690.0),
             ],
@@ -721,16 +717,13 @@ class TestAccountReports(TestAccountReportsCommon):
                 ('Plus Non-current Liabilities', 0, 0),
                 ('Total LIABILITIES', 0, 0),
 
-                ('EQUITY', 0, 690.0),
-                ('Unallocated Earnings', 0, 690.0),
+                ('EQUITY (& EARNINGS)', 0, 690.0),
+                ('Equity', 0, 0),
+                ('Earnings', 0, 690.0),
                 ('Current Year Unallocated Earnings', 0, 690.0),
-                ('Previous Years Unallocated Earnings', 0, 0),
-                ('Total Unallocated Earnings', 0, 690.0),
-                ('Retained Earnings', 0, 0),
-                ('Current Year Retained Earnings', 0, 0),
-                ('Previous Years Retained Earnings', 0, 0),
-                ('Total Retained Earnings', 0, 0),
-                ('Total EQUITY', 0, 690.0),
+                ('Previous Years Earnings', 0, 0),
+                ('Total Earnings', 0, 690.0),
+                ('Total EQUITY (& EARNINGS)', 0, 690.0),
 
                 ('LIABILITIES + EQUITY', 0, 690.0),
             ],
@@ -806,16 +799,13 @@ class TestAccountReports(TestAccountReportsCommon):
                 ('Plus Non-current Liabilities', 0, 0),
                 ('Total LIABILITIES', 0, 0),
 
-                ('EQUITY', -500.0, 460.0),
-                ('Unallocated Earnings', -500.0, 460.0),
+                ('EQUITY (& EARNINGS)', -500.0, 460.0),
+                ('Equity', 0, 0),
+                ('Earnings', -500.0, 460.0),
                 ('Current Year Unallocated Earnings', -500.0, 460.0),
-                ('Previous Years Unallocated Earnings', 0, 0),
-                ('Total Unallocated Earnings', -500.0, 460.0),
-                ('Retained Earnings', 0, 0),
-                ('Current Year Retained Earnings', 0, 0),
-                ('Previous Years Retained Earnings', 0, 0),
-                ('Total Retained Earnings', 0, 0),
-                ('Total EQUITY', -500.0, 460.0),
+                ('Previous Years Earnings', 0, 0),
+                ('Total Earnings', -500.0, 460.0),
+                ('Total EQUITY (& EARNINGS)', -500.0, 460.0),
 
                 ('LIABILITIES + EQUITY', -500.0, 460.0),
             ],
@@ -837,7 +827,7 @@ class TestAccountReports(TestAccountReportsCommon):
 
         # Check result of line Current Year Unallocated Earnings of the report
         self.assertLinesValues(
-            report._get_lines(options)[21:22],
+            report._get_lines(options)[22:23],
             list(range(len(list_values) + 1)),
             [('Current Year Unallocated Earnings', *list_values)],
             options,
@@ -1066,7 +1056,7 @@ class TestAccountReports(TestAccountReportsCommon):
                 ('121000 Account Receivable',           460.0,      460.0,      0.0),
                 (receivable_account_2.display_name,     70.0,       70.0,       0.0),
                 ('400000 Product Sales',                0.0,        70.0,     -70.0),
-                ('Undistributed Profits/Losses - company_1_data', 0.0,        460.0,   -460.0),
+                ('Result Brought Forward - company_1_data', 0.0,        460.0,   -460.0),
                 # Report Total.
                 ('Total General Ledger',                1060.0,     1060.0,     0.0),
             ],
@@ -1112,7 +1102,7 @@ class TestAccountReports(TestAccountReportsCommon):
                 (receivable_account_2.display_name,     70.0,       70.0,       0.0),
                 (receivable_account_3.display_name,     80.0,       80.0,       0.0),
                 ('400000 Product Sales',                0.0,        150.0,   -150.0),
-                ('Undistributed Profits/Losses - company_1_data', 0.0,        460.0,   -460.0),
+                ('Result Brought Forward - company_1_data', 0.0,        460.0,   -460.0),
                 # Report Total.
                 ('Total General Ledger',                1220.0,     1220.0,     0.0),
             ],

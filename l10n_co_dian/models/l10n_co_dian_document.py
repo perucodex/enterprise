@@ -85,7 +85,8 @@ class L10n_Co_DianDocument(models.Model):
             doc.message = msg
 
     def unlink(self):
-        self.attachment_id.unlink()
+        if self.attachment_id:
+            self.attachment_id.unlink()
         return super().unlink()
 
     @api.model
@@ -107,33 +108,39 @@ class L10n_Co_DianDocument(models.Model):
 
     @api.model
     def _create_document(self, xml, move, state, **kwargs):
+        def resolve_doc_datetime(demo_mode, root, kwargs_dict):
+            doc_datetime = fields.Datetime.context_timestamp(self.with_context(tz='America/Bogota'), fields.Datetime.now()).replace(tzinfo=None)
+            if demo_mode:
+                return doc_datetime
+            if 'datetime' in kwargs_dict:
+                return kwargs_dict.pop('datetime')
+            if root is None:
+                return doc_datetime
+            return date_utils.to_timezone(None)(datetime.fromisoformat(root.find('.//{*}SigningTime').text))
+
+        def resolve_identifier(demo_mode, root, kwargs_dict):
+            if demo_mode:
+                return 'DEMO'
+            if 'identifier' in kwargs_dict:
+                return kwargs_dict.pop('identifier')
+            if root is None:
+                return ''
+            return root.find('.//{*}UUID').text
+
         move.ensure_one()
 
-        root = etree.fromstring(xml)
+        root = etree.fromstring(xml) if xml else None
         demo_mode = move.company_id.l10n_co_dian_demo_mode
-        attachment_name = kwargs.pop('attachment_name', None) or self.env['account.edi.xml.ubl_dian']._export_invoice_filename(move)
 
-        if demo_mode:
-            doc_datetime = datetime.now()
-        elif 'datetime' in kwargs:
-            doc_datetime = kwargs.pop('datetime')
-        else:
-            # naive local colombian datetime
-            doc_datetime = date_utils.to_timezone(None)(datetime.fromisoformat(root.find('.//{*}SigningTime').text))
-
-        if demo_mode:
-            identifier = 'DEMO'
-        elif 'identifier' in kwargs:
-            identifier = kwargs.pop('identifier')
-        else:
-            identifier = root.find('.//{*}UUID').text
+        # pop attachment_name here so it is not passed to the document create function
+        attachment_name = kwargs.pop('attachment_name', None)
 
         # create document
         doc = self.create([{
             'move_id': move.id,
-            'identifier': identifier,
+            'identifier': resolve_identifier(demo_mode, root, kwargs),
             'state': state,
-            'datetime': doc_datetime,
+            'datetime': resolve_doc_datetime(demo_mode, root, kwargs),
             'test_environment': move.company_id.l10n_co_dian_test_environment,
             'certification_process': move.company_id.l10n_co_dian_certification_process,
             **kwargs,
@@ -143,12 +150,13 @@ class L10n_Co_DianDocument(models.Model):
             doc.commercial_state = 'pending'
 
         # create attachment
-        doc.attachment_id = self.env['ir.attachment'].create([{
-            'raw': xml,
-            'name': attachment_name,
-            'res_id': doc.id if state != 'invoice_accepted' else move.id,
-            'res_model': doc._name if state != 'invoice_accepted' else move._name,
-        }])
+        if root is not None:
+            doc.attachment_id = self.env['ir.attachment'].create([{
+                'raw': xml,
+                'name': attachment_name or self.env['account.edi.xml.ubl_dian']._export_invoice_filename(move),
+                'res_id': doc.id if state != 'invoice_accepted' else move.id,
+                'res_model': doc._name if state != 'invoice_accepted' else move._name,
+            }])
 
         return doc
 
@@ -247,11 +255,23 @@ class L10n_Co_DianDocument(models.Model):
         }
 
         if self._document_already_processed(root) and (identifier := root.findtext('.//{*}XmlDocumentKey')):
-            # Document has already been processed by DIAN -> correctly set the identifier and state so GetStatus is called correctly
-            document_vals |= {
-                'state': 'invoice_accepted',
-                'identifier': identifier,
-            }
+            # We have to make sure that the identifier is the one associated to this document by fetching the XML from DIAN
+            if xml := self._get_xml_by_document_key(identifier, move):
+                xml_element = etree.fromstring(xml)
+                xml_customer_name = xml_element.findtext('.//{*}AccountingCustomerParty/{*}Party/{*}PartyName/{*}Name')
+                xml_issue_date = xml_element.findtext('./{*}IssueDate')
+                xml_issue_time = xml_element.findtext('./{*}IssueTime')
+
+                customer_name = move.partner_id.name
+                issue_date = move.l10n_co_dian_post_time.date().isoformat()
+                issue_time = move.l10n_co_dian_post_time.strftime("%H:%M:%S-05:00")
+                # check that the customer name, the issue date and time from the XML on DIAN are the same than those of the move
+                if xml_customer_name == customer_name and xml_issue_date == issue_date and xml_issue_time == issue_time:
+                    # Document has already been processed by DIAN -> correctly set the identifier and state so GetStatus is called correctly
+                    document_vals |= {
+                        'state': 'invoice_accepted',
+                        'identifier': identifier,
+                    }
 
         return document_vals
 
@@ -342,7 +362,7 @@ class L10n_Co_DianDocument(models.Model):
                 'soap_body_template': "l10n_co_dian.get_status_zip",
             },
             service="GetStatusZip",
-            company=self.move_id.company_id,
+            company=self._get_company(),
         )
         if response['status_code'] == 200:
             root = etree.fromstring(response['response'])
@@ -366,8 +386,31 @@ class L10n_Co_DianDocument(models.Model):
                 'soap_body_template': "l10n_co_dian.get_status",
             },
             service="GetStatus",
-            company=self.move_id.company_id,
+            company=self._get_company(),
         )
+
+    @api.model
+    def _get_xml_by_document_key(self, identifier, move):
+        """ Fetch the XML linked to the CUFE using the 'GetXmlByDocumentKey' webservice. """
+        # This check is required because the template is added in stable and it's possible
+        # that it doesn't exist if the module has not been upgraded
+        if self.env.ref('l10n_co_dian.get_xml_by_document_key', raise_if_not_found=False):
+            response = xml_utils._build_and_send_request(
+                self,
+                payload={
+                    'track_id': identifier,
+                    'soap_body_template': "l10n_co_dian.get_xml_by_document_key",
+                },
+                service="GetXmlByDocumentKey",
+                company=move.company_id,
+            )
+            if response['status_code'] == 200:
+                root = etree.fromstring(response['response'])
+                response_code = root.findtext('.//{*}Code')
+                # Code 100 means that the XML has been retrieved correctly
+                if response_code == '100':
+                    return b64decode(root.findtext('.//{*}XmlBytesBase64'))
+        return False
 
     def _get_attached_document_values(self, original_xml_etree, response_history):
         values = {
@@ -375,7 +418,7 @@ class L10n_Co_DianDocument(models.Model):
             'id': original_xml_etree.findtext('./{*}ID'),
             'uuid': self[-1].identifier,
             'uuid_attrs': {
-                'scheme_name': self[-1].move_id.l10n_co_dian_identifier_type.upper() + "-SHA384",
+                'schemeName': self[-1]._get_identifier_type().upper() + "-SHA384",
             },
             'issue_date': original_xml_etree.findtext('./{*}IssueDate'),
             'issue_time': original_xml_etree.findtext('./{*}IssueTime'),
@@ -390,8 +433,9 @@ class L10n_Co_DianDocument(models.Model):
                 'id': idx,
                 'uuid': self[-idx].identifier,
                 'uuid_attrs': {
-                    'scheme_name': self[-idx].move_id.l10n_co_dian_identifier_type.upper() + "-SHA384",
+                    'schemeName': self[-idx]._get_identifier_type().upper() + "-SHA384",
                 },
+                'document_id': event_tree.findtext('./{*}DocumentResponse/{*}DocumentReference/{*}ID'),
                 'issue_date': event_tree.findtext('./{*}IssueDate'),
                 'issue_time': event_tree.findtext('./{*}IssueTime'),
                 'response_code': event_tree.findtext('.//{*}Response/{*}ResponseCode'),
@@ -403,12 +447,13 @@ class L10n_Co_DianDocument(models.Model):
 
     def _demo_get_attached_document_values(self, original_xml_etree):
         # Demo mode version: use all values that do not require a DIAN response
+        identifier_type = self[-1]._get_identifier_type().upper()
         return {
             'profile_execution_id': original_xml_etree.findtext('./{*}ProfileExecutionID'),
             'id': original_xml_etree.findtext('./{*}ID'),
             'uuid': self[-1].identifier,
             'uuid_attrs': {
-                'scheme_name': self[-1].move_id.l10n_co_dian_identifier_type.upper() + "-SHA384",
+                'schemeName': f"{identifier_type}-SHA384",
             },
             'issue_date': original_xml_etree.findtext('./{*}IssueDate'),
             'issue_time': original_xml_etree.findtext('./{*}IssueTime'),
@@ -418,8 +463,9 @@ class L10n_Co_DianDocument(models.Model):
                 'id': original_xml_etree.findtext('./{*}ID'),
                 'uuid': self[-1].identifier,
                 'uuid_attrs': {
-                    'scheme_name': self[-1].move_id.l10n_co_dian_identifier_type.upper() + "-SHA384",
+                    'schemeName': f"{identifier_type}-SHA384",
                 },
+                'document_id': original_xml_etree.findtext('./{*}ID'),
                 'issue_date': 'Demo',
                 'issue_time': 'Demo',
                 'response_code': 'Demo',
@@ -430,17 +476,19 @@ class L10n_Co_DianDocument(models.Model):
 
     def _get_response_history(self, current_response=None):
         """
-        Return the responses of all the documents in 'self'
+        Return a tuple (history, error_msg) where:
+        - history: is the responses of all the documents in 'self'
+        - error_msg:  is set when we get a non 200 status code
         """
         if self.move_id.company_id.l10n_co_dian_demo_mode:
-            return [etree.fromstring('<ApplicationResponse></ApplicationResponse>')]
+            return [etree.fromstring('<ApplicationResponse></ApplicationResponse>')], ""
 
         if not current_response:
             # Should not enter this if statement when handling Commercial Events
             # call to GetStatus to get the ApplicationResponse
             current_response = self._get_status()
             if current_response['status_code'] != 200:
-                return "", self.env._(
+                return [], self.env._(
                     "Error %(code)s when calling the DIAN server: %(response)s",
                     code=current_response['status_code'],
                     response=current_response['response'],
@@ -461,7 +509,7 @@ class L10n_Co_DianDocument(models.Model):
             document_event_xml = document_line_ref.findtext('.//{*}Description').encode()
             history.append(document_event_xml)
 
-        return history
+        return history, ""
 
     def _get_attached_document(self, status_response=None):
         """ Return a tuple: (the attached document xml, an error message) """
@@ -470,11 +518,14 @@ class L10n_Co_DianDocument(models.Model):
             self.ensure_one()
 
         # all event xml's for every document in self in order
-        response_history = self._get_response_history(current_response=status_response)
-        current_attachment_raw = self[-1].attachment_id.raw
+        response_history, error_msg = self._get_response_history(current_response=status_response)
+        if error_msg:
+            return "", error_msg
+
+        current_attachment_raw = self.sorted()[:1].attachment_id.raw
         original_xml_etree = etree.fromstring(current_attachment_raw)
 
-        if self.move_id.company_id.l10n_co_dian_demo_mode:
+        if self[0]._get_company().l10n_co_dian_demo_mode:
             vals = self._demo_get_attached_document_values(original_xml_etree=original_xml_etree)
         else:
             vals = self._get_attached_document_values(
@@ -498,7 +549,7 @@ class L10n_Co_DianDocument(models.Model):
         attached_doc_etree.find('./{*}ReceiverParty').append(customer_node)
 
         # Add the xmls (enclosed in CDATA)
-        attached_doc_etree.find('./{*}Attachment/{*}ExternalReference/{*}Description').text = CDATA(current_attachment_raw.decode(encoding='unicode_escape'))
+        attached_doc_etree.find('./{*}Attachment/{*}ExternalReference/{*}Description').text = CDATA(current_attachment_raw.decode())
         for idx, event_xml in enumerate(response_history, start=1):
             document_element = attached_doc_etree.find(f'./{{*}}ParentDocumentLineReference/{{*}}LineID[.="{idx}"]/..')
 
@@ -514,16 +565,20 @@ class L10n_Co_DianDocument(models.Model):
         attached_document, error = self._get_attached_document()
         if error:
             raise UserError(error)
-        attachment = self.env['ir.attachment'].create({
-            'raw': attached_document,
-            'name': self.move_id._l10n_co_dian_get_attached_document_filename() + '_manual.xml',
-            'res_model': 'account.move',
-            'res_id': self.move_id.id,
-        })
+        attachment = self._create_attached_document(raw=attached_document)
         return {
             'type': 'ir.actions.act_url',
             'url': f'/web/content/{attachment.id}?download=true',
         }
+
+    def _create_attached_document(self, raw):
+        self.ensure_one()
+        return self.env['ir.attachment'].create([{
+            'raw': raw,
+            'name': self.move_id._l10n_co_dian_get_attached_document_filename() + '_manual.xml',
+            'res_model': 'account.move',
+            'res_id': self.move_id.id,
+        }])
 
     @api.model
     def _send_to_dian(self, xml, move):
@@ -552,7 +607,7 @@ class L10n_Co_DianDocument(models.Model):
         if errors:
             raise UserError(self.env._("Error(s) while generating the UBL file:\n- %s", '\n- '.join(errors)))
 
-        locked_move.l10n_co_dian_document_ids.filtered(lambda doc: doc.state == 'invoice_rejected').unlink()
+        locked_move.l10n_co_dian_document_ids.filtered(lambda doc: doc.state in ('invoice_rejected', 'invoice_sending_failed')).unlink()
 
         filename = locked_move._l10n_co_dian_get_commercial_event_document_filename('zip')
         zipped_content = xml_utils._zip_xml(filename, xml)
@@ -630,3 +685,11 @@ class L10n_Co_DianDocument(models.Model):
             'type': 'ir.actions.act_url',
             'url': f'/web/content/{self.attachment_id.id}?download=true',
         }
+
+    def _get_company(self):
+        self.ensure_one()
+        return self.move_id.company_id
+
+    def _get_identifier_type(self):
+        self.ensure_one()
+        return self.move_id.l10n_co_dian_identifier_type

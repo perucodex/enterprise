@@ -99,7 +99,10 @@ class SocialTwitterController(SocialController):
         if not stream.exists() or stream.media_id.media_type != 'twitter':
             raise Forbidden()
 
-        return request.env['social.stream.post']._twitter_tweet_like(stream, tweet_id, like)
+        request.env['social.stream.post']._twitter_tweet_like(stream, tweet_id, like)
+        posts = request.env['social.stream.post'].search([('twitter_tweet_id', '=', tweet_id)])
+        posts._twitter_update_likes(like)
+        return True
 
     @http.route('/social_twitter/<int:stream_id>/retweet', type='jsonrpc', auth='user')
     def social_twitter_do_retweet(self, stream_id, tweet_id):

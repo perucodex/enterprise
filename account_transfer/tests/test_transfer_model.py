@@ -396,3 +396,30 @@ class TransferModelTestCase(AccountAutoTransferTestCase):
         self.assertAlmostEqual(lines.filtered(lambda l: l.account_id == slave_ids[1]).credit, 174.39)
         # the remaining amount of the total amount (42.50%)
         self.assertAlmostEqual(lines.filtered(lambda l: l.account_id == slave_ids[2]).credit, 174.4)
+
+    @freeze_time('2022-01-01')
+    def test_compute_transfer_lines_below_hundred_percent_stays_balanced(self):
+        """ The destination line must absorb exactly the amount removed from the source accounts, even the two are rounded independently """
+        self.transfer_model.date_start = datetime.strftime(datetime.today() + relativedelta(day=1), "%Y-%m-%d")
+        neutral_account = self.company_data['default_account_revenue']
+        today_str = datetime.strftime(datetime.today(), "%Y-%m-%d")
+
+        self.transfer_model.write({
+            'account_ids': [Command.link(account.id) for account in self.origin_accounts],
+            'line_ids': [Command.create({
+                'percent': 15,
+                'account_id': self.destination_accounts[0].id,
+            })],
+        })
+        self._create_basic_move(deb_account=self.origin_accounts[0].id, cred_account=neutral_account.id, amount=395.88, date_str=today_str)
+        self._create_basic_move(deb_account=self.origin_accounts[1].id, cred_account=neutral_account.id, amount=252.16, date_str=today_str)
+
+        self.transfer_model.action_enable()
+        self.transfer_model.action_perform_auto_transfer()
+
+        lines = self.transfer_model.move_ids.line_ids
+        # The transfer move must always be balanced, whatever the destination percentages add up to.
+        self.assertAlmostEqual(sum(lines.mapped('balance')), 0, msg='The generated transfer move must be balanced')
+        self.assertAlmostEqual(lines.filtered(lambda l: l.account_id == self.origin_accounts[0]).balance, -59.38)
+        self.assertAlmostEqual(lines.filtered(lambda l: l.account_id == self.origin_accounts[1]).balance, -37.82)
+        self.assertAlmostEqual(lines.filtered(lambda l: l.account_id == self.destination_accounts[0]).balance, 97.20)

@@ -156,3 +156,26 @@ class TestPointOfSaleFlow(TestPointOfSaleHttpCommon):
         with patch.object(PosConfig, 'get_limited_partners_loading', mocked_get_limited_partners_loading):
             self.main_pos_config.open_ui()
             self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'SettleDueAmountMoreCustomers', login="pos_user")
+
+    def test_pos_settling_account_resets_on_payment_screen_unmount(self):
+        """
+        Test that the variable is_settling_account resets to false
+        if payment is not completed or user returns back to product screen
+        """
+        self.main_pos_config.open_ui()
+        self.start_tour(
+            "/pos/ui/%d" % self.main_pos_config.id,
+            'test_pos_settling_account_resets_on_payment_screen_unmount',
+            login="accountman"
+        )
+
+    def test_settle_account_due_with_refund(self):
+        self.partner_test_a = self.env["res.partner"].create({"name": "A Partner"})
+        self.main_pos_config.settle_due_product_id.taxes_id = False
+        self.customer_account_payment_method = self.env['pos.payment.method'].create({
+            'name': 'Customer Account',
+            'split_transactions': True,
+        })
+        self.main_pos_config.write({'payment_method_ids': [(4, self.customer_account_payment_method.id)]})
+        self.main_pos_config.open_ui()
+        self.start_pos_tour("test_settle_account_due_with_refund", login="accountman")

@@ -7,23 +7,26 @@ import { user } from "@web/core/user";
 import { WithLazyGetterTrap } from "@point_of_sale/lazy_getter";
 import { useState } from "@odoo/owl";
 import { debounce } from "@web/core/utils/timing";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { _t } from "@web/core/l10n/translation";
 
 const { DateTime } = luxon;
 
 export class PrepDisplay extends WithLazyGetterTrap {
-    static DEPENDENCIES = ["orm", "bus_service", "notification", "pos_data"];
+    static DEPENDENCIES = ["orm", "bus_service", "notification", "pos_data", "dialog"];
 
     constructor() {
         super(...arguments);
         this.ready = this.setup(...arguments).then(() => this);
     }
-    async setup({ env, deps: { pos_data, bus_service, notification, orm } }) {
+    async setup({ env, deps: { pos_data, bus_service, notification, orm, dialog } }) {
         this.id = odoo.preparation_display.id;
         this.env = env;
         this.orm = orm;
         this.data = pos_data;
         this.bus = bus_service;
         this.notification = notification;
+        this.dialog = dialog;
         this.sound = this.env.services["mail.sound_effects"];
 
         this.selectedStageId = this.data.models["pos.prep.stage"].getFirst().id;
@@ -78,6 +81,7 @@ export class PrepDisplay extends WithLazyGetterTrap {
                 state.stage_id = this.data.models["pos.prep.stage"].get(stage.stage_id);
                 state.todo = true;
                 state.write_date = stage.last_stage_change;
+                state.last_stage_change = stage.last_stage_change;
             }
             for (const [orderId, completion_time] of Object.entries(
                 data["prep_order_completion_time"]
@@ -112,6 +116,9 @@ export class PrepDisplay extends WithLazyGetterTrap {
             }
             this.computeOrderCounts();
         });
+        this.onNotified("POS_ORDER_DELETED", (data) =>
+            this.removeOrdersByPosOrderIds(data.pos_order_ids)
+        );
         this.bus.addEventListener("BUS:RECONNECT", () => {
             this.ringTheBell();
             this.getPreparationDisplayOrder(null);
@@ -124,6 +131,24 @@ export class PrepDisplay extends WithLazyGetterTrap {
     }
     get categories() {
         return this.data.models["pos.category"].getAll();
+    }
+    removeOrdersByPosOrderIds(posOrderIds = []) {
+        // Remove orders and their dependent records
+        if (!posOrderIds.length) {
+            return;
+        }
+        const prepOrders = this.data.models["pos.prep.order"].filter(({ pos_order_id }) =>
+            posOrderIds.includes(pos_order_id.id)
+        );
+        const prepLineIds = prepOrders.flatMap(({ prep_line_ids }) =>
+            prep_line_ids.map(({ id }) => id)
+        );
+        // Prep states must be removed explicitly since they have no cascade relation
+        // with prep lines or preparation orders.
+        this.data.models["pos.prep.state"]
+            .filter(({ prep_line_id }) => prepLineIds.includes(prep_line_id.id))
+            .forEach((state) => state.delete());
+        prepOrders.forEach((order) => this.data.localDeleteCascade(order));
     }
     filterHistory(state) {
         const previousStage = this.orderNextStage(state.stage_id.id, -1);
@@ -351,8 +376,8 @@ export class PrepDisplay extends WithLazyGetterTrap {
             }
             // within the stage, keep the default order unless the state is done then show most recent first.
             let difference;
-            const aWriteDate = Math.max(...a.states.map((sate) => sate.write_date.ts));
-            const bWriteDate = Math.max(...b.states.map((sate) => sate.write_date.ts));
+            const aWriteDate = Math.max(...a.states.map((state) => state.last_stage_change.ts));
+            const bWriteDate = Math.max(...b.states.map((state) => state.last_stage_change.ts));
             if (stageA.id === this.lastStage.id) {
                 difference = bWriteDate - aWriteDate;
             } else {
@@ -403,6 +428,30 @@ export class PrepDisplay extends WithLazyGetterTrap {
         if (direction === 1) {
             currentStage.recallHistory.push(states);
         }
+    }
+    clearAllOrders() {
+        const message =
+            this.filteredOrders[0].stage.id === this.lastStage.id
+                ? _t(
+                      "All orders are in the last stage. This action will mark all orders as Done. Would you like to continue?"
+                  )
+                : _t(
+                      "Clearing all orders will move all the orders of the current stage to the next one. Would you like to continue?"
+                  );
+        this.dialog.add(ConfirmationDialog, {
+            title: _t("Warning"),
+            body: message,
+            confirmLabel: _t("Continue"),
+            cancelLabel: _t("Discard"),
+            confirm: async () => await this.moveAllOrdersToNextStage(),
+            cancel: () => {},
+        });
+    }
+    async moveAllOrdersToNextStage() {
+        const states = this.filteredOrders.flatMap((order) => order.states);
+        this.filteredOrders[0].stage.id === this.lastStage.id
+            ? await this.doneOrders(states)
+            : await this.changeStateStage(states);
     }
     async resetOrders() {
         this.data.models["pos.prep.state"].deleteMany(this.data.models["pos.prep.state"].getAll());

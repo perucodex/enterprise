@@ -53,7 +53,7 @@ class TestMxEdiHrPayrollCommon(TestMxEdiCommon):
             'contract_date_start': '2015-01-01',
             'l10n_mx_regime_type': '03',
             'contract_type_id': cls.env.ref('l10n_mx_hr_payroll_account_edi.l10n_mx_contract_type_01').id,
-            'wage': 5000,
+            'wage': 50000,
             'schedule_pay': 'bi-weekly',
         })
 
@@ -66,8 +66,8 @@ class TestMxEdiHrPayrollCommon(TestMxEdiCommon):
         payslip = self.env['hr.payslip'].create({
             'employee_id': self.employee.id,
             'name': 'Payslip',
-            'date_from': '2024-05-09',
-            'date_to': '2024-05-24',
+            'date_from': '2024-05-01',
+            'date_to': '2024-05-15',
             'struct_id': self.env.ref('l10n_mx_hr_payroll.l10n_mx_regular_pay').id,
         })
         # We can add other inputs to trigger some rules needed for some testing files
@@ -110,7 +110,7 @@ class TestMxEdiHrPayrollCommon(TestMxEdiCommon):
         self._assert_payslip_cfdi(payslip, 'test_cfdi_nomina')
 
     def test_cfdi_nomina_con_bonos_fondo_ahorro_y_deducciones(self):
-        self.employee.wage = 3000
+        self.employee.wage = 30000
         self.employee.l10n_mx_savings_fund = 500
         payslip = self._generate_payslip_with_cfdi(
             lines_values={
@@ -123,3 +123,29 @@ class TestMxEdiHrPayrollCommon(TestMxEdiCommon):
                 'l10n_mx_hr_payroll.l10n_mx_input_bonus': 150
             })
         self._assert_payslip_cfdi(payslip, 'test_cfdi_nomina_con_bonos_fondo_ahorro_y_deducciones')
+
+    def test_cfdi_nomina_con_incapacidades(self):
+        self.env['hr.leave'].create({
+            'employee_id': self.employee.id,
+            'holiday_status_id': self.env.ref('hr_holidays.l10n_mx_leave_type_work_risk_imss').id,
+            'request_date_from': '2024-05-06',
+            'request_date_to': '2024-05-10',
+        })
+        payslip = self._generate_payslip_with_cfdi()
+        self._assert_payslip_cfdi(payslip, 'test_cfdi_nomina_con_incapacidades')
+
+    def test_cfdi_nomina_sat_state_update(self):
+        payslip = self._generate_payslip_with_cfdi(
+            lines_values={
+                'ISR': 100,
+                'IMSS_EMPLOYEE_TOTAL': 200,
+                'CEAV_IMSS_EMPLOYEE': 0,
+                'SUBSIDY': 0,
+            })
+        document = payslip.l10n_mx_edi_document_ids.filtered(lambda x: x.state == 'payslip_sent')
+        self.assertRecordValues(document, [{'sat_state': 'not_defined'}])
+
+        with self.mx_external_setup(self.frozen_today), self.with_mocked_sat_call(lambda _x: 'valid'):
+            document._update_sat_state()
+
+        self.assertRecordValues(document, [{'sat_state': 'valid'}])

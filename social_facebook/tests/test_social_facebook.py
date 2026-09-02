@@ -3,12 +3,12 @@
 
 import json
 import requests
+from unittest.mock import patch
 
 from freezegun import freeze_time
 from odoo.addons.social.tests.tools import mock_void_external_calls
 from odoo.addons.social_facebook.models.social_post import SocialPost
 from odoo.addons.social_facebook.tests.common import SocialFacebookCommon
-from unittest.mock import patch
 
 
 class SocialFacebookCase(SocialFacebookCommon):
@@ -93,3 +93,27 @@ class SocialFacebookCase(SocialFacebookCommon):
                 'created_time': "2000-07-07T09:12:30+0000"
             })
             self.assertEqual(formatted_value, '4 minutes')
+
+    @mock_void_external_calls()
+    def test_social_user_update_likes(self):
+        stream = self.env['social.stream'].create({
+            'account_id': self.social_account.id,
+            'media_id': self.social_account.media_id.id,
+            'stream_type_id': self.env.ref('social_facebook.stream_type_page_posts').id,
+        })
+        stream_post = self.env['social.stream.post'].create({
+            'facebook_likes_count': 4,
+            'facebook_reactions_count': '{"LIKE": 4, "LOVE": 3}',
+            'stream_id': stream.id,
+        })
+
+        stream_post.with_user(self.social_user)._facebook_update_likes(True)
+
+        self.assertEqual(stream_post.facebook_likes_count, 5)
+        self.assertEqual(stream_post.facebook_reactions_count, '{"LIKE": 5, "LOVE": 3}')
+        self.assertTrue(stream_post.facebook_user_likes)
+
+        stream_post.with_user(self.social_user)._facebook_update_likes(False)
+        self.assertEqual(stream_post.facebook_likes_count, 4)
+        self.assertEqual(stream_post.facebook_reactions_count, '{"LIKE": 4, "LOVE": 3}')
+        self.assertFalse(stream_post.facebook_user_likes)

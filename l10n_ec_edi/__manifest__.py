@@ -57,6 +57,9 @@ Includes automations to easily predict the withholding tax to be applied to each
         'web.assets_backend': [
             'l10n_ec_edi/static/src/components/**/*',
         ],
+        'web.assets_frontend': [
+            'l10n_ec_edi/static/src/scss/withhold_portal.scss',
+        ],
     },
     "installable": True,
     "auto_install": ["l10n_ec"],

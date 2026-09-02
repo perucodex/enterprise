@@ -3,6 +3,41 @@ import { isNull } from "@web/views/utils";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import {AccountReturnKanbanRecord} from "./account_return_kanban_record";
 import { AccountReturnBaseKanbanRenderer } from "./account_return_base_kanban_renderer";
+import { useDeleteRecords } from "@web/views/view_hook";
+
+
+/**
+ * Focus the previous/next card, treating every card of the area as a flat list.
+ *
+ * The account return kanban templates lay their cards out in a single column and
+ * don't render the `.o_kanban_group` elements the standard
+ * `KanbanRenderer.focusNextCard` relies on, hence this flat implementation.
+ * Only up/down navigation is supported.
+ *
+ * @param {HTMLElement} area
+ * @param {"down"|"up"|"right"|"left"} direction
+ * @returns {true|undefined} true if the next card has been focused
+ */
+export function focusNextFlatCard(area, direction) {
+    if (direction !== "up" && direction !== "down") {
+        return;
+    }
+    const closestCard = document.activeElement.closest(".o_kanban_record");
+    if (!closestCard) {
+        return;
+    }
+    const cards = [...area.querySelectorAll(".o_kanban_record")];
+    const iCard = cards.indexOf(closestCard);
+    if (iCard === -1) {
+        return;
+    }
+    const nextCard = cards[direction === "down" ? iCard + 1 : iCard - 1];
+
+    if (nextCard) {
+        nextCard.focus();
+        return true;
+    }
+}
 
 
 export class AccountReturnKanbanRenderer extends AccountReturnBaseKanbanRenderer {
@@ -21,6 +56,7 @@ export class AccountReturnKanbanRenderer extends AccountReturnBaseKanbanRenderer
         super.setup();
         this.orm = useService("orm");
         this.actionService = useService("action");
+        this.deleteRecordsWithConfirmation = useDeleteRecords(this.props.list.model);
 
         useBus(this.env.bus, "return_reload_model", (ev) => {
             const recordIds = ev.detail.resIds;
@@ -29,6 +65,14 @@ export class AccountReturnKanbanRenderer extends AccountReturnBaseKanbanRenderer
                 record.model.load();
             }
         });
+    }
+
+    deleteRecord(record) {
+        this.deleteRecordsWithConfirmation({}, [record]);
+    }
+
+    focusNextCard(area, direction) {
+        return focusNextFlatCard(area, direction);
     }
 
     async openRecord(record, params) {

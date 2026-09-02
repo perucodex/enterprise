@@ -214,6 +214,26 @@ class TestPurchaseOrder(TestCommissionsSetup):
         commission_user_2 = user('commission_user_2', self.ref('partner_commission.group_commission_user'))
         commission_manager = user('commission_manager', self.ref('partner_commission.group_commission_manager'))
         purchase_user = user('purchase_user', self.ref('purchase.group_purchase_user'))
+        mixed_purchase_commission_user = self.env['res.users'].create({
+            'name': 'mixed_purchase_commission_user',
+            'login': 'mixed_purchase_commission_user',
+            'email': 'mixed_purchase_commission_user@example.com',
+            'company_id': self.company.id,
+            'group_ids': [(6, 0, [
+                self.ref('purchase.group_purchase_user'),
+                self.ref('partner_commission.group_commission_user'),
+            ])],
+        })
+        mixed_purchase_commission_manager = self.env['res.users'].create({
+            'name': 'mixed_purchase_commission_manager',
+            'login': 'mixed_purchase_commission_manager',
+            'email': 'mixed_purchase_commission_manager@example.com',
+            'company_id': self.company.id,
+            'group_ids': [(6, 0, [
+                self.ref('purchase.group_purchase_user'),
+                self.ref('partner_commission.group_commission_manager'),
+            ])],
+        })
 
         po = self.env['purchase.order'].create({
             'partner_id': self.customer.id,
@@ -239,7 +259,7 @@ class TestPurchaseOrder(TestCommissionsSetup):
         self.assertTrue(commission_manager.has_group('partner_commission.group_commission_user'))
 
         # group_purchase_user: can access procurement.
-        assert_access_allowed([purchase_user])
+        assert_access_allowed([purchase_user, mixed_purchase_commission_user, mixed_purchase_commission_manager])
         # other groups cannot.
         assert_access_denied([salesman_own_docs, salesman_all_docs, commission_user_1, commission_manager])
 

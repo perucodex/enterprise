@@ -16,13 +16,15 @@
 # Tomaž Jug <tomaz@editor.si>, 2023
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# NEDŽAD BEUS <nedzad.beus@implex.si>, 2026.
+# Jan Zorko <jan.zorko@implex.si>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-30 18:43+0000\n"
-"PO-Revision-Date: 2025-11-08 19:33+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-08-14 17:43+0000\n"
+"PO-Revision-Date: 2026-08-27 08:29+0000\n"
+"Last-Translator: Jan Zorko <jan.zorko@implex.si>\n"
 "Language-Team: Slovenian <https://translate.odoo.com/projects/odoo-19/"
 "account_reports/sl/>\n"
 "Language: sl\n"
@@ -31,13 +33,20 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
 "n%100==4 ? 2 : 3;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/bank_reconciliation_report/warnings.xml:0
 msgid "\" account balance is affected by"
 msgstr "\" na stanje računa vplivajo"
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_report.py:0
+#, fuzzy
+msgid "%(date_from)s - %(date_to)s"
+msgstr "od %(date_from)s do %(date_to)s"
 
 #. module: account_reports
 #. odoo-python
@@ -48,14 +57,16 @@ msgstr "%(journal)s - %(account)s"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
+#, fuzzy
 msgid "%(line_name)s - %(company)s"
-msgstr ""
+msgstr "%(line_name)s - %(company)s"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
+#, fuzzy
 msgid "%(line_name)s - %(company_name)s"
-msgstr ""
+msgstr "%(line_name)s - %(company_name)s"
 
 #. module: account_reports
 #. odoo-python
@@ -72,8 +83,9 @@ msgstr "%(names)s in še eden"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "%(return_type_name)s %(period_suffix)s %(country_code)s"
-msgstr ""
+msgstr "%(return_type_name)s %(period_suffix)s %(country_code)s"
 
 #. module: account_reports
 #. odoo-python
@@ -97,26 +109,24 @@ msgstr "%s izbrano"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
+#, fuzzy
 msgid ""
-"'%s' date scope cannot be evaluated for a report used by more than one "
-"return type."
+"'%s' date scope cannot be evaluated for a report used by multiple return "
+"types using different periodicities."
 msgstr ""
+"'%s' obseg datuma ni mogoče izračunati za poročilo, ki ga uporablja več "
+"različnih vrst vračil z različnimi periodami."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
-msgid ""
-"'%s' date scope cannot be evaluated for a report which is not used by any "
-"return type."
-msgstr ""
-
-#. module: account_reports
-#. odoo-python
-#: code:addons/account_reports/models/account_report.py:0
+#, fuzzy
 msgid ""
 "'Open General Ledger' caret option is only available form report lines "
-"targetting accounts or Undistributed Profits/Losses."
+"targetting accounts or Result Brought Forward."
 msgstr ""
+"Možnost »Odpri glavno knjigo« je na voljo samo za vrstice poročila, ki "
+"ciljajo na konte, ali za »Prenešeni rezultat«."
 
 #. module: account_reports
 #. odoo-python
@@ -176,6 +186,7 @@ msgstr ", kar vodi do nepojasnjene razlike"
 
 #. module: account_reports
 #: model:mail.template,body_html:account_reports.email_template_customer_follow_up_report
+#, fuzzy
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "                <p style=\"margin: 0px; padding: 0px;\">\n"
@@ -199,6 +210,27 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p style=\"margin: 0px; padding: 0px;\">\n"
+"                    <t t-if=\"object.id != "
+"object.commercial_partner_id.id\">Spoštovani <t t-out=\"object.name or ''\"/"
+"> (<t t-out=\"object.commercial_partner_id.name or ''\"/>),</t>\n"
+"                    <t t-else=\"\">Spoštovani <t t-out=\"object.name or ''\"/"
+">,</t>\n"
+"                    <br/>\n"
+"                    V prilogi vam pošiljamo seznam vaših odprtih računov.\n"
+"                    <br/>\n"
+"                    Če imate kakršna koli vprašanja, nas brez oklevanja "
+"kontaktirajte.\n"
+"                    <br/>\n"
+"                    S spoštovanjem,\n"
+"                    <br/>\n"
+"                    <t t-out=\"object._get_followup_responsible().name if "
+"is_html_empty(object._get_followup_responsible().signature) else "
+"object._get_followup_responsible().signature\"/>\n"
+"                </p>\n"
+"            </div>\n"
+"        "
 
 #. module: account_reports
 #: model:mail.template,body_html:account_reports.email_template_customer_statement
@@ -248,7 +280,30 @@ msgstr ""
 "        "
 
 #. module: account_reports
+#: model:mail.template,body_html:account_reports.email_template_tax_return_deadline
+msgid ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p style=\"margin: 0px; padding: 0px;\">\n"
+"                    Hi <span t-out=\"ctx.get('partner') and "
+"ctx['partner'].name\"/>,<br/><br/>\n"
+"                    The deadline to submit <strong t-out=\"object.name\"/> "
+"is <strong t-out=\"format_date(object.date_deadline)\"/>.<br/>\n"
+"                    To avoid any potential fine, please ensure all remaining "
+"documents are sent over as soon as possible.<br/>\n"
+"                    If you've already submitted everything but still "
+"received this email, it's likely the tax return hasn't been marked as "
+"submitted in Odoo.<br/>\n"
+"                    Should you have any question or need assistance, feel "
+"free to get in touch.<br/><br/>\n"
+"                    Best regards,<br/>\n"
+"                </p>\n"
+"            </div>\n"
+"        "
+msgstr ""
+
+#. module: account_reports
 #: model:mail.template,body_html:account_reports.email_template_generic_tax_instructions
+#, fuzzy
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
 "                <p>\n"
@@ -286,16 +341,54 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                <p>\n"
+"                    Spoštovani <t t-"
+"out=\"object.company_id.name\">YourCompany</t>,\n"
+"                </p>\n"
+"                <p>\n"
+"                    Na podlagi prejetih dokumentov in informacij je bila "
+"oddana DDV prijava podjetja <t t-out=\"object.company_id.name\">YourCompany</"
+"t>\n"
+"                    za obdobje <t t-"
+"out=\"object.type_id._get_period_name(object.company_id, object.date_from, "
+"object.date_to)\"/>.\n"
+"                </p>\n"
+"                <p>\n"
+"                    Ugotovljeno je bilo, da je znesek <t t-"
+"out=\"format_amount(object.total_amount_to_pay, "
+"object.amount_to_pay_currency_id)\"/> še vedno za plačilo.\n"
+"                </p>\n"
+"                <table style=\"border:1px solid black; padding:20px; text-"
+"align:left; border-spacing: 16px;\">\n"
+"                    <tr>\n"
+"                        <td>Znesek za plačilo</td>\n"
+"                        <td><t t-"
+"out=\"format_amount(object.total_amount_to_pay, "
+"object.amount_to_pay_currency_id)\"/></td>\n"
+"                    </tr>\n"
+"                    <tr>\n"
+"                        <td>Rok plačila</td>\n"
+"                        <td><t t-out=\"format_date(object.date_deadline)\"/"
+"></td>\n"
+"                    </tr>\n"
+"                </table>\n"
+"                <p>Lep pozdrav,</p>\n"
+"                <p><t t-out=\"user.name\">Mitchell Admin</t></p>\n"
+"            </div>\n"
+"        "
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
+#, fuzzy
 msgid "<i class=\"fa fa-ellipsis-v\" title=\"Dropdown Menu\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-ellipsis-v\" title=\"Spustni meni\"/>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
+#, fuzzy
 msgid "<i class=\"fa fa-paperclip fa-lg\" title=\"Open Attachments\"/>"
-msgstr ""
+msgstr "<i class=\"fa fa-paperclip fa-lg\" title=\"Odpri priloge\"/>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_send_form
@@ -319,52 +412,73 @@ msgstr ""
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
+#, fuzzy
 msgid "<span class=\"oe_stat_text pe-1 text-black\">Deadline: </span>"
-msgstr ""
+msgstr "<span class=\"oe_stat_text pe-1 text-black\">Rok: </span>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
+#, fuzzy
 msgid "<span class=\"oe_stat_text pe-1 text-black-50\">Submitted on: </span>"
-msgstr ""
+msgstr "<span class=\"oe_stat_text pe-1 text-black-50\">Oddano dne: </span>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
+#, fuzzy
 msgid ""
 "<span invisible=\"context.get('in_checks_view') or unresolved_check_count != "
 "0 or resolved_check_count &lt;= 0\" class=\"oe_stat_text ps-0 text-"
 "success\">Passed</span>"
 msgstr ""
+"<span invisible=\"context.get('in_checks_view') or unresolved_check_count != "
+"0 or resolved_check_count &lt;= 0\" class=\"oe_stat_text ps-0 text-"
+"success\">Uspešno</span>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
+#, fuzzy
 msgid ""
 "<span invisible=\"context.get('in_checks_view') or unresolved_check_count "
 "&lt;= 0\" class=\"oe_stat_text ps-0 text-danger\">Pending</span>"
 msgstr ""
+"<span invisible=\"context.get('in_checks_view') or unresolved_check_count "
+"&lt;= 0\" class=\"oe_stat_text ps-0 text-danger\">Čakajoče</span>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_kanban_view
+#, fuzzy
 msgid ""
 "<span invisible=\"not records_count or records_count &lt; 21\">20+</span>\n"
 "                                                    <span invisible=\"not "
 "records_count\"> </span>"
 msgstr ""
+"<span invisible=\"not records_count or records_count &lt; 21\">20+</span>\n"
+"                                                    <span invisible=\"not "
+"records_count\"> </span>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.return_creation_wizard_form
+#, fuzzy
 msgid ""
-"<span invisible=\"not show_warning_wrong_dates\" class=\"fa fa-exclamation-"
-"triangle text-danger pb-2\" title=\"The selected range doesn't match any "
-"fiscal period.\"/>\n"
-"                            <span invisible=\"not "
-"show_warning_existing_return\" class=\"fa fa-exclamation-triangle text-"
-"danger pb-2\" title=\"A return already exists for the selected period.\"/>"
+"<span invisible=\"not show_warning_existing_return\" class=\"fa fa-"
+"exclamation-triangle text-danger pb-2\" title=\"A return already exists for "
+"the selected period.\"/>\n"
+"                            <span invisible=\"not show_warning_overlap\" "
+"class=\"fa fa-exclamation-triangle text-danger pb-2\" title=\"Another return "
+"already covers part of this period.\"/>"
 msgstr ""
+"<span invisible=\"not show_warning_existing_return\" class=\"fa fa-"
+"exclamation-triangle text-danger pb-2\" title=\"Za izbrano obdobje vračilo "
+"že obstaja.\"/>\n"
+"                            <span invisible=\"not show_warning_overlap\" "
+"class=\"fa fa-exclamation-triangle text-danger pb-2\" title=\"Drugo vračilo "
+"že zajema del tega obdobja.\"/>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_form_view
+#, fuzzy
 msgid "<span style=\"width: 85%\">days after tax period</span>"
-msgstr ""
+msgstr "<span style=\"width: 85%\">dni po davčnem obdobju</span>"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_report_file_download_error_wizard_form
@@ -385,8 +499,9 @@ msgstr "Vrstica z vrednostjo »Združi po« ne more imeti podrejenih elementov."
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/wizard/return_creation_wizard.py:0
+#, fuzzy
 msgid "A return already exists for the selected period."
-msgstr ""
+msgstr "Za izbrano obdobje že obstaja davčna napoved."
 
 #. module: account_reports
 #. odoo-python
@@ -429,13 +544,20 @@ msgstr "Konto"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_audit_account_status
+#, fuzzy
 msgid "Account Audit Account Status"
-msgstr ""
+msgstr "Stanje konta v reviziji"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_account_balances_search_view
+#, fuzzy
 msgid "Account Audit Status"
-msgstr ""
+msgstr "Stanje revizije konta"
+
+#. module: account_reports
+#: model:ir.model,name:account_reports.model_account_chart_template
+msgid "Account Chart Template"
+msgstr "Predloga kontnega načrta"
 
 #. module: account_reports
 #. odoo-python
@@ -468,8 +590,9 @@ msgstr "Oznaka računa"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_res_company__account_last_return_cron_refresh
+#, fuzzy
 msgid "Account Last Return Cron Refresh"
-msgstr ""
+msgstr "Zadnja osvežitev Cron vračil"
 
 #. module: account_reports
 #. odoo-python
@@ -505,13 +628,15 @@ msgstr "Zastopano podjetje"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__return_id
+#, fuzzy
 msgid "Account Return"
-msgstr ""
+msgstr "Računovodska napoved"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_return_check_template
+#, fuzzy
 msgid "Account Return Check Template"
-msgstr ""
+msgstr "Predloga preverjanja davčnega obračuna"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_res_company__account_revaluation_journal_id
@@ -521,8 +646,9 @@ msgstr "Dnevnik prevrednotenja računa"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__account_status
 #: model:ir.model.fields,field_description:account_reports.field_account_return__audit_account_status_ids
+#, fuzzy
 msgid "Account Status"
-msgstr ""
+msgstr "Stanje konta"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_account_balances_search_view
@@ -553,8 +679,9 @@ msgstr "Obračunska obdobja"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_audit_accounting_process
+#, fuzzy
 msgid "Accounting Process"
-msgstr ""
+msgstr "Računovodski postopek"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_report
@@ -595,18 +722,21 @@ msgstr "Računovodska poročila"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_return
+#, fuzzy
 msgid "Accounting Return"
-msgstr ""
+msgstr "Računovodska napoved"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_return_check
+#, fuzzy
 msgid "Accounting Return Check"
-msgstr ""
+msgstr "Preverjanje računovodske napovedi"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_return_type
+#, fuzzy
 msgid "Accounting Return Type"
-msgstr ""
+msgstr "Vrsta računovodske napovedi"
 
 #. module: account_reports
 #. odoo-javascript
@@ -646,8 +776,9 @@ msgstr "Potreben je ukrep"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__action_id
+#, fuzzy
 msgid "Action on Click"
-msgstr ""
+msgstr "Dejanje ob kliku"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_file_download_error_wizard__actionable_errors
@@ -705,18 +836,21 @@ msgstr "Dodaj vsote pod odseke"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__additional_action_context
+#, fuzzy
 msgid "Additional Action Context"
-msgstr ""
+msgstr "Dodatni kontekst dejanja"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__additional_action_domain
+#, fuzzy
 msgid "Additional Action Domain"
-msgstr ""
+msgstr "Dodatna domena dejanja"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__additional_action_params
+#, fuzzy
 msgid "Additional Action Params"
-msgstr ""
+msgstr "Dodatni parametri dejanja"
 
 #. module: account_reports
 #: model:account.report.column,name:account_reports.multicurrency_revaluation_report_adjustment
@@ -749,10 +883,12 @@ msgstr "Napredno"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "After adjustements, transfer the undistributed Profits/Losses to an equity "
 "account."
 msgstr ""
+"Po prilagoditvah prenesite nerazdeljene dobičke/izgube na konto kapitala."
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_aged_partner_balance_report_handler
@@ -779,8 +915,9 @@ msgstr "Starostna struktura obveznosti"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_aged_payable_review
+#, fuzzy
 msgid "Aged Payables Review"
-msgstr ""
+msgstr "Pregled starostne strukture obveznosti"
 
 #. module: account_reports
 #: model:account.report,name:account_reports.aged_receivable_report
@@ -803,19 +940,22 @@ msgstr "Starostna struktura terjatev"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Aged payables per partner"
-msgstr ""
+msgstr "Zapadle obveznosti po partnerjih"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_aged_receivable_followup
+#, fuzzy
 msgid "Aged receivables and follow-up"
-msgstr ""
+msgstr "Zapadle terjatve in izterjava"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Aged receivables per partner"
-msgstr ""
+msgstr "Zastarale terjatve po partnerju"
 
 #. module: account_reports
 #. odoo-javascript
@@ -853,22 +993,23 @@ msgstr "Vse različice poročila"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "All checks and approvers have been reset"
-msgstr ""
+msgstr "Vsa preverjanja in odobritelji so bili ponastavljeni"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
-msgid ""
-"All customer VAT numbers are valid under <a href=\"https://ec.europa.eu/"
-"taxation_customs/vies\" target=\"_blank\">VIES</a>."
-msgstr ""
+#, fuzzy
+msgid "All customer VAT numbers are valid under VIES."
+msgstr "Vse davčne številke strank so veljavne v sistemu VIES."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "All customers have a VAT number."
-msgstr ""
+msgstr "Vsi kupci imajo davčno številko."
 
 #. module: account_reports
 #. odoo-javascript
@@ -881,9 +1022,16 @@ msgstr ""
 "davčno številko izbranih podjetij."
 
 #. module: account_reports
+#: model:account.return.check.template,name:account_reports.account_return_check_template_allocation_of_prior_year_result_to_equity
+#, fuzzy
+msgid "Allocation of prior-year result to equity"
+msgstr "Alokacija rezultata preteklega leta v kapital"
+
+#. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report__allow_account_audit_status_on_lines
+#, fuzzy
 msgid "Allow Account Audit Status On Lines"
-msgstr ""
+msgstr "Dovoli revizijski status kontov na postavkah"
 
 #. module: account_reports
 #: model:account.report.column,name:account_reports.account_financial_report_ec_sales_amount
@@ -896,6 +1044,7 @@ msgstr "Znesek"
 
 #. module: account_reports
 #. odoo-python
+#: code:addons/account_reports/models/account_general_ledger.py:0
 #: code:addons/account_reports/models/account_journal_report.py:0
 #: model:account.report.column,name:account_reports.aged_payable_report_amount_currency
 #: model:account.report.column,name:account_reports.aged_receivable_report_amount_currency
@@ -909,15 +1058,17 @@ msgstr "Znesek v valuti"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_payment_wizard__amount_to_pay
 #: model:ir.model.fields,field_description:account_reports.field_qr_code_payment_wizard__amount_to_pay
+#, fuzzy
 msgid "Amount To Pay"
-msgstr ""
+msgstr "Znesek za plačilo"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__amount_to_pay_currency_id
 #: model:ir.model.fields,field_description:account_reports.field_account_return_payment_wizard__currency_id
 #: model:ir.model.fields,field_description:account_reports.field_qr_code_payment_wizard__currency_id
+#, fuzzy
 msgid "Amount To Pay Currency"
-msgstr ""
+msgstr "Valuta zneska za plačilo"
 
 #. module: account_reports
 #. odoo-python
@@ -944,6 +1095,13 @@ msgid "Amounts in Thousands"
 msgstr "Zneski v tisočih"
 
 #. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
+msgid "An active return already exists for the same period."
+msgstr "Za isto obdobje že obstaja aktivna vrnitev."
+
+#. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filter_analytic.xml:0
 #: code:addons/account_reports/static/src/components/account_report/filters/filter_analytic_groupby.xml:0
@@ -951,9 +1109,21 @@ msgid "Analytic"
 msgstr "Analitika"
 
 #. module: account_reports
+#: model:ir.model.fields,field_description:account_reports.field_account_analytic_line__analytic_coverage
+#: model:ir.model.fields,field_description:account_reports.field_account_move_line__analytic_coverage
+#, fuzzy
+msgid "Analytic Coverage"
+msgstr "Analitična pokritost"
+
+#. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report__filter_analytic_groupby
 msgid "Analytic Group By"
 msgstr "Analitična skupina po"
+
+#. module: account_reports
+#: model:ir.model,name:account_reports.model_account_analytic_line
+msgid "Analytic Line"
+msgstr "Analitična postavka"
 
 #. module: account_reports
 #. odoo-javascript
@@ -962,52 +1132,70 @@ msgid "Analytic Simulations"
 msgstr "Analitične simulacije"
 
 #. module: account_reports
+#. odoo-javascript
+#: code:addons/account_reports/static/src/components/account_report/header/header.xml:0
+#: model_terms:ir.ui.view,arch_db:account_reports.pdf_export_main_table_header
+#, fuzzy
+msgid "Analytic coverage"
+msgstr "Analitična pokritost"
+
+#. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_analytical_review
+#, fuzzy
 msgid "Analytical Review"
-msgstr ""
+msgstr "Analitični pregled"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_inventory_analytical_review
+#, fuzzy
 msgid "Analyze the change in assets between year N and year N-1."
-msgstr ""
+msgstr "Analizirajte spremembo sredstev med letom N in letom N-1."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_revenue_receivables_review
+#, fuzzy
 msgid ""
 "Analyze the change in revenue and trade receivables between year N and year "
 "N-1."
 msgstr ""
+"Analizirajte spremembo prihodkov in terjatev iz poslovanja med letom N in "
+"letom N-1."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_fixed_assets_review
+#, fuzzy
 msgid ""
 "Analyze the evolution of fixed assets and depreciation between N and N-1."
-msgstr ""
+msgstr "Analizirajte razvoj osnovnih sredstev in amortizacije med N in N-1."
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_mail_compose_message__account_reports_annotation_date
 #: model:ir.model.fields,field_description:account_reports.field_mail_scheduled_message__account_reports_annotation_date
+#, fuzzy
 msgid "Annotated For"
-msgstr ""
+msgstr "Označeno za"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/mail/message_patch.xml:0
+#, fuzzy
 msgid "Annotated for"
-msgstr ""
+msgstr "Označeno za"
 
 #. module: account_reports
 #: model:account.return.type,name:account_reports.annual_corporate_tax_return_type
+#, fuzzy
 msgid "Annual Closing: Corporate Tax"
-msgstr ""
+msgstr "Letno zaprtje: davek od dohodka pravnih oseb"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 #: model:account.report,name:account_reports.annual_statements
 #: model:ir.actions.client,name:account_reports.action_account_report_asr
+#, fuzzy
 msgid "Annual Statements"
-msgstr ""
+msgstr "Letna poročila"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__deadline_periodicity__year
@@ -1021,13 +1209,15 @@ msgstr "Letno"
 #: model:ir.model.fields.selection,name:account_reports.selection__account_audit_account_status__status__anomaly
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__result__anomaly
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_search_view
+#, fuzzy
 msgid "Anomaly"
-msgstr ""
+msgstr "Anomalija"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__country_ids
+#, fuzzy
 msgid "Applicable Countries"
-msgstr ""
+msgstr "Veljavne države"
 
 #. module: account_reports
 #. odoo-javascript
@@ -1037,13 +1227,15 @@ msgstr "Potrdi"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__approver_ids
+#, fuzzy
 msgid "Approved By"
-msgstr ""
+msgstr "Odobril"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__approver_supervisor_ids
+#, fuzzy
 msgid "Approvers and Supervisor"
-msgstr ""
+msgstr "Odobritelji in nadzornik"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_kanban_view
@@ -1061,8 +1253,9 @@ msgstr "Arhivirano"
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/views/accrual_list_view.xml:0
+#, fuzzy
 msgid "As of"
-msgstr ""
+msgstr "Dne"
 
 #. module: account_reports
 #. odoo-python
@@ -1078,8 +1271,9 @@ msgstr "Naraščajoče"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_audit_assets_listing
+#, fuzzy
 msgid "Assets Listing"
-msgstr ""
+msgstr "Seznam sredstev"
 
 #. module: account_reports
 #: model:account.report.column,name:account_reports.aged_payable_report_period0
@@ -1090,8 +1284,9 @@ msgstr "Na datum"
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/views/accrual_list_view.xml:0
+#, fuzzy
 msgid "At the date of"
-msgstr ""
+msgstr "Na dan"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_send_form
@@ -1129,34 +1324,40 @@ msgstr "Revizija"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_account_balances_search_view
+#, fuzzy
 msgid "Audit Accounts"
-msgstr ""
+msgstr "Revizijski konti"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__audit_balance_show_warning
+#, fuzzy
 msgid "Audit Balance Show Warning"
-msgstr ""
+msgstr "Prikaži opozorilo revizijskega stanja"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__audit_previous_balance_show_warning
+#, fuzzy
 msgid "Audit Previous Balance Show Warning"
-msgstr ""
+msgstr "Prikaži opozorilo predhodnega salda"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__audit_status
+#, fuzzy
 msgid "Audit Status"
-msgstr ""
+msgstr "Status revizije"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_audit_balance_clickable_char_field.xml:0
+#, fuzzy
 msgid "Audit account"
-msgstr ""
+msgstr "Revizija konta"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__auto_generate
+#, fuzzy
 msgid "Auto Generated"
-msgstr ""
+msgstr "Samodejno ustvarjeno"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_search_view
@@ -1165,13 +1366,15 @@ msgstr "Samodejno"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_form_view
+#, fuzzy
 msgid "Automated Checks"
-msgstr ""
+msgstr "Samodejna preverjanja"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__available_return_type_ids
+#, fuzzy
 msgid "Available Return Type"
-msgstr ""
+msgstr "Razpoložljiva vrsta vračila"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_avgcre0
@@ -1210,8 +1413,9 @@ msgstr "Saldo"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__audit_previous_balance
+#, fuzzy
 msgid "Balance N-1"
-msgstr ""
+msgstr "Saldo N-1"
 
 #. module: account_reports
 #: model:account.report,name:account_reports.balance_sheet
@@ -1268,25 +1472,29 @@ msgstr "Ravnovesje davčnih kontov (terjatev)"
 #: model:ir.actions.act_window,name:account_reports.action_view_account_balances
 #: model:ir.embedded.actions,name:account_reports.account_audit_embedded_action_account_balances_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_kanban_view
+#, fuzzy
 msgid "Balances"
-msgstr ""
+msgstr "Stanja"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__audit_balances_count
+#, fuzzy
 msgid "Balances Count"
-msgstr ""
+msgstr "Število stanj"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_bank_fees_analytical_review
+#, fuzzy
 msgid "Bank Fees Analytical Review"
-msgstr ""
+msgstr "Analitični pregled bančnih stroškov"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
 #: model:ir.actions.client,name:account_reports.action_account_report_bank_reconciliation
+#, fuzzy
 msgid "Bank Matching"
-msgstr ""
+msgstr "Usklajevanje banke"
 
 #. module: account_reports
 #. odoo-python
@@ -1322,14 +1530,18 @@ msgstr "Bančni in gotovinski računi"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "Bank matching isn’t required for VAT returns but helps spot missing bills."
 msgstr ""
+"Usklajevanje bančnih postavk ni obvezno za DDV obračune, vendar pomaga "
+"odkriti manjkajoče račune."
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.bank_information_customer_report
+#, fuzzy
 msgid "Bank:"
-msgstr ""
+msgstr "Banka:"
 
 #. module: account_reports
 #. odoo-javascript
@@ -1355,14 +1567,16 @@ msgstr "Prej"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Bill Attachments"
-msgstr ""
+msgstr "Priponke računov"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Bill attachments"
-msgstr ""
+msgstr "Priponke računov"
 
 #. module: account_reports
 #. odoo-javascript
@@ -1396,10 +1610,26 @@ msgstr "Postavke proračuna je mogoče urejati samo iz postavk računa."
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return_type__deadline_days_delay
+#, fuzzy
 msgid ""
 "By default, Odoo applies its own deadline for returns (shown as 0). Entering "
 "a value here will override it and be used as the new deadline."
 msgstr ""
+"Privzeto, Odoo za vračila uporablja svoj rok (prikazan kot 0). Vnos "
+"vrednosti tukaj bo ta rok preglasil in ga uporabil kot nov rok."
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_general_ledger.py:0
+msgid "CSV"
+msgstr "CSV"
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_general_ledger.py:0
+#, fuzzy
+msgid "CSV export only works with one column group"
+msgstr "Izvoz v CSV deluje samo z eno skupino stolpcev"
 
 #. module: account_reports
 #. odoo-python
@@ -1513,8 +1743,9 @@ msgstr "V gotovini"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_cash_inventory_reconciliation
+#, fuzzy
 msgid "Cash inventory reconciliation"
-msgstr ""
+msgstr "Usklajevanje gotovinske zaloge"
 
 #. module: account_reports
 #. odoo-python
@@ -1564,8 +1795,9 @@ msgstr "Spremeni datum zaklepanja"
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/account_report.xml:0
 #: code:addons/account_reports/static/src/components/account_return/views/account_audit_balance_list_controller.xml:0
+#, fuzzy
 msgid "Chatter"
-msgstr ""
+msgstr "Klepetalnik"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__type__check
@@ -1575,8 +1807,9 @@ msgstr "Ček"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__code
+#, fuzzy
 msgid "Check ID"
-msgstr ""
+msgstr "ID čeka"
 
 #. module: account_reports
 #. odoo-python
@@ -1587,26 +1820,53 @@ msgstr "Preverite e-poštne naslove partnerjev"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Check State"
-msgstr ""
+msgstr "Stanje preverjanja"
 
 #. module: account_reports
 #: model:ir.actions.act_window,name:account_reports.action_view_account_return_check_templates
+#, fuzzy
 msgid "Check Templates"
-msgstr ""
+msgstr "Predloge čekov"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_aged_payable_review
+#, fuzzy
 msgid ""
 "Check for payables overdue by more than 60 days and validate that all "
 "amounts due are properly recorded."
 msgstr ""
+"Preverite obveznosti, starejše od 60 dni, in potrdite, da so vsi zapadli "
+"zneski pravilno evidentirani."
+
+#. module: account_reports
+#: model:account.return.check.template,description:account_reports.account_return_check_template_allocation_of_prior_year_result_to_equity
+#, fuzzy
+msgid ""
+"Check how the prior year's result (N-1) was allocated, especially if "
+"reclassified into share capital or reserves."
+msgstr ""
+"Preverite, kako je bil rezultat preteklega leta (N-1) razporejen, zlasti ali "
+"je bil prerazvrščen v osnovni kapital ali rezerve."
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/tax_report/warnings.xml:0
 msgid "Check them"
 msgstr "Preverite jih"
+
+#. module: account_reports
+#: model:account.return.check.template,description:account_reports.account_return_check_template_legal_reserve_and_dividend_eligibility
+#, fuzzy
+msgid ""
+"Check whether the legal reserve is properly funded and if dividend "
+"distributions meet legal conditions, especially in case of unamortized "
+"formation expenses."
+msgstr ""
+"Preverite, ali je zakonska rezerva ustrezno financirana in ali razdelitev "
+"dividend izpolnjuje zakonske pogoje, zlasti v primeru neamortiziranih "
+"ustanovnih stroškov."
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__check_ids
@@ -1617,19 +1877,22 @@ msgstr "Čeki"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__check_count
+#, fuzzy
 msgid "Checks Count"
-msgstr ""
+msgstr "Število preverjanj"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Checks Validated"
-msgstr ""
+msgstr "Preverjanja potrjena"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_clear_internal_transfer_account
+#, fuzzy
 msgid "Clear Internal Transfer Accounts"
-msgstr ""
+msgstr "Počisti račune notranjih prenosov"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_report_file_download_error_wizard_form
@@ -1639,8 +1902,9 @@ msgstr "Zaključi"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Closing Entries"
-msgstr ""
+msgstr "Zapiranje vnosov"
 
 #. module: account_reports
 #. odoo-python
@@ -1650,14 +1914,16 @@ msgstr "Zapiranje vnosa"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__closing_move_ids
+#, fuzzy
 msgid "Closing Move"
-msgstr ""
+msgstr "Zaključni dnevniški vnos"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_bank_statement_line__closing_return_id
 #: model:ir.model.fields,field_description:account_reports.field_account_move__closing_return_id
+#, fuzzy
 msgid "Closing Return"
-msgstr ""
+msgstr "Zaključna napoved"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_closing_bank_balance0
@@ -1667,23 +1933,27 @@ msgstr "Končno stanje na bančnem računu"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_move.py:0
+#, fuzzy
 msgid "Closing entry deleted"
-msgstr ""
+msgstr "Zapiranje vnosa izbrisano"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_move.py:0
+#, fuzzy
 msgid "Closing entry deleted for company %s"
-msgstr ""
+msgstr "Zaključni vnos za podjetje %s je bil izbrisan"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Closing entry posted and lock date applied."
-msgstr ""
+msgstr "Zaključi vnos je bil knjižen in datum zaklepanja je bil uporabljen."
 
 #. module: account_reports
 #. odoo-python
+#: code:addons/account_reports/models/account_general_ledger.py:0
 #: code:addons/account_reports/models/account_report.py:0
 #: model:account.report.column,name:account_reports.journal_report_code
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__code
@@ -1698,10 +1968,13 @@ msgstr "Kode:"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_bank_statements
+#, fuzzy
 msgid ""
 "Collect missing bank statements and reconcile them with internal records, "
 "resolving any discrepancies."
 msgstr ""
+"Zberite manjkajoče bančne izpiske in jih uskladite z internimi zapisi, pri "
+"čemer odpravite morebitna odstopanja."
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_form
@@ -1767,22 +2040,29 @@ msgstr "Nastavitve podjetja"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Company data"
-msgstr ""
+msgstr "Podatki podjetja"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_operating_expenses_review
+#, fuzzy
 msgid ""
 "Compare current vs prior year expense trends and justify significant "
 "deviations."
 msgstr ""
+"Primerjajte trende stroškov za tekoče in preteklo leto ter utemeljite "
+"pomembna odstopanja."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_cash_inventory_reconciliation
+#, fuzzy
 msgid ""
 "Compare the general ledger cash account with the physical cash inventory "
 "provided by the client. Investigate and explain any discrepancies."
 msgstr ""
+"Primerjajte gotovinski konto glavne knjige z dejansko gotovinsko zalogo, ki "
+"jo je posredovala stranka. Preverite in pojasnite morebitna odstopanja."
 
 #. module: account_reports
 #. odoo-javascript
@@ -1792,42 +2072,56 @@ msgstr "Primerjava"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_review_of_guaranteed
+#, fuzzy
 msgid ""
 "Compile a complete list of all guarantees received or granted (pledges, "
 "mortgages, collateral)."
 msgstr ""
+"Pripravite popoln seznam vseh prejetih ali danih zavarovanj (zastave, "
+"hipoteke, zavarovanja)."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Complete any necessary manual adjustments and internal checks."
-msgstr ""
+msgstr "Dokončajte vse potrebne ročne prilagoditve in notranje preglede."
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__audit_balances_completed_count
+#, fuzzy
 msgid "Completed Balances Count"
-msgstr ""
+msgstr "Število dokončanih saldojev"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_analytical_review
+#, fuzzy
 msgid ""
 "Conduct a comparative account review to identify key variances, analyze "
 "trends, and assess performance versus prior periods."
 msgstr ""
+"Izvedite primerjalni pregled kontov, da identificirate ključna odstopanja, "
+"analizirate trende in ocenite uspešnost v primerjavi s prejšnjimi obdobji."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_trade_payables_analytical_review
+#, fuzzy
 msgid ""
 "Conduct a year-over-year analysis of trade payables and explain significant "
 "changes."
 msgstr ""
+"Izvedite analizo obveznosti do dobaviteljev od leta do leta in pojasnite "
+"pomembne spremembe."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_bank_fees_analytical_review
+#, fuzzy
 msgid ""
 "Conduct an analytical review of banking fees. Ensure consistent accounting "
 "treatment and explain major changes."
 msgstr ""
+"Izvedite analitični pregled bančnih provizij. Zagotovite dosledno "
+"računovodsko obravnavo in pojasnite glavne spremembe."
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_res_config_settings
@@ -1837,8 +2131,9 @@ msgstr "Uredi nastavitve"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Configure accounts"
-msgstr ""
+msgstr "Nastavite konte"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
@@ -1847,16 +2142,28 @@ msgstr "Nastavite svoje davčne konte"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_marketable_securities_review
+#, fuzzy
 msgid ""
 "Confirm proper classification, fair value measurement, and disposal "
 "treatment of marketable securities."
 msgstr ""
+"Potrdite pravilno razvrstitev, merjenje po pošteni vrednosti in obravnavo "
+"odtujitve tržnih vrednostnih papirjev."
+
+#. module: account_reports
+#: model:account.return.check.template,description:account_reports.account_return_check_template_dividend_payment_verification
+#, fuzzy
+msgid ""
+"Confirm that the declared dividends were actually paid to the shareholders."
+msgstr ""
+"Potrdite, da so bile razglašene dividende dejansko plačane delničarjem."
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filters.js:0
+#, fuzzy
 msgid "Consolidation"
-msgstr ""
+msgstr "Konsolidacija"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_res_partner
@@ -1935,10 +2242,13 @@ msgstr "Ustvari stranko"
 
 #. module: account_reports
 #: model_terms:ir.actions.act_window,help:account_reports.action_view_account_audit
+#, fuzzy
 msgid ""
 "Create a new audit working file with dedicated checks and balance reviews to "
 "ensure smooth closings."
 msgstr ""
+"Ustvarite novo revizijsko delovno datoteko z namenskim preverjanjem in "
+"pregledi stanj, da zagotovite nemoteno zapiranje."
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_audit_account_status__create_uid
@@ -2001,6 +2311,8 @@ msgid "Credit"
 msgstr "Kredit"
 
 #. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_general_ledger.py:0
 #: model:account.report.column,name:account_reports.aged_payable_report_currency
 #: model:account.report.column,name:account_reports.aged_receivable_report_currency
 #: model:account.report.column,name:account_reports.bank_reconciliation_report_currency
@@ -2044,12 +2356,7 @@ msgid "Current Liabilities"
 msgstr "Kratkoročne obveznosti"
 
 #. module: account_reports
-#: model:account.report.line,name:account_reports.account_financial_retained_earnings_line_1
-msgid "Current Year Retained Earnings"
-msgstr "Zadržani dobiček tekočega leta"
-
-#. module: account_reports
-#: model:account.report.line,name:account_reports.account_financial_current_year_earnings0
+#: model:account.report.line,name:account_reports.account_financial_report_current_years_earnings
 msgid "Current Year Unallocated Earnings"
 msgstr "Nerazporejeni dobički tekočega leta"
 
@@ -2104,13 +2411,15 @@ msgstr "Izjava stranke po meri"
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__cycle
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_search_view
+#, fuzzy
 msgid "Cycle"
-msgstr ""
+msgstr "Cikel"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.return_creation_wizard_form
+#, fuzzy
 msgid "Cycles"
-msgstr ""
+msgstr "Cikli"
 
 #. module: account_reports
 #: model:account.report.column,name:account_reports.bank_reconciliation_report_date
@@ -2158,8 +2467,9 @@ msgstr "Dni"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__days_to_deadline
+#, fuzzy
 msgid "Days To Deadline"
-msgstr ""
+msgstr "Dni do roka"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__date_deadline
@@ -2194,18 +2504,21 @@ msgstr "Odbitna franšiza"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__default_deadline_days_delay
+#, fuzzy
 msgid "Default Deadline"
-msgstr ""
+msgstr "Privzeti rok"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__default_deadline_periodicity
+#, fuzzy
 msgid "Default Periodicity"
-msgstr ""
+msgstr "Privzeta periodičnost"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__default_deadline_start_date
+#, fuzzy
 msgid "Default Start Date"
-msgstr ""
+msgstr "Privzeti datum začetka"
 
 #. module: account_reports
 #. odoo-javascript
@@ -2249,8 +2562,9 @@ msgstr "Obdelovalec po meri za poročilo o odloženih stroških"
 
 #. module: account_reports
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_deferred_expense
+#, fuzzy
 msgid "Deferred Expenses"
-msgstr ""
+msgstr "Odloženi stroški"
 
 #. module: account_reports
 #: model:ir.actions.client,name:account_reports.action_account_report_deferred_revenue
@@ -2269,8 +2583,9 @@ msgstr "Poročilo o odloženih prihodkih"
 
 #. module: account_reports
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_deferred_revenue
+#, fuzzy
 msgid "Deferred Revenues"
-msgstr ""
+msgstr "Odloženi prihodki"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_expression_form
@@ -2303,8 +2618,9 @@ msgstr "Opis"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return_type__states_workflow
+#, fuzzy
 msgid "Determines the workflow of the return."
-msgstr ""
+msgstr "Določa potek delovnega toka vračila."
 
 #. module: account_reports
 #. odoo-python
@@ -2334,11 +2650,13 @@ msgstr "Prikaz sestavljalca pošte"
 #: model:ir.model.fields,field_description:account_reports.field_account_aged_partner_balance_report_handler__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_aged_payable_report_handler__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_aged_receivable_report_handler__display_name
+#: model:ir.model.fields,field_description:account_reports.field_account_analytic_line__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_audit_account_status__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_balance_sheet_report_handler__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_bank_reconciliation_report_handler__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_cash_flow_report_handler__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_change_lock_date__display_name
+#: model:ir.model.fields,field_description:account_reports.field_account_chart_template__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_customer_statement_report_handler__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_deferred_expense_report_handler__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_deferred_report_handler__display_name
@@ -2383,6 +2701,7 @@ msgstr "Prikaz sestavljalca pošte"
 #: model:ir.model.fields,field_description:account_reports.field_account_tax_unit__display_name
 #: model:ir.model.fields,field_description:account_reports.field_account_trial_balance_report_handler__display_name
 #: model:ir.model.fields,field_description:account_reports.field_ir_actions_account_report_download__display_name
+#: model:ir.model.fields,field_description:account_reports.field_ir_module_module__display_name
 #: model:ir.model.fields,field_description:account_reports.field_ir_ui_menu__display_name
 #: model:ir.model.fields,field_description:account_reports.field_kpi_provider__display_name
 #: model:ir.model.fields,field_description:account_reports.field_mail_activity__display_name
@@ -2400,10 +2719,30 @@ msgstr "Prikazani naziv"
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_audit_balance_clickable_char_field.js:0
+#, fuzzy
 msgid ""
 "Displays the value of the selected field as a textual hint. If the selected "
 "field is empty, the static placeholder attribute is displayed instead."
 msgstr ""
+"Prikaže vrednost izbranega polja kot besedilni namig. Če je izbrano polje "
+"prazno, se namesto tega prikaže statični atribut placeholder."
+
+#. module: account_reports
+#: model:account.return.check.template,name:account_reports.account_return_check_template_dividend_payment_verification
+#, fuzzy
+msgid "Dividend payment verification"
+msgstr "Preverjanje izplačila dividend"
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_report.py:0
+#, fuzzy
+msgid ""
+"Division by zero occurred while evaluating Expression: %(line_name)s > %"
+"(label)s."
+msgstr ""
+"Med vrednotenjem izraza je prišlo do deljenja z nič: %(line_name)s > %"
+"(label)s."
 
 #. module: account_reports
 #. odoo-python
@@ -2413,13 +2752,17 @@ msgstr "Dokument"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_search_view
+#, fuzzy
 msgid "Document Upload"
-msgstr ""
+msgstr "Nalaganje dokumentov"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_audit_accounting_process
+#, fuzzy
 msgid "Document current accounting processes (especially if done in-house)."
 msgstr ""
+"Dokumentirajte trenutne računovodske procese (še posebej, če se opravljajo "
+"interno)."
 
 #. module: account_reports
 #: model:account.report.column,name:account_reports.journal_report_count
@@ -2467,14 +2810,16 @@ msgstr "Osnutki vnosov"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_journal_report_audit_move_line_search
+#, fuzzy
 msgid "Draft To Review"
-msgstr ""
+msgstr "Osnutek za pregled"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Draft entries"
-msgstr ""
+msgstr "Osnutki vnosov"
 
 #. module: account_reports
 #. odoo-javascript
@@ -2527,21 +2872,31 @@ msgstr "Davek ES za isto državo"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_equity0
-msgid "EQUITY"
-msgstr "KAPITAL"
+#, fuzzy
+msgid "EQUITY (& EARNINGS)"
+msgstr "KAPITAL (& DOBIČEK)"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "Each bill should have its own document attached as a proof in case of audit."
 msgstr ""
+"Vsak račun mora imeti priložen svoj dokument kot dokazilo za primer revizije."
+
+#. module: account_reports
+#: model:account.report.line,name:account_reports.account_financial_report_earnings
+#, fuzzy
+msgid "Earnings"
+msgstr "Zaslužek"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Earnings Allocation"
-msgstr ""
+msgstr "Dodelitev dobička"
 
 #. module: account_reports
 #. odoo-python
@@ -2551,6 +2906,12 @@ msgid ""
 "selected."
 msgstr ""
 "Urejanje ročne vrstice poročila ni dovoljeno, če je izbranih več podjetij."
+
+#. module: account_reports
+#: model:account.return.check.template,name:account_reports.account_return_check_template_eligibility_tax_reductions_and_credits
+#, fuzzy
+msgid "Eligibility for tax reductions and credits"
+msgstr "Upravičenost za davčne olajšave in kredite"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__checkbox_send_mail
@@ -2569,8 +2930,9 @@ msgstr "Predloga e-pošte"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_audit_empty_suspense_accounts
+#, fuzzy
 msgid "Empty Suspense accounts"
-msgstr ""
+msgstr "Prazni prehodni konti"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__enable_download
@@ -2625,39 +2987,82 @@ msgid "Engine"
 msgstr "Motor"
 
 #. module: account_reports
+#: model:account.return.check.template,description:account_reports.account_return_check_template_vat_rate_compliance
+#, fuzzy
+msgid "Ensure VAT rates applied are consistent with the company's activity."
+msgstr ""
+"Zagotovite, da so uporabljene stopnje DDV skladne z dejavnostjo podjetja."
+
+#. module: account_reports
+#: model:account.return.check.template,description:account_reports.account_return_check_template_minutes_of_the_agm_on_profit_allocation
+#, fuzzy
+msgid ""
+"Ensure a signed copy of the AGM minutes allocating prior-year profit has "
+"been obtained and archived."
+msgstr ""
+"Poskrbite, da je bila pridobljena in arhivirana podpisana kopija zapisnika "
+"letne skupščine o razdelitvi dobička preteklega leta."
+
+#. module: account_reports
+#: model:account.return.check.template,description:account_reports.account_return_check_template_equity_account_movements_legal_documents
+#, fuzzy
+msgid ""
+"Ensure accounting entries in capital accounts are consistent with supporting "
+"legal documents."
+msgstr ""
+"Poskrbite, da so knjižbe na kontih kapitala usklajene s pripadajočimi "
+"pravnimi dokumenti."
+
+#. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_clear_internal_transfer_account
+#, fuzzy
 msgid ""
 "Ensure all intercompany or internal bank transfer accounts are cleared and "
 "justified."
 msgstr ""
+"Prepričajte se, da so vsi medpodjetniški ali notranji računi za bančni "
+"prenos poravnani in utemeljeni."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_payables_settlement
+#, fuzzy
 msgid ""
 "Ensure all notes payable recorded at year-end were properly settled in the "
 "following period."
 msgstr ""
+"Preverite, da so bile vse obveznosti do dobaviteljev, zabeležene ob koncu "
+"leta, v naslednjem obdobju pravilno poravnane."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_foreign_currency_liabilities
+#, fuzzy
 msgid ""
 "Ensure that foreign currency payables are revalued at year-end closing rate "
 "and that any unrealized exchange differences are properly recorded in profit "
 "or loss (accounts 654/754) under Belgian GAAP."
 msgstr ""
+"Prepričajte se, da se obveznosti v tuji valuti ponovno ovrednotijo po tečaju "
+"ob koncu leta in da so morebitne nerealizirane tečajne razlike pravilno "
+"knjižene v dobiček ali izgubo (računi 654/754) v skladu z belgijskim GAAP."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_non_recoverable_vat_gross_accounting
+#, fuzzy
 msgid ""
 "Ensure that non-deductible VAT expenses are recorded including VAT (gross "
 "amount)."
 msgstr ""
+"Zagotovite, da so stroški z neodbitnim DDV knjiženi z vključenim DDV (bruto "
+"znesek)."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Ensure the taxes on invoices and bills match the customer’s country."
 msgstr ""
+"Prepričajte se, da se davki na računih in računih dobaviteljev ujemajo z "
+"državo stranke."
 
 #. module: account_reports
 #. odoo-python
@@ -2666,10 +3071,17 @@ msgid "Entries with partners with no VAT"
 msgstr "Prijave s partnerji brez DDV"
 
 #. module: account_reports
+#: model:account.report.line,name:account_reports.account_financial_report_equity1
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__equity
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__equity
 msgid "Equity"
 msgstr "Kapital"
+
+#. module: account_reports
+#: model:account.return.check.template,name:account_reports.account_return_check_template_equity_account_movements_legal_documents
+#, fuzzy
+msgid "Equity account movements vs legal documents"
+msgstr "Premiki kontov kapitala v primerjavi s pravnimi dokumenti"
 
 #. module: account_reports
 #. odoo-python
@@ -2681,15 +3093,17 @@ msgstr "Sporočilo o napaki"
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__deadline_periodicity__2_months
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__default_deadline_periodicity__2_months
 #: model:ir.model.fields.selection,name:account_reports.selection__res_company__account_return_periodicity__2_months
+#, fuzzy
 msgid "Every 2 months"
-msgstr ""
+msgstr "Vsakih 2 mesecev"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__deadline_periodicity__4_months
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__default_deadline_periodicity__4_months
 #: model:ir.model.fields.selection,name:account_reports.selection__res_company__account_return_periodicity__4_months
+#, fuzzy
 msgid "Every 4 months"
-msgstr ""
+msgstr "Vsakih 4 mesecev"
 
 #. module: account_reports
 #. odoo-javascript
@@ -2715,14 +3129,9 @@ msgstr "Izključi valuto določbe"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Exclude any domestic or extra-EU sales from the EC Sales List."
-msgstr ""
-
-#. module: account_reports
-#. odoo-python
-#: code:addons/account_reports/models/account_return.py:0
-msgid "Exclude any private customers."
-msgstr ""
+msgstr "Izključite vse domače ali izven-EU prodaje iz seznama EC Sales List."
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.multicurrency_revaluation_excluded
@@ -2880,8 +3289,9 @@ msgstr "Finančni proračuni"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_financial_provisions_review
+#, fuzzy
 msgid "Financial Provisions Review"
-msgstr ""
+msgstr "Pregled finančnih rezervacij"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_fiscal_position
@@ -2903,20 +3313,31 @@ msgstr ""
 "želeli"
 
 #. module: account_reports
+#: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__deadline_periodicity__fiscalyear
+#: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__default_deadline_periodicity__fiscalyear
+#: model:ir.model.fields.selection,name:account_reports.selection__res_company__account_return_periodicity__fiscalyear
+#, fuzzy
+msgid "Fiscal Year"
+msgstr "Fiskalno leto"
+
+#. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_fixed_assets_review
+#, fuzzy
 msgid "Fixed Assets Review"
-msgstr ""
+msgstr "Pregled nepremičnin"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__fixed_assets
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__fixed_assets
+#, fuzzy
 msgid "Fixed assets"
-msgstr ""
+msgstr "Nepremičnine"
 
 #. module: account_reports
 #: model:mail.template,name:account_reports.email_template_customer_follow_up_report
+#, fuzzy
 msgid "Follow Up Report"
-msgstr ""
+msgstr "Poročilo o opominih"
 
 #. module: account_reports
 #: model:account.report,name:account_reports.followup_report
@@ -2952,22 +3373,29 @@ msgstr "Font izjemna ikona npr. fa-tasks"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_aged_receivable_followup
+#, fuzzy
 msgid ""
 "For each high risk receivables (>60 days), verify the following:\n"
 "- Is there documented follow-up?\n"
 "- Has a payment plan been negotiated?\n"
 "- Is a provision recorded if recovery is doubtful?"
 msgstr ""
+"Za vsako visoko tvegano terjatev (>60 dni) preverite naslednje:\n"
+"- Ali je dokumentirano spremljanje?\n"
+"- Ali je bil dogovorjen plačilni načrt?\n"
+"- Ali je evidentirana rezerva, če je izterjava dvomljiva?"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_foreign_currency_liabilities
+#, fuzzy
 msgid "Foreign Currency Liabilities"
-msgstr ""
+msgstr "Obveznosti v tuji valuti"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_foreign_exchange_differences
+#, fuzzy
 msgid "Foreign Exchange Differences"
-msgstr ""
+msgstr "Razlike iz menjalnega tečaja"
 
 #. module: account_reports
 #. odoo-python
@@ -2976,18 +3404,16 @@ msgid "Foreign currencies adjustment entry as of %s"
 msgstr "Vnos prilagoditve tujih valut na dan %s"
 
 #. module: account_reports
+#: model:account.return.check.template,name:account_reports.account_return_check_template_foreign_operations
+#, fuzzy
+msgid "Foreign operations"
+msgstr "Tuje operacije"
+
+#. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/line/popover/debug_popover.xml:0
 msgid "Formula"
 msgstr "Formula"
-
-#. module: account_reports
-#. odoo-python
-#: code:addons/account_reports/models/account_report.py:0
-msgid ""
-"From %(date_from)s\n"
-"to  %(date_to)s"
-msgstr "Od%(date_from)sza  %(date_to)s"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_reports_export_wizard_format__fun_param
@@ -3027,8 +3453,15 @@ msgstr "Upravljalnik po meri glavne knjige"
 #. module: account_reports
 #: model:ir.actions.act_window,name:account_reports.action_create_account_return
 #: model_terms:ir.ui.view,arch_db:account_reports.return_creation_wizard_form
+#, fuzzy
 msgid "Generate Return"
-msgstr ""
+msgstr "Ustvari vračilo"
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.return_creation_wizard_form
+#, fuzzy
+msgid "Generate Return Anyway"
+msgstr "Vseeno ustvari vračilo"
 
 #. module: account_reports
 #. odoo-python
@@ -3038,8 +3471,9 @@ msgstr "Ustvari vnos"
 
 #. module: account_reports
 #: model:ir.actions.server,name:account_reports.ir_cron_generate_account_return_ir_actions_server
+#, fuzzy
 msgid "Generate or refresh account return for every companies"
-msgstr ""
+msgstr "Ustvari ali osveži računovodsko poročilo za vse družbe"
 
 #. module: account_reports
 #. odoo-python
@@ -3049,28 +3483,33 @@ msgstr "Ustvarjeni dokumenti"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_qr_code_payment_wizard
+#, fuzzy
 msgid "Generic Payment Wizard with QR Code"
-msgstr ""
+msgstr "Splošni plačilni čarovnik z QR kodo"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__generic_state_tax_report
+#, fuzzy
 msgid "Generic State"
-msgstr ""
+msgstr "Splošno stanje"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__generic_state_only_pay
+#, fuzzy
 msgid "Generic State Only Pay"
-msgstr ""
+msgstr "Splošno stanje samo plačilo"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__generic_state_review
+#, fuzzy
 msgid "Generic State Review"
-msgstr ""
+msgstr "Pregled splošnega stanja"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__generic_state_review_submit
+#, fuzzy
 msgid "Generic State Review Submit"
-msgstr ""
+msgstr "Splošno stanje pregleda in oddaje"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_generic_tax_report_handler
@@ -3103,14 +3542,16 @@ msgstr "Blago"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Goods and services classification"
-msgstr ""
+msgstr "Razvrstitev blaga in storitev"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__government
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__state
+#, fuzzy
 msgid "Government"
-msgstr ""
+msgstr "Vlada"
 
 #. module: account_reports
 #. odoo-javascript
@@ -3166,13 +3607,15 @@ msgstr "Ima sporočilo"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__has_move_entries
+#, fuzzy
 msgid "Has Move Entries"
-msgstr ""
+msgstr "Ima knjižne vnose"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__report_opened_once
+#, fuzzy
 msgid "Has the report been opened once"
-msgstr ""
+msgstr "Ali je bilo poročilo že odprto?"
 
 #. module: account_reports
 #. odoo-javascript
@@ -3237,11 +3680,13 @@ msgstr "IBAN"
 #: model:ir.model.fields,field_description:account_reports.field_account_aged_partner_balance_report_handler__id
 #: model:ir.model.fields,field_description:account_reports.field_account_aged_payable_report_handler__id
 #: model:ir.model.fields,field_description:account_reports.field_account_aged_receivable_report_handler__id
+#: model:ir.model.fields,field_description:account_reports.field_account_analytic_line__id
 #: model:ir.model.fields,field_description:account_reports.field_account_audit_account_status__id
 #: model:ir.model.fields,field_description:account_reports.field_account_balance_sheet_report_handler__id
 #: model:ir.model.fields,field_description:account_reports.field_account_bank_reconciliation_report_handler__id
 #: model:ir.model.fields,field_description:account_reports.field_account_cash_flow_report_handler__id
 #: model:ir.model.fields,field_description:account_reports.field_account_change_lock_date__id
+#: model:ir.model.fields,field_description:account_reports.field_account_chart_template__id
 #: model:ir.model.fields,field_description:account_reports.field_account_customer_statement_report_handler__id
 #: model:ir.model.fields,field_description:account_reports.field_account_deferred_expense_report_handler__id
 #: model:ir.model.fields,field_description:account_reports.field_account_deferred_report_handler__id
@@ -3286,6 +3731,7 @@ msgstr "IBAN"
 #: model:ir.model.fields,field_description:account_reports.field_account_tax_unit__id
 #: model:ir.model.fields,field_description:account_reports.field_account_trial_balance_report_handler__id
 #: model:ir.model.fields,field_description:account_reports.field_ir_actions_account_report_download__id
+#: model:ir.model.fields,field_description:account_reports.field_ir_module_module__id
 #: model:ir.model.fields,field_description:account_reports.field_ir_ui_menu__id
 #: model:ir.model.fields,field_description:account_reports.field_kpi_provider__id
 #: model:ir.model.fields,field_description:account_reports.field_mail_activity__id
@@ -3312,35 +3758,60 @@ msgstr "Ikona za označevanje izjemne aktivnosti."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_investigate_unusual_supplier_balances
+#, fuzzy
 msgid ""
 "Identify and explain any significant or unusual supplier balances, "
 "especially debit balances."
 msgstr ""
+"Prepoznajte in pojasnite morebitna pomembna ali nenavadna dobaviteljska "
+"stanja, zlasti debetna stanja."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_no_unjustified_cash_payments_to_supplier
+#, fuzzy
 msgid ""
 "Identify and verify any cash payments made to suppliers. Ensure all are "
 "properly justified."
 msgstr ""
+"Identificirajte in preverite vsa gotovinska plačila, ki so bila izvedena "
+"dobaviteljem. Poskrbite, da so vsa ustrezno utemeljena."
+
+#. module: account_reports
+#: model:account.return.check.template,description:account_reports.account_return_check_template_eligibility_tax_reductions_and_credits
+#, fuzzy
+msgid ""
+"Identify applicable tax credit schemes, verify eligibility, compute "
+"benefits, validate supporting documentation, and monitor refund claims."
+msgstr ""
+"Prepoznajte ustrezne sheme davčnih olajšav, preverite upravičenost, "
+"izračunajte koristi, preverite ustreznost podporne dokumentacije in "
+"spremljajte zahtevke za vračilo."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_outstanding_checks
+#, fuzzy
 msgid ""
 "Identify checks that remain uncashed (lost, forgotten, or to be canceled)"
 msgstr ""
+"Prepoznajte čeke, ki ostanejo neunovčeni (izgubljeni, pozabljeni ali za "
+"preklic)"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_review_for_capitalizable_expenses
+#, fuzzy
 msgid ""
 "Identify expenses that should have been capitalized according to accounting "
 "standards."
 msgstr ""
+"Identificirajte stroške, ki bi morali biti kapitalizirani v skladu z "
+"računovodskimi standardi."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_provision_for_impairment
+#, fuzzy
 msgid "Identify potential losses and record provisions where appropriate."
 msgstr ""
+"Identificirajte potencialne izgube in po potrebi evidentirajte rezerve."
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__message_needaction
@@ -3391,8 +3862,9 @@ msgstr "Neaktivno"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_account_balances_search_view
+#, fuzzy
 msgid "Inactive Account"
-msgstr ""
+msgstr "Neaktiven konto"
 
 #. module: account_reports
 #. odoo-javascript
@@ -3483,6 +3955,24 @@ msgid "Integer Rounding"
 msgstr "Zaokroževanje celih števil"
 
 #. module: account_reports
+#: model:account.return.check.template,name:account_reports.account_return_check_template_intercompany_account_reconciliation
+#, fuzzy
+msgid "Intercompany account reconciliation"
+msgstr "Medpodjetniško usklajevanje kontov"
+
+#. module: account_reports
+#: model:account.return.check.template,description:account_reports.account_return_check_template_intercompany_account_reconciliation
+#, fuzzy
+msgid ""
+"Intercompany reconciliation is vital for accurate group accounting. It "
+"ensures reciprocal balances between related entities match precisely, which "
+"is necessary for eliminating internal transactions during consolidation."
+msgstr ""
+"Medpodjetniško usklajevanje je ključno za natančno skupinsko računovodstvo. "
+"Zagotavlja, da se medsebojna salda med povezanimi družbami natančno ujemajo, "
+"kar je nujno za izločanje notranjih transakcij med konsolidacijo."
+
+#. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/aged_partner_balance/filters.js:0
 msgid "Intervals cannot be smaller than 1"
@@ -3497,8 +3987,9 @@ msgstr "Davki znotraj skupnosti se uporabljajo za"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Invalid code"
-msgstr ""
+msgstr "Neveljavna koda"
 
 #. module: account_reports
 #. odoo-python
@@ -3541,13 +4032,15 @@ msgstr "Zaloga"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_inventory_analytical_review
+#, fuzzy
 msgid "Inventory Analytical Review"
-msgstr ""
+msgstr "Analitični pregled zaloge"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_investigate_unusual_supplier_balances
+#, fuzzy
 msgid "Investigate Unusual Supplier Balances"
-msgstr ""
+msgstr "Preveri nenavadna salda dobaviteljev"
 
 #. module: account_reports
 #. odoo-javascript
@@ -3582,6 +4075,12 @@ msgid "Is Completed"
 msgstr "Je zaključeno"
 
 #. module: account_reports
+#: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__is_create_disabled
+#, fuzzy
+msgid "Is Create Disabled"
+msgstr "Ali je ustvarjanje onemogočeno"
+
+#. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__message_is_follower
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__message_is_follower
 msgid "Is Follower"
@@ -3589,36 +4088,48 @@ msgstr "Je sledilec"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__is_main_company_active
+#, fuzzy
 msgid "Is Main Company Active"
-msgstr ""
+msgstr "Je glavna družba aktivna"
+
+#. module: account_reports
+#: model:ir.model.fields,field_description:account_reports.field_account_return_type__is_master_data
+#, fuzzy
+msgid "Is Master Data"
+msgstr "Je glavni vir"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_payment_wizard__is_recoverable
 #: model:ir.model.fields,field_description:account_reports.field_qr_code_payment_wizard__is_recoverable
+#, fuzzy
 msgid "Is Recoverable"
-msgstr ""
+msgstr "Je izterljiv"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__is_report_set
+#, fuzzy
 msgid "Is Report Set"
-msgstr ""
+msgstr "Je poročilo nastavljeno"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__is_tax_return
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__is_tax_return_type
+#, fuzzy
 msgid "Is a Tax Return Return Type"
-msgstr ""
+msgstr "Je tip davčne napovedi"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__is_ec_sales_list_return
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__is_ec_sales_list_return_type
+#, fuzzy
 msgid "Is an EC Sales List Return Type"
-msgstr ""
+msgstr "Je vrsta vračila seznama prodaje EC"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__unresolved_check_count
+#, fuzzy
 msgid "Issues"
-msgstr ""
+msgstr "Težave"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_budget__item_ids
@@ -3706,8 +4217,9 @@ msgstr "Dnevniki:"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_kpi_provider
+#, fuzzy
 msgid "KPI Provider"
-msgstr ""
+msgstr "Ponudnik KPI"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_liabilities_view0
@@ -3735,13 +4247,15 @@ msgstr "Jezik"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.pdf_export_main_table_header
+#, fuzzy
 msgid "Last Comment"
-msgstr ""
+msgstr "Zadnji komentar"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__last_message
+#, fuzzy
 msgid "Last Message"
-msgstr ""
+msgstr "Zadnje sporočilo"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_reports_journal_dashboard_kanban_view
@@ -3815,13 +4329,21 @@ msgstr "Pozneje"
 
 #. module: account_reports
 #: model:ir.ui.menu,name:account_reports.account_reports_audit_menu
+#, fuzzy
 msgid "Ledgers"
-msgstr ""
+msgstr "Knjižne knjige"
+
+#. module: account_reports
+#: model:account.return.check.template,name:account_reports.account_return_check_template_legal_reserve_and_dividend_eligibility
+#, fuzzy
+msgid "Legal reserve and dividend eligibility"
+msgstr "Zakonski rezervni sklad in upravičenost do dividend"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_allocations_withdrawals0
+#, fuzzy
 msgid "Less Allocations and Plus Withdrawals"
-msgstr ""
+msgstr "Manj alokacij in več umikov"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_cost_sales0
@@ -3867,8 +4389,9 @@ msgstr "Nalaganje …"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__date_lock
+#, fuzzy
 msgid "Lock Date"
-msgstr ""
+msgstr "Datum zaklepanja"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.company_information
@@ -3896,6 +4419,16 @@ msgid "Main Company"
 msgstr "Glavno podjetje"
 
 #. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
+msgid ""
+"Main company must be provided if start_day and start_month are not provided"
+msgstr ""
+"Glavna družba mora biti podana, če vrednosti start_day in start_month nista "
+"podani"
+
+#. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_tax_unit__main_company_id
 msgid ""
 "Main company of this unit; the one actually reporting and paying the taxes."
@@ -3911,8 +4444,10 @@ msgstr "Vnesite prilagoditev"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Make sure the \"Reverse Charge\" mention appears on all invoices."
 msgstr ""
+"Prepričajte se, da je na vseh računih navedena omemba \"Reverse Charge\"."
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_report_file_download_error_wizard
@@ -3927,8 +4462,9 @@ msgstr "Ročno"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Manual Adjustments"
-msgstr ""
+msgstr "Ročne prilagoditve"
 
 #. module: account_reports
 #. odoo-python
@@ -3944,13 +4480,15 @@ msgstr "Ročne vrednosti"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__manually_created
+#, fuzzy
 msgid "Manually Created"
-msgstr ""
+msgstr "Ročno ustvarjeno"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.return_generic_payment_wizard_form
+#, fuzzy
 msgid "Mark Paid"
-msgstr ""
+msgstr "Označi kot plačano"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_kanban_view
@@ -3960,13 +4498,15 @@ msgstr "Označi kot dokončano"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.return_submission_wizard_form
+#, fuzzy
 msgid "Mark as Submitted"
-msgstr ""
+msgstr "Označi kot oddano"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_marketable_securities_review
+#, fuzzy
 msgid "Marketable Securities Review"
-msgstr ""
+msgstr "Pregled tržljivih vrednostnih papirjev"
 
 #. module: account_reports
 #: model:account.report.column,name:account_reports.partner_ledger_report_matching_number
@@ -4008,6 +4548,18 @@ msgid "Method '%(method_name)s' must start with the '%(prefix)s' prefix."
 msgstr "Metoda '%(method_name)s' se mora začeti  z '%(prefix)s' predpono."
 
 #. module: account_reports
+#: model:account.return.check.template,name:account_reports.account_return_check_template_minimum_share_capital_compliance
+#, fuzzy
+msgid "Minimum share capital compliance"
+msgstr "Skladnost z minimalnim osnovnim kapitalom"
+
+#. module: account_reports
+#: model:account.return.check.template,name:account_reports.account_return_check_template_minutes_of_the_agm_on_profit_allocation
+#, fuzzy
+msgid "Minutes of the AGM on profit allocation"
+msgstr "Zapisnik letne skupščine o razdelitvi dobička"
+
+#. module: account_reports
 #: model:account.report.line,name:account_reports.misc_operations
 msgid "Misc. operations"
 msgstr "Razne operacije"
@@ -4015,18 +4567,22 @@ msgstr "Razne operacije"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Missing"
-msgstr ""
+msgstr "Manjka"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "Missing company details (like VAT number or country) can cause errors in "
-"your report,\n"
-"such as using the wrong VAT rate, wrongly exempting transactions.\n"
-"                "
+"your report, such as using the wrong VAT rate, wrongly exempting "
+"transactions."
 msgstr ""
+"Manjkajoči podatki o podjetju (npr. davčna številka DDV ali država) lahko "
+"povzročijo napake v vašem poročilu, kot so uporaba napačne stopnje DDV, "
+"napačno oproščanje transakcij."
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__mode
@@ -4039,6 +4595,12 @@ msgstr "Način"
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__model
 msgid "Model"
 msgstr "Model"
+
+#. module: account_reports
+#: model:ir.model,name:account_reports.model_ir_module_module
+#, fuzzy
+msgid "Module"
+msgstr "Modul"
 
 #. module: account_reports
 #. odoo-javascript
@@ -4108,6 +4670,7 @@ msgstr ""
 #. module: account_reports
 #. odoo-javascript
 #. odoo-python
+#: code:addons/account_reports/models/account_general_ledger.py:0
 #: code:addons/account_reports/models/account_journal_report.py:0
 #: code:addons/account_reports/static/src/components/journal_report/line/line.xml:0
 #: model:account.report.line,name:account_reports.journal_report_line
@@ -4128,8 +4691,9 @@ msgstr "Naziv"
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_audit_balance_clickable_char_field.js:0
+#, fuzzy
 msgid "Name of the function to call when the cell value is clicked."
-msgstr ""
+msgstr "Ime funkcije, ki se pokliče ob kliku na vrednost celice."
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_reports_export_wizard__doc_name
@@ -4144,8 +4708,9 @@ msgstr "Neto dobiček"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_net_profit_after_allocations0
+#, fuzzy
 msgid "Net Profit Left After Allocations and Withdrawals"
-msgstr ""
+msgstr "Neto dobiček po alokacijah in umikih"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_net_assets0
@@ -4193,8 +4758,9 @@ msgstr "Tip naslednje aktivnosti"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__next_state
+#, fuzzy
 msgid "Next State"
-msgstr ""
+msgstr "Naslednje stanje"
 
 #. module: account_reports
 #. odoo-javascript
@@ -4213,8 +4779,9 @@ msgstr "Brez primerjave"
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/partner_ledger_followup/header.xml:0
+#, fuzzy
 msgid "No Follow-Up"
-msgstr ""
+msgstr "Brez opominjanja"
 
 #. module: account_reports
 #. odoo-python
@@ -4224,13 +4791,15 @@ msgstr "Brez dnevnika"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_no_negative_petty_cash_balances
+#, fuzzy
 msgid "No Negative Petty Cash Balances"
-msgstr ""
+msgstr "Brez negativnih stanj drobne blagajne"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_no_unjustified_cash_payments_to_supplier
+#, fuzzy
 msgid "No Unjustified Cash Payments to Suppliers"
-msgstr ""
+msgstr "Brez neupravičenih gotovinskih plačil dobaviteljem"
 
 #. module: account_reports
 #. odoo-python
@@ -4254,8 +4823,9 @@ msgstr "Ni podatkov za prikaz!"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "No draft entries"
-msgstr ""
+msgstr "Brez osnutkov vnosov"
 
 #. module: account_reports
 #. odoo-python
@@ -4298,8 +4868,9 @@ msgstr "Neodbitno"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_non_recoverable_vat_gross_accounting
+#, fuzzy
 msgid "Non-recoverable VAT: gross accounting"
-msgstr ""
+msgstr "Nevračljiv DDV: bruto knjigovodstvo"
 
 #. module: account_reports
 #. odoo-javascript
@@ -4354,15 +4925,19 @@ msgstr "ZUNAJ BILANČNI RAČUNI"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_obtain_signed_inventory_valuation
+#, fuzzy
 msgid ""
 "Obtain a detailed physical inventory, valued and signed by the company "
 "manager."
 msgstr ""
+"Pridobite podroben fizični popis zaloge, ovrednoten in podpisan s strani "
+"direktorja podjetja."
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_obtain_signed_inventory_valuation
+#, fuzzy
 msgid "Obtain signed inventory valuation"
-msgstr ""
+msgstr "Pridobi podpisano vrednotenje zaloge"
 
 #. module: account_reports
 #. odoo-javascript
@@ -4374,11 +4949,15 @@ msgstr "Odoo opozorilo"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "Odoo manages your deferred entries automatically. No deferred entries were "
 "found for this period. Ensure your start and end dates are correctly set on "
 "your bills and invoices."
 msgstr ""
+"Odoo samodejno upravlja vaše odložene vnose. Za to obdobje ni bilo najdenih "
+"odloženih vnosov. Prepričajte se, da so začetni in končni datumi pravilno "
+"nastavljeni na vaših prejetih in izdanih računih."
 
 #. module: account_reports
 #: model:account.report.column,name:account_reports.aged_payable_report_period5
@@ -4389,8 +4968,9 @@ msgstr "Starejši"
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_return/widgets/account_audit_balance_clickable_char_field.js:0
+#, fuzzy
 msgid "OnClick Handler"
-msgstr ""
+msgstr "Obdelovalnik dogodka ob kliku"
 
 #. module: account_reports
 #. odoo-python
@@ -4407,38 +4987,51 @@ msgstr "V teku"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
+msgid "Only an Accountant can delete a return."
+msgstr "Samo računovodja lahko izbriše vračilo."
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Only an Accounting Administrator can reset a return"
-msgstr ""
+msgstr "Samo računovodski skrbnik lahko ponastavi vračilo"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Only an Accounting Administrator can reset a tax return"
-msgstr ""
+msgstr "Davčno napoved lahko ponastavi samo računovodski skrbnik"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Only an Accounting Administrator can reset an annual closing"
-msgstr ""
+msgstr "Samo računovodski skrbnik lahko ponastavi letno zaprtje"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Only an accounting administrator can set/unset a supervisor."
-msgstr ""
+msgstr "Samo računovodski skrbnik lahko nastavi/odstrani nadzornika."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
-msgid "Only business customers"
-msgstr ""
-
-#. module: account_reports
-#. odoo-python
-#: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Only intra-EU customers"
-msgstr ""
+msgstr "Samo kupci znotraj EU"
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
+msgid "Only manually created returns in 'new' state can be deleted."
+msgstr "Samo ročno ustvarjena vračila v stanju 'new' se lahko izbrišejo."
 
 #. module: account_reports
 #: model:ir.actions.server,name:account_reports.action_account_reports_customer_statements
@@ -4453,8 +5046,10 @@ msgstr "Odpri dokument"
 
 #. module: account_reports
 #: model:ir.actions.server,name:account_reports.action_server_open_view_account_return
+#: model:ir.actions.server,name:account_reports.action_server_open_view_account_return_with_additional_params
+#, fuzzy
 msgid "Open Tax Return"
-msgstr ""
+msgstr "Odpri davčno napoved"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_financial_year_op
@@ -4463,8 +5058,9 @@ msgstr "Začetno stanje finančnega leta"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_operating_expenses_review
+#, fuzzy
 msgid "Operating Expenses Review"
-msgstr ""
+msgstr "Pregled obratovalnih stroškov"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_operating_income0
@@ -4474,8 +5070,9 @@ msgstr "Poslovni izid (ali izguba)"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__operating_expenses
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__operating_expenses
+#, fuzzy
 msgid "Operating expenses"
-msgstr ""
+msgstr "Obratovalni stroški"
 
 #. module: account_reports
 #. odoo-javascript
@@ -4505,8 +5102,9 @@ msgstr "Neporavnani računi/plačila"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_outstanding_checks
+#, fuzzy
 msgid "Outstanding checks"
-msgstr ""
+msgstr "Neporavnani čeki"
 
 #. module: account_reports
 #. odoo-python
@@ -4517,19 +5115,22 @@ msgstr "Zapadlo"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Overdue payables"
-msgstr ""
+msgstr "Zapadle obveznosti"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Overdue receivables"
-msgstr ""
+msgstr "Zapadle terjatve"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return_check_template__action_id
+#, fuzzy
 msgid "Overrides the default action based on the model and domain."
-msgstr ""
+msgstr "Preglasi privzeto dejanje na podlagi modela in domene."
 
 #. module: account_reports
 #. odoo-python
@@ -4559,8 +5160,9 @@ msgstr "Partner"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_payment_wizard__partner_bank_id
 #: model:ir.model.fields,field_description:account_reports.field_qr_code_payment_wizard__partner_bank_id
+#, fuzzy
 msgid "Partner Bank"
-msgstr ""
+msgstr "Partnerjeva banka"
 
 #. module: account_reports
 #. odoo-python
@@ -4616,8 +5218,9 @@ msgstr "Kategorije partnerjev:"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Partners in Wrong Country"
-msgstr ""
+msgstr "Partnerji v napačni državi"
 
 #. module: account_reports
 #. odoo-python
@@ -4628,8 +5231,9 @@ msgstr "Partnerji s podvojenimi številkami za DDV"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Partners without VAT"
-msgstr ""
+msgstr "Partnerji brez davčnih številk"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.pdf_export_filters
@@ -4644,8 +5248,9 @@ msgstr "Opravljeno"
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__audit_status__paused
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
+#, fuzzy
 msgid "Paused"
-msgstr ""
+msgstr "Premor"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_only_pay__paid
@@ -4677,8 +5282,9 @@ msgstr "Obveznosti"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_payables_settlement
+#, fuzzy
 msgid "Payables Settlement"
-msgstr ""
+msgstr "Poravnava obveznosti"
 
 #. module: account_reports
 #. odoo-python
@@ -4688,13 +5294,15 @@ msgstr "Plačilo"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__payment_partner_id
+#, fuzzy
 msgid "Payment Partner"
-msgstr ""
+msgstr "Plačilni partner"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_type__payment_partner_bank_id
+#, fuzzy
 msgid "Payment Partner Bank"
-msgstr ""
+msgstr "Banka plačilnega partnerja"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__model__account_payment
@@ -4744,13 +5352,15 @@ msgstr "4. obdobje"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__period_amount_to_pay
+#, fuzzy
 msgid "Period Amount To Pay"
-msgstr ""
+msgstr "Znesek za plačilo v obdobju"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_audit_period_events
+#, fuzzy
 msgid "Period Events"
-msgstr ""
+msgstr "Dogodki obdobja"
 
 #. module: account_reports
 #. odoo-python
@@ -4838,8 +5448,9 @@ msgstr "Prosimo, nastavite odloženi dnevnik v računovodskih nastavitvah."
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Please specify the accounts necessary for the tax closing entry."
-msgstr ""
+msgstr "Prosimo, določite račune, ki so potrebni za knjižbo davčnega zaprtja."
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_fixed_assets_view0
@@ -4879,11 +5490,25 @@ msgid "Posted Entries"
 msgstr "Knjižene postavke"
 
 #. module: account_reports
+#: model:account.return.check.template,description:account_reports.account_return_check_template_risk_provisioning_and_provision_movement_schedule
+#, fuzzy
+msgid ""
+"Prepare a detailed provision schedule and ensure all risks are identified "
+"and properly provisioned."
+msgstr ""
+"Pripravite podroben načrt gibanja rezervacij in poskrbite, da so vsa "
+"tveganja identificirana in pravilno rezervirana."
+
+#. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_subsidaries_and_investments_summary
+#, fuzzy
 msgid ""
 "Prepare a summary of subsidiaries and investments including ownership "
 "percentages, acquisition values, net equity, earnings, and dividends paid."
 msgstr ""
+"Pripravite povzetek hčerinskih družb in naložb, vključno z odstotki "
+"lastništva, nabavnimi vrednostmi, neto kapitalom, dobičkom in izplačanimi "
+"dividendami."
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_prepayements0
@@ -4920,25 +5545,15 @@ msgid "Previous Years"
 msgstr "Prejšnja leta"
 
 #. module: account_reports
-#: model:account.report.line,name:account_reports.account_financial_retained_earnings_line_2
-msgid "Previous Years Retained Earnings"
-msgstr "Zadržani dobiček iz prejšnjih let"
-
-#. module: account_reports
-#: model:account.report.line,name:account_reports.account_financial_previous_year_earnings0
-msgid "Previous Years Unallocated Earnings"
-msgstr "Nerazporejeni dobički iz prejšnjih let"
+#: model:account.report.line,name:account_reports.account_financial_report_previous_years_earnings
+#, fuzzy
+msgid "Previous Years Earnings"
+msgstr "Dobiček prejšnjih let"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_report_send_form
 msgid "Print & Send"
 msgstr "Natisni in pošlji"
-
-#. module: account_reports
-#. odoo-python
-#: code:addons/account_reports/models/account_return.py:0
-msgid "Private Customers"
-msgstr ""
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_multicurrency_revaluation_wizard
@@ -4981,8 +5596,9 @@ msgstr "Zagotovitev za %(for_cur)s (1 %(comp_cur)s = %(rate)s %(for_cur)s)"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_provision_for_impairment
+#, fuzzy
 msgid "Provision for Impairment"
-msgstr ""
+msgstr "Rezerva za oslabitev vrednosti"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__purchases
@@ -4992,8 +5608,9 @@ msgstr "Nabava"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_qr_code_payment_wizard__qr_code
+#, fuzzy
 msgid "Qr Code"
-msgstr ""
+msgstr "QR Koda"
 
 #. module: account_reports
 #. odoo-javascript
@@ -5048,24 +5665,47 @@ msgstr "Prejemniki"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_deferred_reports.py:0
+#, fuzzy
 msgid "Recognized"
-msgstr ""
+msgstr "Priznano"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Reconcile all bank account transactions up to year-end."
+msgstr "Uskladite vse transakcije bančnega računa do konca leta."
+
+#. module: account_reports
+#: model:account.return.check.template,description:account_reports.account_return_check_template_reconcile_payable_with_fillings
+#, fuzzy
+msgid ""
+"Reconcile all tax-related payables with the latest official filings.\n"
+"Analyze discrepancies, verify post-period payments, and document the status "
+"of any unresolved amounts or ongoing disputes."
 msgstr ""
+"Uskladite vse davčno povezane obveznosti z najnovejšimi uradnimi "
+"predložitvami.\n"
+"Preverite odstopanja, preverite plačila po obračunskem obdobju in "
+"dokumentirajte stanje morebitnih nerešenih zneskov ali tekočih sporov."
+
+#. module: account_reports
+#: model:account.return.check.template,name:account_reports.account_return_check_template_reconcile_payable_with_fillings
+#, fuzzy
+msgid "Reconcile tax payables with tax filings"
+msgstr "Uskladi davčne obveznosti z davčnimi oddajami"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__records_count
+#, fuzzy
 msgid "Records Count"
-msgstr ""
+msgstr "Število zapisov"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__records_name
+#, fuzzy
 msgid "Records Name"
-msgstr ""
+msgstr "Naziv zapisov"
 
 #. module: account_reports
 #. odoo-javascript
@@ -5075,24 +5715,33 @@ msgstr "Osvežite"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__refresh_result
+#, fuzzy
 msgid "Refresh Result"
-msgstr ""
+msgstr "Osvežitev rezultata"
 
 #. module: account_reports
 #: model:ir.ui.menu,name:account_reports.account_audit_regularization_entries_menu
+#, fuzzy
 msgid "Regularization Entries"
-msgstr ""
+msgstr "Regularizacijski vnosi"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__regulatory_compliance
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__regulatory_compliance
+#, fuzzy
 msgid "Regulatory compliance"
-msgstr ""
+msgstr "Skladnost s predpisi"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_year_op__account_return_reminder_day
 msgid "Reminder"
 msgstr "Opomnik"
+
+#. module: account_reports
+#: model:mail.template,subject:account_reports.email_template_tax_return_deadline
+#, fuzzy
+msgid "Reminder: Upcoming {{ object.name }} Deadline - Action Required"
+msgstr "Opomnik: Bližajoč se rok {{ object.name }} - Zahtevano ukrepanje"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__account_report_id
@@ -5114,13 +5763,25 @@ msgstr "Naziv poročila"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__report_opened_once
+#, fuzzy
 msgid "Report Opened Once"
-msgstr ""
+msgstr "Poročilo odprto enkrat"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__report_options
 msgid "Report Options"
 msgstr "Možnosti poročila"
+
+#. module: account_reports
+#. odoo-javascript
+#: code:addons/account_reports/static/src/components/account_report/warnings.xml:0
+#, fuzzy
+msgid ""
+"Report is being loaded in the background. Presented data were cached and may "
+"not be accurate."
+msgstr ""
+"Poročilo se nalaga v ozadju. Predstavljeni podatki so bili predpomnjeni in "
+"morda niso točni."
 
 #. module: account_reports
 #. odoo-python
@@ -5157,13 +5818,16 @@ msgstr "Odgovorni uporabnik"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__result
+#, fuzzy
 msgid "Result"
-msgstr ""
+msgstr "Rezultat"
 
 #. module: account_reports
-#: model:account.report.line,name:account_reports.account_financial_retained_earnings0
-msgid "Retained Earnings"
-msgstr "Zadržani dobiček"
+#. odoo-python
+#: code:addons/account_reports/models/account_report.py:0
+#, fuzzy
+msgid "Result Brought Forward"
+msgstr "Preneseni rezultat"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_payment_wizard__return_id
@@ -5175,30 +5839,35 @@ msgstr "Vrni"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Return Completed"
-msgstr ""
+msgstr "Vrnitev zaključena"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__return_name
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_type_list_view
+#, fuzzy
 msgid "Return Name"
-msgstr ""
+msgstr "Naziv vračila"
 
 #. module: account_reports
 #. odoo-javascript
 #: code:addons/account_reports/static/src/components/account_report/filters/filter_date.xml:0
+#, fuzzy
 msgid "Return Period"
-msgstr ""
+msgstr "Obdobje vračila"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__return_state
+#, fuzzy
 msgid "Return State"
-msgstr ""
+msgstr "Stanje vračila"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__state
+#, fuzzy
 msgid "Return State To Check For"
-msgstr ""
+msgstr "Stanje vračila za preverjanje"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__type_id
@@ -5206,19 +5875,21 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
 msgid "Return Type"
-msgstr "Vrsta vračila"
+msgstr "Vrsta napovedi"
 
 #. module: account_reports
 #: model:ir.actions.act_window,name:account_reports.action_view_account_return_types
 #: model:ir.model.fields,field_description:account_reports.field_account_report__return_type_ids
 #: model:ir.ui.menu,name:account_reports.menu_action_return_types
+#, fuzzy
 msgid "Return Types"
-msgstr ""
+msgstr "Vrste vračil"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_return_creation_wizard
+#, fuzzy
 msgid "Return creation wizard"
-msgstr ""
+msgstr "Čarovnik za ustvarjanje vračila"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_return_investment0
@@ -5227,29 +5898,33 @@ msgstr "Donosnost naložb (čisti dobiček / sredstva)"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_return_submission_wizard
+#, fuzzy
 msgid "Return submission wizard"
-msgstr ""
+msgstr "Čarovnik za oddajo vračila"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
+#, fuzzy
 msgid "Return type"
-msgstr ""
+msgstr "Vrsta vračila"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_template_search_view
+#, fuzzy
 msgid "Return/Audit"
-msgstr ""
+msgstr "Napoved/Revizija"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "Returns"
-msgstr "Vračila"
+msgstr "Napovedi"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_return_payment_wizard
+#, fuzzy
 msgid "Returns Generic Payment Wizard"
-msgstr ""
+msgstr "Čarovnik za splošno vračilo plačila"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_income0
@@ -5259,8 +5934,9 @@ msgstr "Prihodek"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_revenue_receivables_review
+#, fuzzy
 msgid "Revenue & receivables Review"
-msgstr ""
+msgstr "Pregled prihodkov in terjatev"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_multicurrency_revaluation_wizard__reversal_date
@@ -5284,8 +5960,9 @@ msgstr "Obrnjen od: %s"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Reverse charge mention"
-msgstr ""
+msgstr "Omenitev obrnjene obdavčitve"
 
 #. module: account_reports
 #. odoo-javascript
@@ -5299,106 +5976,157 @@ msgstr "Pregled"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_foreign_exchange_differences
+#, fuzzy
 msgid ""
 "Review FX rates used at year-end, compare with prior year, and verify "
 "appropriate recognition and presentation of currency adjustments."
 msgstr ""
+"Preglejte tečaje tujih valut, uporabljene ob koncu leta, jih primerjajte s "
+"preteklim letom in preverite ustrezno priznavanje ter prikaz valutnih "
+"prilagoditev."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "Review and post draft invoices and bills in the period, or change their "
 "accounting date."
 msgstr ""
+"Preglejte in knjižite osnutke računov in račune dobaviteljev v obdobju ali "
+"spremenite njihov računovodski datum."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "Review and post draft invoices, bills and entries in the period, or change "
 "their accounting date."
 msgstr ""
+"Preglejte in knjižite osnutke računov, dobaviteljske račune in vnose v "
+"obdobju, ali spremenite njihov računovodski datum."
+
+#. module: account_reports
+#: model:account.return.check.template,description:account_reports.account_return_check_template_foreign_operations
+#, fuzzy
+msgid ""
+"Review and reconcile intra-EU and international (export/import) operations "
+"for compliance and completeness."
+msgstr ""
+"Preglejte in uskladite transakcije znotraj EU in mednarodne (izvoz/uvoz) "
+"operacije za skladnost in popolnost."
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_review_for_capitalizable_expenses
+#, fuzzy
 msgid "Review for capitalizable expenses"
-msgstr ""
+msgstr "Pregled kapitalizabilnih stroškov"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_review_of_guaranteed
+#, fuzzy
 msgid "Review of Guarantees"
-msgstr ""
+msgstr "Pregled garancij"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "Review overdue payables aged over 60 days and assess the need for an "
 "allowance for uncertain liabilities."
 msgstr ""
+"Preglejte zapadle obveznosti, stare več kot 60 dni, in ocenite potrebo po "
+"rezervi za negotove obveznosti."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "Review overdue receivables aged over 60 days and assess the need for an "
 "allowance for doubtful accounts or expected credit loss provision, as per "
 "IFRS 9 guidelines."
 msgstr ""
+"Preglejte zapadle terjatve, starejše od 60 dni, in ocenite potrebo po "
+"rezervi za dvomljive terjatve ali rezervi za pričakovano kreditno izgubo v "
+"skladu z navodili IFRS 9."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Review payables without a partner."
-msgstr ""
+msgstr "Preglejte obveznosti brez partnerja."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_no_negative_petty_cash_balances
+#, fuzzy
 msgid ""
 "Review petty cash accounts to ensure they do not have credit balances. "
 "Investigate and justify any anomalies."
 msgstr ""
+"Preverite konta drobne blagajne, da nimajo kreditnih stanj. Raziščite in "
+"utemeljite morebitna odstopanja."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Review receivables without a partner."
-msgstr ""
+msgstr "Preglejte terjatve brez partnerja."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_year_end_revenue_cutoff_analysis
+#, fuzzy
 msgid ""
 "Review the sales recorded in the final month of the period, identify any "
 "services delivered in the next period, estimate the revenue that should be "
 "recognized later (accrued income), and document how this was determined."
 msgstr ""
+"Preglejte prodaje, zabeležene v zadnjem mesecu obdobja, določite morebitne "
+"storitve, opravljene v naslednjem obdobju, ocenite prihodke, ki naj bi bili "
+"priznani pozneje (pripisani prihodki), in dokumentirajte, kako je bilo to "
+"določeno."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "Review the tax code and ensure each transaction is correctly classified as a "
 "supply of goods or services."
 msgstr ""
+"Preverite davčno kodo in zagotovite, da je vsaka transakcija pravilno "
+"razvrščena kot dobava blaga ali storitev."
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__states_workflow__generic_state_review_submit
+#, fuzzy
 msgid "Review, Submit"
-msgstr ""
+msgstr "Pregled, oddaja"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_type__states_workflow__generic_state_tax_report
+#, fuzzy
 msgid "Review, Submit, Pay"
-msgstr ""
+msgstr "Pregled, Oddaja, Plačilo"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_account__audit_status__reviewed
 #: model:ir.model.fields.selection,name:account_reports.selection__account_audit_account_status__status__reviewed
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__result__reviewed
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_search_view
+#, fuzzy
 msgid "Reviewed"
-msgstr ""
+msgstr "Pregledano"
+
+#. module: account_reports
+#: model:account.return.check.template,name:account_reports.account_return_check_template_risk_provisioning_and_provision_movement_schedule
+#, fuzzy
+msgid "Risk provisioning and provision movement schedule"
+msgstr "Določanje rezervacij za tveganja in pregled gibanja rezervacij"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_account_report_search
@@ -5468,8 +6196,9 @@ msgstr "Pošlji"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_followup_report.py:0
+#, fuzzy
 msgid "Send %s Follow Up Report"
-msgstr ""
+msgstr "Pošlji %s poročilo o opominih"
 
 #. module: account_reports
 #. odoo-python
@@ -5485,8 +6214,9 @@ msgstr "Pošlji in natisni vrednosti"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_followup_report.py:0
+#, fuzzy
 msgid "Send Follow Up Reports"
-msgstr ""
+msgstr "Pošlji poročila o opominih"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__send_mail_readonly
@@ -5523,8 +6253,9 @@ msgstr "Storitve"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_journal_report_audit_move_line_tree
+#, fuzzy
 msgid "Set as Reviewed"
-msgstr ""
+msgstr "Označi kot pregledano"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.duplicated_vat_partner_tree_view
@@ -5539,8 +6270,9 @@ msgstr "Določanje podatkov o družbi"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_settlement_in_subsequent_period
+#, fuzzy
 msgid "Settlement in Subsequent Period"
-msgstr ""
+msgstr "Poravnava v naslednjem obdobju"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.account_financial_report_executivesummary_st_cash_forecast0
@@ -5561,13 +6293,21 @@ msgstr "Prikaži vse račune"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__show_amount_to_pay
+#, fuzzy
 msgid "Show Amount To Pay"
-msgstr ""
+msgstr "Prikaži znesek za plačilo"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__show_companies
+#, fuzzy
 msgid "Show Companies"
-msgstr ""
+msgstr "Prikaži podjetja"
+
+#. module: account_reports
+#: model:ir.model.fields,field_description:account_reports.field_account_return__show_companies_mismatch_warning
+#, fuzzy
+msgid "Show Companies Mismatch Warning"
+msgstr "Prikaži opozorilo o neusklajenosti podjetij"
 
 #. module: account_reports
 #. odoo-javascript
@@ -5577,13 +6317,15 @@ msgstr "Prikaži valuto"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__show_submit_button
+#, fuzzy
 msgid "Show Submit Button"
-msgstr ""
+msgstr "Prikaži gumb za oddajo"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__show_warning_existing_return
+#, fuzzy
 msgid "Show Warning Existing Return"
-msgstr ""
+msgstr "Prikaži opozorilo o obstoječem vračilu"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_multicurrency_revaluation_wizard__show_warning_move_id
@@ -5591,15 +6333,24 @@ msgid "Show Warning Move"
 msgstr "Prikaži opozorilo o premikanju"
 
 #. module: account_reports
+#: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__show_warning_overlap
+#, fuzzy
+msgid "Show Warning Overlap"
+msgstr "Prikaži opozorilo o prekrivanju"
+
+#. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__show_warning_wrong_dates
+#, fuzzy
 msgid "Show Warning Wrong Dates"
-msgstr ""
+msgstr "Prikaži opozorilo napačnih datumov"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_search_view
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_search_view
+#, fuzzy
 msgid "Show all records whose next activity date is past"
 msgstr ""
+"Prikaži vse zapise, pri katerih je datum naslednje aktivnosti že pretekel"
 
 #. module: account_reports
 #. odoo-javascript
@@ -5614,8 +6365,9 @@ msgstr "En sam prejemnik"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__skipped_check_cycles
+#, fuzzy
 msgid "Skipped Check Cycles"
-msgstr ""
+msgstr "Preskočeni cikli preverjanja"
 
 #. module: account_reports
 #. odoo-javascript
@@ -5626,9 +6378,12 @@ msgstr "Nekateri"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "Some checks fail in the current stage, please solve them before proceeding."
 msgstr ""
+"Nekatera preverjanja v trenutni fazi ne uspejo, prosimo, jih odpravite pred "
+"nadaljevanjem."
 
 #. module: account_reports
 #. odoo-javascript
@@ -5641,6 +6396,18 @@ msgstr "Nekatere postavke dnevnika kažejo na zastarele vrstice poročila."
 #: code:addons/account_reports/static/src/components/sales_report/warnings.xml:0
 msgid "Some partners"
 msgstr "Nekateri partnerji"
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
+msgid ""
+"Somes returns made for return type '%s' keep an inconsistent state after "
+"changing the workflow. This likely comes from a missing upgrade script."
+msgstr ""
+"Nekateri obračuni, ustvarjeni za vrsto obračuna '%s', po spremembi delovnega "
+"toka ostajajo v neskladnem stanju. To je verjetno posledica manjkajoče "
+"skripte za nadgradnjo."
 
 #. module: account_reports
 #. odoo-javascript
@@ -5671,8 +6438,9 @@ msgstr "Začetni datum"
 
 #. module: account_reports
 #: model:ir.actions.act_window,name:account_reports.action_create_account_audit
+#, fuzzy
 msgid "Start an Audit"
-msgstr ""
+msgstr "Začni revizijo"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_res_company__account_return_reminder_day
@@ -5688,7 +6456,7 @@ msgstr "Začetno stanje"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__state
 msgid "State"
-msgstr "Zvezna država ali regija"
+msgstr "Stanje"
 
 #. module: account_reports
 #. odoo-javascript
@@ -5744,14 +6512,16 @@ msgstr "Zadeva..."
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__date_submission
+#, fuzzy
 msgid "Submission Date"
-msgstr ""
+msgstr "Datum oddaje"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/wizard/return_submission_wizard.py:0
+#, fuzzy
 msgid "Submission Instructions"
-msgstr ""
+msgstr "Navodila za oddajo"
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return__generic_state_review_submit__submitted
@@ -5763,27 +6533,31 @@ msgstr "Pošlji"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_subsidaries_and_investments_summary
+#, fuzzy
 msgid "Subsidiaries and investments summary"
-msgstr ""
+msgstr "Povzetek podružnic in naložb"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_audit_assets_listing
 #: model:account.return.check.template,description:account_reports.account_return_check_template_audit_period_events
+#, fuzzy
 msgid "Summarize main events that occurs in this fiscal period."
-msgstr ""
+msgstr "Povzemite glavne dogodke, ki se zgodijo v tem fiskalnem obdobju."
 
 #. module: account_reports
 #: model:ir.model.fields.selection,name:account_reports.selection__account_account__audit_status__supervised
 #: model:ir.model.fields.selection,name:account_reports.selection__account_audit_account_status__status__supervised
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check__result__supervised
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_check_search_view
+#, fuzzy
 msgid "Supervised"
-msgstr ""
+msgstr "Nadzorovano"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check__supervisor_id
+#, fuzzy
 msgid "Supervised By"
-msgstr ""
+msgstr "Nadzoroval"
 
 #. module: account_reports
 #. odoo-python
@@ -5836,8 +6610,9 @@ msgstr "Prilagoditev plačanega davka"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.setup_financial_year_opening_form
+#, fuzzy
 msgid "Tax Periodicity"
-msgstr ""
+msgstr "Davčna periodičnost"
 
 #. module: account_reports
 #. odoo-python
@@ -5867,23 +6642,31 @@ msgid "Tax Return"
 msgstr "Davčna napoved"
 
 #. module: account_reports
+#: model:mail.template,name:account_reports.email_template_tax_return_deadline
+#, fuzzy
+msgid "Tax Return Deadline"
+msgstr "Rok za oddajo davčne napovedi"
+
+#. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
 msgid "Tax Return Periodicity"
 msgstr "Periodičnost davčne napovedi"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_check_template__return_type
+#, fuzzy
 msgid "Tax Return/Audit"
-msgstr ""
+msgstr "Davčna napoved/revizija"
 
 #. module: account_reports
 #. odoo-python
-#: code:addons/account_reports/models/res_company.py:0
+#: code:addons/account_reports/models/account_chart_template.py:0
 #: code:addons/account_reports/models/res_users.py:0
 #: model:ir.ui.menu,name:account_reports.menu_action_account_return
 #: model_terms:ir.ui.view,arch_db:account_reports.account_reports_journal_dashboard_kanban_view
+#, fuzzy
 msgid "Tax Returns"
-msgstr ""
+msgstr "Davčne napovedi"
 
 #. module: account_reports
 #: model:ir.model,name:account_reports.model_account_tax_unit
@@ -5907,13 +6690,15 @@ msgstr "Davčne enote"
 
 #. module: account_reports
 #: model:mail.template,name:account_reports.email_template_generic_tax_instructions
+#, fuzzy
 msgid "Tax payment"
-msgstr ""
+msgstr "Plačilo davka"
 
 #. module: account_reports
 #: model:mail.template,subject:account_reports.email_template_generic_tax_instructions
+#, fuzzy
 msgid "Tax return payment instructions"
-msgstr ""
+msgstr "Navodila za plačilo davčne napovedi"
 
 #. module: account_reports
 #. odoo-python
@@ -5932,8 +6717,9 @@ msgstr "Uporabljeni davki"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Taxes and countries matching"
-msgstr ""
+msgstr "Ujemanje davkov in držav"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_tax_unit__fpos_synced
@@ -6005,8 +6791,9 @@ msgstr "Trenutno stanje v"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__generic_state_review
+#, fuzzy
 msgid "The default state for audit and custom generated return types"
-msgstr ""
+msgstr "Privzeto stanje za revizijske in po meri ustvarjene vrste vračil"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_tax_unit__vat
@@ -6022,39 +6809,49 @@ msgstr "Glavno podjetje davčne enote mora biti del nje."
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "The operation is refused as it would impact an already issued tax statement. "
 "Please change the following lock dates to proceed: %(lock_date_info)s."
 msgstr ""
+"Operacija je zavrnjena, ker bi vplivala na že izdano davčno napoved. Za "
+"nadaljevanje spremenite naslednje datume zaklepanja: %(lock_date_info)s."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "The return type country must be the same as the report country"
-msgstr ""
+msgstr "Država vrste vračila mora biti enaka državi poročila"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/wizard/return_creation_wizard.py:0
+#: model_terms:ir.ui.view,arch_db:account_reports.return_creation_wizard_form
+#, fuzzy
 msgid "The selected range doesn't match any fiscal period."
-msgstr ""
+msgstr "Izbrani obseg se ne ujema z nobenim davčnim obdobjem."
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__generic_state_tax_report
+#, fuzzy
 msgid "The state of the return for generic tax report flows"
-msgstr ""
+msgstr "Stanje vrnitve za splošne tokove davčnega poročila"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__generic_state_only_pay
+#, fuzzy
 msgid "The state of the return for report flows when only payment is needed"
-msgstr ""
+msgstr "Stanje vrnitve za poteke poročil, ko je potrebno samo plačilo"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__generic_state_review_submit
+#, fuzzy
 msgid ""
 "The state of the return for report flows when review and submission are "
 "needed"
 msgstr ""
+"Stanje prijave za poteke poročanja, ko je potreben pregled in predložitev"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_res_company__account_tax_unit_ids
@@ -6093,10 +6890,13 @@ msgstr "Za dane filtre ni podatkov za prikaz."
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_audit_empty_suspense_accounts
+#, fuzzy
 msgid ""
 "These accounts must be cleared regularly, as they represent unallocated or "
 "pending transactions."
 msgstr ""
+"Te konta je treba redno poravnavati, saj predstavljajo nedodeljene ali "
+"čakajoče transakcije."
 
 #. module: account_reports
 #. odoo-python
@@ -6303,26 +7103,30 @@ msgstr "Skupaj %s"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__total_amount_to_pay
+#, fuzzy
 msgid "Total Amount To Pay"
-msgstr ""
+msgstr "Skupni znesek za plačilo"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_general_ledger.py:0
+#, fuzzy
 msgid "Total General Ledger"
-msgstr ""
+msgstr "Skupna kartica glavne knjige"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Total Receivables"
-msgstr ""
+msgstr "Skupne terjatve"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Total payables"
-msgstr ""
+msgstr "Skupne obveznosti"
 
 #. module: account_reports
 #. odoo-javascript
@@ -6332,8 +7136,9 @@ msgstr "Trgovinski partnerji"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_trade_payables_analytical_review
+#, fuzzy
 msgid "Trade Payables Analytical Review"
-msgstr ""
+msgstr "Analitični pregled dobaviteljskih obveznosti"
 
 #. module: account_reports
 #: model:account.report.line,name:account_reports.transaction_without_statement
@@ -6343,8 +7148,9 @@ msgstr "Transakcije brez izpiska"
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return_creation_wizard__treasury_financing
 #: model:ir.model.fields.selection,name:account_reports.selection__account_return_check_template__cycle__treasury_financing
+#, fuzzy
 msgid "Treasury and financing"
-msgstr ""
+msgstr "Trezor in financiranje"
 
 #. module: account_reports
 #: model:account.report,name:account_reports.trial_balance_report
@@ -6410,18 +7216,14 @@ msgstr "Tip"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__type_external_id
+#, fuzzy
 msgid "Type External"
-msgstr ""
+msgstr "Zunanji tip"
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Vrsta dejavnosti izjeme na zapisu."
-
-#. module: account_reports
-#: model:account.report.line,name:account_reports.account_financial_unaffected_earnings0
-msgid "Unallocated Earnings"
-msgstr "Nerazporejeni zaslužki"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_audit_kanban_view
@@ -6434,12 +7236,6 @@ msgstr "Dearhiviraj"
 #: code:addons/account_reports/models/account_report.py:0
 msgid "Undefined"
 msgstr "Nedoločeno"
-
-#. module: account_reports
-#. odoo-python
-#: code:addons/account_reports/models/account_report.py:0
-msgid "Undistributed Profits/Losses"
-msgstr ""
 
 #. module: account_reports
 #. odoo-javascript
@@ -6474,8 +7270,9 @@ msgstr "Neznan datumski obseg: %s"
 
 #. module: account_reports
 #: model:ir.ui.menu,name:account_reports.menu_action_account_report_multicurrency_revaluation
+#, fuzzy
 msgid "Unrealized Currencies"
-msgstr ""
+msgstr "Nerealizirane valute"
 
 #. module: account_reports
 #: model:account.report,name:account_reports.multicurrency_revaluation_report
@@ -6511,8 +7308,10 @@ msgstr "To polje uporabite, če želite spremeniti DDV oznako."
 
 #. module: account_reports
 #: model:ir.model.fields,help:account_reports.field_account_return_type__deadline_start_date
+#, fuzzy
 msgid "Used to compute covered period based on the selected periodicity."
 msgstr ""
+"Uporabljeno za izračun pokritega obdobja glede na izbrano periodičnost."
 
 #. module: account_reports
 #: model:account.report.column,name:account_reports.account_financial_report_ec_sales_vat
@@ -6522,14 +7321,22 @@ msgstr "DDV številka"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "VAT Numbers"
-msgstr ""
+msgstr "DDV številke"
+
+#. module: account_reports
+#: model:account.return.check.template,name:account_reports.account_return_check_template_vat_rate_compliance
+#, fuzzy
+msgid "VAT rate compliance"
+msgstr "Skladnost stopenj DDV"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Valid VAT Numbers"
-msgstr ""
+msgstr "Veljavne davčne številke"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
@@ -6538,10 +7345,13 @@ msgstr "Potrditev"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_financial_provisions_review
+#, fuzzy
 msgid ""
 "Validate recognition and classification of financial provisions and "
 "reversals. Ensure all entries are properly justified."
 msgstr ""
+"Preverite priznanje in klasifikacijo finančnih rezervacij in storniranj. "
+"Poskrbite, da so vsi vnosi pravilno utemeljeni."
 
 #. module: account_reports
 #. odoo-javascript
@@ -6551,13 +7361,15 @@ msgstr "Vrednost"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__audit_var_percentage
+#, fuzzy
 msgid "Var %"
-msgstr ""
+msgstr "Odstopanje %"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_account__audit_var_n_1
+#, fuzzy
 msgid "Var N-1"
-msgstr ""
+msgstr "Odstopanje N-1"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_financial_year_op__vat_label
@@ -6566,33 +7378,54 @@ msgstr "DDV oznaka"
 
 #. module: account_reports
 #: model:account.return.check.template,description:account_reports.account_return_check_template_settlement_in_subsequent_period
+#, fuzzy
 msgid ""
 "Verify that cash and card receipts recorded at period-end are actually "
 "settled in the following period. Also check the correct accounting treatment "
-"of Dailly* assignments, discounting operations, and factoring contracts**.\n"
+"of discounting operations and factoring contracts*.\n"
 "\n"
-"* The \"\"Dailly Law\"\" is a French law that allows businesses to assign "
-"commercial receivables (like invoices) to a credit institution (like a bank) "
-"in exchange for financing.\n"
-"\n"
-"**Factoring contracts involve a business selling its unpaid invoices "
+"*Factoring contracts involve a business selling its unpaid invoices "
 "(accounts receivable) to a third-party company, known as a factor, in "
 "exchange for immediate cash.\n"
 "            "
 msgstr ""
+"Preverite, ali so gotovinski in kartični prejemki, zabeleženi ob koncu "
+"obdobja, dejansko poravnani v naslednjem obdobju. Prav tako preverite "
+"pravilno računovodsko obravnavo operacij diskontiranja in pogodb o "
+"faktoringu*.\n"
+"\n"
+"*Pogodbe o faktoringu pomenijo, da podjetje neplačane račune (terjatve) "
+"proda tretjemu podjetju, znanemu kot faktor, v zameno za takojšnjo "
+"gotovino.\n"
+"            "
+
+#. module: account_reports
+#: model:account.return.check.template,description:account_reports.account_return_check_template_minimum_share_capital_compliance
+#, fuzzy
+msgid ""
+"Verify that the company’s share capital meets or exceeds the legal minimum "
+"for its corporate form."
+msgstr ""
+"Preverite, ali temeljni kapital podjetja dosega ali presega zakonsko določen "
+"minimum za njeno pravno obliko."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "Verify that the total aged payables equals the vendor account balance."
 msgstr ""
+"Preverite, da je skupni znesek zapadlih obveznosti enak stanju "
+"dobaviteljskega konta."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "Verify that the total aged receivables equals the customer account balance."
 msgstr ""
+"Preverite, da je skupni znesek zapadlih terjatev enak stanju konta stranke."
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.view_journal_report_audit_move_line_tree
@@ -6613,8 +7446,9 @@ msgstr "Ogled prenosnih vrstic"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
+#, fuzzy
 msgid "View Entry"
-msgstr ""
+msgstr "Prikaži vnos"
 
 #. module: account_reports
 #. odoo-python
@@ -6645,8 +7479,9 @@ msgstr "Ogled plačila"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_return__visible_states
+#, fuzzy
 msgid "Visible States"
-msgstr ""
+msgstr "Vidna stanja"
 
 #. module: account_reports
 #: model:ir.model.fields,field_description:account_reports.field_account_report_send__warnings
@@ -6696,8 +7531,9 @@ msgstr "Z osnutki vnosov"
 
 #. module: account_reports
 #: model:ir.ui.menu,name:account_reports.menu_action_working_files
+#, fuzzy
 msgid "Working Files"
-msgstr ""
+msgstr "Delovne datoteke"
 
 #. module: account_reports
 #. odoo-python
@@ -6725,8 +7561,9 @@ msgstr "Leto"
 
 #. module: account_reports
 #: model:account.return.check.template,name:account_reports.account_return_check_template_year_end_revenue_cutoff_analysis
+#, fuzzy
 msgid "Year-end revenue cutoff analysis"
-msgstr ""
+msgstr "Analiza časovne razmejitve prihodkov ob koncu leta"
 
 #. module: account_reports
 #. odoo-javascript
@@ -6745,10 +7582,13 @@ msgstr "Včeraj"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/wizard/return_creation_wizard.py:0
+#, fuzzy
 msgid ""
 "You are trying to create returns for a company you don't have access to, "
 "please select it in the company selector"
 msgstr ""
+"Poskušate ustvariti vračila za podjetje, do katerega nimate dostopa, "
+"izberite ga v izbirniku podjetja"
 
 #. module: account_reports
 #. odoo-javascript
@@ -6759,20 +7599,16 @@ msgstr "Uporabljate menjalne tečaje po meri."
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "You can only have a unique check code for each return."
-msgstr ""
+msgstr "Za vsak povratek lahko imate samo enolično kodo čeka."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
-msgid "You can only revert a completed return if the previous state was new."
-msgstr ""
-
-#. module: account_reports
-#. odoo-python
-#: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "You can only unarchive a completed return."
-msgstr ""
+msgstr "Lahko odarhivirate le končano vračilo."
 
 #. module: account_reports
 #. odoo-python
@@ -6799,10 +7635,13 @@ msgstr "Za zaklenjeno obdobje ni mogoče ustvariti vnosov."
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "You cannot lock this return as there are previous returns that are waiting "
 "to be posted."
 msgstr ""
+"Te vrnitve ne morete zakleniti, ker obstajajo prejšnje vrnitve, ki čakajo na "
+"knjiženje."
 
 #. module: account_reports
 #. odoo-python
@@ -6820,24 +7659,31 @@ msgstr ""
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "You cannot reset this return to new, as another return has been locked at a "
 "later date."
 msgstr ""
+"To vračilo ne morete ponastaviti na novo, saj je bilo drugo vračilo "
+"zaklenjeno na poznejši datum."
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
+#, fuzzy
 msgid "You cannot update this value as it's locked by: %s"
-msgstr ""
+msgstr "Te vrednosti ne morete posodobiti, ker jo je zaklenil: %s"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "You first need to define an opening date for your accounting. Please contact "
 "your administrator."
 msgstr ""
+"Najprej morate določiti začetni datum za vaše računovodstvo. Prosimo, "
+"obrnite se na svojega administratorja."
 
 #. module: account_reports
 #. odoo-python
@@ -6848,10 +7694,22 @@ msgstr "Za dostop do tega poročila morate aktivirati več kot eno valuto."
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid ""
 "You're only allowed to change the check state when the return hasn't been "
 "reviewed."
 msgstr ""
+"Stanje preverjanja lahko spremenite samo, če obračun še ni bil pregledan."
+
+#. module: account_reports
+#: model_terms:ir.ui.view,arch_db:account_reports.account_return_kanban_view
+#, fuzzy
+msgid ""
+"Your active companies do not match this return's companies. The results "
+"shown for the checks might be incomplete."
+msgstr ""
+"Vaša aktivna podjetja se ne ujemajo s podjetji tega obračuna. Rezultati, "
+"prikazani za preverjanja, so morda nepopolni."
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.journal_report_pdf_export_main
@@ -6875,8 +7733,9 @@ msgstr "in po potrebi popraviti njihove davčne oznake."
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "check updated"
-msgstr ""
+msgstr "ček posodobljen"
 
 #. module: account_reports
 #: model_terms:ir.ui.view,arch_db:account_reports.res_config_settings_view_form
@@ -6934,14 +7793,22 @@ msgstr "zadnji bančni izpisek"
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
 msgid "line_ids"
-msgstr ""
+msgstr "line_ids"
 
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
 msgid "millions"
 msgstr "milijoni"
+
+#. module: account_reports
+#. odoo-python
+#: code:addons/account_reports/models/account_return.py:0
+#, fuzzy
+msgid "n must be a positive integer."
+msgstr "n mora biti pozitivno celo število."
 
 #. module: account_reports
 #. odoo-python
@@ -6964,8 +7831,9 @@ msgstr "predhodno ali vključeno v to obdobje."
 #. module: account_reports
 #. odoo-python
 #: code:addons/account_reports/models/account_report.py:0
+#, fuzzy
 msgid "report.%(file_extension)s"
-msgstr ""
+msgstr "poročilo.%(file_extension)s"
 
 #. module: account_reports
 #. odoo-python
@@ -7053,11 +7921,15 @@ msgstr "brez veljavne davčne številke znotraj skupnosti."
 
 #. module: account_reports
 #: model:mail.template,subject:account_reports.email_template_customer_follow_up_report
+#, fuzzy
 msgid ""
 "{{ (object.company_id or "
 "object._get_followup_responsible().company_id).name }} Follow Up - "
 "{{ object.commercial_company_name }}"
 msgstr ""
+"{{ (object.company_id or "
+"object._get_followup_responsible().company_id).name }} Opomin - "
+"{{ object.commercial_company_name }}"
 
 #. module: account_reports
 #: model:mail.template,subject:account_reports.email_template_customer_statement
@@ -7075,6 +7947,65 @@ msgstr ""
 #: code:addons/account_reports/static/src/components/multicurrency_revaluation_report/warnings.xml:0
 msgid "⇒ Reset to Odoo’s Rate"
 msgstr "⇒ Ponastavi na Odoojev tečaj"
+
+#~ msgid ""
+#~ "<div style=\"margin: 0px; padding: 0px;\">\n"
+#~ "                <p style=\"margin: 0px; padding: 0px;\">\n"
+#~ "                    Hi <span t-out=\"ctx.get('partner') and "
+#~ "ctx['partner'].name\"/>,<br/><br/>\n"
+#~ "                    The deadline to submit <strong t-out=\"object.name\"/"
+#~ "> is <strong t-out=\"object.date_deadline\"/>.<br/>\n"
+#~ "                    To avoid any potential fine, please ensure all "
+#~ "remaining documents are sent over as soon as possible.<br/>\n"
+#~ "                    If you've already submitted everything but still "
+#~ "received this email, it's likely the tax return hasn't been marked as "
+#~ "submitted in Odoo.<br/>\n"
+#~ "                    Should you have any question or need assistance, feel "
+#~ "free to get in touch.<br/><br/>\n"
+#~ "                    Best regards,<br/>\n"
+#~ "                </p>\n"
+#~ "            </div>\n"
+#~ "        "
+#~ msgstr ""
+#~ "<div style=\"margin: 0px; padding: 0px;\">\n"
+#~ "                <p style=\"margin: 0px; padding: 0px;\">\n"
+#~ "                    Pozdravljeni, <span t-out=\"ctx.get('partner') and "
+#~ "ctx['partner'].name\"/>,<br/><br/>\n"
+#~ "                    Rok za oddajo <strong t-out=\"object.name\"/> je "
+#~ "<strong t-out=\"object.date_deadline\"/>.<br/>\n"
+#~ "                    Da bi se izognili morebitnim kaznim, prosimo "
+#~ "poskrbite, da bodo vsi preostali dokumenti oddani čim prej.<br/>\n"
+#~ "                    Če ste že vse oddali, pa ste kljub temu prejeli to e-"
+#~ "poštno sporočilo, davčna napoved v sistemu Odoo verjetno še ni bila "
+#~ "označena kot oddana.<br/>\n"
+#~ "                    Če imate kakršna koli vprašanja ali potrebujete "
+#~ "pomoč, se brez oklevanja obrnite na nas.<br/><br/>\n"
+#~ "                    Lep pozdrav,<br/>\n"
+#~ "                </p>\n"
+#~ "            </div>"
+
+#~ msgid ""
+#~ "From %(date_from)s\n"
+#~ "to  %(date_to)s"
+#~ msgstr "Od%(date_from)sza  %(date_to)s"
+
+#~ msgid "Current Year Retained Earnings"
+#~ msgstr "Zadržani dobiček tekočega leta"
+
+#~ msgid "EQUITY"
+#~ msgstr "KAPITAL"
+
+#~ msgid "Previous Years Retained Earnings"
+#~ msgstr "Zadržani dobiček iz prejšnjih let"
+
+#~ msgid "Previous Years Unallocated Earnings"
+#~ msgstr "Nerazporejeni dobički iz prejšnjih let"
+
+#~ msgid "Retained Earnings"
+#~ msgstr "Zadržani dobiček"
+
+#~ msgid "Unallocated Earnings"
+#~ msgstr "Nerazporejeni zaslužki"
 
 #~ msgid "Currencies"
 #~ msgstr "Valute"
@@ -7098,9 +8029,6 @@ msgstr "⇒ Ponastavi na Odoojev tečaj"
 #~ msgstr ""
 #~ "<span class=\"o_account_reports_footnote_icons\"><i class=\"fa fa-fw fa-"
 #~ "trash-o\" role=\"img\" aria-label=\"Delete\" title=\"Delete\"/></span>"
-
-#~ msgid "Account Chart Template"
-#~ msgstr "Predloga kontnega načrta"
 
 #~ msgid "Activity Type"
 #~ msgstr "Tip aktivnosti"

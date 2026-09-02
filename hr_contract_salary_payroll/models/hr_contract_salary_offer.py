@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
+from odoo.addons.hr_contract_salary.utils.hr_version import requires_hr_version_context, hr_version_context
 from odoo.tools import float_compare
 
 from datetime import date
@@ -56,30 +57,39 @@ class HrContractSalaryOffer(models.Model):
     monthly_employer_cost = fields.Monetary(compute='_compute_salary', store=True)
     is_full_time = fields.Boolean(compute='_compute_salary', store=True)
 
-    # DO NOT CALL THIS FUNCTION OUTSIDE OF A ROLLBACK SAVEPOINT
+    @requires_hr_version_context()
     def _get_version(self):
         self.ensure_one()
-        version = super()._get_version().with_context(tracking_disable=True)
+        version = super()._get_version()
         version_vals = {}
+        resource_calendar = version.resource_calendar_id or self.resource_calendar_id or self._get_default_resource_calendar_id()
         if self.is_simulation_offer:
+            resource_calendar = self.resource_calendar_id or version.resource_calendar_id or self._get_default_resource_calendar_id()
             if self.simulation_employee_id:
-                version = self.simulation_employee_id.version_id.with_context(version.env.context)
+                version = self.simulation_employee_id.version_id
             version_vals.update({
                 'structure_type_id': self.structure_id.type_id.id,
             })
         version_vals.update({
-            'resource_calendar_id': version.resource_calendar_id.id or self.resource_calendar_id.id or self._get_default_resource_calendar_id().id,
+            'resource_calendar_id': resource_calendar.id,
             version._get_contract_wage_field(): self.monthly_wage,
             'wage_with_holidays': self.monthly_wage,
         })
-        if not version.contract_date_start:
-            if self.employee_id and self.employee_id.current_version_id and self.employee_id.current_version_id.contract_date_start:
-                self.employee_id.current_version_id.with_context(tracking_disable=True).write({
-                    'contract_date_end': version.date_version - relativedelta(days=1)
-                })
+        if self.is_simulation_offer:
+            work_time_rate = (resource_calendar.work_time_rate / 100)
+            new_wage = self.monthly_wage * work_time_rate
             version_vals.update({
-                'contract_date_start': version.date_version
+                'wage_on_signature': new_wage,
+                'wage': new_wage,
+                'wage_with_holidays': new_wage,
             })
+        employee = version.employee_id
+        if employee and employee.active:
+            self.with_context(tracking_disable=True)._archive_future_versions(version=employee.version_id)
+        version_vals.update({
+            'contract_date_start': version.contract_date_start or fields.Date.today().replace(day=1),
+            'contract_date_end': False,
+        })
         version.write(version_vals)
         version._inverse_wage_with_holidays()
         return version
@@ -95,19 +105,12 @@ class HrContractSalaryOffer(models.Model):
     @api.depends('final_yearly_costs')
     def _compute_monthly_wage(self):
         monthly_wage_by_offer = {}
-        self.env.flush_all()
-        with self.env.cr.savepoint(flush=False) as sp:
-            for offer in self.with_context(salary_simulation=True):
-                version = offer._get_version()
-                monthly_wage_by_offer[offer] = version._get_gross_from_employer_costs(offer.final_yearly_costs)
-
-            self.env.cr.precommit.data.pop('mail.tracking.hr.version', {})
-            self.env.flush_all()
-            sp.rollback()
-
         # Invalidating the model is needed to be sure that the contract_template_id has the correct data. Even with
         # the rollback, the recordset in cache could still hold some wrong values that were rollbacked
-        self.env['hr.version'].invalidate_model()
+        with hr_version_context(self, invalidate=True) as offers:
+            for offer in offers:
+                version = offer._get_version()
+                monthly_wage_by_offer[offer] = version._get_gross_from_employer_costs(offer.final_yearly_costs)
 
         for offer in self:
             offer.monthly_wage = monthly_wage_by_offer[offer]
@@ -115,19 +118,12 @@ class HrContractSalaryOffer(models.Model):
     @api.depends('monthly_wage')
     def _compute_final_yearly_costs(self):
         final_yearly_costs_by_offer = {}
-        self.env.flush_all()
-        with self.env.cr.savepoint(flush=False) as sp:
-            for offer in self.with_context(salary_simulation=True):
-                version = offer._get_version()
-                final_yearly_costs_by_offer[offer] = version._get_employer_costs_from_gross(offer.monthly_wage)
-
-            self.env.cr.precommit.data.pop('mail.tracking.hr.version', {})
-            self.env.flush_all()
-            sp.rollback()
-
         # Invalidating the model is needed to be sure that the contract_template_id has the correct data. Even with
         # the rollback, the recordset in cache could still hold some wrong values that were rollbacked
-        self.env['hr.version'].invalidate_model()
+        with hr_version_context(self, invalidate=True) as offers:
+            for offer in offers:
+                version = offer._get_version()
+                final_yearly_costs_by_offer[offer] = version._get_employer_costs_from_gross(offer.monthly_wage)
 
         for offer in self:
             offer.final_yearly_costs = final_yearly_costs_by_offer[offer]
@@ -135,13 +131,14 @@ class HrContractSalaryOffer(models.Model):
     @api.depends('monthly_wage', 'structure_id', 'resource_calendar_id')
     def _compute_salary(self) -> None:
         vals_by_offer = {}
-        self.env.flush_all()
-        with self.env.cr.savepoint(flush=False) as sp:
-            for offer in self.with_context(salary_simulation=True):
+        # Invalidating the model is needed to be sure that the contract_template_id has the correct data. Even with
+        # the rollback, the recordset in cache could still hold some wrong values that were rollbacked
+        with hr_version_context(self, invalidate=True) as offers:
+            for offer in offers:
                 version = offer._get_version()
                 payslip = version._generate_salary_simulation_payslip()
                 yearly_employer_cost = version._get_employer_costs_from_gross(version._get_contract_wage())
-                monthly_benefits, yearly_benefits = self._get_benefits(version)
+                monthly_benefits, yearly_benefits = offer._get_benefits(version)
                 vals_by_offer[offer] = {
                     'is_full_time': float_compare(version.work_time_rate, 1.0, 4) == 0,
                     'gross_wage': payslip._get_line_values(['BASIC'])['BASIC'][payslip.id]['total'],
@@ -151,13 +148,6 @@ class HrContractSalaryOffer(models.Model):
                     'yearly_employer_cost': yearly_employer_cost,
                     'monthly_employer_cost': round(yearly_employer_cost / 12, 2),
                 }
-            self.env.cr.precommit.data.pop('mail.tracking.hr.version', {})
-            self.env.flush_all()
-            sp.rollback()
-
-        # Invalidating the model is needed to be sure that the contract_template_id has the correct data. Even with
-        # the rollback, the recordset in cache could still hold some wrong values that were rollbacked
-        self.env['hr.version'].invalidate_model()
 
         for offer in self:
             offer.update(vals_by_offer[offer])

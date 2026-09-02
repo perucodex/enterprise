@@ -2,6 +2,7 @@ import { onWillDestroy } from "@odoo/owl";
 import { ProductCatalogKanbanController } from "@product/product_catalog/kanban_controller";
 import { patch } from "@web/core/utils/patch";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
+import { _t } from "@web/core/l10n/translation";
 
 patch(ProductCatalogKanbanController.prototype, {
     setup() {
@@ -24,6 +25,22 @@ patch(ProductCatalogKanbanController.prototype, {
 
     pushCatalogKanbanUpdate(update) {
         this.catalogKanbanUpdates.push(update);
+    },
+
+    _defineButtonContent() {
+        if (this.props.context.from_shop_floor) {
+            this.buttonString = _t("Back to ShopFloor");
+        } else {
+            super._defineButtonContent();
+        }
+    },
+
+    async backToQuotation() {
+        if (this.props.context.from_shop_floor) {
+            this.dialog.closeAll();
+        } else {
+            await super.backToQuotation();
+        }
     },
 });
 

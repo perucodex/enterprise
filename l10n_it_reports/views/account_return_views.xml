@@ -13,7 +13,7 @@
 
                 <xpath expr="//div[hasclass('w-100') and hasclass('p-2') and hasclass('px-3')]" position="after">
                     <t t-set="is_italian_non_quarterly"
-                       t-value="record.country_code.raw_value == 'IT' and !record.is_quarter_month.raw_value"/>
+                       t-value="record.country_code.raw_value == 'IT' and !(record.is_quarter_month.raw_value and record.type_external_id.raw_value == 'l10n_it_reports.it_tax_return_type')"/>
                 </xpath>
 
                 <xpath expr="//button[@name='action_submit']" position="replace">

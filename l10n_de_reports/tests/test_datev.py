@@ -27,6 +27,15 @@ class TestDatevCSV(AccountTestInvoicingCommon):
             self.partner_b.l10n_de_datev_identifier_customer = 123
         self.partner_b.l10n_de_datev_identifier_customer = 120
 
+        # Fields must be unique even if partner is archived.
+        self.partner_a.active = False
+
+        with self.assertRaises(ValidationError, msg='A ValidationError should be raised when assigning a duplicate Datev identifier.'):
+            self.partner_b.l10n_de_datev_identifier = 123
+
+        with self.assertRaises(ValidationError, msg='A ValidationError should be raised when assigning a duplicate Datev Customer identifier.'):
+            self.partner_b.l10n_de_datev_identifier_customer = 123
+
         company_b = self.env['res.company'].create({
             'name': 'Company B',
         })

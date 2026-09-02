@@ -307,11 +307,10 @@ export class PlanningGanttRenderer extends GanttRenderer {
         const resourceId = record.resource_id && record.resource_id.id;
         const startTime = record.start_datetime;
         const endTime = record.end_datetime;
-        if (!Object.keys(this.model.data.progressBars.resource_id || {}).length) {
+        if (!Object.keys(this.model.data.workIntervals || {}).length) {
             return [];
         }
-        const resourceIntervals =
-            this.model.data.progressBars?.resource_id?.[resourceId]?.work_intervals;
+        const resourceIntervals = this.model.data.workIntervals[resourceId];
         if (!resourceIntervals) {
             return [];
         }
@@ -324,7 +323,7 @@ export class PlanningGanttRenderer extends GanttRenderer {
      * @returns {boolean}
      */
     isFlexibleHours(resource_id) {
-        return !!this.model.data.progressBars?.resource_id?.[resource_id]?.is_flexible_hours;
+        return !!this.model.data.isFlexibleHours?.[resource_id];
     }
 
     /**
@@ -356,7 +355,7 @@ export class PlanningGanttRenderer extends GanttRenderer {
         }
 
         // A row not having work intervals could mean that a resource doesn't have a contract or the row is the "Total" row
-        const workIntervals = this.model.data.progressBars?.resource_id?.[row.resId]?.work_intervals;
+        const workIntervals = this.model.data.workIntervals?.[row.resId];
         if (!workIntervals) {
             if (row.groupedByField === "resource_id") {  // If there is no contract, don't show aggregate info
                 return false;
@@ -418,9 +417,9 @@ export class PlanningGanttRenderer extends GanttRenderer {
         const resource_id = this.row.resId;
         // If flexible hour contract, colour the gantt view group based on whether the aggregate value > the "average work hours" per day.
         if (this.isFlexibleHours(resource_id)) {
-            workHours = this.model.data.progressBars.resource_id[resource_id]?.avg_hours;
+            workHours = this.model.data.avgWorkHours[resource_id];
         } else {
-            workHours = this.model.data.progressBars.resource_id[resource_id]?.work_intervals.reduce(
+            workHours = this.model.data.workIntervals[resource_id].reduce(
                 (sum, [ intervalStart, intervalEnd ]) => {
                     // Check whether the work interval is of the same date as the grouping pill
                     if (intervalStart >= pill.date_start && intervalEnd <= pill.date_end) {
@@ -526,10 +525,11 @@ export class PlanningGanttRenderer extends GanttRenderer {
 
     /**
      * Split a shift (pill) into two shifts.
-     * For shifts with flexible hours or open slots, the split is done without taking into account availabbilities.
-     * For shifts with regular working hours, the split is done taking into account the resource's availabilities.
-     * As an exception, if the shift spans on weekends (where the resource had no availabilities unavailable)
-     * for a regular working schedule, we split the shift but set a 8-17 schedule for the shift in weekends.
+     * If the view scale is 'day', split exactly where requested, else:
+     *     For shifts with flexible hours or open slots, the split is done without taking into account availabilities.
+     *     For shifts with regular working hours, the split is done taking into account the resource's availabilities.
+     *     As an exception, if the shift spans on weekends (where the resource had no availabilities unavailable)
+     *     for a regular working schedule, we split the shift but set a 8-17 schedule for the shift in weekends.
      *
      * @param {Pill} pill
      * @param {number} startColumnId - column where to split the pill
@@ -539,7 +539,7 @@ export class PlanningGanttRenderer extends GanttRenderer {
         const splitRightPill = this.getColumnStartStop(startColumnId, startColumnId);
         const splitLeftPill = this.getColumnStartStop(startColumnId - 1, startColumnId - 1);
         let copiedShiftId;
-        if (!resourceId || this.isFlexibleHours(resourceId)) {
+        if (!resourceId || this.isFlexibleHours(resourceId) || this.currentScaleId === "day") {
             const start = splitRightPill.start;
             const stop = splitLeftPill.stop;
             copiedShiftId = await this.model.splitPill(start, stop, pill.record);

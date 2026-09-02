@@ -5,6 +5,7 @@ from odoo.addons.l10n_mx_edi.tests.common import EXTERNAL_MODE
 from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCommon
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import tagged
+from datetime import datetime
 
 
 @tagged('post_install_l10n', 'post_install', '-at_install', *(['-standard', 'external'] if EXTERNAL_MODE else []))
@@ -245,6 +246,57 @@ class TestCFDIPosOrder(TestMxEdiPosCommon, TestPointOfSaleHttpCommon):
                 'state': 'invoice_sent',
             }])
 
+            gi_document = order.l10n_mx_edi_document_ids.filtered(lambda d: d.state == 'ginvoice_sent')
+            with self.with_mocked_pac_cancel_success():
+                self.env['l10n_mx_edi.invoice.cancel']\
+                    .with_context(gi_document.action_request_cancel()['context'])\
+                    .create({'cancellation_reason': '02'})\
+                    .action_cancel_invoice()
+            self.assertRecordValues(refund, [{'l10n_mx_edi_cfdi_state': False}])
+
+            with self.with_mocked_pac_sign_success():
+                self.env['l10n_mx_edi.global_invoice.create']\
+                    .with_context(order.l10n_mx_edi_action_create_global_invoice()['context'])\
+                    .create({})\
+                    .action_create_global_invoice()
+            self.assertRecordValues(order + refund, [
+                {'l10n_mx_edi_cfdi_state': 'global_sent'},
+                {'l10n_mx_edi_cfdi_state': 'global_sent'},
+            ])
+
+            # Create a second refund against the new global invoice, then simulate the SAT
+            # cron picking up a manual SAT-portal cancellation of that GI. The cascade must
+            # also cover this entry path, not only the Odoo cancellation wizard.
+            with self.with_pos_session(), self.with_mocked_pac_sign_success():
+                refund2 = self._create_order({
+                    'pos_order_lines_ui_args': [
+                        {
+                            'product': self.product,
+                            'quantity': -2.0,
+                            'refunded_orderline_id': order.lines[0].id,
+                        },
+                    ],
+                    'payments': [(self.bank_pm1, -2320.0)],
+                })[1]
+            self.assertRecordValues(refund2, [{'l10n_mx_edi_cfdi_state': 'sent'}])
+
+            gi_document = order.l10n_mx_edi_document_ids\
+                .filtered(lambda d: d.state == 'ginvoice_sent' and d.sat_state != 'skip')
+            with self.with_mocked_pac_cancel_success():
+                gi_document._update_document_sat_state('cancelled')
+            self.assertRecordValues(refund2, [{'l10n_mx_edi_cfdi_state': False}])
+
+            with self.with_mocked_pac_sign_success():
+                self.env['l10n_mx_edi.global_invoice.create']\
+                    .with_context(order.l10n_mx_edi_action_create_global_invoice()['context'])\
+                    .create({})\
+                    .action_create_global_invoice()
+            self.assertRecordValues(order + refund + refund2, [
+                {'l10n_mx_edi_cfdi_state': 'global_sent'},
+                {'l10n_mx_edi_cfdi_state': 'global_sent'},
+                {'l10n_mx_edi_cfdi_state': 'global_sent'},
+            ])
+
     def test_global_invoice_documents(self):
         with self.mx_external_setup(self.frozen_today), self.with_pos_session() as _session:
             order1 = self._create_order({
@@ -288,9 +340,7 @@ class TestCFDIPosOrder(TestMxEdiPosCommon, TestPointOfSaleHttpCommon):
             }] * 2)
 
             with self.with_mocked_sat_call(lambda _x: 'valid'):
-                self.env['l10n_mx_edi.document']._fetch_and_update_sat_status(
-                    extra_domain=[('id', '=', orders.l10n_mx_edi_document_ids.id)]
-                )
+                orders[0].l10n_mx_edi_cfdi_try_sat()
             sent_doc_values['sat_state'] = 'valid'
             self.assertRecordValues(orders.l10n_mx_edi_document_ids, [sent_doc_values])
 
@@ -782,3 +832,47 @@ class TestCFDIPosOrder(TestMxEdiPosCommon, TestPointOfSaleHttpCommon):
                 'l10n_mx_edi_payment_method_id': 1,
             }
         ])
+
+    def test_global_invoice_with_cancelled_and_paid_refund(self):
+        """
+        Test that a canceled refund is ignored while a paid refund
+        of the same order is still distributed in the global invoice.
+        """
+        with self.mx_external_setup(self.frozen_today), self.with_pos_session():
+            order = self._create_order({
+                'pos_order_lines_ui_args': [
+                    (self.product, 1.0),
+                ],
+                'payments': [(self.bank_pm1, 1160)],
+            })
+            canceled_refund = self.env['pos.order'].browse(order.refund()['res_id'])
+            canceled_refund.action_pos_order_cancel()
+            paid_refund = self._create_order({
+                'pos_order_lines_ui_args': [
+                    {
+                        'product': self.product,
+                        'quantity': -1.0,
+                        'refunded_orderline_id': order.lines[0].id,
+                    },
+                ],
+                'payments': [(self.bank_pm1, -1160)],
+            })[1]
+            with self.with_mocked_pac_sign_success():
+                order._l10n_mx_edi_cfdi_global_invoice_try_send()
+            self.assertEqual(canceled_refund.l10n_mx_edi_cfdi_state, False)
+            self.assertEqual(paid_refund.l10n_mx_edi_cfdi_state, 'global_sent')
+
+    def test_global_invoice_periodicity_month(self):
+        """Test that when creating a global invoice from the order, the month of the global invoice is the month the order was made."""
+        with self.mx_external_setup(self.frozen_today), self.with_pos_session():
+            order_date = datetime(2025, 6, 1, 4, 0, 0)
+            first_order = self._create_order({
+                'pos_order_lines_ui_args': [
+                    (self.product, 1.0),
+                ],
+            })
+            first_order.date_order = order_date
+            with self.with_mocked_pac_sign_success():
+                first_order._l10n_mx_edi_cfdi_global_invoice_try_send()
+            xml_tree = self.get_xml_tree_from_string(first_order.l10n_mx_edi_document_ids.attachment_id.raw)
+            self.assertEqual(int(xml_tree.find('{http://www.sat.gob.mx/cfd/4}InformacionGlobal').attrib['Meses']), 5)

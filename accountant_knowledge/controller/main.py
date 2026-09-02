@@ -1,12 +1,11 @@
-import copy
 import json
 import logging
 import re
 
 from io import BytesIO
-from lxml import html
+from lxml import html, etree
 from markupsafe import Markup
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlencode, urlsplit
 
 from odoo import http, tools
 from odoo.fields import Domain
@@ -56,7 +55,7 @@ def get_attached_pdfs(root):
     domains = []
     for element in root.xpath(f'.//*[@data-embedded="file" or { xpath_has_class("o_file_box") }]'):
         if element.get('data-embedded') == 'file':
-            embedded_props = json.loads(element.get('data-embedded-props'))
+            embedded_props = json.loads(element.get('data-embedded-props', '{}'))
             file_data = embedded_props.get('fileData')
             if file_data:
                 file_type = file_data.get('type')
@@ -68,7 +67,7 @@ def get_attached_pdfs(root):
                     ]])
         else:
             for link in element.xpath(f'.//*[{ xpath_has_class("o_link_readonly") }]'):
-                parsed_url = urlparse(link.get('href'))
+                parsed_url = urlsplit(link.get('href'))
                 match = re.search(r'^\/web\/content\/(?P<ir_attachment_id>[0-9]+)$', parsed_url.path)
                 if match:
                     url_params = parse_qs(parsed_url.query)
@@ -101,10 +100,15 @@ def get_account_reports_pdfs(root):
     })
 
     for account_report_options in all_account_report_options:
+        company_id = account_report_options.get("forced_companies", [False])[0] \
+            or (account_report_options.get("companies") and account_report_options["companies"][0].get("id"))
         account_report_id = account_report_options['report_id']
         account_report = all_account_reports.filtered(
             lambda account_report: account_report.id == account_report_id)
+
         if account_report:
+            if company_id:
+                account_report = account_report.with_company(company_id)
             result = account_report.dispatch_report_action(account_report_options, 'export_to_pdf')
             yield PdfFileReader(BytesIO(result.get('file_content')))
 
@@ -167,9 +171,10 @@ def get_front_cover_pdf(article):
 
     writer = PdfFileWriter()
     for k in range(front_cover_pdf.getNumPages()):
-        page = copy.deepcopy(front_cover_layout_pdf.getPage(0))
+        writer.addPage(front_cover_layout_pdf.getPage(0))
+        page = writer.getPage(-1)
         page.mergePage(front_cover_pdf.getPage(k))
-        writer.addPage(page)
+        page.compressContentStreams()
 
     output_stream = BytesIO()
     writer.write(output_stream)
@@ -184,7 +189,7 @@ def get_back_cover_pdf():
 def compute_total_assets(audit_report):
     balance_sheet_report = request.env.ref('account_reports.balance_sheet').with_company(audit_report.company_id)
     balance_sheet_report_options = balance_sheet_report.get_options({
-        'selected_variant_id': balance_sheet_report.id,
+        'forced_companies': audit_report.company_id.ids,
         'date': {
             'date_from': str(audit_report.start_date),
             'date_to': str(audit_report.end_date),
@@ -208,7 +213,7 @@ def compute_total_assets(audit_report):
 def compute_net_profit_and_total_revenue(audit_report):
     profit_and_loss_report = request.env.ref('account_reports.profit_and_loss').with_company(audit_report.company_id)
     profit_and_loss_report_options = profit_and_loss_report.get_options({
-        'selected_variant_id': profit_and_loss_report.id,
+        'forced_companies': audit_report.company_id.ids,
         'date': {
             'date_from': str(audit_report.start_date),
             'date_to': str(audit_report.end_date),
@@ -255,6 +260,16 @@ def get_template_variables(article):
 
 
 class KnowledgeAuditReportController(http.Controller):
+
+    def _get_template_variables(self, article):
+        return get_template_variables(article)
+
+    def _get_html_template_variables(self, article):
+        return {}
+
+    def _get_front_cover_pdf(self, article):
+        return get_front_cover_pdf(article)
+
     @http.route(
         '/knowledge_accountant/article/<model("knowledge.article"):root_article>/audit_report',
         type='http', auth='user', methods=['GET'])
@@ -276,13 +291,28 @@ class KnowledgeAuditReportController(http.Controller):
         base_url = request.env['ir.qweb'].get_base_url()
 
         stack = [root_article]
-        template_variables = get_template_variables(root_article)
+        template_variables = self._get_template_variables(root_article)
+        html_template_variables = self._get_html_template_variables(root_article)
+
+        SUPPORTED_IMAGE_TYPES = {
+            'image/jpeg', 'image/png', 'image/gif',
+            'image/webp', 'image/svg+xml'
+        }
 
         def render_article_body(root, template_variables):
+            def render_html_placeholder(element, template_variables):
+                for to_replace, value in template_variables.items():
+                    if to_replace not in element.text:
+                        continue
+                    node = html.fragment_fromstring(value, create_parent='div')
+                    element.text = element.text.replace(to_replace, '')
+                    element.append(node)
+
             # Replace all the placeholder values:
             for element in root.iter():
                 if element.text:
                     element.text = render_placeholder(element.text, template_variables)
+                    render_html_placeholder(element, html_template_variables)
                 if element.tail:
                     element.tail = render_placeholder(element.tail, template_variables)
 
@@ -301,6 +331,39 @@ class KnowledgeAuditReportController(http.Controller):
                 parent = element.getparent()
                 if parent is not None:
                     parent.remove(element)
+
+            # Replace the embedded images with standard <img /> tags:
+            for element in root.xpath('.//*[@data-embedded="file"]'):
+                try:
+                    embedded_props = json.loads(
+                        element.get('data-embedded-props', '{}'))
+                except json.JSONDecodeError:
+                    continue
+
+                if not isinstance(embedded_props, dict):
+                    continue
+
+                file_data = embedded_props.get('fileData', {})
+                if not isinstance(file_data, dict):
+                    continue
+
+                is_embedded_image = (
+                        file_data.get('type') == 'binary'
+                    and file_data.get('mimetype') in SUPPORTED_IMAGE_TYPES
+                )
+
+                if not is_embedded_image:
+                    continue
+
+                if attachment_id := file_data["id"]:
+                    url = f'/web/content/{attachment_id}'
+                    if access_token := file_data.get('access_token'):
+                        url += '?' + urlencode({'access_token': access_token})
+
+                    img = etree.Element('img', src=url, style='max-width: 100%')
+                    img.tail = element.tail
+                    parent = element.getparent()
+                    parent.replace(element, img)
 
             article_headings = root.xpath(
                 "//*[self::h1 or self::h2 or self::h3][translate(normalize-space(.), ' ', '') != '']")
@@ -328,7 +391,7 @@ class KnowledgeAuditReportController(http.Controller):
                     except PdfReadError:
                         # version 1.26 of PyPDF2 is not capable of generating the outline / headers
                         # see https://github.com/py-pdf/pypdf/issues/193
-                        _logger.warning('Unable to generate Audit Report heading, please update your PyPDF version.')
+                        _logger.warning('Unable to generate Annual Report heading, please update your PyPDF version.')
                         generate_headings = False
 
                 body_pdfs.append(title_page_pdf)
@@ -360,7 +423,7 @@ class KnowledgeAuditReportController(http.Controller):
                     except PdfReadError:
                         # version 1.26 of PyPDF2 is not capable of generating the outline / headers
                         # see https://github.com/py-pdf/pypdf/issues/193
-                        _logger.warning('Unable to generate Audit Report heading, please update your PyPDF version.')
+                        _logger.warning('Unable to generate Annual Report heading, please update your PyPDF version.')
                         generate_headings = False
 
                 body_pdfs.append(article_pdf)
@@ -378,7 +441,7 @@ class KnowledgeAuditReportController(http.Controller):
                 stack.extend(article.child_ids.sorted(
                     lambda child: child.sequence, reverse=True))
 
-        front_cover_pdf = get_front_cover_pdf(root_article)
+        front_cover_pdf = self._get_front_cover_pdf(root_article)
         # Create the PDF output:
         writer = PdfFileWriter()
         writer.appendPagesFromReader(front_cover_pdf)
@@ -454,6 +517,7 @@ class KnowledgeAuditReportController(http.Controller):
         for k in range(number_of_pages):
             page = writer.getPage(k + front_cover_pdf.getNumPages())
             page.mergePage(empty_pdf_for_page_numbers.getPage(k))
+            page.compressContentStreams()
 
         output_stream = BytesIO()
         writer.write(output_stream)

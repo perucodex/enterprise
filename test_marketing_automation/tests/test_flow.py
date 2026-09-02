@@ -545,6 +545,7 @@ for record in records:
                 'fields_values': {
                     'schedule_date': date_reference_reply + relativedelta(hours=1),
                 },
+                'sent_unlink': True,  # should have been deleted anyway
                 'trace_status': 'pending',
             }, {
                 'status': 'scheduled',
@@ -630,7 +631,9 @@ for record in records:
                 'records': (self.test_records_failure_wrong + self.test_records_failure_dupe),  # server action did crash, description is False (see muted logger)
                 'fields_values': {
                     'schedule_date': date_reference_new,
-                    'state_msg_content': 'Exception in server action',
+                    'state_msg': "Exception in server action: TypeError(\"unsupported operand type(s) for +: 'bool' and 'str'\") while evaluating\n"
+                                 "\"for record in records:\\n    record.write({'description': record.description + ' - Did not answer, sad campaign is sad.'})\""
+
                 },
             }, {
                 'status': 'rejected',

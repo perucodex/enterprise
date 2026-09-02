@@ -65,7 +65,8 @@ class TestPeEdiCommon(AccountEdiTestCommon):
         cls.national_bank_account = cls.env['res.partner.bank'].create({
             'acc_number': 'CUENTAPRUEBA',
             'bank_id': cls.national_bank.id,
-            'partner_id': cls.company_data['company'].partner_id.id
+            'partner_id': cls.company_data['company'].partner_id.id,
+            'allow_out_payment': True,
         })
         cls.company_data['company'].partner_id.write({
             'vat': "20557912879",
@@ -181,9 +182,8 @@ class TestPeEdiCommon(AccountEdiTestCommon):
             'invoice_line_ids': [(0, 0, {
                 'product_id': self.product.id,
                 'product_uom_id': self.env.ref('uom.product_uom_kgm').id,
-                'price_unit': 2000.0,
+                'price_unit': 1600.0,
                 'quantity': 5,
-                'discount': 20.0,
                 'tax_ids': [(6, 0, self.tax_18.ids)],
             })],
         }
@@ -206,9 +206,8 @@ class TestPeEdiCommon(AccountEdiTestCommon):
             'invoice_line_ids': [(0, 0, {
                 'product_id': self.product.id,
                 'product_uom_id': self.env.ref('uom.product_uom_kgm').id,
-                'price_unit': 2000.0,
+                'price_unit': 1600.0,
                 'quantity': 5,
-                'discount': 20.0,
                 'tax_ids': [(6, 0, self.tax_18.ids)],
             })],
         }

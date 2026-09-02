@@ -74,16 +74,11 @@ class HelpdeskTeam(models.Model):
         if not teams:
             return
 
-        default_form = self.env.ref('website_helpdesk.ticket_submit_form').sudo().arch
+        submit_form = self.env.ref('website_helpdesk.ticket_submit_form').sudo()
         for team in teams:
             if not team.website_form_view_id:
                 xmlid = 'website_helpdesk.team_form_' + str(team.id)
-                form_template = self.env['ir.ui.view'].sudo().create({
-                    'type': 'qweb',
-                    'arch': default_form,
-                    'name': xmlid,
-                    'key': xmlid
-                })
+                form_template = submit_form.copy({'name': xmlid, 'key': xmlid})
                 self.env['ir.model.data'].sudo().create({
                     'module': 'website_helpdesk',
                     'name': xmlid.split('.')[1],

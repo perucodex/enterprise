@@ -56,7 +56,8 @@ export class DocumentService {
         const documentId =
             Number(urlSearch.documents_init_document_id) || documents_init?.document_id;
         this.documentIdToRestoreOnce = documentId;
-        const userFolderId = urlSearch.documents_init_user_folder_id;
+        const userFolderId = 
+            urlSearch.documents_init_user_folder_id || documents_init?.user_folder_id;
         this._initData = { documentId, userFolderId, openPreview };
         if (userFolderId) {
             browser.localStorage.setItem("searchpanel_documents_document", userFolderId);
@@ -92,7 +93,9 @@ export class DocumentService {
             this.userIsInternal ||
             (await this.orm.call("documents.operation", "get_any_editor_destination")).length > 0;
         const initialState =
-            this.userIsInternal && JSON.parse(localStorage.getItem("documentsChatterVisible"));
+            !this.env.isSmall &&
+            this.userIsInternal &&
+            JSON.parse(localStorage.getItem("documentsChatterVisible"));
         this.rightPanelReactive = reactive(
             {
                 visible: initialState,
@@ -142,7 +145,7 @@ export class DocumentService {
         } else {
             // Document was renamed
             if ("attachment" in data && data.name !== document.name) {
-                document.attachment = this.store.Attachment.insert(data.attachment);
+                document.attachment = this.store["ir.attachment"].insert(data.attachment);
             }
         }
         // return reactive version
@@ -485,7 +488,7 @@ export class DocumentService {
         if (!accessToken) {
             return;
         }
-        rpc(`/documents/touch/${encodeURIComponent(accessToken)}`);
+        return rpc(`/documents/touch/${encodeURIComponent(accessToken)}`);
     }
 
     /**

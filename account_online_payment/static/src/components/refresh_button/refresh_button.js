@@ -8,22 +8,23 @@ export class RefreshButton extends Component {
 
     setup() {
         this.state = useState({
-            status: this.props.record.data.payment_online_status,
             isFetching: false,
         });
         this.orm = useService("orm");
     }
 
+    get paymentOnlineStatus() {
+        return this.props.record.data.payment_online_status;
+    }
+
     async onClickFetchStatus() {
         this.state.isFetching = true;
 
-        const response = await this.orm.call(
-            "account.batch.payment",
-            "check_online_payment_status",
-            [this.props.record.data.id],
-        );
+        await this.orm.call("account.batch.payment", "check_online_payment_status", [
+            this.props.record.data.id,
+        ]);
 
-        this.state.status = response[this.props.record.data.id];
+        this.props.record.model.load();
         this.state.isFetching = false;
     }
 }

@@ -28,8 +28,9 @@ class SaleOrder(models.Model):
             from_date=from_date, to_date=to_date, warehouse_id=warehouse_id
         ).qty_available
         qty_available += product.with_context(warehouse_id=warehouse_id).qty_in_rent
+        rented_domain = [('order_id', '!=', self.id)] + ([('warehouse_id', '=', warehouse_id)] if warehouse_id else [])
         product_rented_qties, product_key_dates = product._get_rented_quantities(
-            from_date, to_date, domain=[('order_id', '!=', self.id)]
+            from_date, to_date, domain=rented_domain
         )
         so_rented_qties, so_key_dates = common_lines._get_rented_quantities([from_date, to_date])
         current_cart_qty = max_cart_qty = 0

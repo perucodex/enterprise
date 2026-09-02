@@ -4,7 +4,7 @@ import { Domain } from "@web/core/domain";
 import { deserializeDateTime, serializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
 import { pick } from "@web/core/utils/objects";
-import { localStartOf } from "@web_gantt/gantt_helpers";
+import { localStartOf, localEndOf } from "@web_gantt/gantt_helpers";
 import { GanttModel } from "@web_gantt/gantt_model";
 import { usePlanningModelActions } from "../planning_hooks";
 
@@ -69,11 +69,21 @@ export class PlanningGanttModel extends GanttModel {
                 displayOpenShift = true;
             }
         }
-        if (displayRoleOpenShift){
+        if (displayRoleOpenShift) {
             searchParams.domain = Domain.and([domain, [["is_users_role", "=", true]]]).toList();
-        }
-        else if (displayOpenShift) {
-            searchParams.domain = Domain.or([domain, "[('resource_id', '=', false)]"]).toList();
+        } else if (displayOpenShift) {
+            searchParams.domain = Domain.or([
+                domain,
+                Domain.and([
+                    Domain.removeDomainLeaves(domain, [
+                        "resource_id",
+                        "department_id",
+                        "manager_id",
+                        "job_title",
+                    ]),
+                    [["resource_id", "=", false]],
+                ]),
+            ]).toList();
         }
 
         let groupProm;
@@ -95,18 +105,31 @@ export class PlanningGanttModel extends GanttModel {
     /**
      * @override
      */
-    _processProgressBars(progressBars) {
-        if (!this.orm.isSample) {
-            const resources = Object.values(progressBars.resource_id || []);
-            for (const resource of resources) {
-                if (resource.work_intervals) {
-                    resource.work_intervals = resource.work_intervals.map((work_interval) =>
+    _processGanttData(metaData, data, ganttData) {
+        if ("planning_data" in ganttData) {
+            if (!this.orm.isSample) {
+                const workIntervals = {};
+                for (const [resource_id, periods] of Object.entries(ganttData.planning_data.work_intervals)) {
+                    workIntervals[resource_id] = periods.map((work_interval) =>
                         work_interval.map(deserializeDateTime)
-                    );
+                    )
                 }
+                data.workIntervals = workIntervals;
             }
+            
+            const isFlexibleHours = {};
+            for (const [resource_id, value] of Object.entries(ganttData.planning_data.is_flexible)) {
+                isFlexibleHours[resource_id] = value
+            }
+            data.isFlexibleHours = isFlexibleHours;
+
+            const avgWorkHours = {};
+            for (const [resource_id, value] of Object.entries(ganttData.planning_data.avg_hours)) {
+                avgWorkHours[resource_id] = value
+            }
+            data.avgWorkHours = avgWorkHours;
         }
-        return super._processProgressBars(progressBars);
+        super._processGanttData(metaData, data, ganttData);
     }
 
     //--------------------------------------------------------------------------
@@ -118,12 +141,16 @@ export class PlanningGanttModel extends GanttModel {
      */
     getAdditionalContext() {
         const { records } = this.data;
-        const { startDate, scale, stopDate } = this.metaData;
+        const { startDate, scale, rangeId } = this.metaData;
         const defaultEmployeeIds = new Set();
         for (const record of records) {
             if (record.employee_id) {
                 defaultEmployeeIds.add(record.employee_id.id);
             }
+        }
+        let stopDate = this.metaData.stopDate;
+        if (this.metaData.ranges && rangeId in this.metaData.ranges) {
+            stopDate = localEndOf(startDate, rangeId);
         }
         return {
             ...this.searchParams.context,

@@ -1,5 +1,6 @@
 from odoo import api, fields, models, SUPERUSER_ID, _
-from odoo.addons.account.tools.structured_reference import is_valid_structured_reference
+from odoo.exceptions import UserError
+from odoo.addons.account.tools.structured_reference import is_valid_structured_reference_for_country
 
 STATUSES = [
     ('uninitiated', 'Uninitiated'),
@@ -54,6 +55,7 @@ class AccountBatchPayment(models.Model):
             return action
 
         account_online_link = self.journal_id.account_online_link_id
+        self.journal_id.account_online_account_id._check_payment_limit_exceeded(self)
         data = self._prepare_payment_data()
         while True:
             response = account_online_link._fetch_odoo_fin('/proxy/v1/initiate_payment', data)
@@ -84,6 +86,9 @@ class AccountBatchPayment(models.Model):
         statuses = {}
         for batch in self:
             account_online_account = batch.journal_id.account_online_account_id
+            if not account_online_account:
+                raise UserError(self.env._("This journal needs to be connected to a bank to check its status."))
+
             data = {
                 "payment_identifier": batch.payment_identifier,
                 "account_id": account_online_account.online_identifier,
@@ -156,7 +161,8 @@ class AccountBatchPayment(models.Model):
 
         payments = []
         for payment in self.payment_ids:
-            payments.append({
+            country_code = payment.partner_bank_id.sanitized_acc_number[:2]
+            payment_data = {
                 "amount": payment.amount,
                 "account_number": payment.partner_bank_id.sanitized_acc_number,
                 "account_type": "IBAN",
@@ -164,15 +170,33 @@ class AccountBatchPayment(models.Model):
                 "currency": payment.currency_id.display_name,
                 "date": fields.Date.to_string(payment.date),
                 "reference": payment.memo,
-                "structured_reference": is_valid_structured_reference(payment.memo),
+                "structured_reference": is_valid_structured_reference_for_country(payment.memo, country_code),
                 "end_to_end_uuid": payment.end_to_end_uuid,
-            })
+            }
 
-        return {
+            if vat := payment.partner_id.vat:
+                payment_data['creditor_identification'] = vat
+            if address := payment.partner_id.contact_address_inline:
+                payment_data['creditor_address'] = address
+
+            payments.append(payment_data)
+
+        data = {
             "account_id": self.journal_id.account_online_account_id.online_identifier,
             "batch_booking": self.iso20022_batch_booking,
             "date": fields.Date.to_string(self.date),
+            "payer_account_number": self.journal_id.account_online_account_id.account_number,
+            "payer_account_type": 'iban',
+            "payer_account_holder_name": self.journal_id.bank_account_id.acc_holder_name,
+            "payer_name": self.journal_id.company_id.name,
             "payment_type": "bulk",
             "payments": payments,
             "reference": self.name,
         }
+
+        if vat := self.journal_id.company_id.vat:
+            data['payer_identification'] = vat
+        if address := self.journal_id.company_id.partner_id.contact_address_inline:
+            data['payer_address'] = address
+
+        return data

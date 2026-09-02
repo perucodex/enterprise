@@ -63,8 +63,10 @@ export class AddressBook extends Component {
             return contacts;
         }
         return contacts.filter(
-            ({ voipName, phone }) =>
-                isSubstring(voipName, searchTerms) || matchPhoneNumber(phone, searchTerms)
+            ({ voipName, phone, phone_sanitized }) =>
+                isSubstring(voipName, searchTerms) ||
+                matchPhoneNumber(phone, searchTerms) ||
+                (phone_sanitized && matchPhoneNumber(phone_sanitized, searchTerms))
         );
     }
 

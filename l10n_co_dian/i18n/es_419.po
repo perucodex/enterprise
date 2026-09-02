@@ -2,15 +2,16 @@
 # This file contains the translation of the following modules:
 # * l10n_co_dian
 #
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 # Marco Antonio Iribe Sepulveda <masi@odoo.com>, 2026.
+# "Fernanda Alvarez (mfar)" <mfar@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.5a1+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-30 19:05+0000\n"
-"PO-Revision-Date: 2026-01-10 09:39+0000\n"
-"Last-Translator: Marco Antonio Iribe Sepulveda <masi@odoo.com>\n"
+"POT-Creation-Date: 2026-07-03 18:06+0000\n"
+"PO-Revision-Date: 2026-08-18 21:17+0000\n"
+"Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
 "odoo-19-l10n/l10n_co_dian/es_419/>\n"
 "Language: es_419\n"
@@ -18,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: l10n_co_dian
 #: model:ir.model.fields.selection,name:l10n_co_dian.selection__account_move__l10n_co_dian_commercial_state__received
@@ -49,41 +50,6 @@ msgstr "033 - Aceptado por el Cliente"
 #: model:ir.model.fields.selection,name:l10n_co_dian.selection__l10n_co_dian_document__commercial_state__accepted_by_issuer
 msgid "034 - Accepted by Issuer"
 msgstr "034 - Aceptado por el Emisor"
-
-#. module: l10n_co_dian
-#: model_terms:ir.ui.view,arch_db:l10n_co_dian.report_invoice_document
-msgid "1018418009"
-msgstr "1018418009"
-
-#. module: l10n_co_dian
-#: model_terms:ir.ui.view,arch_db:l10n_co_dian.report_invoice_document
-msgid "18760000001"
-msgstr "18760000001"
-
-#. module: l10n_co_dian
-#: model_terms:ir.ui.view,arch_db:l10n_co_dian.report_invoice_document
-msgid "2019-01-01"
-msgstr "2019-01-01"
-
-#. module: l10n_co_dian
-#: model_terms:ir.ui.view,arch_db:l10n_co_dian.report_invoice_document
-msgid "2024-03-15 15:43:50"
-msgstr "2024-03-15 15:43:50"
-
-#. module: l10n_co_dian
-#: model_terms:ir.ui.view,arch_db:l10n_co_dian.report_invoice_document
-msgid "2024-03-15 15:43:58"
-msgstr "2024-03-15 15:43:58"
-
-#. module: l10n_co_dian
-#: model_terms:ir.ui.view,arch_db:l10n_co_dian.report_invoice_document
-msgid "2030-12-31"
-msgstr "2030-12-31"
-
-#. module: l10n_co_dian
-#: model_terms:ir.ui.view,arch_db:l10n_co_dian.report_invoice_document
-msgid "4390"
-msgstr "4390"
 
 #. module: l10n_co_dian
 #: model_terms:ir.ui.view,arch_db:l10n_co_dian.report_invoice_document
@@ -181,6 +147,73 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"        Apreciable\n"
+"        <t t-if=\"object.partner_id.parent_id\">\n"
+"            <t t-if=\"object.partner_id.name\">\n"
+"                <t t-out=\"object.partner_id.name\">Brandon Freeman</t> (<t "
+"t-out=\"object.partner_id.parent_id.name or ''\">Azure Interior</t>),\n"
+"            </t>\n"
+"            <t t-else=\"\">\n"
+"                <t t-out=\"object.partner_id.parent_id.name or ''\">Azure "
+"Interior</t>,\n"
+"            </t>\n"
+"        </t>\n"
+"        <t t-else=\"\">\n"
+"            <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,\n"
+"        </t>\n"
+"        <br/><br/>\n"
+"        A continuación encontrarás tu\n"
+"        <t t-if=\"object.name\">\n"
+"            factura <span style=\"font-weight:bold;\" t-out=\"object.name or "
+"''\">INV/2021/05/0005</span>\n"
+"        </t>\n"
+"        <t t-else=\"\">\n"
+"            factura\n"
+"        </t>\n"
+"        <t t-if=\"object.invoice_origin\">\n"
+"            (con la referencia: <t t-out=\"object.invoice_origin or ''\">"
+"SUB003</t>)\n"
+"        </t>\n"
+"        por <span style=\"font-weight:bold;\" t-out=\"format_amount"
+"(object.amount_total, object.currency_id) or ''\">$ 143,750.00</span>\n"
+"        de <t t-out=\"object.company_id.name or ''\">TuEmpresa</t>.\n"
+"        <t t-if=\"object.payment_state in ('paid', 'in_payment')\">\n"
+"            Esta factura ya está pagada.\n"
+"        </t>\n"
+"        <t t-else=\"\">\n"
+"            Paga lo antes posible.\n"
+"            <t t-if=\"object.payment_reference\">\n"
+"                <br/><br/>\n"
+"                Utiliza la siguiente referencia para realizar tu pago: "
+"<strong t-out=\"object.payment_reference or ''\">INV/2021/05/0005</strong>\n"
+"                <t t-if=\"object.partner_bank_id\">\n"
+"                    en la cuenta <strong t-"
+"out=\"object.partner_bank_id.acc_number\"/>\n"
+"                </t>\n"
+"                .\n"
+"            </t>\n"
+"        </t>\n"
+"        <t t-if=\"hasattr(object, 'timesheet_count') and "
+"object.timesheet_count\">\n"
+"            <br/><br/>\n"
+"            Recuerda que puedes consultar tus horas registradas <a t-att-"
+"href=\"'/my/timesheets?search_in=invoice&amp;search=%s' % object.name\">"
+"desde el portal.</a>\n"
+"        </t>\n"
+"        <br/><br/>\n"
+"        Contáctanos si tienes alguna pregunta.\n"
+"        <t t-if=\"not is_html_empty(object.invoice_user_id.signature)\" data-"
+"o-mail-quote-container=\"1\">\n"
+"            <br/><br/>\n"
+"            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-"
+"out=\"object.invoice_user_id.signature or ''\" data-o-mail-quote=\"1\">"
+"Mitchell Admin</t></div>\n"
+"        </t>\n"
+"    </p>\n"
+"</div>\n"
+"            "
 
 #. module: l10n_co_dian
 #: model:mail.template,body_html:l10n_co_dian.email_template_edi_credit_note
@@ -225,6 +258,44 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"        Apreciable\n"
+"        <t t-if=\"object.partner_id.parent_id\">\n"
+"            <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t> "
+"(<t t-out=\"object.partner_id.parent_id.name or ''\">Azure Interior</t>),\n"
+"        </t>\n"
+"        <t t-else=\"\">\n"
+"            <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,\n"
+"        </t>\n"
+"        <br/><br/>\n"
+"        A continuación encontrarás tu\n"
+"        <t t-if=\"object.name\">\n"
+"            nota de crédito <span style=\"font-weight:bold;\" t-"
+"out=\"object.name or ''\">RINV/2021/05/0001</span>\n"
+"        </t>\n"
+"        <t t-else=\"\">\n"
+"            nota de crédito\n"
+"        </t>\n"
+"        <t t-if=\"object.invoice_origin\">\n"
+"            (con referencia: <t t-out=\"object.invoice_origin or ''\">"
+"SUB003</t>)\n"
+"        </t>\n"
+"        por <span style=\"font-weight:bold;\" t-out=\"format_amount"
+"(object.amount_total, object.currency_id) or ''\">$143,750.00</span>\n"
+"        de <t t-out=\"object.company_id.name or ''\">TuEmpresa</t>.\n"
+"        <br/><br/>\n"
+"        Contáctanos si tienes alguna pregunta.\n"
+"        <t t-if=\"not is_html_empty(object.invoice_user_id.signature)\" data-"
+"o-mail-quote-container=\"1\">\n"
+"            <br/><br/>\n"
+"            <div data-o-mail-quote=\"1\">--<br data-o-mail-quote=\"1\"/><t t-"
+"out=\"object.invoice_user_id.signature or ''\" data-o-mail-quote=\"1\">"
+"Mitchell Admin</t></div>\n"
+"        </t>\n"
+"    </p>\n"
+"</div>\n"
+"            "
 
 #. module: l10n_co_dian
 #: model_terms:ir.ui.view,arch_db:l10n_co_dian.res_partner_form_inherit
@@ -232,6 +303,8 @@ msgid ""
 "<i title=\"Update data\" role=\"img\" aria-label=\"Update Data\" class=\"fa "
 "fa-fw fa-refresh\"/>"
 msgstr ""
+"<i title=\"Actualizar datos\" role=\"img\" aria-label=\"Actualizar datos\" "
+"class=\"fa fa-fw fa-refresh\"/>"
 
 #. module: l10n_co_dian
 #: model_terms:ir.ui.view,arch_db:l10n_co_dian.report_invoice_document
@@ -241,7 +314,7 @@ msgstr "<strong>Método de pago</strong>"
 #. module: l10n_co_dian
 #: model_terms:ir.ui.view,arch_db:l10n_co_dian.report_invoice_document
 msgid "<strong>Payment Method</strong>"
-msgstr "<strong>Términos de pago</strong>"
+msgstr "<strong>Método de pago</strong>"
 
 #. module: l10n_co_dian
 #. odoo-python
@@ -294,7 +367,7 @@ msgstr "Activar proceso de certificación"
 msgid ""
 "Activate this checkbox if you are in the certification process with the DIAN."
 msgstr ""
-"Active esta casilla si está en el proceso de certificación con la DIAN."
+"Activa esta casilla si estás en el proceso de certificación con la DIAN."
 
 #. module: l10n_co_dian
 #: model:ir.model.fields,help:l10n_co_dian.field_res_config_settings__l10n_co_dian_demo_mode
@@ -310,8 +383,8 @@ msgstr ""
 msgid ""
 "Activate this checkbox if you’re testing workflows for electronic invoicing."
 msgstr ""
-"Active esta casilla si está probando los flujos de trabajo para la "
-"facturación electrónica."
+"Activa esta casilla si estás probando flujos de trabajo para la facturación "
+"electrónica."
 
 #. module: l10n_co_dian
 #: model_terms:ir.ui.view,arch_db:l10n_co_dian.res_config_settings_view_form
@@ -353,7 +426,7 @@ msgstr "Todos los Documentos"
 #. odoo-python
 #: code:addons/l10n_co_dian/models/account_edi_xml_ubl_dian.py:0
 msgid "All products in an AIU invoice should be a service."
-msgstr "Todos los productos de una factura AIU debem de ser de tipo servicio."
+msgstr "Todos los productos de una factura AIU deben de ser de tipo servicio."
 
 #. module: l10n_co_dian
 #. odoo-python
@@ -376,7 +449,7 @@ msgstr "ApplicationResponse"
 #. module: l10n_co_dian
 #: model_terms:ir.ui.view,arch_db:l10n_co_dian.l10n_co_dian_operation_mode_view_tree
 msgid "Are you sure you want to delete this record?"
-msgstr "¿Está seguro de que desea eliminar este registro?"
+msgstr "¿De verdad quieres eliminar este registro?"
 
 #. module: l10n_co_dian
 #: model:ir.model.fields,field_description:l10n_co_dian.field_l10n_co_dian_document__attachment_id
@@ -396,7 +469,7 @@ msgstr "Código de barras"
 #. module: l10n_co_dian
 #: model_terms:ir.ui.view,arch_db:l10n_co_dian.res_config_settings_view_form
 msgid "Begin Certification Process"
-msgstr "Iniciar Proceso de Habilitaciòn"
+msgstr "Iniciar proceso de habilitación"
 
 #. module: l10n_co_dian
 #: model:ir.model.fields.selection,name:l10n_co_dian.selection__account_move__l10n_co_dian_identifier_type__cude
@@ -488,7 +561,7 @@ msgstr "Evento Comercial Colombia"
 #. module: l10n_co_dian
 #: model:ir.actions.server,name:l10n_co_dian.ir_cron_update_event_status_ir_actions_server
 msgid "Colombian EDI: Update Invoice Commercial States"
-msgstr "EDI Colombiano: Actualizar Estado Comercial de Facturas"
+msgstr "EDI colombiano: Actualizar estado comercial de las facturas"
 
 #. module: l10n_co_dian
 #: model:ir.model,name:l10n_co_dian.model_l10n_co_dian_document
@@ -573,7 +646,7 @@ msgstr "Creado el"
 #. module: l10n_co_dian
 #: model:mail.template,name:l10n_co_dian.email_template_edi_credit_note
 msgid "Credit Note (DIAN): Sending"
-msgstr "Nota Crédito (DIAN): Envío"
+msgstr "Nota de crédito (DIAN): Enviando"
 
 #. module: l10n_co_dian
 #: model_terms:ir.ui.view,arch_db:l10n_co_dian.report_invoice_document
@@ -674,7 +747,7 @@ msgstr "Eliminar"
 #. odoo-python
 #: code:addons/l10n_co_dian/models/l10n_co_dian_document.py:0
 msgid "Demo mode response"
-msgstr "Respuesta en modo DEMO"
+msgstr "Respuesta en modo demo"
 
 #. module: l10n_co_dian
 #: model:ir.model.fields,field_description:l10n_co_dian.field_account_edi_xml_ubl_dian__display_name
@@ -683,6 +756,7 @@ msgstr "Respuesta en modo DEMO"
 #: model:ir.model.fields,field_description:l10n_co_dian.field_account_move_line__display_name
 #: model:ir.model.fields,field_description:l10n_co_dian.field_account_move_send__display_name
 #: model:ir.model.fields,field_description:l10n_co_dian.field_certificate_certificate__display_name
+#: model:ir.model.fields,field_description:l10n_co_dian.field_ir_module_module__display_name
 #: model:ir.model.fields,field_description:l10n_co_dian.field_l10n_co_dian_claim_wizard__display_name
 #: model:ir.model.fields,field_description:l10n_co_dian.field_l10n_co_dian_document__display_name
 #: model:ir.model.fields,field_description:l10n_co_dian.field_l10n_co_dian_operation_mode__display_name
@@ -798,6 +872,12 @@ msgid ""
 "{{ object._l10n_co_dian_get_mail_commercial_state_label().split(' - ', 1)"
 "[0] }}"
 msgstr ""
+"Evento;{{ object.ref }};{{ "
+"object.company_id.partner_id._get_vat_without_verification_code() }};{{ "
+"object.company_id.partner_id.l10n_co_edi_commercial_name or "
+"object.company_id.partner_id.name }};{{ "
+"object._l10n_co_dian_get_electronic_document_number() }};{{ "
+"object._l10n_co_dian_get_mail_commercial_state_label().split(' - ', 1)[0] }}"
 
 #. module: l10n_co_dian
 #. odoo-python
@@ -816,6 +896,17 @@ msgstr "Todos los productos de exportación deben tener un código arancelario."
 #: code:addons/l10n_co_dian/models/account_edi_xml_ubl_dian.py:0
 msgid "Every lines should have non zero price units."
 msgstr "Todas las líneas deben tener un precio unitario diferente de 0."
+
+#. module: l10n_co_dian
+#. odoo-python
+#: code:addons/l10n_co_dian/models/account_edi_xml_ubl_dian.py:0
+msgid ""
+"Exportation invoices require custom code in all the products, please fill in "
+"this information before validating the invoice"
+msgstr ""
+"Las facturas de exportación requieren que todos los productos cuenten con un "
+"código de partida arancelaria, completa esta información antes de confirmar "
+"la factura"
 
 #. module: l10n_co_dian
 #: model_terms:ir.ui.view,arch_db:l10n_co_dian.report_invoice_document
@@ -850,6 +941,7 @@ msgstr "Ir a Socio"
 #: model:ir.model.fields,field_description:l10n_co_dian.field_account_move_line__id
 #: model:ir.model.fields,field_description:l10n_co_dian.field_account_move_send__id
 #: model:ir.model.fields,field_description:l10n_co_dian.field_certificate_certificate__id
+#: model:ir.model.fields,field_description:l10n_co_dian.field_ir_module_module__id
 #: model:ir.model.fields,field_description:l10n_co_dian.field_l10n_co_dian_claim_wizard__id
 #: model:ir.model.fields,field_description:l10n_co_dian.field_l10n_co_dian_document__id
 #: model:ir.model.fields,field_description:l10n_co_dian.field_l10n_co_dian_operation_mode__id
@@ -902,7 +994,7 @@ msgstr ""
 #. module: l10n_co_dian
 #: model:mail.template,name:l10n_co_dian.email_template_edi_invoice
 msgid "Invoice (DIAN): Sending"
-msgstr "Factura (DIAN): Envío"
+msgstr "Factura (DIAN): Enviando"
 
 #. module: l10n_co_dian
 #. odoo-python
@@ -949,7 +1041,7 @@ msgstr "L10N Co Dian Proceso de certificación"
 #. module: l10n_co_dian
 #: model:ir.model.fields,field_description:l10n_co_dian.field_res_company__l10n_co_dian_demo_mode
 msgid "L10N Co Dian Demo Mode"
-msgstr "L10N Co Dian Demo Mode"
+msgstr "Modo de prueba DIAN"
 
 #. module: l10n_co_dian
 #: model:ir.model.fields,field_description:l10n_co_dian.field_account_bank_statement_line__l10n_co_dian_document_ids
@@ -961,7 +1053,7 @@ msgstr "L10N Co Dian Documento"
 #: model:ir.model.fields,field_description:l10n_co_dian.field_res_partner__l10n_co_dian_enable_update_data
 #: model:ir.model.fields,field_description:l10n_co_dian.field_res_users__l10n_co_dian_enable_update_data
 msgid "L10N Co Dian Enable Update Data"
-msgstr "L10N Co Dian Enable Update Data"
+msgstr "DIAN - Habilitar actualización de datos"
 
 #. module: l10n_co_dian
 #: model:ir.model.fields,field_description:l10n_co_dian.field_account_bank_statement_line__l10n_co_dian_identifier_type
@@ -985,7 +1077,7 @@ msgstr "L10N Co Dian Hora de publicación"
 #: model:ir.model.fields,field_description:l10n_co_dian.field_account_bank_statement_line__l10n_co_dian_processed_by_get_event_status_cron
 #: model:ir.model.fields,field_description:l10n_co_dian.field_account_move__l10n_co_dian_processed_by_get_event_status_cron
 msgid "L10N Co Dian Processed By Get Event Status Cron"
-msgstr "L10N Co Dian Processed By Get Event Status Cron"
+msgstr "DIAN - Procesado por el cron Obtener estado del evento"
 
 #. module: l10n_co_dian
 #: model:ir.model.fields,field_description:l10n_co_dian.field_account_journal__l10n_co_dian_provider
@@ -1009,7 +1101,7 @@ msgstr "L10N Co Dian Estado"
 #: model:ir.model.fields,field_description:l10n_co_dian.field_account_bank_statement_line__l10n_co_dian_update_commercial_event_enabled
 #: model:ir.model.fields,field_description:l10n_co_dian.field_account_move__l10n_co_dian_update_commercial_event_enabled
 msgid "L10N Co Dian Update Commercial Event Enabled"
-msgstr "L10N Co Dian Update Commercial Event Enabled"
+msgstr "DIAN - Actualización de evento comercial habilitada"
 
 #. module: l10n_co_dian
 #: model:ir.model.fields,field_description:l10n_co_dian.field_l10n_co_dian_claim_wizard__write_uid
@@ -1041,6 +1133,11 @@ msgid "Message Json"
 msgstr "JSON del mensaje"
 
 #. module: l10n_co_dian
+#: model:ir.model,name:l10n_co_dian.model_ir_module_module
+msgid "Module"
+msgstr "Módulo"
+
+#. module: l10n_co_dian
 #: model:ir.model.fields,field_description:l10n_co_dian.field_l10n_co_dian_document__move_id
 msgid "Move"
 msgstr "Documento"
@@ -1055,6 +1152,12 @@ msgstr "NIT:"
 #: code:addons/l10n_co_dian/models/account_edi_xml_ubl_dian.py:0
 msgid "No DIAN Operation Mode Matches"
 msgstr "No coinciden los modos de operación de la DIAN"
+
+#. module: l10n_co_dian
+#. odoo-python
+#: code:addons/l10n_co_dian/models/account_edi_xml_ubl_dian.py:0
+msgid "No DIAN certificate is configured on the company."
+msgstr "No hay ningún certificado digital DIAN configurado en la empresa."
 
 #. module: l10n_co_dian
 #. odoo-python
@@ -1124,6 +1227,12 @@ msgstr "Pendiente"
 #: code:addons/l10n_co_dian/models/res_config_settings.py:0
 msgid "Please click below to check the status of your documents."
 msgstr "Dar clic abajo para consultar el estado de tus documentos."
+
+#. module: l10n_co_dian
+#. odoo-python
+#: code:addons/l10n_co_dian/models/res_config_settings.py:0
+msgid "Please set a certificate to begin the certification process."
+msgstr "Configura un certificado para iniciar el proceso de certificación."
 
 #. module: l10n_co_dian
 #. odoo-python
@@ -1208,10 +1317,10 @@ msgid ""
 "In the fields below, define the number of 'Total Required Accepted "
 "Documents' specified in the Test Set assigned by the DIAN."
 msgstr ""
-"Envíe documentos electrónicos de prueba con su certificado para lograr el "
+"Envía documentos electrónicos de prueba con tu certificado para obtener el "
 "estado 'Habilitado' en el portal de la DIAN para el modo de operación "
-"'Software propio'. En los campos de abajo, defina la cantidad de 'Total de "
-"Documentos Aceptados Requeridos' especificados en el Set de Pruebas asignado "
+"'Software propio'. En los campos de abajo, define el número de 'Total de "
+"documentos aceptados requeridos' que especifica el set de pruebas asignado "
 "por la DIAN."
 
 #. module: l10n_co_dian
@@ -1223,12 +1332,12 @@ msgstr "Envío fallido"
 #. module: l10n_co_dian
 #: model:mail.template,description:l10n_co_dian.email_template_edi_credit_note
 msgid "Sent to customers with the credit note in attachment"
-msgstr "Enviado al cliente con la nota crédito adjunta"
+msgstr "Enviado a los clientes con la nota de crédito adjunta"
 
 #. module: l10n_co_dian
 #: model:mail.template,description:l10n_co_dian.email_template_edi_invoice
 msgid "Sent to customers with their invoices in attachment"
-msgstr "Enviado al cliente con facturas adjuntas"
+msgstr "Enviado a los clientes con las facturas adjuntas"
 
 #. module: l10n_co_dian
 #: model:mail.template,description:l10n_co_dian.email_template_commercial_event
@@ -1249,7 +1358,7 @@ msgstr "Servicio no prestado"
 #. module: l10n_co_dian
 #: model:ir.model.fields,field_description:l10n_co_dian.field_l10n_co_dian_document__show_button_fetch_attached_document
 msgid "Show Button Fetch Attached Document"
-msgstr "Mostrar Botón para obtener Attached Document"
+msgstr "Mostrar botón Obtener documento adjunto"
 
 #. module: l10n_co_dian
 #: model:ir.model.fields,field_description:l10n_co_dian.field_l10n_co_dian_document__show_button_get_status
@@ -1279,7 +1388,7 @@ msgstr "Modo del software"
 #. module: l10n_co_dian
 #: model:ir.model.fields,field_description:l10n_co_dian.field_l10n_co_dian_operation_mode__dian_software_security_code
 msgid "Software PIN"
-msgstr "NIP del software"
+msgstr "PIN del software"
 
 #. module: l10n_co_dian
 #: model:ir.model.fields,help:l10n_co_dian.field_l10n_co_dian_operation_mode__dian_software_security_code
@@ -1408,10 +1517,10 @@ msgstr "La factura vinculada a esta nota de crédito no tiene CUFE."
 #. odoo-python
 #: code:addons/l10n_co_dian/models/account_edi_xml_ubl_dian.py:0
 msgid ""
-"The issue date can not be older than 5 days or more than 5 days in the "
+"The issue date can not be older than 6 days or more than 6 days in the "
 "future."
 msgstr ""
-"La fecha de emisión no puede ser anterior a 5 días ni más de 5 días en el "
+"La fecha de generación no puede ser anterior a 6 días o más de 6 días en el "
 "futuro."
 
 #. module: l10n_co_dian
@@ -1456,13 +1565,19 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_co_dian/models/account_edi_xml_ubl_dian.py:0
 msgid "The software PIN is required to compute the CUDE/CUDS."
-msgstr "Se requiere el NIP del software para calcular el CUDE/CUDS."
+msgstr "El NIP del software es necesario para calcular el CUDE/CUDS."
 
 #. module: l10n_co_dian
 #. odoo-python
 #: code:addons/l10n_co_dian/models/account_edi_xml_ubl_dian.py:0
 msgid "The support document linked to this credit note has no CUDS."
 msgstr "El documento soporte vinculado a esta nota de crédito no tiene CUDS."
+
+#. module: l10n_co_dian
+#. odoo-python
+#: code:addons/l10n_co_dian/models/account_edi_xml_ubl_dian.py:0
+msgid "There is no Colombian code on the unit of measure: %s"
+msgstr "No existe un código colombiano para la unidad de medida: %s"
 
 #. module: l10n_co_dian
 #. odoo-python
@@ -1490,7 +1605,23 @@ msgstr "No hay documento soporte vinculado a esta nota de crédito."
 #. odoo-python
 #: code:addons/l10n_co_dian/models/res_config_settings.py:0
 msgid "This action must only be called while in certification mode."
-msgstr "Esta acción solo debe ser llama en el modo de certificación."
+msgstr "Esta acción solo debe ser llamada en el modo de certificación."
+
+#. module: l10n_co_dian
+#. odoo-python
+#: code:addons/l10n_co_dian/models/res_partner.py:0
+msgid ""
+"This contact has already been updated with DIAN information, please review "
+"the related invoicing address contact and see if it matches the data "
+"returned from DIAN:\n"
+"Email: %(partner_email)s\n"
+"Name: %(partner_name)s"
+msgstr ""
+"Este contacto ya se actualizó con información de la DIAN. Revisa el contacto "
+"de dirección de facturación relacionado y verifica si coincide con los datos "
+"que devolvió la DIAN:\n"
+"Correo electrónico: %(partner_email)s\n"
+"Nombre: %(partner_name)s"
 
 #. module: l10n_co_dian
 #: model_terms:ir.ui.view,arch_db:l10n_co_dian.res_config_settings_view_form
@@ -1509,7 +1640,7 @@ msgstr "UBL 2.1"
 #. module: l10n_co_dian
 #: model:ir.model,name:l10n_co_dian.model_account_edi_xml_ubl_dian
 msgid "UBL DIAN Mandate extension"
-msgstr "UBL DIAN Extensión Mandatos"
+msgstr "UBL DIAN - Extensión para mandatos"
 
 #. module: l10n_co_dian
 #. odoo-python
@@ -1600,10 +1731,9 @@ msgid ""
 "best guarantee certification with DIAN. Please make sure you are only "
 "running this on a testing database."
 msgstr ""
-"Atención! Al activar esta acción se realizarán cambios irreversibles a su "
-"base de datos con el objetivo de garantizar el éxito de su habilitación con "
-"la DIAN. Por favor asegurese de correr la acción en una base de datos de "
-"prueba."
+"¡Advertencia! Esta acción realizará cambios irreversibles en tu base de "
+"datos con el objetivo de garantizar el éxito de tu habilitación con la DIAN. "
+"Asegúrate de ejecutar esta acción solo en una base de datos de prueba."
 
 #. module: l10n_co_dian
 #: model:ir.model,name:l10n_co_dian.model_l10n_co_dian_claim_wizard
@@ -1655,3 +1785,34 @@ msgid ""
 "{{ object.company_id.name }};{{ object.name }};{{ (object.l10n_co_edi_type "
 "or '') }};{{ object.company_id.partner_id.l10n_co_edi_commercial_name }}"
 msgstr ""
+"{{ object.company_id.partner_id._get_vat_without_verification_code() }};{{ "
+"object.company_id.name }};{{ object.name }};{{ (object.l10n_co_edi_type or "
+"'') }};{{ object.company_id.partner_id.l10n_co_edi_commercial_name }}"
+
+#~ msgid "1018418009"
+#~ msgstr "1018418009"
+
+#~ msgid "18760000001"
+#~ msgstr "18760000001"
+
+#~ msgid "2019-01-01"
+#~ msgstr "2019-01-01"
+
+#~ msgid "2024-03-15 15:43:50"
+#~ msgstr "2024-03-15 15:43:50"
+
+#~ msgid "2024-03-15 15:43:58"
+#~ msgstr "2024-03-15 15:43:58"
+
+#~ msgid "2030-12-31"
+#~ msgstr "2030-12-31"
+
+#~ msgid "4390"
+#~ msgstr "4390"
+
+#~ msgid ""
+#~ "The issue date can not be older than 5 days or more than 5 days in the "
+#~ "future."
+#~ msgstr ""
+#~ "La fecha de emisión no puede ser anterior a 5 días ni más de 5 días en el "
+#~ "futuro."

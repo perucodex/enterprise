@@ -7,7 +7,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
 from odoo.tools import groupby
 from odoo.tools.date_utils import get_timedelta
-from odoo.tools.float_utils import float_compare, float_is_zero, float_round
+from odoo.tools.float_utils import float_is_zero, float_round
 
 
 class AccountTransferModel(models.Model):
@@ -212,7 +212,6 @@ class AccountTransferModel(models.Model):
 
         values = []
         currency_round = self.company_id.currency_id.round
-        transfer_lines_total_percentage_is_hundred = float_compare(sum(self.mapped('line_ids.percent')), 100, precision_digits=6) == 0
         transferred_lines_by_account = dict(groupby(transferred_amls, lambda aml: aml.account_id.id))
         transferred_lines_total_balance = sum(transferred_amls.mapped('balance'))
         amount_to_transfer = 0
@@ -232,9 +231,10 @@ class AccountTransferModel(models.Model):
 
         for transfer_line in self.line_ids:
             destination_account = transfer_line.account_id
-            if transfer_lines_total_percentage_is_hundred and destination_account == self.line_ids.mapped('account_id')[-1]:
-                # If the transfer model is set to redistribute the full amount of the source account and this is the last aml for that account,
-                # we take the rest of the balance instead of computing it in % to avoid rounding issues.
+            if destination_account == self.line_ids.mapped('account_id')[-1]:
+                # The last destination line takes whatever remains to transfer instead of computing it in %, to avoid rounding issues.
+                # The sum of all destination amounts must always match the amount removed from the source accounts,
+                # regardless of whether the destination percentages add up to 100%.
                 amount = amount_to_transfer
             else:
                 amount = transferred_lines_total_balance * (transfer_line.percent / 100.0)

@@ -10,6 +10,7 @@ import {extractFieldsFromArchInfo, getFieldsSpec} from "@web/model/relational_mo
 import {RelationalModel} from "@web/model/relational_model/relational_model";
 import {isNull} from "@web/views/utils";
 import {AccountReturnKanbanRecord} from "./account_return_kanban_record";
+import {focusNextFlatCard} from "./account_return_kanban_renderer";
 import {Chatter} from "@mail/chatter/web_portal/chatter";
 
 
@@ -143,6 +144,10 @@ export class AccountReturnCheckKanbanRenderer extends KanbanRenderer {
             ...group,
             key: isNull(group.value) ? `group_key_${index}` : String(group.value),
         }));
+    }
+
+    focusNextCard(area, direction) {
+        return focusNextFlatCard(area, direction);
     }
 
     async openRecord(record, params) {

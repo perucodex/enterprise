@@ -14,8 +14,7 @@ import { onRpc, serverState } from "@web/../tests/web_test_helpers";
 describe.current.tags("desktop");
 setupVoipTests();
 
-// TODO: fix this test
-test.skip("Scrolling to bottom loads more recent calls", async () => {
+test("Scrolling to bottom loads more recent calls", async () => {
     const pyEnv = await startServer();
     let rpcCount = 0;
     onRpc("voip.call", "get_recent_phone_calls", () => {

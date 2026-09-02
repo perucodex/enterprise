@@ -164,6 +164,19 @@ class L10nPayrollAccountCommon(AccountTestInvoicingCommon):
             "parameter_value": {"claimable": 150},
         })
 
+    @classmethod
+    def _create_company(cls, **create_values):
+        company = super()._create_company(**create_values)
+        cls.env['ir.sequence'].create({
+            'name': 'STP Sequence',
+            'code': 'stp.transaction',
+            'prefix': 'PAYEVENT0004',
+            'padding': 10,
+            'number_next': 1,
+            'company_id': company.id,
+        })
+        return company
+
     def _register_payment(self, payslip_run):
         action = payslip_run.action_register_payment()
 

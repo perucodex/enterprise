@@ -160,10 +160,13 @@ class StockMoveLine(models.Model):
                 tracking_number_list = [i for i in range(start_number, start_number + len(move_line_ids), 1)]
                 epc_sequence.write({'number_next_actual': start_number + len(move_line_ids)})
             else:
-                tracking_number_list = [m.lot_id.name if m.lot_id else m.lot_name for m in move_line_ids if m.lot_id or m.lot_name]
-                if len(tracking_number_list) == 0:
-                    move_line_ids.electronic_product_code = self.env._("Error: We can't generate an Electronic Product Code for a tracked product without a tracking number.")
+                untracked_move_lines = move_line_ids.filtered(lambda m: not m.lot_id and not m.lot_name)
+                if untracked_move_lines:
+                    untracked_move_lines.electronic_product_code = self.env._("Error: We can't generate an Electronic Product Code for a tracked product without a tracking number.")
+                    move_line_ids -= untracked_move_lines
+                if not move_line_ids:
                     continue
+                tracking_number_list = [m.lot_id.name if m.lot_id else m.lot_name for m in move_line_ids]
                 alphanumeric_tracking = any(re.search(r'[^\d]', tracking_number) for tracking_number in tracking_number_list)
             # NOTE: In the future, obtain the filter & company prefix length rather than providing them explicitly
             gtin = product_id.barcode
@@ -189,8 +192,3 @@ class StockMoveLine(models.Model):
         if res and from_barcode:
             res['context'] = {**res.get('context', {}), 'barcode_view': True}
         return res
-
-    def _should_display_put_in_pack_wizard(self, package_id, package_type_id, package_name, from_package_wizard):
-        if self.env.context.get('barcode_view'):
-            return False
-        return super()._should_display_put_in_pack_wizard(package_id, package_type_id, package_name, from_package_wizard)

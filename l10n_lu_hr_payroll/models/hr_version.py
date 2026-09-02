@@ -246,3 +246,17 @@ class HrVersion(models.Model):
                 "l10n_lu_meal_voucher_employer_cost",
             ]
         return whitelisted_fields
+
+    def _get_l10n_lu_indexed_wage(self, date=None):
+        self.ensure_one()
+        date = date or fields.Date.today()
+
+        index_at_signature = self.l10n_lu_index_on_contract_signature
+        index_at_date = self.env['hr.rule.parameter']._get_parameter_from_code(
+            'l10n_lu_index', date=date, raise_if_not_found=False
+        )
+        wage = self.wage if self.wage_type == 'monthly' else self.hourly_wage
+
+        if index_at_signature and index_at_date:
+            return wage / index_at_signature * index_at_date
+        return wage

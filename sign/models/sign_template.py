@@ -140,8 +140,11 @@ class SignTemplate(models.Model):
         return super().get_empty_list_help(help_message)
 
     def copy_data(self, default=None):
-        vals_list = super().copy_data(default=default)
-        for template, vals in zip(self, vals_list):
+        # Need to add the new sign map to the context for Copying sign.item.roles
+        # because they need thier own copys instead of using the same roles in sign.templates.
+        templates = self.with_context(__sign_role_copy_map={})
+        vals_list = super(SignTemplate, templates).copy_data(default=default)
+        for template, vals in zip(templates, vals_list):
             if 'name' in vals and vals.get('name') == template.name or 'name' not in vals:
                 vals['name'] = template._get_copy_name(template.name)
 
@@ -427,12 +430,17 @@ class SignTemplate(models.Model):
 
     def trigger_template_tour(self):
         template = self.env.ref('sign.template_sign_tour')
-        if template.has_sign_requests:
+        # Write access to the item's roles is needed to update the roles names.
+        sign_items_access = template.sign_item_ids.mapped('responsible_id').has_access('write')
+        if template.has_sign_requests or not sign_items_access:
             template = template.copy({
+                'user_id': self.env.user.id,
                 'favorited_ids': [Command.link(self.env.user.id)],
                 'active': False,
-                'sign_item_ids': False,
             })
+            # Remove items added by previous tour runs, as the tour guides
+            # the user to add new ones. Also avoids access errors.
+            template.sign_item_ids.unlink()
         return {
             'type': 'ir.actions.client',
             'tag': 'sign.Template',
@@ -557,9 +565,12 @@ class SignTemplate(models.Model):
     def create_item_and_role(self, document_id, role_name):
         """ Create a new sign role and a corresponding dummy sign item. """
         role = self.env['sign.item.role'].create({'name': role_name})
+        signature_item_type = self.env["sign.item.type"].search([], limit=1)
+        if not signature_item_type:
+            raise UserError(_("You need at least one field type in order to sign a document!"))
         self.env['sign.item'].create({
             'document_id': document_id,
-            'type_id': 1,
+            'type_id': signature_item_type.id,
             'required': False,
             'responsible_id': role.id,
             'page': -1,

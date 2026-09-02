@@ -11,6 +11,7 @@ from odoo.tests import tagged
 from odoo.tools import formataddr
 from .sign_controller_common import TestSignControllerCommon
 
+
 @tagged('post_install', '-at_install')
 class TestSignController(TestSignControllerCommon):
     # test float auto_field display
@@ -275,14 +276,15 @@ class TestSignController(TestSignControllerCommon):
         # Create two sign requests. The second one will be returned as 'the next' to be signed.
         self.sign_request = self.create_sign_request_1_role(self.partner_1, self.env['res.partner'])
         self.next_sign_request = self.create_sign_request_1_role(self.partner_1, self.env['res.partner'])
+        self.sign_request_item = self.sign_request.request_item_ids[0]
 
         self.authenticate(None, None)  # Ensure the current user for the request is public
         response = self._json_url_open(
             '/sign/sign_request_items',
             {
                 'request_id': self.sign_request.id,
-                'token': self.sign_request.access_token,
-                'sign_item_id': self.sign_request.request_item_ids[0].id,
+                'token': self.sign_request_item.access_token,
+                'sign_item_id': self.sign_request_item.id,
             }
         )
         self.assertEqual(response.status_code, 200, f"Expected 200 OK, got {response.status_code}")
@@ -327,3 +329,61 @@ class TestSignController(TestSignControllerCommon):
         self.assertEqual(create_log.user_id, self.env.user, "The sign request is created by current user")
         self.assertEqual(signature_log.create_uid, self.user_1, "the signature is created by the signing user")
         self.assertEqual(signature_log.user_id, self.user_2, "the signature log user_id is the logged in user")
+
+    def test_sign_completed_redirection(self):
+        """ Test that internal users are redirected to the backend when a sign request is completed. """
+        sign_request = self.create_sign_request_1_role(self.partner_1, self.env['res.partner'])
+        sign_request_item = sign_request.request_item_ids[0]
+        sign_vals = self.create_sign_values(sign_request.template_id.sign_item_ids, sign_request_item.role_id.id)
+        sign_request_item._sign(sign_vals)
+        url = '/sign/document/%s/%s' % (sign_request.id, sign_request_item.access_token)
+
+        # Test redirection for a logged-in user with a sign.group_sign_user
+        self.authenticate("user_1", "user_1")
+        response = self.url_open(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(f'/odoo/sign.request/{sign_request.id}/action-sign.Document' in response.url)
+
+        # Test no redirection for a public user
+        self.authenticate(None, None)
+        response = self.url_open(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse('/odoo/sign.request/' in response.url)
+
+        # Test no redirection for an internal user without sign.group_sign_user
+        self.authenticate("user_5", "user_5")
+        response = self.url_open(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse('/odoo/sign.request/' in response.url)
+
+    def test_sequential_signing_non_consecutive(self):
+        template = self.template_3_roles
+        roles = template.sign_item_ids.mapped('responsible_id')
+        role_customer = roles[0]
+        role_employee = roles[1]
+        role_company = roles[2]
+        sign_request = self.env['sign.request'].create({
+            'template_id': template.id,
+            'reference': 'A-B-A Sequence',
+            'request_item_ids': [
+                Command.create({'partner_id': self.partner_1.id, 'role_id': role_customer.id, 'mail_sent_order': 1}),
+                Command.create({'partner_id': self.partner_2.id, 'role_id': role_employee.id, 'mail_sent_order': 2}),
+                Command.create({'partner_id': self.partner_1.id, 'role_id': role_company.id, 'mail_sent_order': 3})
+            ],
+        })
+        role2item = {sri.role_id: sri for sri in sign_request.request_item_ids}
+        item_customer = role2item[role_customer]
+        item_company = role2item[role_company]
+        customer_sign_values = self.create_sign_values(template.sign_item_ids, role_customer.id)
+        item_customer.sudo().sign(customer_sign_values)
+        self.authenticate(None, None)
+        response = self._json_url_open(
+            '/sign/sign_request_items',
+            {
+                'request_id': sign_request.id,
+                'token': item_customer.access_token,
+                'sign_item_id': item_customer.id
+            }
+        )
+        result_ids = [item['id'] for item in response.json().get('result', [])]
+        self.assertNotIn(item_company.id, result_ids)

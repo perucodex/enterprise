@@ -38,6 +38,9 @@ class TestUi(odoo.tests.HttpCase):
     def test_rename(self):
         self.start_tour("/odoo?debug=tests", 'web_studio_main_and_rename', login="admin", timeout=200)
 
+    def test_rename_2(self):
+        self.start_tour("/web?debug=tests", 'web_studio_rename', login="admin", timeout=200)
+
     def test_approval(self):
         self.start_tour("/odoo?debug=tests", 'web_studio_approval_tour', login="admin")
 
@@ -904,7 +907,7 @@ class TestStudioUIUnit(odoo.tests.HttpCase):
             "forbid": False,
         }])
 
-        xml_temp = E.field(name="color", groups=doesNotHaveGroupXmlId.complete_name, column_invisible="True", studio_groups=studio_groups)
+        xml_temp = E.field(name="color", groups=doesNotHaveGroupXmlId.complete_name, column_invisible="True", actual_invisible="False", studio_groups=studio_groups)
 
         expected = '''
             <list>
@@ -2278,6 +2281,34 @@ class TestStudioUIUnit(odoo.tests.HttpCase):
                 <field name="x_test_binary" filename="x_test_binary_filename"/>
             </xpath>
         </data>''')
+
+    def test_negated_groups_do_not_interfere_with_invisible(self):
+        doesNotHaveGroup = self.env["res.groups"].create({
+            "name": "studio does not have"
+        })
+        doesNotHaveGroupXmlId = self.env["ir.model.data"].create({
+            "name": "studio_test_doesnothavegroup",
+            "model": "res.groups",
+            "module": "web_studio",
+            "res_id": doesNotHaveGroup.id,
+        })
+        self.testView.arch = f'''
+            <form>
+                <group>
+                    <field name="name" />
+                    <field name="function" groups="{doesNotHaveGroupXmlId.complete_name}" />
+                </group>
+            </form>
+        '''
+        self.start_tour("/odoo?debug=tests", 'web_studio_test_negated_groups_do_not_interfere_with_invisible', login="admin")
+        studioView = _get_studio_view(self.testView)
+        assertViewArchEqual(self, studioView.arch, """
+            <data>
+                <xpath expr="/form//field[@name='function']" position="attributes">
+                    <attribute name="invisible">display_name == "Robert"</attribute>
+                </xpath>
+            </data>
+        """)
 
     def test_cohort_measure_values(self):
         testCohortView = self.env["ir.ui.view"].create({

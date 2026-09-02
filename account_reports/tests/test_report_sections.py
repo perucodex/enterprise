@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=C0326
 
+from os import getenv
+
 from freezegun import freeze_time
+from unittest import skipIf
 from unittest.mock import patch
 
 from odoo.addons.account.tests.common import AccountTestInvoicingHttpCommon
@@ -131,6 +134,7 @@ class TestReportSections(AccountTestInvoicingHttpCommon):
         self.assertEqual(options['selected_section_id'], self.section_2.id, "Section 2 should be selected.")
         self.assertEqual(options['report_id'], self.section_2.id, "Selecting the second section from the first one should open it.")
 
+    @skipIf(getenv("ODOO_FAKETIME_TEST_MODE"), "Faketime mode doesn't play well with interval selection in the report filter")
     def test_sections_tour(self):
         def patched_init_options_custom(report, options, previous_options):
             # Emulates a custom handler modifying the export buttons
@@ -202,3 +206,18 @@ class TestReportSections(AccountTestInvoicingHttpCommon):
         tax_return._proceed_with_locking()
         tax_return.action_submit()
         self.assertEqual(tax_return.total_amount_to_pay, 150)
+
+    def test_composite_report_with_journal_report_pdf_export(self):
+        """
+        Test that exporting a composite report containing a journal report to PDF
+        works correctly.
+        """
+        journal_report = self.env.ref('account_reports.journal_report')
+        composite_with_journal = self.env['account.report'].create({
+            'name': 'Test Composite with Journal Report',
+            'section_report_ids': [Command.set([journal_report.id])],
+        })
+        options = composite_with_journal.get_options({})
+        result = composite_with_journal.export_to_pdf(options)
+        self.assertTrue(result.get('file_content'), 'PDF should be generated successfully')
+        self.assertEqual(result.get('file_type'), 'pdf', 'File type should be PDF')

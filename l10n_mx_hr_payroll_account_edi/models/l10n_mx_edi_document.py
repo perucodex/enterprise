@@ -47,3 +47,21 @@ class L10nMxEdiDocument(models.Model):
                 lambda x: x != document and x.attachment_uuid == document.attachment_uuid).write({'sat_state': 'skip'})
 
         return document
+
+    @api.model
+    def _update_document_sat_state(self, sat_state, error=None):
+        if super()._update_document_sat_state(sat_state, error=error):
+            return True
+
+        if self.payslip_id and self.state in ('payslip_sent', 'payslip_cancel'):
+            self.payslip_id._l10n_mx_edi_cfdi_payslip_update_sat_state(self, sat_state, error=error)
+            return True
+
+    @api.model
+    def _get_update_sat_status_domains(self, from_cron=True):
+        return super()._get_update_sat_status_domains(from_cron=from_cron) + [
+            [
+                ('state', 'in', ('payslip_sent', 'payslip_cancel')),
+                ('sat_state', 'not in', ('valid', 'cancelled', 'skip')),
+            ],
+        ]

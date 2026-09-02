@@ -65,7 +65,6 @@ class L10nBeOnssDeclaration(models.Model):
         _logger.info("User %s starting ONSS SFTP connection for company %s",
                      self.env.user.login, self.env.company.name)
 
-    @api.model
     def action_test_sftp_connection(self):
         self.ensure_one()
         self._check_access_sftp_connection()
@@ -142,8 +141,10 @@ class L10nBeOnssDeclaration(models.Model):
         reception_result = data_dict['ACRF']['Form']['ReceptionResult']
         if reception_result['ResultCode'] == '0':
             onss_declaration.state = 'error'
-            error_code = reception_result['ErrorID']
-            onss_declaration.error_message = f"{error_code}\n{self._get_error_label(error_code.split('-')[-1])}"
+            error_codes = reception_result['ErrorID']
+            if not isinstance(error_codes, list):
+                error_codes = [error_codes]
+            onss_declaration.error_message = ', '.join(f"{error_code}\n{self._get_error_label(error_code.split('-')[-1])}" for error_code in error_codes)
             onss_declaration.dmfa_id.message_post(body=_(
                 'The %(declaration)s (id=%(declaration_id)s) has been received as invalid by the ONSS',
                 declaration=onss_declaration._get_html_link(_('declaration')),
@@ -262,7 +263,7 @@ class L10nBeOnssDeclaration(models.Model):
                             'The DIMONA declaration has been notified as invalid by the ONSS:\n%(error_message)s',
                             error_message='\n'.join(error_message)))
                     else:
-                        dimona_data = form['HandlingResult']['ImpactReport']['DimonaImpactReport']['DimonaPeriodAfter']
+                        dimona_data = form['HandlingResult']['ImpactReport']['DimonaImpactReport'].get('DimonaPeriodAfter', {})
                         employee.message_post(
                             body=_(
                                 "DIMONA declaration opened (Starting %(start)s, Ending %(end)s)",
@@ -360,6 +361,7 @@ class L10nBeOnssDeclaration(models.Model):
         for onss_file in onss_files:
             if onss_file.onss_declaration_id:
                 continue
+            _logger.info(onss_file.name)
             matching_file = self.env['l10n.be.onss.file'].search([
                 ('name', 'like', '.'.join(onss_file.name.split('.')[1:])),
                 ('onss_declaration_id', '!=', False),

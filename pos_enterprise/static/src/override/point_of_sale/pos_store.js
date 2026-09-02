@@ -26,6 +26,7 @@ patch(PosStore.prototype, {
                     cancelled: opts.cancelled,
                     fired_course_id: opts.firedCourseId,
                 };
+                o.updateLastOrderChange();
 
                 if (opts.cancelled) {
                     await this.data.call("pos.prep.order", "process_order", [
@@ -65,5 +66,8 @@ patch(PosStore.prototype, {
         }
 
         return result;
+    },
+    hasDevice(opts = {}) {
+        return super.hasDevice(opts) || this.config.preparationDisplayCategories.size > 0;
     },
 });

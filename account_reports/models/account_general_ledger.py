@@ -1,10 +1,14 @@
+import csv
+import io
 import json
 
 from collections import defaultdict
 from itertools import groupby
+from textwrap import shorten
 
 from odoo import models, fields, _
-from odoo.tools import SQL
+from odoo.tools import float_repr, SQL
+from odoo.exceptions import UserError
 
 
 class AccountGeneralLedgerReportHandler(models.AbstractModel):
@@ -13,6 +17,14 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
     _description = 'General Ledger Custom Handler'
 
     def _custom_options_initializer(self, report, options, previous_options):
+        options['buttons'].append({
+            'name': _("CSV"),
+            'sequence': 50,
+            'action': 'export_file',
+            'action_param': 'generate_csv_export',
+            'file_export_type': _('CSV'),
+        })
+
         super()._custom_options_initializer(report, options, previous_options=previous_options)
         # Remove multi-currency columns if needed
         if self.env.user.has_group('base.group_multi_currency'):
@@ -25,6 +37,9 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
 
         # Automatically unfold the report when printing it, unless some specific lines have been unfolded
         options['unfold_all'] = (options['export_mode'] == 'print' and not options.get('unfolded_lines')) or options['unfold_all']
+
+        if options.get('force_not_unfold_all'):
+            options['unfold_all'] = False
 
         options['custom_display_config'] = {
             'templates': {
@@ -91,8 +106,9 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                     aml_keys.append(grouping_key)
 
             records_unsorted = self.env['account.move.line'].browse(ids_to_browse)
+            records_unsorted.fetch(['display_name'])
             for record, aml_key in zip(records_unsorted, aml_keys):
-                keys_names_in_sequence[aml_key] = record.display_name
+                keys_names_in_sequence[aml_key] = shorten(record.display_name, width=200)
 
             return keys_names_in_sequence
 
@@ -120,115 +136,11 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                     return json.dumps([fields.Date.to_string(row['date']), row['id']])
             return row[groupby] if groupby else None
 
-        report = self.env['account.report'].browse(options['report_id'])
-        options_date_from = fields.Date.from_string(options['date']['date_from'])
-        current_fiscalyear_date_from = self.env.company.compute_fiscalyear_dates(options_date_from)['date_from']
-
-        # We want to exclude move lines from expense and income accounts before the fiscal year for every groupby under account_id
-        additional_domain = [
-            '|',
-            ('account_id.include_initial_balance', '=', True),
-            ('date', '>=', current_fiscalyear_date_from),
-        ]
-
-        report_query = report._get_report_query(options, 'from_beginning', additional_domain)
-
-        if options.get('export_mode') == 'print' and options.get('filter_search_bar') and current_groupby not in ('id_with_accumulated_balance', 'id'):
-            search_bar_sql = SQL(
-                """
-                AND result_account.id = ANY(%(search_bar_account_query)s)
-                """,
-                search_bar_account_query=self.env['account.account']._search([
-                    ('display_name', 'ilike', options.get('filter_search_bar')),
-                    *self.env['account.account']._check_company_domain(self.env['account.report'].get_report_company_ids(options)),
-                ]).select(SQL.identifier('id'))
-            )
-        else:
-            search_bar_sql = SQL()
-
-        additional_select = SQL("")
-        groupby = []
-        if current_groupby == 'id_with_accumulated_balance':
-            account_code_select = self.env['account.account']._field_to_sql('result_account', 'code', report_query)
-            account_name_select = self.env['account.account']._field_to_sql('result_account', 'name')
-            additional_select = SQL("""
-                CASE
-                    WHEN account_move_line.date >= %(date)s THEN account_move_line.id
-                    ELSE NULL
-                END AS id,
-                CASE
-                    WHEN account_move_line.date >= %(date)s THEN account_move_line.date
-                    ELSE NULL
-                END AS date,
-                MIN(move.name) AS move_name,
-
-                SUM(account_move_line.amount_currency) AS amount_currency,
-                MIN(partner.name) AS partner_name,
-                MIN(account_move_line.currency_id) AS currency_id,
-                MIN(result_account.id) AS account_id,
-
-                MIN(account_move_line.name) AS line_name,
-                MIN(%(account_name_select)s) AS account_name,
-                MIN(%(account_code_select)s) AS account_code,
-                """,
-                date=fields.Date.from_string(options['date']['date_from']),
-                account_name_select=account_name_select,
-                account_code_select=account_code_select,
-            )
-            groupby = [SQL("1"), SQL("2"), SQL("account_id")]
-        elif current_groupby == 'account_id':
-            additional_select = SQL("""
-                result_account.id AS account_id,
-                result_account.account_type AS account_type,
-                SUM(account_move_line.amount_currency) AS amount_currency,
-                result_account.currency_id AS currency_id,
-            """)
-            groupby = [SQL("result_account.id"), SQL("result_account.currency_id")]
-        elif current_groupby:
-            additional_select = SQL("%s,", self.env['account.move.line']._field_to_sql('account_move_line', current_groupby, report_query))
-            groupby = [SQL("%s", self.env['account.move.line']._field_to_sql('account_move_line', current_groupby, report_query))]
-
-        query = SQL(
-            """
-            SELECT
-                %(additional_select)s
-                COALESCE(SUM(%(select_debit)s), 0.0) AS debit,
-                COALESCE(SUM(%(select_credit)s), 0.0) AS credit,
-                COALESCE(SUM(%(select_balance)s), 0.0) AS balance
-            FROM %(from_clause)s
-
-            LEFT JOIN res_partner partner ON partner.id = account_move_line.partner_id
-            JOIN account_account account ON account.id = account_move_line.account_id
-            JOIN account_account result_account ON result_account.id = account_move_line.account_id
-
-            JOIN account_move move ON move.id = account_move_line.move_id
-            %(currency_table_join)s
-
-            WHERE %(where_clause)s
-            %(search_bar_sql)s
-
-            %(additional_groupby)s
-            %(orderby_clause)s
-
-            %(offset_clause)s
-            LIMIT %(limit)s
-            """,
-            additional_select=additional_select,
-            select_balance=report._currency_table_apply_rate(SQL("account_move_line.balance")),
-            select_debit=report._currency_table_apply_rate(SQL("account_move_line.debit")),
-            select_credit=report._currency_table_apply_rate(SQL("account_move_line.credit")),
-            from_clause=report_query.from_clause,
-            currency_table_join=report._currency_table_aml_join(options),
-            where_clause=report_query.where_clause,
-            search_bar_sql=search_bar_sql,
-            additional_groupby=SQL("GROUP BY %s", SQL(",").join(groupby)) if groupby else SQL(),
-            orderby_clause=SQL("ORDER BY 2 NULLS FIRST, move_name, 1 NULLS FIRST") if current_groupby == 'id_with_accumulated_balance' else SQL(),
-            offset_clause=SQL("OFFSET %s", offset) if offset else SQL(),
-            limit=limit
-        )
+        query = self._get_query(options, current_groupby, offset=offset, limit=limit)
 
         rows_by_key = defaultdict(lambda: {
             'date': None,
+            'invoice_date': None,
             'partner_name': None,
             'amount_currency': None,
             'currency_id': self.env.company.currency_id.id,
@@ -259,6 +171,8 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                         rows_by_key[aml_key]['account_code'] = row['account_code']
                         rows_by_key[aml_key]['account_name'] = row['account_name']
                         rows_by_key[aml_key]['move_name'] = row['move_name']
+                        if any(column['expression_label'] == 'invoice_date' for column in options['columns']):
+                            rows_by_key[aml_key]['invoice_date'] = row['invoice_date']
                     if row['currency_id'] != self.env.company.currency_id.id:
                         rows_by_key[aml_key]['amount_currency'] = row['amount_currency']
                         rows_by_key[aml_key]['currency_id'] = row['currency_id']
@@ -278,6 +192,143 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
             return rows_by_key[None]  # None is the key for total line as there is no groupby
 
         return [(key, entry) for key, entry in rows_by_key.items()]
+
+    def _get_query(self, options, current_groupby, order_by_account=False, offset=0, limit=None):
+        report = self.env['account.report'].browse(options['report_id'])
+        options_date_from = fields.Date.from_string(options['date']['date_from'])
+        current_fiscalyear_date_from = self.env.company.compute_fiscalyear_dates(options_date_from)['date_from']
+
+        # We want to exclude move lines from expense and income accounts before the fiscal year for every groupby under account_id
+        additional_domain = [
+            '|',
+            ('account_id.include_initial_balance', '=', True),
+            ('date', '>=', current_fiscalyear_date_from),
+        ]
+
+        report_query = report._get_report_query(options, 'from_beginning', additional_domain)
+
+        if options.get('export_mode') == 'print' and options.get('filter_search_bar') and current_groupby not in ('id_with_accumulated_balance', 'id'):
+            search_bar_sql = SQL(
+                """
+                AND account_move_line.account_id = ANY(%(search_bar_account_query)s)
+                """,
+                search_bar_account_query=self.env['account.account']._search([
+                    ('display_name', 'ilike', options.get('filter_search_bar')),
+                    *self.env['account.account']._check_company_domain(self.env['account.report'].get_report_company_ids(options)),
+                ]).select(SQL.identifier('id'))
+            )
+        else:
+            search_bar_sql = SQL()
+
+        additional_select = SQL("")
+        groupby = []
+        if current_groupby == 'id_with_accumulated_balance':
+            account_code_select = self.env['account.account']._field_to_sql('account_move_line__account_id', 'code', report_query)
+            account_name_select = self.env['account.account']._field_to_sql('account_move_line__account_id', 'name')
+            invoice_date_select = SQL(
+                """
+                    MIN(
+                        CASE
+                            WHEN account_move_line.date >= %(date)s THEN account_move_line.invoice_date
+                            ELSE NULL
+                        END
+                    ) AS invoice_date,
+                """,
+                date=options_date_from,
+            ) if any(column['expression_label'] == 'invoice_date' for column in options['columns']) else SQL("")
+            additional_select = SQL("""
+                CASE
+                    WHEN account_move_line.date >= %(date)s THEN account_move_line.id
+                    ELSE NULL
+                END AS id,
+                CASE
+                    WHEN account_move_line.date >= %(date)s THEN account_move_line.date
+                    ELSE NULL
+                END AS date,
+                %(invoice_date_select)s
+                MIN(move.name) AS move_name,
+
+                CASE
+                    WHEN MIN(account_move_line.currency_id) = MAX(account_move_line.currency_id)
+                    THEN SUM(account_move_line.amount_currency)
+                    ELSE NULL
+                END AS amount_currency,
+                MIN(partner.name) AS partner_name,
+                CASE
+                    WHEN MIN(account_move_line.currency_id) = MAX(account_move_line.currency_id)
+                    THEN MIN(account_move_line.currency_id)
+                    ELSE NULL
+                END AS currency_id,
+                MIN(account_move_line__account_id.id) AS account_id,
+
+                MIN(account_move_line.name) AS line_name,
+                MIN(%(account_name_select)s) AS account_name,
+                MIN(%(account_code_select)s) AS account_code,
+                """,
+                date=options_date_from,
+                invoice_date_select=invoice_date_select,
+                account_name_select=account_name_select,
+                account_code_select=account_code_select,
+            )
+            groupby = [SQL("1"), SQL("2"), SQL("account_move_line.account_id")]
+        elif current_groupby == 'account_id':
+            additional_select = SQL("""
+                account_move_line__account_id.id AS account_id,
+                account_move_line__account_id.account_type AS account_type,
+                SUM(account_move_line.amount_currency) AS amount_currency,
+                account_move_line__account_id.currency_id AS currency_id,
+            """)
+            groupby = [SQL("account_move_line__account_id.id"), SQL("account_move_line__account_id.currency_id")]
+        elif current_groupby:
+            groupby_field_sql = self.env['account.move.line']._field_to_sql('account_move_line', current_groupby, report_query)
+            additional_select = SQL("%s AS %s,", groupby_field_sql, SQL.identifier(current_groupby))
+            groupby = [groupby_field_sql]
+
+        report_query.left_join('account_move_line', 'account_id', 'account_account', 'id', 'account_id')
+        if current_groupby == 'account_id' or order_by_account:
+            order_clause = [self.env['account.account']._order_to_sql(self.env['account.account']._order, report_query, 'account_move_line__account_id')]
+            groupby = order_clause + groupby
+        else:
+            order_clause = []
+        if current_groupby == 'id_with_accumulated_balance':
+            order_clause.append(SQL("2 NULLS FIRST, move_name, 1 NULLS FIRST"))
+
+        query = SQL(
+            """
+            SELECT
+                %(additional_select)s
+                COALESCE(SUM(%(select_debit)s), 0.0) AS debit,
+                COALESCE(SUM(%(select_credit)s), 0.0) AS credit,
+                COALESCE(SUM(%(select_balance)s), 0.0) AS balance
+            FROM %(from_clause)s
+
+            LEFT JOIN res_partner partner ON partner.id = account_move_line.partner_id
+            JOIN account_move move ON move.id = account_move_line.move_id
+            %(currency_table_join)s
+
+            WHERE %(where_clause)s
+            %(search_bar_sql)s
+
+            %(additional_groupby)s
+            %(orderby_clause)s
+
+            %(offset_clause)s
+            LIMIT %(limit)s
+            """,
+            additional_select=additional_select,
+            select_balance=report._currency_table_apply_rate(SQL("account_move_line.balance")),
+            select_debit=report._currency_table_apply_rate(SQL("account_move_line.debit")),
+            select_credit=report._currency_table_apply_rate(SQL("account_move_line.credit")),
+            from_clause=report_query.from_clause,
+            currency_table_join=report._currency_table_aml_join(options),
+            where_clause=report_query.where_clause,
+            search_bar_sql=search_bar_sql,
+            additional_groupby=SQL("GROUP BY %s", SQL(",").join(groupby)) if groupby else SQL(),
+            orderby_clause=SQL("ORDER BY %s", SQL(",").join(order_clause)) if order_clause else SQL(),
+            offset_clause=SQL("OFFSET %s", offset) if offset else SQL(),
+            limit=limit
+        )
+        return query
 
     def _report_expand_unfoldable_line_with_groupby(self, line_dict_id, groupby, options, progress, offset, unfold_all_batch_data=None):
         """
@@ -309,6 +360,8 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
             for col_group_key in col_group_keys
         })
         for col_group_key in col_group_keys:
+            if 'balance' not in colname_to_idx[col_group_key]:
+                continue
             for line in processed_lines:
                 line_balance = line['columns'][colname_to_idx[col_group_key]['balance']]['no_format']
                 accumulated_balance_by_colgroup[col_group_key] += line_balance
@@ -454,3 +507,133 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                                 )
 
         return results
+
+    def generate_csv_export(self, options):
+        if len(options['column_groups']) > 1:
+            raise UserError(_("CSV export only works with one column group"))
+
+        report = self.env['account.report'].browse(options['report_id'])
+        return {
+            'file_content': self._generate_csv_lazy_export(options),
+            'file_type': 'csv',
+            'file_name': report.get_default_report_filename(options, 'csv')
+        }
+
+    def _generate_csv_lazy_export(self, options):
+        with self.pool.cursor() as new_cr:
+            self.env.flush_all()
+            handler = self.with_env(self.env(cr=new_cr))
+            cur_data = {
+                currency.id: {'name': currency.name, 'decimal_places': currency.decimal_places}
+                for currency in handler.env['res.currency'].with_context(active_test=False).search([])
+            }
+            company_currency_id = handler.env.company.currency_id.id
+
+            def csv_format_account_line(account_line, has_code=True):
+                if has_code:
+                    cells = list(handler.env['account.account']._split_code_name(account_line['name']))
+                else:
+                    cells = ['/', account_line['name']]
+
+                for col in account_line['columns']:
+                    cell = col['name']
+                    currency_id = col['currency'].id if col.get('currency') else company_currency_id
+
+                    if col['figure_type'] == 'monetary' and isinstance(cell, float):
+                        cell = float_repr(cell, cur_data[currency_id]['decimal_places'])
+
+                    if col['expression_label'] == 'amount_currency':
+                        cells.append(cell)
+                        cell = cur_data[currency_id]['name'] if currency_id != company_currency_id else ''
+
+                    cells.append(cell)
+
+                return csv_format(cells)
+
+            def csv_format_aml_res(aml_res):
+                cells = ['', aml_res.get('move_name', '')]
+                for col in options['columns']:
+                    cell = aml_res.get(col['expression_label'], '')
+
+                    if col['figure_type'] == 'monetary' and isinstance(cell, float):
+                        if col['expression_label'] == 'amount_currency':
+                            currency_id = aml_res['currency_id']
+                            amount_cur_cell = float_repr(cell, cur_data[currency_id]['decimal_places']) if currency_id != company_currency_id else ''
+                            cells.append(amount_cur_cell)
+                            cell = cur_data[currency_id]['name'] if currency_id != company_currency_id else ''
+                        else:
+                            cell = float_repr(cell, cur_data[company_currency_id]['decimal_places'])
+                    cells.append(cell)
+
+                return csv_format(cells)
+
+            def csv_format(cells):
+                with io.StringIO() as buf:
+                    writer = csv.writer(buf, delimiter=',', lineterminator='\n')
+                    writer.writerow(cells)
+                    return buf.getvalue().encode()
+
+            col_names = [col['name'] for col in options['columns']]
+            currency_idx = next((i for i, col in enumerate(options['columns']) if col.get('expression_label') == 'amount_currency'), None)
+            header = [_("Code"), _("Name")]
+
+            if currency_idx is not None:
+                header += [
+                    *col_names[:currency_idx],
+                    _("Amount Currency"),
+                    _("Currency"),
+                    *col_names[currency_idx + 1:]
+                ]
+            else:
+                header += col_names
+
+            yield csv_format(header)
+
+            report = handler.env['account.report'].browse(options['report_id'])
+            agg_lines_options = report.get_options(previous_options={**options, 'unfolded_lines': [], 'force_not_unfold_all': True})
+            agg_lines = report.with_context(no_format=True)._get_lines(agg_lines_options)
+
+            # Exclude total lines
+            account_lines = []
+            accounts = []
+            for agg_line in agg_lines:
+                line_id = agg_line['id']
+                markup, model, res_id = report._parse_line_id(line_id)[-1]
+                if markup != 'total':
+                    if model == 'account.account':
+                        accounts.append(res_id)
+                    account_lines.append(agg_line)
+
+            if not account_lines:
+                return
+
+            accounts_with_codes = {account.id for account in handler.env['account.account'].browse(accounts) if account.code}
+
+            account_lines_iter = iter(account_lines)
+            account_line = next(account_lines_iter)
+            _model, account_id = report._get_model_info_from_id(account_line['id'])
+            yield csv_format_account_line(account_line, has_code=account_id in accounts_with_codes)
+
+            aml_query = handler._get_query(options, 'id_with_accumulated_balance', order_by_account=True)
+            handler.env.cr.execute(SQL("%s", aml_query))
+            progress = 0
+            while aml_line := handler.env.cr.dictfetchone():
+                while account_id != aml_line['account_id']:
+                    account_line = next(account_lines_iter)
+                    _model, account_id = report._get_model_info_from_id(account_line['id'])
+                    yield csv_format_account_line(account_line, has_code=account_id in accounts_with_codes)
+                    progress = 0
+
+                if aml_line['id'] is None:
+                    aml_line['move_name'] = _("Initial Balance")
+                    aml_line['partner_name'] = ''
+
+                progress = aml_line['balance'] = (progress + aml_line['balance'])
+                yield csv_format_aml_res(aml_line)
+
+            # These are the "Result Brought Forward" lines
+            for account_line in account_lines_iter:
+                yield csv_format_account_line(account_line, has_code=False)
+
+            total_line = agg_lines[-1]
+            yield csv_format_account_line(total_line)

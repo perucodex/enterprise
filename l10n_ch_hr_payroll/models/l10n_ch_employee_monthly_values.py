@@ -104,6 +104,8 @@ class L10nCHEmployeeMonthlySnapshot(models.Model):
 
         return values
 
+    def _get_swissdec_structure_rules(self):
+        return self.env.ref('l10n_ch_hr_payroll.hr_payroll_structure_ch_elm').with_context(active_test=False).rule_ids
 
     @api.depends('yearly_values_id', 'month')
     def _compute_employee_meta_data(self):
@@ -265,7 +267,7 @@ class L10nCHEmployeeMonthlySnapshot(models.Model):
 
     @api.depends("employee_id", "year", "month")
     def _compute_bvg_lpp_annual_basis(self):
-        swissdec_structure_rules = self.env.ref('l10n_ch_hr_payroll.hr_payroll_structure_ch_elm').rule_ids
+        swissdec_structure_rules = self._get_swissdec_structure_rules()
         paid_slips = self.env["hr.payslip"]._read_group(
             domain=[("employee_id", 'in', self.employee_id.ids),
                     ('l10n_ch_lpp_not_insured', '!=', True),
@@ -316,7 +318,7 @@ class L10nCHEmployeeMonthlySnapshot(models.Model):
 
         for snapshot in self:
             existing_declaration = [r for m, r in mapped_bvg_lpp_declarations[snapshot.employee_id.company_id][snapshot.year].items() if r]
-            existing_declaration = max(existing_declaration, key=lambda r: r.month) if existing_declaration else False
+            existing_declaration = max(existing_declaration, key=lambda r: r[0].month) if existing_declaration else False
             existing_employee_declaration = False
             if existing_declaration:
                 lpp_line = existing_declaration.lpp_basis_line_ids.filtered(lambda l: l.employee_id == snapshot.employee_id)
@@ -335,11 +337,7 @@ class L10nCHEmployeeMonthlySnapshot(models.Model):
                         retroactive_basis = 0
                     previsional_basis = sum(line_values[r.code][p.id]['total'] * r.l10n_ch_lpp_factor for p in presumable_current_month_slip for r in previsional_rules)
 
-                    total = float_round(retroactive_basis + previsional_basis, precision_rounding=0.01, rounding_method="HALF-UP")
-                    if total % 0.05 >= 0.025:
-                        total = total + 0.05 - (total % 0.05)
-                    else:
-                        total = total - (total % 0.05)
+                    total = float_round(retroactive_basis + previsional_basis, precision_rounding=0.05, rounding_method="HALF-UP")
 
                     snapshot.bvg_lpp_annual_basis = total
                 else:
@@ -454,7 +452,7 @@ class L10nCHEmployeeMonthlySnapshot(models.Model):
     @api.depends("month", "year", "employee_id")
     def _compute_monthly_statistics(self):
         swissdec_declaration = SwissdecDeclaration()
-        swissdec_structure_rules = self.env.ref('l10n_ch_hr_payroll.hr_payroll_structure_ch_elm').rule_ids
+        swissdec_structure_rules = self._get_swissdec_structure_rules()
         paid_slips = self.env["hr.payslip"]._read_group(
             domain=[
                 ("employee_id", 'in', self.employee_id.ids),
@@ -854,7 +852,7 @@ class L10nCHEmployeeMonthlySnapshot(models.Model):
                 res_field = missing_dict.get("res_field")
                 employee_id = missing_dict.get("employee_id")
                 if res_model and res_id:
-                    field_description = self.env[res_model]._fields[res_field].string
+                    field_description = self.env[res_model]._fields[res_field].get_description(self.env, ["string"])["string"]
                     if res_model == 'hr.version' and employee_id:
                         record = self.env['hr.employee'].browse(employee_id)
                         action = record._get_records_action()

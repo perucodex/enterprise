@@ -182,10 +182,10 @@ test("Details panel required document name", async () => {
 
 test("Details panel root folder placeholders", async () => {
     const serverData = getDocumentsTestServerModelsData([
-        makeDocumentRecordData(2, "In COMPANY"),
+        makeDocumentRecordData(2, "In COMPANY (readonly)", { user_permission: "view" }),
         makeDocumentRecordData(3, "In MY DRIVE", { owner_id: serverState.userId }),
         makeDocumentRecordData(4, "In SHARED WITH ME", { owner_id: serverState.odoobotId }),
-        makeDocumentRecordData(5, "In COMPANY (readonly)", { user_permission: "view" }),
+        makeDocumentRecordData(5, "In COMPANY"),
     ]);
     await makeDocumentsMockEnv({ serverData });
     await mountDocumentsKanbanView({ arch: archWithTags });

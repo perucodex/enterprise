@@ -213,12 +213,18 @@ class HrVersion(models.Model):
     def _compute_l10n_in_basic_salary_amount(self):
         self.env.remove_to_compute(self._fields['l10n_in_basic_percentage'], self)
         for version in self:
+            if version.country_code != "IN":
+                version.l10n_in_basic_salary_amount = 0.0
+                continue
             monthly_wage = version._l10n_in_get_montly_wage()
             version.l10n_in_basic_salary_amount = monthly_wage * version.l10n_in_basic_percentage
 
     @api.depends('l10n_in_basic_salary_amount')
     def _compute_l10n_in_basic_percentage(self):
         for version in self:
+            if version.country_code != "IN":
+                version.l10n_in_basic_percentage = 0.0
+                continue
             monthly_wage = version._l10n_in_get_montly_wage()
             if not monthly_wage:
                 version.l10n_in_basic_percentage = 0.0
@@ -230,13 +236,16 @@ class HrVersion(models.Model):
     def _compute_l10n_in_hra(self):
         self.env.remove_to_compute(self._fields['l10n_in_hra_percentage'], self)
         for version in self:
+            if version.country_code != "IN":
+                version.l10n_in_hra = 0.0
+                continue
             version.l10n_in_hra = version.l10n_in_basic_salary_amount *\
                 version.l10n_in_hra_percentage
 
     @api.depends('l10n_in_hra', 'l10n_in_basic_salary_amount')
     def _compute_l10n_in_hra_percentage(self):
         for version in self:
-            if not version.l10n_in_basic_salary_amount:
+            if version.country_code != "IN" or not version.l10n_in_basic_salary_amount:
                 version.l10n_in_hra_percentage = 0.0
                 continue
             version.l10n_in_hra_percentage = version.l10n_in_hra /\
@@ -246,13 +255,16 @@ class HrVersion(models.Model):
     def _compute_l10n_in_standard_allowance(self):
         self.env.remove_to_compute(self._fields['l10n_in_standard_allowance_percentage'], self)
         for version in self:
+            if version.country_code != "IN":
+                version.l10n_in_standard_allowance = 0.0
+                continue
             version.l10n_in_standard_allowance = version.l10n_in_basic_salary_amount *\
                 version.l10n_in_standard_allowance_percentage
 
     @api.depends('l10n_in_standard_allowance', 'l10n_in_basic_salary_amount')
     def _compute_l10n_in_standard_allowance_percentage(self):
         for version in self:
-            if not version.l10n_in_basic_salary_amount:
+            if version.country_code != "IN" or not version.l10n_in_basic_salary_amount:
                 version.l10n_in_standard_allowance_percentage = 0.0
                 continue
             version.l10n_in_standard_allowance_percentage = version.l10n_in_standard_allowance /\
@@ -262,13 +274,16 @@ class HrVersion(models.Model):
     def _compute_l10n_in_performance_bonus(self):
         self.env.remove_to_compute(self._fields['l10n_in_performance_bonus_percentage'], self)
         for version in self:
+            if version.country_code != "IN":
+                version.l10n_in_performance_bonus = 0.0
+                continue
             version.l10n_in_performance_bonus = version.l10n_in_basic_salary_amount *\
                 version.l10n_in_performance_bonus_percentage
 
     @api.depends('l10n_in_performance_bonus', 'l10n_in_basic_salary_amount')
     def _compute_l10n_in_performance_bonus_percentage(self):
         for version in self:
-            if not version.l10n_in_basic_salary_amount:
+            if version.country_code != "IN" or not version.l10n_in_basic_salary_amount:
                 version.l10n_in_performance_bonus_percentage = 0.0
                 continue
             version.l10n_in_performance_bonus_percentage = version.l10n_in_performance_bonus /\
@@ -278,13 +293,16 @@ class HrVersion(models.Model):
     def _compute_l10n_in_leave_travel_allowance(self):
         self.env.remove_to_compute(self._fields['l10n_in_leave_travel_percentage'], self)
         for version in self:
+            if version.country_code != "IN":
+                version.l10n_in_leave_travel_allowance = 0.0
+                continue
             version.l10n_in_leave_travel_allowance = version.l10n_in_basic_salary_amount *\
                 version.l10n_in_leave_travel_percentage
 
     @api.depends('l10n_in_leave_travel_allowance', 'l10n_in_basic_salary_amount')
     def _compute_l10n_in_leave_travel_percentage(self):
         for version in self:
-            if not version.l10n_in_basic_salary_amount:
+            if version.country_code != "IN" or not version.l10n_in_basic_salary_amount:
                 version.l10n_in_leave_travel_percentage = 0.0
                 continue
             version.l10n_in_leave_travel_percentage = version.l10n_in_leave_travel_allowance /\
@@ -294,6 +312,9 @@ class HrVersion(models.Model):
         'l10n_in_hra', 'l10n_in_performance_bonus', 'l10n_in_leave_travel_allowance', 'l10n_in_standard_allowance')
     def _compute_l10n_in_fixed_allowance(self):
         for version in self:
+            if version.country_code != "IN":
+                version.l10n_in_fixed_allowance = 0.0
+                continue
             if version.l10n_in_basic_salary_amount:
                 total_allowances = sum([
                     version.l10n_in_basic_salary_amount,
@@ -310,7 +331,7 @@ class HrVersion(models.Model):
     @api.depends('l10n_in_fixed_allowance')
     def _compute_l10n_in_fixed_allowance_percentage(self):
         for version in self:
-            if not version.l10n_in_basic_salary_amount:
+            if version.country_code != "IN" or not version.l10n_in_basic_salary_amount:
                 version.l10n_in_fixed_allowance_percentage = 0.0
                 continue
             version.l10n_in_fixed_allowance_percentage = version.l10n_in_fixed_allowance /\
@@ -321,12 +342,15 @@ class HrVersion(models.Model):
     def _compute_l10n_in_gratuity(self):
         self.env.remove_to_compute(self._fields['l10n_in_gratuity_percentage'], self)
         for version in self:
+            if version.country_code != "IN":
+                version.l10n_in_gratuity = 0.0
+                continue
             version.l10n_in_gratuity = version.l10n_in_basic_salary_amount * version.l10n_in_gratuity_percentage
 
     @api.depends('l10n_in_gratuity', 'l10n_in_basic_salary_amount')
     def _compute_l10n_in_gratuity_percentage(self):
         for version in self:
-            if not version.l10n_in_basic_salary_amount:
+            if version.country_code != "IN" or not version.l10n_in_basic_salary_amount:
                 version.l10n_in_gratuity_percentage = 0.0
                 continue
             version.l10n_in_gratuity_percentage = version.l10n_in_gratuity / version.l10n_in_basic_salary_amount
@@ -337,7 +361,7 @@ class HrVersion(models.Model):
         pf_amount = rule_parameter._get_parameter_from_code('l10n_in_pf_amount', raise_if_not_found=False)
         pf_percentage = rule_parameter._get_parameter_from_code('l10n_in_pf_percent', raise_if_not_found=False)
         for version in self:
-            if not (version.wage or version.hourly_wage) or\
+            if version.country_code != "IN" or not (version.wage or version.hourly_wage) or\
                 not (version.l10n_in_pf_employee_type in ('fixed', 'calculate') and pf_percentage):
                 version.l10n_in_pf_employee_amount = 0.0
                 continue
@@ -349,6 +373,9 @@ class HrVersion(models.Model):
     @api.depends('l10n_in_pf_employee_amount', 'l10n_in_basic_salary_amount')
     def _compute_l10n_in_pf_employee_percentage(self):
         for version in self:
+            if version.country_code != "IN":
+                version.l10n_in_pf_employee_percentage = 0.0
+                continue
             if version.l10n_in_basic_salary_amount:
                 version.l10n_in_pf_employee_percentage = version.l10n_in_pf_employee_amount /\
                     version.l10n_in_basic_salary_amount
@@ -361,7 +388,7 @@ class HrVersion(models.Model):
         pf_amount = rule_parameter._get_parameter_from_code('l10n_in_pf_amount', raise_if_not_found=False)
         pf_percentage = rule_parameter._get_parameter_from_code('l10n_in_pf_percent', raise_if_not_found=False)
         for version in self:
-            if not (version.wage or version.hourly_wage) or\
+            if version.country_code != "IN" or not (version.wage or version.hourly_wage) or\
             not (version.l10n_in_pf_employer_type in ('fixed', 'calculate') and pf_percentage):
                 version.l10n_in_pf_employer_amount = 0.0
                 continue
@@ -373,6 +400,9 @@ class HrVersion(models.Model):
     @api.depends('l10n_in_pf_employer_amount', 'l10n_in_basic_salary_amount')
     def _compute_l10n_in_pf_employer_percentage(self):
         for version in self:
+            if version.country_code != "IN":
+                version.l10n_in_pf_employer_percentage = 0.0
+                continue
             if version.l10n_in_basic_salary_amount:
                 version.l10n_in_pf_employer_percentage = version.l10n_in_pf_employer_amount /\
                     version.l10n_in_basic_salary_amount
@@ -384,6 +414,9 @@ class HrVersion(models.Model):
         'l10n_in_internet_subscription', 'l10n_in_meal_voucher_amount', 'l10n_in_company_transport')
     def _compute_l10n_in_gross_salary(self):
         for version in self:
+            if version.country_code != "IN":
+                version.l10n_in_gross_salary = 0.0
+                continue
             version.l10n_in_gross_salary = sum([version.l10n_in_basic_salary_amount, version.l10n_in_hra,
                 version.l10n_in_fixed_allowance, version.l10n_in_performance_bonus, version.l10n_in_standard_allowance,
                 version.l10n_in_leave_travel_allowance, version.l10n_in_phone_subscription,
@@ -394,7 +427,7 @@ class HrVersion(models.Model):
     def _compute_l10n_in_esic_employee_amount(self):
         self.env.remove_to_compute(self._fields['l10n_in_esic_employee_percentage'], self)
         for version in self:
-            if not version.l10n_in_gross_salary:
+            if version.country_code != "IN" or not version.l10n_in_gross_salary:
                 version.l10n_in_esic_employee_amount = 0.0
                 continue
             version.l10n_in_esic_employee_amount = version.l10n_in_gross_salary *\
@@ -403,7 +436,7 @@ class HrVersion(models.Model):
     @api.depends('l10n_in_esic_employee_amount', 'l10n_in_gross_salary')
     def _compute_l10n_in_esic_employee_percentage(self):
         for version in self:
-            if not version.l10n_in_gross_salary:
+            if version.country_code != "IN" or not version.l10n_in_gross_salary:
                 version.l10n_in_esic_employee_percentage = 0.0
                 continue
             version.l10n_in_esic_employee_percentage = version.l10n_in_esic_employee_amount /\
@@ -413,7 +446,7 @@ class HrVersion(models.Model):
     def _compute_l10n_in_esic_employer_amount(self):
         self.env.remove_to_compute(self._fields['l10n_in_esic_employer_percentage'], self)
         for version in self:
-            if not version.l10n_in_gross_salary:
+            if version.country_code != "IN" or not version.l10n_in_gross_salary:
                 version.l10n_in_esic_employer_amount = 0.0
                 continue
             version.l10n_in_esic_employer_amount = version.l10n_in_gross_salary *\
@@ -422,7 +455,7 @@ class HrVersion(models.Model):
     @api.depends('l10n_in_gross_salary', 'l10n_in_esic_employer_amount')
     def _compute_l10n_in_esic_employer_percentage(self):
         for version in self:
-            if not version.l10n_in_gross_salary:
+            if version.country_code != "IN" or not version.l10n_in_gross_salary:
                 version.l10n_in_esic_employer_percentage = 0.0
                 continue
             version.l10n_in_esic_employer_percentage = version.l10n_in_esic_employer_amount /\
@@ -432,6 +465,9 @@ class HrVersion(models.Model):
         'l10n_in_insured_second_children')
     def _compute_l10n_in_medical_insurance_total(self):
         for version in self:
+            if version.country_code != "IN":
+                version.l10n_in_medical_insurance_total = 0.0
+                continue
             insured_count = 1 + sum([
                 version.l10n_in_insured_spouse,
                 version.l10n_in_insured_first_children,
@@ -465,6 +501,8 @@ class HrVersion(models.Model):
         """
         Returns the monthly wage based on the wage type and resource calendar.
         """
+        if self.country_code != "IN":
+            return 0
         calendar = self.resource_calendar_id or self.company_id.resource_calendar_id
         if self.wage_type == 'hourly' and calendar:
             hours_per_week = calendar.hours_per_week or calendar.full_time_required_hours or 0.0

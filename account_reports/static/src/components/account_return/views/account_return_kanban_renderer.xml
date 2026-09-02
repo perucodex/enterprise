@@ -3,7 +3,7 @@
 <templates>
     <t t-name="account_reports.account_return_kanban_renderer">
 
-        <div class="o_kanban_renderer o_renderer o_account-return-kanban">
+        <div class="o_kanban_renderer o_renderer o_account-return-kanban" t-ref="root">
             <t t-if="groups">
                 <t t-foreach="groups" t-as="group" t-key="group.key">
                     <t t-if="group.count > 0">
@@ -31,6 +31,7 @@
                 readonly="false"
                 forceGlobalClick="false"
                 canResequence="false"
+                deleteRecord.bind="deleteRecord"
                 openRecord.bind="openRecord"
             />
         </t>

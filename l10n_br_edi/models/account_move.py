@@ -674,6 +674,11 @@ class AccountMove(models.Model):
 
     def _l10n_br_get_additional_info(self):
         info = self.narration and html2plaintext(self.narration)  # html2plaintext turns False into "False"
+        tax_data, _ = self._l10n_br_edi_get_tax_data()  # TODO: Pass as a parameter in master
+        informative_taxes = tax_data.get('summary', {}).get('taxImpactHighlights', {}).get('informative', [])
+        approximate_taxes = {tax['taxType']: tax['tax'] for tax in informative_taxes if tax['taxType'] in ('aproxtribState', 'aproxtribFed', 'aproxtribCity')}
+        aprox_line = f"Trib. Aprox. R$ {approximate_taxes.get('aproxtribFed', 0.0)} Federal, R$ {approximate_taxes.get('aproxtribState', 0.0)} Estadual e R$ {approximate_taxes.get('aproxtribCity', 0.0)} Municipal. Fonte: IBPT"
+        info = "\n".join(line for line in (info, aprox_line) if line)  # skip the None line if there's no narration since we always want the approx line
         return {
             "additionalInfo": {"otherInfo" if self.l10n_br_is_service_transaction else "complementaryInfo": info}
         }
@@ -774,9 +779,11 @@ class AccountMove(models.Model):
             return None, str(e)
 
     def _cron_l10n_br_get_invoice_statuses(self, batch_size=10):
-        pending_invoices = self.search([("l10n_br_last_edi_status", "=", "pending")], limit=batch_size)
+        pending_invoices = self.search([("l10n_br_last_edi_status", "=", "pending")], limit=batch_size + 1)
         for invoice in pending_invoices[:batch_size]:
             invoice.button_l10n_br_edi_get_service_invoice()
+            if self._can_commit():
+                self.env.cr.commit()
 
         if len(pending_invoices) > batch_size:
             self.env.ref("l10n_br_edi.ir_cron_l10n_br_edi_check_status")._trigger()
@@ -941,7 +948,7 @@ class AccountMove(models.Model):
         """ Identify NFe files. """
         # EXTENDS 'account'
 
-        if b"<nfeProc " in file_data['raw'] and b"<NFe " in file_data['raw']:
+        if b"<nfeProc " in file_data['raw'] and b"<NFe" in file_data['raw']:
             return 'l10n_br.nfe'
 
         return super()._get_import_file_type(file_data)

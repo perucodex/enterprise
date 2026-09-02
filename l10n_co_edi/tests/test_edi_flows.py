@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+from datetime import timedelta
+
 from .common import TestCoEdiCommon
 
+from odoo import fields
 from odoo.tests import tagged
 from odoo.exceptions import UserError, ValidationError
 
@@ -52,3 +55,13 @@ class TestEdiFlows(TestCoEdiCommon):
             # Test that we can cancel the invoice
             with self.assertRaises(UserError):
                 self.invoice.button_draft()
+
+    def test_invoice_date_constraints_carvajal(self):
+        """Test that invoices date older than 6 days or more than 6 days ahead trigger the warning."""
+        with self.mock_carvajal():
+            bogota_today = fields.Date.context_today(self.env.user.with_context(tz='America/Bogota'))
+            msg = "The issue date can not be older than 6 days or more than 6 days in the future."
+            for days, assertion in [(6, self.assertNotIn), (7, self.assertIn)]:
+                inv = self.invoice.copy({'invoice_date': bogota_today - timedelta(days=days)})
+                inv.action_post()
+                assertion(msg, inv.message_ids.mapped('preview'))

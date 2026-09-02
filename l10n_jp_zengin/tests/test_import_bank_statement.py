@@ -27,7 +27,7 @@ class TestImportZenginBankStatement(AccountTestInvoicingCommon):
             }).ids)
 
         zengin_transfer_file = (
-            b'10100504050503240503310009\xd0\xc2\xb2\xbd\xd0\xc4\xd3        410\xbb\xdd\xc9\xd0\xd4          10355368\xdc\xb6\xb8\xbb\xbc\xd6\xb3\xb6\xb2                                                                                                                           \r\n'
+            b'10100504050503240503310009\xd0\xc2-\xb2\xbd\xd0\xc4\xd3       410\xbb\xdd\xc9\xd0\xd4          10355368\xdc\xb6\xb8\xbb\xbc\xd6\xb3\xb6\xb2                                                                                                                           \r\n'
             b'203000105032405032400000600000000000000          \xdc\xb6\xb8\xbb \xb2\xc1\xdb\xb3                                       \xd0\xc2\xb2\xbd\xd0\xc4\xd3        \xbb\xdd\xc9\xd0\xd4                                                                                  \r\n'
             b'203000205032905032900000000000000000000          \xdc\xb6\xb8\xbb\xbc\xd6\xb3\xbc\xde(\xb6                                     \xd0\xc2\xb2\xbd\xd0\xc4\xd3        \xbb\xdd\xc9\xd0\xd4           050000000000000000000000                                               \r\n'
             b'8000002050000060000000000000000000000                                                                                                                                                                  \r\n'

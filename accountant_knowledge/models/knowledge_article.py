@@ -14,7 +14,7 @@ class KnowledgeArticle(models.Model):
     audit_report_id = fields.One2many('audit.report', 'knowledge_article_id')
     inherited_audit_report_id = fields.One2many('audit.report',
         compute='_compute_inherited_audit_report', store=False)
-    is_audit_report_template = fields.Boolean('Audit Report Template')
+    is_audit_report_template = fields.Boolean('Annual Report Template')
 
     @api.depends('audit_report_id')
     def _compute_inherited_audit_report(self):
@@ -47,17 +47,25 @@ class KnowledgeArticle(models.Model):
         base_domain = super()._get_available_template_domain()
         return Domain.AND([base_domain, [("is_audit_report_template", "=", False)]])
 
+    def _get_inherited_audit_report(self):
+        self.ensure_one()
+        return self.inherited_audit_report_id
+
     def _prepare_template(self, ref):
         fragment = super()._prepare_template(ref)
+        account_report_elements = fragment.xpath('//*[@data-embedded="accountReport"]')
+        if not account_report_elements:
+            return fragment
+
         if 'target_article_id' in self.env.context:
             target_article = self.env['knowledge.article'].browse(
                 self.env.context['target_article_id'])
-            audit_report = target_article.inherited_audit_report_id
+            audit_report = target_article._get_inherited_audit_report()
 
             def transform_xmlid_to_res_id(match):
                 return str(ref(match.group('xml_id')))
 
-            for element in fragment.xpath('//*[@data-embedded="accountReport"]'):
+            for element in account_report_elements:
                 embedded_props = ast.literal_eval(re.sub(
                     r'(?<![\w])ref\(\'(?P<xml_id>\w+\.\w+)\'\)',
                     transform_xmlid_to_res_id,
@@ -66,8 +74,9 @@ class KnowledgeArticle(models.Model):
                     account_report_options = embedded_props['options']
                     if 'report_id' in account_report_options:
                         account_report = self.env['account.report'].browse(account_report_options['report_id'])
+                        account_report = account_report.with_company(audit_report.company_id)
                         embedded_props['options'] = account_report.get_options({
-                            'selected_variant_id': account_report.id,
+                            'forced_companies': audit_report.company_id.ids,
                             'date': {
                                 'date_from': str(audit_report.start_date),
                                 'date_to': str(audit_report.end_date),
@@ -78,7 +87,7 @@ class KnowledgeArticle(models.Model):
                         })
                 element.set('data-embedded-props', json.dumps(embedded_props))
         else:
-            for element in fragment.xpath('//*[@data-embedded="accountReport"]'):
+            for element in account_report_elements:
                 embedded_props = ast.literal_eval(re.sub(
                     r'(?<![\w])ref\(\'(?P<xml_id>\w+\.\w+)\'\)',
                     lambda match: '0',
@@ -89,3 +98,13 @@ class KnowledgeArticle(models.Model):
                 }))
 
         return fragment
+
+    @api.autovacuum
+    def _gc_trashed_articles(self):
+        articles = self.with_context(active_test=False).search(
+            self._get_gc_trashed_articles_domain(), limit=100,
+        )
+        self.env['audit.report'].search([
+            ('knowledge_article_id', 'in', articles.ids),
+        ]).unlink()
+        return articles.unlink()

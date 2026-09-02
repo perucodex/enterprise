@@ -15,6 +15,11 @@ export const DocumentsModelMixin = (component) =>
             }
             this.dialogService = useService("dialog");
             this.documentService = useService("document.document");
+            this.notification = useService("notification");
+
+            if (!this.defaultOrderBy?.length) {
+                this.defaultOrderBy = [{ name: "create_date", asc: false }, {name: "id", asc: false}];
+            }
         }
 
         exportSelection() {
@@ -45,6 +50,9 @@ export const DocumentsModelMixin = (component) =>
             this.shortcutTargetRecords = this.orm.isSample
                 ? []
                 : await this._loadShortcutTargetRecords();
+            if (this.documentService.documentIdToRestore) {
+                this.documentService.documentIdToRestore = undefined;
+            }
             return res;
         }
 
@@ -376,8 +384,10 @@ export const DocumentsModelMixin = (component) =>
          * Open the permission panel of the selected document.
          */
         async onShare() {
-            const documents = this.targetRecords;
-            await this.documentService.openSharingDialog(documents.map((d) => d.data.id));
+            const selectedIds = this.isDomainSelected
+                ? await this.getResIds()
+                : this.targetRecords.map((d) => d.data.id);
+            await this.documentService.openSharingDialog(selectedIds);
         }
 
         /**
@@ -444,6 +454,48 @@ export const DocumentsModelMixin = (component) =>
                 this.documentService.downloadDocuments(this.targetRecords, resIds);
             } else {
                 this.documentService.downloadDocuments(this.targetRecords);
+            }
+        }
+        /**
+         * Make sure that when coming for a specific document, it is present as the first
+         * document on the first page. Notify the user if the requested document wasn't found.
+         */
+        async _loadDocumentToRestore(config, data) {
+            // This getter resets the DocumentIdToRestore, we'll restore it if we do have the record.
+            const documentIdToRestore = this.documentService.getOnceDocumentIdToRestore();
+            if (!documentIdToRestore) {
+                return data;
+            }
+            const idxToRestore = data.records.findIndex((r) => r.id === documentIdToRestore);
+            if (idxToRestore !== -1) {
+                const recordToRestore = data.records.splice(idxToRestore, 1)[0]; // take it out
+                data.records.splice(0, 0, recordToRestore); // put it at the top of the list
+                this.documentService.documentIdToRestore = documentIdToRestore;
+            } else {
+                const missingData = await super._loadData({
+                    ...config,
+                    domain: Domain.and([
+                        config.domain,
+                        [
+                            ["id", "=", documentIdToRestore],
+                            ["active", "in", [true, false]],
+                        ],
+                    ]).toList(),
+                    limit: 1,
+                });
+                if (missingData?.records?.length) {
+                    const addedRecord = missingData.records[0];
+                    data.records.splice(0, 0, addedRecord); // put it at the top of the list
+                    data.records.pop(); // Remove the last item to not overflow page
+                    if (!addedRecord.active) {
+                        this.documentService.archivedDocumentRestored = addedRecord;
+                    }
+                    this.documentService.documentIdToRestore = documentIdToRestore;
+                } else {
+                    this.notification.add(_t("Document not found or inaccessible."), {
+                        type: "danger",
+                    });
+                }
             }
         }
     };

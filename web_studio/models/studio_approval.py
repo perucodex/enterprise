@@ -4,7 +4,7 @@ from ast import literal_eval
 import logging
 
 from odoo import api, models, fields, _
-from odoo.exceptions import ValidationError, UserError
+from odoo.exceptions import AccessError, ValidationError, UserError
 from odoo.fields import Command, Domain
 from collections import defaultdict
 
@@ -58,6 +58,14 @@ class StudioApprovalRule(models.Model):
         except ValueError:
             action = self.env.ref(str_action, raise_if_not_found=False)
             return action and action.id
+
+    @api.model
+    def _cast_domain(self, domain):
+        if isinstance(domain, str):
+            domain = literal_eval(domain)
+        if domain is False or domain is None:
+            return Domain(True)
+        return Domain(domain)
 
     def _group_expand_notification_order(self, options, domain):
         return sorted(set(options).union({'1', '2', '3', '4'}))
@@ -324,6 +332,7 @@ class StudioApprovalRule(models.Model):
                 "model": "base.automation",
                 "res_id": base_auto.id,
                 "module": "web_studio",
+                "noupdate": True,
             })
             server_action = self_sudo.env.ref(get_base_action_server_xml_id(model), raise_if_not_found=False)
             if server_action:
@@ -347,6 +356,7 @@ class StudioApprovalRule(models.Model):
                     "model": "ir.actions.server",
                     "res_id": server_action.id,
                     "module": "web_studio",
+                    "noupdate": True,
                 }, {
                     "name": model_data_name,
                     "model": "ir.actions.server",
@@ -585,8 +595,8 @@ class StudioApprovalRule(models.Model):
 
             can_revoke = False
             for rule in rules_above:
-                domain = literal_eval(rule["domain"] or "[]")
-                if not record.filtered_domain(domain):
+                domain = self._cast_domain(rule["domain"])
+                if not record.sudo().filtered_domain(domain):
                     continue
                 if rule["can_validate"]:
                     can_revoke = True
@@ -702,8 +712,8 @@ class StudioApprovalRule(models.Model):
             ], ["domain", "notification_order"]):
                 if rule["id"] == ruleSudo.id:
                     continue
-                rule_domain = rule["domain"] and literal_eval(rule["domain"])
-                if rule_domain and not record.filtered_domain(rule_domain):
+                rule_domain = self._cast_domain(rule["domain"])
+                if not record.sudo().filtered_domain(rule_domain):
                     continue
                 if rule["notification_order"] == ruleSudo.notification_order:
                     same_level_rules.append(rule["id"])
@@ -830,11 +840,7 @@ class StudioApprovalRule(models.Model):
 
             record_ids_for_result = list()
             if records_for_rule:
-                if not rule_domain:
-                    record_ids_for_result = records_for_rule.ids
-                else:
-                    impacted_records = records_for_rule.filtered_domain(rule_domain)
-                    record_ids_for_result = impacted_records.ids
+                record_ids_for_result = records_for_rule.sudo().filtered_domain(self._cast_domain(rule_domain)).ids
 
             # Push rule here to search for entries
             # we won't fetch entries for the False res_id
@@ -1000,8 +1006,8 @@ class StudioApprovalRule(models.Model):
         )
         applicable_rule_ids = list()
         for rule in rules_data:
-            rule_domain = rule.get('domain') and literal_eval(rule['domain'])
-            if not rule_domain or record.filtered_domain(rule_domain):
+            rule_domain = self._cast_domain(rule.get('domain'))
+            if record.sudo().filtered_domain(rule_domain):
                 # the record matches the domain of the rule
                 # or the rule has no domain set on it
                 applicable_rule_ids.append(rule['id'])
@@ -1069,8 +1075,8 @@ class StudioApprovalRule(models.Model):
                 ('method', '=', ruleSudo.method),
                 ('action_id', '=', ruleSudo.action_id.id)
             ]):
-                rule_domain = approval_rule.domain and literal_eval(approval_rule.domain)
-                if rule_domain and not record.filtered_domain(rule_domain):
+                rule_domain = self._cast_domain(approval_rule.domain)
+                if not record.sudo().filtered_domain(rule_domain):
                     continue
                 existing_entry = entry_sudo.search([
                     ('model', '=', ruleSudo.model_name),
@@ -1166,7 +1172,7 @@ class StudioApprovalRule(models.Model):
     def _post_create_delete(self, operation=None):
         for model_name, method, action_id in {(r.model_name, r.method, r.action_id) for r in self}:
             if model_name == "account.move" and method == "action_post":
-                if action := self.env.ref("account.action_validate_account_move", raise_if_not_found=False):
+                if action := self.env.ref("account.action_validate_account_moves", raise_if_not_found=False):
                     if operation == "create":
                         action.binding_model_id = False
                     if operation == "unlink" and not self.search_count(self._get_remaining_rules_domain(model_name, method, action_id)):
@@ -1309,9 +1315,11 @@ class StudioApprovalRuleDelegate(models.TransientModel):
     def create(self, vals_list):
         records = super().create(vals_list)
         for rec in records:
-            rule = rec.approval_rule_id.sudo()
-            rule._delegate_to(rec.approver_ids, rec.date_to)
-            rule.write({"users_to_notify": rec.users_to_notify})
+            rule_su = rec.approval_rule_id.sudo()
+            if not self.env.su and not rule_su.can_validate:
+                raise AccessError(_("You are not allowed to delegate this approval rule."))
+            rule_su._delegate_to(rec.approver_ids, rec.date_to)
+            rule_su.write({"users_to_notify": rec.users_to_notify})
         return records
 
     @api.model

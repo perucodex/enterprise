@@ -7,6 +7,7 @@ from markupsafe import Markup
 
 from odoo.tests import Form
 from odoo.tests.common import TransactionCase
+from odoo import Command
 
 
 class TestHrAppraisal(TransactionCase):
@@ -44,18 +45,6 @@ class TestHrAppraisal(TransactionCase):
             'notification_type': 'email',
         })
 
-        with freeze_time(date.today() + relativedelta(months=-6)):
-            cls.hr_employee = cls.HrEmployee.create(dict(
-                name="Michael Hawkins",
-                user_id=cls.user.id,
-                department_id=cls.dep_rd.id,
-                parent_id=cls.manager.id,
-                job_id=cls.job.id,
-                work_phone="+3281813700",
-                work_email='michael@odoo.com',
-            ))
-            cls.hr_employee.write({'work_location_id': [(0, 0, {'name': "Grand-Rosière"})]})
-
         cls.env.company.appraisal_plan = True
         cls.env['ir.config_parameter'].sudo().set_param("hr_appraisal.appraisal_create_in_advance_days", 8)
         cls.duration_after_recruitment = 6
@@ -69,6 +58,18 @@ class TestHrAppraisal(TransactionCase):
         cls.appraisal_rating = cls.env['hr.appraisal.note'].create({'name': 'Exceeds expectations'})
         cls.employee_feedback = Markup("<span>Employee Feedback</span>")
         cls.manager_feedback = Markup("<span>Manager Feedback</span>")
+
+        with freeze_time(date.today() + relativedelta(months=-6)):
+            cls.hr_employee = cls.HrEmployee.create(dict(
+                name="Michael Hawkins",
+                user_id=cls.user.id,
+                department_id=cls.dep_rd.id,
+                parent_id=cls.manager.id,
+                job_id=cls.job.id,
+                work_phone="+3281813700",
+                work_email='michael@odoo.com',
+            ))
+            cls.hr_employee.write({'work_location_id': [(0, 0, {'name': "Grand-Rosière"})]})
 
     def test_hr_appraisal(self):
         with freeze_time(date.today() + relativedelta(months=6)):
@@ -101,8 +102,6 @@ class TestHrAppraisal(TransactionCase):
             Thus, next_appraisal_date should be empty.
         """
         with freeze_time(date.today() - relativedelta(months=6)):
-            self.hr_employee.last_ongoing_appraisal_date = date.today()
-
             months = self.hr_employee.company_id.duration_after_recruitment
             upcoming_appraisal_date = date.today() + relativedelta(months=months)
 
@@ -361,3 +360,174 @@ class TestHrAppraisal(TransactionCase):
 
         self.assertEqual(self._get_appraisal_count(admin_user), 1)
         self.assertEqual(self._get_appraisal_count(officer_user), 1)
+
+    def test_appraisal_departement_from_employee(self):
+        self.assertEqual(self.hr_employee.department_id, self.dep_rd)
+
+        with freeze_time(self.hr_employee.date_version + relativedelta(months=self.duration_after_recruitment)):
+            self.env['res.company']._run_employee_appraisal_plans()
+            appraisals = self.HrAppraisal.search([('employee_id', '=', self.hr_employee.id)])
+            self.assertEqual(appraisals.department_id, self.dep_rd)
+
+    def test_appraisal_template_computation(self):
+        # Delete all templates to prevent them from interacting with the test
+        for template in self.env['hr.appraisal.template'].search([]):
+            template.unlink()
+
+        test_template = self.env['hr.appraisal.template'].create({'description': 'Test appraisal template'})
+        test_template.company_id = self.env.company
+        self.hr_employee.department_id = False
+
+        with freeze_time(self.hr_employee.date_version + relativedelta(months=self.duration_after_recruitment)):
+            self.env['res.company']._run_employee_appraisal_plans()
+            appraisals = self.HrAppraisal.search([('employee_id', '=', self.hr_employee.id)])
+            self.assertEqual(appraisals.appraisal_template_id, test_template)
+
+    def test_appraisal_template_department_priority(self):
+        # A template restricted to a department must take precedence over a
+        # global template that was already auto-selected because no employee
+        # (hence no department) was set on the form yet.
+        self.env['hr.appraisal.template'].search([]).unlink()
+        global_template = self.env['hr.appraisal.template'].create({
+            'description': 'Global Template',
+            'company_id': False,
+        })
+        department_template = self.env['hr.appraisal.template'].create({
+            'description': 'Department Template',
+            'company_id': self.env.company.id,
+            'department_ids': [Command.set(self.dep_rd.ids)],
+        })
+
+        appraisal_form = Form(self.HrAppraisal)
+        # No employee yet: the global template is the only candidate.
+        self.assertEqual(appraisal_form.appraisal_template_id, global_template)
+        # Setting an employee of the department must switch to its template.
+        appraisal_form.employee_id = self.colleague
+        self.assertEqual(appraisal_form.department_id, self.dep_rd)
+        self.assertEqual(appraisal_form.appraisal_template_id, department_template)
+
+    def test_appraisal_template_keeps_department_choice(self):
+        # When a department has several templates, a template the user chose
+        # for that department must be preserved when the template is recomputed
+        # (e.g. the employee or department is reselected), instead of being
+        # reset to the first template of the department.
+        self.env['hr.appraisal.template'].search([]).unlink()
+        Template = self.env['hr.appraisal.template']
+        first_template = Template.create({
+            'description': 'RD First',
+            'department_ids': [Command.set(self.dep_rd.ids)],
+        })
+        second_template = Template.create({
+            'description': 'RD Second',
+            'department_ids': [Command.set(self.dep_rd.ids)],
+        })
+
+        appraisal = self.HrAppraisal.create({'employee_id': self.colleague.id})
+        self.assertEqual(appraisal.appraisal_template_id, first_template)
+
+        # The user picks the other template of the same department.
+        appraisal.appraisal_template_id = second_template
+        # A recompute must not reset it to the department's first template.
+        appraisal._compute_appraisal_template()
+        self.assertEqual(appraisal.appraisal_template_id, second_template)
+
+    def test_appraisal_template_keeps_generic_choice_on_state_change(self):
+        self.env['hr.appraisal.template'].search([]).unlink()
+        Template = self.env['hr.appraisal.template']
+        Template.create({'description': 'First Generic Template'})
+        selected_template = Template.create({'description': 'Selected Generic Template'})
+
+        appraisal = self.HrAppraisal.create({'employee_id': self.colleague.id})
+        appraisal.appraisal_template_id = selected_template
+
+        appraisal.action_confirm()
+        self.assertEqual(appraisal.appraisal_template_id, selected_template)
+
+        appraisal.action_back()
+        self.assertEqual(appraisal.appraisal_template_id, selected_template)
+
+    def test_check_next_appraisal_date_is_unset_for_archived_employee(self):
+        """
+            Check that when an employee is archived,
+            its next_appraisal_date is unset.
+        """
+        self.hr_employee.next_appraisal_date = date.today() + relativedelta(months=6)
+        self.hr_employee.action_archive()
+        self.assertFalse(self.hr_employee.next_appraisal_date, 'next_appraisal_date should be empty for archived employee')
+
+    def test_check_appraisals_and_goals_after_employees_departure(self):
+        """
+        In case of end of collaboration with an employee:
+        - all their future appraisals should be removed
+        - the employee should be removed from manager_ids in appraisals
+        - all their personal goals should be removed
+        """
+        future_appraisal_new = self.HrAppraisal.create({
+            'employee_id': self.hr_employee.id,
+            'date_close': date.today() + relativedelta(months=2),
+            'manager_ids': [(6, 0, [self.manager.id])],
+            'state': '1_new'
+        })
+        future_appraisal_pending = self.HrAppraisal.create({
+            'employee_id': self.hr_employee.id,
+            'date_close': date.today() + relativedelta(months=1),
+            'manager_ids': [(6, 0, [self.manager.id])],
+            'state': '2_pending'
+        })
+        completed_appraisal = self.HrAppraisal.create({
+            'employee_id': self.hr_employee.id,
+            'date_close': date.today() + relativedelta(months=-1),
+            'manager_ids': [(6, 0, [self.manager.id])],
+            'state': '3_done'
+        })
+        goal_test = self.env['hr.appraisal.goal'].create({
+            'name': 'Goal Test',
+            'employee_ids': [(6, 0, [self.hr_employee.id])],
+            'manager_ids': [(6, 0, [self.manager.id])],
+        })
+        self.assertTrue(future_appraisal_new, "Appraisal in state 'new' has not been created")
+        self.assertTrue(future_appraisal_pending, "Appraisal in state 'pending' has not been created")
+        self.assertTrue(completed_appraisal, "Appraisal in state 'done' has not been created")
+        self.assertTrue(goal_test, "Goal has not been created")
+
+        # appraiser leaves the company
+        self.manager.create_date = date.today() + relativedelta(years=-1)
+        self.env['hr.departure.wizard'].create({
+            'employee_ids': [Command.set([self.manager.id])],
+            'departure_date': date.today(),
+        }).action_register_departure()
+
+        self.assertFalse(future_appraisal_new.manager_ids, "Manager wasn't removed from appraisal after departure")
+        self.assertFalse(future_appraisal_pending.manager_ids, "Manager wasn't removed from appraisal after departure")
+
+        # employee leaves the company
+        self.env['hr.departure.wizard'].create({
+            'employee_ids': [Command.set([self.hr_employee.id])],
+            'departure_date': date.today(),
+        }).action_register_departure()
+
+        self.assertFalse(future_appraisal_new.exists(), "Appraisal in state 'new' was not removed after employee's departure")
+        self.assertFalse(future_appraisal_pending.exists(), "Appraisal in state 'pending' was not removed after employee's departure")
+        self.assertTrue(completed_appraisal.exists(), "Appraisal in state 'done' was removed")
+        self.assertFalse(goal_test.exists(), "Personal goal was not removed after employee's departure")
+
+    def test_request_late_appraisal(self):
+        """Tests that requesting an appraisal after next_appraisal_date properly creates the appraisal"""
+        old_appraisal_date = self.hr_employee.next_appraisal_date
+        with freeze_time(self.hr_employee.next_appraisal_date + relativedelta(days=7)):
+            with Form.from_action(self.env, self.hr_employee.action_send_appraisal_request()) as form:
+                form.employee_id = self.hr_employee
+                appraisal = form.save()
+            self.assertTrue(appraisal.exists())
+            self.assertEqual(self.hr_employee.next_appraisal_date, date.today())
+
+        with freeze_time(old_appraisal_date - relativedelta(days=7)):
+            self.hr_employee.next_appraisal_date = old_appraisal_date
+        with freeze_time(self.hr_employee.next_appraisal_date + relativedelta(days=7)):
+            with Form.from_action(self.env, self.manager.action_send_appraisal_request()) as form:
+                form.employee_id = self.manager
+                appraisal = form.save()
+            self.assertTrue(appraisal.exists())
+            with Form(appraisal) as form:
+                form.employee_id = self.hr_employee
+            self.assertEqual(self.hr_employee.next_appraisal_date, date.today())

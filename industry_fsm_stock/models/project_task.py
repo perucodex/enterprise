@@ -85,9 +85,13 @@ class ProjectTask(models.Model):
 
         def is_fsm_material_picking(picking, task):
             """ this function returns if the picking is a picking ready to be validated. """
-            moves = picking.move_ids
-            while moves.move_dest_ids:
-                moves = moves.move_dest_ids
+            accessed_moves = moves = picking.move_ids
+            while moves:
+                next_moves = moves.move_dest_ids - accessed_moves
+                if not next_moves:
+                    break
+                accessed_moves |= next_moves
+                moves = next_moves
             for move in moves:
                 sol = move.sale_line_id
                 if sol.fsm_lot_id:

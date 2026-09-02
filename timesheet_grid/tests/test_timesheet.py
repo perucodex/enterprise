@@ -1,4 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import re
+
 from datetime import date, datetime, timedelta
 from unittest.mock import patch
 
@@ -14,21 +16,21 @@ from odoo.tests import Form, freeze_time
 
 @freeze_time(datetime(2021, 4, 1) + timedelta(hours=12, minutes=21))
 class TestTimesheetValidation(TestCommonTimesheet, MockEmail):
-
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
         today = fields.Date.today()
-        self.timesheet1 = self.env['account.analytic.line'].with_user(self.user_employee).create({
+        cls.timesheet1 = cls.env['account.analytic.line'].with_user(cls.user_employee).create({
             'name': "my timesheet 1",
-            'project_id': self.project_customer.id,
-            'task_id': self.task1.id,
+            'project_id': cls.project_customer.id,
+            'task_id': cls.task1.id,
             'date': today - timedelta(days=1),
             'unit_amount': 2.0,
         })
-        self.timesheet2 = self.env['account.analytic.line'].with_user(self.user_employee).create({
+        cls.timesheet2 = cls.env['account.analytic.line'].with_user(cls.user_employee).create({
             'name': "my timesheet 2",
-            'project_id': self.project_customer.id,
-            'task_id': self.task2.id,
+            'project_id': cls.project_customer.id,
+            'task_id': cls.task2.id,
             'date': today - timedelta(days=1),
             'unit_amount': 3.11,
         })
@@ -237,6 +239,7 @@ class TestTimesheetValidation(TestCommonTimesheet, MockEmail):
 
     def test_working_hours_for_employees(self):
         company = self.env['res.company'].create({'name': 'My_Company'})
+        uom_day = self.env.ref('uom.product_uom_day')
         employee = self.env['hr.employee'].with_company(company).create({
             'name': 'Juste Leblanc',
             'user_id': self.user_manager.id,
@@ -248,6 +251,17 @@ class TestTimesheetValidation(TestCommonTimesheet, MockEmail):
 
         working_hours = employee.get_timesheet_and_working_hours('2021-12-01', '2021-12-31')
         self.assertEqual(working_hours[employee.id]['working_hours'], 184.0, "Number of hours should be 23d * 8h/d = 184h")
+
+        # Switch timesheet encoding to days and simulate a translated UoM
+        # to ensure day detection does not rely on translated names.
+        company.timesheet_encode_uom_id = uom_day.id
+        self.env['res.lang']._activate_lang('fr_FR')
+        uom_day.with_context(lang='fr_FR').name = 'Jours'
+
+        working_hours = employee.with_context(lang='fr_FR').get_timesheet_and_working_hours_for_employees('2021-12-01', '2021-12-31')
+        self.assertEqual(working_hours[employee.id]['units_to_work'], 23, "Number of days should be 184h / 8h per day = 23d")
+
+        company.timesheet_encode_uom_id = self.env.ref('uom.product_uom_hour').id
 
         # Create a user in the second company and link it to the employee created above
         user = self.env['res.users'].with_company(company).create({
@@ -330,9 +344,13 @@ class TestTimesheetValidation(TestCommonTimesheet, MockEmail):
             }
             Timesheet.with_user(self.user_employee).create({**timesheet_vals})
             self.env['res.company']._cron_timesheet_reminder()
+            mails = self._new_mails.filtered(lambda x: x.res_id == self.empl_manager.id)
             self.assertEqual(
-                len(self._new_mails.filtered(lambda x: x.res_id == self.empl_manager.id)), 1,
+                len(mails), 1,
                 "An email should be sent to the 'User Empl Officer' since he has a timesheet to validate")
+            # Check that the action contained within the template
+            action = self.env.ref(re.search(r"action-([a-zA-Z_\.]+)\?", mails.body_html).group(1), raise_if_not_found=True)
+            self.assertEqual(action, self.env.ref('timesheet_grid.timesheet_grid_to_validate_action'))
 
     def test_timesheet_employee_reminder(self):
         """ Reminder mail will be sent to each Users' Employee """
@@ -415,6 +433,38 @@ class TestTimesheetValidation(TestCommonTimesheet, MockEmail):
         self.assertEqual(Timesheet.search_count([('employee_id', '=', self.empl_employee.id)]), sheet_count + 1,
                          "Should create new timesheet instead of updating validated timesheet in cell")
 
+    def test_grid_update_cell_uses_default_name_from_context(self):
+        """ grid_update_cell should use the description from context (default_name)
+            so the new timesheet stays in the same group as the original one.
+        """
+        Timesheet = self.env['account.analytic.line']
+        description = "Development work"
+        today = fields.Date.today()
+
+        timesheet = Timesheet.with_user(self.user_manager).create({
+            'name': description,
+            'project_id': self.project_customer.id,
+            'task_id': self.task1.id,
+            'employee_id': self.empl_manager.id,
+            'unit_amount': 2.0,
+        })
+        timesheet.with_user(self.user_manager).action_validate_timesheet()
+
+        Timesheet.with_user(self.user_manager).with_context(
+            default_name=description,
+        ).grid_update_cell([('id', '=', timesheet.id)], 'unit_amount', 1.0)
+
+        new_timesheet = Timesheet.search([
+            ('employee_id', '=', self.empl_manager.id),
+            ('date', '=', today),
+            ('id', '!=', timesheet.id),
+        ])
+        self.assertEqual(len(new_timesheet), 1)
+        self.assertEqual(
+            new_timesheet.name, description,
+            "New timesheet should use the description from context, not '/'",
+        )
+
     def test_get_last_week(self):
         """Test the get_last_week method. It should return grid_anchor (GA), last_week (LW),
             where last_week is first Sunday before GA - 7 days. Example:
@@ -463,6 +513,7 @@ class TestTimesheetValidation(TestCommonTimesheet, MockEmail):
         # test that we get correct daily hours with flexible schedules
         employee.resource_calendar_id.flexible_hours = True
         employee.resource_calendar_id.hours_per_day = 2
+        employee.resource_calendar_id.hours_per_week = 10
 
         flexible_expected_hours = {
             '2021-03-22': 2.0,
@@ -471,6 +522,7 @@ class TestTimesheetValidation(TestCommonTimesheet, MockEmail):
             '2021-03-25': 2.0,
             '2021-03-26': 2.0,
             'full_time_required_hours': 28.57,
+            'hours_per_week': 7.14,
         }
         flexible_daily_hours = self.user_employee.with_user(self.user_employee).get_daily_working_hours('2021-03-22', '2021-03-26')
         self.assertEqual(flexible_expected_hours, flexible_daily_hours)

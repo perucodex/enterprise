@@ -181,6 +181,20 @@ test("Can fetch next templates", async function () {
     expect.verifySteps(["fetch_templates", "fetch_templates"]);
 });
 
+test("Can create a blank spreadsheet without access to the template model", async function () {
+    const mockRPC = async function (route, args) {
+        if (args.model === "spreadsheet.template" && args.method === "has_access") {
+            return false;
+        }
+    };
+    await initTestEnvWithKanban({ additionalTemplates: TEST_TEMPLATES, mockRPC });
+    await openTemplateDialog();
+
+    expect(`${dialogSelector} .o-spreadsheet-grid:not(.o-spreadsheet-grid-ghost-item)`).toHaveCount(
+        1
+    );
+});
+
 test("Disable create button if no template is selected", async function () {
     await initTestEnvWithKanban({ additionalTemplates: TEST_TEMPLATES });
     await openTemplateDialog();

@@ -318,6 +318,82 @@ class TestWebsiteSaleStockRenting(TestWebsiteSaleRentingCommon):
         )
         self.assertTrue(filtered_products_after_rental)
 
+    def test_out_of_stock_ribbon_is_not_applicable_for_rentals(self):
+        out_of_stock_ribbon = self.env["product.ribbon"].search(
+            [("assign", "=", "out_of_stock")], limit=1
+        ) or self.env["product.ribbon"].create({"name": "Out of stock", "assign": "out_of_stock"})
+        rental_product = self.env["product.product"].create({
+            "name": "Rental Product",
+            "rent_ok": True,
+            "is_storable": True,
+            "allow_out_of_stock_order": False,
+        })
+        self.assertFalse(out_of_stock_ribbon._is_applicable_for(rental_product, {}))
+
+    def test_serial_product_rental_available_quantities_in_multiple_warehouses(self):
+        """
+        A serial-tracked product with one unit in each of two warehouses should be
+        rentable from either warehouse independently. Renting the unit from one
+        warehouse should not affect the availability of the unit in the other.
+        """
+
+        if self.env['ir.module.module']._get('website_sale_collect').state != 'installed':
+            self.skipTest("website_sale_collect not installed")
+
+        serial_product = self.env['product.product'].create({
+            'name': 'Serial Product',
+            'is_storable': True,
+            'tracking': 'serial',
+            'rent_ok': True,
+            'allow_out_of_stock_order': False,
+        })
+        wh2 = self.env['stock.warehouse'].create({
+            'name': 'Second Warehouse',
+            'code': 'WH2',
+            'company_id': self.company.id,
+        })
+
+        for warehouse, lot_name in [(self.wh, 'SN001'), (wh2, 'SN002')]:
+            lot = self.env['stock.lot'].create({
+                'name': lot_name,
+                'product_id': serial_product.id,
+                'company_id': self.company.id,
+            })
+            quant = self.env['stock.quant'].create({
+                'product_id': serial_product.id,
+                'inventory_quantity': 1.0,
+                'location_id': warehouse.lot_stock_id.id,
+                'lot_id': lot.id,
+            })
+            quant.action_apply_inventory()
+
+        rental_so = self._create_so_with_sol(
+            rental_start_date=self.now,
+            rental_return_date=self.now + relativedelta(days=1),
+            product_id=serial_product.id,
+        )
+        rental_so.action_confirm()
+        self._pickup_so(rental_so)
+
+        in_store_carrier = self.env['delivery.carrier'].create({
+            'name': 'In-Store Pickup',
+            'delivery_type': 'in_store',
+            'product_id': self.env['product.product'].create({
+                'name': 'In-Store Pickup Delivery',
+                'type': 'service',
+            }).id,
+        })
+
+        wh2_so = self.env['sale.order'].create({
+            'partner_id': self.partner.id,
+            'company_id': self.company.id,
+            'rental_start_date': self.now,
+            'rental_return_date': self.now + relativedelta(days=1),
+            'warehouse_id': wh2.id,
+            'carrier_id': in_store_carrier.id
+        })
+        self._assert_cart_and_free_qty(wh2_so, 0.0, 1.0, serial_product)
+
     def _assert_rented_quantities(
         self, from_date, to_date, expected_rented_quantities, expected_key_dates
     ):
@@ -331,9 +407,9 @@ class TestWebsiteSaleStockRenting(TestWebsiteSaleRentingCommon):
             availabilities = self.computer._get_availabilities(from_date, to_date, self.wh.id)
         self.assertListEqual(availabilities, expected_availabilities)
 
-    def _assert_cart_and_free_qty(self, so, expected_cart_qty, expected_free_qty):
+    def _assert_cart_and_free_qty(self, so, expected_cart_qty, expected_free_qty, product=False):
         with freeze_time(self.now):
-            cart_qty, free_qty = so._get_cart_and_free_qty(product=self.computer)
+            cart_qty, free_qty = so._get_cart_and_free_qty(product=product or self.computer)
         self.assertEqual(cart_qty, expected_cart_qty)
         self.assertEqual(free_qty, expected_free_qty)
 

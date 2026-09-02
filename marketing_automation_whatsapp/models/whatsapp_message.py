@@ -45,10 +45,11 @@ class WhatsappMessage(models.Model):
         traces = self.sudo().marketing_trace_ids
         if not traces:
             return
+        # TDE FIXME: handle bounce / error from status
         traces.write({
-                'state': 'canceled',
-                'schedule_date': self.env.cr.now(),
-                'state_msg': _('WhatsApp canceled')
+            'state': 'canceled',
+            'schedule_date': self.env.cr.now(),
+            'state_msg': _('WhatsApp canceled'),
         })
         if self.state == 'bounced':
             for trace in traces:

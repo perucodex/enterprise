@@ -35,7 +35,7 @@ class AccountAnalyticLine(models.Model):
 
     @api.constrains('unit_amount')
     def _check_timesheet_unit_amount(self):
-        if any(t.unit_amount > 999999 for t in self if t.project_id):
+        if any(abs(t.unit_amount) > 999999 for t in self if t.project_id):
             raise UserError(_("You can't encode numbers with more than six digits."))
 
     def _is_readonly(self):
@@ -82,6 +82,16 @@ class AccountAnalyticLine(models.Model):
                 return []
             return get_unavailable_dates(company_calendar._work_intervals_batch(from_datetime, to_datetime)[False])
 
+        def get_current_user_unavailable_dates():
+            resource = self.env.user.employee_id.resource_id
+            if resource:
+                resource_work_intervals, _ = resource._get_valid_work_intervals(
+                    from_datetime, to_datetime
+                )
+                if resource.id in resource_work_intervals:
+                    return get_unavailable_dates(resource_work_intervals[resource.id])
+            return False
+
         if groupby == 'employee_id':
             employees = self.env['hr.employee'].browse(set(res_ids))
             availability_intervals_per_resource_id, calendar_work_intervals = employees.resource_id._get_valid_work_intervals(from_datetime, to_datetime)
@@ -103,6 +113,8 @@ class AccountAnalyticLine(models.Model):
                 for resource_id, employee_id in employee_id_per_resource_id.items()
             }
             unavailability_intervals_per_employee_id[False] = company_unavailable_days
+        elif self.env.context.get('get_current_user_unavailable_dates', False):
+            unavailability_intervals_per_employee_id[False] = get_current_user_unavailable_dates()
         else:
             if self.env.user.resource_calendar_id.flexible_hours:
                 unavailability_intervals_per_employee_id[False] = []
@@ -359,7 +371,7 @@ class AccountAnalyticLine(models.Model):
         non_validated_timesheets = timesheets.filtered(lambda timesheet: not timesheet.validated)
         if len(non_validated_timesheets) > 1 or (len(timesheets) == 1 and timesheets.validated):
             timesheets[0].copy({
-                'name': '/',
+                'name': self.env.context.get('default_name', '/'),
                 measure_field_name: value,
             })
         elif len(non_validated_timesheets) == 1:
@@ -379,7 +391,7 @@ class AccountAnalyticLine(models.Model):
                 raise UserError(_("You cannot adjust the time of the timesheet for a project with timesheets disabled."))
 
             self.create({
-                'name': '/',
+                'name': self.env.context.get('default_name', '/'),
                 'project_id': project_id,
                 field_name: field_value,
                 measure_field_name: value,

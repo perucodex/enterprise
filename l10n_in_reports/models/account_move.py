@@ -3,13 +3,18 @@
 import contextlib
 import json
 import jwt
+import logging
 import re
 from datetime import datetime, date
 from markupsafe import Markup
 
 from odoo import  Command, _, api, fields, models, modules
 from odoo.tools import split_every
+from odoo.exceptions import RedirectWarning, UserError
 from .irn_exception import IrnException
+
+_logger = logging.getLogger(__name__)
+
 
 UOM_REF_MAP = {
     "CMS": "uom.product_uom_cm",
@@ -80,29 +85,32 @@ class AccountMove(models.Model):
         'unique(company_id, l10n_in_irn_number)',
         'Irn number must be unique for bills per company.',
     )
-    @api.depends("country_code", "l10n_in_state_id", "company_id")
+
+    @api.depends("country_code", "l10n_in_state_id", "company_id", "commercial_partner_id", "journal_id")
     def _compute_l10n_in_transaction_type(self):
-        self.fetch(['country_code', 'l10n_in_state_id', "company_id"])
+        self.fetch(['country_code', 'l10n_in_state_id', "company_id", "commercial_partner_id", "journal_id"])
         for move in self:
             if move.country_code == "IN":
-                if move.l10n_in_state_id and move.l10n_in_state_id == move.company_id.state_id:
+                # POS and other non-purchase journal moves' state should be compared against the company's state.
+                state = move.commercial_partner_id.state_id if move.journal_id.type == 'purchase' else move.company_id.state_id
+                if move.l10n_in_state_id and move.l10n_in_state_id == state:
                     move.l10n_in_transaction_type = 'intra_state'
                 else:
                     move.l10n_in_transaction_type = 'inter_state'
             else:
                 move.l10n_in_transaction_type = False
 
-    @api.depends('move_type', 'reversed_entry_id', 'state', 'invoice_date', 'invoice_line_ids.tax_ids')
+    @api.depends('move_type', 'reversed_entry_id', 'state', 'invoice_date', 'invoice_line_ids.tax_ids', 'checked')
     def _compute_l10n_in_reversed_entry_warning(self):
         for move in self:
             if (
                 move.country_code == 'IN'
                 and move.l10n_in_gst_efiling_feature_enabled
                 and move.move_type == 'out_refund'
-                and move.state == 'draft'
                 and move.invoice_date
                 and move.reversed_entry_id
                 and move.invoice_line_ids.tax_ids
+                and (move.state == 'draft' or (move.state == 'posted' and not move.checked))
             ):
                 move.l10n_in_reversed_entry_warning = move.reversed_entry_id.invoice_date < move._l10n_in_get_fiscal_year_start_date(
                     move.company_id, move.invoice_date)
@@ -117,10 +125,18 @@ class AccountMove(models.Model):
         return fiscal_year_start_date
 
     def _post(self, soft=True):
+        """
+        The parent `_post` method sets the `checked` flag based on the journal
+        configuration. After posting, we explicitly reset `checked` to False
+        for invoices that have a credit note (reversed entry) warning.
+        """
+        warning_invoices = self.filtered(lambda i: i.l10n_in_reversed_entry_warning)
+        to_post = super()._post(soft=soft)
         for invoice in self:
             if invoice.l10n_in_gstr2b_reconciliation_status == "gstr2_bills_not_in_odoo":
                 invoice.l10n_in_gstr2b_reconciliation_status = "pending"
-        return super(AccountMove, self)._post(soft=soft)
+        warning_invoices.checked = False
+        return to_post
 
     def button_draft(self):
         res = super().button_draft()
@@ -139,9 +155,10 @@ class AccountMove(models.Model):
 
         :returns: action to refresh the form view.
         """
-        self.env['account.return']._l10n_in_check_config(
-            company=self.env.company
-        )
+        for company in self.company_id:
+            self.env['account.return']._l10n_in_check_config(
+                company=company
+            )
 
         JSON_MIMETYPE = 'application/json'
         STATUS_CANCELLED = 'CNL'
@@ -200,8 +217,10 @@ class AccountMove(models.Model):
         ]
         moves = self.search(domain)
         for move_batch in split_every(job_count, moves):
-            for move in move_batch:
-                move.l10n_in_update_move_using_irn()
+            try:
+                move_batch.l10n_in_update_move_using_irn()
+            except (RedirectWarning, UserError):
+                _logger.exception('Error when update Bill with IRN')
             if not modules.module.current_test:
                 self.env.cr.commit()
 

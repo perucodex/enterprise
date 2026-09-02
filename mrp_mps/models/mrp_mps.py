@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from math import log10
 
 from odoo import api, fields, models, _
-from odoo.fields import Domain
+from odoo.fields import Datetime, Domain
 from odoo.tools.date_utils import add, subtract
 from odoo.tools.float_utils import float_compare, float_round
 from collections import OrderedDict
@@ -229,7 +229,7 @@ class MrpProductionSchedule(models.Model):
                     ('product_id', 'in', product_ids)
                 ]).product_id.ids
                 product_ratio += [
-                    (l[0], l[0].product_qty * l[1]['qty'])
+                    (l[0], l[1]['qty'] / bom.product_qty)
                     for l in bom_lines if l[0].product_id.id not in product_ids_with_forecast
                 ]
 
@@ -545,17 +545,19 @@ class MrpProductionSchedule(models.Model):
                 if not forecast_values['replenish_qty']:
                     continue
                 # Set the indirect demand qty for children schedules.
+                product_key = ((date_start, date_stop), production_schedule.product_id, production_schedule.warehouse_id)
                 for (product, ratio) in indirect_ratio_mps[(production_schedule.warehouse_id, production_schedule.product_id)].items():
                     subproduct_indirect_demand = 0
-                    if demand_qty_dict.get(((date_start, date_stop), production_schedule.product_id, production_schedule.warehouse_id), False):
-                        for (parent_date, parent_quantity) in demand_qty_dict[(date_start, date_stop), production_schedule.product_id, production_schedule.warehouse_id].items():
+                    if demand_qty_dict.get(product_key, False):
+                        for (parent_date, parent_quantity) in demand_qty_dict[product_key].items():
                             related_date = max(subtract(parent_date, days=lead_time_ignore_components), fields.Date.today())
                             index = next(i for i, (dstart, dstop) in enumerate(date_range) if related_date <= dstop)
                             related_key = (date_range[index], product, production_schedule.warehouse_id)
                             demand_qty_dict[related_key][related_date] += ratio * (parent_quantity - forecast_values['starting_inventory_qty'])
                             subproduct_indirect_demand += ratio * (parent_quantity - forecast_values['starting_inventory_qty'])
                     if float_compare((ratio * forecast_values['replenish_qty']), subproduct_indirect_demand, precision_rounding=rounding) != 0:
-                        related_date = max(subtract(date_start, days=lead_time_ignore_components), fields.Date.today())
+                        date_first_demand = min(demand_qty_dict.get(product_key, {}), default=date_start)
+                        related_date = max(subtract(date_first_demand, days=lead_time_ignore_components), fields.Date.today())
                         index = next(i for i, (dstart, dstop) in enumerate(date_range) if related_date <= dstop)
                         related_key = (date_range[index], product, production_schedule.warehouse_id)
                         demand_qty_dict[related_key][related_date] += (ratio * forecast_values['replenish_qty']) - subproduct_indirect_demand
@@ -714,7 +716,7 @@ class MrpProductionSchedule(models.Model):
                     break
                 forecast.write({'forecast_qty': 0})
             if quantity_to_add < 0:
-                new_qty = float_round(new_qty, precision_rounding=self.product_uom_id.rounding)
+                new_qty = float_round(quantity_to_add, precision_rounding=self.product_uom_id.rounding)
                 first_forecast.write({'forecast_qty': new_qty})
         return True
 
@@ -768,7 +770,7 @@ class MrpProductionSchedule(models.Model):
         rtype dict
         """
         values = {
-            'date_planned': forecast_values['date_start'],
+            'date_planned': Datetime.to_datetime(forecast_values['date_start']),
             'warehouse_id': self.warehouse_id,
         }
         if self.route_id:
@@ -858,8 +860,9 @@ class MrpProductionSchedule(models.Model):
         rtype: float
         """
         optimal_qty = self.forecast_target_qty - after_forecast_qty
-        if self.bom_id.enable_batch_size:
-            batch_size = self.bom_id.product_uom_id._compute_quantity(self.bom_id.batch_size, self.product_uom_id)
+        bom_id = self.bom_id or self.product_id.bom_ids and self.product_id.bom_ids[0]
+        if bom_id and bom_id.enable_batch_size:
+            batch_size = bom_id.product_uom_id._compute_quantity(bom_id.batch_size, self.product_uom_id)
             optimal_qty = float_round(optimal_qty / batch_size, precision_digits=0, rounding_method='UP') * batch_size
 
         if optimal_qty <= 0:
@@ -1003,6 +1006,7 @@ class MrpProductionSchedule(models.Model):
         influenced by the others.
         """
         bom_by_product = self.env['mrp.bom']._bom_find(self.product_id)
+        bom_by_schedule = {schedule.product_id: schedule.bom_id for schedule in self if schedule.bom_id}
 
         Node = namedtuple('Node', ['product', 'ratio', 'children'])
         indirect_demand_trees = {}
@@ -1014,8 +1018,12 @@ class MrpProductionSchedule(models.Model):
                 return Node(product_tree.product, ratio, product_tree.children)
 
             product_tree = Node(product, ratio, [])
-            product_bom = bom_by_product.get(product)
-            if product not in bom_by_product and not product_bom:
+
+            if product in bom_by_schedule:
+                product_bom = bom_by_schedule[product]
+            elif product in bom_by_product:
+                product_bom = bom_by_product[product]
+            else:
                 product_bom = self.env['mrp.bom']._bom_find(product)[product]
             for line in product_bom.bom_line_ids:
                 if line._skip_bom_line(product):
@@ -1111,7 +1119,8 @@ class MrpProductionSchedule(models.Model):
     def _get_moves_and_date(self, moves_domain, order=False):
         moves = self.env['stock.move'].search(moves_domain, order=order)
         res_moves = []
-        for move in moves:
+        moves.fetch(['move_dest_ids', 'company_id', 'state', 'date', 'rule_id', 'product_id', 'location_id', 'origin_returned_move_id', 'product_qty'])
+        for move in moves.with_context(prefetch_fields=False):
             delay = self._get_dest_moves_delay(move)
             date = fields.Date.to_date(move.date) + relativedelta(days=delay)
             res_moves.append((move, date))

@@ -6,8 +6,9 @@ import { formatMonetary } from "@web/views/fields/formatters";
 import { KanbanRecord } from "@web/views/kanban/kanban_record";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
-import { onWillStart, useState, useRef } from "@odoo/owl";
+import { onWillStart, useEffect, useState, useRef } from "@odoo/owl";
 import { useBankReconciliation } from "../bank_reconciliation_service";
+import { floatIsZero } from "@web/core/utils/numbers";
 
 export class BankRecStatementLine extends KanbanRecord {
     static template = "account_accountant.BankRecStatementLine";
@@ -26,15 +27,26 @@ export class BankRecStatementLine extends KanbanRecord {
         this.bankReconciliation = useBankReconciliation();
         this.state = useState({
             isUnfolded: false,
+            accountMoveLines: [],
+            linesToReconcile: [],
+            suspenseAccountLine: undefined,
+            reconciledLineName: {},
         });
         this.statementLineRootRef = useRef("root");
         if (this.env.model.config.context?.default_st_line_id === this.props.record.resId) {
             this.state.isUnfolded = true;
             this.bankReconciliation.selectStatementLine(this.props.record);
         }
+        this._updateLinesState();
         onWillStart(async () => {
             this.userCanReview = await user.hasGroup("account.group_account_user");
         });
+        useEffect(
+            () => {
+                this._updateLinesState();
+            },
+            () => [this.recordData.line_ids.records]
+        );
     }
 
     getRecordClasses() {
@@ -78,27 +90,24 @@ export class BankRecStatementLine extends KanbanRecord {
         this.record.load();
     }
 
+    async undoReconciliation() {
+        await this.orm.call("account.bank.statement.line", "action_undo_reconciliation", [this.recordData.id]);
+        this.record.load();
+    }
+
     // -----------------------------------------------------------------------------
     // HELPER
     // -----------------------------------------------------------------------------
-    get reconciledLineName() {
-        const reconciledLine = {};
-        for (const line of this.linesToReconcile) {
-            if (
-                line.reconciled_lines_excluding_exchange_diff_ids.records.length === 1 &&
-                line.reconciled_lines_excluding_exchange_diff_ids.records[0].data.move_name
-            ) {
-                reconciledLine[line.id] = {
-                    move: line.reconciled_lines_excluding_exchange_diff_ids.records[0].data
-                        .move_name,
-                };
-            } else if (line.tax_ids.count) {
-                reconciledLine[line.id] = { tax: line.tax_ids.records };
-            } else {
-                reconciledLine[line.id] = { account: line.account_id.display_name };
-            }
-        }
-        return reconciledLine;
+    _updateLinesState() {
+        const suspenseId = this.recordData.journal_id?.suspense_account_id.id;
+        const defaultId = this.recordData.journal_id?.default_account_id.id;
+        const allLines = this.recordData.line_ids.records.map((line) => line.data);
+
+        this.state.accountMoveLines = allLines;
+        this.state.linesToReconcile = allLines.filter(
+            (line) => line.account_id.id !== suspenseId && line.account_id.id !== defaultId
+        );
+        this.state.suspenseAccountLine = allLines.find((line) => line.account_id.id === suspenseId);
     }
 
     get record() {
@@ -107,6 +116,22 @@ export class BankRecStatementLine extends KanbanRecord {
 
     get recordData() {
         return this.props.record.data;
+    }
+
+    get accountMoveLines() {
+        return this.state.accountMoveLines;
+    }
+
+    get linesToReconcile() {
+        return this.state.linesToReconcile;
+    }
+
+    get suspenseAccountLine() {
+        return this.state.suspenseAccountLine || undefined;
+    }
+
+    get reconciledLineName() {
+        return this.recordData.reconciled_lines_name;
     }
 
     fold() {
@@ -123,23 +148,29 @@ export class BankRecStatementLine extends KanbanRecord {
         this.selectStatementLine();
     }
 
-    toggleUnfold() {
-        this.state.isUnfolded = !this.isUnfolded;
-        this.selectStatementLine();
+    toggleUnfold(event) {
+        if (event?.pointerType === 'mouse') {
+            this.state.isUnfolded = !this.isUnfolded;
+        }
+        this.selectStatementLine(event);
     }
 
-    selectStatementLine() {
+    selectStatementLine(event) {
+        // In case we are on a mobile device, we want to keep the old onClick behaviour
+        if (this.recordData.is_reconciled && event?.pointerType !== 'mouse') {
+            this.state.isUnfolded = !this.isUnfolded;
+        }
         // Update the chatter with the last selected element
         this.bankReconciliation.selectStatementLine(this.record);
     }
 
     openChatter() {
-        this.selectStatementLine();
+        this.bankReconciliation.selectStatementLine(this.record);
         this.bankReconciliation.openChatter();
     }
 
     get hasInvalidAnalytics() {
-        return this.linesToReconcile.some((line) => line.has_invalid_analytics);
+        return this.recordData.has_invalid_analytics;
     }
 
     get isUnfolded() {
@@ -175,32 +206,13 @@ export class BankRecStatementLine extends KanbanRecord {
         return this.recordData.partner_id;
     }
 
-    get linesToReconcile() {
-        return this.accountMoveLines.filter((line) => {
-            return (
-                line.account_id.id !== this.recordData.journal_id?.suspense_account_id.id &&
-                line.account_id.id !== this.recordData.journal_id?.default_account_id.id
-            );
-        });
-    }
-
-    get suspenseAccountLine() {
-        return this.accountMoveLines.filter((line) => {
-            return line.account_id.id === this.recordData.journal_id.suspense_account_id.id;
-        })?.[0];
-    }
-
-    get accountMoveLines() {
-        return [...this.recordData.line_ids.records.map((line) => line.data)];
-    }
-
     get hasForeignCurrencyAndSameCurrencyForAllLines() {
         return (
             this.recordData.foreign_currency_id &&
-            this.linesToReconcile &&
-            this.linesToReconcile.filter((line) => {
-                return line.currency_id.id !== this.recordData.foreign_currency_id.id;
-            }).length === 0
+            this.linesToReconcile.length > 0 &&
+            this.linesToReconcile.every(
+                (line) => line.currency_id.id === this.recordData.foreign_currency_id.id
+            )
         );
     }
 
@@ -229,42 +241,20 @@ export class BankRecStatementLine extends KanbanRecord {
      * @returns {number} The total number of attachments found. A return value greater than 0 indicates the presence of attachments.
      */
     get hasAttachment() {
-        const statementAttachment = this.recordData.bank_statement_attachment_ids.records.map(
-            (attachment) => attachment.data.id
-        );
-
-        return (
-            this.recordData.attachment_ids.records.length +
-            this.linesToReconcile
-                .flatMap((line) => line.reconciled_lines_ids.records)
-                .filter((line) => line.data.move_attachment_ids?.count)
-                .reduce(
-                    (accumulator, line) =>
-                        parseInt(accumulator) + parseInt(line.data.move_attachment_ids.count),
-                    0
-                ) +
-            this.linesToReconcile
-                .filter(
-                    (line) =>
-                        line.move_attachment_ids?.count &&
-                        !line.move_attachment_ids.records
-                            .map((attachment) => attachment.data.id)
-                            .every((id) => statementAttachment.includes(id))
-                )
-                .reduce(
-                    (accumulator, line) =>
-                        parseInt(accumulator) + parseInt(line.move_attachment_ids.count),
-                    0
-                )
-        );
+        return this.recordData.has_attachments;
     }
 
     get amountClasses() {
-        const classes = this.recordData.foreign_currency_id ? "w-50" : "w-100";
-        if (this.recordData.amount > 0) {
+        const { foreign_currency_id: foreignCurrencyId, amount } = this.recordData;
+        const classes = foreignCurrencyId ? "w-50" : "w-100";
+        if (this.isDraft && !floatIsZero(amount)) {
+            return `${classes} text-info`;
+        }
+
+        if (amount > 0) {
             return `${classes} fw-bold`;
         }
-        if (this.recordData.amount < 0) {
+        if (amount < 0) {
             return `${classes} text-danger fw-bold`;
         }
         return `${classes} text-secondary`;
@@ -297,5 +287,9 @@ export class BankRecStatementLine extends KanbanRecord {
 
     get isChatterOpen() {
         return this.bankReconciliation.chatterState.visible;
+    }
+
+    get isDraft() {
+        return this.recordData.state === "draft";
     }
 }

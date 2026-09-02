@@ -356,6 +356,7 @@ class StockPicking(models.Model):
             } for line in self.move_line_ids],
             'note': self.note.striptags().replace('\n', ' ')[:300] if self.note else None,
             'origin': self.origin or None,
+            'provider_vat': self.env['account.move']._l10n_ec_get_provider_vat(),
         }
 
     def _l10n_ec_get_authorization_number(self):
@@ -506,4 +507,5 @@ class StockPicking(models.Model):
             'E-mail': self.partner_id.email or '',
             'Dirección': self.partner_id.street or '',
             'Teléfono': self.partner_id.phone or '',
+            'RUC Proveedor': self.env['account.move']._l10n_ec_get_provider_vat() or '',
         }

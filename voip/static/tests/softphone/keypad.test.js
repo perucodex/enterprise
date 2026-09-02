@@ -218,6 +218,23 @@ test("Search by phone number works", async () => {
     await contains(".o-voip-Keypad button:contains(123456)");
 });
 
+test("Search by phone number falls back to phone_sanitized", async () => {
+    const pyEnv = await startServer();
+    pyEnv["res.partner"].create({
+        name: "John Doe",
+        phone: "1234567890",
+        phone_sanitized: "+11234567890",
+    });
+    await start();
+    await click(".o_menu_systray [title='Show Softphone']");
+    await click(".o-voip-Softphone nav button:contains(Keypad)");
+    // Search term has country code prefix that doesn't match raw `phone`,
+    // but should match `phone_sanitized` via fallback.
+    await insertText(".o-voip-Keypad-input", "+11234567890");
+    await contains(".o-voip-Keypad button:contains(John Doe)");
+    await contains(".o-voip-Keypad button:contains(+11234567890)");
+});
+
 test("T9 search does not match when contact has falsy t9_name", async () => {
     const pyEnv = await startServer();
     pyEnv["res.partner"].create([{ name: " ", phone: "+1234567890", t9_name: false }]);

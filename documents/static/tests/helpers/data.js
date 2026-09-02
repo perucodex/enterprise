@@ -1,3 +1,4 @@
+import { Domain } from "@web/core/domain";
 import { user } from "@web/core/user";
 
 import { mailModels } from "@mail/../tests/mail_test_helpers";
@@ -116,6 +117,8 @@ export class DocumentsDocument extends models.Model {
         default: "3_day",
     });
     activity_user_id = fields.Many2one({ relation: "res.users" });
+    // added here for convenience, do not use in views if the field does not exist (as in "base" `documents`)
+    has_embedded_pdf = fields.Boolean({ string: "Has Embedded PDF" });
 
     get_deletion_delay() {
         return 30;
@@ -145,11 +148,13 @@ export class DocumentsDocument extends models.Model {
     }
 
     /**
-     * Override to implement _search_user_folder_id search method
+     * Override to implement _search_user_folder_id search method, and to hide
+     * the documents the user has no access to (as the record rules do).
      */
     web_search_read() {
-        const domain = arguments[0].domain;
-        if (domain?.length > 0) {
+        const kwargs = arguments[0];
+        const domain = kwargs?.domain;
+        if (domain) {
             const folderLeafIdx = domain.findIndex((leaf) => leaf[0] === "user_folder_id");
             if (folderLeafIdx !== -1) {
                 domain.splice(folderLeafIdx, 1, [
@@ -158,6 +163,10 @@ export class DocumentsDocument extends models.Model {
                     domain[folderLeafIdx][2].toString(),
                 ]);
             }
+            // maybe redundant but should never be incorrect
+            kwargs.domain = Domain.and([domain, [["user_permission", "!=", "none"]]]).toList();
+        } else {
+            kwargs.domain = [["user_permission", "!=", "none"]];
         }
         return super.web_search_read(...arguments);
     }
@@ -169,12 +178,16 @@ export class DocumentsDocument extends models.Model {
 
     /**
      * @override to avoid super() not working for us.
+     * Folders the user has no access to are not returned, as on the server.
      */
     async search_panel_select_range(fieldName) {
         const result = { parent_field: "user_folder_id" };
         result.values = await this._get_search_panel_specials();
         for (const record of this.search_read(
-            [["type", "=", "folder"]],
+            [
+                ["type", "=", "folder"],
+                ["user_permission", "!=", "none"],
+            ],
             [
                 "access_internal",
                 "access_via_link",
@@ -195,6 +208,7 @@ export class DocumentsDocument extends models.Model {
                 "partner_id",
                 "type",
                 "user_permission",
+                "access_token",
             ]
         )) {
             if (!isNaN(record.user_folder_id)) {
@@ -270,6 +284,10 @@ export class DocumentsDocument extends models.Model {
     toggle_lock(id) {
         const record = this.browse(id)[0];
         record.lock_uid = record.lock_uid ? false : serverState.odoobotId;
+    }
+
+    get_documents_actions(folder_id) {
+        return [];
     }
 }
 

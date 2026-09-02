@@ -3,6 +3,7 @@ import csv
 import io
 from datetime import date
 
+from odoo.exceptions import UserError
 from odoo.fields import Command
 from odoo.tests import tagged
 
@@ -390,7 +391,7 @@ class TestEmpf(TestL10NHkHrPayrollAccountCommon):
             lines,
             [[
                 "MT00298", "123456789012", "MLY", "", "20211201", "20211231", "", "REE", "HKID", "Z6833676", "20110102", "T",  # General info
-                "", "", "20211201", "20211231", "", "", "", "11000.0", "", "550.0", "550.0", "200.0", "200.0", "", "", "", "1500.0",  # Contribution info
+                "", "", "20211201", "20211231", "", "", "", "11000.0", "", "550.0", "550.0", "103.23", "103.23", "", "", "", "1306.46",  # Contribution info
                 "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",  # New member info
                 "20211216", "RESIGN", ""  # Termination info
             ]]
@@ -1213,3 +1214,27 @@ class TestEmpf(TestL10NHkHrPayrollAccountCommon):
                     csv_reports_per_type[label] = csv_report
 
         return csv_reports_per_type[report_type] if report_type else csv_reports_per_type
+
+    def test_display_errors_on_contribution_line_when_employee_missing(self):
+        """Test that checks display errors when contribution line does not have an employee set."""
+        report = self.env['l10n_hk.empf.contribution.report'].create({
+            'contribution_period_start': date(2021, 12, 1),
+            'contribution_period_end': date(2021, 12, 31),
+            'scheme_id': self.mpf_scheme.id,
+            'contribution_line_ids': [Command.create({
+                'status': 'N',
+                'contribution_start_date': date(2021, 12, 1),
+                'contribution_end_date': date(2021, 12, 31),
+            })],
+        })
+
+        action = report.action_validate()
+        self.assertEqual(action['params']['title'], 'Validation Failed')
+
+        line = report.contribution_line_ids[0]
+        self.assertFalse(line.version_id)
+        with self.assertRaises(UserError) as err:
+            line.action_display_errors()
+        self.assertEqual(
+            err.exception.args[0], "You must have an Employee or Payslip set on every line of the report."
+        )

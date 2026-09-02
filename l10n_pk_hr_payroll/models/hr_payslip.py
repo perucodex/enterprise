@@ -9,12 +9,12 @@ class HrPayslip(models.Model):
     def _l10n_pk_get_tax(self, income):
         self.ensure_one()
         result = 0
-        tax_brackets = iter(self._rule_parameter('l10n_pk_tax_brackets'))
-        for low, high, rate, fix in tax_brackets:
+        tax_brackets = list(iter(self._rule_parameter('l10n_pk_tax_brackets')))
+        for i, (low, high, rate, fix) in enumerate(tax_brackets):
             if income > low:
                 if income <= high:
                     result += rate * (income - low)
                     break
                 else:
-                    result += fix
+                    result = fix
         return result

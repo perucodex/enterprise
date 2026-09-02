@@ -1,6 +1,6 @@
-import { reactive, useEnv, useRef } from "@odoo/owl";
+import { onWillStart, reactive, useEnv, useRef } from "@odoo/owl";
 import { useDateTimePicker } from "@web/core/datetime/datetime_picker_hook";
-import { serializeDate } from "@web/core/l10n/dates";
+import { deserializeDate, serializeDate } from "@web/core/l10n/dates";
 import { ListController } from "@web/views/list/list_controller";
 
 const { DateTime } = luxon;
@@ -11,9 +11,13 @@ export class AccrualListController extends ListController {
         super.setup();
         this.accrualContext = useEnv().accrualContext;
         this.state = reactive({
-            date: DateTime.now(),
+            date: null,
         });
-        this.dateAsString = serializeDate(this.state.date);
+        onWillStart(async () => {
+            const saved = this.accrualContext.accrual_entry_date;
+            const date = saved ? deserializeDate(saved) : null;
+            await this.setDate(date?.isValid ? date : DateTime.now());
+        });
         if (this.model.config.resModel === "purchase.order.line") {
             this.model.config.fields.qty_received_at_date.aggregator = "sum";
         } else {
@@ -64,12 +68,8 @@ export class AccrualListController extends ListController {
         this.accrualContext.accrual_entry_date = this.dateAsString;
         this.state.date = date;
 
-        if (this.model.config.groups) {
-            // If records are grouped, update context of grouped lines too.
-            for (const group of Object.values(this.model.config.groups)) {
-                group.context.accrual_entry_date = this.dateAsString;
-            }
-        }
+        delete this.model.config.currentGroups;
+        this.model.config.groups = {};
 
         await this.model.root.load();
         this.model.notify();

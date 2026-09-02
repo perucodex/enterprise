@@ -115,8 +115,11 @@ class HrEmployee(models.Model):
                 if not calendar:
                     calendar = employee.company_id.resource_calendar_id
                 full_time_required_hours = calendar.full_time_required_hours
-                if full_time_required_hours and delta.days > 0:
+                if full_time_required_hours and delta.days > 0:  # TODO remove in master
                    result[employee.id]['full_time_required_hours'] = round(full_time_required_hours / 7 * (delta.days + 1), 2)
+                hours_per_week = calendar.hours_per_week
+                if hours_per_week and delta.days > 0:
+                    result[employee.id]['hours_per_week'] = round(hours_per_week / 7 * (delta.days + 1), 2)
                 hours_per_day = calendar.hours_per_day or HOURS_PER_DAY
             for day_count in range(delta.days + 1):
                 date = date_start_date + timedelta(days=day_count)
@@ -159,7 +162,8 @@ class HrEmployee(models.Model):
                     the number of worked units by the employees
         """
         result = {}
-        uom = str(self.env.company.timesheet_encode_uom_id.name).lower()
+        uom = self.env.company.timesheet_encode_uom_id
+        day_uom = self.env.ref('uom.product_uom_day')
         hours_per_day_per_employee = {}
         employees_work_days_data = {}
 
@@ -170,19 +174,19 @@ class HrEmployee(models.Model):
             units_to_work = sum_intervals(employees_work_days_data[employee.resource_id.id])
 
             # Adjustments if we work with a different unit of measure
-            if uom == 'days':
+            if uom == day_uom:
                 calendar = employee.resource_calendar_id or employee.company_id.resource_calendar_id
                 hours_per_day_per_employee[employee.id] = calendar.hours_per_day
                 units_to_work = units_to_work / hours_per_day_per_employee[employee.id]
                 rounding = len(str(self.env.company.timesheet_encode_uom_id.rounding).split('.')[1])
                 units_to_work = round(units_to_work, rounding)
-            result[employee.id] = {'units_to_work': units_to_work, 'uom': uom, 'worked_hours': 0.0}
+            result[employee.id] = {'units_to_work': units_to_work, 'uom': 'days' if uom == day_uom else 'hours', 'worked_hours': 0.0}
 
         query = self._get_timesheets_and_working_hours_query()
         self.env.cr.execute(query, (tuple(self.ids), date_start, date_stop))
         for data_row in self.env.cr.dictfetchall():
             worked_hours = data_row['worked_hours']
-            if uom == 'days':
+            if uom == day_uom:
                 worked_hours /= hours_per_day_per_employee[data_row['employee_id']]
                 rounding = len(str(self.env.company.timesheet_encode_uom_id.rounding).split('.')[1])
                 worked_hours = round(worked_hours, rounding)

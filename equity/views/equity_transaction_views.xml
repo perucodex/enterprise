@@ -118,7 +118,7 @@
                     </group>
                     <group>
                         <group id="left_group">
-                            <field name="partner_id"/>
+                            <field name="partner_id" context="{'default_is_company': True}"/>
                             <field name="date"/>
                             <field name="seller_id" options="{'placeholder_field': 'subscriber_id_placeholder'}" invisible="transaction_type != 'transfer'" required="securities_type == 'shares'"/>
                             <field name="subscriber_id" options="{'placeholder_field': 'subscriber_id_placeholder'}" string="Buyer" invisible="transaction_type != 'transfer'" required="securities_type == 'shares'"/>
@@ -163,9 +163,11 @@
                             </div>
                             <div class="d-flex">
                                 <field name="security_price" class="w-50" widget="monetary" options="{'currency_field': 'equity_currency_id'}"/>
+                                <field name="equity_currency_id" class="w-25" options="{'no_create': True}" groups="base.group_multi_currency" invisible="not can_change_currency"/>
                                 <div>/ Security</div>
                             </div>
                             <field name="transfer_amount" widget="monetary"/>
+                            <field name="company_id" groups="base.group_multi_company" invisible="not company_id"/>
                         </group>
                     </group>
                     <group string="Notes">

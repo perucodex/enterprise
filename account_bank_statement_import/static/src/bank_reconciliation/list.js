@@ -7,7 +7,9 @@ import {
     BankRecListController,
     BankRecListRenderer,
 } from "@account_accountant/components/bank_reconciliation/list_view/list";
-import { useState } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
+import { onWillStart, useState } from "@odoo/owl";
+import { fetchBankStatementsSourceInto } from "./utils";
 
 const synchronizedModes = ["online_sync", "l10n_be_codabox"]
 
@@ -16,6 +18,12 @@ export class BankRecListUploadController extends BankRecListController {
         ...BankRecListController.components,
         AccountFileUploader,
     };
+
+    setup() {
+        super.setup();
+        this.orm = useService("orm");
+        onWillStart(() => fetchBankStatementsSourceInto(this.orm, this.props.context));
+    }
 
     get showUploadButton() {
         return !synchronizedModes.includes(this.props.context?.bank_statements_source);
@@ -31,7 +39,9 @@ export class BankRecListUploadRenderer extends BankRecListRenderer {
 
     setup() {
         super.setup();
+        this.orm = useService("orm");
         this.dropzoneState = useState({ visible: false });
+        onWillStart(() => fetchBankStatementsSourceInto(this.orm, this.env.model.config.context));
     }
 
     onDragStart(ev) {

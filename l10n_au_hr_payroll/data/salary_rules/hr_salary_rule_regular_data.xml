@@ -57,12 +57,12 @@ result = sum(payslip.input_line_ids.filtered(lambda i: i.code == 'EXTRA.INPUT').
         <field name="condition_select">python</field>
         <field name="condition_python">
 sacrifice_other = "SS.O" in inputs and inputs["SS.O"].amount or 0
-result = -version.l10n_au_salary_sacrifice_other - version.l10n_au_workplace_giving_employer - version.l10n_au_salary_sacrifice_superannuation - sacrifice_other
+result = -payslip.l10n_au_salary_sacrifice_other - version.l10n_au_workplace_giving_employer - version.l10n_au_salary_sacrifice_superannuation - sacrifice_other
         </field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
 sacrifice_other = "SS.O" in inputs and inputs["SS.O"].amount or 0
-result = -version.l10n_au_salary_sacrifice_other - version.l10n_au_workplace_giving_employer - version.l10n_au_salary_sacrifice_superannuation - sacrifice_other
+result = -payslip.l10n_au_salary_sacrifice_other - version.l10n_au_workplace_giving_employer - version.l10n_au_salary_sacrifice_superannuation - sacrifice_other
         </field>
         <field name="struct_id" ref="l10n_au_hr_payroll.hr_payroll_structure_au_regular"/>
     </record>
@@ -145,11 +145,11 @@ result = sum(payslip.input_line_ids.filtered(lambda x: x.code == 'BACKPAY.INPUT'
         <field name="code">SALARY.SACRIFICE.OTHER</field>
         <field name="sequence">75</field>
         <field name="condition_select">python</field>
-        <field name="condition_python">result = (-version.l10n_au_salary_sacrifice_other - version.l10n_au_workplace_giving_employer) or "SS.O" in inputs</field>
+        <field name="condition_python">result = (-payslip.l10n_au_salary_sacrifice_other - version.l10n_au_workplace_giving_employer) or "SS.O" in inputs</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
 sacrifice_other = "SS.O" in inputs and inputs["SS.O"].amount or 0
-result = -version.l10n_au_salary_sacrifice_other - version.l10n_au_workplace_giving_employer - sacrifice_other
+result = -payslip.l10n_au_salary_sacrifice_other - version.l10n_au_workplace_giving_employer - sacrifice_other
         </field>
         <field name="struct_id" ref="l10n_au_hr_payroll.hr_payroll_structure_au_regular"/>
     </record>
@@ -172,11 +172,11 @@ result = -version.l10n_au_workplace_giving
         <field name="name">Fees and Deductions</field>
         <field name="code">FEES</field>
         <field name="condition_select">python</field>
-        <field name="condition_python">result = "F" in inputs</field>
+        <field name="condition_python">result = "DED.UPF" in inputs</field>
         <field name="sequence">80</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
-result = -inputs['F'].amount
+result = -inputs['DED.UPF'].amount
         </field>
         <field name="struct_id" ref="l10n_au_hr_payroll.hr_payroll_structure_au_regular"/>
     </record>
@@ -262,6 +262,21 @@ result = (inputs.get("LSL", 0) and inputs.get("LSL").amount) + (inputs.get("AL",
         <field name="struct_id" ref="l10n_au_hr_payroll.hr_payroll_structure_au_regular"/>
     </record>
 
+    <record id="l10n_au_qe_salary_rule" model="hr.salary.rule">
+        <field name="category_id" ref="l10n_au_hr_payroll.rule_category_qualifying_earnings"/>
+        <field name="name">Qualifying Earnings</field>
+        <field name="code">QE</field>
+        <field name="sequence">107</field>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = payslip.date_from &gt;= date(2026, 7, 1)</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+result = categories['OTE'] + sum(payslip.input_line_ids.filtered(lambda l: l.input_type_id == payslip.env.ref('l10n_au_hr_payroll.input_bonus_commissions_overtime')).mapped('amount'))
+        </field>
+        <field name="struct_id" ref="l10n_au_hr_payroll.hr_payroll_structure_au_regular"/>
+        <field name="appears_on_payslip" eval="False"/>
+    </record>
+
     <!-- Schedule 1 - Statement of formulas for calculating amounts to be withheld -->
     <record id="l10n_au_withholding_structure_1" model="hr.salary.rule">
         <field name="category_id" ref="l10n_au_hr_payroll.rule_category_withholding"/>
@@ -271,7 +286,7 @@ result = (inputs.get("LSL", 0) and inputs.get("LSL").amount) + (inputs.get("AL",
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
 coefficients = payslip._l10n_au_tax_schedule_parameters()
-if employee.l10n_au_tax_treatment_category == 'H' and payslip.company_id.l10n_au_registered_for_whm:
+if version.l10n_au_tax_treatment_category == 'H' and payslip.company_id.l10n_au_registered_for_whm:
     if isinstance(coefficients, int):
         result_rate = -coefficients
     else:
@@ -280,7 +295,7 @@ if employee.l10n_au_tax_treatment_category == 'H' and payslip.company_id.l10n_au
                 result_rate = -rate[3]
                 break
     result = categories['GROSS']
-elif employee.l10n_au_tax_treatment_category in ["W", "H", "V"]:
+elif version.l10n_au_tax_treatment_category in ["W", "H", "V"]:
     gross = categories['GROSS']
     result = -payslip._l10n_au_compute_withholding_amount(categories['GROSS'], version.schedule_pay, coefficients)
 else:
@@ -297,10 +312,10 @@ else:
         <field name="code">WITHHOLD.ADDITIONAL</field>
         <field name="sequence">108</field>
         <field name="condition_select">python</field>
-        <field name="condition_python">result = employee.l10n_au_additional_withholding_amount</field>
+        <field name="condition_python">result = version.l10n_au_additional_withholding_amount</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
-result = -employee.l10n_au_additional_withholding_amount
+result = -version.l10n_au_additional_withholding_amount
         </field>
         <field name="struct_id" ref="l10n_au_hr_payroll.hr_payroll_structure_au_regular"/>
     </record>
@@ -327,7 +342,7 @@ result, backpay_stsl = payslip._l10n_au_compute_backpay_withhold(net_salary, res
         <field name="sequence">109</field>
         <field name="condition_select">python</field>
         <field name="condition_python">
-if version.schedule_pay not in ["weekly", "fortnightly"] or not employee.l10n_au_extra_pay or not payslip._l10n_au_has_extra_pay():
+if version.schedule_pay not in ["weekly", "fortnightly"] or not version.l10n_au_extra_pay or not payslip._l10n_au_has_extra_pay():
     result = False
 else:
     weekly_min_amount = payslip._rule_parameter("l10n_au_extra_withholding")[version.schedule_pay][0][0]
@@ -353,7 +368,7 @@ for bracket in brackets:
         <field name="sequence">109</field>
         <field name="condition_select">python</field>
         <field name="condition_python">
-categories_to_ignore = employee.l10n_au_tax_treatment_category in ["W", "V", "H"]
+categories_to_ignore = version.l10n_au_tax_treatment_category in ["W", "V", "H"]
 b2work_type = payslip.env.ref('l10n_au_hr_payroll.input_b2work')
 b2work = bool(payslip.input_line_ids.filtered(lambda l: l.input_type_id == b2work_type))
 result = b2work and not categories_to_ignore
@@ -362,7 +377,7 @@ result = b2work and not categories_to_ignore
         <field name="amount_python_compute">
 # Withhold for RTW with Salary Withhold in case of Tax Treatment Category H, W, and V
 rates = payslip._rule_parameter("l10n_au_withholding_rtw")
-if employee.l10n_au_tfn_declaration != "000000000":
+if version.l10n_au_tfn_declaration != "000000000":
     result_rate = -rates['tfn']
 else:
     result_rate = -rates["foreign"] if employee.is_non_resident else -rates["resident"]
@@ -392,13 +407,13 @@ result = compute_leave_loading_withhold(payslip, employee, inputs["LEAVE.LOAD"].
         <field name="sequence">140</field>
         <field name="condition_select">python</field>
         <field name="condition_python">
-tax_treatment = employee.l10n_au_tax_treatment_category in ['R', 'S', 'F'] and employee.l10n_au_medicare_reduction == 'X' and employee.l10n_au_employment_basis_code != 'C'
-result = employee.l10n_au_training_loan and tax_treatment
+tax_treatment = version.l10n_au_tax_treatment_category in ['R', 'S', 'F'] and version.l10n_au_medicare_reduction == 'X' and version.l10n_au_employment_basis_code != 'C'
+result = version.l10n_au_training_loan and tax_treatment
         </field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
-if employee.l10n_au_tax_treatment_category in ['R', 'S', 'F'] and employee.l10n_au_medicare_reduction == 'X' and employee.l10n_au_employment_basis_code != 'C':
-    coefficients = payslip._rule_parameter("l10n_au_stsl")["tax-free" if employee.l10n_au_tax_free_threshold or employee.is_non_resident else "no-tax-free"]
+if version.l10n_au_tax_treatment_category in ['R', 'S', 'F'] and version.l10n_au_medicare_reduction == 'X' and version.l10n_au_employment_basis_code != 'C':
+    coefficients = payslip._rule_parameter("l10n_au_stsl")["tax-free" if version.l10n_au_tax_free_threshold or employee.is_non_resident else "no-tax-free"]
     gross = categories['GROSS'] - result_rules['BACKPAY']['total']
     result = -payslip._l10n_au_compute_loan_withhold(gross, version.schedule_pay, coefficients)
 if "BACKPAY.INPUT" in inputs:
@@ -413,17 +428,17 @@ if "BACKPAY.INPUT" in inputs:
         <field name="code">TAX.OFFSET</field>
         <field name="sequence">148</field>
         <field name="condition_select">python</field>
-        <field name="condition_python">result = employee.l10n_au_nat_3093_amount</field>
+        <field name="condition_python">result = version.l10n_au_nat_3093_amount</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
 if version.schedule_pay == "weekly":
-    result = round(0.019 * employee.l10n_au_nat_3093_amount)
+    result = round(0.019 * version.l10n_au_nat_3093_amount)
 elif version.schedule_pay == "bi-weekly":
-    result = round(0.038 * employee.l10n_au_nat_3093_amount)
+    result = round(0.038 * version.l10n_au_nat_3093_amount)
 elif version.schedule_pay == "monthly":
-    result = round(0.083 * employee.l10n_au_nat_3093_amount)
+    result = round(0.083 * version.l10n_au_nat_3093_amount)
 elif version.schedule_pay == "quarterly":
-    result = round(0.25 * employee.l10n_au_nat_3093_amount)
+    result = round(0.25 * version.l10n_au_nat_3093_amount)
         </field>
         <field name="struct_id" ref="l10n_au_hr_payroll.hr_payroll_structure_au_regular"/>
     </record>
@@ -434,15 +449,25 @@ elif version.schedule_pay == "quarterly":
         <field name="code">MEDICARE</field>
         <field name="sequence">156</field>
         <field name="condition_select">python</field>
-        <field name="condition_python">result = employee.l10n_au_medicare_exemption != 'X' or employee.l10n_au_tax_free_threshold</field>
+        <field name="condition_python">result = version.l10n_au_medicare_exemption != 'X' or version.l10n_au_tax_free_threshold</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
-rates = payslip._rule_parameter("l10n_au_withholding_schedule_1")['medicare']
-if employee.l10n_au_medicare_exemption == "H":
-    params = rates['half-exemption']
-    result = payslip._l10n_au_compute_medicare_adjustment(categories['GROSS'], version.schedule_pay, params)
-elif employee.l10n_au_tax_free_threshold:
-    params = rates['tax-free']
+if version.l10n_au_tax_treatment_category == "S" and version.l10n_au_medicare_exemption != "F":
+    rates = payslip._rule_parameter("l10n_au_withholding_schedule_9")
+    # Backward compatibility with pre-2024 structure
+    if payslip.date_from &lt;= date(2024, 7, 1):
+        params = rates["medicare"]
+    # Post July 2024
+    params = rates["medicare"]["half-exemption"] if version.l10n_au_medicare_exemption == "H" else rates["medicare"]["full"]
+else:
+    # Schedule 1
+    rates = payslip._rule_parameter("l10n_au_withholding_schedule_1")["medicare"]
+    if version.l10n_au_medicare_exemption == "H":
+        params = rates["half-exemption"]
+    elif version.l10n_au_tax_free_threshold:
+        params = rates["tax-free"]
+
+if params:
     result = payslip._l10n_au_compute_medicare_adjustment(categories['GROSS'], version.schedule_pay, params)
         </field>
         <field name="struct_id" ref="l10n_au_hr_payroll.hr_payroll_structure_au_regular"/>
@@ -544,14 +569,14 @@ result_name = inputs['CHILD_SUPPORT'].name
         <field name="sequence">183</field>
         <field name="condition_select">python</field>
         <field name="condition_python">
-result = employee.l10n_au_child_support_garnishee_amount or 'CHILD_SUPPORT_GARNISHEE' in inputs
+result = version.l10n_au_child_support_garnishee_amount or 'CHILD_SUPPORT_GARNISHEE' in inputs
         </field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
 net_salary = categories['BASIC'] + categories['ALW'] + categories['DED'] + categories['RTW'] + categories['EXTRA']
 lumpsum_child_support = sum(payslip.input_line_ids.filtered(lambda x: x.code == 'CHILD_SUPPORT_GARNISHEE').mapped("amount"))
 net_earnings = net_salary - lumpsum_child_support
-lumpsum_child_support += net_earnings * employee.l10n_au_child_support_garnishee_amount
+lumpsum_child_support += net_earnings * version.l10n_au_child_support_garnishee_amount
 result = -round(min(net_salary, lumpsum_child_support), 2)
         </field>
         <field name="appears_on_payslip" eval="False"/>
@@ -565,7 +590,7 @@ result = -round(min(net_salary, lumpsum_child_support), 2)
         <field name="sequence">185</field>
         <field name="condition_select">python</field>
         <field name="condition_python">
-result = employee.l10n_au_child_support_deduction or employee.l10n_au_child_support_garnishee_amount or 'CHILD_SUPPORT_GARNISHEE' in inputs
+result = version.l10n_au_child_support_deduction or version.l10n_au_child_support_garnishee_amount or 'CHILD_SUPPORT_GARNISHEE' in inputs
         </field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
@@ -573,6 +598,19 @@ net_salary = categories['BASIC'] + categories['ALW'] + categories['DED'] + categ
 result = -payslip._l10n_au_compute_child_support(net_salary) + result_rules['CHILD.SUPPORT.GARNISHEE']['total']
         </field>
         <field name="struct_id" ref="l10n_au_hr_payroll.hr_payroll_structure_au_regular"/>
+    </record>
+
+    <!-- Post-tax Deduction -->
+    <record id="l10n_au_hr_payroll_structure_au_regular_post_tax_deduction" model="hr.salary.rule">
+        <field name="category_id" ref="hr_payroll.DED"/>
+        <field name="name">Post-tax Deductions</field>
+        <field name="sequence">198</field>
+        <field name="code">DED.POST</field>
+        <field name="condition_select">input</field>
+        <field name="condition_other_input_id" ref="l10n_au_hr_payroll.input_post_tax_deduction"/>
+        <field name="amount_select">input</field>
+        <field name="amount_other_input_id" ref="l10n_au_hr_payroll.input_post_tax_deduction"/>
+        <field name="struct_id" ref="hr_payroll_structure_au_regular"/>
     </record>
 
     <!-- Deduction, Sequence 198 -->
@@ -650,8 +688,14 @@ result = version.l10n_au_salary_sacrifice_superannuation + extra_super + sacrifi
         <field name="sequence">230</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
-rate = payslip._rule_parameter("l10n_au_withholding_super")
-result = categories['OTE'] * rate/100
+rule = payslip._rule_parameter("l10n_au_withholding_super")
+if payslip.date_from &gt;= date(2026, 7, 1):
+    prior_slips = payslip._l10n_au_get_year_to_date_slips()
+    prior_ote = prior_slips._get_line_values(['QE'], compute_sum=True)['QE']['sum']['total']
+    remaining = max(rule['cap'] - prior_ote, 0)
+    result = min(categories['QE'], remaining) * rule['rate'] / 100
+else:
+    result = categories['OTE'] * (rule / 100)
         </field>
         <field name="struct_id" ref="l10n_au_hr_payroll.hr_payroll_structure_au_regular"/>
     </record>

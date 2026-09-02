@@ -130,6 +130,11 @@ class ProviderFedex(models.Model):
             if carrier.delivery_type == 'fedex_rest':
                 carrier.supports_shipping_insurance = True
 
+    def write(self, vals):
+        if 'FREIGHT' in vals.get('fedex_rest_service_type', ''):
+            raise UserError(_('Freight services for Fedex are not implemented.'))
+        return super().write(vals)
+
     def fedex_rest_rate_shipment(self, order):
         srm = FedexRequest(self)
         try:

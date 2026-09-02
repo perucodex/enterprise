@@ -182,11 +182,11 @@ class TestPlanningLeaves(TestCommon):
                              "Employee is on leave, there should be a warning")
         self.assertEqual(
             re.sub(r'\s+', ' ', slot_1.leave_warning),
-            "bert requested time off on 01/01/2020 from 9:00 AM to 1:00 PM. ",
+            "bert requested time off on 01/01/2020 from 09:00 AM to 01:00 PM. ",
         )
         self.assertEqual(
             re.sub(r'\s+', ' ', slot_2.leave_warning),
-            "bert requested time off on 01/02/2020 from 2:00 PM to 6:00 PM. ",
+            "bert requested time off on 01/02/2020 from 02:00 PM to 06:00 PM. ",
         )
         self.assertEqual(slot_3.leave_warning, False,
                          "Employee is not on leave, there should be no warning")
@@ -227,6 +227,7 @@ class TestPlanningLeaves(TestCommon):
             'tz': 'UTC',
             'flexible_hours': True,
             'hours_per_day': 8,
+            'hours_per_week': 40,
             'full_time_required_hours': 40,
             'attendance_ids': [],
         })
@@ -291,6 +292,7 @@ class TestPlanningLeaves(TestCommon):
             'tz': 'UTC',
             'flexible_hours': True,
             'hours_per_day': 8,
+            'hours_per_week': 40,
             'full_time_required_hours': 40,
             'attendance_ids': [],
         })
@@ -351,8 +353,8 @@ class TestPlanningLeaves(TestCommon):
         end_dt = datetime.datetime(2025, 4, 30, 23, 59, 59, 999999, tzinfo=utc)
         intervals = self.flexible_calendar._leave_intervals_batch(start_dt, end_dt, [self.employee_bert.resource_id])
         interval = next(iter(intervals[self.employee_bert.resource_id.id]))
-        self.assertEqual(interval[0], datetime.datetime(2025, 4, 30, 8, 0, 0, tzinfo=utc), "The start of the interval should be 08:00:00")
-        self.assertEqual(interval[1], datetime.datetime(2025, 4, 30, 16, 0, 0, tzinfo=utc), "The end of the interval should be 16:00:00")
+        self.assertEqual(interval[0], datetime.datetime(2025, 4, 30, 0, 0, 0, tzinfo=utc), "The start of the interval should be 00:00:00")
+        self.assertEqual(interval[1], datetime.datetime(2025, 4, 30, 23, 59, 59, 999999, tzinfo=utc), "The end of the interval should be 23:59:59")
 
     def test_batch_creation_from_calendar_with_time_off(self):
         """
@@ -574,3 +576,35 @@ class TestPlanningLeaves(TestCommon):
 
         self.assertEqual(res['open_shift_assigned'], [], "max hours already done 5.5 + 5.5 = 11")
         self.assertFalse(shift3.resource_id.employee_id)
+
+    def test_planning_gantt_unavailabilities_flexible_employee_public_holiday(self):
+        employee = self.env['hr.employee'].create({
+            'name': 'Test Employee',
+            'tz': 'UTC',
+        })
+        flexible_calendar = self.env['resource.calendar'].create({
+            'name': 'Flex Calendar',
+            'tz': 'UTC',
+            'flexible_hours': True,
+            'hours_per_day': 8,
+            'full_time_required_hours': 40,
+            'attendance_ids': [],
+        })
+        employee.resource_calendar_id = flexible_calendar
+
+        public_holiday = self.env['resource.calendar.leaves'].create({
+            'name': 'Public Holiday',
+            'date_from': datetime.datetime(2019, 1, 5, 0, 0, 0),
+            'date_to': datetime.datetime(2019, 1, 5, 23, 59, 59),
+        })
+
+        unavailabilities = self.env['planning.slot']._gantt_unavailability(
+            'resource_id',
+            [employee.resource_id.id],
+            datetime.datetime(2019, 1, 1),
+            datetime.datetime(2019, 1, 7),
+            'week',
+        )
+
+        self.assertEqual(unavailabilities[employee.resource_id.id][0]['start'], public_holiday.date_from.astimezone(utc))
+        self.assertEqual(unavailabilities[employee.resource_id.id][0]['stop'], public_holiday.date_to.astimezone(utc))

@@ -7,6 +7,7 @@ import {
     mockService,
     onRpc,
     patchWithCleanup,
+    selectFieldDropdownItem,
     serverState,
 } from "@web/../tests/web_test_helpers";
 import { user } from "@web/core/user";
@@ -143,6 +144,26 @@ test("Document actions are hidden when focused record is not selected", async fu
     await waitFor(".o_control_panel_actions:contains('Download')");
 });
 
+test("Actions menu opens after selecting multiple records", async function () {
+    onRpc("/documents/touch/<access_token>", () => ({}));
+
+    const serverData = getDocumentsTestServerModelsData([
+        makeDocumentRecordData(2, "File 1", { attachment_id: 1, folder_id: 1 }),
+        makeDocumentRecordData(3, "File 2", { attachment_id: 2, folder_id: 1 }),
+    ]);
+    serverData["ir.attachment"] = [
+        { id: 1, name: "One" },
+        { id: 2, name: "Two" },
+    ];
+    await makeDocumentsMockEnv({ serverData });
+    await mountDocumentsListView();
+    await contains(".o_data_row:contains('File 1') .o_list_record_selector").click();
+    await contains(".o_data_row:contains('File 2') .o_list_record_selector").click();
+    await waitFor(".o_selection_box:contains('2')");
+    await contains(".o_cp_action_menus button:contains('Actions')").click();
+    await waitFor(".o-dropdown--menu .o_menu_item");
+});
+
 test("only show common available actions", async function () {
     await makeDocumentsMockEnv({ serverData: embeddedActionsServerData });
     await mountDocumentsListView();
@@ -180,10 +201,10 @@ test("Required document name", async function () {
         expect(".o_notification").toHaveCount(1);
         expect(".o_notification").toHaveText("Name cannot be empty.");
         await contains(".o_notification .o_notification_close").click();
-        await expect(lr(documentName, ".o_data_cell[name='name'] input")).toHaveValue(documentName);
+        await expect(lr(documentName, ".o_data_cell[name='name']")).toHaveText(documentName);
+        await expect(lr(documentName, ".o_data_cell[name='name'] input")).toHaveCount(0);
         // Remove selection and close record edition
         await contains(".o_list_renderer").click();
-        await contains(".o_list_button_discard").click();
         await animationFrame();
     }
 });
@@ -239,4 +260,121 @@ test("company_id field visibility for portal in multicompany", async function ()
         },
     });
     expect("thead th[data-name='company_id']").toHaveCount(0);
+});
+
+test("file sharing via link with multiple subfolders", async function () {
+    let accessFolder1 = false;
+    let accessFolder2 = false;
+    let addFolder4 = false;
+    onRpc("/documents/touch/accessTokenFolder1", () => {
+        expect.step("touch 1");
+        accessFolder1 = true;
+        return { reload: true };
+    });
+    onRpc("/documents/touch/accessTokenFolder2", () => {
+        expect.step("touch 2");
+        accessFolder2 = true;
+        return { reload: true };
+    });
+    onRpc("/documents/touch/accessTokenFolder3", () => {
+        return { reload: true };
+    });
+    onRpc("/documents/touch/accessTokenFolder4", () => {
+        return { reload: true };
+    });
+
+    // Set active true/false to control the folders display
+    const folder2 = makeDocumentRecordData(2, "Folder 2", {
+        type: "folder",
+        is_folder: true,
+        folder_id: 1,
+        access_token: "accessTokenFolder2",
+        active: false,
+    });
+    const folder3 = makeDocumentRecordData(3, "Folder 3", {
+        type: "folder",
+        is_folder: true,
+        folder_id: 2,
+        access_token: "accessTokenFolder3",
+        active: false,
+    });
+    const folder4 = makeDocumentRecordData(4, "Folder 4", {
+        type: "folder",
+        is_folder: true,
+        folder_id: 2,
+        access_token: "accessTokenFolder4",
+        active: false,
+    });
+    const serverData = getDocumentsTestServerModelsData([folder2, folder3, folder4]);
+
+    const docEnv = await makeDocumentsMockEnv({ serverData });
+    const activateFolders = ({ args }) => {
+        folder2.active = accessFolder1;
+        folder3.active = accessFolder2;
+        if (addFolder4) {
+            folder4.active = accessFolder2;
+            // Ensure only one folder button available
+            folder3.active = false;
+        }
+    };
+    onRpc("search_panel_select_range", activateFolders);
+    onRpc("web_search_read", activateFolders);
+
+    const docService = docEnv.services["document.document"];
+    // Avoid logAccess 1000ms debounce timer
+    patchWithCleanup(docService, {
+        logAccess: (token) => docService._logAccess(token),
+        // Avoid duplicates due to focusRecord logAccess with no debounce
+        focusRecord: () => false,
+    });
+    await mountDocumentsListView();
+
+    await contains(`.o_search_panel_label[data-tooltip="Company"] .o_toggle_fold`).click();
+    expect(`.o_data_row .o_field_cell[name="name"]:contains("Folder 1")`).toHaveCount(1);
+    await contains(`.o_data_row .o_field_cell .o_field_documents_type_icon`).click();
+    expect(`.o_data_row .o_field_cell[name="name"]:contains("Folder 2")`).toHaveCount(1);
+    await contains(`.o_data_row .o_field_cell .o_field_documents_type_icon`).click();
+    expect(`.o_data_row .o_field_cell[name="name"]:contains("Folder 3")`).toHaveCount(1);
+    await contains(`.o_data_row .o_field_cell .o_field_documents_type_icon`).click();
+
+    expect.verifySteps(["touch 1", "touch 2"]);
+
+    expect(`.o_search_panel_label[data-tooltip="Folder 4"]`).toHaveCount(0);
+    // New sub-folder added without reloading
+    addFolder4 = true;
+    await contains(`.o_search_panel_label_title:contains("Folder 2")`).click();
+    expect(`.o_search_panel_label[data-tooltip="Folder 4"]`).toHaveCount(0);
+    expect(`.o_data_row .o_field_cell[name="name"]:contains("Folder 4")`).toHaveCount(1);
+    await contains(`.o_data_row .o_field_cell .o_field_documents_type_icon`).click();
+    expect(`.o_search_panel_label[data-tooltip="Folder 4"]`).toHaveCount(1);
+    expect.verifySteps(["touch 2"]);
+});
+
+test("edit mode is preserved when interacting with modals or control panel", async function () {
+    onRpc("/documents/touch/<access_token>", () => ({}));
+    const serverData = getDocumentsTestServerModelsData();
+    await makeDocumentsMockEnv({ serverData });
+    await mountDocumentsListView();
+
+    // Enter edit mode and open "Search More" modal
+    await contains(".o_data_row:nth-child(1) td.o_list_record_selector").click();
+    expect(".o_data_row_selected").toHaveCount(1);
+    await contains('.o_data_row:nth-child(1) td.o_list_many2one[name="partner_id"]').click();
+    await selectFieldDropdownItem("partner_id", "Search more...");
+    
+    // Clicks inside the modal do not exit edit mode
+    await contains(`.modal-title:contains("Search: Related partner")`).click();
+    await animationFrame();
+    expect(".modal-title").toHaveText("Search: Related partner");
+    expect(".o_data_row_selected").toHaveCount(1);
+    await contains(".modal-footer .btn-secondary").click();
+
+    // Clicks near searchbar exit edit mode
+    await contains(".o_control_panel_breadcrumbs").click();
+    expect(".o_list_button_discard").toHaveCount(0);
+    expect(".o_data_row_selected").toHaveCount(1);
+
+    // Click below the list panel unselects the row
+    await contains(".o_renderer_with_searchpanel").click();
+    expect(".o_data_row_selected").toHaveCount(0);
 });

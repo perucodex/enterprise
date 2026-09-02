@@ -21,11 +21,11 @@ export class IoTPrinter extends BasePrinter {
     /**
      * @override
      */
-    sendPrintingJob(img, actionId) {
-        return this.action({ action: "print_receipt", receipt: img }, actionId);
+    sendPrintingJob(img) {
+        return this.action({ action: "print_receipt", receipt: img });
     }
 
-    async action(data, actionId = null) {
+    async action(data) {
         return new Promise((resolve) => {
             const processResult = (printResult) => {
                 if (printResult.status === "success") {
@@ -42,8 +42,7 @@ export class IoTPrinter extends BasePrinter {
                 this.device.identifier,
                 data,
                 processResult,
-                processResult,
-                actionId
+                processResult
             );
         });
     }
@@ -52,7 +51,7 @@ export class IoTPrinter extends BasePrinter {
      * @override
      */
     getActionError() {
-        if (window.isSecureContext && this.device.iotIp.endsWith(".odoo-iot.com")) {
+        if (window.isSecureContext && this.device.iotIp?.endsWith(".odoo-iot.com")) {
             return {
                 successful: false,
                 canRetry: true,
@@ -74,7 +73,7 @@ export class IoTPrinter extends BasePrinter {
      * @override
      */
     getResultsError(printResult) {
-        let title = _t("Printing failed");
+        const title = _t("Printing failed");
         let body;
         switch (printResult.status) {
             case "disconnected":
@@ -85,18 +84,13 @@ export class IoTPrinter extends BasePrinter {
                         "2/ for network printers, ensure the printer is connected to the internet."
                 );
                 break;
-            case "warning":
-                // e.g. "low_paper"
-                title = _t("Printing warning");
-                body = PRINTER_MESSAGES[printResult.message] ?? printResult.message;
-                break;
             default:
                 body = PRINTER_MESSAGES[printResult.message] ?? printResult.message;
                 break;
         }
         return {
             successful: false,
-            canRetry: printResult.status !== "warning",
+            canRetry: true,
             message: { title, body },
         };
     }

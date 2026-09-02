@@ -2,7 +2,7 @@
 <odoo>
     <data>
         <record id="rule_parameter_l10n_tr_lower_boundary" model="hr.rule.parameter">
-            <field name="name">Türkiye Minimum Wage</field>
+            <field name="name">Türkiye Minimum Net Wage</field>
             <field name="code">l10n_tr_min_wage</field>
             <field name="country_id" ref="base.tr"/>
         </record>
@@ -27,6 +27,38 @@
             <field name="rule_parameter_id" ref="rule_parameter_l10n_tr_ssi_base_ceiling"/>
             <field name="date_from" eval="datetime(2024, 1, 1).date()"/>
         </record>
+        <record id="rule_parameter_l10n_tr_ssi_base_ceiling_value_2026" model="hr.rule.parameter.value">
+            <field name="parameter_value">297270.0</field>
+            <field name="rule_parameter_id" ref="rule_parameter_l10n_tr_ssi_base_ceiling"/>
+            <field name="date_from" eval="datetime(2026, 1, 1).date()"/>
+        </record>
+
+        <record id="rule_parameter_l10n_tr_ssi_base_minimum" model="hr.rule.parameter">
+            <field name="name">Türkiye SSI Base Amount Minimum</field>
+            <field name="code">l10n_tr_ssi_base_minimum</field>
+            <field name="country_id" ref="base.tr"/>
+        </record>
+        <record id="rule_parameter_l10n_tr_ssi_base_minimum_value_2026" model="hr.rule.parameter.value">
+            <field name="parameter_value">33030</field>
+            <field name="rule_parameter_id" ref="rule_parameter_l10n_tr_ssi_base_minimum"/>
+            <field name="date_from" eval="datetime(2026, 1, 1).date()"/>
+        </record>
+        <record id="rule_parameter_l10n_tr_ssi_base_minimum_value_2024" model="hr.rule.parameter.value">
+            <field name="parameter_value">0</field>
+            <field name="rule_parameter_id" ref="rule_parameter_l10n_tr_ssi_base_minimum"/>
+            <field name="date_from" eval="datetime(2024, 1, 1).date()"/>
+        </record>
+
+        <record id="rule_parameter_l10n_tr_ssi_employee_contribution_rates" model="hr.rule.parameter">
+            <field name="name">Türkiye SSI Employee Contribution</field>
+            <field name="code">l10n_tr_ssi_employee_contribution_rates</field>
+            <field name="country_id" ref="base.tr"/>
+        </record>
+        <record id="rule_parameter_l10n_tr_ssi_employee_contribution_rates_value_2024" model="hr.rule.parameter.value">
+            <field name="parameter_value">14.0</field>
+            <field name="rule_parameter_id" ref="rule_parameter_l10n_tr_ssi_employee_contribution_rates"/>
+            <field name="date_from" eval="datetime(2024, 1, 1).date()"/>
+        </record>
 
         <record id="rule_parameter_l10n_tr_tax_exempt_amount" model="hr.rule.parameter">
             <field name="name">Türkiye Tax Exemption Amount</field>
@@ -42,6 +74,11 @@
             <field name="parameter_value">3315.7</field>
             <field name="rule_parameter_id" ref="rule_parameter_l10n_tr_tax_exempt_amount"/>
             <field name="date_from" eval="datetime(2025, 1, 1).date()"/>
+        </record>
+        <record id="l10n_tr_rule_parameter_tax_exempt_amount_value_2026" model="hr.rule.parameter.value">
+            <field name="parameter_value">4954.5</field>
+            <field name="rule_parameter_id" ref="rule_parameter_l10n_tr_tax_exempt_amount"/>
+            <field name="date_from" eval="datetime(2026, 1, 1).date()"/>
         </record>
 
         <record id="rule_parameter_l10n_tr_stamp_tax_pcnt" model="hr.rule.parameter">
@@ -69,6 +106,11 @@
             <field name="parameter_value">197.38</field>
             <field name="rule_parameter_id" ref="rule_parameter_l10n_tr_stamp_tax_exempt_amount"/>
             <field name="date_from" eval="datetime(2025, 1, 1).date()"/>
+        </record>
+        <record id="l10n_tr_rule_parameter_stamp_tax_exempt_amount_value_2026" model="hr.rule.parameter.value">
+            <field name="parameter_value">213.09</field>
+            <field name="rule_parameter_id" ref="rule_parameter_l10n_tr_stamp_tax_exempt_amount"/>
+            <field name="date_from" eval="datetime(2026, 1, 1).date()"/>
         </record>
 
         <!-- Tax Rates -->
@@ -101,6 +143,18 @@
             <field name="rule_parameter_id" ref="rule_parameter_l10_tr_tax_rates"/>
             <field name="date_from" eval="datetime(2025, 1, 1).date()"/>
         </record>
+        <record id="l10n_tr_rule_parameter_tax_rates_value_2026" model="hr.rule.parameter.value">
+            <field name="parameter_value">[
+    # TAXB_from, TAXB_to, tax_pcnt
+    (0.00, 190_000.00, 0.15),
+    (190_000.01, 400_000.00, 0.20),
+    (400_000.01, 1_000_000.00, 0.27),
+    (1_000_000.01, 5_300_000.00, 0.35),
+    (5_300_000.01, 0.00, 0.40),
+]</field>
+            <field name="rule_parameter_id" ref="rule_parameter_l10_tr_tax_rates"/>
+            <field name="date_from" eval="datetime(2026, 1, 1).date()"/>
+        </record>
 
         <record id="rule_parameter_l10n_tr_ssi_company_contribution_rates" model="hr.rule.parameter">
             <field name="name">Türkiye SSI Company Contribution</field>
@@ -112,6 +166,11 @@
             <field name="parameter_value">15.5</field>
             <field name="rule_parameter_id" ref="rule_parameter_l10n_tr_ssi_company_contribution_rates"/>
             <field name="date_from" eval="datetime(2024, 1, 1).date()"/>
+        </record>
+        <record id="rule_parameter_l10n_tr_ssi_company_contribution_rates_value_2026" model="hr.rule.parameter.value">
+            <field name="parameter_value">16.75</field>
+            <field name="rule_parameter_id" ref="rule_parameter_l10n_tr_ssi_company_contribution_rates"/>
+            <field name="date_from" eval="datetime(2026, 1, 1).date()"/>
         </record>
     </data>
 </odoo>

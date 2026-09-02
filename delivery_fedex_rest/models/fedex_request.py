@@ -2,12 +2,14 @@
 import json
 from json import JSONDecodeError
 
+import re
+
 import requests
 from requests import RequestException
 
 from odoo import _
 from odoo.exceptions import ValidationError, UserError
-from odoo.tools import float_repr
+from odoo.tools import float_repr, remove_accents
 
 TEST_BASE_URL = "https://apis-sandbox.fedex.com"
 PROD_BASE_URL = "https://apis.fedex.com"
@@ -215,7 +217,7 @@ class FedexRequest:
     def _get_location_from_partner(self, partner, check_residential=False):
         res = {'countryCode': partner.country_id.code}
         if partner.city:
-            res['city'] = partner.city
+            res['city'] = remove_accents(partner.city)
         if partner.zip:
             res['postalCode'] = partner.zip
         if partner.state_id:
@@ -245,9 +247,9 @@ class FedexRequest:
 
     def _get_address_from_partner(self, partner, check_residential=False):
         res = self._get_location_from_partner(partner, check_residential)
-        res['streetLines'] = [partner.street]
+        res['streetLines'] = [remove_accents(partner.street)]
         if partner.street2:
-            res['streetLines'].append(partner.street2)
+            res['streetLines'].append(remove_accents(partner.street2))
         return res
 
     def _get_contact_from_partner(self, partner, company_partner=False):
@@ -280,6 +282,7 @@ class FedexRequest:
                 'units': self.weight_units,
                 'value': self.carrier._fedex_rest_convert_weight(package.weight)
             },
+            'customerReferences': [],
         }
         if int(package.dimension['length']) or int(package.dimension['width']) or int(package.dimension['height']):
             # FedEx will raise a warning when mixing imperial and metric units (MIXED.MEASURING.UNITS.INCLUDED).
@@ -304,11 +307,16 @@ class FedexRequest:
         description = ', '.join([c.product_id.name for c in package.commodities])
         res['itemDescription'] = description[:50]
         res['itemDescriptionForClearance'] = description
+        if package.picking_id:
+            res['customerReferences'].append({
+                'customerReferenceType': 'CUSTOMER_REFERENCE',
+                'value': package.picking_id.name,
+            })
         if order_no:
-            res['customerReferences'] = [{
+            res['customerReferences'].append({
                 'customerReferenceType': 'P_O_NUMBER',
                 'value': order_no
-            }]
+            })
         return res
 
     def _get_commodities_info(self, commodity, currency):
@@ -330,16 +338,23 @@ class FedexRequest:
         return res
 
     def _get_tins_from_partner(self, partner, custom_vat=False):
+        def _transform_vat_to_fedex_format(vat_number):
+            if not vat_number:
+                return ''
+            if len(vat_number) > 18:
+                return re.sub(r'[^A-Za-z0-9 ]', '', vat_number)
+            return vat_number
+
         res = []
         if custom_vat:
             res.append({
-                'number': self.vat_override,
+                'number': _transform_vat_to_fedex_format(self.vat_override),
                 'tinType': 'BUSINESS_UNION'
             })
         if partner.vat and partner.is_company:
-            res.append({'number': partner.vat, 'tinType': 'BUSINESS_NATIONAL'})
+            res.append({'number': _transform_vat_to_fedex_format(partner.vat), 'tinType': 'BUSINESS_NATIONAL'})
         elif partner.parent_id and partner.parent_id.vat and partner.parent_id.is_company:
-            res.append({'number': partner.parent_id.vat, 'tinType': 'BUSINESS_NATIONAL'})
+            res.append({'number': _transform_vat_to_fedex_format(partner.parent_id.vat), 'tinType': 'BUSINESS_NATIONAL'})
         return res
 
     def _get_shipping_price(self, ship_from, ship_to, packages, currency):
@@ -470,8 +485,6 @@ class FedexRequest:
                     ]
                 }
             }
-        if self.make_return:
-            request_data['requestedShipment']['customsClearanceDetail']['customsOption'] = {'type': 'COURTESY_RETURN_LABEL'}
 
         self._add_extra_data_to_request(request_data, 'ship')
         res = self._send_fedex_request("/ship/v1/shipments", request_data)
@@ -481,7 +494,7 @@ class FedexRequest:
             details = shipment['completedShipmentDetail']
             pieces = shipment['pieceResponses']
             # Sometimes the shipment might be created but no pricing calculated, we just set to 0.
-            price = self._decode_pricing(details['shipmentRating']) if 'shipmentRating' in details else 0.0
+            price = self._decode_pricing(details['shipmentRating'], fedex_currency) if 'shipmentRating' in details else 0.0
         except KeyError:
             raise ValidationError(_('Could not decode response')) from None
 
@@ -591,8 +604,13 @@ class FedexRequest:
             'alert_message': self._process_alerts(shipment),
         }
 
-    def _decode_pricing(self, rating_result):
-        actual = next(filter(lambda d: d['rateType'] == rating_result['actualRateType'], rating_result['shipmentRateDetails']), {})
+    def _decode_pricing(self, rating_result, request_currency=False):
+        actual = next(filter(
+            lambda d:
+                d['rateType'] in [rating_result['actualRateType'], rating_result['actualRateType'].replace("PAYOR", "PREFERRED").replace("RATED", "PREFERRED")] and
+                (not request_currency or d['currency'] == request_currency),
+            rating_result['shipmentRateDetails']
+        ), {})
         if actual.get('totalNetChargeWithDutiesAndTaxes', False):
             return actual['totalNetChargeWithDutiesAndTaxes']
         return actual['totalNetCharge']

@@ -9,9 +9,12 @@ patch(OrderPaymentValidation.prototype, {
         if (this.pos.useBlackBoxBe() && !this.pos.userSessionStatus) {
             await this.pos.clock(true);
         }
-        await super.validateOrder(isForceValidate);
+        return super.validateOrder(isForceValidate);
     },
     async afterOrderValidation() {
+        if (!this.pos.useBlackBoxBe()) {
+            return super.afterOrderValidation();
+        }
         if (!this.order.blackbox_signature || this.order.blackbox_signature == EMPTY_SIGNATURE) {
             try {
                 await this.pos.syncAllOrders({ orders: [this.order], throw: true });
@@ -25,14 +28,10 @@ patch(OrderPaymentValidation.prototype, {
         return super.afterOrderValidation();
     },
     handleValidationError(error) {
-        try {
-            return super.handleValidationError(error);
-        } catch (e) {
-            if (e instanceof BlackboxError) {
-                this.order.state = "draft";
-                e.retry ??= this.finalizeValidation.bind(this);
-            }
-            throw error;
+        if (error instanceof BlackboxError) {
+            this.order.state = "draft";
+            error.retry ??= this.validateOrder.bind(this);
         }
+        return super.handleValidationError(error);
     },
 });

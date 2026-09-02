@@ -37,6 +37,36 @@ result = payslip.paid_amount
         <field name="struct_id" ref="l10n_us_hr_payroll.hr_payroll_structure_us_employee_salary"/>
     </record>
 
+    <record id="l10n_us_hr_payroll_structure_us_employee_qualified_overtime" model="hr.salary.rule">
+        <field name="category_id" ref="l10n_us_hr_payroll.hr_payroll_reference_value"/>
+        <field name="name">Qualified Overtime</field>
+        <field name="sequence">5</field>
+        <field name="code">QAOT</field>
+        <field name="appears_on_payslip" eval="True"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">
+year_payslips = version.env['hr.payslip'].search([
+    ('employee_id', '=', employee.id),
+    ('state', 'in', ['validated', 'paid']),
+    ('date_from', '&gt;=', payslip.date_from + relativedelta(day=1, month=1)),
+    ('date_to', '&lt;=', payslip.date_from + relativedelta(days=-1)),
+    ('company_id', '=', version.company_id.id),
+])
+overtime_sum = year_payslips._get_line_values(['QAOT'], compute_sum=True)['QAOT']['sum']['total']
+overtime_caps = payslip._rule_parameter('l10n_us_qualified_overtime_deduction_cap') if 'OVERTIME' in worked_days else {}
+result = employee.l10n_us_filing_status in overtime_caps and overtime_sum &lt; overtime_caps[employee.l10n_us_filing_status]
+        </field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">
+overtime_cap = payslip._rule_parameter('l10n_us_qualified_overtime_deduction_cap')[employee.l10n_us_filing_status]
+current_overtime_amount = worked_days['OVERTIME'].amount/3
+if overtime_sum + current_overtime_amount &gt;= overtime_cap:
+    current_overtime_amount = overtime_cap - overtime_sum
+result = current_overtime_amount
+        </field>
+        <field name="struct_id" ref="hr_payroll_structure_us_employee_salary"/>
+    </record>
+
     <record id="l10n_us_employee_salary_bonus" model="hr.salary.rule">
         <field name="name">Bonus</field>
         <field name="code">BONUS</field>
@@ -126,20 +156,21 @@ year_payslips = version.env['hr.payslip'].search([
     ('company_id', '=', version.company_id.id),
 ])
 previous_amounts = year_payslips._get_line_values(['401K'], vals_list=['amount'], compute_sum=True)['401K']['sum']['amount']
-cap = payslip._rule_parameter('l10n_us_benefits_matching_cap')
-if previous_amounts &gt; cap:
-    employee_contribution = 0
-else:
-    employee_contribution = min(cap - previous_amounts, employee_contribution)
+irs_cap = payslip._rule_parameter('l10n_us_benefits_matching_cap')
+
+# 1. IRS cap on employee contributions
+employee_contribution = max(0, min(irs_cap - previous_amounts, employee_contribution))
+
 
 if version.l10n_us_pre_retirement_matching_type == "percent":
-    matching_amount = employee_contribution * version.l10n_us_pre_retirement_matching_amount / 100.0
-    partial_cap = version.wage * version.l10n_us_pre_retirement_matching_yearly_cap / 100.0 * version.l10n_us_pre_retirement_matching_amount / 100.0
+    # 2. Salary-based eligibility cap
+    eligible_base = min(employee_contribution, GROSS * version.l10n_us_pre_retirement_matching_yearly_cap / 100.0)
+    # 3. apply match
+    matching_amount = eligible_base * version.l10n_us_pre_retirement_matching_amount / 100.0
 else:
     matching_amount = min(employee_contribution, version.l10n_us_pre_retirement_matching_amount)
-    partial_cap = matching_amount
 
-result = min(matching_amount, partial_cap)
+result = matching_amount
         </field>
         <field name="struct_id" ref="l10n_us_hr_payroll.hr_payroll_structure_us_employee_salary"/>
     </record>
@@ -690,7 +721,7 @@ else:
 
 # Step 3
 # Final taxable amount by applying the deduction
-taxable = gross_income - deduction
+taxable = max(gross_income - deduction, 0)
 
 # Step 4
 # Tax amount per year
@@ -1120,7 +1151,7 @@ total_deduction = standard_deduction + fit + personal_exemption + dependents_ded
 
 # Step 7
 # Compute taxable amount
-taxable_amount = gross_income - total_deduction
+taxable_amount = max(gross_income - total_deduction, 0)
 
 # Step 8
 # Compute income tax

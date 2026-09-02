@@ -13,6 +13,12 @@ class AccountAssetReportHandler(models.AbstractModel):
     _inherit = ['account.report.custom.handler']
     _description = 'Assets Report Custom Handler'
 
+    def _customize_warnings(self, report, options, all_column_groups_expression_totals, warnings):
+        if asset_ids := options.get('discrepancy_asset_ids'):
+            warnings['account_asset.common_warning_discrepancy_detected'] = {
+                'asset_ids': asset_ids,
+            }
+
     def _dynamic_lines_generator(self, report, options, all_column_groups_expression_totals, warnings=None):
         lines, totals_by_column_group = self._generate_report_lines_without_grouping(report, options)
         # add the groups by grouping_field
@@ -46,6 +52,7 @@ class AccountAssetReportHandler(models.AbstractModel):
         #   {(account_id, asset_id, asset_group_id): {col_group_key: {expression_label_1: value, expression_label_2: value, ...}}}
         all_asset_ids = set()
         all_lines_data = {}
+        account_mismatch_ids = set()
         for column_group_key, column_group_options in report._split_options_per_column_group(options).items():
             # the lines returned are already sorted by account_id!
             lines_query_results = self._query_lines(column_group_options, prefix_to_match=prefix_to_match, forced_account_id=forced_account_id)
@@ -56,6 +63,10 @@ class AccountAssetReportHandler(models.AbstractModel):
                     all_lines_data[line_id] = {column_group_key: []}
                 all_lines_data[line_id][column_group_key] = cols_by_expr_label
 
+                if cols_by_expr_label['account_mismatch']:
+                    account_mismatch_ids.add(asset_id)
+
+        options['discrepancy_asset_ids'] = list(account_mismatch_ids)
         column_names = [
             'assets_date_from', 'assets_plus', 'assets_minus', 'assets_date_to', 'depre_date_from',
             'depre_plus', 'depre_minus', 'depre_date_to', 'balance'
@@ -176,6 +187,7 @@ class AccountAssetReportHandler(models.AbstractModel):
             columns_by_expr_label = {
                 "acquisition_date": al["asset_acquisition_date"] and format_date(self.env, al["asset_acquisition_date"]) or "",  # Characteristics
                 "method": (al["asset_method"] == "linear" and _("Linear")) or (al["asset_method"] == "degressive" and _("Declining")) or _("Dec. then Straight"),
+                "account_mismatch": al.get('account_mismatch', False),
                 **asset_parent_values
             }
 
@@ -314,7 +326,7 @@ class AccountAssetReportHandler(models.AbstractModel):
         for parent_field in parent_recordset:
             parent_line_vals = line_vals_per_grouping_field_id[parent_field.id]
             if options['assets_grouping_field'] == 'account_id':
-                parent_line_vals['name'] = f"{parent_field.code} {parent_field.name}"
+                parent_line_vals['name'] = f"{parent_field.code or ''} {parent_field.name}".strip()
             else:
                 parent_line_vals['name'] = parent_field.name or _('(No %s)', parent_field._description)
 
@@ -383,6 +395,14 @@ class AccountAssetReportHandler(models.AbstractModel):
 
         sql = SQL(
             """
+             WITH asset_account_mismatches AS (
+            SELECT amlr.asset_id,
+                   BOOL_OR(aml.account_id IS DISTINCT FROM aa.account_asset_id) AS has_mismatch
+              FROM asset_move_line_rel amlr
+              JOIN account_move_line aml ON aml.id = amlr.line_id
+              JOIN account_asset aa ON aa.id = amlr.asset_id
+          GROUP BY amlr.asset_id
+             )
             SELECT asset.id AS asset_id,
                    asset.parent_id AS parent_id,
                    asset.name AS asset_name,
@@ -404,15 +424,17 @@ class AccountAssetReportHandler(models.AbstractModel):
                    %(account_id)s AS account_id,
                    COALESCE(SUM(move.depreciation_value) FILTER (WHERE move.date < %(date_from)s), 0) + COALESCE(asset.already_depreciated_amount_import, 0) AS depreciated_before,
                    COALESCE(SUM(move.depreciation_value) FILTER (WHERE move.date BETWEEN %(date_from)s AND %(date_to)s), 0) AS depreciated_during,
-                   COALESCE(SUM(move.depreciation_value) FILTER (WHERE move.date BETWEEN %(date_from)s AND %(date_to)s AND move.asset_number_days IS NULL), 0) AS asset_disposal_value
+                   COALESCE(SUM(move.depreciation_value) FILTER (WHERE move.date BETWEEN %(date_from)s AND %(date_to)s AND move.asset_number_days IS NULL), 0) AS asset_disposal_value,
+                   COALESCE(aam.has_mismatch, FALSE) AS account_mismatch
               FROM %(from_clause)s
+         LEFT JOIN asset_account_mismatches aam ON aam.asset_id = asset.id
              WHERE %(where_clause)s
                AND asset.company_id in %(company_ids)s
                AND (asset.acquisition_date <= %(date_to)s OR move.date <= %(date_to)s)
                AND (asset.disposal_date >= %(date_from)s OR asset.disposal_date IS NULL)
                AND (asset.state not in ('model', 'draft', 'cancelled') OR (asset.state = 'draft' AND %(include_draft)s))
                AND asset.active = 't'
-          GROUP BY asset.id, account_id, account_code, account_name
+          GROUP BY asset.id, account_id, account_code, account_name, aam.has_mismatch
           ORDER BY account_code, asset.acquisition_date, asset.id;
             """,
             account_code=account_code,
@@ -456,6 +478,13 @@ class AccountAssetReportHandler(models.AbstractModel):
             'offset_increment': len(lines),
             'has_more': False,
         }
+
+    def open_discrepancy_assets(self, options, params=None):
+        ''' Open the list of assets whose account do not match with the account of the related move line '''
+        action = self.env["ir.actions.actions"]._for_xml_id("account_asset.action_account_asset_form")
+        if params and params.get('asset_ids'):
+            action['domain'] = [('id', 'in', params['asset_ids'])]
+        return action
 
 
 class AccountReport(models.Model):

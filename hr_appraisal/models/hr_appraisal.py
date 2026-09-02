@@ -192,14 +192,31 @@ class HrAppraisal(models.Model):
             appraisal.employee_feedback_template = appraisal._get_appraisal_template('employee')
             appraisal.manager_feedback_template = appraisal._get_appraisal_template('manager')
 
-    @api.depends('department_id')
+    @api.depends('department_id', 'company_id')
     def _compute_appraisal_template(self):
         all_department_template_ids = self.env['hr.appraisal.template'].search(
-            [('department_ids', '=', False), ('company_id', 'in', self.department_id.company_id.ids + [False])])
+            [('department_ids', '=', False), ('company_id', 'in', self.company_id.ids + [False])])
         for appraisal in self:
-            appraisal.appraisal_template_id = appraisal.appraisal_template_id or \
+            # Keep the current template only when it belongs to the appraisal's
+            # department; otherwise prefer the department's own template and fall
+            # back to a generic one. This prevents a generic template that was
+            # auto-selected before the department was known from sticking, while
+            # still preserving a deliberate template chosen for that department.
+            # Also keep a compatible generic template once the appraisal exists,
+            # as it may then be a deliberate choice rather than the initial default.
+            current_template = appraisal.appraisal_template_id
+            is_department_template = current_template in appraisal.department_id.appraisal_template_ids
+            is_selected_generic_template = (
+                appraisal._origin.id
+                and current_template
+                and not current_template.department_ids
+                and current_template.company_id.id in [appraisal.company_id.id, False]
+            )
+            if not is_department_template and not is_selected_generic_template:
+                current_template = False
+            appraisal.appraisal_template_id = current_template or \
                 appraisal.department_id.appraisal_template_ids[:1] or \
-                all_department_template_ids.filtered(lambda t: t.company_id.id in [appraisal.department_id.company_id.id, False])[:1]
+                all_department_template_ids.filtered(lambda t: t.company_id.id in [appraisal.company_id.id, False])[:1]
 
     @api.depends('employee_feedback_published', 'manager_feedback_published')
     def _compute_waiting_feedback(self):
@@ -283,6 +300,9 @@ class HrAppraisal(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        today = fields.Date.today()
+        for vals in vals_list:
+            self._ensure_min_next_appraisal_date(vals, today)
         appraisals = super().create(vals_list)
         appraisals_to_send = self.env['hr.appraisal']
         for appraisal, vals in zip(appraisals, vals_list):
@@ -296,6 +316,15 @@ class HrAppraisal(models.Model):
         # TDE FIXME: check if we can use suggested recipients instead (master)
         appraisals.subscribe_employees()
         return appraisals
+
+    @api.model
+    def _ensure_min_next_appraisal_date(self, vals, min_date):
+        next_appraisal_date = vals.get('next_appraisal_date')
+        if not next_appraisal_date:
+            return
+        if isinstance(next_appraisal_date, str):
+            next_appraisal_date = fields.Date.from_string(next_appraisal_date)
+        vals['next_appraisal_date'] = max(min_date, next_appraisal_date)
 
     @api.depends('employee_feedback', 'can_see_employee_publish', 'employee_feedback_published')
     def _compute_accessible_employee_feedback(self):
@@ -351,6 +380,7 @@ class HrAppraisal(models.Model):
         if 'manager_feedback_published' in vals and not all(a.can_see_manager_publish for a in self):
             raise UserError(self.env._('The "Manager Feedback Published" cannot be changed by an employee.'))
 
+        self._ensure_min_next_appraisal_date(vals, fields.Date.today())
         force_published = self.env['hr.appraisal']
         if vals.get('employee_feedback_published'):
             user_employees = self.env.user.employee_ids
@@ -374,12 +404,13 @@ class HrAppraisal(models.Model):
                 self._appraisal_plan_post()
                 if self.env.user.partner_id.email_formatted:
                     body = self.env._("The appraisal's status has been set to Done by %s", self.env.user.name)
-                    self.message_notify(
-                        body=body,
-                        subject=self.env._("Your Appraisal has been completed"),
-                        partner_ids=appraisal.message_partner_ids.ids,
-                    )
-                    self.message_post(body=body)
+                    for appraisal in self:
+                        appraisal.message_notify(
+                            body=body,
+                            subject=self.env._("Your Appraisal has been completed"),
+                            partner_ids=appraisal.message_partner_ids.ids,
+                        )
+                        appraisal.message_post(body=body)
         result = super().write(vals)
         if force_published:
             for appraisal in force_published:
@@ -467,7 +498,7 @@ class HrAppraisal(models.Model):
 
     def action_calendar_event(self):
         self.ensure_one()
-        partners = self.manager_ids.mapped('related_partner_id') | self.employee_id.related_partner_id | self.env.user.partner_id
+        partners = self.manager_ids.work_contact_id | self.employee_id.work_contact_id | self.env.user.partner_id
         action = self.env["ir.actions.actions"]._for_xml_id("calendar.action_calendar_event")
         action['context'] = {
             'default_partner_ids': partners.ids,

@@ -103,6 +103,14 @@
     height:100%;
     overflow: hidden;
 
+    // The kanban css variables are declared on .o_kanban_renderer, which this custom template doesn't render.
+    --KanbanColumn__highlight-selected-border: #{tint-color($o-action, 60%)};
+
+    .o_kanban_record:focus {
+        outline: none;
+        box-shadow: inset 0 0 0 2px var(--KanbanColumn__highlight-selected-border);
+    }
+
     .kanban_return_and_checks_cards {
         flex-grow: 1;
         overflow-y: scroll;
@@ -203,8 +211,4 @@
     .o_dropdown_kanban {
         top: 8px !important;
     }
-}
-
-.o_audit_kanban_record a.link_balances_progressbar {
-    color: var(--body-color)
 }

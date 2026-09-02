@@ -61,10 +61,17 @@ export class PDFIframe {
             this.renderSignItems();
             this.postRender();
 
+            if (!this.root.defaultView) {
+                return;
+            }
             const { eventBus } = this.root.defaultView.PDFViewerApplication;
             eventBus.on("pagerendered",  (ev) => this.refreshSignItems(ev.pageNumber));
             eventBus.on("scalechange",   ()  => this.updateFontSize());
             eventBus.on("rotationchanging",() => this.updateFontSize());
+
+            // We need to refresh just one more time after we assign the eventbus on the pageredered
+            // as the page could have rendered before we assigned the bus
+            this.refreshSignItems();
         });
     }
 
@@ -204,7 +211,7 @@ export class PDFIframe {
     renderSignItem(signItemData, target) {
         const signItemElement = renderToString("sign.signItem", this.getContext(signItemData));
         target.insertAdjacentHTML("beforeend", signItemElement);
-        const signItem = target.lastChild;
+        const signItem = target.lastElementChild;
         signItem.classList.add("d-none");
         signItem.setAttribute("tabindex", "0");
         this.enableCustom({ el: signItem, data: signItemData });
@@ -236,12 +243,20 @@ export class PDFIframe {
             (responsible > 0 && responsible !== this.currentRole) ||
             !!signItem.value;
         const isCurrentRole = this.currentRole === parseInt(responsible);
-        const placeholder =
+        let placeholder =
             signItem.placeholder ||
             (isCurrentRole && signItem.name) ||
             (this.readonly && `${signItem.name}\n${signItem.responsible_name}`) ||
             "";
+
         const constant = signItem.constant ?? false;
+        const hidePlaceholder = constant && signItem.value !== undefined & signItem.value === "";
+        if (hidePlaceholder) {
+            // Keep the placeholder until a value is available for the field.
+            // If the available value is empty, show it as empty instead of the placeholder.
+            placeholder = "";
+        }
+
         return Object.assign(signItem, {
             constant: constant,
             readonly: signItem.readonly ?? readonly,
@@ -279,7 +294,6 @@ export class PDFIframe {
     preRender() {
         const viewerContainer = this.root.querySelector("#viewerContainer");
         viewerContainer.style.visibility = "visible";
-        this.setInitialZoom();
     }
 
     get normalSize() {
@@ -319,15 +333,6 @@ export class PDFIframe {
             button.removeAttribute("disabled");
             this.refreshSignItems();
         }
-    }
-
-    setInitialZoom() {
-        let button = this.root.querySelector("button#zoomInButton");
-        if (!this.env.isSmall) {
-            button = this.root.querySelector("button#zoomOutButton");
-            button.click();
-        }
-        button.click();
     }
 
     postRender() {

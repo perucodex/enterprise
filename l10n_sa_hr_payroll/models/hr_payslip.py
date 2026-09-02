@@ -109,6 +109,7 @@ class HrPayslip(models.Model):
 
         for payslip in self:
             employee_id = payslip.employee_id
+            bank_account = employee_id.primary_bank_account_id
 
             net = all_line_values['NET'][payslip.id]['total']
             basic = all_line_values['BASIC'][payslip.id]['total']
@@ -120,9 +121,11 @@ class HrPayslip(models.Model):
 
             rows.append([
                 self._l10n_sa_format_float(net),
-                employee_id.primary_bank_account_id.acc_number or "",
-                employee_id.name or "",
-                (employee_id.primary_bank_account_id.bank_id.l10n_sa_sarie_code or "") if employee_id.primary_bank_account_id.bank_id != payslip.company_id.l10n_sa_bank_account_id.bank_id else "",
+                bank_account.acc_number or "",
+                bank_account.acc_holder_name or employee_id.name or "",
+                bank_account.bank_id.l10n_sa_sarie_code or ""
+                if bank_account.bank_id.country_code == 'SA' or not bank_account.bank_id.country_code
+                else bank_account.bank_bic or "",
                 employee_id.version_id.l10n_sa_wps_description or "",
                 '',  # [RET-CODE]: Required blank cell
                 self._l10n_sa_format_float(basic),
@@ -137,51 +140,10 @@ class HrPayslip(models.Model):
         return [header, *rows]
 
     def _l10n_sa_get_eos_benefit(self):
-        result = 0
-        employee = self.employee_id
-        version = self.employee_id.version_id
-        start_date = employee._get_first_version_date()
-        end_date = employee.departure_date
-        total_years = self._l10n_sa_get_number_of_years(start_date, end_date)
-
-        compensation = (self._get_contract_wage() + version.l10n_sa_housing_allowance
-                + version.l10n_sa_transportation_allowance + version.l10n_sa_other_allowances)
-
-        if reason_type := employee.departure_reason_id.l10n_sa_reason_type:
-            if reason_type == 'fired':
-                result = 0
-            elif reason_type in ['end_of_contract', 'retired']:
-                if 1 <= total_years <= 5:
-                    result = total_years * compensation / 2
-                if total_years > 5:
-                    result = (5 * compensation / 2) + ((total_years - 5) * compensation)
-            elif reason_type == 'clause_77':
-                result = compensation
-            elif reason_type == 'resigned':
-                if 2 <= total_years < 10:
-                    result = (total_years * compensation / 2) / 3
-                else:
-                    result = (5 * compensation / 2) + ((total_years - 5) * compensation)
-        return self.company_id.currency_id.round(result)
+        return "The method _l10n_sa_get_eos_benefit is deprecated because the logic is moved to the salary rule"
 
     def _l10n_sa_get_eos_provision(self):
-        result = 0
-        version = self.employee_id.version_id
-        total_years = self._l10n_sa_get_number_of_years(self.employee_id._get_first_version_date(), self.date_to)
-
-        provision_month = (self._get_contract_wage() + version.l10n_sa_housing_allowance
-                        + version.l10n_sa_transportation_allowance + version.l10n_sa_other_allowances) / 12
-
-        if total_years <= 5:
-            provision_month = provision_month / 2
-
-        if version.work_entry_source == 'calendar':
-            result = provision_month
-        elif 'WORK100' in self.worked_days_line_ids.mapped('code'):
-            total_number_of_days = sum(self.worked_days_line_ids.mapped('number_of_days')) or 1
-            result = ((provision_month / total_number_of_days) / version.resource_calendar_id.hours_per_day) * \
-                    self.worked_days_line_ids.filtered(lambda l: l.code == 'WORK100').number_of_hours
-        return self.company_id.currency_id.round(result)
+        return "The method _l10n_sa_get_eos_provision is deprecated because the logic is moved to the salary rule"
 
     def _l10n_sa_get_number_of_years(self, start_date, end_date):
         worked_duration = relativedelta(end_date, start_date)
@@ -195,16 +157,13 @@ class HrPayslip(models.Model):
         return total_years
 
     def action_payslip_payment_report(self, export_format='l10n_sa_wps'):
-        self.ensure_one()
-        return {
-            'type': 'ir.actions.act_window',
-            'res_model': 'hr.payroll.payment.report.wizard',
-            'view_mode': 'form',
-            'views': [(False, 'form')],
-            'target': 'new',
+        action = super().action_payslip_payment_report()
+        if self.company_id.country_code != 'SA':
+            return action
+        action.update({
             'context': {
-                'default_payslip_ids': self.ids,
-                'default_payslip_run_id': self.payslip_run_id.id,
+                **action['context'],
                 'default_export_format': export_format,
             },
-        }
+        })
+        return action

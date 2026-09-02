@@ -24,11 +24,15 @@ class SaleSubscriptionCommon(SaleCommon):
             cls.plan_week,
             cls.plan_month,
             cls.plan_2_month,
+            cls.plan_3_month,
+            cls.plan_6_month,
             cls.plan_year,
         ) = cls.env['sale.subscription.plan'].create([
             {'name': 'Weekly', 'billing_period_value': 1, 'billing_period_unit': 'week', 'sequence': 1},
             {'name': 'Monthly', 'billing_period_value': 1, 'billing_period_unit': 'month', 'sequence': 4},
             {'name': '2 Months', 'billing_period_value': 2, 'billing_period_unit': 'month', 'sequence': 8},
+            {'name': '3 Months', 'billing_period_value': 3, 'billing_period_unit': 'month', 'sequence': 10},
+            {'name': '6 Months', 'billing_period_value': 6, 'billing_period_unit': 'month', 'sequence': 12},
             {'name': 'Yearly', 'billing_period_value': 1, 'billing_period_unit': 'year', 'sequence': 52},
         ])
 
@@ -284,6 +288,7 @@ class TestSubscriptionCommon(TestSaleCommon):
             'note': "original subscription description",
             'partner_id': cls.user_portal.partner_id.id,
             'sale_order_template_id': cls.subscription_tmpl.id,
+            'require_signature': False,
         })
         cls.subscription._onchange_sale_order_template_id()
         cls.subscription.start_date = False # the confirmation will set the start_date

@@ -32,6 +32,8 @@ import { WebClient } from "@web/webclient/webclient";
 import { GanttController } from "@web_gantt/gantt_controller";
 import { GanttRenderer } from "@web_gantt/gantt_renderer";
 import { GanttRowProgressBar } from "@web_gantt/gantt_row_progress_bar";
+import { localization } from "@web/core/l10n/localization";
+const { DateTime } = luxon;
 
 // Hard-coded daylight saving dates from 2019
 const DST_DATES = {
@@ -1787,7 +1789,7 @@ test("context in action should not override context added by the gantt view", as
     expect(".modal .o_field_many2one[name=user_id] input").toHaveValue("User 1");
 });
 
-test("The date and task should appear even if the pill is planned on 2 days but displayed in one day by the gantt view", async () => {
+test("The date shouldn't appear in the title if the pill is displayed on 2 days", async () => {
     mockDate("2024-01-01T08:00:00", +0);
 
     Tasks._records.push(
@@ -1806,7 +1808,6 @@ test("The date and task should appear even if the pill is planned on 2 days but 
             stop: "2024-01-03 02:00:00",
         },
         {
-            // will be displayed in 2 days
             id: 11,
             name: "Task 11",
             allocated_hours: 4,
@@ -1828,8 +1829,62 @@ test("The date and task should appear even if the pill is planned on 2 days but 
     });
     expect(".o_gantt_pill").toHaveCount(3, { message: "should have 3 pills in the gantt view" });
     expect(queryAllTexts(".o_gantt_pill_title")).toEqual([
-        "4:00 PM - 1:00 AM (4h) Task 9",
-        "4:00 PM - 2:00 AM (4h) Task 10",
+        "Task 9",
+        "Task 10",
         "Task 11",
     ]);
 });
+
+test("Gantt view should not crash when opening on a DST transition day (Asia/Beirut)", async () => {
+    // Beirut (Asia/Beirut) springs forward at midnight on the last Sunday of March,
+    // making that day only 23 hours long. diffColumn() used to return a float (e.g.
+    // 6.958 days for a 7-day week) because luxon's .diff() works in absolute time.
+    // Array(6.958) throws RangeError: Invalid array length, crashing the gantt view.
+    mockTimeZone("Asia/Beirut");
+    Tasks._records = [
+        {
+            id: 1,
+            name: "Beirut DST Task",
+            start: `${DST_DATES.winterToSummer.before} 08:00:00`,
+            stop: `${DST_DATES.winterToSummer.after} 17:00:00`,
+        },
+    ];
+    await mountGanttView({
+        resModel: "tasks",
+        arch: `<gantt date_start="start" date_stop="stop" default_scale="week"/>`,
+        context: {
+            initialDate: `${DST_DATES.winterToSummer.before} 08:00:00`,
+        },
+    });
+    const { columnHeaders, rows } = getGridContent();
+    expect(columnHeaders.length).toBeGreaterThan(0);
+    expect(rows[0].pills).toHaveLength(1);
+});
+
+test("GanttRenderer with weekly scale respects local start of week", async () => {
+    patchWithCleanup(localization, { weekStart: 7, });
+
+    const ISODate = "2026-05-17"
+    const sundayDate = DateTime.fromISO(ISODate + "T10:00:00");
+    const globalStart = DateTime.fromISO(ISODate + "T00:00:00");
+
+    const renderer = new GanttRenderer();
+    renderer.model = {
+        metaData: {
+            globalStart,
+            scale: {
+                interval: "week",
+                cellPart: 1,
+                cellTime: 1,
+                time: "day",
+            },
+        },
+    };
+
+    const { column } = renderer.getSubColumnFromDate(sundayDate);
+    expect(column.toISODate()).toBe(ISODate);
+
+    const [firstCol] = renderer.getGridColumnFromDates(sundayDate, sundayDate);
+    expect(firstCol).toBe(1);
+});
+

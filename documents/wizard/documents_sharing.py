@@ -121,7 +121,7 @@ class DocumentsSharing(models.TransientModel):
         for record in self:
             record.has_warning_link_with_more_rights = (
                     not record.invite_partner_ids and record.access_via_link.endswith('edit') and (
-                    record.access_internal.endswith('view') or any(a.role.endswith('view') for a in record.share_access_ids)))
+                    record.access_internal.endswith('view') or any(a.role.endswith('view') and not a.is_deleted for a in record.share_access_ids)))
 
     @api.depends('access_via_link', 'invite_partner_ids', 'share_access_ids.partner_id.user_ids')
     def _compute_has_warning_partners_without_access(self):
@@ -151,16 +151,29 @@ class DocumentsSharing(models.TransientModel):
         else:
             self.document_ids.action_update_access_rights(
                 partners={
-                    partner: (self.invite_role, None)
+                    partner: (self.invite_role, False)
                     for partner in self.invite_partner_ids
                 },
                 no_propagation=not self.is_folder_only,
             )
             if self.invite_notify and (
                     share_template := self.env.ref('documents.mail_template_document_share', raise_if_not_found=False)):
+                access_urls_by_partner = {}
+                for partner in self.invite_partner_ids:
+                    access_urls = {}
+                    for document in self.document_ids:
+                        access_url = document.access_url
+                        member = document.access_ids.filtered(lambda access:
+                            access.partner_id == partner)
+                        if member and member._is_signup_available():
+                            access_url = f'{access_url}?member_signup_token={member._get_member_signup_token()}&member_id={member.id}'
+                        access_urls[document] = access_url
+                    access_urls_by_partner[partner] = access_urls
                 share_template.with_context(
                     documents=self.document_ids,
+                    access_urls_by_partner=access_urls_by_partner,
                     message=self.invite_notify_message or "").send_mail_batch(self.invite_partner_ids.ids)
+
             params = {
                 'title': _('Successfully Shared'),
                 'message': (

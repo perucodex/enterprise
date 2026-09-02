@@ -26,8 +26,11 @@
                     <t t-name="card" class="p-0 w-100">
                         <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="not context.get('in_checks_view') or active"/>
                         <div class="w-100 p-2 px-3" >
+                            <div class="alert alert-warning text-center" role="alert" invisible="not context.get('in_checks_view') or not show_companies_mismatch_warning">
+                                Your active companies do not match this return's companies. The results shown for the checks might be incomplete.
+                            </div>
                             <div class="row h-full position-relative">
-                                <div class="col-12 col-lg-3">
+                                <div class="col-12" t-att-class="{'col-lg-3': record.return_type_category.raw_value != 'audit', 'col-lg-5': record.return_type_category.raw_value == 'audit'}">
                                     <div class="row">
                                         <div class="o_field_widget">
                                             <field class="oe_state_value pe-2 fs-5" name="name"/>
@@ -51,7 +54,7 @@
                                     </div>
                                 </div>
 
-                                <div id="account_tax_return_amount" class="col-12 col-lg-2 px-lg-0 d-flex align-items-center text-end">
+                                <div id="account_tax_return_amount" class="col-12 col-lg-2 px-lg-0 d-flex align-items-center text-end" invisible="return_type_category == 'audit'">
                                     <field name="amount_to_pay_currency_id" invisible="1"/>
                                     <div id="return_amount_to_pay" invisible="not show_amount_to_pay or not is_main_company_active or return_type_category == 'audit'">
                                         <h2 class="o_account_return_amount o_field_widget">
@@ -84,12 +87,12 @@
 
                                     <t t-if="!record.report_opened_once.raw_value and record.show_submit_button.raw_value and record.is_report_set.raw_value">
                                         <button class="btn btn-primary" type="object" name="action_open_report"><field name="report_name"/></button>
-                                        <button invisible="not context.get('in_checks_view') or not type_external_id or is_completed or not is_main_company_active"
+                                        <button invisible="not context.get('in_checks_view') or is_completed or not is_main_company_active"
                                                 class="btn btn-secondary" type="object" name="action_submit">Submit</button>
                                     </t>
                                     <t t-else="">
                                         <button invisible="not is_report_set" class="btn btn-secondary" type="object" name="action_open_report"><field name="report_name"/></button>
-                                        <button invisible="not context.get('in_checks_view') or not type_external_id or is_completed or not show_submit_button or not is_main_company_active"
+                                        <button invisible="not context.get('in_checks_view') or is_completed or not show_submit_button or not is_main_company_active"
                                                 class="btn btn-primary" type="object" name="action_submit">Submit</button>
                                     </t>
 
@@ -97,7 +100,7 @@
                                     </t>
                                     <t id="default_buttons" t-else="">
                                         <button invisible="not context.get('in_checks_view') or next_state != 'reviewed' or is_completed or not is_main_company_active or unresolved_check_count or not active" class="btn btn-primary" type="object" name="action_validate">Validate</button>
-                                        <button invisible="not context.get('in_checks_view') or not type_external_id or next_state != 'paid' or is_completed or not is_main_company_active" class="btn btn-primary" type="object" name="action_pay">Pay</button>
+                                        <button invisible="not context.get('in_checks_view') or next_state != 'paid' or is_completed or not is_main_company_active" class="btn btn-primary" type="object" name="action_pay">Pay</button>
                                     </t>
 
                                     <div class="dropdown show dropdown-sm" invisible="not is_main_company_active">
@@ -106,11 +109,11 @@
                                         </button>
 
                                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" role="menu">
-                                            <a invisible="state != 'new' or is_completed or not active" class="dropdown-item" type="object" name="action_mark_completed" string="Mark as Completed"/>
+                                            <a invisible="is_completed or not active" class="dropdown-item" type="object" name="action_mark_completed" string="Mark as Completed"/>
                                             <a invisible="not has_move_entries or state not in ('reviewed', 'submitted', 'paid')" class="dropdown-item" type="object" name="action_view_entry" string="View Entry"/>
                                             <a invisible="context.get('in_checks_view') or not active or state != 'new' or is_completed" class="dropdown-item" type="object" name="action_archive" string="Archive"/>
                                             <a invisible="active" class="dropdown-item" type="object" name="action_unarchive" string="Unarchive"/>
-                                            <a invisible="context.get('in_checks_view') or not (manually_created and state == 'new')" class="dropdown-item" type="object" name="action_delete" string="Delete"/>
+                                            <a invisible="context.get('in_checks_view') or not (manually_created and state == 'new')" class="dropdown-item" type="delete" groups="account.group_account_user">Delete</a>
 
                                             <!-- Reset should be last-->
                                             <a invisible="state == 'new' and not is_completed or not is_tax_return" class="dropdown-item" type="object" name="action_reset_tax_return_common" string="Reset"/>

@@ -141,12 +141,12 @@ export class TimerTimesheetGridRenderer extends TimesheetGridRenderer {
         if (!Object.keys(this.props.model.workingHoursData.daily).length) {
             return null;
         }
-        if ("full_time_required_hours" in this.props.model.workingHoursData.daily) {
+        if ("hours_per_week" in this.props.model.workingHoursData.daily) {
             const grandTotal = this.props.model.columnsArray.reduce(
                 (total, column) => total + column.grandTotal,
                 0
             );
-            return grandTotal - this.props.model.workingHoursData.daily.full_time_required_hours;
+            return grandTotal - this.props.model.workingHoursData.daily.hours_per_week;
         }
         return this.props.model.columnsArray.reduce(
             (overtime, column) => overtime + this.getDailyOvertime(column),

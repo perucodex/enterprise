@@ -107,7 +107,7 @@ class L10n_Be281_45(models.Model):
 
     @api.depends('xml_file')
     def _compute_validation_state(self):
-        xsd_schema_file_path = file_path('l10n_be_hr_payroll/data/Belcotax-2024.xsd')
+        xsd_schema_file_path = file_path('l10n_be_hr_payroll/data/Belcotax-2025.xsd')
         xsd_root = etree.parse(xsd_schema_file_path)
         schema = etree.XMLSchema(xsd_root)
 
@@ -169,12 +169,6 @@ class L10n_Be281_45(models.Model):
     @api.model
     def _get_country_code(self, country):
         return COUNTRY_CODES[country.code]
-
-    @api.model
-    def _get_other_family_charges(self, employee):
-        if employee.dependent_children and employee.marital in ['single', 'widower']:
-            return 'X'
-        return ''
 
     def _get_rendering_data(self, employees):
         # Round to eurocent for XML file, not PDF

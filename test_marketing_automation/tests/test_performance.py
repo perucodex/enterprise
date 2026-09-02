@@ -1,8 +1,13 @@
+import logging
+import time
+
 from contextlib import contextmanager
 from datetime import timedelta
 from unittest.mock import patch
 
 from odoo import fields
+from odoo.addons.base.models.ir_cron import MIN_FAILURE_COUNT_BEFORE_DEACTIVATION
+from odoo.addons.base.tests.test_ir_cron import CronMixinCase
 from odoo.addons.marketing_automation.models.marketing_activity import MarketingActivity
 from odoo.addons.marketing_automation.models.marketing_participant import MarketingParticipant
 from odoo.addons.marketing_automation.models.marketing_trace import MarketingTrace
@@ -12,9 +17,11 @@ from odoo.tests.common import warmup
 from odoo.tests import tagged, users
 from odoo.tools import mute_logger
 
+_logger = logging.getLogger(__name__)
+
 
 @tagged('mail_performance', 'marketing_automation', 'post_install', '-at_install')
-class MAPerformanceCommon(BaseMailPerformance, TestMACommon):
+class MAPerformanceCommon(BaseMailPerformance, TestMACommon, CronMixinCase):
 
     @classmethod
     def setUpClass(cls):
@@ -22,7 +29,16 @@ class MAPerformanceCommon(BaseMailPerformance, TestMACommon):
         cls.date_reference = fields.Datetime.from_string("2024-07-15 10:30:00")
 
     @contextmanager
-    def mockMACalls(self):
+    def trace_duration(self, label):
+        """ Context manager to measure wall-clock time """
+        start = time.perf_counter()
+        yield
+        spent = time.perf_counter() - start
+        _logger.info("[Performance] %s: %.4f seconds", label, spent)
+
+    @contextmanager
+    def mockMACalls(self, error_dict=None):
+        error_dict = error_dict or {}
         original_act_execute_on_traces = MarketingActivity.execute_on_traces
         original_part_create = MarketingParticipant.create
         original_part_search = MarketingParticipant.search
@@ -31,10 +47,44 @@ class MAPerformanceCommon(BaseMailPerformance, TestMACommon):
         original_trace_search = MarketingTrace.search
         original_trace_write = MarketingTrace.write
 
+        # error generation tweaks
+        # 1. fail at participant creation (e.g. )
+        fail_part_create_ctr = error_dict.get('fail_part_create_ctr')
+        fail_act_exec_traces_ctr = error_dict.get('fail_act_exec_traces_ctr')
+
+        creation_counter = 0
+        exec_traces_counter = 0
+
+        def _failing_part_create(*args, **kwargs):
+            nonlocal fail_part_create_ctr
+            nonlocal creation_counter
+            nonlocal original_part_create
+
+            model, vals_list = args
+            creation_counter += len(vals_list)
+            if fail_part_create_ctr and creation_counter >= fail_part_create_ctr:
+                raise MemoryError('Raising MemoryError')
+            return original_part_create(model, vals_list, **kwargs)
+
+        def _failing_act_exec_traces(*args):
+            nonlocal fail_act_exec_traces_ctr
+            nonlocal exec_traces_counter
+            nonlocal original_part_create
+
+            model, traces = args
+            exec_traces_counter += 1
+            # make time move forward, notably because crons check time spend in jobs
+            # and may loop indefinitively
+            self.frozen_datetime_mock.tick(delta=timedelta(minutes=1))
+
+            if fail_act_exec_traces_ctr and exec_traces_counter >= fail_act_exec_traces_ctr:
+                raise MemoryError('Raising MemoryError')
+            return original_act_execute_on_traces(model, traces)
+
         with patch.object(MarketingActivity, 'execute_on_traces',
-                          autospec=True, side_effect=original_act_execute_on_traces) as mock_act_execute_on_traces, \
+                          autospec=True, side_effect=_failing_act_exec_traces) as mock_act_execute_on_traces, \
              patch.object(MarketingParticipant, 'create',
-                          autospec=True, side_effect=original_part_create) as mock_part_create, \
+                          autospec=True, side_effect=_failing_part_create) as mock_part_create, \
              patch.object(MarketingParticipant, 'search',
                           autospec=True, side_effect=original_part_search) as mock_part_search, \
              patch.object(MarketingParticipant, 'write',
@@ -214,7 +264,7 @@ class MAPerformanceCommon(BaseMailPerformance, TestMACommon):
         return test_campaign
 
     @classmethod
-    def _create_test_records(cls, count=200):
+    def _create_perf_test_records(cls, count=200, include_void=True, include_dupe=False):
         # --------------------------------------------------
         # TEST RECORDS, using marketing.test.performance
         #
@@ -227,7 +277,314 @@ class MAPerformanceCommon(BaseMailPerformance, TestMACommon):
         return cls._create_marketauto_records(
             model="marketing.test.performance",
             count=count,
+            include_void=include_void,
+            include_dupe=include_dupe,
         )
+
+
+@tagged('mail_performance', 'ma_cron', 'post_install', '-at_install')
+class TestMACron(MAPerformanceCommon):
+    """ Cron behavior for marketing campaigns
+
+    Quick timing info
+    Vers -- cnt -- aver
+    19.0  10000    37  / 50 (unique)
+    19.0   1000    1.7 / 1.9 (unique)
+    19.0    100    0.15
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        # test records
+        cls.total_size = 100
+        cls.test_records = cls._create_perf_test_records(count=int(cls.total_size / 5), include_void=False, include_dupe=True)
+        cls.dupe_size = cls.total_size / 5
+
+        # test campaign, same for all tests
+        with cls.mock_datetime_and_now(cls, cls.date_reference):
+            cls.campaign = cls._create_test_campaign(
+                campaign_domain=[("name", "!=", "Invalid"), ("selection_field", "!=", "key3")],
+            )
+            cls.campaign.write({'state': 'running'})
+        cls.begin_activities = cls.campaign.marketing_activity_ids.filtered(lambda a: a.trigger_type == 'begin')
+
+    def test_assert_initial_values(self):
+        """ Common initial tests for this class """
+        self.assertEqual(len(self.test_records), self.total_size)
+        self._assert_cron_progress(self.cron_ma_sync_participants, 0)
+        self._assert_cron_progress(self.cron_ma_execute_activities, 0)
+        self.assertEqual(len(self.begin_activities), 4)
+
+        # crons are clean
+        self._assert_cron_state(self.cron_ma_sync_participants)
+        self._assert_cron_state(self.cron_ma_execute_activities)
+
+    def test_cron_execute_activities(self):
+        """ Test 'ir_cron_campaign_execute_activities' cron """
+        cron = self.cron_ma_execute_activities
+        campaign = self.campaign
+
+        with self.mock_datetime_and_now(self.date_reference):
+            campaign.sync_participants()
+        self.assertEqual(len(campaign.participant_ids), self.total_size)
+        self.assertActivityScheduled(self.begin_activities, self.test_records)
+
+        with self.trace_duration('Cron Complete'), \
+             self.mock_datetime_and_now(self.date_reference + timedelta(hours=4)), \
+             self.mock_mail_gateway(), self.mockSMSGateway(), \
+             self.mockWhatsappGateway(), \
+             self.capture_triggers('marketing_automation.ir_cron_campaign_sync_participants') as captured_triggers_sync, \
+             self.capture_triggers('marketing_automation.ir_cron_campaign_execute_activities') as captured_triggers_execute:
+            cron.method_direct_trigger()
+
+        # progression check
+        self.assertActivityProcessed(self.begin_activities, self.test_records)
+        # cron usage
+        self._assert_cron_state(
+            cron, failure_count=0, first_failure_date=False,
+            lastcall=self.date_reference + timedelta(hours=4),
+        )
+        self.assertEqual(cron.nextcall, self.date_reference + timedelta(hours=5), 'Rescheduled for later, not asap (to check for time)')
+        self._assert_cron_progress(cron, 1, remaining=0)
+        # triggers: for children traces (_generate_children_traces); those are
+        # scheduled one day after the 'begin' trace, see setup
+        self.assertEqual(len(captured_triggers_execute.records), 3,
+                         "Cron triggers for child activities, added in '_generate_children_traces'")
+        self.assertEqual(captured_triggers_execute.records.cron_id, cron)
+        self.assertEqual(
+            sorted(captured_triggers_execute.records.mapped('call_at')),
+            [self.date_reference + timedelta(days=1, hours=1), self.date_reference + timedelta(days=1, hours=2), self.date_reference + timedelta(days=1, hours=3)],
+        )
+        # sync untouched
+        self.assertEqual(len(captured_triggers_sync.records), 0,
+                         'Run did not schedule anything (nor commit progress)')
+
+    def test_cron_execute_activities_fail(self):
+        """ Test 'ir_cron_campaign_execute_activities' cron managing failures """
+        cron = self.cron_ma_execute_activities
+        campaign = self.campaign
+
+        with self.mock_datetime_and_now(self.date_reference):
+            campaign.sync_participants()
+        self.assertEqual(len(campaign.participant_ids), self.total_size)
+        self.assertActivityScheduled(self.begin_activities, self.test_records)
+
+        # fail when calling execute_on_traces, simulating a MemoryError
+        with self.mockMACalls({'fail_act_exec_traces_ctr': 2}), \
+             mute_logger('odoo.addons.base.models.ir_cron'),\
+             self.mock_datetime_and_now(self.date_reference + timedelta(hours=4)), \
+             self.mock_mail_gateway(), self.mockSMSGateway(), \
+             self.mockWhatsappGateway(), \
+             self.capture_triggers('marketing_automation.ir_cron_campaign_sync_participants') as captured_triggers_sync, \
+             self.capture_triggers('marketing_automation.ir_cron_campaign_execute_activities') as captured_triggers_execute:
+            cron.method_direct_trigger()
+
+        # progression check
+        self.assertActivityScheduled(self.begin_activities, self.test_records)  # 'Due to fail, traces has not been processed'
+        # cron usage
+        self._assert_cron_state(
+            cron, failure_count=1,
+            first_failure_date=self.date_reference + timedelta(hours=4),
+            lastcall=self.date_reference + timedelta(hours=4),
+        )
+        self.assertEqual(cron.nextcall, self.date_reference + timedelta(hours=5), 'Rescheduled for later, not asap (to check for time)')
+        self._assert_cron_progress(cron, 1, remaining=0)
+        self.assertEqual(len(captured_triggers_sync.records), 0,
+                         'Run did not schedule anything (nor commit progress)')
+        # sync untouched
+        self.assertEqual(len(captured_triggers_execute.records), 0,
+                         'Run did not schedule anything (nor commit progress)')
+
+    def test_cron_execute_activities_fail_mixed(self):
+        """ Test 'ir_cron_campaign_execute_activities' cron managing failures
+        on working and failing campaigns, aka check iterative support """
+        cron = self.cron_ma_execute_activities
+        campaign = self.campaign
+        begin_activities = self.begin_activities
+        campaign_2 = campaign.copy({'state': 'running'})
+        begin_activities_2 = campaign_2.marketing_activity_ids.filtered(lambda a: a.trigger_type == 'begin')
+
+        with self.mock_datetime_and_now(self.date_reference):
+            (campaign + campaign_2).sync_participants()
+        self.assertEqual(len(campaign.participant_ids), self.total_size)
+        self.assertEqual(len(campaign_2.participant_ids), self.total_size)
+        self.assertActivityScheduled(begin_activities, self.test_records)
+        self.assertActivityScheduled(begin_activities_2, self.test_records)
+
+        # fail when calling execute_on_traces, simulating a MemoryError during
+        # 'campaign' 2d activity (aka 6th activity)
+        with self.mockMACalls({'fail_act_exec_traces_ctr': 6}), \
+             mute_logger('odoo.addons.base.models.ir_cron'),\
+             self.mock_datetime_and_now(self.date_reference + timedelta(hours=4)), \
+             self.mock_mail_gateway(), self.mockSMSGateway(), \
+             self.mockWhatsappGateway(), \
+             self.capture_triggers('marketing_automation.ir_cron_campaign_sync_participants') as captured_triggers_sync, \
+             self.capture_triggers('marketing_automation.ir_cron_campaign_execute_activities') as captured_triggers_execute:
+            cron.method_direct_trigger()
+
+        # progression check
+        self.assertActivityScheduled(self.begin_activities, self.test_records)  # 'Due to fail, traces has not been processed'
+        self.assertActivityScheduled(begin_activities_2, self.test_records)  # 'Due to fail, traces has not been processed'
+        # cron usage
+        self._assert_cron_state(
+            cron, failure_count=1,
+            first_failure_date=self.date_reference + timedelta(hours=4),
+            lastcall=self.date_reference + timedelta(hours=4),
+        )
+        self.assertEqual(cron.nextcall, self.date_reference + timedelta(hours=5), 'Rescheduled for later, not asap (to check for time)')
+        self._assert_cron_progress(cron, 1, remaining=0)
+        self.assertEqual(len(captured_triggers_sync.records), 0,
+                         'Run did not schedule anything (nor commit progress)')
+        # sync untouched
+        self.assertEqual(len(captured_triggers_execute.records), 0,
+                         'Run did not schedule anything (nor commit progress)')
+
+    def test_cron_synchronize_participants(self):
+        """ Test 'ir_cron_campaign_sync_participants' cron """
+        cron = self.cron_ma_sync_participants
+        campaign = self.campaign
+
+        with self.trace_duration('Cron Complete'), \
+             self.mock_datetime_and_now(self.date_reference), \
+             self.capture_triggers('marketing_automation.ir_cron_campaign_sync_participants') as captured_triggers:
+            cron.method_direct_trigger()
+
+        # progression check
+        self.assertEqual(
+            len(campaign.participant_ids), self.total_size,
+            'Synchronized everything, as process is not iterative')
+        # cron usage: no failure detecter
+        self._assert_cron_state(cron, failure_count=0, first_failure_date=False, lastcall=self.date_reference)
+        self.assertEqual(cron.nextcall, self.cron_last_call + timedelta(hours=12), 'Rescheduled for later, not asap')
+        self._assert_cron_progress(cron, 1, remaining=0)
+        self.assertEqual(len(captured_triggers.records), 0,
+                         'Run did not schedule anything (nor commit progress)')
+
+    def test_cron_synchronize_participants_fail(self):
+        """ Test 'ir_cron_campaign_sync_participants' cron managing failures """
+        cron = self.cron_ma_sync_participants
+        campaign = self.campaign
+
+        with self.mockMACalls({'fail_part_create_ctr': 75}), \
+             mute_logger('odoo.addons.base.models.ir_cron'),\
+             self.mock_datetime_and_now(self.date_reference), \
+             self.capture_triggers('marketing_automation.ir_cron_campaign_sync_participants') as captured_triggers:
+            cron.method_direct_trigger()
+
+        # progression check
+        self.assertEqual(
+            len(campaign.participant_ids), 0,
+            'Failed, everything is rollbacked (which could be improved)')
+        # cron usage: failure detected once
+        self._assert_cron_state(cron, active=True, failure_count=1, first_failure_date=self.date_reference, lastcall=self.date_reference)
+        self.assertEqual(cron.nextcall, self.cron_last_call + timedelta(hours=12), 'Rescheduled for later, not asap')
+        self._assert_cron_progress(cron, 1, remaining=0)
+        self.assertEqual(len(captured_triggers.records), 0,
+                         'Run did not schedule anything (nor commit progress)')
+
+        # some more fails (see MIN_FAILURE_COUNT_BEFORE_DEACTIVATION) under limited
+        # timeframe (see MIN_DELTA_BEFORE_DEACTIVATION) should deactivate it (such sad)
+        for idx in range(MIN_FAILURE_COUNT_BEFORE_DEACTIVATION - 1):
+            with self.mockMACalls({'fail_part_create_ctr': 75}), \
+                 mute_logger('odoo.addons.base.models.ir_cron'),\
+                 self.mock_datetime_and_now(self.date_reference + timedelta(days=(7 + idx))):
+                cron.method_direct_trigger()
+        # cron deactivated
+        self.assertFalse(cron.active, 'Should be deactivated after successive fails')
+
+    def test_cron_synchronize_participants_fail_mixed(self):
+        """ Test 'ir_cron_campaign_sync_participants' cron managing failures
+        on working and failing campaigns, aka check iterative support """
+        cron = self.cron_ma_sync_participants
+        campaign = self.campaign
+        campaign_2 = campaign.copy({'state': 'running'})
+
+        with self.mockMACalls({'fail_part_create_ctr': 175}), \
+             mute_logger('odoo.addons.base.models.ir_cron'),\
+             self.mock_datetime_and_now(self.date_reference), \
+             self.capture_triggers('marketing_automation.ir_cron_campaign_sync_participants') as captured_triggers:
+            cron.method_direct_trigger()
+
+        # progression check
+        self.assertEqual(
+            len(campaign.participant_ids), 0,
+            'Failed, everything is rollbacked (which could be improved)')
+        self.assertEqual(
+            len(campaign_2.participant_ids), 0,
+            'Failed, everything is rollbacked (which could be improved)')
+        # cron usage
+        self._assert_cron_state(
+            cron, failure_count=1,
+            first_failure_date=self.date_reference,
+            lastcall=self.date_reference,
+        )
+        self.assertEqual(cron.nextcall, self.date_reference + timedelta(hours=1), 'Rescheduled for later, not asap (to check for time)')
+        self._assert_cron_progress(cron, 1, remaining=0)
+        self.assertEqual(len(captured_triggers.records), 0,
+                         'Run did not schedule anything (nor commit progress)')
+
+    def test_cron_synchronize_participants_unique(self):
+        """ Test 'ir_cron_campaign_sync_participants' cron, dealing with field
+        unicity. """
+        cron = self.cron_ma_sync_participants
+        campaign = self.campaign
+
+        with self.mock_datetime_and_now(self.date_reference):
+            campaign.write({'unique_field_id': self.env['ir.model.fields']._get(self.test_records._name, 'email_from').id})
+
+        with self.trace_duration('Cron Complete Unique Check'), \
+             self.mock_datetime_and_now(self.date_reference), \
+             self.capture_triggers('marketing_automation.ir_cron_campaign_sync_participants') as captured_triggers:
+            cron.method_direct_trigger()
+
+        # progression check
+        self.assertEqual(
+            len(campaign.participant_ids), self.total_size - self.dupe_size,
+            'Synchronized everything, as process is not iterative, minus duplicates')
+        # cron usage
+        self._assert_cron_state(cron, active=True, failure_count=0, first_failure_date=False, lastcall=self.date_reference)
+        self.assertEqual(cron.nextcall, self.cron_last_call + timedelta(hours=12), 'Rescheduled for later, not asap')
+        self._assert_cron_progress(cron, 1, remaining=0)
+        self.assertEqual(len(captured_triggers.records), 0,
+                         'Run did not schedule anything (nor commit progress)')
+
+    def test_cron_synchronize_participants_unique_quick(self):
+        """ Quick testing of unique feature support, easing early fault detection
+        in queries / algorithm """
+        cron = self.cron_ma_sync_participants
+        campaign = self.campaign
+        campaign_2 = campaign.copy({'state': 'running'})
+        test_records = self.env['marketing.test.performance'].create([
+            {'email_from': 'from.1@zboing.example.com'},
+            {'email_from': 'from.2@zboing.example.com'},  # already participating
+            {'email_from': 'from.3@zboing.example.com'},
+            {'email_from': 'from.1@zboing.example.com'},  # duplicate inside new to consider
+            {'email_from': 'from.2@zboing.example.com'},  # duplicate of already participating
+        ])
+        _existing = self.env['marketing.participant'].create({'campaign_id': campaign.id, 'res_id': test_records[1].id})
+        _existing2 = self.env['marketing.participant'].create({'campaign_id': campaign_2.id, 'res_id': test_records[1].id})
+
+        with self.mock_datetime_and_now(self.date_reference):
+            (campaign + campaign_2).write({
+                'domain': [('email_from', 'ilike', 'zboing.example.com')],
+                'unique_field_id': self.env['ir.model.fields']._get(self.test_records._name, 'email_from').id,
+            })
+            with self.capture_triggers('marketing_automation.ir_cron_campaign_sync_participants') as captured_triggers:
+                cron.method_direct_trigger()
+
+        for c in campaign + campaign_2:
+            self.assertEqual(len(c.participant_ids), 3)
+            self.assertEqual(
+                sorted(test_records.browse(c.participant_ids.mapped('res_id')).mapped('email_from')),
+                [f'from.{idx}@zboing.example.com' for idx in range(1, 4)]
+            )
+        self._assert_cron_state(cron, active=True, failure_count=0, first_failure_date=False, lastcall=self.date_reference)
+        self.assertEqual(cron.nextcall, self.cron_last_call + timedelta(hours=12), 'Rescheduled for later, not asap')
+        self._assert_cron_progress(cron, 1, remaining=0)
+        self.assertEqual(len(captured_triggers.records), 0,
+                         'Run did not schedule anything (nor commit progress)')
 
 
 @tagged('mail_performance', 'post_install', '-at_install')
@@ -237,7 +594,7 @@ class TestMAPerformance(MAPerformanceCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.test_records = cls._create_test_records()
+        cls.test_records = cls._create_perf_test_records()
 
     def setUp(self):
         super().setUp()
@@ -272,8 +629,8 @@ class TestMAPerformance(MAPerformanceCommon):
         self.assertEqual(len(self.test_records), 1000)
 
         # local: 1099
-        # runbot: 1110, taking 100 more to avoid runbot issues in stable
-        with self.assertQueryCount(1110 + 100), \
+        # runbot: 1099, taking 100 more to avoid runbot issues in stable
+        with self.assertQueryCount(1099 + 100), \
              self.mock_datetime_and_now(self.date_reference), \
              self.mockMACalls():
             campaign.sync_participants()
@@ -303,12 +660,12 @@ class TestMAPerformance(MAPerformanceCommon):
         based on DB state. """
         campaign = self.test_campaign
 
-        # local: 16028
-        # runbot: 16060, taking 100 more to avoid runbot issues in stable
+        # local: 16864
+        # runbot: 16869, taking 100 more to avoid runbot issues in stable
         # hours+4 -> is going to trigger all 4 begin activities
-        with self.assertQueryCount(16060 + 100), \
+        with self.assertQueryCount(16869 + 100), \
              self.mock_datetime_and_now(self.date_reference + timedelta(hours=4)), \
-             self.mock_mail_gateway(), self.mockSMSGateway(), \
+             self.mock_mail_gateway(), self.mock_mail_app(), self.mockSMSGateway(), \
              self.mockWhatsappGateway(), self.patchWhatsappCronTrigger(), \
              self.mockMACalls():
             campaign.execute_activities()
@@ -349,13 +706,17 @@ class TestMAPerformance(MAPerformanceCommon):
         # side records performance check
         self.assertEqual(self.mail_mail_create_mocked.call_count, 20,
                          'Done by batch size inside activity execution batch (2 * 10)')
+        self.assertEqual(self._mock_mail_message_create.call_count, 1022,
+                         'Sequential creation spotted notably in whatsapp')
         self.assertEqual(self._mock_sms_create.call_count, 2,
                          'Done by activity execution batch (500 currently)')
         self.assertEqual(self._mock_wa_msg_create.call_count, 2,
                          'Done by activity execution batch (500 currently)')
+        self.assertEqual(self._mock_wa_msg_write.call_count, 2000,
+                         'Sequential update of whatsapp message (during creation and send)')
 
         # now create 10*5 records, unlink other 50 records, observe performance
-        self.test_records_new = self._create_test_records(count=10)
+        self.test_records_new = self._create_perf_test_records(count=10)
         self.assertEqual(len(self.test_records_new), 50)
         self.test_records[:50].unlink()
 
@@ -431,6 +792,6 @@ class TestMAPerformance(MAPerformanceCommon):
         self.assertEqual(self._mock_part_write.call_count, 7)
         self.assertEqual(self._mock_trace_create.call_count, 1000,
                          'New traces for new begin activity created sequentially')
-        self.assertEqual(self._mock_trace_search.call_count, 11)
+        self.assertEqual(self._mock_trace_search.call_count, 13)
         self.assertEqual(self._mock_trace_write.call_count, 1000,
                          'Looks like sequential update')

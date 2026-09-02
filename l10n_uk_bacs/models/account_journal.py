@@ -135,9 +135,12 @@ class AccountJournal(models.Model):
 
             for payment in payments_in_date:
                 partner_name = format_communication(payment['partner_name'])[:18].ljust(18)
-                partner_bank_iban = payment['partner_bank_iban']
-                partner_sort_code = get_iban_part(partner_bank_iban, 'branch')
-                partner_account_number = get_iban_part(partner_bank_iban, 'account')
+                if partner_bank_iban := payment.get('partner_bank_iban'):
+                    partner_sort_code = get_iban_part(partner_bank_iban, 'branch')
+                    partner_account_number = get_iban_part(partner_bank_iban, 'account')
+                else:
+                    partner_sort_code = payment.get('partner_sort_code', '').replace('-', '')
+                    partner_account_number = payment.get('partner_account_number')
                 payment_reference = format_communication(payment['ref'])[:18].ljust(18)
 
                 amount = payment['amount']
@@ -222,10 +225,14 @@ class AccountJournal(models.Model):
                     raise UserError(_("The payment must be linked to a BACS Direct Debit Instruction in order to generate a Direct Debit File."))
                 if ddi.state == 'revoked':
                     raise UserError(_("The BACS Direct Debit Instruction associated to the payment has been revoked and cannot be used anymore."))
-                partner_bank_iban = ddi.partner_bank_id.sanitized_acc_number
-
-                partner_sort_code = get_iban_part(partner_bank_iban, 'branch')
-                partner_account_number = get_iban_part(partner_bank_iban, 'account')
+                partner_bank_type = ddi.partner_bank_id.acc_type
+                if partner_bank_type == 'iban':
+                    partner_bank_iban = ddi.partner_bank_id.sanitized_acc_number
+                    partner_sort_code = get_iban_part(partner_bank_iban, 'branch')
+                    partner_account_number = get_iban_part(partner_bank_iban, 'account')
+                else:
+                    partner_sort_code = (ddi.partner_bank_id.clearing_number or '').replace('-', '')
+                    partner_account_number = ddi.partner_bank_id.sanitized_acc_number
                 partner_name = format_communication(partner_name)[:18].ljust(18)
 
                 payment_reference = format_communication(payment['ref'])[:18].ljust(18)

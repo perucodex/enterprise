@@ -9,8 +9,8 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.tools.misc import format_date
 from odoo.tools.float_utils import float_compare
+from odoo.tools.misc import format_date, format_time
 
 _logger = logging.getLogger(__name__)
 
@@ -385,7 +385,7 @@ class L10nBeSocialBalanceSheet(models.TransientModel):
                 reports_data['social_balance_sheet'] = report_data
                 report_data['year'] = date_from.strftime('%Y')
             else:
-                report_data['month'] = date_from.strftime('%B')
+                report_data['month'] = format_date(self.env, date_from, date_format='MMMM')
                 report_data['year'] = date_from.strftime('%Y')
                 reports_data['SBS{:0{}}'.format(i, max_int_len)] = report_data
         return collections.OrderedDict(sorted(reports_data.items(), key=lambda t: t[0], reverse=True))
@@ -447,7 +447,11 @@ class L10nBeSocialBalanceSheet(models.TransientModel):
             },
             'established': {
                 'header': self.env._('Established on'),
-                'value': self.create_date.strftime("%d %B %Y at %H:%M:%S"),
+                'value': self.env._(
+                    "%(established_date)s at %(established_time)s",
+                    established_date=format_date(self.env, self.create_date, date_format='long'),
+                    established_time=format_time(self.env, self.create_date),
+                )
             },
             'joint_committees': {
                 'header': self.env._('Number of joint committees'),
@@ -455,7 +459,11 @@ class L10nBeSocialBalanceSheet(models.TransientModel):
             },
             'period': {
                 'header': self.env._('Period'),
-                'value': self.env._('%(date_from)s to %(date_to)s', date_from=self.date_from.strftime("%d %B %Y"), date_to=self.date_to.strftime("%d %B %Y")),
+                'value': self.env._(
+                    '%(date_from)s to %(date_to)s',
+                    date_from=format_date(self.env, self.date_from, date_format='long'),
+                    date_to=format_date(self.env, self.date_to, date_format='long'),
+                ),
             },
             'currency': {
                 'header': self.env._('Currency'),

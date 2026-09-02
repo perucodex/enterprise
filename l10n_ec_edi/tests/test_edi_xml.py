@@ -39,6 +39,29 @@ class TestEcEdiXmls(TestEcEdiCommon):
             </xpath>
         """)
 
+    def test_xml_tree_with_non_iva_tax(self):
+        ice_tax = self._get_tax_by_xml_id('tax_ice_plastic_bag')
+        invoice = self.get_invoice(
+            {
+                'move_type': 'out_invoice',
+                'partner_id': self.partner_a.id,
+            },
+            invoice_line_args=[
+                Command.create({
+                    'product_id': self.product_a.id,
+                    'tax_ids': [Command.set(ice_tax.ids)],
+                }),
+            ],
+        )
+        invoice.action_post()
+
+        xml_string, errors = self.env['account.edi.format']._l10n_ec_generate_xml(invoice)
+        self.assertFalse(errors)
+
+        tax_node = etree.fromstring(xml_string.encode()).xpath('//detalle/impuestos/impuesto')[0]
+        self.assertEqual(tax_node.findtext('codigoPorcentaje'), ice_tax.l10n_ec_code_ats)
+        self.assertEqual(tax_node.findtext('tarifa'), f'{ice_tax.amount:.6f}')
+
     def test_xml_tree_credit_note_product_extra_fields(self):
         self.product_a.l10n_ec_auxiliary_code = 'F010101'
         self.test_xml_tree_credit_note(xpath="""
@@ -253,7 +276,7 @@ class TestEcEdiXmls(TestEcEdiCommon):
                 <totalSinImpuestos>852.580000</totalSinImpuestos>
             </xpath>
             <xpath expr="//totalDescuento" position="replace">
-                <totalDescuento>206.06</totalDescuento>
+                <totalDescuento>103.03</totalDescuento>
             </xpath>
             <xpath expr="//totalImpuesto/baseImponible" position="replace">
                 <baseImponible>852.580000</baseImponible>
@@ -278,7 +301,7 @@ class TestEcEdiXmls(TestEcEdiCommon):
                     <descripcion>product_a</descripcion>
                     <cantidad>5.000000</cantidad>
                     <precioUnitario>200.000000</precioUnitario>
-                    <descuento>200.00</descuento>
+                    <descuento>100.00</descuento>
                     <precioTotalSinImpuesto>800.00</precioTotalSinImpuesto>
                     <impuestos>
                         <impuesto>
@@ -312,7 +335,7 @@ class TestEcEdiXmls(TestEcEdiCommon):
                     <descripcion>product_b</descripcion>
                     <cantidad>120.000000</cantidad>
                     <precioUnitario>0.240000</precioUnitario>
-                    <descuento>6.06</descuento>
+                    <descuento>3.03</descuento>
                     <precioTotalSinImpuesto>22.76</precioTotalSinImpuesto>
                     <impuestos>
                         <impuesto>
@@ -409,21 +432,21 @@ class TestEcEdiXmls(TestEcEdiCommon):
                     <descripcion>product_a</descripcion>
                     <cantidad>1.000000</cantidad>
                     <precioUnitario>200.000000</precioUnitario>
-                    <descuento>100.00</descuento>
-                    <precioTotalSinImpuesto>100.00</precioTotalSinImpuesto>
+                    <descuento>160.00</descuento>
+                    <precioTotalSinImpuesto>40.00</precioTotalSinImpuesto>
                     <impuestos>
                         <impuesto>
                             <codigo>2</codigo>
                             <codigoPorcentaje>4</codigoPorcentaje>
                             <tarifa>15.000000</tarifa>
-                            <baseImponible>100.000000</baseImponible>
-                            <valor>15.00</valor>
+                            <baseImponible>40.000000</baseImponible>
+                            <valor>6.00</valor>
                         </impuesto>
                         <impuesto>
                             <codigo>2</codigo>
                             <codigoPorcentaje>0</codigoPorcentaje>
                             <tarifa>0.000000</tarifa>
-                            <baseImponible>100.000000</baseImponible>
+                            <baseImponible>40.000000</baseImponible>
                             <valor>0.00</valor>
                         </impuesto>
                     </impuestos>
@@ -433,21 +456,21 @@ class TestEcEdiXmls(TestEcEdiCommon):
                     <descripcion>product_a</descripcion>
                     <cantidad>1.000000</cantidad>
                     <precioUnitario>300.000000</precioUnitario>
-                    <descuento>300.00</descuento>
-                    <precioTotalSinImpuesto>0.00</precioTotalSinImpuesto>
+                    <descuento>240.00</descuento>
+                    <precioTotalSinImpuesto>60.00</precioTotalSinImpuesto>
                     <impuestos>
                         <impuesto>
                             <codigo>2</codigo>
                             <codigoPorcentaje>4</codigoPorcentaje>
                             <tarifa>15.000000</tarifa>
-                            <baseImponible>0.000000</baseImponible>
-                            <valor>0.00</valor>
+                            <baseImponible>140.000000</baseImponible>
+                            <valor>21.00</valor>
                         </impuesto>
                         <impuesto>
                             <codigo>2</codigo>
                             <codigoPorcentaje>0</codigoPorcentaje>
                             <tarifa>0.000000</tarifa>
-                            <baseImponible>0.000000</baseImponible>
+                            <baseImponible>140.000000</baseImponible>
                             <valor>0.00</valor>
                         </impuesto>
                     </impuestos>
@@ -621,7 +644,7 @@ class TestEcEdiXmls(TestEcEdiCommon):
         Fallback tax for services: company.l10n_ec_withhold_services_tax_id."""
         self.product_a.type = 'service'
         self.get_and_test_xml_tree_in_withhold(
-            xpath=self.get_withhold_xpath_for_taxes(tax_percent='2.75', withhold_amount='11.00', tax_code=3440)
+            xpath=self.get_withhold_xpath_for_taxes(tax_percent='3.00', withhold_amount='12.00', tax_code=3440)
         )
 
     def test_xml_tree_in_withhold_suggested_tax_taxpayer_type(self):

@@ -1,18 +1,23 @@
 # -*- coding: utf-8 -*-
 
 import base64
+import textwrap
+from datetime import timedelta
+from freezegun import freeze_time
+from itertools import product
 from unittest.mock import patch
 
 from odoo import Command
 from odoo.addons.documents_account.tests.common import DocumentsAccountTestCommon, TEXT, PDF
 from odoo.exceptions import UserError
-from odoo.tests.common import tagged
+from odoo.tests.common import tagged, HttpCase
 from odoo.addons.account.tests.test_account_move_send import TestAccountMoveSendCommon
 from odoo.addons.documents.models.documents_document import DocumentsDocument
+from odoo.tools.misc import file_open
 
 
 @tagged('post_install', '-at_install', 'test_document_bridge')
-class TestCaseDocumentsBridgeAccount(DocumentsAccountTestCommon):
+class TestCaseDocumentsBridgeAccount(DocumentsAccountTestCommon, HttpCase):
 
     def test_action_view_documents_account_move(self):
         """
@@ -337,6 +342,28 @@ class TestCaseDocumentsBridgeAccount(DocumentsAccountTestCommon):
         self.assertEqual(document.thumbnail_status, 'client_generated')
         self.assertTrue(document.has_embedded_pdf)
 
+    def test_pdf_first_page_route_for_embedded_pdf(self):
+        with file_open("documents_account/tests/assets/vendor_bill_example.xml", "rb") as xml_file:
+            xml_bytes = xml_file.read()
+
+        document = self.env['documents.document'].create({
+            'name': 'test',
+            'folder_id': self.folder_a.id,
+            'datas': base64.b64encode(xml_bytes).decode(),
+        })
+
+        self.assertEqual(document.mimetype, "text/xml")
+        self.assertTrue(document.has_embedded_pdf)
+        self.assertTrue(document._extract_pdf_from_xml())
+        self.assertEqual(document.thumbnail_status, 'client_generated')
+
+        self.authenticate("admin", "admin")
+        pdf_first_page = self.url_open(f'/documents/content/pdf_first_page/{document.access_token}')
+        self.assertEqual(pdf_first_page.status_code, 200)
+
+    def test_tour_embedded_pdf_thumbnail_generation(self):
+        self.start_tour("/odoo", "test_embedded_pdf_thumbnail_generation", login="admin")
+
     def test_move_document_unlink(self):
         """Test that the document is sent to trash when the `account.move` is unlinked."""
         document1, document2 = self.document_txt, self.document_gif
@@ -388,9 +415,31 @@ class TestCaseDocumentsBridgeAccount(DocumentsAccountTestCommon):
         self.assertEqual(misc_entry_action.get('res_model'), 'account.move')
         self.assertEqual(move.move_type, 'entry')
 
-    def test_workflow_create_bank_statement_raise(self):
-        with self.assertRaises(UserError): # Could not make sense of the given file.
-            (self.document_txt | self.document_gif).account_create_account_bank_statement()
+    def test_workflow_create_bank_statement_raise_content_parsing(self):
+        for document in self.document_txt, self.document_gif:
+            with self.subTest(document=document.name):
+                with self.assertRaises(UserError) as err:
+                    document.account_create_account_bank_statement()
+                self.assertEqual(
+                    err.exception.args[0],
+                    f"All or part of the following file(s) could not be imported:\n"
+                    f"- {document.name}: Could not make sense of the given file.\n"
+                    f"Did you install the module to support this type of file?",
+                )
+
+    def test_workflow_create_bank_statement_raise_no_journal(self):
+        new_company = self.env['res.company'].create({'name': 'new_company_without_journals'})
+        doc_in_new_company = self.document_txt.copy({'company_id': new_company.id})
+
+        for sudo in False, True:
+            # Running test with sudo similulates server actions that run with sudo rights
+            with self.subTest(sudo=sudo):
+                with self.assertRaises(UserError) as err:
+                    doc_in_new_company.with_company(new_company).sudo(sudo).account_create_account_bank_statement()
+                self.assertEqual(
+                    err.exception.args[0],
+                    "No journal could be found in company new_company_without_journals for any of those types: bank",
+                )
 
     def test_workflow_create_vendor_bill(self):
         vendor_bill_entry_action = self.document_txt.account_create_account_move('in_invoice')
@@ -406,38 +455,81 @@ class TestCaseDocumentsBridgeAccount(DocumentsAccountTestCommon):
         self.assertEqual(move.move_type, 'in_receipt')
 
     def test_documents_xml_attachment(self):
-        """
-        Makes sure pdf and xml created by the system will create a document
+        """ Tests that XML and PDF attachments are correctly synced as documents,
+        whether they are linked to the move during create() or write().
         """
         folder_test = self.env['documents.document'].create({'name': 'Bills', 'type': 'folder'})
 
-        invoice = self.init_invoice("out_invoice", amounts=[1000], post=True)
-        setting = self.setup_sync_journal_folder(invoice.journal_id, folder_test)
-        att_ids = []
-        for fmt in ('xml', 'txt'):
-            attachment = self.env["ir.attachment"].create({
-                "raw": "<text/>",
-                "name": f"attachment-{fmt}.txt",
-                "mimetype": f"application/{fmt}",
-                "res_model": "account.move",
-                "res_id": invoice.id,
+        invoice = self.init_invoice('out_invoice', amounts=[1000], post=True)
+        self.setup_sync_journal_folder(invoice.journal_id, folder_test)
+
+        expected_sync_att_ids = []
+
+        for fmt, no_doc in product(('application/xml', 'text/xml', 'application/txt'), (False, True)):
+            expected_doc_count = 0 if fmt == 'application/txt' or no_doc else 1
+            folder_domain = [('folder_id', '=', folder_test.id)] if expected_doc_count else []
+            fmt_name = fmt.replace('/', '_')
+
+            # 1. Test sync via attachment.create()
+            create_att = self.env['ir.attachment'].with_context(no_document=no_doc).create({
+                'raw': b'<text/>',
+                'name': f'create-{fmt_name}.txt',
+                'mimetype': fmt,
+                'res_model': 'account.move',
+                'res_id': invoice.id,
             })
-            att_ids.append(attachment.id)
-        documents = self.env['documents.document'].search([('attachment_id', 'in', att_ids)])
-        self.assertEqual(len(documents), 1, "TXT should not create a document")
-        attachment_pdf = self.env['ir.attachment'].create({
+            self.assertEqual(
+                self.env['documents.document'].search_count([('attachment_id', '=', create_att.id)] + folder_domain),
+                expected_doc_count,
+                f"{fmt} failed correct sync behavior on create() with no_documents={no_doc}"
+            )
+
+            # 2. Test sync via attachment.write()
+            write_att = self.env['ir.attachment'].create({
+                'raw': b'<text/>',
+                'name': f'write-{fmt_name}.txt',
+                'mimetype': fmt,
+            })
+            self.assertFalse(self.env['documents.document'].search_count([('attachment_id', '=', write_att.id)]))
+
+            write_att.with_context(no_document=no_doc).write({
+                'res_model': 'account.move',
+                'res_id': invoice.id,
+            })
+            self.assertEqual(
+                self.env['documents.document'].search_count([('attachment_id', '=', write_att.id)] + folder_domain),
+                expected_doc_count,
+                f"{fmt} failed correct sync behavior on write() with no_documents={no_doc}"
+            )
+            if expected_doc_count == 1:
+                expected_sync_att_ids.extend([create_att.id, write_att.id])
+
+        # Test PDF sync
+        pdf_att = self.env['ir.attachment'].create({
             'datas': PDF,
             'name': 'file.pdf',
             'mimetype': 'application/pdf',
-            'res_model': invoice._name,
+            'res_model': 'account.move',
             'res_id': invoice.id,
         })
-        documents = self.env['documents.document'].search([('attachment_id', '=', attachment_pdf.id)])
-        self.assertFalse(documents, "pdf should not be attached if not main attachment")
-        attachment_pdf.register_as_main_attachment(force=False)
-        documents = self.env['documents.document'].search([('attachment_id', '=', attachment_pdf.id)])
-        self.assertEqual(len(documents), 1, "Pdf registered as main attachment did not create a single document")
-        setting.unlink()
+        self.assertFalse(invoice.message_main_attachment_id)
+        self.assertFalse(
+            self.env['documents.document'].search_count([('attachment_id', '=', pdf_att.id)]),
+            "PDF should not be attached if not main attachment",
+        )
+        pdf_att.register_as_main_attachment(force=True)
+        self.assertTrue(
+            self.env["documents.document"].search_count([
+                ("attachment_id", "=", pdf_att.id),
+                ("folder_id", "=", folder_test.id),
+            ])
+        )
+        expected_sync_att_ids.append(pdf_att.id)
+
+        # Test final count of syncs
+        all_docs = self.env['documents.document'].search([('attachment_id', 'in', expected_sync_att_ids)])
+        self.assertEqual(len(all_docs), len(expected_sync_att_ids), "All XMLs and the registered PDF must be synced")
+        self.assertEqual(all_docs.mapped('folder_id'), folder_test, "All documents must be in the synced folder")
 
     def test_embeddable_server_action_domain(self):
         """Test the domain that filters server actions that can be embedded on a folder.
@@ -514,9 +606,128 @@ class TestCaseDocumentsBridgeAccount(DocumentsAccountTestCommon):
             {'multi', f'multi {company_2.name}', 'single', f'single {company_2.name}'}
         )
 
+    def test_gc_clear_bin_for_journal_folder(self):
+        """Check that account setting folders are excluded from garbage collector."""
+        folder_setting, other_folder = self.env['documents.document'].create([
+            {'name': 'Folder setting', 'type': 'folder'},
+            {'name': 'Other folder', 'type': 'folder'},
+        ])
+        self.env['documents.account.folder.setting'].search([]).unlink()
+        self.setup_sync_journal_folder(self.company_data['default_journal_sale'], folder_setting)
+        (folder_setting | other_folder).action_archive()
+        document_deletion_date = folder_setting.write_date + timedelta(
+            days=folder_setting.get_deletion_delay(), seconds=30)
+        with freeze_time(document_deletion_date):
+            self.env["documents.document"]._gc_clear_bin()
+
+        self.assertTrue(folder_setting.exists(),
+                        "folder linked to journal setting should not be deleted after gc_clear_bin")
+        self.assertFalse(other_folder.exists(),
+                        "folder not linked to journal setting should be deleted after gc_clear_bin")
+
+    def test_permissions_adding_document_attachment(self):
+        """Check that attachment of send_and_print can be copied in composer."""
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'invoice_date': '2016-01-01',
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [Command.create({
+                'quantity': 1,
+                'price_unit': 500,
+                'tax_ids': [],
+            })]
+        })
+        attachment = self.env['ir.attachment'].create([{
+            'name': 'att.pdf',
+            'res_id': invoice.id,
+            'res_model': 'account.move',
+            'res_field': 'invoice_pdf_report_file',  # simulates send & print
+            'datas': 'test',
+            'type': 'binary',
+        }])
+        attachment.register_as_main_attachment()
+
+        document = self.env['documents.document'].search([('attachment_id', '=', attachment.id)], limit=1)
+        self.assertTrue(document)
+        document.with_user(self.simple_accountman).add_documents_attachment("mail.compose.message", 0)
+        attachment_copy = self.env['ir.attachment'].search([('original_id', '=', attachment.id)], limit=1)
+        self.assertTrue(attachment_copy)
+
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
 class TestAccountMoveSendDocument(DocumentsAccountTestCommon, TestAccountMoveSendCommon):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.folder_test = cls.env['documents.document'].create({'name': 'folder_test', 'type': 'folder'})
+        cls.journal = cls.company_data['default_journal_purchase']
+        cls.setup_sync_journal_folder(cls.journal, cls.folder_test)
+
+    def test_log_note_and_incoming_email_document_creation(self):
+        """
+        Test that posting a file via log note or incoming email syncs to Documents ONLY if its mimetype
+        is explicitly allowed by `_should_attach_to_record` (e.g., PDFs, CSVs). Unlisted formats (e.g., images)
+        are orphaned and must not trigger a document sync.
+        """
+        test_cases = [
+            ('invoice.pdf', 'application/pdf', PDF, True),
+            ('receipt.png', 'image/png', base64.b64encode(b'dummy image content'), False),
+        ]
+        origins = ('log_note', 'email')
+        for origin, (filename, mimetype, content, should_sync) in product(origins, test_cases):
+            with self.subTest(origin=origin, filename=filename, mimetype=mimetype):
+                if origin == 'log_note':
+                    invoice = self.init_invoice("in_invoice", amounts=[1000], post=False)
+                    attachment = self.env['ir.attachment'].create({
+                        'name': filename,
+                        'datas': content,
+                        'mimetype': mimetype,
+                        'res_model': 'account.move',
+                        'res_id': invoice.id,
+                    })
+                    invoice.message_post(message_type='comment', attachment_ids=attachment.ids)
+                elif origin == 'email':
+                    content_str = content.decode() if isinstance(content, bytes) else content
+                    email_raw = textwrap.dedent(f"""\
+                        MIME-Version: 1.0
+                        Date: Fri, 26 Nov 2021 16:27:45 +0100
+                        Message-ID: <test-{filename}-{origin}@example.com>
+                        Subject: Incoming bill {filename}
+                        From: Someone <someone@some.company.com>
+                        To: {self.journal.alias_id.display_name}
+                        Content-Type: multipart/alternative; boundary="000000000000a47519057e029630"
+
+                        --000000000000a47519057e029630
+                        Content-Type: text/plain; charset="UTF-8"
+
+                        Here is your document.
+
+                        --000000000000a47519057e029630
+                        Content-Type: {mimetype}
+                        Content-Transfer-Encoding: base64
+                        Content-Disposition: attachment; filename="{filename}"
+
+                        {content_str}
+                        --000000000000a47519057e029630--
+                    """)
+                    invoice_id = self.env['mail.thread'].message_process(
+                        'account.move',
+                        email_raw,
+                        custom_values={'move_type': 'in_invoice', 'journal_id': self.journal.id}
+                    )
+                    invoice = self.env['account.move'].browse(invoice_id)
+                    attachment = self.env['ir.attachment'].search([('name', '=', filename)], limit=1)
+                    self.assertTrue(attachment)
+
+                self.assertEqual(invoice.message_main_attachment_id, attachment)
+                doc = self.env['documents.document'].search([('attachment_id', '=', attachment.id)])
+                if should_sync:
+                    self.assertEqual(attachment.res_model, 'account.move')
+                    self.assertTrue(doc)
+                else:
+                    self.assertFalse(attachment.res_model)
+                    self.assertFalse(doc)
 
     def test_send_and_print_document_creation(self):
         """

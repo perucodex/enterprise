@@ -1,7 +1,10 @@
 import { mailModels } from "@mail/../tests/mail_test_helpers";
 import { mailDataHelpers } from "@mail/../tests/mock_server/mail_mock_server";
+import { fields } from "@web/../tests/web_test_helpers";
 
 export class ResPartner extends mailModels.ResPartner {
+    phone_sanitized = fields.Char();
+
     /** @override */
     _compute_display_name() {
         super._compute_display_name();
@@ -25,12 +28,13 @@ export class ResPartner extends mailModels.ResPartner {
             id: contact.id,
             email: contact.email,
             phone: contact.phone,
+            phone_sanitized: contact.phone_sanitized,
             name: contact.display_name,
             t9_name: contact.t9_name,
         }));
     }
 
     _voip_get_store_fields() {
-        return ["id", "email", "phone", "name", "t9_name"];
+        return ["id", "email", "phone", "phone_sanitized", "name", "t9_name"];
     }
 }

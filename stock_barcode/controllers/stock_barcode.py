@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from odoo import fields, http, _
 from odoo.http import request
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
 from odoo.tools import pdf, split_every
 from odoo.tools.misc import file_open
@@ -21,18 +21,26 @@ class StockBarcodeController(http.Controller):
             action (open an existing / new picking) or warning.
         """
         barcode_type = None
+        request.update_context(allowed_company_ids=self._get_allowed_company_ids())
         nomenclature = request.env.company.nomenclature_id
-        parsed_results = nomenclature.parse_barcode(barcode)
+        try:
+            parsed_results = nomenclature.parse_barcode(barcode)
+        except ValidationError:
+            parsed_results = False
         if parsed_results and nomenclature.is_gs1_nomenclature:
             # search with the last feasible rule
             for result in parsed_results[::-1]:
-                if result['type'] in ['product', 'package', 'location', 'dest_location']:
+                if result['type'] in ['product', 'package', 'location', 'location_dest']:
                     barcode_type = result['type']
                     break
 
         # Alias support
         elif parsed_results:
             for res in parsed_results if isinstance(parsed_results, list) else [parsed_results]:
+                if res['type'] in ['price', 'weight']:
+                    barcode = res['base_code']
+                    barcode_type = 'product'
+                    break
                 barcode = res.get('code', barcode)
                 break
 
@@ -46,7 +54,7 @@ class StockBarcodeController(http.Controller):
                 return ret_open_picking_type
 
         if request.env.user.has_group('stock.group_stock_multi_locations') and \
-           (not barcode_type or barcode_type in ['location', 'dest_location']):
+           (not barcode_type or barcode_type in ['location', 'location_dest']):
             ret_new_internal_picking = self._try_new_internal_picking(barcode)
             if ret_new_internal_picking:
                 return ret_new_internal_picking
@@ -119,6 +127,7 @@ class StockBarcodeController(http.Controller):
         }
         quant_count = request.env['stock.quant'].search_count([
             '|', ('user_id', '=', user.id), ('user_id', '=', False),
+            ("company_id", "=", self._get_allowed_company_ids()[0]),
             ("location_id.usage", "in", ["internal", "transit"]),
             ("inventory_date", "<=", fields.Date.context_today(user)),
             ("inventory_quantity_set", "=", False),

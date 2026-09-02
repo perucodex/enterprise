@@ -31,7 +31,7 @@ class HrOvertimeRule(models.Model):
             expected_hours = sum(planning_slots.mapped('duration'))
 
             return expected_hours
-        return super()._get_expected_hours_from_contract(date, version, period='day')
+        return super()._get_expected_hours_from_contract(date, version, period)
 
 
 class HrVersion(models.Model):
@@ -62,7 +62,8 @@ class HrVersion(models.Model):
                 ])
 
         result = {
-            r: (mapped_intervals[r] - overtime_intervals[r])
+            # FIX LOCAL (bug upstream): ver hr_work_entry_attendance/hr_version.py
+            r: Intervals(list(mapped_intervals[r] - overtime_intervals[r]), keep_distinct=True)
             | Intervals(work_entry_overtime_intervals[r], keep_distinct=True)
             for r in mapped_intervals
         }

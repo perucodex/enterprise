@@ -46,6 +46,26 @@ class TestSubscriptionStockOnOrder(TestSubscriptionStockCommon):
             self.assertEqual(move.quantity, 1, 'Move should be delivered now')
             self.assertEqual(sub.order_line.qty_delivered, 1, 'Order line should be marked as delivered')
 
+    def test_subscription_delivery_scheduled_date(self):
+        """Test that subscription deliveries are scheduled in the company timezone: the first
+        picking at the order confirmation datetime, and subsequent pickings at 00:00 local time
+        converted to UTC, so the scheduled date does not render as the previous day for users
+        in negative-offset timezones (e.g. UTC-3).
+        """
+        self.company_data['company'].partner_id.tz = 'America/Argentina/Buenos_Aires'
+        sub = self.subscription_order.copy()
+
+        with freeze_time("2022-03-02 14:30:00"), patch.object(self.env.cr, 'now', fields.Datetime.now):
+            sub.action_confirm()
+        first_picking = sub.picking_ids
+        self.assertEqual(first_picking.move_ids.date, sub.date_order)
+
+        self.simulate_period(sub, "2022-03-02 14:30:00")
+        with freeze_time("2022-04-02 10:00:00"):
+            self.env['sale.order']._cron_recurring_create_invoice()
+        second_picking = sub.picking_ids - first_picking
+        self.assertEqual(second_picking.move_ids.date, datetime.datetime(2022, 4, 2, 3, 0))
+
     def test_subscription_stock_order_cron(self):
 
         sub = self.subscription_order.copy()
@@ -868,6 +888,7 @@ class TestSubscriptionStockOnOrder(TestSubscriptionStockCommon):
             It happened when the first period picking was validated in the second period.
             Then, when you triggered the second period, it would find one picking already done,
             and skip the picking creation.
+            It also check that an user with only inventory right can validate a delivery
         """
 
         storable_product = self.env['product.product'].create({
@@ -901,7 +922,8 @@ class TestSubscriptionStockOnOrder(TestSubscriptionStockCommon):
             first_picking = sub.picking_ids
             self.assertTrue(first_picking)
             first_picking.move_ids.write({'quantity': 1, 'picked': True})
-            first_picking.button_validate()
+            inventory_user = self.env['res.users'].search([('name', '=', "Inventory User")], limit=1)
+            first_picking.with_user(inventory_user).button_validate()
             quantity_delivered = sum(sub.order_line.move_ids.mapped("quantity"))
             self.assertEqual(quantity_delivered, 1)
             # start the cron once, it will increment the next invoice date but no new picking is created
@@ -1110,6 +1132,18 @@ class TestSubscriptionStockOnOrder(TestSubscriptionStockCommon):
         sale_order.action_confirm()
         picking = sale_order.picking_ids
         self.assertTrue(picking, "A picking should be created for the one-time sale product.")
+
+        product = sale_order.order_line[0].product_id
+        forecast_data = self.env['stock.forecasted_product_product']._get_report_data(product_ids=[product.id])
+        subscription_qty = sum(
+            p.get('subscription_qty', {}).get('out', 0)
+            for p in forecast_data['product'].values()
+        )
+
+        self.assertEqual(
+            subscription_qty, 0,
+            'A one-time sale of a recurring product should NOT generate future subscription stock forecasts.'
+        )
 
     def test_subscription_return_qty_delivered(self):
         sub = self.subscription_order

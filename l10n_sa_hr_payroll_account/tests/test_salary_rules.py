@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import date
+from datetime import date, datetime
 
 from odoo.fields import Command
 from odoo.tests.common import tagged
@@ -91,6 +91,7 @@ class TestPayslipValidation(TestPayslipValidationCommon):
             'ANNUALP': 799.17,
             'GROSS': 13700.0,
             'NET': 12432.5,
+            'NETCOST': 14027.5,
         }
         self._validate_payslip(payslip, payslip_results)
 
@@ -119,8 +120,9 @@ class TestPayslipValidation(TestPayslipValidationCommon):
             'MEDICAL': 400.0,
             'IQAMA': 500.0,
             'WORKPER': 300.0,
-            'GROSS': 54800.0,
-            'NET': 53532.5,
+            'GROSS': 57197.5,
+            'NET': 55930.0,
+            'NETCOST': 57525.0,
         }
         self._validate_payslip(payslip, payslip_results)
 
@@ -146,7 +148,8 @@ class TestPayslipValidation(TestPayslipValidationCommon):
             'EOSP': 895.83,
             'ANNUALP': 597.22,
             'GROSS': 10750.0,
-            'NET': 9736.0
+            'NET': 9736.0,
+            'NETCOST': 11972.0,
         }
         self._validate_payslip(payslip, payslip_results)
 
@@ -227,3 +230,59 @@ class TestPayslipValidation(TestPayslipValidationCommon):
         payslip.compute_sheet()
 
         self.assertEqual(payslip._get_line_values(['LOAN_DEDUCTION'])['LOAN_DEDUCTION'][payslip.id]['total'], -200.0)
+
+    def test_saudi_payslip_with_attendance(self):
+        if self.env["ir.module.module"]._get("hr_payroll_attendance").state != "installed":
+            self.skipTest(
+                "The test was skipped because the 'hr_payroll_attendance' module isn’t installed; therefore, attendance-based entries are unavailable."
+            )
+        self.saudi_employee.work_entry_source = "attendance"
+        payslip = self.env['hr.payslip'].create([{
+            'name': "Test Payslip",
+            'employee_id': self.saudi_employee.id,
+            'version_id': self.saudi_employee.version_id.id,
+            'company_id': self.env.company.id,
+            'struct_id': self.env.ref('l10n_sa_hr_payroll.ksa_saudi_employee_payroll_structure').id,
+            'date_from': date(2026, 1, 1),
+            'date_to': date(2026, 1, 31),
+        }])
+        payslip.compute_sheet()
+        payslip_results = {
+            'BASIC': 0.0,
+        }
+        self._validate_payslip(payslip, payslip_results, skip_lines=True)
+
+    def test_saudi_payslip_gosi_contribution(self):
+        self.env['resource.calendar.leaves'].create([{
+            'name': "Absence",
+            'company_id': self.env.company.id,
+            'resource_id': self.saudi_employee.resource_id.id,
+            'date_from': datetime(2024, 1, 10, 6, 0, 0),
+            'date_to': datetime(2024, 1, 11, 22, 0, 0),
+            'time_type': "leave",
+            'work_entry_type_id': self.env.ref('hr_work_entry.work_entry_type_unpaid_leave').id
+        }])
+
+        payslip = self._generate_payslip(
+            date(2024, 1, 1), date(2024, 1, 31),
+            employee_id=self.saudi_employee.id,
+            version_id=self.saudi_employee.version_id.id,
+            struct_id=self.env.ref('l10n_sa_hr_payroll.ksa_saudi_employee_payroll_structure').id)
+        payslip_results = {
+            'BASIC': 12000.0,
+            'HOUALLOW': 1000.0,
+            'TRAALLOW': 200.0,
+            'OTALLOW': 500.0,
+            'GOSI_COMP': -1527.5,
+            'GOSI_EMP': -1267.5,
+            'UNPAID': -685.0,
+            'EOSP': 570.83,
+            'MEDICAL': 400.0,
+            'IQAMA': 500.0,
+            'WORKPER': 300.0,
+            'ANNUALP': 799.17,
+            'GROSS': 13700.0,
+            'NET': 11747.5,
+            'NETCOST': 13342.5,
+        }
+        self._validate_payslip(payslip, payslip_results)

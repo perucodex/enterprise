@@ -4,13 +4,14 @@
 #
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# "Malaz Siddig Elsayed Abuidris (msea)" <msea@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-30 18:49+0000\n"
-"PO-Revision-Date: 2025-11-16 13:32+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-07-10 17:53+0000\n"
+"PO-Revision-Date: 2026-08-25 09:44+0000\n"
+"Last-Translator: \"Malaz Siddig Elsayed Abuidris (msea)\" <msea@odoo.com>\n"
 "Language-Team: Arabic <https://translate.odoo.com/projects/odoo-19/"
 "sale_commission/ar/>\n"
 "Language: ar\n"
@@ -19,7 +20,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale_commission
 #. odoo-python
@@ -32,6 +33,12 @@ msgstr "%(plan)s - %(type)s %(product)s %(categ)s"
 #: code:addons/sale_commission/model/commission_plan_user.py:0
 msgid "%(user)s - %(plan)s"
 msgstr "%(user)s - %(plan)s"
+
+#. module: sale_commission
+#. odoo-python
+#: code:addons/sale_commission/model/commission_plan_achievement.py:0
+msgid "%s"
+msgstr "%s"
 
 #. module: sale_commission
 #. odoo-python
@@ -60,12 +67,12 @@ msgstr "النسبة التي تم تحقيقها"
 #. module: sale_commission
 #: model:ir.model.fields,help:sale_commission.field_sale_commission_achievement_report__commission_rate
 msgid "Achieved over the commission target amount"
-msgstr ""
+msgstr "تم تحقيق المبلغ المستهدف من العمولة"
 
 #. module: sale_commission
 #: model:ir.model.fields,help:sale_commission.field_sale_commission_achievement_report__target_rate
 msgid "Achieved over the target of that period, meaningless in group by"
-msgstr ""
+msgstr "تم تجاوز الهدف لهذه الفترة، لا قيمة له عند التجميع"
 
 #. module: sale_commission
 #: model:ir.model.fields,field_description:sale_commission.field_sale_commission_plan__achievement_ids
@@ -310,7 +317,7 @@ msgstr "خطط العمولة"
 #. module: sale_commission
 #: model:ir.model.fields,field_description:sale_commission.field_sale_commission_achievement_report__commission_rate
 msgid "Commission Rate"
-msgstr ""
+msgstr "نسبة العمولة"
 
 #. module: sale_commission
 #: model_terms:ir.ui.view,arch_db:sale_commission.sale_commission_report_view_search
@@ -320,7 +327,7 @@ msgstr "تقرير عمولة المبيعات"
 #. module: sale_commission
 #: model_terms:ir.ui.view,arch_db:sale_commission.sale_achievement_report_view_list
 msgid "Commission Target"
-msgstr ""
+msgstr "هدف العمولة المراد تحقيقه"
 
 #. module: sale_commission
 #: model:ir.model.fields,field_description:sale_commission.field_sale_commission_achievement_report__commission_target_amount
@@ -567,12 +574,6 @@ msgid "From"
 msgstr "من"
 
 #. module: sale_commission
-#. odoo-python
-#: code:addons/sale_commission/model/commission_plan_user.py:0
-msgid "From must be before To"
-msgstr "يجب أن تكون قيمة \"من\" قبل قيمة \"إلى\""
-
-#. module: sale_commission
 #: model:ir.model.fields,field_description:sale_commission.field_sale_commission_plan__has_message
 msgid "Has Message"
 msgstr "يحتوي على رسالة"
@@ -758,6 +759,18 @@ msgid "Other plans"
 msgstr "الخطط الأخرى"
 
 #. module: sale_commission
+#. odoo-python
+#: code:addons/sale_commission/model/commission_plan_target.py:0
+msgid ""
+"Overlapping periods detected for plan '%(plan)s':\n"
+"- %(c_name)s [%(c_from)s → %(c_to)s]\n"
+"- %(n_name)s [%(n_from)s → %(n_to)s]"
+msgstr ""
+"تم الكشف عن فترات تداخل في الخطة \"%(plan)s\":\n"
+"- %(c_name)s [%(c_from)s → %(c_to)s]\n"
+"- %(n_name)s [%(n_from)s → %(n_to)s]"
+
+#. module: sale_commission
 #: model:ir.model.fields,field_description:sale_commission.field_sale_commission_plan_target__payment_amount
 msgid "Payment Amount"
 msgstr "المبلغ المدفوع"
@@ -892,6 +905,7 @@ msgstr "مندوبو المبيعات"
 #. module: sale_commission
 #: model:ir.model.fields,field_description:sale_commission.field_sale_commission_achievement_report__user_id
 #: model:ir.model.fields,field_description:sale_commission.field_sale_commission_report__user_id
+#: model_terms:ir.ui.view,arch_db:sale_commission.sale_commission_plan_view_search
 msgid "Sales Person"
 msgstr "مندوب مبيعات"
 
@@ -990,15 +1004,36 @@ msgstr "الأهداف المُراد تحقيقها"
 
 #. module: sale_commission
 #. odoo-python
+#: code:addons/sale_commission/model/commission_plan_user.py:0
+msgid "The assignment start date must be before the end date"
+msgstr ""
+
+#. module: sale_commission
+#. odoo-python
 #: code:addons/sale_commission/model/commission_plan.py:0
 msgid "The plan should have at least one target with an achievement rate of 0%"
 msgstr "يجب أن تتضمن الخطة هدفاً واحداً على الأقل بمعدل إنجاز يبلغ 0%"
 
 #. module: sale_commission
 #. odoo-python
+#: code:addons/sale_commission/model/commission_plan_user.py:0
+msgid ""
+"The sales person's assignment must be within the commission plan period."
+msgstr ""
+
+#. module: sale_commission
+#. odoo-python
 #: code:addons/sale_commission/model/commission_plan.py:0
 msgid "The start date must be before the end date."
 msgstr "يجب أن يكون تاريخ البدء قبل تاريخ الانتهاء."
+
+#. module: sale_commission
+#. odoo-python
+#: code:addons/sale_commission/model/commission_plan_target.py:0
+msgid ""
+"The start date must be before the end date.\n"
+"Period: %s"
+msgstr ""
 
 #. module: sale_commission
 #. odoo-python
@@ -1098,8 +1133,8 @@ msgstr "لا يمكن أن تنتهي فترة المستخدم بعد الخط�
 #. module: sale_commission
 #. odoo-python
 #: code:addons/sale_commission/model/commission_plan_user.py:0
-msgid "User period cannot start before the plan."
-msgstr "لا يمكن أن تبدأ فترة المستخدم قبل الخطة."
+msgid "User period cannot start after the plan."
+msgstr ""
 
 #. module: sale_commission
 #: model:ir.model.fields,field_description:sale_commission.field_sale_commission_plan__website_message_ids
@@ -1141,3 +1176,9 @@ msgstr "مثال: خطة العمولة لعام 2025"
 #: model_terms:ir.ui.view,arch_db:sale_commission.sale_commission_plan_view_form
 msgid "per"
 msgstr "لكل"
+
+#~ msgid "From must be before To"
+#~ msgstr "يجب أن تكون قيمة \"من\" قبل قيمة \"إلى\""
+
+#~ msgid "User period cannot start before the plan."
+#~ msgstr "لا يمكن أن تبدأ فترة المستخدم قبل الخطة."

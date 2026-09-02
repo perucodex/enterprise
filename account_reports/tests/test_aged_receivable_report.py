@@ -269,6 +269,36 @@ class TestAgedReceivableReport(TestAccountReportsCommon):
             options
         )
 
+    def test_aged_receivable_unfold_all_with_integer_rounding(self):
+        """ Test unfolding a line when rendering the whole report with integer rounding. """
+        self.report.integer_rounding = 'HALF-UP'
+        options = self._generate_options(self.report, '2017-02-01', '2017-02-01')
+        partner_a_line_id = self.report._get_generic_line_id('res.partner', self.partner_a.id, parent_line_id=self.parent_line_id, markup={'groupby': 'partner_id'})
+        options['unfolded_lines'] = [partner_a_line_id]
+        report_lines = self.report._get_lines(options)
+        self.assertLinesValues(
+            # pylint: disable=C0326
+            self.report.sort_lines(report_lines, options),
+            #   Name                   Not Due On      1 - 30     31 - 60     61 - 90    91 - 120       Older        Total
+            [   0,                              3,          4,          5,          6,          7,          8,           9],
+            [
+                ('Aged Receivable',         150.0,      150.0,      150.0,       900.0,     450.0,      150.0,      1950.0),
+                ('partner_a',               100.0,      100.0,      100.0,       600.0,     300.0,      100.0,      1300.0),
+                ('INV/2016/00001',            0.0,        0.0,        0.0,        0.0,      200.0,        0.0,          ''),
+                ('INV/2016/00001',          100.0,        0.0,        0.0,        0.0,        0.0,        0.0,          ''),
+                ('INV/2016/00001',            0.0,      100.0,        0.0,        0.0,        0.0,        0.0,          ''),
+                ('INV/2016/00001',            0.0,        0.0,      100.0,        0.0,        0.0,        0.0,          ''),
+                ('INV/2016/00001',            0.0,        0.0,        0.0,      100.0,        0.0,        0.0,          ''),
+                ('INV/2016/00001',            0.0,        0.0,        0.0,        0.0,      100.0,        0.0,          ''),
+                ('INV/2016/00001',            0.0,        0.0,        0.0,        0.0,        0.0,      100.0,          ''),
+                ('INV/2016/00002',            0.0,        0.0,        0.0,      500.0,        0.0,        0.0,          ''),
+                ('Total partner_a',         100.0,      100.0,      100.0,       600.0,     300.0,      100.0,      1300.0),
+                ('partner_b',                50.0,       50.0,       50.0,       300.0,     150.0,       50.0,       650.0),
+                ('Total Aged Receivable',   150.0,      150.0,      150.0,      900.0,      450.0,      150.0,      1950.0),
+            ],
+            options
+        )
+
     def test_aged_receivable_unknown_partner(self):
         """ Test that journal items without a partner in the receivable account appear as unknown partner. """
 
@@ -833,4 +863,31 @@ class TestAgedReceivableReport(TestAccountReportsCommon):
                 ('Total Aged Receivable',  150.0,      300.0,     1350.0,         0.0,       0.0,      150.0,      1950.0),
             ],
             options
+        )
+
+    def test_aged_receivable_horizontal_groups(self):
+        horizontal_group = self.env['account.report.horizontal.group'].create({
+            'name': 'Horizontal Group total',
+            'rule_ids': [
+                Command.create({
+                    'field_name': 'company_id',
+                    'domain': f"[('id', 'in', {(self.company_data['company'] + self.company_data_2['company']).ids})]",
+                }),
+            ],
+            'report_ids': self.report
+        })
+        options = self._generate_options(self.report, '2017-03-01', '2017-04-01', default_options={'selected_horizontal_group_id': horizontal_group.id})
+        self.env.company.totals_below_sections = False
+
+        self.assertLinesValues(
+            # pylint: disable=C0326
+            self.report._get_lines(options),
+            #   Name                 At Date      1 - 30     31 - 60     61 - 90    91 - 120       Older        Total      At Date      1 - 30     31 - 60     61 - 90    91 - 120       Older        Total
+            [   0,                         3,          4,          5,          6,          7,          8,           9,          12,         13,         14,         15,         16,         17,          18],
+            [
+            ('Aged Receivable',          0.0,        0.0,      100.0,      100.0,      100.0,     1000.0,      1300.0,         0.0,        0.0,       50.0,       50.0,       50.0,      500.0,       650.0),
+                ('partner_a',            0.0,        0.0,      100.0,      100.0,      100.0,     1000.0,      1300.0,         0.0,        0.0,        0.0,        0.0,        0.0,        0.0,         0.0),
+                ('partner_b',            0.0,        0.0,        0.0,        0.0,        0.0,        0.0,         0.0,         0.0,        0.0,       50.0,       50.0,       50.0,      500.0,       650.0),
+            ],
+            options,
         )

@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
+from dateutil.relativedelta import relativedelta
 from markupsafe import Markup
 from werkzeug.urls import url_quote_plus
 import logging
@@ -8,7 +9,7 @@ import logging
 from odoo import api, fields, models
 from odoo.addons.base.models.ir_qweb import keep_query
 from odoo.addons.l10n_mx_edi.models.l10n_mx_edi_document import CFDI_DATE_FORMAT
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -262,6 +263,26 @@ class HrPayslip(models.Model):
                     ),
                     'level': 'warning',
                 })
+
+        for slip in self.filtered(lambda s: (
+            s.country_code == 'MX'
+            and s.state in ['draft']
+        )):
+            # -- Adjustments salary --
+            if (
+                slip.date_from
+                and slip.date_to
+                and slip.date_from + relativedelta(day=31) <= slip.date_to
+                and slip._get_accumulated_monthly_subsidy()
+                and slip._get_accumulated_monthly_gross_wage() > slip._rule_parameter('l10n_mx_subsidy_salary_limit', slip.date_from)
+            ):
+                warnings_by_slip[slip].append({
+                    'message': self.env._('This employee exceeds the "Salary Limit for Employment Subsidy" - Validate Subsidy and ISR Adjustments'),
+                    'action_text': self.env._("Payslip(s)"),
+                    'action': slip._get_payslips_in_month()._get_records_action(),
+                    'level': 'warning',
+                })
+
         return warnings_by_slip
 
     def _is_invalid(self):
@@ -274,6 +295,20 @@ class HrPayslip(models.Model):
             'l10n_mx_hr_payroll_account_edi', [
                 'data/hr_salary_rule_data.xml',
             ])]
+
+    def _get_accumulated_monthly_gross_wage(self):
+        payslips_in_month = self._get_payslips_in_month() + self
+        line_values = payslips_in_month._get_line_values(['GROSS'])
+
+        accumulated_gross_wage = 0.0
+        for slip in payslips_in_month:
+            days_in_period = (slip.date_to - slip.date_from).days + 1
+            days_in_current_month = min(days_in_period, slip.date_to.day)
+            if self.date_from.month != slip.date_to.month:
+                days_in_current_month = days_in_period - days_in_current_month
+            accumulated_gross_wage += line_values['GROSS'][slip.id]['total'] / days_in_period * days_in_current_month
+
+        return accumulated_gross_wage
 
     # -------------------------------------------------------------------------
     # CFDI Generation: Payslips
@@ -301,7 +336,7 @@ class HrPayslip(models.Model):
         cfdi_values['tipo_de_comprobante'] = 'N'
         cfdi_values['serie'], _, cfdi_values['folio'] = self.move_id.name.rpartition('/')
         periodicity = self.version_id.l10n_mx_payment_periodicity if self.struct_id.l10n_mx_payroll_type == 'O' else '99'
-        periodicity_label = dict(self.version_id._fields['l10n_mx_payment_periodicity'].selection).get(periodicity)
+        periodicity_label = dict(self.version_id._fields['l10n_mx_payment_periodicity']._description_selection(self.env)).get(periodicity)
         cfdi_values['periodo'] = f'{periodicity} - {periodicity_label}'
 
         cfdi_values['receptor'] = {
@@ -315,7 +350,7 @@ class HrPayslip(models.Model):
             'fecha_pago': self.paid_date.isoformat(),
             'fecha_inicial_pago': self.date_from.isoformat(),
             'fecha_final_pago': self.date_to.isoformat(),
-            'num_dias_pagados': (self.date_to - self.date_from).days + 1,
+            'num_dias_pagados': self._get_schedule_days(),
         }
 
         cfdi_values['nomina_emisor'] = {
@@ -324,9 +359,9 @@ class HrPayslip(models.Model):
             'rfc_patron_origen': self.company_id.vat,
         }
 
-        bank_account = self.employee_id.bank_account_ids[0]
+        bank_account = self.employee_id.bank_account_ids[:1]
         bank_account_number = bank_account.l10n_mx_edi_clabe or bank_account.acc_number
-        is_clabe = len(bank_account_number) == 18
+        is_clabe = bank_account_number and len(bank_account_number) == 18
         integrated_daily_wage_rule = self.env.ref('l10n_mx_hr_payroll.l10n_mx_regular_pay_integrated_daily_wage', raise_if_not_found=False)
         integrated_daily_wage = rules_amount[integrated_daily_wage_rule] if integrated_daily_wage_rule and integrated_daily_wage_rule in rules_amount else 0
         cfdi_values['nomina_receptor'] = {
@@ -357,25 +392,45 @@ class HrPayslip(models.Model):
         total_other_payments = 0
 
         rules = self.line_ids.salary_rule_id
+        entitled_subsidy = round(next((line.amount for line in self.line_ids if line.code == 'SUBSIDY'), 0.0), 2)
         if 'SUBSIDY' not in rules.mapped('code'):
-            rules |= self.env.ref('l10n_mx_hr_payroll.l10n_mx_regular_pay_subsidy', raise_if_not_found=False)
+            rules |= subsidy_rule
         for rule in rules:
             concept = rule.l10n_mx_concept
             if not concept:
                 continue
 
-            amount = rules_amount.get(rule, 0)
+            amount = round(rules_amount.get(rule, 0), 2)
             if not amount and not (concept.cfdi_type == 'other' and concept.sat_code == '002'):
                 continue
 
             # == PERCEPTIONS ==
             if concept.cfdi_type == 'perception':
+                imp_gravado = amount if concept.is_taxable else 0
+                imp_exento = amount if not concept.is_taxable else 0
+
+                if imp_gravado == 0 and imp_exento == 0:
+                    raise UserError(self.env._(
+                        "Perception cannot have both Taxable (ImporteGravado) "
+                        "and Exempt (ImporteExento) amounts set to 0 simultaneously."))
+
+                if concept.sat_code == '038':
+                    if imp_exento != 0:
+                        raise UserError(self.env._(
+                            "Perception '038' (Other Salary Income) cannot have a Tax-Exempt amount (ImporteExento). "
+                            "It must be completely recorded under Taxable Income (ImporteGravado)."
+                        ))
+                    if imp_gravado <= 0:
+                        raise UserError(self.env._(
+                            "Perception '038' (Other Salary Income) must have a positive Taxable amount (ImporteGravado)."
+                        ))
+
                 perceptions.append({
                     'tipo_percepcion': concept.sat_code,
                     'clave': concept.payroll_code,
                     'concepto': concept.name,
-                    'importe_gravado': amount if concept.is_taxable else 0,
-                    'importe_exento': amount if not concept.is_taxable else 0,
+                    'importe_gravado': imp_gravado,
+                    'importe_exento': imp_exento,
                 })
 
                 if concept.is_taxable:
@@ -408,7 +463,7 @@ class HrPayslip(models.Model):
                     'clave': concept.payroll_code,
                     'concepto': concept.name,
                     'importe': amount,
-                    'subsidio_causado': amount if concept.sat_code == '002' else 0,
+                    'subsidio_causado': entitled_subsidy if concept.sat_code == '002' else 0,
                     'saldo_a_favor': amount if concept.sat_code == '001' else 0,
                     'año': self.date_from.year,
                     'remanente_sal_fav': 0.0,
@@ -417,7 +472,7 @@ class HrPayslip(models.Model):
 
         # == SUB TOTALS ==
         total_perceptions = total_salaries + total_severance_pay
-        nomina['total_percepciones'] = total_perceptions
+        nomina['total_percepciones'] = total_perceptions or None
         cfdi_values['nomina_percepciones'] = {
             'total_sueldos': total_salaries,
             'total_gravado': total_taxable,
@@ -425,25 +480,48 @@ class HrPayslip(models.Model):
         }
 
         total_deductions = total_taxes_withheld + total_other_deductions
-        nomina['total_deducciones'] = total_deductions
+        nomina['total_deducciones'] = total_deductions or None
         cfdi_values['nomina_deducciones'] = {
             'total_otras_deducciones': total_other_deductions,
-            'total_impuestos_retenidos': total_taxes_withheld,
+            'total_impuestos_retenidos': total_taxes_withheld or None,
         }
 
         nomina['total_otros_pagos'] = total_other_payments
 
-        # == INCAPACITIES ==
+        # == INCAPACITIES AND UNPAID DAYS ==
+        out_of_contract_entry_type = self.env.ref('hr_work_entry.hr_work_entry_type_out_of_contract', raise_if_not_found=False)
+        all_unpaid_types = self.struct_id.unpaid_work_entry_type_ids | out_of_contract_entry_type
+        unpaid_days = 0
         cfdi_values['incapacidad_list'] = incapacities = []
         incapacities_days_by_code = defaultdict(int)
         for worked_days in self.worked_days_line_ids:
             if code := worked_days.work_entry_type_id.l10n_mx_sat_code:
                 incapacities_days_by_code[code] += worked_days.number_of_days
+            if worked_days.work_entry_type_id in all_unpaid_types:
+                unpaid_days += worked_days.number_of_days
+
         for code, days in incapacities_days_by_code.items():
             incapacities.append({
                 'tipo_incapacidad': code,
                 'dias_incapacidad': days,
+                'importe_monetario': days * self.l10n_mx_daily_salary,
             })
+
+        cfdi_values['nomina']['num_dias_pagados'] -= unpaid_days
+
+        num_dias_pagados = cfdi_values['nomina']['num_dias_pagados']
+        for op in other_payments:
+            if op['tipo_otro_pago'] == '002':
+                subsidio_causado = op['subsidio_causado']
+                if num_dias_pagados <= 31:
+                    max_subsidy = 628.00
+                else:
+                    max_subsidy = num_dias_pagados * 0.206
+
+                if subsidio_causado > max_subsidy:
+                    raise UserError(self.env._(
+                        "The Employment Subsidy (SubsidioCausado) exceeds the maximum allowed limit"
+                    ))
 
         # == TOTALS ==
         cfdi_values['concepto'] = {
@@ -452,9 +530,9 @@ class HrPayslip(models.Model):
             'descuento': total_deductions,
         }
 
-        cfdi_values['subtotal'] = total_perceptions + total_other_payments
-        cfdi_values['descuento'] = total_deductions
-        cfdi_values['total'] = cfdi_values['subtotal'] - cfdi_values['descuento']
+        cfdi_values['subtotal'] = round(total_perceptions + total_other_payments, 2)
+        cfdi_values['descuento'] = round(total_deductions, 2)
+        cfdi_values['total'] = round(cfdi_values['subtotal'] - cfdi_values['descuento'], 2)
         return cfdi_values
 
     # -------------------------------------------------------------------------
@@ -572,6 +650,21 @@ class HrPayslip(models.Model):
             }
         return self.env['l10n_mx_edi.document']._create_update_payslip_document(self, document_values)
 
+    def _l10n_mx_edi_cfdi_payslip_update_sat_state(self, document, sat_state, error=None):
+        """ Update the SAT state of the document for the current payslip.
+
+        :param document:    The CFDI document to be updated.
+        :param sat_state:   The newly fetched state from the SAT.
+        :param error:       In case of error, the message returned by the SAT.
+        """
+        self.ensure_one()
+
+        document.sat_state = sat_state
+        document.message = None
+        if sat_state == 'error' and error:
+            document.message = error
+            self.message_post(body=error)
+
     def _l10n_mx_edi_get_extra_report_values(self):
         cfdi_infos = self.env['l10n_mx_edi.document']._decode_cfdi_attachment(self.l10n_mx_edi_cfdi_attachment_id.raw)
         if not cfdi_infos:
@@ -591,3 +684,9 @@ class HrPayslip(models.Model):
             **cfdi_infos,
             'barcode_src': barcode_src,
         }
+
+    def _check_send_payslip_mail(self):
+        self.ensure_one()
+        if self.country_code == 'MX' and not self.l10n_mx_edi_cfdi_uuid:
+            return False
+        return super()._check_send_payslip_mail()

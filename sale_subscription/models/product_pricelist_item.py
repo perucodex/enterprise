@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
+from odoo.fields import Domain
 
 
 class ProductPricelistItem(models.Model):
@@ -17,9 +18,9 @@ class ProductPricelistItem(models.Model):
 
     @api.depends('plan_id')
     def _compute_company_id(self):
-        rules_with_pricelist = self.filtered('pricelist_id')
-        super(ProductPricelistItem, rules_with_pricelist)._compute_company_id()
-        for item in (self - rules_with_pricelist):
+        rules_with_pricelist_or_template_id = self.filtered(lambda rule: rule.pricelist_id or rule.product_tmpl_id)
+        super(ProductPricelistItem, rules_with_pricelist_or_template_id)._compute_company_id()
+        for item in (self - rules_with_pricelist_or_template_id):
             # must have a plan if there is no pricelist
             if not item.plan_id:
                 continue
@@ -73,6 +74,9 @@ class ProductPricelistItem(models.Model):
                 date=fields.Datetime.now(),
                 plan_id=plan_id,
             )
+            # Exclude self: a no-pricelist plan rule must not use itself as its own
+            # base price, otherwise _compute_price would recurse infinitely.
+            domain &= Domain('id', 'not in', self.ids)
             no_pl_rule = self.env['product.pricelist.item'].search(domain, order='plan_id', limit=1)
             if no_pl_rule:
                 return no_pl_rule._compute_price(

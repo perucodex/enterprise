@@ -352,12 +352,11 @@ class L10n_Be274_Xx(models.Model):
         for payslip in payslips:
             pp_total = line_values['PPTOTAL'][payslip.id]['total'] \
                      - line_values['DOUBLE.DECEMBER.P.P'][payslip.id]['total']
-            if pp_total:
-                pp_total_eurocent = pp_total
-                taxable_eurocent = line_values['GROSS'][payslip.id]['total'] + line_values['DOUBLE.DECEMBER.GROSS'][payslip.id]['total']
-                declaration_10['prepayment'] += pp_total_eurocent
-                declaration_10['taxable_revenue'] += taxable_eurocent
-                result['positive_total'] += pp_total_eurocent
+            pp_total_eurocent = pp_total
+            taxable_eurocent = line_values['GROSS'][payslip.id]['total'] + line_values['DOUBLE.DECEMBER.GROSS'][payslip.id]['total']
+            declaration_10['prepayment'] += pp_total_eurocent
+            declaration_10['taxable_revenue'] += taxable_eurocent
+            result['positive_total'] += pp_total_eurocent
 
             if payslip.struct_id == monthly_pay and payslip.version_id.rd_percentage:
                 employee = payslip.employee_id

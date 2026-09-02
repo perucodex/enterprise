@@ -84,7 +84,7 @@ class AccountMove(models.Model):
     def _compute_l10n_ke_validation_message(self):
         """ Compute the series of messages to be displayed in the banner at the header of the invoice. """
         for move in self:
-            if not move.is_invoice(include_receipts=True):
+            if not move.is_invoice(include_receipts=True) or move.country_code != 'KE':
                 move.l10n_ke_validation_message = False
                 continue
 
@@ -287,7 +287,7 @@ class AccountMove(models.Model):
                 'itemSeq':   index + 1,                                             # Line number
                 'itemCd':    product.l10n_ke_item_code,                             # Item code as defined by us, of the form KE2BFTNE0000000000000039
                 'itemClsCd': product.unspsc_code_id.code,                           # Item classification code, in this case the UNSPSC code
-                'itemNm':    line.name,                                             # Item name
+                'itemNm':    (line.name or '')[:200],                               # Item name
                 'pkgUnitCd': product.l10n_ke_packaging_unit_id.code,                # Packaging code, describes the type of package used
                 'pkg':       product_uom_qty / product.l10n_ke_packaging_quantity,  # Number of packages used
                 'qtyUnitCd': line.product_uom_id.l10n_ke_quantity_unit_id.code,     # The UOMs as defined by the KRA, defined seperately from the UOMs on the line
@@ -636,7 +636,7 @@ class AccountMove(models.Model):
         for company in companies:
             error, data, _date = company._l10n_ke_call_etims(
                 'selectTrnsPurchaseSalesList',
-                {'lastReqDt': format_etims_datetime(company.l10n_ke_oscu_last_fetch_purchase_date or datetime.datetime(2018, 1, 1))}
+                {'lastReqDt': format_etims_datetime(company.l10n_ke_oscu_last_fetch_purchase_date or datetime(2018, 1, 1))}
             )
             if error:
                 if error['code'] == '001':

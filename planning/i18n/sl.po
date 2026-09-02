@@ -4,13 +4,16 @@
 #
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# NEDŽAD BEUS <nedzad.beus@implex.si>, 2026.
+# Žiga Trček <ziga.trcek@implex.si>, 2026.
+# Jan Zorko <jan.zorko@implex.si>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-09 18:43+0000\n"
-"PO-Revision-Date: 2025-11-08 19:53+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-07-17 17:43+0000\n"
+"PO-Revision-Date: 2026-08-06 12:12+0000\n"
+"Last-Translator: NEDŽAD BEUS <nedzad.beus@implex.si>\n"
 "Language-Team: Slovenian <https://translate.odoo.com/projects/odoo-19/"
 "planning/sl/>\n"
 "Language: sl\n"
@@ -19,7 +22,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
 "n%100==4 ? 2 : 3;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: planning
 #. odoo-python
@@ -46,8 +49,9 @@ msgstr "(%s dni razpona)"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.open_slots_list_template
+#, fuzzy
 msgid ".&amp;nbsp;"
-msgstr ""
+msgstr ".&amp;nbsp;"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
@@ -76,7 +80,7 @@ msgstr "4 dni po razgovoru"
 #. module: planning
 #: model_terms:digest.tip,tip_description:planning.digest_tip_planning_0
 msgid "<b class=\"tip_title\">Tip: Record your planning faster</b>"
-msgstr ""
+msgstr "<b class=\"tip_title\">Namig: Zabeležite svoje načrtovanje hitreje</b>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_ics_description
@@ -91,25 +95,29 @@ msgid ""
 "duplicate it instead.</i> <b>Adjust the size</b> of the shift to modify its "
 "period."
 msgstr ""
+"<b>Povlecite in spustite</b> svojo izmeno za preureditev. <i>Namig: "
+"pritisnite CTRL (ali Cmd) za podvojitev.</i> <b>Prilagodite velikost</b> "
+"izmene za spremembo obdobja."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_ics_description
 msgid "<b>Note:</b>"
-msgstr ""
+msgstr "<b>Opomba:</b>"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/tours/planning.js:0
 msgid "<b>Publish & send</b> your employee's planning."
-msgstr ""
+msgstr "<b>Objavite in pošljite</b> načrtovanje vaših zaposlenih."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_ics_description
 msgid "<b>Role:</b>"
-msgstr ""
+msgstr "<b>Vloga:</b>"
 
 #. module: planning
 #: model:mail.template,body_html:planning.email_template_shift_switch_email
+#, fuzzy
 msgid ""
 "<div>\n"
 "                    <p t-if=\"ctx.get('old_assignee_name')\">Dear <t t-"
@@ -181,6 +189,76 @@ msgid ""
 "                </div>\n"
 "            "
 msgstr ""
+"<div>\n"
+"                    <p t-if=\"ctx.get('old_assignee_name')\">Spoštovani <t t-"
+"out=\"ctx['old_assignee_name']\">Anita Oliver</t>,</p>\n"
+"                    <p t-else=\"\">Pozdravljeni,</p>\n"
+"                    <br/>\n"
+"                    <p>\n"
+"                        Naslednja izmena, za katero ste zaprosili za "
+"zamenjavo, je bila ponovno dodeljena\n"
+"                        <t t-if=\"ctx.get('new_assignee_name')\"> osebi <t t-"
+"out=\"ctx['new_assignee_name']\">Marc Demo</t></t>.\n"
+"                    </p>\n"
+"                    <table style=\"margin-left: 30px;\">\n"
+"                        <tr t-if=\"(ctx.get('start_datetime') and ctx.get"
+"('end_datetime'))                                   or ctx.get"
+"('allocated_hours')                                   or ctx.get"
+"('allocated_percentage')\">\n"
+"                            <th style=\"padding: 5px; text-align: left;\">"
+"Datum</th>\n"
+"                            <td style=\"padding: 5px;\">\n"
+"                                <span t-if=\"ctx.get('start_datetime') and "
+"ctx.get('end_datetime')\" t-out=\"'%s ⟶ %s' % "
+"(                                     "
+"ctx['start_datetime'],                                     "
+"ctx['end_datetime'],                                 )\">\n"
+"                                    05/31/2021, 8:00 AM ⟶ 05/31/2021, 4:00 "
+"PM\n"
+"                                </span>\n"
+"                                <span t-if=\"ctx.get('allocated_hours')\" "
+"style=\"opacity: 0.5;\">\n"
+"                                    (<t t-out=\"ctx['allocated_hours']\">"
+"4:00</t>h)\n"
+"                                </span>\n"
+"                                <span t-if=\"ctx.get('allocated_percentage') "
+"and ctx['allocated_percentage'] != '100'\" style=\"opacity: 0.5;\">\n"
+"                                    (<t t-"
+"out=\"ctx['allocated_percentage']\">50</t>%)\n"
+"                                </span>\n"
+"                            </td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"object.role_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;\">"
+"Vloga</th>\n"
+"                            <td style=\"padding: 5px;\" t-"
+"out=\"object.role_id.name or ''\">Natakar</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'project_id') and "
+"object.project_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;\">"
+"Projekt</th>\n"
+"                            <td style=\"padding: 5px;\" t-out=\"object.sudo()"
+".project_id.name or ''\">Zbiranje</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'sale_line_id') and "
+"object.sale_line_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;\">"
+"Postavka prodajnega naloga</th>\n"
+"                            <td style=\"padding: 5px;\" t-out=\"object.sudo()"
+".sale_line_id.name or ''\">Kava</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'name') and object.name\">"
+"\n"
+"                            <th style=\"padding: 5px; text-align: left;\">"
+"Opomba</th>\n"
+"                            <td style=\"padding: 5px;\" t-out=\"object.name "
+"or ''\">/</td>\n"
+"                        </tr>\n"
+"                    </table>\n"
+"                    <br/>\n"
+"                </div>\n"
+"            "
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_notification
@@ -189,6 +267,9 @@ msgid ""
 "                        You have successfully requested to switch your "
 "shift. You will be notified when another employee takes over your shift."
 msgstr ""
+"<i class=\"fa fa-check-circle\"/>\n"
+"                        Uspešno ste zahtevali zamenjavo svoje izmene. "
+"Obveščeni boste, ko bo drugi zaposleni prevzel vašo izmeno."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_notification
@@ -196,12 +277,14 @@ msgid ""
 "<i class=\"fa fa-check-circle\"/> Request to switch shift cancelled "
 "successfully."
 msgstr ""
+"<i class=\"fa fa-check-circle\"/> Zahteva za zamenjavo izmene uspešno "
+"preklicana."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_notification
 msgid ""
 "<i class=\"fa fa-check-circle\"/> This shift is no longer assigned to you."
-msgstr ""
+msgstr "<i class=\"fa fa-check-circle\"/> Ta izmena vam ni več dodeljena."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_notification
@@ -209,6 +292,8 @@ msgid ""
 "<i class=\"fa fa-check-circle\"/> You were successfully assigned this open "
 "shift."
 msgstr ""
+"<i class=\"fa fa-check-circle\"/> Ta odprta izmena vam je bila uspešno "
+"dodeljena."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_slot_template_view_kanban
@@ -216,6 +301,7 @@ msgid ""
 "<i class=\"fa fa-clock-o\" role=\"img\" aria-label=\"Hours\" title=\"Hours\"/"
 ">"
 msgstr ""
+"<i class=\"fa fa-clock-o\" role=\"img\" aria-label=\"Ure\" title=\"Ure\"/>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_assignee_contact_popover
@@ -223,6 +309,8 @@ msgid ""
 "<i class=\"fa fa-envelope-o\" title=\"Mail\" role=\"img\" style=\"padding-"
 "right: 2px\"/>"
 msgstr ""
+"<i class=\"fa fa-envelope-o\" title=\"Pošta\" role=\"img\" style=\"padding-"
+"right: 2px\"/>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_notification
@@ -230,6 +318,8 @@ msgid ""
 "<i class=\"fa fa-exclamation-circle\"/> This shift is already assigned to "
 "another employee."
 msgstr ""
+"<i class=\"fa fa-exclamation-circle\"/> Ta izmena je že dodeljena drugemu "
+"zaposlenemu."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_notification
@@ -237,6 +327,8 @@ msgid ""
 "<i class=\"fa fa-exclamation-circle\"/> You can no longer unassign yourself "
 "from this shift."
 msgstr ""
+"<i class=\"fa fa-exclamation-circle\"/> Ne morete se več izpisati iz te "
+"izmene."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_slot_template_view_form
@@ -244,6 +336,8 @@ msgid ""
 "<i class=\"fa fa-long-arrow-right my-1 mx-1\" aria-label=\"Arrow icon\" "
 "title=\"Arrow\"/>"
 msgstr ""
+"<i class=\"fa fa-long-arrow-right my-1 mx-1\" aria-label=\"Ikona puščice\" "
+"title=\"Puščica\"/>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.open_slots_list_template
@@ -251,6 +345,8 @@ msgid ""
 "<i class=\"fa fa-long-arrow-right\" aria-label=\"Arrow icon\" "
 "title=\"Arrow\"/>"
 msgstr ""
+"<i class=\"fa fa-long-arrow-right\" aria-label=\"Ikona puščice\" "
+"title=\"Puščica\"/>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_assignee_contact_popover
@@ -258,28 +354,39 @@ msgid ""
 "<i class=\"fa fa-phone\" title=\"Phone\" role=\"img\" style=\"padding-right: "
 "2px\"/>"
 msgstr ""
+"<i class=\"fa fa-phone\" title=\"Telefon\" role=\"img\" style=\"padding-"
+"right: 2px\"/>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_kanban
+#, fuzzy
 msgid ""
 "<i class=\"me-1 mt-1 fa fa-clock-o\" role=\"img\" aria-label=\"Date\" "
 "title=\"Date\"/>"
 msgstr ""
+"<i class=\"me-1 mt-1 fa fa-clock-o\" role=\"img\" aria-label=\"Date\" "
+"title=\"Date\"/>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
+#, fuzzy
 msgid ""
 "<span class=\"o_start_date\"/>\n"
 "                                    <i class=\"mx-1 fa fa-long-arrow-right\" "
 "aria-label=\"Arrow icon\" title=\"Arrow\"/>\n"
 "                                    <span class=\"o_end_date\"/>"
 msgstr ""
+"<span class=\"o_start_date\"/>\n"
+"                                    <i class=\"mx-1 fa fa-long-arrow-right\" "
+"aria-label=\"Ikona puščice\" title=\"Puščica\"/>\n"
+"                                    <span class=\"o_end_date\"/>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_public_view_form
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_view_form_inherit
+#, fuzzy
 msgid "<span class=\"o_stat_text\">Planning</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">Načrtovanje</span>"
 
 #. module: planning
 #: model_terms:hr.job,job_details:planning.job_maintenance_technician
@@ -301,31 +408,37 @@ msgstr "<span class=\"text-muted small\">Čas za odgovor</span>"
 
 #. module: planning
 #: model_terms:web_tour.tour,rainbow_man_message:planning.planning_tour
+#, fuzzy
 msgid ""
 "<span><b>Congratulations!</b> You are now a master of planning.\n"
 "        </span>"
 msgstr ""
+"<span><b>Čestitamo!</b> Zdaj ste mojster načrtovanja.\n"
+"        </span>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
 msgid "<span>Allow employees to:</span>"
-msgstr ""
+msgstr "<span>Dovolite zaposlenim, da:</span>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_kanban_inherit
+#, fuzzy
 msgid ""
 "<span>The employee assigned would like to switch shifts with someone else.</"
 "span>"
 msgstr ""
+"<span>Dodeljeni zaposleni bi želel zamenjati izmeno z nekom drugim.</span>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
 msgid "<span>months ahead</span>"
-msgstr ""
+msgstr "<span>mesecev vnaprej</span>"
 
 #. module: planning
 #: model:mail.template,body_html:planning.email_template_slot_single
+#, fuzzy
 msgid ""
 "<style>\n"
 "                    .planning_mail_template_button {\n"
@@ -439,9 +552,123 @@ msgid ""
 "                </div>\n"
 "            </body>"
 msgstr ""
+"<style>\n"
+"                    .planning_mail_template_button {\n"
+"                        padding: 5px 10px;\n"
+"                        text-decoration: none;\n"
+"                        border: 1px;\n"
+"                        border-radius: 3px;\n"
+"                        text-align: center;\n"
+"                        color: #374151;\n"
+"                        background-color: #E7E9ED;\n"
+"                        border: solid #E7E9ED;\n"
+"                        flex: 1 1 40%;\n"
+"                    }\n"
+"                    .top_button {\n"
+"                        color: #FFFFFF;\n"
+"                        background-color: #714B67;\n"
+"                        border: solid #714B67;\n"
+"                        flex: 1 1 60%;\n"
+"                    }\n"
+"                    .button_box {\n"
+"                        display: flex;\n"
+"                        flex-wrap: wrap;\n"
+"                        gap: 10px;\n"
+"                        margin: 20px 15px 0px 15px;\n"
+"                    }\n"
+"                </style>\n"
+"                <body><div>\n"
+"                    <p t-if=\"ctx.get('employee_name')\">Spoštovani <t t-"
+"out=\"ctx['employee_name']\">Anita Oliver</t>,</p>\n"
+"                    <p t-else=\"\">Pozdravljeni,</p>\n"
+"                    <br/>\n"
+"                    <p t-if=\"ctx.get('open_shift_available')\">Odprta je "
+"nova izmena:</p>\n"
+"                    <p t-else=\"\">Dodeljena vam je bila naslednja izmena:</"
+"p>\n"
+"                    <table style=\"margin-left: 30px;\">\n"
+"                        <tr t-if=\"(ctx.get('start_datetime') and ctx.get"
+"('end_datetime'))                                   or ctx.get"
+"('allocated_hours')                                   or ctx.get"
+"('allocated_percentage')\">\n"
+"                            <th style=\"padding: 5px; text-align: left;\">"
+"Datum</th>\n"
+"                            <td style=\"padding: 5px;\">\n"
+"                                <span t-if=\"ctx.get('start_datetime') and "
+"ctx.get('end_datetime')\" t-out=\"'%s ⟶ %s' % "
+"(                                     "
+"ctx['start_datetime'],                                     "
+"ctx['end_datetime'],                                 )\">\n"
+"                                    05/31/2021, 8:00 AM ⟶ 05/31/2021, 4:00 "
+"PM\n"
+"                                </span>\n"
+"                                <span t-if=\"ctx.get('allocated_hours')\" "
+"style=\"opacity: 0.5;\">\n"
+"                                    (<t t-out=\"ctx['allocated_hours']\">"
+"4:00</t>h)\n"
+"                                </span>\n"
+"                                <span t-if=\"ctx.get('allocated_percentage') "
+"and ctx['allocated_percentage'] != '100'\" style=\"opacity: 0.5;\">\n"
+"                                    (<t t-"
+"out=\"ctx['allocated_percentage']\">50</t>%)\n"
+"                                </span>\n"
+"                            </td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"object.role_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;\">"
+"Vloga</th>\n"
+"                            <td style=\"padding: 5px;\" t-"
+"out=\"object.role_id.name or ''\">Natakar</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'project_id') and "
+"object.project_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;\">"
+"Projekt</th>\n"
+"                            <td style=\"padding: 5px;\" t-out=\"object.sudo()"
+".project_id.name or ''\">Druženje</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'sale_line_id') and "
+"object.sale_line_id\">\n"
+"                            <th style=\"padding: 5px; text-align: left;\">"
+"Postavka prodajnega naloga</th>\n"
+"                            <td style=\"padding: 5px;\" t-out=\"object.sudo()"
+".sale_line_id.name or ''\">Kava</td>\n"
+"                        </tr>\n"
+"                        <tr t-if=\"hasattr(object, 'name') and object.name\">"
+"\n"
+"                            <th style=\"padding: 5px; text-align: left;\">"
+"Opomba</th>\n"
+"                            <td style=\"padding: 5px;\" t-out=\"object.name "
+"or ''\">/</td>\n"
+"                        </tr>\n"
+"                    </table>\n"
+"                    <div class=\"button_box\">\n"
+"                        <a t-if=\"ctx.get('available_link')\" t-att-"
+"href=\"ctx['available_link']\" target=\"_blank\" "
+"class=\"planning_mail_template_button top_button\">Dodelite mi to izmeno</a>"
+"\n"
+"                        <a t-if=\"ctx.get('unavailable_link')\" t-att-"
+"href=\"ctx['unavailable_link']\" target=\"_blank\" "
+"class=\"planning_mail_template_button top_button\">Nisem na voljo</a>\n"
+"                        <a t-if=\"ctx.get('google_url')\" t-att-"
+"href=\"ctx['google_url']\" target=\"_blank\" "
+"class=\"planning_mail_template_button\">Dodaj v Google Koledar</a>\n"
+"                        <a t-if=\"ctx.get('iCal_url')\" t-att-"
+"href=\"ctx['iCal_url']\" target=\"_blank\" "
+"class=\"planning_mail_template_button\">Dodaj v iCal/Outlook</a>\n"
+"                    </div>\n"
+"                    <br/>\n"
+"                    <p t-if=\"ctx.get('open_shift_available')\">Če vas ta "
+"izmena zanima in ste na voljo, si jo dodelite.</p>\n"
+"                    <p t-else=\"\">Če vam trenutna izmena ne ustreza, vam "
+"priporočamo, da se obrnete na svoje sodelavce in jih prosite za zamenjavo "
+"izmene. Morda jih bo zanimalo, da izmeno zamenjajo z vami.</p>\n"
+"                </div>\n"
+"            </body>"
 
 #. module: planning
 #: model:mail.template,body_html:planning.email_template_planning_planning
+#, fuzzy
 msgid ""
 "<style>\n"
 "                .planning_mail_template_button {\n"
@@ -507,6 +734,69 @@ msgid ""
 "                </div>\n"
 "            </body>"
 msgstr ""
+"<style>\n"
+"                .planning_mail_template_button {\n"
+"                    padding: 5px 10px;\n"
+"                    text-decoration: none;\n"
+"                    border: 1px;\n"
+"                    border-radius: 3px;\n"
+"                    display: inline-block; \n"
+"                    width: 190px;\n"
+"                    text-align: center;\n"
+"                }\n"
+"                </style>\n"
+"                <body><div>\n"
+"                    <p t-if=\"ctx.get('employee')\">Spoštovani <t t-"
+"out=\"ctx['employee'].name or ''\">Anita Oliver</t>,</p>\n"
+"                    <p t-else=\"\">Pozdravljeni,</p>\n"
+"                    <br/>\n"
+"                    <p t-if=\"ctx.get('start_datetime') and ctx.get"
+"('end_datetime')\">\n"
+"                        Vaše prihajajoče izmene od <t t-out=\"format_date"
+"(ctx['start_datetime'])\">05-05-2021</t>\n"
+"                        do <t t-out=\"format_date(ctx['end_datetime'])\">05-"
+"11-2021</t> so bile objavljene.\n"
+"                    </p>\n"
+"                    <div style=\"display: flex; margin: 15px;\">\n"
+"                        <div t-if=\"ctx.get('planning_url')\" style=\"margin-"
+"right: 15px;\">\n"
+"                            <a t-att-href=\"ctx['planning_url']\" "
+"target=\"_blank\" class=\"planning_mail_template_button\" t-attf-"
+"style=\"color: {{object.company_id.email_primary_color or '#FFFFFF'}}; "
+"background-color: {{object.company_id.email_secondary_color or '#875A7B'}}"
+";\">Oglejte si svoj razpored</a>\n"
+"                        </div>\n"
+"                        <div t-if=\"ctx.get('planning_url_ics')\">\n"
+"                            <a t-att-href=\"ctx['planning_url_ics']\" "
+"target=\"_blank\" class=\"planning_mail_template_button\" style=\"color: "
+"#374151; background-color: #E7E9ED; border: solid #E7E9ED;\">Dodaj v "
+"koledar</a>\n"
+"                        </div>\n"
+"                    </div>\n"
+"                    <br/>\n"
+"                    <p t-if=\"ctx.get('slot_unassigned') or "
+"(object.allow_self_unassign and object.self_unassign_days_before)\">\n"
+"                        <t t-if=\"ctx.get('slot_unassigned')\">\n"
+"                            Radi bi vas tudi opomnili, da je na voljo nekaj "
+"prostih izmen. Če vas zanimajo in ste na voljo, se jim prosimo sami "
+"dodelite.\n"
+"                        </t>\n"
+"                        <t t-if=\"object.allow_self_unassign and "
+"object.self_unassign_days_before\">\n"
+"                            Če ne morete delati izmene, ki vam je bila "
+"dodeljena, se z nje prosimo odjavite v <t t-"
+"out=\"object.self_unassign_days_before or ''\">5</t> dneh pred začetkom "
+"izmene.\n"
+"                        </t>\n"
+"                    </p>\n"
+"                    <p t-if=\"ctx.get('message')\" t-out=\"ctx['message']\"/>"
+"\n"
+"                    <p t-if=\"object.allow_self_unassign\">Če vam trenutni "
+"urnik ne ustreza, vam priporočamo, da se obrnete na svoje sodelavce in jih "
+"prosite za zamenjavo izmen. Morda jih bo zanimalo, da z vami zamenjajo "
+"izmene.</p>\n"
+"                </div>\n"
+"            </body>"
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_recurrency_check_until_limit
@@ -518,8 +808,9 @@ msgstr ""
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_recurrency.py:0
+#, fuzzy
 msgid "A shift must be in the same company as its recurrence."
-msgstr ""
+msgstr "Izmena mora biti v istem podjetju kot njena ponovitev."
 
 #. module: planning
 #. odoo-javascript
@@ -537,7 +828,7 @@ msgstr "Aktivno"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.js:0
 msgid "Add Shift"
-msgstr ""
+msgstr "Dodaj izmeno"
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_planning_send__note
@@ -546,13 +837,16 @@ msgstr "Dodatno sporočilo, prikazano v e-poštnem sporočilu poslano zaposlenim
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_send_view_form
+#, fuzzy
 msgid "Additional message included in the email sent to your employees"
 msgstr ""
+"Dodatno sporočilo, vključeno v e-poštnem sporočilu, poslanem vašim zaposlenim"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
+#, fuzzy
 msgid "Additional note sent to the employee"
-msgstr ""
+msgstr "Dodatna opomba, poslana zaposlenemu"
 
 #. module: planning
 #: model:res.groups,name:planning.group_planning_manager
@@ -562,28 +856,36 @@ msgstr "Administrator"
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_hooks.js:0
+#, fuzzy
 msgid ""
 "All open shifts have already been assigned, or there are no resources "
 "available to take them at this time."
 msgstr ""
+"Vse odprte izmene so že bile dodeljene ali pa trenutno ni na voljo virov, ki "
+"bi jih lahko prevzeli."
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_ask_recurrence_update/planning_ask_recurrence_update_dialog.js:0
 #: model:ir.model.fields.selection,name:planning.selection__planning_slot__recurrence_update__all
+#, fuzzy
 msgid "All shifts"
-msgstr ""
+msgstr "Vse izmene"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
+#, fuzzy
 msgid ""
 "All subsequent shifts will be deleted. Are you sure you want to continue?"
 msgstr ""
+"Vse nadaljnje izmene bodo izbrisane. Ali ste prepričani, da želite "
+"nadaljevati?"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
+#, fuzzy
 msgid "Allocated Percentage"
-msgstr ""
+msgstr "Dodeljeni odstotek"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__allocated_hours
@@ -618,10 +920,13 @@ msgstr "Vrsta dodelitve"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_report_action_analysis
+#, fuzzy
 msgid ""
 "Analyze the allocation of your resources across roles, projects, and sales "
 "orders, and estimate future needs."
 msgstr ""
+"Analizirajte razporeditev svojih virov med vlogami, projekti in prodajnimi "
+"naročili ter ocenite prihodnje potrebe."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_role_view_form
@@ -635,17 +940,21 @@ msgstr "Arhivirano"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/resource_form/resource_form_controller.js:0
 #: code:addons/planning/static/src/views/resource_list/resource_list_controller.js:0
+#, fuzzy
 msgid ""
 "Archiving this resource will transform all of its future shifts into open "
 "shifts. Are you sure you want to continue?"
 msgstr ""
+"Arhiviranje tega vira bo vse njegove prihodnje izmene spremenilo v odprte "
+"izmene. Ali želite nadaljevati?"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_form/planning_form_view.js:0
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer.js:0
+#, fuzzy
 msgid "Are you sure you want to delete this shift?"
-msgstr ""
+msgstr "Ali ste prepričani, da želite izbrisati to izmeno?"
 
 #. module: planning
 #. odoo-javascript
@@ -663,22 +972,28 @@ msgstr "Ikona puščice"
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
+#, fuzzy
 msgid "Ask To Switch"
-msgstr ""
+msgstr "Zaprosi za zamenjavo"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
+#, fuzzy
 msgid "Ask to Switch"
-msgstr ""
+msgstr "Zaprosi za zamenjavo"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/tours/planning.js:0
+#, fuzzy
 msgid ""
 "Assign a <b>resource</b>, or leave it open for the moment. <i>Tip: Create "
 "open shifts for the roles you will be needing to complete a mission. Then, "
 "assign those open shifts to the resources that are available.</i>"
 msgstr ""
+"Dodelite <b>vir</b> ali ga za zdaj pustite odprtega. <i>Namig: Ustvarite "
+"odprte izmene za vloge, ki jih boste potrebovali za dokončanje naloge. Nato "
+"te odprte izmene dodelite razpoložljivim virom.</i>"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.unwanted_slots_list_template
@@ -691,15 +1006,17 @@ msgstr "Zadolžen"
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
+#, fuzzy
 msgid "Auto Plan"
-msgstr ""
+msgstr "Samodejno načrtovanje"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_calendar_controller.xml:0
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
+#, fuzzy
 msgid "Automatically plan open shifts and sales orders"
-msgstr ""
+msgstr "Samodejno načrtuj odprte izmene in prodajna naročila"
 
 #. module: planning
 #. odoo-javascript
@@ -709,8 +1026,9 @@ msgstr "Avatar"
 
 #. module: planning
 #: model:ir.ui.menu,name:planning.planning_menu_schedule_by_resource
+#, fuzzy
 msgid "By Resource"
-msgstr ""
+msgstr "Po viru"
 
 #. module: planning
 #: model:ir.ui.menu,name:planning.planning_menu_schedule_by_role
@@ -719,16 +1037,18 @@ msgstr "Po vlogi"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.unwanted_slots_list_template
+#, fuzzy
 msgid "CANCEL SWITCH"
-msgstr ""
+msgstr "PREKLIČI PREKLOP"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
+#, fuzzy
 msgid "Cancel Switch"
-msgstr ""
+msgstr "Prekliči preklop"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_view_form_simplified
@@ -743,8 +1063,9 @@ msgstr "Barva"
 
 #. module: planning
 #: model:planning.role,name:planning.planning_role_cm
+#, fuzzy
 msgid "Community Manager"
-msgstr ""
+msgstr "Vodja skupnosti"
 
 #. module: planning
 #: model:ir.model,name:planning.model_res_company
@@ -762,10 +1083,15 @@ msgstr "Podjetje"
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_planning_planning__company_id
+#, fuzzy
 msgid ""
 "Company linked to the material resource. Leave empty for the resource to be "
 "available in every company."
 msgstr ""
+"Podjetje, povezano z materialnim virom. Pustite prazno, da bo vir na voljo "
+"vsem podjetjem.\n"
+"Lokacija: "
+"model:ir.model.fields,help:planning.field_planning_planning__company_id"
 
 #. module: planning
 #: model:ir.model,name:planning.model_res_config_settings
@@ -786,8 +1112,9 @@ msgstr "Potrdi"
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_calendar_controller.xml:0
+#, fuzzy
 msgid "Copy previous"
-msgstr ""
+msgstr "Kopiraj prejšnje"
 
 #. module: planning
 #. odoo-javascript
@@ -798,16 +1125,21 @@ msgstr "Kopiraj prejšnji teden"
 
 #. module: planning
 #: model:planning.role,name:planning.planning_role_crane
+#, fuzzy
 msgid "Crane"
-msgstr ""
+msgstr "Žerjav"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_open_shifts
+#, fuzzy
 msgid ""
 "Create open shifts for the roles you will be needing to complete a mission."
 "<br>\n"
 "                Allocate open shifts to resources based on their roles."
 msgstr ""
+"Ustvarite odprte izmene za vloge, ki jih boste potrebovali za dokončanje "
+"misije.<br>\n"
+"                Odprte izmene dodelite virom glede na njihove vloge."
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_calendar_resource__create_uid
@@ -860,8 +1192,9 @@ msgstr "Dni"
 #: model:ir.model.fields,field_description:planning.field_planning_slot__self_unassign_days_before
 #: model:ir.model.fields,field_description:planning.field_res_company__planning_self_unassign_days_before
 #: model:ir.model.fields,field_description:planning.field_res_config_settings__planning_self_unassign_days_before
+#, fuzzy
 msgid "Days before shift for unassignment"
-msgstr ""
+msgstr "Dni pred izmeno za preklic dodelitve"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
@@ -873,35 +1206,45 @@ msgstr "Rok"
 #: model:ir.model.fields,help:planning.field_planning_slot__self_unassign_days_before
 #: model:ir.model.fields,help:planning.field_res_company__planning_self_unassign_days_before
 #: model:ir.model.fields,help:planning.field_res_config_settings__planning_self_unassign_days_before
+#, fuzzy
 msgid "Deadline in days for shift unassignment"
-msgstr ""
+msgstr "Rok za odjavo iz izmene v dnevih"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_hr_employee__default_planning_role_id
 #: model:ir.model.fields,field_description:planning.field_resource_resource__default_role_id
+#, fuzzy
 msgid "Default Role"
-msgstr ""
+msgstr "Privzeta vloga"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.resource_resource_search_view_inherit
+#, fuzzy
 msgid "Default Roles"
-msgstr ""
+msgstr "Privzete vloge"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.employee_no_email_list_wizard
+#, fuzzy
 msgid ""
 "Define a work email address for the following employees so they will receive "
 "the planning."
 msgstr ""
+"Določite službeni e-poštni naslov za naslednje zaposlene, da bodo prejeli "
+"razpored."
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_planning_slot__role_id
 #: model_terms:ir.actions.act_window,help:planning.planning_action_roles
+#, fuzzy
 msgid ""
 "Define the roles your resources will perform (e.g. Chef, Bartender, Waiter). "
 "Create open shifts based on the roles needed for a mission, then assign "
 "those shifts to available resources."
 msgstr ""
+"Določite vloge, ki jih bodo opravljali vaši viri (npr. kuhar, natakar, "
+"strežnik). Ustvarite odprte izmene glede na vloge, potrebne za nalogo, nato "
+"pa te izmene dodelite razpoložljivim virom."
 
 #. module: planning
 #. odoo-javascript
@@ -915,8 +1258,9 @@ msgstr "Izbriši"
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/components/address_recurrency_confirmation_dialog/address_recurrency_confirmation_dialog.js:0
+#, fuzzy
 msgid "Delete Recurring Shift"
-msgstr ""
+msgstr "Izbriši ponavljajočo se izmeno"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__department_id
@@ -947,6 +1291,7 @@ msgstr "Opusti"
 #: model:ir.model.fields,field_description:planning.field_hr_departure_wizard__display_name
 #: model:ir.model.fields,field_description:planning.field_hr_employee__display_name
 #: model:ir.model.fields,field_description:planning.field_hr_employee_public__display_name
+#: model:ir.model.fields,field_description:planning.field_ir_actions_report__display_name
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__display_name
 #: model:ir.model.fields,field_description:planning.field_planning_calendar_resource__display_name
 #: model:ir.model.fields,field_description:planning.field_planning_planning__display_name
@@ -964,8 +1309,9 @@ msgstr "Prikazani naziv"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_resources
+#, fuzzy
 msgid "Distribute your material resources across projects and sales orders."
-msgstr ""
+msgstr "Porazdelite svoje materialne vire med projekte in prodajna naročila."
 
 #. module: planning
 #. odoo-javascript
@@ -978,10 +1324,14 @@ msgstr "Osnutek"
 
 #. module: planning
 #: model_terms:digest.tip,tip_description:planning.digest_tip_planning_0
+#, fuzzy
 msgid ""
 "Drag a shift to another day to reschedule it, or to another row to reassign "
 "the shift. Press CTRL (or Cmd on Mac) while dragging a shift to duplicate it."
 msgstr ""
+"Povlecite izmeno na drug dan, da jo prestavite, ali v drugo vrstico, da jo "
+"prerazporedite. Med vlečenjem izmene pritisnite CTRL (ali Cmd v računalniku "
+"Mac), da jo podvojite."
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__duration
@@ -990,8 +1340,9 @@ msgstr "Trajanje"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot_template__duration_days
+#, fuzzy
 msgid "Duration Days"
-msgstr ""
+msgstr "Trajanje dni"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_role_view_kanban
@@ -1002,26 +1353,34 @@ msgstr "Uredi"
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_ask_recurrence_update/planning_ask_recurrence_update_dialog.xml:0
+#, fuzzy
 msgid "Edit Recurrent Shift"
-msgstr ""
+msgstr "Urejanje ponavljajoče se izmene"
 
 #. module: planning
 #: model:mail.template,description:planning.email_template_shift_switch_email
+#, fuzzy
 msgid ""
 "Email sent automatically when an employee self-assigns to the unwanted shift "
 "of another employee, notifying the person who requested to switch that the "
 "shift has been taken"
 msgstr ""
+"E-poštno sporočilo, poslano samodejno, ko zaposleni prevzame neželeno izmeno "
+"drugega zaposlenega, pri čemer osebo, ki je zaprosila za zamenjavo, obvesti, "
+"da je bila izmena prevzeta"
 
 #. module: planning
 #: model:mail.template,description:planning.email_template_slot_single
+#, fuzzy
 msgid "Email sent automatically when publishing a shift"
-msgstr ""
+msgstr "E-pošta, poslana samodejno ob objavi izmene"
 
 #. module: planning
 #: model:mail.template,description:planning.email_template_planning_planning
+#, fuzzy
 msgid "Email sent automatically when publishing the schedule of your employees"
 msgstr ""
+"E-poštno sporočilo, poslano samodejno ob objavi razporeda vaših zaposlenih"
 
 #. module: planning
 #: model:ir.model,name:planning.model_hr_employee
@@ -1040,8 +1399,9 @@ msgstr "Ime zaposlenega"
 #: model:ir.model.fields,field_description:planning.field_res_company__planning_employee_unavailabilities
 #: model:ir.model.fields,field_description:planning.field_res_config_settings__planning_employee_unavailabilities
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
+#, fuzzy
 msgid "Employee Unavailabilities"
-msgstr ""
+msgstr "Nerazpoložljivosti zaposlenih"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_send__employee_ids
@@ -1053,8 +1413,9 @@ msgstr "Kadri"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.employee_no_email_list_wizard
+#, fuzzy
 msgid "Employees with no Work Email"
-msgstr ""
+msgstr "Zaposleni brez službenega e-poštnega naslova"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__end_datetime
@@ -1065,8 +1426,9 @@ msgstr "Končni datum"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot_template__end_time
+#, fuzzy
 msgid "End Hour"
-msgstr ""
+msgstr "Končna ura"
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_hr_employee_employee_token_unique
@@ -1087,15 +1449,19 @@ msgstr "Dodatno sporočilo"
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer.js:0
+#, fuzzy
 msgid "Failed to undo reschedule"
-msgstr ""
+msgstr "Razveljavitev prestavitve ni uspela"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_my_calendar
+#, fuzzy
 msgid ""
 "Find here your planning. Assign yourself open shifts that match your roles, "
 "or indicate your unavailability."
 msgstr ""
+"Tukaj poiščite svoj razpored. Dodelite si odprte izmene, ki ustrezajo vašim "
+"vlogam, ali označite svojo nedosegljivost."
 
 #. module: planning
 #. odoo-python
@@ -1105,13 +1471,15 @@ msgstr "Najprej določite datum povabila."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.view_employee_filter_inherit_hr
+#, fuzzy
 msgid "Fixed Hours"
-msgstr ""
+msgstr "Fiksne ure"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.view_employee_filter_inherit_hr
+#, fuzzy
 msgid "Flexible Hours"
-msgstr ""
+msgstr "Prilagodljiv delovni čas"
 
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__planning_slot__allocation_type__forecast
@@ -1132,34 +1500,40 @@ msgstr "Za vedno, vsak %s teden"
 
 #. module: planning
 #: model:planning.role,name:planning.planning_furniture_assembler
+#, fuzzy
 msgid "Furniture Assembler"
-msgstr ""
+msgstr "Sestavljavec pohištva"
 
 #. module: planning
 #: model:planning.role,name:planning.planning_furniture_tool
+#, fuzzy
 msgid "Furniture Tools"
-msgstr ""
+msgstr "Orodje za pohištvo"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
+#, fuzzy
 msgid "Generate shifts"
-msgstr ""
+msgstr "Ustvari izmene"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.brand_promotion
+#, fuzzy
 msgid "Give depth to your"
-msgstr ""
+msgstr "Dajte globino svojemu"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_hr_employee__has_slots
 #: model:ir.model.fields,field_description:planning.field_hr_employee_public__has_slots
+#, fuzzy
 msgid "Has Slots"
-msgstr ""
+msgstr "Ima termine"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__request_to_switch
+#, fuzzy
 msgid "Has there been a request to switch on this shift slot?"
-msgstr ""
+msgstr "Ali je bila podana zahteva za vklop tega termina izmene?"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot_template__name
@@ -1175,21 +1549,24 @@ msgstr "Oseba"
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
+#, fuzzy
 msgid "I Am Unavailable"
-msgstr ""
+msgstr "Nisem na voljo"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.open_slots_list_template
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
+#, fuzzy
 msgid "I Take It"
-msgstr ""
+msgstr "Prevzamem"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
+#, fuzzy
 msgid "I Take it"
-msgstr ""
+msgstr "Prevzamem"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
@@ -1200,6 +1577,7 @@ msgstr "Nisem na voljo"
 #: model:ir.model.fields,field_description:planning.field_hr_departure_wizard__id
 #: model:ir.model.fields,field_description:planning.field_hr_employee__id
 #: model:ir.model.fields,field_description:planning.field_hr_employee_public__id
+#: model:ir.model.fields,field_description:planning.field_ir_actions_report__id
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__id
 #: model:ir.model.fields,field_description:planning.field_planning_calendar_resource__id
 #: model:ir.model.fields,field_description:planning.field_planning_planning__id
@@ -1227,26 +1605,31 @@ msgstr ""
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/tours/planning.js:0
+#, fuzzy
 msgid ""
 "If you are happy with your planning, you can now <b>send</b> it to your "
 "employees."
 msgstr ""
+"Če ste zadovoljni z načrtom, ga lahko zdaj <b>pošljete</b> svojim zaposlenim."
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_send__include_unassigned
 #: model_terms:ir.ui.view,arch_db:planning.planning_send_view_form
+#, fuzzy
 msgid "Include Open Shifts"
-msgstr ""
+msgstr "Vključi odprte izmene"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_planning__include_unassigned
+#, fuzzy
 msgid "Includes Open Shifts"
-msgstr ""
+msgstr "Vključuje odprte izmene"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_planning__is_planning_preview
+#, fuzzy
 msgid "Is Planning Preview"
-msgstr ""
+msgstr "Je predogled načrtovanja"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_view_form_simplified
@@ -1292,38 +1675,50 @@ msgstr "Legenda"
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_planning__allow_self_unassign
 #: model:ir.model.fields,field_description:planning.field_planning_slot__allow_self_unassign
+#, fuzzy
 msgid "Let Employee Unassign Themselves"
-msgstr ""
+msgstr "Dovoli zaposlenim, da se sami odstranijo"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
+#, fuzzy
 msgid ""
 "Let employees switch shifts with colleagues or unassign themselves when "
 "unavailable"
 msgstr ""
+"Zaposlenim omogočite, da zamenjajo izmene s sodelavci ali se odjavijo od "
+"izmen, ko niso na voljo"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/tours/planning.js:0
+#, fuzzy
 msgid ""
 "Let's check out the Gantt view for cool features. Get ready to <b>share your "
 "schedule</b> and easily plan your shifts with just one click by <em>copying "
 "the previous week's schedule</em>."
 msgstr ""
+"Oglejmo si pogled Gantt z odličnimi funkcijami. Pripravite se na <b>deljenje "
+"svojega urnika</b> in preprosto načrtujte svoje izmene z enim samim klikom, "
+"tako da <em>kopirate urnik prejšnjega tedna</em>."
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/tours/planning.js:0
+#, fuzzy
 msgid ""
 "Let's create your first <b>shift</b>. <i>Tip: use the (+) shortcut available "
 "on each cell of the Gantt view to save time.</i>"
 msgstr ""
+"Ustvarimo vašo prvo <b>izmeno</b>. <i>Namig: uporabite bližnjico (+), ki je "
+"na voljo v vsaki celici gantograma, da prihranite čas.</i>"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/tours/planning.js:0
+#, fuzzy
 msgid "Let's schedule a <b>shift</b> for this time range."
-msgstr ""
+msgstr "Načrtujmo <b>izmeno</b> za to časovno obdobje."
 
 #. module: planning
 #. odoo-javascript
@@ -1340,13 +1735,15 @@ msgstr "Seznam"
 #. module: planning
 #: model:hr.job,name:planning.job_maintenance_technician
 #: model:planning.role,name:planning.planning_maintenance_technician
+#, fuzzy
 msgid "Maintenance Technician"
-msgstr ""
+msgstr "Vzdrževalni tehnik"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_shift_template
+#, fuzzy
 msgid "Make encoding shifts easy with templates."
-msgstr ""
+msgstr "Poenostavite premike kodiranja s predlogami."
 
 #. module: planning
 #: model:planning.role,name:planning.planning_role_management
@@ -1376,14 +1773,16 @@ msgstr "Materiali"
 #. module: planning
 #. odoo-python
 #: code:addons/planning/wizard/planning_preview.py:0
+#, fuzzy
 msgid "Missing start or end datetime in context."
-msgstr ""
+msgstr "V kontekstu manjka začetni ali končni datum in čas."
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__publication_warning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__publication_warning
+#, fuzzy
 msgid "Modified Since Last Publication"
-msgstr ""
+msgstr "Spremenjeno od zadnje objave"
 
 #. module: planning
 #. odoo-javascript
@@ -1414,8 +1813,9 @@ msgstr "Moje načrtovanje"
 #: model_terms:ir.ui.view,arch_db:planning.planning_role_view_search
 #: model_terms:ir.ui.view,arch_db:planning.planning_slot_template_view_search
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
+#, fuzzy
 msgid "My Roles"
-msgstr ""
+msgstr "Moje vloge"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
@@ -1445,14 +1845,16 @@ msgstr "Nov dogodek"
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 #: code:addons/planning/static/src/views/planning_calendar/planning_calendar_controller.js:0
+#, fuzzy
 msgid "New Shift"
-msgstr ""
+msgstr "Nova izmena"
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/controllers/main.py:0
+#, fuzzy
 msgid "New_Shift"
-msgstr ""
+msgstr "Nova izmena"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
@@ -1462,13 +1864,15 @@ msgstr "Naslednji teden"
 #. module: planning
 #. odoo-python
 #: code:addons/planning/wizard/planning_send.py:0
+#, fuzzy
 msgid "No Email Address for Some Employees"
-msgstr ""
+msgstr "Za nekatere zaposlene ni e-poštnega naslova"
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_planning_recurrency__repeat_number
+#, fuzzy
 msgid "No Of Repetitions of the plannings"
-msgstr ""
+msgstr "Število ponovitev načrtov"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_report_action_analysis
@@ -1477,32 +1881,37 @@ msgstr "Podatkov še ni!"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_resources
+#, fuzzy
 msgid "No material resources found. Let's create one!"
-msgstr ""
+msgstr "Materialni viri niso bili najdeni. Ustvarimo enega!"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_roles
+#, fuzzy
 msgid "No roles found. Let's create one!"
-msgstr ""
+msgstr "Ni najdenih vlog. Ustvarimo eno!"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_shift_template
+#, fuzzy
 msgid "No shift templates found. Let's create one!"
-msgstr ""
+msgstr "Ni najdenih predlog izmen. Ustvarimo eno!"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_my_calendar
 #: model_terms:ir.actions.act_window,help:planning.planning_action_open_shifts
 #: model_terms:ir.actions.act_window,help:planning.planning_action_schedule_by_resource
 #: model_terms:ir.actions.act_window,help:planning.planning_action_schedule_by_role
+#, fuzzy
 msgid "No shifts found. Let's create one!"
-msgstr ""
+msgstr "Ni najdenih izmen. Ustvarimo eno!"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_hooks.js:0
+#, fuzzy
 msgid "No shifts to print"
-msgstr ""
+msgstr "Ni izmen za tiskanje"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__name
@@ -1520,15 +1929,19 @@ msgstr "Opomba:"
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/tours/planning.js:0
+#, fuzzy
 msgid ""
 "Now that this week is ready, let's get started on <b>next week's schedule</"
 "b>."
 msgstr ""
+"Zdaj, ko je ta teden pripravljen, začnimo z <b>urnikom za naslednji teden</b>"
+"."
 
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__planning_slot__repeat_type__x_times
+#, fuzzy
 msgid "Number of Occurrences"
-msgstr ""
+msgstr "Število ponovitev"
 
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__planning_recurrency__repeat_type__x_times
@@ -1538,8 +1951,9 @@ msgstr "Število ponovitev"
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
+#, fuzzy
 msgid "Open Shift"
-msgstr ""
+msgstr "Odprta izmena"
 
 #. module: planning
 #. odoo-javascript
@@ -1556,20 +1970,23 @@ msgstr "Odprte izmene"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.open_slots_list_template
+#, fuzzy
 msgid "Open Shifts Available"
-msgstr ""
+msgstr "Odprte izmene na voljo"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_hooks.js:0
+#, fuzzy
 msgid "Open shifts assigned"
-msgstr ""
+msgstr "Odprte izmene so dodeljene"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_hooks.js:0
+#, fuzzy
 msgid "Open shifts unscheduled"
-msgstr ""
+msgstr "Odprte nenačrtovane izmene"
 
 #. module: planning
 #. odoo-javascript
@@ -1580,10 +1997,13 @@ msgstr "Odpri: %s"
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid ""
 "Operation not supported, you should always compare overlap_slot_count to 0 "
 "value with = or > operator."
 msgstr ""
+"Operacija ni podprta, vedno primerjajte overlap_slot_count z vrednostjo 0 z "
+"operatorjem = ali >."
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_send__start_datetime
@@ -1593,26 +2013,33 @@ msgstr "Obdobje"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
+#, fuzzy
 msgid ""
 "Plan resource allocation across projects and estimate deadlines more "
 "accurately"
-msgstr ""
+msgstr "Načrtujte razporeditev virov po projektih in natančneje ocenite roke"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/tours/planning.js:0
+#, fuzzy
 msgid ""
 "Plan your shifts in one click by <b>copying the schedule from the previous "
 "week</b>."
 msgstr ""
+"Načrtujte svoje izmene z enim klikom tako, da <b>kopirate razpored iz "
+"prejšnjega tedna</b>."
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/tours/planning.js:0
+#, fuzzy
 msgid ""
 "Plan your shifts in one click by <b>copying the schedule from the previous "
 "week</b>. Open the menu to access this option."
 msgstr ""
+"Načrtujte svoje izmene z enim klikom tako, da <b>kopirate razpored iz "
+"prejšnjega tedna</b>. Odprite meni za dostop do te možnosti."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
@@ -1651,13 +2078,15 @@ msgstr "Analiza načrtovanja"
 
 #. module: planning
 #: model:ir.model,name:planning.model_planning_analysis_report
+#, fuzzy
 msgid "Planning Analysis Report"
-msgstr ""
+msgstr "Poročilo analize načrtovanja"
 
 #. module: planning
 #: model:ir.model,name:planning.model_planning_preview
+#, fuzzy
 msgid "Planning Preview"
-msgstr ""
+msgstr "Predogled načrtovanja"
 
 #. module: planning
 #: model:ir.model,name:planning.model_planning_recurrency
@@ -1688,8 +2117,9 @@ msgstr "Načrtovalni termin"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_role__slot_properties_definition
+#, fuzzy
 msgid "Planning Slot Properties"
-msgstr ""
+msgstr "Lastnosti termina načrtovanja"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
@@ -1698,18 +2128,21 @@ msgstr "Načrtovanje:"
 
 #. module: planning
 #: model:mail.template,name:planning.email_template_planning_planning
+#, fuzzy
 msgid "Planning: New Schedule"
-msgstr ""
+msgstr "Načrtovanje: Nov urnik"
 
 #. module: planning
 #: model:mail.template,name:planning.email_template_slot_single
+#, fuzzy
 msgid "Planning: New Shift"
-msgstr ""
+msgstr "Načrtovanje: nova izmena"
 
 #. module: planning
 #: model:mail.template,name:planning.email_template_shift_switch_email
+#, fuzzy
 msgid "Planning: Shift Re-assigned"
-msgstr ""
+msgstr "Načrtovanje: izmena je bila ponovno dodeljena"
 
 #. module: planning
 #: model:ir.actions.server,name:planning.ir_cron_forecast_schedule_ir_actions_server
@@ -1719,14 +2152,16 @@ msgstr "Načrtovanje: ustvarite naslednje ponavljajoče se izmene"
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "Planning: new open shift available on"
-msgstr ""
+msgstr "Načrtovanje: nova odprta izmena je na voljo dne"
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "Planning: new shift on"
-msgstr ""
+msgstr "Načrtovanje: nova izmena dne"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.brand_promotion
@@ -1735,22 +2170,27 @@ msgstr "Načrtovanje"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_view_form_email
+#, fuzzy
 msgid ""
 "Please add a work email for the following employee so that they can receive "
 "their planning:"
 msgstr ""
+"Prosimo, dodajte službeni e-poštni naslov za naslednjega zaposlenega, da bo "
+"lahko prejemal svoje načrtovanje:"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/components/conflicting_slot_ids_field/conflicting_slot_ids_field.xml:0
+#, fuzzy
 msgid "Prepare for the ultimate multi-tasking challenge:"
-msgstr ""
+msgstr "Pripravite se na ultimativni izziv večopravilnosti:"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer_controls.xml:0
+#, fuzzy
 msgid "Press Ctrl to duplicate the shift"
-msgstr ""
+msgstr "Pritisnite Ctrl, da podvojite izmeno"
 
 #. module: planning
 #. odoo-javascript
@@ -1762,8 +2202,9 @@ msgstr "Predogled"
 
 #. module: planning
 #: model:ir.actions.act_window,name:planning.resource_preview_action
+#, fuzzy
 msgid "Preview Planning"
-msgstr ""
+msgstr "Predogled načrtovanja"
 
 #. module: planning
 #. odoo-javascript
@@ -1776,8 +2217,9 @@ msgstr "Tiskanje"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_calendar_controller.xml:0
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_controller.xml:0
+#, fuzzy
 msgid "Print resource calendar"
-msgstr ""
+msgstr "Natisni koledar virov"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_res_config_settings__module_project_forecast
@@ -1786,8 +2228,9 @@ msgstr "Projektno načrtovanje"
 
 #. module: planning
 #: model:planning.role,name:planning.planning_role_projector
+#, fuzzy
 msgid "Projector"
-msgstr ""
+msgstr "Projektor"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__slot_properties
@@ -1819,7 +2262,7 @@ msgstr "Objavi & Pošlji"
 #. module: planning
 #: model:ir.actions.act_window,name:planning.planning_send_action
 msgid "Publish & Send the Schedule by Email"
-msgstr ""
+msgstr "Objavi in pošlji razpored po e-pošti"
 
 #. module: planning
 #. odoo-javascript
@@ -1833,14 +2276,16 @@ msgstr "Objavljeno"
 #. module: planning
 #: model:hr.job,name:planning.job_quality_control
 #: model:planning.role,name:planning.planning_quality_control
+#, fuzzy
 msgid "Quality Control Inspector"
-msgstr ""
+msgstr "Inšpektor za nadzor kakovosti"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_res_company__planning_generation_interval
 #: model:ir.model.fields,field_description:planning.field_res_config_settings__planning_generation_interval
+#, fuzzy
 msgid "Rate Of Shift Generation"
-msgstr ""
+msgstr "Pogostost ustvarjanja izmen"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__recurrence_update
@@ -1854,19 +2299,22 @@ msgstr "Ponovitve"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
+#, fuzzy
 msgid "Recurring Shifts"
-msgstr ""
+msgstr "Ponavljajoče se izmene"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_form/planning_form_view.js:0
+#, fuzzy
 msgid "Recurring shifts created"
-msgstr ""
+msgstr "Ustvarjene ponavljajoče se izmene"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_recurrency__slot_ids
+#, fuzzy
 msgid "Related Planning Entries"
-msgstr ""
+msgstr "Povezani vnosi načrtovanja"
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_planning_slot__user_id
@@ -1917,19 +2365,27 @@ msgid "Repetitions"
 msgstr "Ponovitve"
 
 #. module: planning
+#: model:ir.model,name:planning.model_ir_actions_report
+#, fuzzy
+msgid "Report Action"
+msgstr "Ukrep poročila"
+
+#. module: planning
 #: model:ir.ui.menu,name:planning.planning_menu_reporting
 msgid "Reporting"
 msgstr "Poročanje"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
+#, fuzzy
 msgid "Request to Switch"
-msgstr ""
+msgstr "Zahteva za zamenjavo"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
+#, fuzzy
 msgid "Requests to Switch"
-msgstr ""
+msgstr "Zahteve za zamenjavo"
 
 #. module: planning
 #: model:ir.actions.server,name:planning.model_planning_slot_action_reset_to_draft
@@ -1947,8 +2403,9 @@ msgstr "Vir"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__resource_color
+#, fuzzy
 msgid "Resource color"
-msgstr ""
+msgstr "Barva vira"
 
 #. module: planning
 #: model:ir.model,name:planning.model_resource_resource
@@ -1970,26 +2427,41 @@ msgstr "Vloga"
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_hr_employee__default_planning_role_id
+#, fuzzy
 msgid ""
 "Role that will be selected by default when creating a shift for this "
 "employee.\n"
 "This role will also have precedence over the other roles of the employee "
 "when planning orders."
 msgstr ""
+"Vloga, ki bo privzeto izbrana pri ustvarjanju izmene za tega zaposlenega.\n"
+"Ta vloga bo imela tudi prednost pred drugimi vlogami zaposlenega pri "
+"načrtovanju naročil.\n"
+"Lokacija: "
+"model:ir.model.fields,help:planning.field_hr_employee__default_planning_role_id"
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_resource_resource__default_role_id
+#, fuzzy
 msgid ""
 "Role that will be selected by default when creating a shift for this "
 "resource.\n"
 "This role will also have precedence over the other roles of the resource "
 "when planning shifts."
 msgstr ""
+"Vloga, ki bo privzeto izbrana pri ustvarjanju izmene za ta vir.\n"
+"Ta vloga bo imela tudi prednost pred drugimi vlogami vira pri načrtovanju "
+"izmen.\n"
+"Lokacija: "
+"model:ir.model.fields,help:planning.field_resource_resource__default_role_id"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_shift_ics_description
+#, fuzzy
 msgid "Role:"
 msgstr ""
+"Vloga:\n"
+"Lokacija:"
 
 #. module: planning
 #. odoo-javascript
@@ -2006,6 +2478,7 @@ msgstr "Vloge"
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_hr_employee__planning_role_ids
+#, fuzzy
 msgid ""
 "Roles that the employee can fill in. When creating a shift for this "
 "employee, only the shift templates for these roles will be displayed.\n"
@@ -2015,6 +2488,13 @@ msgid ""
 "(with the default planning role having precedence over the other ones).\n"
 "Leave empty for the employee to be assigned shifts regardless of the role."
 msgstr ""
+"Vloge, ki jih lahko opravlja zaposleni. Pri ustvarjanju izmene za tega "
+"zaposlenega bodo prikazane samo predloge izmen za te vloge. Podobno bodo "
+"zaposlenemu ob objavi urnika poslane samo odprte izmene, ki so na voljo za "
+"te vloge. Poleg tega bodo zaposlenemu dodeljena samo naročila za te vloge "
+"(pri čemer ima privzeta vloga načrtovanja prednost pred drugimi). Pustite "
+"prazno, da se zaposlenemu dodelijo izmene ne glede na vlogo. Lokacija: "
+"model:ir.model.fields,help:planning.field_hr_employee__planning_role_ids"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
@@ -2023,8 +2503,9 @@ msgstr "Shrani"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.employee_no_email_list_wizard
+#, fuzzy
 msgid "Save & Send Schedule"
-msgstr ""
+msgstr "Shrani in pošlji urnik"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form_in_gantt
@@ -2039,8 +2520,9 @@ msgstr "Shrani kot predlogo"
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/tours/planning.js:0
+#, fuzzy
 msgid "Save this shift once it is ready."
-msgstr ""
+msgstr "Shranite to izmeno, ko bo pripravljena."
 
 #. module: planning
 #: model:planning.role,name:planning.planning_role_scanner
@@ -2057,26 +2539,31 @@ msgstr "Razpored"
 #. module: planning
 #: model:ir.actions.act_window,name:planning.planning_action_schedule_by_resource
 msgid "Schedule by Resource"
-msgstr ""
+msgstr "Razpored po viru"
 
 #. module: planning
 #: model:ir.actions.act_window,name:planning.planning_action_schedule_by_role
+#, fuzzy
 msgid "Schedule by Role"
-msgstr ""
+msgstr "Razpored po vlogi"
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/wizard/planning_send.py:0
+#, fuzzy
 msgid "Schedule sent to your employees"
-msgstr ""
+msgstr "Urnik je bil poslan vašim zaposlenim"
 
 #. module: planning
 #: model_terms:ir.actions.act_window,help:planning.planning_action_schedule_by_resource
 #: model_terms:ir.actions.act_window,help:planning.planning_action_schedule_by_role
+#, fuzzy
 msgid ""
 "Schedule your human and material resources across roles, projects and sales "
 "orders."
 msgstr ""
+"Razporedite svoje človeške in materialne vire po vlogah, projektih in "
+"prodajnih naročilih."
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_planning__access_token
@@ -2086,8 +2573,9 @@ msgstr "Varnostni žeton"
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/components/conflicting_slot_ids_field/conflicting_slot_ids_field.xml:0
+#, fuzzy
 msgid "See conflicting shifts"
-msgstr ""
+msgstr "Prikaži konfliktne izmene"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
@@ -2116,10 +2604,13 @@ msgstr "Nastavitve"
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/tours/planning.js:0
+#, fuzzy
 msgid ""
 "Share the schedule with your team by publishing and sending it. Open the "
 "menu to access this option."
 msgstr ""
+"Delite razpored s svojo ekipo tako, da ga objavite in pošljete. Odprite meni "
+"za dostop do te možnosti."
 
 #. module: planning
 #. odoo-python
@@ -2158,93 +2649,111 @@ msgstr "Predloge izmen"
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer.js:0
+#, fuzzy
 msgid "Shift could not be removed"
-msgstr ""
+msgstr "Izmene ni bilo mogoče odstraniti"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer.js:0
+#, fuzzy
 msgid "Shift duplicated"
-msgstr ""
+msgstr "Izmena je podvojena"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer.js:0
+#, fuzzy
 msgid "Shift removed"
-msgstr ""
+msgstr "Izmena odstranjena"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer.js:0
+#, fuzzy
 msgid "Shift reschedule undone"
-msgstr ""
+msgstr "Prestavitev izmene razveljavljena"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer.js:0
+#, fuzzy
 msgid "Shift rescheduled"
-msgstr ""
+msgstr "Izmena prestavljena"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_form/planning_form_view.js:0
+#, fuzzy
 msgid "Shift saved as template"
-msgstr ""
+msgstr "Izmena shranjena kot predloga"
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "Shift sent"
-msgstr ""
+msgstr "Izmena poslana"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
+#, fuzzy
 msgid "Shifts Planned"
-msgstr ""
+msgstr "Načrtovane izmene"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
+#, fuzzy
 msgid "Shifts from"
-msgstr ""
+msgstr "Izmene od"
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
+#, fuzzy
 msgid "Shifts in Conflict"
-msgstr ""
+msgstr "Izmene v konfliktu"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
+#, fuzzy
 msgid "Shifts of Your Department Member"
-msgstr ""
+msgstr "Izmene člana vašega oddelka"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
+#, fuzzy
 msgid "Shifts of Your Team Member"
-msgstr ""
+msgstr "Izmene člana vaše ekipe"
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/wizard/planning_send.py:0
+#, fuzzy
 msgid "Shifts published — employees without a work email were skipped"
 msgstr ""
+"Izmene so bile objavljene — zaposleni brez službenega e-poštnega naslova so "
+"bili preskočeni"
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "Shifts reset to draft"
-msgstr ""
+msgstr "Izmene ponastavljene na osnutek"
 
 #. module: planning
 #: model:planning.role,name:planning.planning_shipping_associate
+#, fuzzy
 msgid "Shipping Associate"
-msgstr ""
+msgstr "Sodelavec za odpremo"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_preview__slot_count
+#, fuzzy
 msgid "Slot Count"
-msgstr ""
+msgstr "Število terminov"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_kanban_inherit
@@ -2253,13 +2762,15 @@ msgstr "Od objave te izmene je bilo nekaj sprememb."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_slot_template_view_form
+#, fuzzy
 msgid "Span"
-msgstr ""
+msgstr "Razpon"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_slot_template_view_form
+#, fuzzy
 msgid "Start & End Hours"
-msgstr ""
+msgstr "Ure začetka in konca"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__start_datetime
@@ -2283,31 +2794,59 @@ msgstr "Končni datum"
 
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__res_company__planning_employee_unavailabilities__switch
+#, fuzzy
 msgid "Switch shifts with other employees"
+msgstr "Zamenjaj izmene z drugimi zaposlenimi"
+
+#. module: planning
+#. odoo-python
+#: code:addons/planning/models/ir_actions_report.py:0
+#, fuzzy
+msgid ""
+"The Planning report cannot be added to the print menu. Please use the Print "
+"action available in the Planning calendar and Gantt views."
 msgstr ""
+"Poročila za načrtovanje ni mogoče dodati v meni za tiskanje. Uporabite "
+"dejanje »Natisni«, ki je na voljo v pogledih koledarja in gantograma v "
+"modulu Načrtovanje."
+
+#. module: planning
+#. odoo-python
+#: code:addons/planning/models/ir_actions_report.py:0
+#, fuzzy
+msgid ""
+"The Planning report cannot be printed from here. Please use the Print action "
+"available in the Planning calendar and Gantt views."
+msgstr ""
+"Poročila za načrtovanje ni mogoče natisniti tukaj. Uporabite dejanje »Natisni"
+"«, ki je na voljo v pogledih koledarja in gantograma v modulu Načrtovanje."
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_res_company_planning_self_unassign_days_before_positive
+#, fuzzy
 msgid ""
 "The amount of days before unassignment must be positive or equal to zero."
-msgstr ""
+msgstr "Število dni pred preklicem dodelitve mora biti pozitivno ali enako nič."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "The company does not allow you to unassign yourself from shifts."
-msgstr ""
+msgstr "Podjetje vam ne dovoljuje, da se sami odstranite iz izmen."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "The deadline for unassignment has passed."
-msgstr ""
+msgstr "Rok za preklic dodelitve je potekel."
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_slot_check_start_date_lower_end_date
+#, fuzzy
 msgid "The end date of a shift should be after its start date."
-msgstr ""
+msgstr "Končni datum izmene mora biti poznejši od njenega začetnega datuma."
 
 #. module: planning
 #. odoo-python
@@ -2317,95 +2856,111 @@ msgstr "Število ponovitev ne sme biti negativno."
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_recurrency_check_repeat_interval_positive
+#, fuzzy
 msgid "The recurrence should be greater than 0."
-msgstr ""
+msgstr "Ponovitev mora biti večja od 0."
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_form/planning_form_view.js:0
+#, fuzzy
 msgid "The shift has successfully been created."
-msgstr ""
+msgstr "Izmena je bila uspešno ustvarjena."
 
 #. module: planning
 #. odoo-javascript
 #. odoo-python
 #: code:addons/planning/static/src/views/planning_hooks.js:0
 #: code:addons/planning/wizard/planning_send.py:0
+#, fuzzy
 msgid ""
 "The shifts have already been published, or there are no shifts to publish."
-msgstr ""
+msgstr "Izmene so bile že objavljene ali pa ni izmen za objavo."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "The shifts have successfully been published and sent."
-msgstr ""
+msgstr "Izmene so bile uspešno objavljene in poslane."
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_slot_template_check_duration_days_positive
+#, fuzzy
 msgid "The span must be at least 1 working day."
-msgstr ""
+msgstr "Razpon mora trajati vsaj 1 delovni dan."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_template.py:0
+#, fuzzy
 msgid ""
 "The start and end hours must be greater or equal to 0 and lower than 24."
-msgstr ""
+msgstr "Začetne in končne ure morajo biti večje ali enake 0 in manjše od 24."
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_slot_template_check_start_time_lower_than_24
+#, fuzzy
 msgid "The start hour cannot be greater than 24."
-msgstr ""
+msgstr "Začetna ura ne sme biti večja od 24."
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_planning_slot_template_check_start_time_positive
+#, fuzzy
 msgid "The start hour cannot be negative."
-msgstr ""
+msgstr "Začetna ura ne sme biti negativna."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_template.py:0
+#, fuzzy
 msgid ""
-"The start hour cannot be before the end hour for a one-day shift template."
+"The start hour cannot be after the end hour for a one-day shift template."
 msgstr ""
+"Za predlogo enodnevne izmene začetna ura ne sme biti poznejša od končne ure."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "There are no resources available for this open shift."
-msgstr ""
+msgstr "Za to odprto izmeno ni na voljo nobenih virov."
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_hooks.js:0
+#, fuzzy
 msgid ""
 "There are no shifts planned for the previous week, or they have already been "
 "copied."
-msgstr ""
+msgstr "Za prejšnji teden ni načrtovanih izmen ali pa so bile te že kopirane."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "There are no shifts to publish and send."
-msgstr ""
+msgstr "Ni izmen za objavo in pošiljanje."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "There are no shifts to reset to draft."
-msgstr ""
+msgstr "Ni izmen, ki bi jih bilo treba ponastaviti na osnutek."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "This Progress Bar is not implemented."
-msgstr ""
+msgstr "Ta vrstica napredka ni implementirana."
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_slot__was_copied
+#, fuzzy
 msgid "This Shift Was Copied From Previous Week"
-msgstr ""
+msgstr "Ta izmena je bila kopirana iz prejšnjega tedna"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
@@ -2416,61 +2971,79 @@ msgstr "Ta teden"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_ask_recurrence_update/planning_ask_recurrence_update_dialog.js:0
 #: model:ir.model.fields.selection,name:planning.selection__planning_slot__recurrence_update__subsequent
+#, fuzzy
 msgid "This and following shifts"
-msgstr ""
+msgstr "Ta in naslednje izmene"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_preview_view_form
+#, fuzzy
 msgid "This employee has no published shifts scheduled for this period."
-msgstr ""
+msgstr "Ta zaposleni v tem obdobju nima objavljenih načrtovanih izmen."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid ""
 "This employee is not expected to work during this period, either because "
 "they do not have a current contract or because they are on leave."
 msgstr ""
+"Od tega zaposlenega se v tem obdobju ne pričakuje dela, bodisi zato, ker "
+"nima veljavne pogodbe, bodisi zato, ker je na dopustu."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "This method must take two slots in argument."
-msgstr ""
+msgstr "Ta metoda mora kot argument sprejeti dva termina."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
+#, fuzzy
 msgid ""
 "This open shift is no longer available, or the planning has been updated in "
 "the meantime. Please contact your manager for further information."
 msgstr ""
+"Ta odprta izmena ni več na voljo ali pa je bil načrt medtem posodobljen. Za "
+"več informacij se obrnite na svojega vodjo."
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_calendar/planning_ask_recurrence_update/planning_ask_recurrence_update_dialog.js:0
 #: model:ir.model.fields.selection,name:planning.selection__planning_slot__recurrence_update__this
+#, fuzzy
 msgid "This shift"
-msgstr ""
+msgstr "Ta izmena"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/components/address_recurrency_confirmation_dialog/address_recurrency_confirmation_dialog.xml:0
+#, fuzzy
 msgid "This shift is recurrent. Delete:"
-msgstr ""
+msgstr "Ta izmena se ponavlja. Izbriši:"
 
 #. module: planning
 #: model:digest.tip,name:planning.digest_tip_planning_0
+#, fuzzy
 msgid "Tip: Record your planning faster"
-msgstr ""
+msgstr "Namig: Hitreje beležite svoje načrtovanje"
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_planning_slot__repeat
+#, fuzzy
 msgid ""
 "To avoid polluting your database and performance issues, shifts are only "
 "created for the next 6 months. They are then gradually created as time "
 "passes by in order to always get shifts 6 months ahead. This value can be "
 "modified from the settings of Planning, in debug mode."
 msgstr ""
+"Da bi se izognili onesnaženju vaše podatkovne zbirke in težavam z "
+"zmogljivostjo, se izmene ustvarijo le za naslednjih 6 mesecev. Nato se "
+"postopoma ustvarjajo, ko čas mineva, tako da so vedno na voljo izmene za 6 "
+"mesecev vnaprej. To vrednost lahko spremenite v nastavitvah Načrtovanja v "
+"načinu za odpravljanje napak."
 
 #. module: planning
 #. odoo-javascript
@@ -2488,22 +3061,28 @@ msgstr "Tip"
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid ""
 "Uh-oh! Let's keep things in the right order: the recurrence end date should "
 "always come after the shift start date. It's like trying to eat your "
 "breakfast before waking up - not possible!"
 msgstr ""
+"Ojoj! Ohranimo stvari v pravem vrstnem redu: končni datum ponavljanja mora "
+"biti vedno za začetnim datumom izmene. To je tako, kot bi poskušali "
+"zajtrkovati, preden se zbudimo – nemogoče!"
 
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__res_company__planning_employee_unavailabilities__unassign
+#, fuzzy
 msgid "Unassign themselves from shifts"
-msgstr ""
+msgstr "Sami se odjavijo iz izmen"
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "Undefined %(group)s"
-msgstr ""
+msgstr "Nedoločena %(group)s"
 
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__planning_recurrency__repeat_type__until
@@ -2513,8 +3092,9 @@ msgstr "Do"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.unwanted_slots_list_template
+#, fuzzy
 msgid "Unwanted Shifts Available"
-msgstr ""
+msgstr "Na voljo so neželene izmene"
 
 #. module: planning
 #: model:ir.model.fields,help:planning.field_planning_recurrency__repeat_until
@@ -2543,8 +3123,9 @@ msgstr "Teden"
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "Week from %(start_date)s to %(end_date)s"
-msgstr ""
+msgstr "Teden od%(start_date)s do %(end_date)s"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_recurrency__repeat_type
@@ -2565,18 +3146,24 @@ msgstr "Lokacija delovnega mesta"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_slot_template_view_form
+#, fuzzy
 msgid "Working Days"
-msgstr ""
+msgstr "Delovni dnevi"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/tours/planning.js:0
+#, fuzzy
 msgid ""
 "Write the <b>role</b> your employee will perform (<i>e.g. Chef, Bartender, "
 "Waiter, etc.</i>). <i>Tip: Create open shifts for the roles you will be "
 "needing to complete a mission. Then, assign those open shifts to the "
 "resources that are available.</i>"
 msgstr ""
+"Vpišite <b>vlogo</b>, ki jo bo opravljal vaš zaposleni (<i>npr. kuhar, "
+"natakar, strežnik itd.</i>). <i>Namig: Ustvarite odprte izmene za vloge, ki "
+"jih boste potrebovali za izvedbo naloge. Nato te odprte izmene dodelite "
+"razpoložljivim virom.</i>"
 
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__planning_recurrency__repeat_unit__year
@@ -2587,8 +3174,9 @@ msgstr "Leta"
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "You are not allowed to reset shifts to draft."
-msgstr ""
+msgstr "Izmen ni dovoljeno ponastaviti na osnutek."
 
 #. module: planning
 #. odoo-python
@@ -2605,81 +3193,98 @@ msgstr "Ne morete izpisati drugega zaposlenega kot sebe."
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "You cannot assign yourself to a shift belonging to another company."
-msgstr ""
+msgstr "Ne morete se sami razporediti v izmeno, ki pripada drugemu podjetju."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "You cannot assign yourself to a shift in the past."
-msgstr ""
+msgstr "Ne morete se sami razporediti v preteklo izmeno."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "You cannot cancel a request to switch made by another user."
 msgstr ""
+"Zahteve za zamenjavo, ki jo je poslal drug uporabnik, ne morete preklicati."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "You cannot cancel a request to switch that is in the past."
-msgstr ""
+msgstr "Zahteve za zamenjavo za preteklo obdobje ne morete preklicati."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "You cannot request to switch a shift that is assigned to another user."
 msgstr ""
+"Ne morete zahtevati zamenjave izmene, ki je dodeljena drugemu uporabniku."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "You cannot switch a shift that is in the past."
-msgstr ""
+msgstr "Izmene, ki je v preteklosti, ne morete preklopiti."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "You cannot unassign yourself from a shift in the past."
-msgstr ""
+msgstr "Ne morete se sami odjaviti iz pretekle izmene."
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/planning_calendar_front.js:0
+#, fuzzy
 msgid "You don't have any shifts planned yet."
-msgstr ""
+msgstr "Zaenkrat nimate načrtovanih nobenih izmen."
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/js/planning_calendar_front.js:0
+#, fuzzy
 msgid ""
 "You don't have any shifts planned yet. You can assign yourself some of the "
 "available open shifts."
 msgstr ""
+"Še nimate načrtovanih izmen. Dodelite si lahko nekaj razpoložljivih odprtih "
+"izmen."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "You don't have the right to assign yourself to shifts."
-msgstr ""
+msgstr "Nimate pravice, da se sami razporedite na izmene."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "You don't have the right to cancel a request to switch."
-msgstr ""
+msgstr "Nimate pravice preklicati zahteve za zamenjavo."
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/planning_slot.py:0
+#, fuzzy
 msgid "You don't have the right to switch shifts."
-msgstr ""
+msgstr "Nimate pravice zamenjati izmen."
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.slot_unassign
+#, fuzzy
 msgid "You have been successfully unassigned from this shift"
-msgstr ""
+msgstr "Uspešno ste bili odjavljeni iz te izmene"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.slot_unassign
@@ -2688,23 +3293,30 @@ msgstr "Vaše načrtovanje"
 
 #. module: planning
 #: model:mail.template,subject:planning.email_template_planning_planning
+#, fuzzy
 msgid ""
 "Your planning from {{ format_date(ctx.get('start_datetime')) }} to "
 "{{ format_date(ctx.get('end_datetime')) }}"
 msgstr ""
+"Vaše načrtovanje od {{ format_date(ctx.get('start_datetime')) }} do {{ "
+"format_date(ctx.get('end_datetime')) }}"
 
 #. module: planning
 #: model:mail.template,subject:planning.email_template_shift_switch_email
+#, fuzzy
 msgid ""
 "Your shift on {{ ctx.get('start_datetime') }} was re-assigned to "
 "{{ ctx.get('new_assignee_name', 'Marc Demo') }}"
 msgstr ""
+"Vaša izmena dne {{ ctx.get('start_datetime') }} je bila ponovno dodeljena "
+"uporabniku {{ ctx.get('new_assignee_name', 'Marc Demo') }}"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/components/address_recurrency_confirmation_dialog/address_recurrency_confirmation_dialog.xml:0
+#, fuzzy
 msgid "all shifts"
-msgstr ""
+msgstr "Vse izmene"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
@@ -2713,26 +3325,30 @@ msgstr "zapri"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.res_config_settings_view_form
+#, fuzzy
 msgid "days before the beginning of the shift"
-msgstr ""
+msgstr "dni pred začetkom izmene"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_view_form_inherit
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_form
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_tree
+#, fuzzy
 msgid "e.g. Bartender"
-msgstr ""
+msgstr "npr. Natakar"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_role_view_tree
+#, fuzzy
 msgid "e.g. Cleaner"
-msgstr ""
+msgstr "npr. Čistilec"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.resource_resource_form_view_inherit
 #: model_terms:ir.ui.view,arch_db:planning.resource_resource_tree_view_inherit
+#, fuzzy
 msgid "e.g. Crane"
-msgstr ""
+msgstr "npr. žerjav"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.hr_employee_view_form_simplified
@@ -2741,32 +3357,42 @@ msgid "e.g. John Doe"
 msgstr "npr. Janez Novak"
 
 #. module: planning
+#: model_terms:ir.ui.view,arch_db:planning.planning_view_kanban
+#, fuzzy
+msgid "h"
+msgstr "h"
+
+#. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_kanban_inherit
 msgid "other shift(s) in conflict."
 msgstr "druge izmene v konfliktu"
 
 #. module: planning
 #: model:ir.model,name:planning.model_planning_calendar_resource
+#, fuzzy
 msgid "planning calendar resource"
-msgstr ""
+msgstr "Vir koledarja načrtovanja"
 
 #. module: planning
 #. odoo-python
 #: code:addons/planning/models/hr.py:0
+#, fuzzy
 msgid "resource_id"
-msgstr ""
+msgstr "ID vira"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/components/address_recurrency_confirmation_dialog/address_recurrency_confirmation_dialog.xml:0
+#, fuzzy
 msgid "this and following shifts"
-msgstr ""
+msgstr "ta in naslednje izmene"
 
 #. module: planning
 #. odoo-javascript
 #: code:addons/planning/static/src/components/address_recurrency_confirmation_dialog/address_recurrency_confirmation_dialog.xml:0
+#, fuzzy
 msgid "this shift"
-msgstr ""
+msgstr "ta izmena"
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.period_report_template
@@ -2775,5 +3401,6 @@ msgstr "do"
 
 #. module: planning
 #: model:mail.template,subject:planning.email_template_slot_single
+#, fuzzy
 msgid "{{ ctx.get('mail_subject', '') }} {{ ctx.get('start_datetime' , '') }}"
-msgstr ""
+msgstr "{{ ctx.get('mail_subject', '') }} {{ ctx.get('start_datetime' , '') }}"

@@ -22,6 +22,7 @@ class HrWorkEntryContractTest(HttpCase, TransactionCase):
                     'base_off': 'quantity',
                     'expected_hours_from_contract': True,
                     'quantity_period': 'day',
+                    'paid': True,
                 })],
         })
         cls.employee = cls.env['hr.employee'].create({
@@ -81,3 +82,60 @@ class HrWorkEntryContractTest(HttpCase, TransactionCase):
 
         # should not generate the work entry becuase the work entry for that woking day is already generated
         self.assertFalse(another_work_entry)
+
+    def test_attendance_creation_work_entry_by_planning(self):
+        # Ensure that attendance is created correctly when the work entry source
+        # is 'planning', even if there are other published planning slots
+        # for material type resources during the same period.
+        material_resource = self.env['resource.resource'].create({
+            'name': 'Test non human resource',
+            'resource_type': 'material',
+        })
+        self.env['planning.slot'].create({
+            'resource_id': material_resource.id,
+            'state': 'published',
+            'start_datetime': datetime(2024, 7, 15, 0, 0),
+            'end_datetime': datetime(2024, 7, 17, 23, 59, 59, 999999),
+        })
+        self.env['hr.attendance'].create({
+            'employee_id': self.employee.id,
+            'check_in': datetime(2024, 7, 16, 8, 0, 0),
+            'check_out': datetime(2024, 7, 16, 18, 0, 0),
+        })
+
+    def test_weekly_overtime_flexible_resource_public_holiday_work_entry_attendance(self):
+        self.ruleset.rule_ids.write({
+            'expected_hours_from_contract': True,
+            'quantity_period': 'week',
+        })
+
+        calendar_flex_40h = self.env['resource.calendar'].create({
+            'name': 'Flexible 40 hours/week',
+            'company_id': self.env.company.id,
+            'hours_per_day': 8,
+            'hours_per_week': 40,
+            'flexible_hours': True,
+            'full_time_required_hours': 40,
+        })
+
+        self.employee.resource_calendar_id = calendar_flex_40h
+        self.employee.version_id.work_entry_source = 'attendance'
+
+        self.env['resource.calendar.leaves'].create({
+            'name': 'Public Holiday',
+            'calendar_id': calendar_flex_40h.id,
+            'date_from': datetime(2026, 6, 25, 0, 0),
+            'date_to': datetime(2026, 6, 25, 23, 59, 59),
+            'company_id': self.env.company.id,
+        })
+
+        attendances = self.env['hr.attendance'].create([
+            {'employee_id': self.employee.id, 'check_in': datetime(2026, 6, 22, 0, 0), 'check_out': datetime(2026, 6, 22, 8, 0)},
+            {'employee_id': self.employee.id, 'check_in': datetime(2026, 6, 23, 0, 0), 'check_out': datetime(2026, 6, 23, 8, 0)},
+            {'employee_id': self.employee.id, 'check_in': datetime(2026, 6, 24, 0, 0), 'check_out': datetime(2026, 6, 24, 8, 0)},
+            {'employee_id': self.employee.id, 'check_in': datetime(2026, 6, 25, 0, 0), 'check_out': datetime(2026, 6, 25, 8, 0)},
+            {'employee_id': self.employee.id, 'check_in': datetime(2026, 6, 26, 0, 0), 'check_out': datetime(2026, 6, 26, 8, 0)}
+        ])
+
+        self.assertEqual(sum(attendances.mapped('worked_hours')), 40)
+        self.assertEqual(sum(attendances.mapped('overtime_hours')), 8)

@@ -46,6 +46,7 @@
                         'dynamic_placeholder_model_reference_field': 'mailing_model_real',
                         'filterTemplates': true,
                     }"/>
+                    <field name="body_html" invisible="1" required="body_arch"/>
                     <field name="is_body_empty" invisible="1"/>
                 </page>
             </xpath>
@@ -73,6 +74,21 @@
             </xpath>
             <xpath expr="//field[@name='use_exclusion_list']" position="attributes">
                 <attribute name="invisible">(use_in_marketing_automation or not mail_server_id) and use_exclusion_list</attribute>
+            </xpath>
+            <xpath expr="//field[@name='email_from']" position="attributes">
+                <attribute name="readonly" add="not use_in_marketing_automation" separator="and"/>
+            </xpath>
+            <xpath expr="//field[@name='reply_to']" position="attributes">
+                <attribute name="readonly" add="not use_in_marketing_automation" separator="and"/>
+            </xpath>
+            <xpath expr="//field[@name='attachment_ids']" position="attributes">
+                <attribute name="readonly" add="not use_in_marketing_automation" separator="and"/>
+            </xpath>
+            <xpath expr="//button[@name='action_retry_failed']" position="before">
+                <field name="use_in_marketing_automation" invisible="1"/>
+            </xpath>
+            <xpath expr="//button[@name='action_retry_failed']" position="attributes">
+                <attribute name="invisible" add="use_in_marketing_automation" separator=" or "/>
             </xpath>
         </field>
     </record>

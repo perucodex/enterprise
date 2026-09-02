@@ -58,7 +58,7 @@ class SaleOrderLine(models.Model):
             group_by = self.env.context.get('group_by', [])
 
             if 'partner_id' not in group_by:
-                descriptions.append(sol.order_partner_id.name)
+                descriptions.append(sol.order_partner_id.display_name)
             if 'product_id' not in group_by:
                 descriptions.append(sol.product_id.name)
             descriptions.append(sol.order_id.name)
@@ -177,8 +177,7 @@ class SaleOrderLine(models.Model):
                 ('rent_ok', '=', True),
                 ('type', '!=', 'combo'),
             ]),
-            # The rental schedule gantt view already has a hard limit of 20 groups max.
-            limit=21 - len(products),
+            limit=80 - len(products),
         )
         # While `_web_read_group_expand` already includes `products` in the expanded set, it
         # exhibits an unusual behavior of adding the expanded groups first, even though they are

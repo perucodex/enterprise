@@ -77,27 +77,22 @@
 
 
     <template id="portal_withholding_page" inherit_id="account.portal_invoice_page" name="Withholding">
-        <xpath expr="//div[@name='invoice_paid_badge']" position="after">
+        <xpath expr="//t[@t-call='portal.portal_record_sidebar']//h2[1]" position="after">
             <t t-if="page_name == 'withholding'">
                 <span t-if="invoice.state == 'posted'"
-                    class="badge rounded-pill text-bg-success">
+                    class="o_l10n_ec_withhold_status badge rounded-pill text-bg-success">
                     <i class="fa fa-fw fa-check" aria-label="Posted" title="Posted" role="img"/>
                     <span class="d-none d-md-inline"> Posted</span>
                 </span>
-                <span t-elif="invoice.state == 'draft'" class="badge rounded-pill text-bg-info" name="draft">
+                <span t-elif="invoice.state == 'draft'" class="o_l10n_ec_withhold_status badge rounded-pill text-bg-info" name="draft">
                     <i class="fa fa-fw fa-clock-o" aria-label="Draft" title="Draft" role="img"/>
                     <span class="d-none d-md-inline"> Draft</span>
                 </span>
-                <span t-else="" class="badge rounded-pill text-bg-danger">
+                <span t-else="" class="o_l10n_ec_withhold_status badge rounded-pill text-bg-danger">
                     <i class="fa fa-fw fa-remove" aria-label="Cancelled" title="Cancelled" role="img"/>
                     <span class="d-none d-md-inline"> Cancelled</span>
                 </span>
             </t>
         </xpath>
-
-        <xpath expr="//div[@name='invoice_paid_badge']" position="attributes">
-            <attribute name="t-attf-class" separator=" " add="rounded text-bg-success fw-normal badge {{ 'd-none' if page_name == 'withholding' else '' }}"/>
-        </xpath>
-
     </template>
 </odoo>

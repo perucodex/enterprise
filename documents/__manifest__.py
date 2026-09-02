@@ -58,6 +58,9 @@ App to upload and manage your documents.
     ],
     'author': 'Odoo S.A.',
     'license': 'OEEL-1',
+    'kpi_providers': [
+        'models.kpi_provider:get_kpi_summary',
+    ],
     'assets': {
         'web.assets_backend': [
             'documents/static/src/scss/documents_views.scss',
@@ -65,8 +68,11 @@ App to upload and manage your documents.
             'documents/static/src/attachments/**/*',
             'documents/static/src/core/**/*',
             'documents/static/src/js/**/*',
+            'documents/static/src/mail/**/*',
             'documents/static/src/owl/**/*',
+            'documents/static/src/utils.js',
             'documents/static/src/views/**/*',
+            'documents/static/src/webclient/webclient.js',
             ('remove', 'documents/static/src/views/activity/**'),
             ('after', 'web/static/src/core/errors/error_dialogs.xml', 'documents/static/src/web/error_dialog/error_dialog_patch.xml'),
             'documents/static/src/web/**/*',

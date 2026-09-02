@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import datetime
+from dateutil.relativedelta import relativedelta
 from unittest.mock import patch
+
+from odoo.fields import Date
 
 from odoo.addons.documents.tests.test_documents_multipage import single_page_pdf
 from odoo.addons.documents_hr.tests.test_documents_hr_common import TransactionCaseDocumentsHr
@@ -143,7 +147,7 @@ class TestCaseDocumentsBridgeHR(TestPayslipBase, TransactionCaseDocumentsHr):
         self.check_document_no_access(document, self.payroll_manager)
 
     def test_payslip_document_creation_with_no_partner(self):
-        """Check that the payslip document is created when the employee has no partner."""
+        """Check that no document is created when the employee has no partner."""
         # Ensure the employee has no partner
         self.richard_emp.user_id = False
         self.richard_emp.user_id.partner_id = False
@@ -151,11 +155,67 @@ class TestCaseDocumentsBridgeHR(TestPayslipBase, TransactionCaseDocumentsHr):
 
         payslip = self.payslip
         payslip.compute_sheet()
+        # Single payslip with on_confirmed trigger: PDF is generated directly, not queued.
         payslip.with_context(payslip_generate_pdf=True).action_payslip_done()
-        self.assertTrue(payslip.queued_for_pdf, "Payslip should be queued for PDF generation when not generating directly.")
-
-        payslip.browse()._cron_generate_pdf()
 
         # Check if the document is created
         document = self.env['documents.document'].search([('res_model', '=', payslip._name), ('res_id', '=', payslip.id)])
         self.assertFalse(document, "A document will not be created if the employee has no partner.")
+
+    def test_payslip_document_creation_with_several_payslips(self):
+        """Check that the payslip documents are created when the cron is run on several payslips."""
+        contract_jul = self.jules_emp.create_version({
+            'date_version': Date.to_date('2018-01-01'),
+            'contract_date_start': Date.to_date('2018-01-01'),
+            'contract_date_end': Date.today() + relativedelta(years=2),
+            'date_end': Date.today() + relativedelta(years=2),
+            'name': 'Contract for Jules',
+            'wage': 5000.33,
+            'structure_type_id': self.structure_type.id,
+        })
+
+        payslip_jul = self.env['hr.payslip'].create({
+            'name': 'Payslip of Jules',
+            'employee_id': self.jules_emp.id,
+            'version_id': contract_jul.id,
+        })
+        payslip_ric = self.payslip
+        payslips = payslip_jul + payslip_ric
+
+        payslips.compute_sheet()
+        payslips.with_context(payslip_generate_pdf=True).action_payslip_done()
+        self.assertTrue(payslip_jul.queued_for_pdf)
+        self.assertTrue(payslip_ric.queued_for_pdf)
+
+        self.env['hr.payslip']._cron_generate_pdf()
+
+        # Check if the documents are created
+        documents = self.env['documents.document'].search([('res_model', '=', payslips._name), ('res_id', 'in', payslips.ids)])
+        self.assertEqual(len(documents), 2)
+
+    def test_payslip_document_unlink_delete_document(self):
+        payslip_run = self.env['hr.payslip.run'].create({
+            'date_start': datetime.date.today() + relativedelta(years=-1, month=8, day=1),
+            'date_end': datetime.date.today() + relativedelta(years=-1, month=8, day=31),
+            'name': 'Payment Test'
+        })
+
+        payslip_run.generate_payslips(employee_ids=[self.richard_emp.id])
+        payslip_run.with_context(payslip_generate_pdf=True).action_validate()
+
+        self.env['hr.payslip']._cron_generate_pdf()
+
+        payslip = payslip_run.slip_ids[0]
+
+        # Check if the document are created
+        documents = self.env['documents.document'].search([('res_model', '=', payslip._name), ('res_id', 'in', payslip.ids)])
+        self.assertEqual(len(documents), 1)
+
+        payslip_ids = payslip.ids
+
+        payslip.action_payslip_draft()
+        payslip_run.action_draft()
+        payslip_run.unlink()
+
+        documents = self.env['documents.document'].search([('res_model', '=', 'hr.payslip'), ('res_id', 'in', payslip_ids)])
+        self.assertEqual(len(documents), 0)

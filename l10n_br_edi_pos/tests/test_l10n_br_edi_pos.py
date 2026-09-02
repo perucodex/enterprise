@@ -2,6 +2,7 @@
 import re
 from unittest.mock import patch
 
+from odoo.tools import SQL
 from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCommon
 from odoo.addons.l10n_br_avatax.tests.test_br_avatax import TestBRMockedRequests
 from odoo.addons.l10n_br_edi.tests.test_l10n_br_edi import TestL10nBREDICommon
@@ -384,6 +385,35 @@ class TestL10nBREDIPOS(TestL10nBREDIPOSCommon, CommonPosBrEdiTest):
         })
         order_2.write({'state': 'paid'})
         self.assertEqual(order_2.name, 'PoS Config USD - 6')
+
+    @freeze_time(TEST_DATETIME)
+    def test_10_refund_with_reference(self):
+        """
+        Tests that the refund has an invoice_refs, which is required to make a refund
+        """
+        refund_move = self.env['account.move'].create({
+            'move_type': 'out_refund',
+            'company_id': self.env.company.id,
+        })
+        res = refund_move._get_l10n_br_avatax_service_params()
+        self.assertTrue(res['invoice_refs'])
+
+    def test_find_tax_for_avatax_code_is_a_sale_tax(self):
+        purchase_tax = self.env["account.tax"].with_context(active_test=False).search([
+            ("l10n_br_avatax_code", "=", "icms"),
+            ("price_include_override", "=", "tax_included"),
+            ("company_id", "=", self.company.id),
+            ("type_tax_use", "=", "purchase"),
+        ], limit=1)
+        # The error was undeterministic since it depended on the order of creation of the taxes.
+        # Hack below reproduce the breaking case.
+        self.env.cr.execute(SQL(
+            "UPDATE account_tax SET create_date = create_date + interval '1 second' WHERE id = %s",
+            purchase_tax.id,
+        ))
+        order = self.env["pos.order"].new({"company_id": self.company.id})
+        tax = order._l10n_br_find_tax_for_l10n_br_avatax_code("icms")
+        self.assertEqual(tax.type_tax_use, "sale")
 
 
 @freeze_time(TEST_DATETIME)

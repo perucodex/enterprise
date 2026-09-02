@@ -24,16 +24,19 @@ from odoo.tools.misc import mute_logger, submap
 
 from odoo.addons.ai.utils.ai_citation import apply_numeric_citations, get_attachment_ids_from_text
 from odoo.addons.ai.utils.llm_api_service import LLMApiService
-from odoo.addons.ai.utils.llm_providers import PROVIDERS, check_model_depreciation, get_provider
+from odoo.addons.ai.utils.llm_providers import (
+    PROVIDERS,
+    TEMPERATURE_MAP as TEMP_MAP,
+    get_provider,
+    get_deprecated_model_replacement_label
+)
 
 _logger = logging.getLogger(__name__)
 
 
-TEMPERATURE_MAP = {
-    'analytical': 0.2,
-    'balanced': 0.5,
-    'creative': 0.8,
-}
+# TEMPERATURE_MAP is moved to llm_providers so that it can be used inside llm_providers.py without a circular dependency
+# on ai_agent. However, it is redefined here so as not to break customizations that import it from ai_agent.
+TEMPERATURE_MAP = TEMP_MAP
 
 # Pre-prompts are put in a dictionary so that they can easily be overridden
 PREPROMPTS = {
@@ -279,6 +282,7 @@ class AIAgent(models.Model):
         string="Response Style",
         default='balanced',
         required=True,
+        help="For thinking models (e.g. gpt-5): Analytical: Medium thinking, Balanced: Low thinking, Creative: Minimal thinking",
     )
 
     llm_model = fields.Selection(
@@ -287,6 +291,9 @@ class AIAgent(models.Model):
         default='gpt-4o',
         required=True,
     )
+
+    deprecated_model_replacement_hint = fields.Text(compute='_compute_deprecated_model_replacement_hint')
+
     restrict_to_sources = fields.Boolean(
         string="Restrict to Sources",
         help="If checked, the agent will only respond based on the provided sources.")
@@ -313,12 +320,22 @@ class AIAgent(models.Model):
         search='_search_is_ask_ai_agent'
     )
 
+    @api.depends('llm_model', 'response_style')
+    def _compute_deprecated_model_replacement_hint(self):
+        for agent in self:
+            if replacement_model_label := get_deprecated_model_replacement_label(agent.llm_model, agent.response_style):
+                agent.deprecated_model_replacement_hint = _(
+                    "Using %(llm_model_label)s based on your agent setup.",
+                    llm_model_label=replacement_model_label,
+                )
+            else:
+                agent.deprecated_model_replacement_hint = False
+
     @api.model_create_multi
     def create(self, vals_list):
         with file_open('ai/static/description/icon.png', 'rb') as f:
             image_placeholder = f.read()
         for vals in vals_list:
-            check_model_depreciation(self.env, vals.get("llm_model"))
             partner = self.env['res.partner'].create({
                 'name': vals.get('name'),
                 'active': False,
@@ -336,8 +353,6 @@ class AIAgent(models.Model):
 
         old_providers = {agent.id: agent._get_provider() for agent in self}
 
-        llm_model = vals.get("llm_model")
-        check_model_depreciation(self.env, llm_model)
         result = super().write(vals)
         for agent in self:
             new_provider = agent._get_provider()
@@ -383,14 +398,8 @@ class AIAgent(models.Model):
     def action_refresh_sources(self):
         """
         Refresh the sources to show the new status if any was changed by the cron.
-        Run the cron if there are sources to process.
         """
         self.ensure_one()
-        cron = self.env.ref('ai.ir_cron_generate_embedding')
-        unprocessed_sources = self.sources_ids.filtered(lambda s: s.status == 'processing')
-        if unprocessed_sources:
-            cron._trigger()
-
         return {
             'type': 'ir.actions.client',
             'tag': 'soft_reload',
@@ -538,7 +547,7 @@ class AIAgent(models.Model):
             system_messages,
             [],
             inputs=(chat_history or []) + [{'role': 'user', 'content': prompt}],
-            tools=self.topic_ids.tool_ids._get_ai_tools(),
+            tools=self.sudo().topic_ids.tool_ids._get_ai_tools(),  # sudo => internal users without admin access should be able to access tools
             temperature=TEMPERATURE_MAP[self.response_style],
         )
         if rag_context:
@@ -633,8 +642,9 @@ class AIAgent(models.Model):
         if self.sources_ids:
             provider = self._get_provider()
             embedding_model = self._get_embedding_model()
-            response = LLMApiService(env=self.env, provider=provider).get_embedding(
-                input=prompt,
+            llm_service = LLMApiService(env=self.env, provider=provider)
+            response = llm_service.get_embedding(
+                input=llm_service._format_for_embedding(content=prompt, mode="query"),
                 dimensions=self.env['ai.embedding']._get_dimensions(),
                 model=embedding_model
             )
@@ -684,6 +694,12 @@ class AIAgent(models.Model):
         root = lxml.html.fromstring(rendered_html)
 
         prompt_containers = root.xpath("//div[hasclass('o_editor_prompt')]")
+
+        root_is_prompt = root in prompt_containers
+
+        if root_is_prompt:
+            root = lxml.html.fromstring(f'<div>{rendered_html}</div>')
+            prompt_containers = root.xpath("//div[hasclass('o_editor_prompt')]")
 
         if not prompt_containers:
             return Wrapper(rendered_html)

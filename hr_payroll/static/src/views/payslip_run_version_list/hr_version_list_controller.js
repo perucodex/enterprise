@@ -19,6 +19,10 @@ export class VersionPayrunListController extends ListController {
     }
 
     async onClose() {
+        if (this.createdPayrunId) {
+            await this.orm.call("hr.payslip.run", "unlink", [[this.createdPayrunId]]);
+            this.createdPayrunId = null;
+        }
         return this.actionService.doAction({type: "ir.actions.act_window_close"});
     }
 
@@ -36,11 +40,11 @@ export class VersionPayrunListController extends ListController {
         this.state.disabled = true;
         const selectedVersions = await this.model.root.getResIds(true);
         if (selectedVersions.length < 1) return;
-        let ids = [this.props.context.active_id];
-        if (this.props.context.raw_record) {
+        if (this.props.context.raw_record && !this.createdPayrunId) {
             const rawRecord = this.buildRawRecord(this.props.context.raw_record);
-            ids = await this.orm.create("hr.payslip.run", [rawRecord]);
+            this.createdPayrunId = (await this.orm.create("hr.payslip.run", [rawRecord]))[0];
         }
+        const ids = this.createdPayrunId ? [this.createdPayrunId] : [this.props.context.active_id];
         try {
             await this.orm.call(
                 "hr.payslip.run",
@@ -52,8 +56,15 @@ export class VersionPayrunListController extends ListController {
             if (this.props.context.raw_record) {
                 await this.openPayslips(ids);
             }
+            this.createdPayrunId = null;
             await this.onClose();
             await this.onReload();
+        } catch (err) {
+            if (this.createdPayrunId) {
+                await this.orm.call("hr.payslip.run", "unlink", [[this.createdPayrunId]]);
+                this.createdPayrunId = null;
+            }
+            throw err;
         } finally {
             this.state.disabled = false;
         }

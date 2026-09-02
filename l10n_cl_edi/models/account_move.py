@@ -126,10 +126,15 @@ services reception has been received as well.
         ('RFP', 'Claim for Partial Lack of Merchandise'),
         ('RFT', 'Claim for Total Lack of Merchandise'),
         ('NCA', 'Reception of Cancellation that References Document'),
+        ('ENC', 'Reception of Credit note different to Cancellation'),
+        ('PAG', 'DTE Paid with Cash'),
+        ('ERG', 'Merchandise and Service Receipt Acknowledge in Delivery Guide Previous Month'),
+        ('ERI', 'Merchandise and Service Receipt Acknowledge Printed in Previous Month'),
+        ('CED', 'Yielded DTE'),
     ], string='Claim', copy=False, help='The reason why the DTE was accepted or claimed by the customer')
     l10n_cl_claim_description = fields.Char(string='Claim Detail', readonly=True, copy=False)
-    l10n_cl_sii_send_file = fields.Many2one('ir.attachment', string='SII Send file', copy=False, groups='base.group_system')
-    l10n_cl_dte_file = fields.Many2one('ir.attachment', string='DTE file', copy=False, groups='base.group_system')
+    l10n_cl_sii_send_file = fields.Many2one('ir.attachment', string='SII Send file', copy=False, groups='base.group_system', index='btree_not_null')
+    l10n_cl_dte_file = fields.Many2one('ir.attachment', string='DTE file', copy=False, groups='base.group_system', index='btree_not_null')
     l10n_cl_sii_send_ident = fields.Text(string='SII Send Identification(Track ID)', copy=False, tracking=True)
     l10n_cl_journal_point_of_sale_type = fields.Selection(related='journal_id.l10n_cl_point_of_sale_type')
     l10n_cl_reference_ids = fields.One2many('l10n_cl.edi.reference', 'move_id', string='Reference Records')
@@ -671,7 +676,8 @@ services reception has been received as well.
                 ('status', '=', 'in_use'), ('company_id', '=', self.company_id.id)], limit=1)
                 if not available_caf:
                     start_nb = self.l10n_latam_document_type_id._get_start_number()
-                    res = f"{self.l10n_latam_document_type_id.doc_code_prefix} {start_nb - 1:06d}"
+                    if start_nb:
+                        res = f"{self.l10n_latam_document_type_id.doc_code_prefix} {start_nb - 1:06d}"
         return res
 
     def _l10n_cl_create_dte(self):
@@ -788,6 +794,9 @@ services reception has been received as well.
             raise UserError(_(
                 'There are no activity codes configured in your company. This is mandatory for electronic '
                 'invoicing. Please go to your company and set the correct activity codes (www.sii.cl - Mi SII)'))
+        if len(self.company_id.l10n_cl_company_activity_ids) > 4:
+            raise UserError(self.env._(
+                'The maximum amount of Activities Names is 4. Please go to your company and select only 4 or less options.'))
         if not self.company_id.l10n_cl_sii_regional_office:
             raise UserError(_(
                 'There is no SII Regional Office configured in your company. This is mandatory for electronic '
@@ -992,7 +1001,7 @@ services reception has been received as well.
 
     def _l10n_cl_ask_claim_status(self):
         for move in self.search([('l10n_cl_dte_acceptation_status', 'in', ['accepted', 'claimed']),
-                                 ('move_type', 'in', ['out_invoice', 'out_refund']),
+                                 ('move_type', '=', 'out_invoice'),
                                  ('l10n_cl_claim', '=', False)]):
             if move.company_id.l10n_cl_dte_service_provider in ['SIITEST', 'SIIDEMO']:
                 continue
@@ -1047,7 +1056,7 @@ services reception has been received as well.
         if file_data['import_file_type'] != 'l10n_cl.dte':
             return super()._unwrap_attachment(file_data, recurse)
 
-        embedded = self._split_xml_into_new_attachments(file_data, tag='DTE')
+        embedded = self._split_xml_into_new_attachments(file_data, tag='{*}DTE')
         if embedded and recurse:
             embedded.extend(self._unwrap_attachments(embedded, recurse=True))
         return embedded
@@ -1075,6 +1084,11 @@ services reception has been received as well.
         origin_type = self.env['fetchmail.server']._get_xml_origin_type(xml_tree)
         if origin_type == 'not_classified':
             messages.append(_('Failed to determine origin type of the attached document, attempting to process as a vendor bill'))
+
+        # The file may contain several DTEs: only the first one belongs to this vendor bill.
+        dte_nodes = xml_tree.findall('.//ns0:DTE', namespaces=XML_NAMESPACES)
+        if len(dte_nodes) > 1:
+            xml_tree = dte_nodes[0]
 
         invoice._l10n_cl_fill_partner_vals_from_xml(xml_tree, vals, messages)
         invoice._l10n_cl_fill_document_number_vals_from_xml(xml_tree, vals, messages)
@@ -1199,7 +1213,8 @@ services reception has been received as well.
         """
         gross_amount = xml_tree.findtext('.//ns0:MntBruto', namespaces=XML_NAMESPACES) is not None
         use_default_tax = xml_tree.findtext('.//ns0:TasaIVA', namespaces=XML_NAMESPACES) is not None
-        default_purchase_tax = self.company_id.account_purchase_tax_id or self.env['account.chart.template'].ref('OTAX_19')
+        default_purchase_tax = (self.company_id.account_purchase_tax_id or
+                                self.env['account.chart.template'].with_company(self.company_id).ref('OTAX_19'))
         currency = vals['currency_id']
         lines_vals_list = []
         for dte_line in xml_tree.findall('.//ns0:Detalle', namespaces=XML_NAMESPACES):

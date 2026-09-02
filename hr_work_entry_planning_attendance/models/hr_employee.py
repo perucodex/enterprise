@@ -35,6 +35,7 @@ class HrEmployee(models.Model):
         planning_slots_by_employee = dict(self.env['planning.slot'].sudo()._read_group(
             domain=Domain.AND([
                 Domain('state', '=', 'published'),
+                Domain('employee_id', 'in', self.ids),
                 Domain.OR(planning_periods)
             ]),
             groupby=["employee_id"],

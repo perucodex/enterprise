@@ -14,11 +14,13 @@ DEFAULT_ENDPOINT = "https://graph.facebook.com/v23.0"
 MAX_RESPONSE_SIZE = 10 * 1024 * 1024  # 10MB
 
 class WhatsAppApi:
-    def __init__(self, wa_account_id):
-        wa_account_id.ensure_one()
+    def __init__(self, wa_account_id, token=None):
+        """Take a token for the flows running before the account exists, such as the onboarding."""
+        if wa_account_id:
+            wa_account_id.ensure_one()
         self.wa_account_id = wa_account_id
         self.phone_uid = wa_account_id.phone_uid
-        self.token = wa_account_id.sudo().token
+        self.token = token or wa_account_id.sudo().token
         self.is_shared_account = False
 
     def _check_allow_requests(self):
@@ -29,15 +31,23 @@ class WhatsAppApi:
         if modules.module.current_test:
             raise WhatsAppError("API requests disabled in testing.")
 
+    def _check_account_configured(self):
+        """Raise when the account misses the credentials needed to reach the API.
+
+        Flows running before the account exists, such as the OAuth onboarding,
+        have nothing to configure yet and are left alone.
+        """
+        if self.wa_account_id and not all([self.token, self.phone_uid]):
+            action = self.wa_account_id.env.ref('whatsapp.whatsapp_account_action')
+            raise RedirectWarning(_("To use WhatsApp Configure it first"), action=action.id, button_text=_("Configure Whatsapp Business Account"))
+
     def __api_requests(self, request_type, url, auth_type="", params=False, headers=None, data=False, files=False, endpoint_include=False):
         self._check_allow_requests()
 
         headers = headers or {}
         params = params or {}
         wa_account_id = self.wa_account_id
-        if not all([self.token, self.phone_uid]):
-            action = wa_account_id.env.ref('whatsapp.whatsapp_account_action')
-            raise RedirectWarning(_("To use WhatsApp Configure it first"), action=action.id, button_text=_("Configure Whatsapp Business Account"))
+        self._check_account_configured()
         if auth_type == 'oauth':
             headers.update({'Authorization': f'OAuth {self.token}'})
         if auth_type == 'bearer':
@@ -93,6 +103,13 @@ class WhatsAppApi:
                 raise WhatsAppError(failure_type='network')
 
         return res
+
+    def _api_requests(self, *args, **kwargs):
+        """
+            Allow subclasses to reuse the common HTTP request implementation,
+            which they cannot call directly because of the name mangling.
+        """
+        return self.__api_requests(*args, **kwargs)
 
     def _prepare_error_response(self, response):
         """
@@ -230,6 +247,9 @@ class WhatsAppApi:
         raise WhatsAppError(*self._prepare_error_response(response_json))
 
     def _send_whatsapp(self, number, message_type, send_vals, parent_message_id=False):
+        return self._send_whatsapp_to_identifier(None, number, message_type, send_vals, parent_message_id=parent_message_id)['msg_uid']
+
+    def _send_whatsapp_to_identifier(self, bsuid, number, message_type, send_vals, parent_message_id=False):
         """ Send WA messages for all message type using WhatsApp Business Account
 
         API Documentation:
@@ -239,8 +259,11 @@ class WhatsAppApi:
         data = {
             'messaging_product': 'whatsapp',
             'recipient_type': 'individual',
-            'to': number
         }
+        if number:
+            data['to'] = number
+        else:
+            data['recipient'] = bsuid
         # if there is parent_message_id then we send message as reply
         if parent_message_id:
             data.update({
@@ -265,7 +288,8 @@ class WhatsAppApi:
         response_json = response.json()
         if response_json.get('messages'):
             msg_uid = response_json['messages'][0]['id']
-            return msg_uid
+            recipient_wa_id = response_json['contacts'][0].get('wa_id')
+            return {'msg_uid': msg_uid, 'wa_id': recipient_wa_id}
         raise WhatsAppError(*self._prepare_error_response(response_json))
 
     def _get_header_data_from_handle(self, url):

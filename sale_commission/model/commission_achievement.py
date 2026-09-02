@@ -8,8 +8,8 @@ class SaleCommissionAchievement(models.Model):
     _description = 'Manual Commission Achievement'
     _order = 'id desc'
 
-    add_user_id = fields.Many2one('sale.commission.plan.user', "Add to", domain=[('plan_id.active', '=', True)])
-    reduce_user_id = fields.Many2one('sale.commission.plan.user', "Reduce From", domain=[('plan_id.active', '=', True)])
+    add_user_id = fields.Many2one('sale.commission.plan.user', "Add to", domain=[('plan_id.active', '=', True), ('plan_id.state', '=', 'approved')])
+    reduce_user_id = fields.Many2one('sale.commission.plan.user', "Reduce From", domain=[('plan_id.active', '=', True), ('plan_id.state', '=', 'approved')])
     achieved = fields.Monetary("Achieved", currency_field='currency_id')
     company_id = fields.Many2one('res.company', string='Company', required=True, readonly=False, default=lambda self: self.env.company)
     date = fields.Date("Date", default=fields.Date.today, required=True)

@@ -105,6 +105,48 @@ class TestDocumentsAccess(TransactionCaseDocuments, MockEmail):
         self._assert_raises_check_access_rule(folder_a_as_portal)
         self._assert_raises_check_access_rule(folder_a_a_as_portal)  # logged access it to parent, now mute.
 
+    @mute_logger('odoo.addons.base.models.ir_rule')
+    def test_access_from_search_panel_token(self):
+        """Check that a shared folder (e.g. embedded view) is unlocked by its token."""
+        (self.folder_a + self.folder_a_a).write({'access_internal': 'none', 'access_via_link': 'none'})
+        self._assert_no_members(self.folder_a)
+        folder_a_as_internal = self.folder_a.with_user(self.internal_user)
+        self._assert_raises_check_access_rule(folder_a_as_internal, 'read')
+
+        def select_range(folder_id=None, access_token=None):
+            """Return the {folder name: parent} of the search panel of the folder."""
+            context = {
+                **({'documents_unique_folder_id': folder_id} if folder_id else {}),
+                **({'documents_shared_access_token': access_token} if access_token else {}),
+            }
+            values = self.env['documents.document'].with_user(self.internal_user).with_context(
+                context).search_panel_select_range('user_folder_id')['values']
+            return {vals['display_name']: vals.get('user_folder_id') for vals in values}
+
+        self.assertFalse(select_range(self.folder_a.id, self.folder_a.access_token), msg="Not shared via link")
+        self.assertEqual(folder_a_as_internal.user_permission, "none")
+
+        (self.folder_a + self.folder_a_a).access_via_link = 'view'
+        self.assertFalse(select_range(self.folder_a.id), msg="No token")
+        self.assertEqual(folder_a_as_internal.user_permission, "none")
+
+        self.assertFalse(select_range(self.folder_a.id), msg="No token")
+        self.assertEqual(folder_a_as_internal.user_permission, "none")
+
+        all_range = select_range(None, self.folder_a.access_token)
+        self.assertNotIn("folder a", all_range, msg="id not provided with token, save resources")
+        self.assertNotIn("folder a - a", all_range)
+        self.assertEqual(folder_a_as_internal.user_permission, "none")
+
+        # With both, the folder and its content are unlocked
+        expected = {'folder A': False, 'folder A - A': self.folder_a.id}
+        with RecordCapturer(self.env["documents.access"]) as capture:
+            self.assertEqual(select_range(self.folder_a.id, self.folder_a.access_token), expected)
+        self.assertEqual(self.folder_a.with_user(self.internal_user).user_permission, "view")
+        logged_access = capture.records
+        self.assertEqual(logged_access.document_id, self.folder_a)
+        self.assertFalse(logged_access.role)
+
     def test_access_rights_inherited_on_create(self):
         (self.folder_a + self.folder_b).write({
             'access_via_link': 'none',
@@ -474,12 +516,13 @@ class TestDocumentsAccess(TransactionCaseDocuments, MockEmail):
 
     @users('documents@example.com')
     def test_moving_documents(self):
-        """Check that documents can be moved to a new location and have their rights updated."""
+        """Check that documents can be moved to a new location and have their rights updated except discoverability."""
         self.folder_b.write({
             'access_internal': 'none',
             'access_via_link': 'none',
+            'is_access_via_link_hidden': True,
         })
-        self.folder_a.write({'access_via_link': 'view'})
+        self.folder_a.write({'access_via_link': 'view', 'is_access_via_link_hidden': False})
         self.folder_a_a.folder_id = self.folder_b.id
         self.assertEqual(self.folder_a_a.folder_id, self.folder_b)
 
@@ -488,6 +531,7 @@ class TestDocumentsAccess(TransactionCaseDocuments, MockEmail):
         self.assertEqual(self.folder_b.folder_id, self.folder_a)
         self.assertEqual(self.folder_b.access_internal, 'view', 'Internal access should have been updated.')
         self.assertEqual(self.folder_b.access_via_link, 'view', 'link access should have been updated.')
+        self.assertEqual(self.folder_b.is_access_via_link_hidden, True, 'Discoverability should not be updated')
 
         self.document_gif.folder_id = False
         shortcut = self.folder_b.with_user(self.doc_user).action_create_shortcut(location_user_folder_id='MY')
@@ -504,69 +548,13 @@ class TestDocumentsAccess(TransactionCaseDocuments, MockEmail):
         # Can't move out if not editor on folder
         self.folder_a.action_update_access_rights(partners={self.internal_user.partner_id.id: ('edit', False)})
         self.folder_b.action_update_access_rights(partners={self.internal_user.partner_id.id: ('view', False)})
+        self.document_gif.action_update_access_rights(partners={self.internal_user.partner_id.id: ('edit', False)})
         with self.assertRaises(AccessError):
             self.document_gif.with_user(self.internal_user).folder_id = self.folder_a
-
-        with self.assertRaises(AccessError):
-            self.document_gif.with_user(self.internal_user).folder_id = self.folder_a.id
 
         # Unless user is the owner
         self.document_gif.owner_id = self.internal_user
         self.document_gif.with_user(self.internal_user).folder_id = self.folder_a
-
-    def test_ir_actions_server(self):
-        """Check the behavior of the documents actions.
-
-        To be able to use those actions, they need to be embedded on the folder of
-        the documents on which we execute the action.
-        """
-        self.internal_user.group_ids |= self.env.ref('documents.group_documents_user')
-        document = self.document_gif.with_user(self.internal_user)
-        document.sudo().access_internal = 'edit'
-
-        # Sanity check
-        self.assertEqual(document.user_permission, 'edit')
-        self.assertEqual(document.folder_id.user_permission, 'view')
-        self.assertEqual(self.folder_a.user_permission, 'edit')
-        with self.assertRaises(AccessError):
-            document.folder_id = self.folder_a
-
-        action_base_values = {
-            'name': 'Test Action',
-            'model_id': self.env['ir.model']._get_id('documents.document'),
-            'update_path': 'folder_id',
-            'usage': 'documents_embedded',
-            'resource_ref': f'documents.document,{self.folder_a.id}',
-        }
-
-        action = self.env['ir.actions.server'].create({
-            **action_base_values,
-            'state': 'multi',
-            # Check that the child actions can be executed
-            'child_ids': [Command.create({
-                **action_base_values,
-                'state': 'multi',
-                'child_ids': [Command.create({
-                    **action_base_values,
-                    'state': 'object_write',
-                })],
-            })],
-        }).with_user(self.internal_user)
-
-        # We can not execute the action because it's not pinned on the folder
-        with self.assertRaises(UserError):
-            action.with_context(active_model='documents.document', active_id=document.id).run()
-
-        # Pin the action on the folder, so we can execute it
-        self.env['documents.document'].action_folder_embed_action(document.folder_id.id, action.id)
-
-        # We can move the documents even if we have no write access on the initial folder
-        action.with_context(active_model='documents.document', active_id=document.id).run()
-        self.assertEqual(document.folder_id, self.folder_a)
-
-        # Check that we can not execute the action if it's pinned on a different folder
-        with self.assertRaises(UserError):
-            action.with_context(active_model='documents.document', active_id=document.id).run()
 
     @mute_logger('odoo.addons.base.models.ir_model', 'odoo.addons.base.models.ir_rule')
     def test_create_document_access(self):
@@ -770,6 +758,18 @@ class TestDocumentsAccess(TransactionCaseDocuments, MockEmail):
         self.folder_a_a.action_update_access_rights(access_internal='edit')
         self.folder_a.with_user(self.internal_user).unlink()
         self.assertFalse(self.folder_a_a.exists())
+
+    @mute_logger('odoo.addons.base.models.ir_rule')
+    def test_archiving_as_portal(self):
+        """Check that (un)archiving is not allowed to portal users."""
+        self.folder_a.action_update_access_rights(partners={self.portal_user.partner_id: ("edit", False)})
+        with self.assertRaises(UserError):
+            self.folder_a.with_user(self.portal_user).action_archive()
+        self.folder_a.action_archive()
+        self.assertFalse(self.folder_a.active)
+        with self.assertRaises(UserError):
+            self.folder_a.with_user(self.portal_user).action_unarchive()
+        self.folder_a.with_user(self.portal_user).sudo().action_unarchive()
 
     @mute_logger('odoo.addons.base.models.ir_rule')
     def test_archiving_with_children(self):
@@ -1318,11 +1318,11 @@ class TestDocumentsAccess(TransactionCaseDocuments, MockEmail):
             'access_ids': [Command.create({'partner_id': self.doc_user.partner_id.id, 'role': 'edit'})],
         })
         # User creates two documents in that folder
-        user_doc_1, user_doc_2 = user_docs = self.env['documents.document'].with_user(self.doc_user).create([{
+        user_doc_1, user_doc_2, user_doc_3 = user_docs = self.env['documents.document'].with_user(self.doc_user).create([{
             'folder_id': folder.id,
             'name': f'User doc #{idx}',
             'type': 'binary',
-        } for idx in range(2)])
+        } for idx in range(3)])
         self.assertEqual(user_docs.owner_id, self.doc_user)
         # Manager removes user's role on the folder
         folder.with_user(self.document_manager).action_update_access_rights(
@@ -1343,6 +1343,8 @@ class TestDocumentsAccess(TransactionCaseDocuments, MockEmail):
         self.assertEqual(user_doc_2.with_user(self.doc_user).user_permission, 'edit')
         with self.assertRaises(UserError, msg="Editor without edit permission on folder shouldn't be able to archive"):
             user_doc_2.with_user(self.doc_user).action_archive()
+        with self.assertRaises(AccessError, msg="Editor without edit permission on folder shouldn't be able to archive"):
+            user_doc_2.with_user(self.doc_user).active = False
         with self.assertRaises(UserError, msg="Editor without edit permission on folder shouldn't be able to delete"):
             user_doc_2.with_user(self.doc_user).unlink()
 
@@ -1353,6 +1355,12 @@ class TestDocumentsAccess(TransactionCaseDocuments, MockEmail):
         user_doc_2.folder_id.sudo().access_internal = 'view'
         with self.assertRaises(UserError, msg="Editor with view permission on folder shouldn't be able to delete"):
             user_doc_2.with_user(self.doc_user).unlink()
+
+        user_doc_3.with_user(self.document_manager).owner_id = self.document_manager
+        user_doc_3.with_user(self.document_manager).action_update_access_rights(
+            partners={self.doc_user.partner_id: ('view', None)},
+        )
+        self.assertFalse((user_doc_2 | user_doc_3)._filtered_access('unlink'))
 
     def test_updating_owner(self):
         self.assertEqual(self.folder_a_a.owner_id, self.doc_user)
@@ -1682,6 +1690,53 @@ class TestDocumentsAccess(TransactionCaseDocuments, MockEmail):
             (self.internal_user.partner_id, 'view'),
             self.document_txt.access_ids.mapped(lambda a: (a.partner_id, a.role)))
 
+    def test_members_invitation(self):
+        Access = self.env['documents.access']
+        internal_access = Access.create({
+            'document_id': self.folder_a.id,
+            'partner_id': self.internal_user.partner_id.id,
+            'last_access_date': fields.Datetime.now(),
+            'role': 'view',
+        })
+        with self.assertRaises(UserError):
+            internal_access._get_member_signup_token()
+
+        portal_access = Access.create({
+            'document_id': self.folder_a.id,
+            'partner_id': self.portal_user.partner_id.id,
+            'last_access_date': fields.Datetime.now(),
+            'role': 'view',
+        })
+        with self.assertRaises(UserError):
+            portal_access._get_member_signup_token()
+
+        public_access = Access.create({
+            'document_id': self.folder_a.id,
+            'partner_id': self.env["res.partner"].create({'name': 'Test'}).id,
+            'last_access_date': fields.Datetime.now(),
+            'role': 'view',
+        })
+        token = public_access._get_member_signup_token()
+        self.assertEqual(Access._get_member_from_token(public_access.id, token), public_access)
+        self.assertNotEqual(Access._get_member_from_token(public_access.id, 'invalid' + token), public_access)
+
+        public_access.expiration_date = fields.Datetime.now() + datetime.timedelta(days=1)
+        token = public_access._get_member_signup_token()
+        self.assertEqual(Access._get_member_from_token(public_access.id, token), public_access)
+
+        # use an old token
+        token = public_access._get_member_signup_token()
+        public_access.expiration_date = fields.Datetime.now() - datetime.timedelta(days=1)
+        self.assertFalse(Access._get_member_from_token(public_access.id, token))
+
+        public_access = Access.create({
+            'document_id': self.folder_a.id,
+            'partner_id': self.env["res.partner"].create({'name': 'Test'}).id,
+            'last_access_date': fields.Datetime.now(),
+        })
+        with self.assertRaises(UserError):
+            public_access._get_member_signup_token()
+
     def test_permissions_internal_propagation_on_folder_moves(self):
         not_secret_folder = self.env['documents.document'].create({
             'name': 'Not Secret Folder',
@@ -1759,3 +1814,19 @@ class TestDocumentsAccess(TransactionCaseDocuments, MockEmail):
 
         self.assertNotIn(self.internal_user.partner_id, secret_folder.access_ids.partner_id)
         self.assertNotIn(self.doc_user.partner_id, secret_folder.access_ids.partner_id)
+
+    @users('documents@example.com')
+    def test_owner_edition(self):
+        """Check that with edit permission, users can change the owner of a document he owns or without owners."""
+        document = self.env['documents.document'].create({'name': 'test'})
+        self.assertEqual(document.owner_id, self.env.user)
+        self.assertEqual(document.user_folder_id, 'MY')
+        document.owner_id = False
+        self.assertEqual(document.user_permission, 'edit', 'Removing the owner gives him edit permission')
+        self.assertEqual(document.user_folder_id, 'COMPANY')
+        document.owner_id = self.env.user
+        self.assertEqual(document.user_folder_id, 'MY')
+        document.owner_id = False
+        document.owner_id = self.document_manager
+        with self.assertRaises(AccessError, msg='You cannot change the owner of documents you do not own.'):
+            document.owner_id = self.env.user

@@ -9,7 +9,7 @@ import mimetypes
 
 from odoo import http, tools, Command, _, fields
 from odoo.http import request, content_disposition
-from odoo.tools import consteq, format_date, posix_to_ldml
+from odoo.tools import consteq, format_date, posix_to_ldml, email_normalize
 from odoo.tools.pdf import PdfFileWriter, PdfFileReader
 from odoo.tools.misc import babel_locale_parse
 from odoo.addons.iap.tools import iap_tools
@@ -79,7 +79,8 @@ class Sign(http.Controller):
         frame_values = {}
         sr_values = http.request.env['sign.request.item.value'].sudo().search([('sign_request_id', '=', sign_request.id), '|', ('sign_request_item_id', '=', current_request_item.id), ('sign_request_item_id.state', '=', 'completed')])
         for value in sr_values:
-            item_values[value.sign_item_id.id] = value.value
+            # Convert False to an empty string to avoid omitting the data-value attribute.
+            item_values[value.sign_item_id.id] = '' if value.value is False else value.value
             frame_values[value.sign_item_id.id] = value.frame_value
 
         if sign_request.state != 'shared':
@@ -89,7 +90,7 @@ class Sign(http.Controller):
                 'action': 'open',
             })
 
-        lang_code = sign_request.communication_company_id.partner_id.lang
+        lang_code = (sign_request.communication_company_id or sign_request.create_uid.company_id).partner_id.lang
         lang = request.env['res.lang']._lang_get(lang_code)
         locale = babel_locale_parse(lang_code)
         date_format = ""
@@ -166,6 +167,18 @@ class Sign(http.Controller):
         if res.get('error'):
             return request.render(res['template']) if res.get('template') else request.not_found()
 
+        user = request.env.user
+        current_request_item = res['rendering_context']['current_request_item']
+        if user.has_group('sign.group_sign_user') and current_request_item and current_request_item.state == 'completed':
+            sign_request = res['rendering_context']['sign_request']
+            return request.redirect('/odoo/sign.request/%s/action-sign.Document?id=%s&token=%s&name=%s&state=%s' % (
+                sign_request_id,
+                sign_request_id,
+                token,
+                sign_request.reference,
+                sign_request.state
+            ))
+
         return http.request.render('sign.doc_sign', res.get('rendering_context'))
 
     @http.route([
@@ -241,14 +254,14 @@ class Sign(http.Controller):
         Returns:
             http.Response: Response containing the document data or a ZIP file, or a 404 response if not found.
         """
+        template_documents_ids = sign_request.template_document_ids
         if sign_document_id:
-            document_id = request.env['sign.document'].sudo().browse(sign_document_id)
+            document_id = template_documents_ids.filtered(lambda d: d.id == sign_document_id)
             if not document_id:
                 return request.not_found()
             attachment_data = document_id.attachment_id.datas
             return self._create_document_response(sign_request, attachment_data, document_name=document_id.name)
 
-        template_documents_ids = sign_request.template_document_ids
         if len(template_documents_ids) == 1:
             attachment_data = template_documents_ids[0].attachment_id.datas
             return self._create_document_response(sign_request, attachment_data, document_name=template_documents_ids[0].name)
@@ -330,13 +343,7 @@ class Sign(http.Controller):
             subject = subject[:-4]
         if not doc_name.endswith('.pdf'):
             doc_name += '.pdf'
-        download_name = f'{subject}/{doc_name}'
-        counter = 1
-        while download_name in existing_document_names:
-            name, ext = download_name.rsplit('.', 1)
-            download_name = f'{name} ({counter}).{ext}'
-            counter += 1
-        existing_document_names.add(download_name)
+        download_name = f'{subject}_{sign_request.id}/{doc_name}'
         return download_name
 
     def _create_document_response(self, sign_request, attachment_data, document_name=None):
@@ -494,7 +501,16 @@ class Sign(http.Controller):
         if not sign_request or len(sign_request.request_item_ids) != 1 or sign_request.request_item_ids.partner_id:
             return False
 
-        partner = self.env['mail.thread'].sudo()._partner_find_from_emails_single([mail], no_create=False)
+        normalize_email = email_normalize(mail)
+        partner = self.env['mail.thread'].sudo()._partner_find_from_emails_single(
+            [mail],
+            additional_values={
+                normalize_email: {
+                    'name': name,
+                }
+            },
+            no_create=False
+        )
 
         new_sign_request_sudo = sign_request.with_user(sign_request.create_uid).with_context(no_sign_mail=True).sudo().copy({
             'reference': sign_request.reference.replace('-%s' % _("Shared"), ''),
@@ -682,15 +698,17 @@ class Sign(http.Controller):
         """
         sign_request = request.env['sign.request'].browse(request_id).sudo()
         sign_item = request.env['sign.request.item'].browse(sign_item_id).sudo()
-        if not sign_request.exists() or not consteq(sign_request.access_token, token) or not sign_item.exists():
+        if not sign_request.exists() or not sign_item.exists() or not consteq(sign_item.access_token, token) or not sign_item.signer_email:
             return []
         uid = sign_request.create_uid.id
         items = request.env['sign.request.item'].sudo().search_read(
             domain=[
-                ('signer_email', '=', sign_item.signer_email),
+                ('signer_email', '!=', False),
+                ('partner_id', '=', sign_item.partner_id.id),
                 ('state', '=', 'sent'),
                 ('sign_request_id.state', '=', 'sent'),
-                ('id', '!=', sign_item.id)
+                ('id', '!=', sign_item.id),
+                ('is_mail_sent', '=', True),
             ],
             fields=['access_token', 'sign_request_id', 'create_uid', 'create_date'],
             order='create_date DESC',

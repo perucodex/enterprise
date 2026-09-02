@@ -1,7 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
+
 from odoo import api, models
-from odoo.fields import Domain
+from odoo.fields import Command, Domain
 
 
 class StockMove(models.Model):
@@ -39,7 +41,7 @@ class StockMove(models.Model):
     @api.model
     def _prepare_merge_moves_distinct_fields(self):
         distinct_fields = super()._prepare_merge_moves_distinct_fields()
-        if any(sale_order.is_rental_order for sale_order in self.reference_ids.sale_ids):
+        if any(sale_order.is_rental_order for sale_order in self.reference_ids.sale_ids.sudo()):
             distinct_fields.remove('origin_returned_move_id')
             distinct_fields.remove('procure_method')
         return distinct_fields
@@ -66,8 +68,12 @@ class StockMove(models.Model):
     def _action_done(self, cancel_backorder=False):
         """ Correctly set the qty_delivered and qty_returned of rental order lines when using pickings."""
         res = super()._action_done(cancel_backorder=cancel_backorder)
-        if self.env['res.groups']._is_feature_enabled('sale_stock_renting.group_rental_stock_picking'):
-            for move in self:
+        if (
+            not self.env.context.get('rental_direct_stock_move')
+            and self.env['res.groups']._is_feature_enabled('sale_stock_renting.group_rental_stock_picking')
+        ):
+            returned_lot_ids, pickedup_lot_ids = (defaultdict(set), defaultdict(set))
+            for move in res:
                 if move.state != "done":
                     continue
                 if not move.sale_line_id.is_rental or move.product_id != move.sale_line_id.product_id:
@@ -87,6 +93,14 @@ class StockMove(models.Model):
                     sol.reserved_lot_ids = (
                         move.lot_ids | sol.reserved_lot_ids
                     )[:qty_to_keep_reserved]
+                    if move.location_id == move.company_id.rental_loc_id:
+                        returned_lot_ids[move.sale_line_id.id].update(move.lot_ids.ids)
+                    elif move.location_dest_id == move.company_id.rental_loc_id:
+                        pickedup_lot_ids[move.sale_line_id.id].update(move.lot_ids.ids)
+            for sale_line_id, lot_ids in returned_lot_ids.items():
+                self.env['sale.order.line'].browse(sale_line_id).returned_lot_ids = [Command.link(lot_id) for lot_id in lot_ids]
+            for sale_line_id, lot_ids in pickedup_lot_ids.items():
+                self.env['sale.order.line'].browse(sale_line_id).pickedup_lot_ids = [Command.link(lot_id) for lot_id in lot_ids]
         return res
 
     def _compute_location_dest_id(self):

@@ -103,9 +103,20 @@ CREATE INDEX IF NOT EXISTS account_move_invoice_user_id_date_idx ON account_move
                 timedelta = relativedelta(years=1, month=1, day=1)
                 date_from = date_from - relativedelta(days=1) + timedelta
 
+            match plan.periodicity:
+                case 'month':
+                    expected_target_duration = range(27, 31)
+                case 'quarter':
+                    expected_target_duration = range(89, 92)
+                case 'year':
+                    expected_target_duration = range(364, 366)
             # Map existing targets and track changes, starting by unlinking out-of-range ones.
             existing_targets = {(t.date_from, t.date_to): t for t in plan.target_ids}
-            target_changes = [Command.unlink(t.id) for t in plan.target_ids if t.date_from < plan.date_from or t.date_to > plan.date_to]
+            target_changes = [
+                Command.unlink(t.id) for t in plan.target_ids
+                if (t.date_from < plan.date_from or t.date_to > plan.date_to)      # Doesn't belong to updated period
+                or (t.date_to - t.date_from).days not in expected_target_duration  # Doesn't belong to updated periodicity
+            ]
 
             while date_from + timedelta - relativedelta(days=1) <= plan.date_to:
                 # Add new targets for missing periods.

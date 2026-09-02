@@ -14,7 +14,15 @@ import { PinPopup } from "@mrp_workorder/components/pin_popup";
 import { useConnectedEmployee } from "@mrp_workorder/mrp_display/hooks/employee_hooks";
 import { MrpDisplaySearchBar } from "@mrp_workorder/mrp_display/search_bar";
 import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
-import { Component, onWillRender, onWillStart, useState, useSubEnv } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillRender,
+    onWillStart,
+    onWillUnmount,
+    useState,
+    useSubEnv,
+} from "@odoo/owl";
 import { MrpEmployeeDialog } from "./dialog/mrp_employee_dialog";
 
 const defaultWorkcenterButtons = [
@@ -45,6 +53,7 @@ export class MrpDisplay extends Component {
     };
 
     setup() {
+        this.env.config.disableSearchBarAutofocus = true;
         this.homeMenu = useService("home_menu");
         this.viewService = useService("view");
         this.actionService = useService("action");
@@ -79,6 +88,7 @@ export class MrpDisplay extends Component {
             firstLoad: firstLoad,
         });
         this.recordCacheIds = [];
+        this.showCaseId = undefined;
 
         const params = this._makeModelParams();
 
@@ -150,6 +160,12 @@ export class MrpDisplay extends Component {
         onWillRender(() => {
             this.defineRelevantRecords();
         });
+        onMounted(() => {
+            document.body.classList.add("o_mrp_workorder_o_mrp_display");
+        });
+        onWillUnmount(() => {
+            document.body.classList.remove("o_mrp_workorder_o_mrp_display");
+        });
     }
 
     removeRecordIdFromCache(id) {
@@ -160,6 +176,7 @@ export class MrpDisplay extends Component {
         if (this.recordCacheIds.length) {
             this.recordCacheIds = [];
         }
+        this.showCaseId = undefined;
     }
 
     async close() {
@@ -205,7 +222,7 @@ export class MrpDisplay extends Component {
             }
             // 2. Check if there is a move with this product (WO/MO)
             for (const move of record.data.move_raw_ids.records) {
-                if (move.data.product_barcode === barcode && move.data.manual_consumption) {
+                if (move.data.product_barcode === barcode && move.data.operation_id) {
                     return move.component.onClick();
                 }
             }
@@ -244,6 +261,7 @@ export class MrpDisplay extends Component {
     }
 
     _onWorkorderBarcodeScanned(workorder) {
+        workorder.component.env.searchModel.removeMOFilter();
         return workorder.component.onClickHeader();
     }
 
@@ -333,10 +351,16 @@ export class MrpDisplay extends Component {
                 : recordsNotInCache.push(record);
         }
 
-        // Sort records already in cache by their position in this cache.
+        // Sort records already in cache by their position in this cache, keeping show case at first position
         recordsAlreadyInCache.sort((rec1, rec2) => {
-            const index1 = this.recordCacheIds.indexOf(rec1.id);
-            const index2 = this.recordCacheIds.indexOf(rec2.id);
+            if (rec1.resId == this.showCaseId) {
+                return -1;
+            }
+            if (rec2.resId == this.showCaseId) {
+                return +1;
+            }
+            const index1 = this.recordCacheIds.indexOf(rec1.resId);
+            const index2 = this.recordCacheIds.indexOf(rec2.resId);
             return index1 - index2;
         });
 
@@ -356,7 +380,16 @@ export class MrpDisplay extends Component {
                     const v2 = statesComparativeValues[wo2.data.state];
                     const d1 = wo1.data.date_start;
                     const d2 = wo2.data.date_start;
-                    return v1 - v2 || d1 - d2;
+
+                    // primary: sort by state
+                    if (v1 !== v2) return v1 - v2;
+
+                    // tiebreaker: sort by date, false dates go last
+                    if (!d1 && !d2) return 0;
+                    if (!d1) return 1;
+                    if (!d2) return -1;
+
+                    return d1 - d2;
                 });
             }
             const recordIds = recordsNotInCache.map((r) => r.resId);
@@ -389,6 +422,7 @@ export class MrpDisplay extends Component {
         await this.useEmployee.getConnectedEmployees();
         if (showcaseId) {
             this.recordCacheIds.push(showcaseId);
+            this.showCaseId = showcaseId;
         }
         this.state.activeWorkcenter = Number(workcenterId);
         localStorage.setItem(this.env.localStorageName + `.activeWC`, Number(workcenterId));
@@ -482,7 +516,9 @@ export class MrpDisplay extends Component {
     _onPagerChanged({ offset, limit }) {
         this.state.offset = offset;
         this.state.limit = limit;
+        const showCaseId = this.showCaseId;
         this.invalidateRecordIdsCache();
+        this.showCaseId = showCaseId;
         this.env.reload();
     }
 
@@ -494,7 +530,7 @@ export class MrpDisplay extends Component {
     }
 
     get appName() {
-        return encodeURIComponent(this.menu.getCurrentApp().name);
+        return encodeURIComponent(this.menu.getCurrentApp()?.name || _t("Shop Floor"));
     }
 
     get displayBackButton() {

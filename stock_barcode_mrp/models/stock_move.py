@@ -1,9 +1,17 @@
-from odoo import models
+from odoo import api, models
 from odoo.tools.float_utils import float_compare
 
 
 class StockMove(models.Model):
     _inherit = 'stock.move'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        moves = super().create(vals_list)
+        for move, vals in zip(moves, vals_list):
+            if not vals.get('product_uom') and move.bom_line_id:
+                move.product_uom = move.bom_line_id.product_uom_id
+        return moves
 
     def _get_fields_stock_barcode(self):
         return super()._get_fields_stock_barcode() + ['product_uom', 'bom_line_id']
@@ -25,3 +33,12 @@ class StockMove(models.Model):
         if new_move_line_vals:
             self.env['stock.move.line'].create(new_move_line_vals)
         return super(StockMove, self - production_moves).split_uncompleted_moves()
+
+    def _should_bypass_set_qty_producing(self):
+        if self.env.context.get('barcode_view') or self.env.context.get('barcode_trigger'):
+            picking_type = self.raw_material_production_id.picking_type_id
+            if picking_type.restrict_scan_product or (
+                picking_type.restrict_scan_tracking_number and self.product_id.tracking in ('lot', 'serial')
+            ):
+                return True
+        return super()._should_bypass_set_qty_producing()

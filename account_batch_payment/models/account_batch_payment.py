@@ -288,7 +288,7 @@ class AccountBatchPayment(models.Model):
 
     @api.depends('state')
     def _compute_display_name(self):
-        state_values = dict(self._fields['state'].selection)
+        state_values = dict(self._fields['state']._description_selection(self.env))
         for batch in self:
             batch.display_name = f'{batch.name} ({state_values.get(batch.state)})'
 

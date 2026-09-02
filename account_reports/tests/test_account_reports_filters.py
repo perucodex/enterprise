@@ -623,7 +623,7 @@ class TestAccountReportsFilters(TestAccountReportsCommon, odoo.tests.HttpCase):
             self.date_range_report,
             {'date': {'filter': 'custom', 'mode': 'range', 'date_from': '2017-01-01', 'date_to': '2017-01-15'}},
             {
-                'string': 'From %s\nto  %s' % (format_date(self.env, '2017-01-01'), format_date(self.env, '2017-01-15')),
+                'string': '%s - %s' % (format_date(self.env, '2017-01-01'), format_date(self.env, '2017-01-15')),
                 'period_type': 'custom',
                 'mode': 'range',
                 'filter': 'custom',
@@ -667,7 +667,7 @@ class TestAccountReportsFilters(TestAccountReportsCommon, odoo.tests.HttpCase):
             },
             [
                 {
-                    'string': 'From %s\nto  %s' % (format_date(self.env, '2016-01-01'), format_date(self.env, '2016-01-15')),
+                    'string': '%s - %s' % (format_date(self.env, '2016-01-01'), format_date(self.env, '2016-01-15')),
                     'period_type': 'custom',
                     'mode': 'range',
                     'date_from': '2016-01-01',
@@ -675,7 +675,7 @@ class TestAccountReportsFilters(TestAccountReportsCommon, odoo.tests.HttpCase):
                     'currency_table_period_key': '2016-01-01_2016-01-15',
                 },
                 {
-                    'string': 'From %s\nto  %s' % (format_date(self.env, '2015-01-01'), format_date(self.env, '2015-01-15')),
+                    'string': '%s - %s' % (format_date(self.env, '2015-01-01'), format_date(self.env, '2015-01-15')),
                     'period_type': 'custom',
                     'mode': 'range',
                     'date_from': '2015-01-01',
@@ -1643,6 +1643,26 @@ class TestAccountReportsFilters(TestAccountReportsCommon, odoo.tests.HttpCase):
             },
         )
 
+        self.env.company.fiscalyear_last_day = 31
+        self.env.company.fiscalyear_last_month = '5'
+
+        self._assert_filter_date(
+            generic_tax_report,
+            {'date': {'period': -1, 'filter': 'previous_return_period'}, 'no_report_reroute': True},
+            {
+                'string': '2023',
+                'period_type': 'return_period',
+                'mode': 'range',
+                'filter': 'previous_return_period',
+                'period': -1,
+                'date_from': '2023-01-01',
+                'date_to': '2023-12-31',
+                'currency_table_period_key': '2023-01-01_2023-12-31',
+            },
+        )
+
+        self.env.company.fiscalyear_last_month = '12'
+
         # Setting a periodicity on the return type should take precedence over the company setting
         return_type.deadline_periodicity = 'semester'
 
@@ -1650,7 +1670,7 @@ class TestAccountReportsFilters(TestAccountReportsCommon, odoo.tests.HttpCase):
             generic_tax_report,
             {'no_report_reroute': True},
             {
-                'string': '01/01/2024 - 06/30/2024',
+                'string': 'Jan 2024 - Jun 2024',
                 'period_type': 'return_period',
                 'mode': 'range',
                 'filter': 'previous_return_period',
@@ -1986,3 +2006,23 @@ class TestAccountReportsFilters(TestAccountReportsCommon, odoo.tests.HttpCase):
         self.assertFalse(wizard.mail_template_id)
 
         wizard.action_send_and_print()
+
+    @freeze_time('2020-01-16')
+    def test_hide_line_at_0_tour_load_more_line(self):
+        report = self.env.ref('account_reports.general_ledger_report')
+        report.filter_hide_0_lines = 'optional'
+        report.load_more_limit = 1
+        self.env['account.move'].create([{
+            'move_type': 'entry',
+            'date': '2020-01-15',
+            'line_ids': [Command.create({
+                'partner_id': self.partner_a.id,
+                'debit': 0.0,
+                'credit': 0.0,
+                'name': f"Coucou les biloutes {i}",
+                'account_id': self.company_data['default_account_payable'].id,
+                'journal_id': self.company_data['default_journal_misc'].id,
+            })],
+        } for i in range(2)]).action_post()
+
+        self.start_tour("/odoo", 'account_reports_hide_0_lines_load_more', login=self.env.user.login)

@@ -14,6 +14,7 @@
     'depends': [
         'hr',
         'sms',
+        'web_gantt',
     ],
     'data': [
         'security/security.xml',

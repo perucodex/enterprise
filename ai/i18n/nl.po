@@ -3,58 +3,24 @@
 # * ai
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
-# Bren Driesen <brdri@odoo.com>, 2025.
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2025.
+# Bren Driesen <brdri@odoo.com>, 2025, 2026.
+# Erwin van der Ploeg <erwin@odooexperts.nl>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
 # Odoo Translation Bot <c3p@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-09 18:45+0000\n"
-"PO-Revision-Date: 2025-12-06 10:09+0000\n"
-"Last-Translator: Odoo Translation Bot <c3p@odoo.com>\n"
+"POT-Creation-Date: 2026-08-28 17:46+0000\n"
+"PO-Revision-Date: 2026-08-27 10:02+0000\n"
+"Last-Translator: Bren Driesen <brdri@odoo.com>\n"
 "Language-Team: Dutch <https://translate.odoo.com/projects/odoo-19/ai/nl/>\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
-
-#. module: ai
-#: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_read_group
-msgid ""
-"\n"
-"            **Tool Name: Read group**\n"
-"\n"
-"            Searches a particular model using a domain. The provided domain "
-"must be in valid JSON format.\n"
-"        "
-msgstr ""
-"\n"
-"            **Toolnaam: Groep lezen**\n"
-"\n"
-"            Zoekt een specifiek model aan de hand van een domein. Het "
-"opgegeven domein moet een geldig JSON-formaat zijn.\n"
-"        "
-
-#. module: ai
-#: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_search
-msgid ""
-"\n"
-"            **Tool Name: search**\n"
-"\n"
-"            Searches a particular model using a domain. The provided domain "
-"must be in valid JSON format.\n"
-"        "
-msgstr ""
-"\n"
-"            **Toolnaam: zoeken**\n"
-"\n"
-"            Zoekt een specifiek model aan de hand van een domein. Het "
-"opgegeven domein moet een geldig JSON-formaat hebben.\n"
-"        "
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_get_fields
@@ -97,6 +63,43 @@ msgid ""
 "Make 3 parallel calls.\n"
 "        "
 msgstr ""
+"\n"
+"            Geeft UITSLUITEND doorzoekbare velden voor één specifiek model "
+"die gebruikt kunnen worden in domeinfilters en groeperingen.\n"
+"            Essentieel voor het opbbouwen van geldige domains - als een veld "
+"hier noet wordt vermeld, KAN HET NIET worden gebruikt.\n"
+"\n"
+"            Antwoordformaat:\n"
+"            ```\n"
+"            field_name|display_name|type|sortable|groupable|description\n"
+"            partner_id|Customer|many2one(res.partner)|true|true|Customer for "
+"this order\n"
+"            date_order|Order Date|datetime|true|true|Date when order was "
+"placed\n"
+"            order_line|Order Lines|one2many(sale.order.line)|false|false|"
+"Lines in this order\n"
+"            state|Status|selection|true|true|Order status\n"
+"            ```\n"
+"\n"
+"            Belangrijke opmerkingen:\n"
+"            - ⚠️ Geeft enkel DOORZOEKBARE velden terug - andere vleden kunnen "
+"niet in domains worden gebruikt.\n"
+"            - Voor relaties: het gerelateerde model wordt tussen haakjes "
+"weergegeven (many2one, one2many, many2many)\n"
+"            - Enkel relatievelden kunnen worden gebruikt om naar andere "
+"modellen te navigeren\n"
+"            - Letterlijke velden zoals char/text/float KUNNEN NIET WORDEN "
+"gebruikt voor traversal\n"
+"            - 'sortable' geeft aan of het veld kan worden gebruikt in "
+"order_by parameter\n"
+"            - 'groupable' geeft aan of het veld kan worden gebruikt voor "
+"groepering wanneer het niet beschikbaar is in de zoekweergave\n"
+"\n"
+"            💡 Prestatietip: Als je meerdere modellen verkent, roep deze "
+"tool meerdere keren aan in EEN bericht\n"
+"            Voorbeeld: Verken je sale.order, product.product en res.partner? "
+"Maak dan 3 parallelle oproepen.\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_compute_report_measures
@@ -125,6 +128,30 @@ msgid ""
 "            - Call multiple times in parallel if comparing different menus\n"
 "        "
 msgstr ""
+"\n"
+"            Geeft een lijst van numerieke velden (metingen) die beschikbaar "
+"zijn voor aggregatie in draaitabel- en grafiekweergaven.\n"
+"            MOET worden aangeroepen voor het gebruikk van metingen in "
+"open_menu_pivot() of open_menu_graph().\n"
+"\n"
+"            Geeft CSV with pipe (|)-scheidingsteken:\n"
+"            ```\n"
+"            field_name|display_name|type|aggregator|sortable\n"
+"            __count|Count|integer||true\n"
+"            amount_total|Total|monetary|sum|true\n"
+"            margin|Margin|float|sum|true\n"
+"            quantity|Quantity|float|sum|true\n"
+"            ```\n"
+"\n"
+"            Belangrijke opmerkingen:\n"
+"            - __count is altijd beschikbaar (telt records)\n"
+"            - Alleen numerieke velden met aggregators worden weergegeven\n"
+"            - Gebruik field_name in de parameter voor metingen\n"
+"            - Voor rangschikkingen in draaitabellen: Voeg sortering toe (bv. "
+"\"amount_total desc\")\n"
+"            - Roep meerdere keren parallel op wanneer je verschillende "
+"menu's vergelijkt\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_graph
@@ -153,6 +180,32 @@ msgid ""
 "            ⚠️ Order must be exactly 'ASC' or 'DESC'\n"
 "        "
 msgstr ""
+"\n"
+"            Opent een grafiekweergave met behulp van zoekweergave-"
+"elementen.\n"
+"            Het meest geschikt voor: Trends, vergelijkingen, verdelingen, "
+"visuele KPI's.\n"
+"\n"
+"            Ondersteunde grafiektypen:\n"
+"            - 'bar': Vergelijk waarden tussen categorieën\n"
+"            - 'line': Trends doorheen de tijd weergeven\n"
+"            - 'pie': Verhoudingen van een geheel weergeven\n"
+"\n"
+"            Functies:\n"
+"            - Filters toepassen uit de beschikbare opties in het menu\n"
+"            - Een enkele maat visualiseren\n"
+"            - Groepeer op één veld voor de grafiekas\n"
+"            - Zoeken binnen specifieke velden\n"
+"            - Stapel- en cumulatieopties\n"
+"            - Volgordecontrole (ASC/DESC)\n"
+"\n"
+"            💡 Roep eerst compute_report_measures() aan om geldige metingen "
+"te vinden\n"
+"            ⚠️ Elke zoekstring moet het formaat 'field=text' gebruiken. "
+"Matrix kan meerdere zoekreeksen bevatten of leeg zijn []\n"
+"            ⚠️ Modus moet precies 'bar', 'line' of 'pie' zijn\n"
+"            ⚠️ Volgorde moet precies 'ASC' of 'DESC' zijn\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_kanban
@@ -271,6 +324,37 @@ msgid ""
 "needs\n"
 "        "
 msgstr ""
+"\n"
+"            Opent een draaitabel met geavanceerd zoeken en filteren.\n"
+"            Het meest geschikt voor: \"Top N\"-zoekopdrachten, ranglijsten, "
+"kruistabellen, prestatiecijfers.\n"
+"\n"
+"            Belangrijkste functies:\n"
+"            - Ondersteunt filters vanuit zoekweergave\n"
+"            - Groepeert gegevens op rijen EN kolommen tegelijk\n"
+"            - Voegt maatregelen samen (som, gemiddelde, aantal)\n"
+"            - Ondersteunt zoeken op tekst in doorzoekbare velden\n"
+"            - Excel-achtige draaitabel functionaliteit\n"
+"\n"
+"            💡 Roep ALTIJD eerst compute_report_measures() aan om geldige "
+"metingen te krijgen\n"
+"            💡 Voor rangschikkingen: Neem ordening op in maatregelen (bv. "
+"[\"amount_total desc\"])\n"
+"            💡 Gebruik de zoekparameter om te filteren op elk doorzoekbaar "
+"veld VOORDAT je aangepaste domeinen overweegt\n"
+"            ⚠️ Geef de voorkeur aan \"Rapportage\"-app-menu's voor de beste "
+"draaitabellen\n"
+"            ⚠️ Elke zoekreeks moet het formaat 'field=text' gebruiken. Matrix "
+"kan meerdere zoekreeksen bevatten of leeg zijn []\n"
+"            ⚠️ Opmerking: Gebruikt row_groupbys/col_groupbys (matrixen) in "
+"plaats van selected_groupbys\n"
+"\n"
+"            Voorbeeld: Voor \"topverkopers die kantoorproducten verkopen\":\n"
+"            - Gebruik search=[\"categ_id\", \"office\"] als categ_id "
+"doorzoekbaar is\n"
+"            - Gebruik custom_domain alleen als er geen doorzoekbaar veld aan "
+"je behoeften voldoet\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_get_menu_details
@@ -301,6 +385,48 @@ msgid ""
 "            ⚠️ Always validate the returned model matches your expectations\n"
 "        "
 msgstr ""
+"\n"
+"            Haalt gedetailleerde informatie op (context, domain, "
+"search_view) voor specifieke menu's.\n"
+"            MOET worden aangeroepen voordat een open_menu_* tool wordt "
+"gebruikt om menu-specifieke details te verkrijgen.\n"
+"\n"
+"            Geeft CSV met scheidingsteken voor pipe delimiter (|):\n"
+"            ```\n"
+"            menu_id|model_name|context|domain|search_view\n"
+"            389|sale.order|{\"search_default_my_quotation\": 1}|[]|"
+"<search><fields>...</fields></search>\n"
+"            172|account.move|{\"search_default_draft\": 1}|[[\"type\", "
+"\"=\", \"out_invoice\"]]|<search>...</search>\n"
+"            ```\n"
+"\n"
+"            Belangrijke informatie:\n"
+"            - Context: Standaard filters/groeperingen toegepast bij het "
+"openen van het menu\n"
+"            - Domain: Permanente filters die niet door gebruikers kunnen "
+"worden verwijderd\n"
+"            - Search_view: Volledige XML-structuur met beschikbare filters, "
+"groepen en doorzoekbare velden\n"
+"\n"
+"            💡 Prestatietip: Vraag meerdere menudetails op in één oproep bij "
+"het vergelijken van opties\n"
+"            ⚠️ Controleer altijd of het geretourneerde model overeenkomt met "
+"je verwachtingen\n"
+"        "
+
+#. module: ai
+#: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_read_group
+#: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_search
+msgid ""
+"\n"
+"            Searches a particular model using a domain. The provided domain "
+"must be in valid JSON format.\n"
+"        "
+msgstr ""
+"\n"
+"            Zoekt een bepaald model aan de hand van een domein. Het "
+"opgegeven domein moet in een geldig JSON-formaat zijn.\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_adjust_search
@@ -346,6 +472,50 @@ msgid ""
 "the current view info.\n"
 "        "
 msgstr ""
+"\n"
+"            De gebruiker kan doorgaan met vragen stellen en als je denkt dat "
+"de huidige zoekopdracht gewoon aangepast kan worden zonder een ander menu te "
+"openen, dan kun je deze tool gebruiken.\n"
+"\n"
+"            In de <session_info_context> van de prompt staat een huidige "
+"weergave-info die de actieve zoekfacetten bevat.\n"
+"            Een facet kan een groep `OR`ed filters, een groep groupbys of "
+"een groep `OR`ed zoektermen zijn.\n"
+"\n"
+"            **De parameters begrijpen**:\n"
+"            - `remove_facets` - Het verwijderen van een facet verwijdert de "
+"hele groep filters/groupbys/zoektermen. Het verwijderen van een filter of "
+"een zoekfacet vermindert de beperkingen.\n"
+"            - `toggle_filters` - Door een filter te schakelen wordt een "
+"filter toegevoegd aan of verwijderd uit een actief filterfacet.\n"
+"            - `toggle_groupbys` - Door een groupby te schakelen wordt een "
+"groupby aan het actieve groupbys facet toegevoegd of verwijderd.\n"
+"            - `apply_searches` - Een zoekopdracht toepassen zal `OR` de "
+"zoekterm op een actieve zoekfacet met hetzelfde veld. Als er bijvoorbeeld "
+"een veldfacet \"name=John\" is en je geeft zoekopdracht \"name=Jane\" op, "
+"dan zal de resulterende zoekopdracht \"name=John OR name=Jane\" zijn.\n"
+"            - `maatregelen` - Door maatregelen op te geven worden de "
+"geselecteerde maatregelen geactiveerd in de huidige weergave als het een "
+"draaipunt- of grafiekweergave is.\n"
+"            - `mode` - Alleen grafiekweergave: Dit is het grafiektype. Kies "
+"uit \"lijn\", \"staaf\" of \"taart\" om het grafiektype in de huidige "
+"grafiekweergave te wijzigen.\n"
+"            - `volgorde` - Alleen grafiekweergave: Door de volgorde op te "
+"geven verander je de sortering van de resultaten in de huidige "
+"grafiekweergave.\n"
+"            - `gestapeld` - Alleen grafiekweergave: Door gestapeld op te "
+"geven wordt het stapelen van de resultaten in de huidige grafiekweergave "
+"gewijzigd.\n"
+"            - `cumulated` - Alleen grafiekweergave: Door cumulated op te "
+"geven wordt de accumulatie van de resultaten in de huidige grafiekweergave "
+"gewijzigd.\n"
+"            - `custom_domain` - Het kan zijn dat de elementen van de "
+"zoekweergave niet voldoende zijn om het benodigde domein uit te drukken. In "
+"dat geval kun je een aangepast domein opgeven als een JSON-string.\n"
+"            - `switch_view_type` - Als je van weergavetype wisselt, wordt de "
+"huidige weergave gewijzigd in het opgegeven type. Selecteer uit de "
+"beschikbare weergavetypen in de huidige weergave-info.\n"
+"        "
 
 #. module: ai
 #. odoo-python
@@ -357,7 +527,7 @@ msgstr "%s (kopie)"
 #. odoo-python
 #: code:addons/ai/utils/llm_providers.py:0
 msgid "%s is no longer available. Please select a newer model."
-msgstr ""
+msgstr "%s is niet langer beschikbaar. Selecteer een nieuwer model."
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
@@ -844,6 +1014,11 @@ msgid "Customize to control relevance and formatting."
 msgstr "Personaliseer deze tekst om voor relevante inhoud en opmaak te zorgen."
 
 #. module: ai
+#: model:ir.model.fields,field_description:ai.field_ai_agent__deprecated_model_replacement_hint
+msgid "Deprecated Model Replacement Hint"
+msgstr ""
+
+#. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 #: model:ir.model.fields,field_description:ai.field_ai_agent__subtitle
@@ -882,6 +1057,7 @@ msgstr "Chatkanaal"
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__display_name
 #: model:ir.model.fields,field_description:ai.field_ir_attachment__display_name
 #: model:ir.model.fields,field_description:ai.field_ir_http__display_name
+#: model:ir.model.fields,field_description:ai.field_ir_model_fields__display_name
 #: model:ir.model.fields,field_description:ai.field_mail_composer_mixin__display_name
 #: model:ir.model.fields,field_description:ai.field_mail_render_mixin__display_name
 #: model:ir.model.fields,field_description:ai.field_mail_template__display_name
@@ -922,7 +1098,7 @@ msgstr "E-mail-discussie"
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__embedding_model
 msgid "Embedding Model"
-msgstr ""
+msgstr "Embeddingmodel"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__embedding_vector
@@ -961,13 +1137,13 @@ msgstr "Mislukt"
 #. odoo-python
 #: code:addons/ai/utils/html_extractor.py:0
 msgid "Failed to fetch URL: %s"
-msgstr ""
+msgstr "URL ophalen mislukt: %s"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent_source.py:0
 msgid "Failed to fetch the content of the source."
-msgstr ""
+msgstr "Inhoud van de bron ophalen mislukt."
 
 #. module: ai
 #. odoo-python
@@ -982,6 +1158,16 @@ msgid "Field Selector"
 msgstr "Veldkiezer"
 
 #. module: ai
+#: model:ir.model.fields,field_description:ai.field_ir_model_fields__ttype
+msgid "Field Type"
+msgstr "Soort veld"
+
+#. module: ai
+#: model:ir.model,name:ai.model_ir_model_fields
+msgid "Fields"
+msgstr "Velden"
+
+#. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__type__binary
 msgid "File"
 msgstr "Bestand"
@@ -990,6 +1176,13 @@ msgstr "Bestand"
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__file_size
 msgid "File Size"
 msgstr "Bestandsgrootte"
+
+#. module: ai
+#: model:ir.model.fields,help:ai.field_ai_agent__response_style
+msgid ""
+"For thinking models (e.g. gpt-5): Analytical: Medium thinking, Balanced: Low "
+"thinking, Creative: Minimal thinking"
+msgstr ""
 
 #. module: ai
 #. odoo-javascript
@@ -1003,7 +1196,7 @@ msgid "Get help on a record"
 msgstr "Krijg hulp bij een record"
 
 #. module: ai
-#: model:ir.model.fields.selection,name:ai.selection__ai_embedding__embedding_model__gemini-embedding-001
+#: model:ir.model.fields.selection,name:ai.selection__ai_embedding__embedding_model__gemini-embedding-2
 msgid "Google"
 msgstr "Google"
 
@@ -1020,7 +1213,7 @@ msgstr "HTTP routing"
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__has_embedding_generation_failed
 msgid "Has Embedding Generation Failed"
-msgstr ""
+msgstr "Heeft Embeddinggeneratie mislukt"
 
 #. module: ai
 #. odoo-javascript
@@ -1039,6 +1232,7 @@ msgstr "Hallo, waarmee kan ik je helpen?"
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__id
 #: model:ir.model.fields,field_description:ai.field_ir_attachment__id
 #: model:ir.model.fields,field_description:ai.field_ir_http__id
+#: model:ir.model.fields,field_description:ai.field_ir_model_fields__id
 #: model:ir.model.fields,field_description:ai.field_mail_composer_mixin__id
 #: model:ir.model.fields,field_description:ai.field_mail_render_mixin__id
 #: model:ir.model.fields,field_description:ai.field_mail_template__id
@@ -1058,7 +1252,7 @@ msgstr ""
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_agent_source__is_active
 msgid "If the source is active, it will be used in the RAG context."
-msgstr ""
+msgstr "Als de bron actief is, wordt deze gebruikt in de RAG-context."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__image_128
@@ -1134,7 +1328,7 @@ msgstr "Ongeldige zoekoperator."
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__is_ask_ai_agent
 msgid "Is Natural Language Query Agent"
-msgstr ""
+msgstr "Is agent voor zoekopdrachten in natuurlijke taal"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__is_system_default
@@ -1149,6 +1343,8 @@ msgid ""
 "JSON containing the values that can be returned by the LLM along with their "
 "properties (type, length, ...)"
 msgstr ""
+"JSON die de waarden bevat die door de LLM kunnen worden geretourneerd, samen "
+"met hun eigenschappen (type, lengte, ...)"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
@@ -1258,7 +1454,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/ai/utils/llm_providers.py:0
 msgid "No embedding configuration found for the provider"
-msgstr ""
+msgstr "Er is geen embeddingconfiguratie gevonden voor de provider"
 
 #. module: ai
 #. odoo-python
@@ -1281,7 +1477,7 @@ msgstr "Geen provider gevonden voor het geselecteerde model"
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
 msgid "No tool was executed."
-msgstr ""
+msgstr "Er is geen tool uitgevoerd."
 
 #. module: ai
 #. odoo-javascript
@@ -1322,7 +1518,7 @@ msgstr "Alleen beheerders kunnen bronnen maken van URL's."
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
 msgid "Oops, it looks like our AI is unreachable"
-msgstr ""
+msgstr "Oeps, het lijkt erop dat onze AI onbereikbaar is"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_embedding__embedding_model__text-embedding-3-small
@@ -1349,7 +1545,7 @@ msgstr "Plak je links, één per regel"
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "Pretty Edit"
-msgstr ""
+msgstr "Geavanceerde bewerking"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__processing
@@ -1472,7 +1668,7 @@ msgstr "Serveractie"
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
 msgid "Share by email"
-msgstr "Delen per e-mail"
+msgstr "Delen via e-mail"
 
 #. module: ai
 #. odoo-javascript
@@ -1594,7 +1790,7 @@ msgstr "De actie '%s' kan niet worden gebruikt als AI-tool."
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_composer__name
 msgid "The identifier for the interface component to agent rule"
-msgstr ""
+msgstr "De identifier voor het onderdeel van de interface naar agentregel"
 
 #. module: ai
 #. odoo-javascript
@@ -1618,6 +1814,7 @@ msgstr "De prompt die naar AI wordt gestuurd als erop wordt geklikt"
 #: code:addons/ai/utils/html_extractor.py:0
 msgid "The site's rules (robots.txt) prevent reading this page."
 msgstr ""
+"De regels van de site (robots.txt) verhinderen het lezen van deze pagina."
 
 #. module: ai
 #. odoo-python
@@ -1658,6 +1855,9 @@ msgid ""
 "This tool is automatically provided with `__end_message` param which when "
 "provided, the LLM processing loop is terminated."
 msgstr ""
+"Deze tool wordt automatisch voorzien van de parameter `__end_message`. "
+"Wanneer deze parameter wordt opgegeven, wordt de LLM-verwerkingslus "
+"beëindigd."
 
 #. module: ai
 #. odoo-javascript
@@ -1703,7 +1903,6 @@ msgstr "Onderwerpen"
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
-#, fuzzy
 msgid "Transcript"
 msgstr "Transcript"
 
@@ -1766,13 +1965,13 @@ msgstr "URL"
 #. odoo-python
 #: code:addons/ai/utils/html_extractor.py:0
 msgid "URL %(url)s returned non-HTML content: %(content_type)s"
-msgstr ""
+msgstr "URL %(url)s gaf niet-HTML-inhoud als resultaat: %(content_type)s"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/html_extractor.py:0
 msgid "URL %s returned empty content"
-msgstr ""
+msgstr "URL %s heeft lege inhoud als resultaat opgeleverd"
 
 #. module: ai
 #. odoo-javascript
@@ -1836,6 +2035,12 @@ msgstr "Gebruikersfout"
 #: code:addons/ai/static/src/im_status_patch.xml:0
 msgid "User is online"
 msgstr "Gebruiker is online"
+
+#. module: ai
+#. odoo-python
+#: code:addons/ai/models/ai_agent.py:0
+msgid "Using %(llm_model_label)s based on your agent setup."
+msgstr ""
 
 #. module: ai
 #. odoo-javascript
@@ -1910,6 +2115,41 @@ msgstr "uitgevoerd."
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "fa-hashtag"
 msgstr "fa-hashtag"
+
+#. module: ai
+#: model:ir.model.fields.selection,name:ai.selection__ir_model_fields__ttype__vector
+msgid "vector"
+msgstr "vector"
+
+#~ msgid ""
+#~ "\n"
+#~ "            **Tool Name: Read group**\n"
+#~ "\n"
+#~ "            Searches a particular model using a domain. The provided "
+#~ "domain must be in valid JSON format.\n"
+#~ "        "
+#~ msgstr ""
+#~ "\n"
+#~ "            **Toolnaam: Groep lezen**\n"
+#~ "\n"
+#~ "            Zoekt een specifiek model aan de hand van een domein. Het "
+#~ "opgegeven domein moet een geldig JSON-formaat zijn.\n"
+#~ "        "
+
+#~ msgid ""
+#~ "\n"
+#~ "            **Tool Name: search**\n"
+#~ "\n"
+#~ "            Searches a particular model using a domain. The provided "
+#~ "domain must be in valid JSON format.\n"
+#~ "        "
+#~ msgstr ""
+#~ "\n"
+#~ "            **Toolnaam: zoeken**\n"
+#~ "\n"
+#~ "            Zoekt een specifiek model aan de hand van een domein. Het "
+#~ "opgegeven domein moet een geldig JSON-formaat hebben.\n"
+#~ "        "
 
 #~ msgid "An error occurred while generating the AI response."
 #~ msgstr ""

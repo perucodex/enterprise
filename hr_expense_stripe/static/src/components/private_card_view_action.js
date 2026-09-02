@@ -37,7 +37,7 @@ class PrivateCardViewDialog extends Component {
             ephemeralKey: undefined,
             nonce: undefined,
             session: undefined,
-            phone_number_last3: _t("(Fetching...)"),
+            message: _t("Enter the code we sent to the cardholder's phone or email: Fetching ..."),
             card: {
                 name: _t("Cardholder Name"),
                 number: "**** **** **** 1234",
@@ -144,27 +144,25 @@ class PrivateCardViewDialog extends Component {
         cardCvcElement.focus = () => {};
         cardCvcElement.mount(this.cvcPlaceholder.el);
 
-        if (this.state.card.card_type === "physical") {
-            let cardPinElement = elements.create(
-                "issuingCardPinDisplay",
-                {
-                    issuingCard: this.stripe_id,
-                    nonce: this.state.nonce,
-                    ephemeralKeySecret: this.state.ephemeralKey,
-                    style: {
-                        base: {
-                            color: cookie.get("color_scheme") === "dark" ? '#fff' : '#000',
-                            fontWeight: 400,
-                            fontSize: '14px',
-                            alignSelf: 'center'
-                        },
-                    }
+        let cardPinElement = elements.create(
+            "issuingCardPinDisplay",
+            {
+                issuingCard: this.stripe_id,
+                nonce: this.state.nonce,
+                ephemeralKeySecret: this.state.ephemeralKey,
+                style: {
+                    base: {
+                        color: cookie.get("color_scheme") === "dark" ? '#fff' : '#000',
+                        fontWeight: 400,
+                        fontSize: '14px',
+                        alignSelf: 'center'
+                    },
                 }
-            );
-            // Small Fix as sometimes when we click on the numbers it calls focus which is not available for issuing elements
-            cardPinElement.focus = () => {};
-            cardPinElement.mount(this.pinPlaceholder.el);
-        }
+            }
+        );
+        // Small Fix as sometimes when we click on the numbers it calls focus which is not available for issuing elements
+        cardPinElement.focus = () => {};
+        cardPinElement.mount(this.pinPlaceholder.el);
 
         //Copy buttons
         let cardNumberCopyElement = elements.create(
@@ -208,7 +206,17 @@ class PrivateCardViewDialog extends Component {
     async send2FARequest() {
         const phoneResult = await this.ormCardCall("action_send_iap_2fa_code");
         this.state.session = phoneResult.session_id;
-        this.state.phone_number_last3 = phoneResult.phone_number_last3;
+        if (phoneResult.phone_number_last3) {
+            this.state.message = _t(
+                "Enter the code we sent to the cardholder's phone number ending in %(phone)s.",
+                { phone: phoneResult.phone_number_last3 },
+            );
+        } else if (phoneResult.sanitized_email) {
+            this.state.message = _t(
+                "Enter the code we sent to the cardholder's email %(email)s.",
+                { email: phoneResult.sanitized_email },
+            );
+        }
     }
 
     async requestEphemeralKey(code) {

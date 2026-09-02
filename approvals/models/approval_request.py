@@ -248,7 +248,7 @@ class ApprovalRequest(models.Model):
 
     def action_cancel(self):
         self.sudo()._get_user_approval_activities(user=self.env.user).unlink()
-        self.mapped('approver_ids').write({'status': 'cancel'})
+        self.sudo().mapped('approver_ids').write({'status': 'cancel'})
 
     @api.depends_context('uid')
     @api.depends('approver_ids.status')
@@ -279,7 +279,10 @@ class ApprovalRequest(models.Model):
             request.request_status = status
 
             # Send approval accepted/refused message
-            if status != old_status and status in ('approved', 'refused') and request.request_owner_id.partner_id:
+            if (request.id
+                and status != old_status
+                and status in ('approved', 'refused')
+                and request.request_owner_id.partner_id):
                 if status == 'approved':
                     body = _("The request created on %(create_date)s by %(request_owner)s has been approved.",
                             create_date=request.create_date.date(),

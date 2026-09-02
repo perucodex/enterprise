@@ -146,7 +146,7 @@ class HrLeave(models.Model):
                     if next_work_entry.work_entry_type_id.code != "WORK100":
                         continue
                     if not float_compare(next_work_entry.duration, work_entry.duration, 2):
-                        if next_work_entry.duration > current_leave_hours_to_defer:
+                        if float_compare(next_work_entry.duration, current_leave_hours_to_defer, 2) == 1:
                             # This is required for half-day or hourly leaves.
                             # The work entry must be split according to the exact leave duration.
                             next_work_entry.action_split({
@@ -194,9 +194,11 @@ class HrLeave(models.Model):
         ])
         for leave in self:
             if any(
+                    leave.state == 'validate' and
                     p.employee_id == leave.employee_id and
                     p.date_from <= leave.date_to.date() and
                     p.date_to >= leave.date_from.date() and
+                    p.done_date > leave.create_date and
                     p.is_regular
                     for p in payslips
             ):

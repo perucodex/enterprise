@@ -71,8 +71,8 @@ class AccountBatchPayment(models.Model):
                     batch.bacs_expiry_date = batch.bacs_processing_date + relativedelta(days=90)
             if not company.bacs_sun:
                 raise UserError(_("The company '%s' requires a SUN to generate BACS files. Please configure it first.", company.name))
-            if batch.journal_id.bank_account_id.acc_type != 'iban':
-                raise UserError(_("The account %(account)s, of journal '%(journal)s', is not of type IBAN.\nA valid IBAN account is required to use BACS features.", account=batch.journal_id.bank_account_id.acc_number, journal=batch.journal_id.name))
+            if not batch.journal_id.bank_account_id._is_valid_uk_bank_account():
+                raise UserError(_("The account %(account)s, of journal '%(journal)s', is not a UK bank account.\nA valid UK bank account is required to use BACS features.", account=batch.journal_id.bank_account_id.acc_number, journal=batch.journal_id.name))
             if batch.bacs_processing_date < fields.Date.today():
                 raise UserError(_("The processing date cannot be in the past."))
 
@@ -162,7 +162,9 @@ class AccountBatchPayment(models.Model):
                 'payment_type' : payment.payment_type,
                 'ref' : payment.name,
                 'partner_name' : payment.partner_id.name,
-                'partner_bank_iban': payment.partner_bank_id.sanitized_acc_number,
+                'partner_bank_iban': payment.partner_bank_id.sanitized_acc_number if payment.partner_bank_id.acc_type == 'iban' else False,
+                'partner_account_number': payment.partner_bank_id.sanitized_acc_number,
+                'partner_sort_code': payment.partner_bank_id.clearing_number,
             }
 
             payment_dicts.append(payment_dict)

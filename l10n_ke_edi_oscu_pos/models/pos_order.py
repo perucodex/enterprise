@@ -116,7 +116,7 @@ class PosOrder(models.Model):
         """ Return the values that should be sent to eTIMS for the lines in self. """
         self.ensure_one()
         lines_values = []
-        for index, line in enumerate(self.lines):
+        for index, line in enumerate(self.lines.filtered(lambda l: l.product_id.type != 'combo')):
             product = line.product_id  # for ease of reference
             product_uom_qty = line.product_uom_id._compute_quantity(line.qty, product.uom_id)
 
@@ -170,7 +170,8 @@ class PosOrder(models.Model):
         self.l10n_ke_oscu_confirmation_datetime = fields.Datetime.now()
         confirmation_datetime = format_etims_datetime(self.l10n_ke_oscu_confirmation_datetime)
         order_date = (self.date_order and self.date_order.strftime('%Y%m%d')) or ''
-        order_number = self.sequence_number
+        # For a refund, eTIMS needs the KRA invoice number of the order being refunded, not this order's own number.
+        order_number = self.refunded_order_id.l10n_ke_oscu_order_number if self.refunded_order_id else self.sequence_number
         line_items = self._l10n_ke_oscu_get_json_from_order_lines()
 
         tax_codes, tax_rates, taxable_amounts, tax_amounts = self.env["account.move"]._get_taxes_data(line_items)
@@ -178,7 +179,7 @@ class PosOrder(models.Model):
         content = {
             'invcNo':           '',                                         # KRA Invoice Number (set at the point of sending)
             'trdInvcNo':        (self.name or '')[:50],                     # Trader system pos order number
-            'orgInvcNo':        order_number,                               # Original pos order number
+            'orgInvcNo':        order_number,                               # Original pos order number (or original invoice number if a refund)
             'cfmDt':            confirmation_datetime,                      # Validated date
             'pmtTyCd':          self.l10n_ke_payment_method_id.code or '',  # Payment type code
             'rcptTyCd': 'S' if not self.refunded_order_id else 'R',         # Receipt code
@@ -246,7 +247,7 @@ class PosOrder(models.Model):
 
     def _get_l10n_ke_edi_oscu_pos_qrurl(self):
         self.ensure_one()
-        res = self._l10n_ke_oscu_get_receipt_url() if self.l10n_ke_order_send_status == 'sent' else None
+        res = self._l10n_ke_oscu_get_receipt_url() if self.l10n_ke_oscu_signature else None
         return res
 
     def _l10n_ke_oscu_get_receipt_url(self):

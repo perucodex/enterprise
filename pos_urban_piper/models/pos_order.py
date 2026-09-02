@@ -53,7 +53,7 @@ class PosOrder(models.Model):
             'metadata': {},
         }
         if lopc.get('urbanpiper_printed', False):
-            raise ValueError("This delivery order has already been printed automatically.")
+            return False
 
         lopc['urbanpiper_printed'] = True
         self.last_order_preparation_change = json.dumps(lopc)

@@ -11,6 +11,7 @@ export class AccountReportController {
         this.actionService = useService("action");
         this.dialog = useService("dialog");
         this.orm = useService("orm");
+        this.ui = useService("ui");
         this.chatterState = useState({
             model: undefined,
             id: undefined,
@@ -51,12 +52,14 @@ export class AccountReportController {
         this.reportLoadingPromise = this.displayReport(mainReportOptions['report_id']);
         this.preLoadClosedSections();
 
-        const chatterState = JSON.parse(
-            browser.sessionStorage.getItem(this.sessionChatterStateID())
-        );
-        this.chatterState.model = chatterState?.model;
-        this.chatterState.id = chatterState?.id;
-        this.chatterState.lineId = chatterState?.lineId;
+        if (!this.ui.isSmall) {
+            const chatterState = JSON.parse(
+                browser.sessionStorage.getItem(this.sessionChatterStateID())
+            );
+            this.chatterState.model = chatterState?.model;
+            this.chatterState.id = chatterState?.id;
+            this.chatterState.lineId = chatterState?.lineId;
+        }
     }
 
     getCacheKey(sectionsSourceId, reportId) {
@@ -83,7 +86,7 @@ export class AccountReportController {
     serverCallResultCanBeSetAsActive(callResult, options, cacheKey) {
         return callResult !== undefined
             && this.loadingCallNumberByCacheKey[cacheKey] === options["loading_call_number"]
-            && (this.lastOpenedSectionByReport === {} || this.lastOpenedSectionByReport[options['selected_variant_id']] === options['selected_section_id']);
+            && (!Object.keys(this.lastOpenedSectionByReport).length || this.lastOpenedSectionByReport[options['selected_variant_id']] === options['selected_section_id']);
     }
 
     async loadInformationMap(options, cacheKey) {
@@ -96,6 +99,7 @@ export class AccountReportController {
             this.loadingData = false;
             this.options = options;
             this.data = informationMap;
+            this.displayReportAsyncLoadingWarning();
 
             // If there is a specific order for lines in the options, we want to use it by default
             if (this.areLinesOrdered()) {
@@ -114,6 +118,17 @@ export class AccountReportController {
 
         if (this.loadingData) {
             this.data = undefined;
+        }
+    }
+
+    async displayReportAsyncLoadingWarning() {
+        // Wait for 200 ms to prevent the warning banner from flickering if the report loads quickly.
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        if (this.asyncDataLoading) {
+            this.data.warnings["account_reports.report_info_being_loaded"] = {
+                alert_type: "warning",
+            };
         }
     }
 
@@ -139,6 +154,8 @@ export class AccountReportController {
     }
 
     async preLoadClosedSections() {
+        if (this.destroyed) return;
+
         let sectionLoaded = false;
         for (const section of this.options['sections']) {
             // Preload the first non-loaded section we find amongst this report's sections.
@@ -165,17 +182,30 @@ export class AccountReportController {
 
         const cacheKey = this.getCacheKey(options['sections_source_id'], reportToDisplayId)
         if (!this.reportInformationMap[cacheKey]) {
-            this.reportInformationMap[cacheKey] = this.orm.call(
-                "account.report",
-                options.readonly_query ? "get_report_information_readonly" : "get_report_information",
-                [
-                    reportToDisplayId,
-                    options,
-                ],
-                {
-                    context: this.action.context,
-                },
-            );
+            this.asyncDataLoading = true;
+            this.reportInformationMap[cacheKey] = this.orm
+                .cache({
+                    type: "disk",
+                    update: "always",
+                    callback: (result, hasChanged) => {
+                        this.asyncDataLoading = false;
+                        delete this.data?.warnings?.["account_reports.report_info_being_loaded"];
+                        if (hasChanged) {
+                            this.reportInformationMap[cacheKey] = Promise.resolve(result);
+                            this.loadInformationMap(options, cacheKey);
+                        }
+                    },
+                })
+                .call(
+                    "account.report",
+                    options.readonly_query
+                        ? "get_report_information_readonly"
+                        : "get_report_information",
+                    [reportToDisplayId, options],
+                    {
+                        context: this.action.context,
+                    }
+                );
         }
 
         if (!preloading) {
@@ -321,6 +351,10 @@ export class AccountReportController {
     //------------------------------------------------------------------------------------------------------------------
     get needsColumnPercentComparison() {
         return this.options.column_percent_comparison === "growth";
+    }
+
+    get needsAnalyticCoverageColumn() {
+        return this.options.column_percent_comparison === "analytic_coverage";
     }
 
     get hasCustomSubheaders() {
@@ -494,40 +528,74 @@ export class AccountReportController {
     }
 
     async unfoldNewLine(lineIndex) {
+        const applyNewLines = (newLines) => {
+            if (this.areLinesOrdered()) {
+                this.updateLinesOrderIndexes(lineIndex, newLines, false);
+            }
+
+            this.insertLinesAfter(lineIndex, newLines);
+
+            const totalIndex = lineIndex + newLines.length + 1;
+
+            if (
+                this.filters.show_totals &&
+                this.lines[totalIndex] &&
+                this.isTotalLine(totalIndex)
+            ) {
+                this.lines[totalIndex].visible = true;
+            }
+
+            // Update options
+            this.options.unfolded_lines.push(
+                ...newLines.filter((line) => line.unfolded).map(({ id }) => id)
+            );
+
+            this.saveSessionOptions(this.options);
+            return totalIndex;
+        };
+
         const options = await this.options;
-        const newLines = await this.orm.call(
-            "account.report",
-            options.readonly_query ? "get_expanded_lines_readonly" : "get_expanded_lines",
-            [
-                this.options['report_id'],
-                this.options,
-                this.lines[lineIndex].id,
-                this.lines[lineIndex].groupby,
-                this.lines[lineIndex].expand_function,
-                this.lines[lineIndex].progress,
-                0,
-                this.lines[lineIndex].horizontal_split_side,
-            ],
-        );
+        const newLines = await this.orm
+            .cache({
+                type: "disk",
+                update: "always",
+                callback: (result, hasChanged) => {
+                    if (hasChanged) {
+                        // Remove previously cached lines.
+                        let nextIndex = lineIndex + 1;
+                        while (this.isNextLineChild(nextIndex, this.lines[lineIndex].id)) {
+                            nextIndex += 1;
+                        }
+                        if (this.isTotalLine(nextIndex - 1)) {
+                            nextIndex -= 1;
+                        }
+                        const numberOfChildren = nextIndex - lineIndex - 1;
+                        this.lines.splice(lineIndex + 1, numberOfChildren);
 
-        if (this.areLinesOrdered()) {
-            this.updateLinesOrderIndexes(lineIndex, newLines, false)
-        }
-        this.insertLinesAfter(lineIndex, newLines);
+                        const lastLineIndex = applyNewLines(result);
+                        this.loadAnnotations(lineIndex + 1, lastLineIndex);
+                        this.setLineVisibility(this.lines.slice(lineIndex + 1, lastLineIndex));
+                    }
+                },
+            })
+            .call(
+                "account.report",
+                options.readonly_query ? "get_expanded_lines_readonly" : "get_expanded_lines",
+                [
+                    this.options["report_id"],
+                    this.options,
+                    this.lines[lineIndex].id,
+                    this.lines[lineIndex].groupby,
+                    this.lines[lineIndex].expand_function,
+                    this.lines[lineIndex].progress,
+                    0,
+                    this.lines[lineIndex].horizontal_split_side,
+                ]
+            );
 
-        const totalIndex = lineIndex + newLines.length + 1;
+        const totalIndex = applyNewLines(newLines);
 
-        if (this.filters.show_totals && this.lines[totalIndex] && this.isTotalLine(totalIndex))
-            this.lines[totalIndex].visible = true;
-
-        // Update options
-        this.options.unfolded_lines.push(
-            ...newLines.filter(line => line.unfolded).map(({ id }) => id)
-        );
-
-        this.saveSessionOptions(this.options);
-
-        return totalIndex
+        return totalIndex;
     }
 
     /**
@@ -564,24 +632,31 @@ export class AccountReportController {
 
     async unfoldLine(lineIndex) {
         const targetLine = this.lines[lineIndex];
-        let lastLineIndex = lineIndex + 1;
 
-        const isLoadedLine = this.isLoadedLine(lineIndex);
-        if (isLoadedLine) {
-            lastLineIndex = await this.unfoldLoadedLine(lineIndex);
-        } else if (targetLine.expand_function) {
-            lastLineIndex = await this.unfoldNewLine(lineIndex);
-            this.loadAnnotations(lineIndex + 1, lastLineIndex);
+        // Prevent concurrent unfold calls for the same line (e.g. from rapid clicks or a slow connection).
+        if (targetLine.unfolding) return;
+        targetLine.unfolding = true;
+
+        try {
+            let lastLineIndex = lineIndex + 1;
+            if (this.isLoadedLine(lineIndex)) {
+                lastLineIndex = await this.unfoldLoadedLine(lineIndex);
+            } else if (targetLine.expand_function) {
+                lastLineIndex = await this.unfoldNewLine(lineIndex);
+                this.loadAnnotations(lineIndex + 1, lastLineIndex);
+            }
+
+            this.setLineVisibility(this.lines.slice(lineIndex + 1, lastLineIndex));
+            targetLine.unfolded = true;
+
+            // Update options
+            if (!this.options.unfolded_lines.includes(targetLine.id))
+                this.options.unfolded_lines.push(targetLine.id);
+
+            this.saveSessionOptions(this.options);
+        } finally {
+            targetLine.unfolding = false;
         }
-
-        this.setLineVisibility(this.lines.slice(lineIndex + 1, lastLineIndex));
-        targetLine.unfolded = true;
-
-        // Update options
-        if (!this.options.unfolded_lines.includes(targetLine.id))
-            this.options.unfolded_lines.push(targetLine.id);
-
-        this.saveSessionOptions(this.options);
     }
 
     foldLine(lineIndex) {
@@ -737,14 +812,7 @@ export class AccountReportController {
         this.chatterState.model = undefined;
         this.chatterState.id = undefined;
         this.chatterState.lineId = undefined;
-        browser.sessionStorage.setItem(
-            this.sessionChatterStateID(),
-            JSON.stringify({
-                model: this.chatterState.model,
-                id: this.chatterState.id,
-                lineId: this.chatterState.lineId,
-            })
-        );
+        browser.sessionStorage.removeItem(this.sessionChatterStateID());
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -793,7 +861,8 @@ export class AccountReportController {
 
         const number_figure_types = ['integer', 'float', 'monetary', 'percentage'];
         reversed_lines.forEach((line) => {
-            const isZero = line.columns.every(column => !number_figure_types.includes(column.figure_type) || column.is_zero);
+            const isLoadMoreLine = line.id.includes("|load_more~~");
+            const isZero = !isLoadMoreLine && line.columns.every(column => Object.keys(column).length && (!number_figure_types.includes(column.figure_type) || column.is_zero));
 
             // If the line has no visible children and all the columns are equals to zero then the line needs to be hidden
             if (!hasVisibleChildren.has(line.id) && isZero) {
@@ -807,6 +876,17 @@ export class AccountReportController {
                 hasVisibleChildren.add(line.parent_id);
             }
         })
+    }
+
+    isHiddenBySearchFilter(lineId = null) {
+        if (!("lines_searched" in this))
+            return false;
+
+        for (let searchLineId of this.lines_searched)
+            if (this.isLineRelatedTo(searchLineId, lineId) || lineId === searchLineId)
+                return false;
+
+        return true;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -849,7 +929,7 @@ export class AccountReportController {
                 callOnSectionsSource,
             ],
             {
-                context: Object.assign({}, this.context, actionContext)
+                context: Object.assign({}, this.action.context, actionContext)
             }
         );
         if (dispatchReportAction?.help) {

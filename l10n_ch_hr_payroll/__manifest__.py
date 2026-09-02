@@ -31,6 +31,7 @@ Switzerland Payroll Rules.
         'data/hr_payslip_input_type_data.xml',
         'data/hr_salary_rule_data.xml',
         'data/hr_contract_type_data.xml',
+        'data/hr_payroll_dashboard_warning_data.xml',
         'views/hr_employee_views.xml',
         'views/hr_contract_template_views.xml',
         'views/l10n_ch_transmitter_mixin_views.xml',

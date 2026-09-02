@@ -11,6 +11,7 @@ from odoo.tools import create_index
 class L10n_AuPayslipYtd(models.Model):
     _name = 'l10n_au.payslip.ytd'
     _description = "YTD Opening Balances"
+    _order = "sequence, id"
 
     name = fields.Char(string="Description", compute="_compute_name", required=True)
     start_date = fields.Date(string="Fiscal Start Date", inverse="_fiscal_start_date", required=True, help="The date should be the start of the fiscal year.")
@@ -30,6 +31,7 @@ class L10n_AuPayslipYtd(models.Model):
         required=True,
     )
     rule_id = fields.Many2one("hr.salary.rule", string="Salary Rule", required=True)
+    sequence = fields.Integer(related="rule_id.sequence", string="Sequence")
     requires_inputs = fields.Boolean("Requires Inputs")
     l10n_au_payslip_ytd_input_ids = fields.One2many("l10n_au.payslip.ytd.input", "l10n_au_payslip_ytd_id", string="Inputs")
     start_value = fields.Monetary(string="Start Value")
@@ -94,7 +96,7 @@ class L10n_AuPayslipYtd(models.Model):
         for rec in self:
             start_date = self._get_start_date(rec.start_date)
             end_date = start_date + relativedelta(years=1, days=-1)
-            if self.env["hr.payslip"].search_count([
+            if not self.env.context.get("allow_regenerate") and self.env["hr.payslip"].search_count([
                 ("employee_id", "=", rec.employee_id.id),
                 ("state", "in", ("validated", "paid")),
                 ("date_from", "<=", end_date),
@@ -125,6 +127,12 @@ class L10n_AuPayslipYtd(models.Model):
         self.write({
             "finalised": True
         })
+
+    @api.model
+    def action_regenerate_ytd_values(self, kwargs=None):
+        grouped_ytd = self._read_group([("finalised", "=", False)], ["start_date:day"], ["employee_id:recordset"])
+        for start_date, employees in grouped_ytd:
+            self.env.company._regenerate_ytd_values(employees, start_date)
 
     @api.model
     def _get_ote_total(self, employee_ids, start_date):

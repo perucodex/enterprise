@@ -124,6 +124,7 @@ test("No preview on small devices", async () => {
                 groupby_read_specification: {},
                 context: {
                     ...userContext(),
+                    bin_size: true,
                     read_group_expand: true,
                     group_by: ["move_id"],
                 },
@@ -217,6 +218,7 @@ test("Fetch and preview of attachments on big devices", async () => {
                 groupby_read_specification: {},
                 context: {
                     ...userContext(),
+                    bin_size: true,
                     read_group_expand: true,
                     group_by: ["move_id"],
                 },

@@ -10,9 +10,13 @@ patch(Composer.prototype, {
         super.saveContent();
     },
     onFocusin(ev) {
-        super.onFocusin();
+        super.onFocusin(ev);
         if (this.thread?.channel_type === "ai_chat") {
-            ev.target.select();
+            if (this.composerService.htmlEnabled) {
+                this.editor?.shared.selection.focusEditable();
+            } else {
+                ev.target.select();
+            }
         }
     },
     get wysiwygConfig() {

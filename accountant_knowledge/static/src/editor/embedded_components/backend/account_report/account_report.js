@@ -1,4 +1,5 @@
 import { Component } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
 import { getEmbeddedProps } from "@html_editor/others/embedded_component_utils";
 import { useService } from "@web/core/utils/hooks";
 
@@ -34,8 +35,14 @@ export class AccountReportComponent extends Component {
 export const accountReportEmbedding = {
     name: "accountReport",
     Component: AccountReportComponent,
-    getProps: (host) => ({
-        ...getEmbeddedProps(host),
-        host,
-    }),
+    getProps: (host) => {
+        const props = {
+            ...getEmbeddedProps(host),
+            host
+        };
+        if (props.name) {
+            props.name = _t(props.name);
+        }
+        return props;
+    },
 };

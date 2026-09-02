@@ -29,7 +29,14 @@ class AccountJournal(models.Model):
 
     def _check_zengin(self, zengin_string):
         # Match the first 59 characters of the Zengin file, as defined by the zengin specifications
-        return re.match(r'10[13]0\d{6}\d{6}\d{6}\d{4}[ \uFF5F-\uFF9F]{15}\d{3}[ \uFF5F-\uFF9F]{15}', zengin_string) is not None
+        allowed_chars = r'[ 0-9A-Z\uFF5F-\uFF9F\\,./()-]'
+        pattern = (
+            r'10[13]0\d{6}\d{6}\d{6}\d{4}'
+            + allowed_chars + r'{15}'
+            + r'\d{3}'
+            + allowed_chars + r'{15}'
+        )
+        return re.match(pattern, zengin_string) is not None
 
     def _parse_bank_statement_file(self, raw_file):
         record_data = False

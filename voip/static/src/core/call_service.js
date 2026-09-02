@@ -2,6 +2,7 @@ import { registry } from "@web/core/registry";
 
 export class CallService {
     missedCalls = 0;
+    _startPromises = new WeakMap();
 
     constructor(env, services) {
         this.env = env;
@@ -66,6 +67,18 @@ export class CallService {
     }
 
     async start(call) {
+        let startPromise = this._startPromises.get(call);
+        if (!startPromise) {
+            startPromise = this._start(call).catch((error) => {
+                this._startPromises.delete(call);
+                throw error;
+            });
+            this._startPromises.set(call, startPromise);
+        }
+        return startPromise;
+    }
+
+    async _start(call) {
         this.store.insert(await this.orm.call("voip.call", "start_call", [[call.id]]));
         call.timer = {};
         // Use the time from the client (rather than call.start_date) to avoid

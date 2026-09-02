@@ -33,6 +33,21 @@
         <field name="date_from" eval="datetime(2023, 1, 1).date()"/>
     </record>
 
+    <record id="rule_parameter_federal_qualified_overtime_deduction_cap" model="hr.rule.parameter">
+        <field name="name">US: Qualified Overtime Deduction Cap</field>
+        <field name="code">l10n_us_qualified_overtime_deduction_cap</field>
+        <field name="country_id" ref="base.us"/>
+        <field name="description" type="html">
+            <p>Specifies the maximum annual amount of qualified overtime pay(the 0.5x premium portion of time‑and‑a‑half wages) eligible for the
+            federal tax deduction under the One Big Beautiful Bill Act. Used for tracking and reporting purposes in payroll calculations.</p>
+        </field>
+    </record>
+    <record id="rule_parameter_federal_qualified_overtime_deduction_cap_2025" model="hr.rule.parameter.value">
+        <field name="rule_parameter_id" ref="rule_parameter_federal_qualified_overtime_deduction_cap"/>
+        <field name="date_from" eval="datetime(2025, 1, 1).date()"/>
+        <field name="parameter_value">{'single': 12500, 'jointly':25000}</field>
+    </record>
+
     <record id="rule_parameter_co_income_tax_rate" model="hr.rule.parameter">
         <field name="name">US: Colorado Income Tax Rate</field>
         <field name="code">l10n_us_co_income_tax_rate</field>

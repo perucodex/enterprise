@@ -1058,6 +1058,11 @@ class KnowledgeArticle(models.Model):
 
     @api.autovacuum
     def _gc_trashed_articles(self):
+        return self.with_context(active_test=False).search(
+            self._get_gc_trashed_articles_domain(), limit=100
+        ).unlink()
+
+    def _get_gc_trashed_articles_domain(self):
         limit_days = self.env["ir.config_parameter"].sudo().get_param(
             "knowledge.knowledge_article_trash_limit_days"
         )
@@ -1066,8 +1071,10 @@ class KnowledgeArticle(models.Model):
         except ValueError:
             limit_days = self.DEFAULT_ARTICLE_TRASH_LIMIT_DAYS
         timeout_ago = datetime.utcnow() - timedelta(days=limit_days)
-        domain = [("write_date", "<", timeout_ago), ("to_delete", "=", True)]
-        return self.with_context(active_test=False).search(domain, limit=100).unlink()
+        return [
+            ("write_date", "<", timeout_ago),
+            ("to_delete", "=", True),
+        ]
 
     def action_archive(self):
         self._action_archive_articles()
@@ -1174,7 +1181,7 @@ class KnowledgeArticle(models.Model):
                 context.update({"active_id": self.id, "default_parent_id": self.id})
                 element.set("data-embedded-props", json.dumps(embedded_props))
 
-        return html.tostring(fragment, encoding="unicode")
+        return "".join(html.tostring(node, encoding="unicode") for node in fragment)
 
     # ------------------------------------------------------------
     # ACTIONS
@@ -1859,6 +1866,8 @@ class KnowledgeArticle(models.Model):
 
     def get_permission_panel_members(self):
         self.ensure_one()
+        if not self.user_has_access:
+            return []
         res_partner_fields_list = [('name', 'name'), ('partner_share', 'partner_share'), ('id', 'partner_id')]
         if self.env.user._is_internal():
             res_partner_fields_list.append(('email', 'email'))
@@ -2909,8 +2918,9 @@ class KnowledgeArticle(models.Model):
 
             # Create the child articles:
             child_templates = parent_template.child_ids
-            child_templates = child_templates.filtered(
-                lambda template: template.template_child_default_create)
+            if parent_article._should_load_all_annexes():
+                child_templates = child_templates.filtered(
+                    lambda template: template.template_child_default_create)
             child_templates = child_templates.sorted(
                 lambda template: (template.write_date, template.id))
 
@@ -3155,6 +3165,14 @@ class KnowledgeArticle(models.Model):
             } for stage_name, sequence, fold in [
                 (_("New"), 0, False), (_("Ongoing"), 1, False), (_("Done"), 2, True)]
             ])
+
+    def _should_load_all_annexes(self):
+        """
+        Return whether all child templates should be loaded when applying a template.
+        If True, the template_child_default_create flag is ignored.
+        """
+        self.ensure_one()
+        return True
 
     # ------------------------------------------------------------
     # TOOLS

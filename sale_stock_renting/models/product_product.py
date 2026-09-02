@@ -100,17 +100,10 @@ class ProductProduct(models.Model):
     ):
         self.ensure_one()
 
-        domain = [
-            ('is_rental', '=', True),
-            ('product_id', '=', self.id),
-            ('state', '=', 'sale'),
-        ]
+        domain = self.with_context(warehouse_id=warehouse_id)._get_qty_in_rent_domain()
 
         if ignored_soline_id:
             domain += [('id', '!=', ignored_soline_id)]
-
-        if warehouse_id:
-            domain += [('order_id.warehouse_id', '=', warehouse_id)]
 
         include_bounds = to_date == from_date
         domain += [

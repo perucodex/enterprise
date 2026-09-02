@@ -65,7 +65,7 @@ class L10n_Ph_ReportsDatFileExport(models.TransientModel):
                     'message': wizard.env._(
                         "Please note that the %(report_name)s is %(expected_period)s report, but you are exporting it for %(period)s.\n"
                         "You can change the export period using the date filter on the accounting report.",
-                        report_name=dict(wizard._fields['attachment_for'].selection)[wizard.attachment_for],
+                        report_name=dict(wizard._fields['attachment_for']._description_selection(self.env))[wizard.attachment_for],
                         expected_period=expected_period,
                         period=period_types_display_map[period_type],
                     ),

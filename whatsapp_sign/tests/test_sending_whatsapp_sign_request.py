@@ -90,3 +90,17 @@ class TestSignRequest(SignRequestCommon, WhatsAppCommon, WhatsAppSignCommon):
         ])
 
         self.assertEqual(len(refusal_messages), 3)
+
+    def test_partner_email_change_multiple_sign_requests(self):
+        """Changing a partner's email when they have sign request items from
+        multiple sign requests should not crash with a singleton error.
+        """
+        sign_request_1 = self.create_sign_request_1_role(self.partner_1, self.env['res.partner'])
+        sign_request_2 = self.create_sign_request_1_role(self.partner_1, self.env['res.partner'])
+        self.partner_1.email = 'laurie.new@example.com'
+
+        self.assertRecordValues(sign_request_1 + sign_request_2, [
+            {'state': 'sent'},
+            {'state': 'sent'}
+        ])
+        self.assertEqual(self.partner_1.email, 'laurie.new@example.com')

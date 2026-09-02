@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-30 18:42+0000\n"
-"PO-Revision-Date: 2026-01-07 18:04+0000\n"
+"POT-Creation-Date: 2026-08-21 17:44+0000\n"
+"PO-Revision-Date: 2026-08-27 10:02+0000\n"
 "Last-Translator: Bren Driesen <brdri@odoo.com>\n"
 "Language-Team: Dutch <https://translate.odoo.com/projects/odoo-19/"
 "account_asset/nl/>\n"
@@ -26,7 +26,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: account_asset
 #: model:ir.model.fields,field_description:account_asset.field_account_asset__total_depreciation_entries_count
@@ -308,7 +308,7 @@ msgstr "Activiteitsfase"
 #. module: account_asset
 #: model:ir.model.fields,field_description:account_asset.field_account_asset__activity_type_icon
 msgid "Activity Type Icon"
-msgstr "Activiteitensoort icoon"
+msgstr "Activiteitstype icoon"
 
 #. module: account_asset
 #: model_terms:ir.ui.view,arch_db:account_asset.asset_modify_form
@@ -360,7 +360,7 @@ msgid ""
 "vendor bill or a refund"
 msgstr ""
 "Er wordt een actief aangemaakt voor elk activamodel wanneer deze rekening "
-"wordt gebruikt op een leveranciersfactuur of een terugbetaling"
+"wordt gebruikt op een leveranciersfactuur of een creditfactuur"
 
 #. module: account_asset
 #. odoo-python
@@ -501,8 +501,8 @@ msgstr "Actief aangemaakt vanuit factuur: %s"
 #. module: account_asset
 #. odoo-python
 #: code:addons/account_asset/models/account_asset.py:0
-msgid "Asset disposed. %s"
-msgstr "Activum afgestoten. %s"
+msgid "Asset disposed. %(message)s"
+msgstr "Actief afgestoten. %(message)s"
 
 #. module: account_asset
 #: model:account.return.check.template,name:account_asset.account_return_check_template_asset_movement_and_accounting_treatment
@@ -518,8 +518,14 @@ msgstr "Activum gepauzeerd. %s"
 #. module: account_asset
 #. odoo-python
 #: code:addons/account_asset/models/account_asset.py:0
-msgid "Asset sold. %s"
-msgstr "Activum verkocht. %s"
+msgid "Asset sold. %(message)s See %(invoice_links)s"
+msgstr "Actief verkocht. %(message)s Zie %(invoice_links)s"
+
+#. module: account_asset
+#. odoo-python
+#: code:addons/account_asset/models/account_asset.py:0
+msgid "Asset sold: %s"
+msgstr "Actief verkocht: %s"
 
 #. module: account_asset
 #. odoo-python
@@ -749,7 +755,7 @@ msgstr "Aanmaken en bevestigen"
 #. module: account_asset
 #: model:ir.model.fields.selection,name:account_asset.selection__account_account__create_asset__draft
 msgid "Create in draft"
-msgstr "Aanmaken in concept"
+msgstr "Aanmaken als concept"
 
 #. module: account_asset
 #: model_terms:ir.actions.act_window,help:account_asset.action_account_asset_model_form
@@ -936,7 +942,7 @@ msgstr "Geef activarekening weer"
 #: model:ir.model.fields,field_description:account_asset.field_asset_modify__display_name
 #: model:ir.model.fields,field_description:account_asset.field_res_company__display_name
 msgid "Display Name"
-msgstr "Weergavenaam"
+msgstr "Schermnaam"
 
 #. module: account_asset
 #: model:ir.model.fields.selection,name:account_asset.selection__account_move__asset_move_type__disposal
@@ -1012,6 +1018,20 @@ msgid ""
 msgstr ""
 "Of wel \"Maanden\" ofwel \"Jaren\" (hoofdlettergevoelig). Geeft de "
 "tijdseenheid aan."
+
+#. module: account_asset
+#: model:account.return.check.template,description:account_asset.account_return_check_template_monitoring_of_depreciation
+msgid ""
+"Ensure compliance with local tax rules on depreciation.\n"
+"Verify that the depreciation methods, depreciation period, and start dates "
+"align with tax requirements (e.g. linear depreciation, pro rata temporis "
+"application, no double declining for tax purposes)."
+msgstr ""
+"Zorg ervoor dat je voldoet aan de lokale belastingregels voor "
+"afschrijvingen.\n"
+"Controleer of de afschrijvingsmethoden, afschrijvingstermijnen en startdata "
+"overeenkomen met de belastingvereisten (bv. lineaire afschrijving, pro rata "
+"temporis-toepassing, geen dubbele afschrijving voor belastingdoeleinden)."
 
 #. module: account_asset
 #. odoo-python
@@ -1121,7 +1141,7 @@ msgstr "Groepeer op rekening"
 #. odoo-javascript
 #: code:addons/account_asset/static/src/components/depreciation_schedule/groupby.xml:0
 msgid "Group by Asset Group"
-msgstr "Groepeer per activagroep"
+msgstr "Groeperen op activagroep"
 
 #. module: account_asset
 #: model:ir.model.fields,field_description:account_asset.field_account_asset__has_message
@@ -1181,7 +1201,7 @@ msgid ""
 "depreciation."
 msgstr ""
 "Importeer de oorspronkelijke gegevens van je vaste activa en hun reeds "
-"geaccumuleerde afschrijvingen."
+"gecumuleerde afschrijvingen."
 
 #. module: account_asset
 #: model:ir.model.fields,help:account_asset.field_account_asset__already_depreciated_amount_import
@@ -1356,6 +1376,11 @@ msgstr "Activum bijwerken"
 #: model_terms:ir.ui.view,arch_db:account_asset.view_account_asset_form
 msgid "Modify Depreciation"
 msgstr "Afschrijving wijzigen"
+
+#. module: account_asset
+#: model:account.return.check.template,name:account_asset.account_return_check_template_monitoring_of_depreciation
+msgid "Monitoring of Depreciation "
+msgstr "Monitoring van afschrijvingen "
 
 #. module: account_asset
 #: model:ir.model.fields.selection,name:account_asset.selection__account_asset__method_period__1
@@ -1951,6 +1976,14 @@ msgstr ""
 "\"Afschrijvingen\" of \"Kosten\" zijn."
 
 #. module: account_asset
+#. odoo-javascript
+#: code:addons/account_asset/static/src/components/depreciation_schedule/warnings.xml:0
+msgid "The fixed asset account differs from the account on the bill. Click"
+msgstr ""
+"De rekening voor vaste activa wijkt af van de rekening op de "
+"leveranciersfactuur. Klik op"
+
+#. module: account_asset
 #: model:ir.model.fields,help:account_asset.field_account_asset__method_number
 msgid "The number of depreciations needed to depreciate your asset"
 msgstr "Het aantal afschrijvingen nodig om het activum af te schrijven"
@@ -2330,6 +2363,12 @@ msgid "gain/loss"
 msgstr "winst/verlies"
 
 #. module: account_asset
+#. odoo-javascript
+#: code:addons/account_asset/static/src/components/depreciation_schedule/warnings.xml:0
+msgid "here"
+msgstr "hier"
+
+#. module: account_asset
 #. odoo-python
 #: code:addons/account_asset/controller/asset_template_controller.py:0
 msgid "journal_id"
@@ -2406,6 +2445,12 @@ msgstr "salvage_value"
 #: code:addons/account_asset/wizard/asset_modify.py:0
 msgid "sell"
 msgstr "verkopen"
+
+#~ msgid "Asset disposed. %s"
+#~ msgstr "Activum afgestoten. %s"
+
+#~ msgid "Asset sold. %s"
+#~ msgstr "Activum verkocht. %s"
 
 #~ msgid " (%s of %s)"
 #~ msgstr " (%s van %s)"

@@ -7,14 +7,14 @@
 # Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2023
 # Ryoko Tsuda <ryoko@quartile.co>, 2023
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
-# "Junko Augias (juau)" <juau@odoo.com>, 2025.
-# Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# "Junko Augias (juau)" <juau@odoo.com>, 2025, 2026.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-09 18:43+0000\n"
-"PO-Revision-Date: 2025-12-06 09:55+0000\n"
+"POT-Creation-Date: 2026-04-10 18:45+0000\n"
+"PO-Revision-Date: 2026-08-13 03:49+0000\n"
 "Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-19/"
 "quality_control/ja/>\n"
@@ -23,7 +23,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: quality_control
 #: model_terms:ir.ui.view,arch_db:quality_control.quality_point_view_form_inherit_quality_control
@@ -46,11 +46,6 @@ msgstr "'Worksheet_%s' % object.name"
 #: model_terms:ir.ui.view,arch_db:quality_control.worksheet_page
 msgid "15.3 cm"
 msgstr "15.3 cm"
-
-#. module: quality_control
-#: model_terms:ir.ui.view,arch_db:quality_control.worksheet_page
-msgid "2023-08-15"
-msgstr "2023-08-15"
 
 #. module: quality_control
 #: model_terms:ir.ui.view,arch_db:quality_control.quality_alert_team_dashboard_view_kanban
@@ -270,7 +265,7 @@ msgstr "検査日"
 #: model:ir.model.fields,field_description:quality_control.field_stock_move_line__check_ids
 #: model:ir.model.fields,field_description:quality_control.field_stock_picking__check_ids
 msgid "Checks"
-msgstr "小切手"
+msgstr "検査"
 
 #. module: quality_control
 #: model_terms:ir.ui.view,arch_db:quality_control.quality_alert_team_dashboard_view_kanban
@@ -382,7 +377,7 @@ msgstr "現在のチェック"
 #: model:ir.model.fields,field_description:quality_control.field_quality_check_spreadsheet__current_revision_uuid
 #: model:ir.model.fields,field_description:quality_control.field_quality_spreadsheet_template__current_revision_uuid
 msgid "Current Revision Uuid"
-msgstr "現在の改訂Uuid"
+msgstr "現在のリビジョンUUID"
 
 #. module: quality_control
 #: model_terms:ir.ui.view,arch_db:quality_control.quality_spreadsheet_template_view_list
@@ -409,7 +404,7 @@ msgid ""
 "manufacturing orders."
 msgstr ""
 "適正なロジスティック工程(運送/製造オーダ)の際に自動的に品質検査が生成されるよ"
-"うに品質管理ポイントを定義しましょう"
+"うに品質検査ポイントを定義しましょう"
 
 #. module: quality_control
 #: model:ir.model.fields,help:quality_control.field_quality_check__testing_percentage_within_lot
@@ -778,7 +773,7 @@ msgstr "品質検査なし"
 #. module: quality_control
 #: model_terms:ir.actions.act_window,help:quality_control.quality_point_action
 msgid "No quality control point found"
-msgstr "品質管理ポイントがありません"
+msgstr "品質検査ポイントがありません"
 
 #. module: quality_control
 #: model:ir.model.fields,field_description:quality_control.field_quality_point__norm
@@ -801,6 +796,11 @@ msgstr "メモ"
 #: model_terms:ir.ui.view,arch_db:quality_control.quality_check_view_form
 msgid "Notes"
 msgstr "ノート"
+
+#. module: quality_control
+#: model_terms:ir.ui.view,arch_db:quality_control.quality_check_wizard_form_failure
+msgid "OK"
+msgstr "OK"
 
 #. module: quality_control
 #: model:ir.model.fields.selection,name:quality_control.selection__quality_point__measure_frequency_type__on_demand
@@ -1085,13 +1085,13 @@ msgstr "品質管理"
 #. module: quality_control
 #: model:ir.model,name:quality_control.model_quality_point
 msgid "Quality Control Point"
-msgstr "品質管理ポイント"
+msgstr "品質検査ポイント"
 
 #. module: quality_control
 #: model:ir.model.fields,field_description:quality_control.field_product_product__quality_control_point_qty
 #: model:ir.model.fields,field_description:quality_control.field_product_template__quality_control_point_qty
 msgid "Quality Control Point Qty"
-msgstr "品質管理ポイント数量"
+msgstr "品質検査ポイント数量"
 
 #. module: quality_control
 #: model:ir.model.fields,field_description:quality_control.field_product_product__quality_fail_qty
@@ -1473,8 +1473,9 @@ msgstr "単位"
 #. module: quality_control
 #. odoo-python
 #: code:addons/quality_control/models/quality_spreadsheet_template.py:0
+#, fuzzy
 msgid "Untitled spreadsheet"
-msgstr ""
+msgstr "無題スプレッドシート"
 
 #. module: quality_control
 #: model_terms:ir.ui.view,arch_db:quality_control.view_quality_check_wizard
@@ -1546,6 +1547,17 @@ msgstr "検証する前に写真を提出する必要があります。"
 #. module: quality_control
 #. odoo-python
 #: code:addons/quality_control/models/stock_picking.py:0
+#, fuzzy
+msgid ""
+"You need to supply a Lot/Serial Number for product:\n"
+"%(products)s"
+msgstr ""
+"プロダクトのロット/シリアル番号を指定する必要があります: \n"
+"%(products)s"
+
+#. module: quality_control
+#. odoo-python
+#: code:addons/quality_control/models/stock_picking.py:0
 msgid "You still need to do the quality checks!"
 msgstr "品質検査が必要です。"
 
@@ -1564,6 +1576,9 @@ msgstr "例: QAマスター"
 msgid "e.g. mycompany.com"
 msgstr "例: mycompany.com"
 
+#~ msgid "2023-08-15"
+#~ msgstr "2023-08-15"
+
 #~ msgid "Cancel"
 #~ msgstr "取消"
 
@@ -1572,9 +1587,6 @@ msgstr "例: mycompany.com"
 
 #~ msgid "In #{kanban_getcolorname(record.color.raw_value)}"
 #~ msgstr "番号{kanban_getcolorname(record.color.raw_value)}の中にあります"
-
-#~ msgid "OK"
-#~ msgstr "OK"
 
 #~ msgid "Product Unit of Measure"
 #~ msgstr "プロダクト単位"

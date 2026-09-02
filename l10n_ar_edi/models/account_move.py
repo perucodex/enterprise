@@ -103,7 +103,9 @@ class AccountMove(models.Model):
                     value = "Yes" if account.currency_id and account.currency_id != move.company_currency_id else "No"
                 move.l10n_ar_payment_foreign_currency = value
 
+    # -------------------------------------------------------------------------
     # Compute methods
+    # -------------------------------------------------------------------------
 
     @api.depends('l10n_ar_afip_result')
     def _compute_show_reset_to_draft_button(self):
@@ -133,7 +135,7 @@ class AccountMove(models.Model):
             data = {
                 'ver': 1,
                 'fecha': str(rec.invoice_date),
-                'cuit': int(rec.company_id.partner_id.l10n_ar_vat),
+                'cuit': int(cuit) if (cuit := rec.company_id.partner_id.l10n_ar_vat).isdigit() else '',
                 'ptoVta': rec.journal_id.l10n_ar_afip_pos_number,
                 'tipoCmp': int(rec.l10n_latam_document_type_id.code),
                 'nroCmp': int(self._l10n_ar_get_document_number_parts(
@@ -175,7 +177,10 @@ class AccountMove(models.Model):
         remaining = self - available_to_verify
         remaining.l10n_ar_afip_verification_type = 'not_available'
 
+    # -------------------------------------------------------------------------
     # Buttons
+    # -------------------------------------------------------------------------
+
     def _is_dummy_afip_validation(self):
         self.ensure_one()
         return self.company_id._get_environment_type() == 'testing' and \
@@ -188,7 +193,8 @@ class AccountMove(models.Model):
         sale_ar_invoices = ar_invoices.filtered(lambda x: x.move_type in ['out_invoice', 'out_refund'])
 
         # Verify only Vendor bills (only when verification is configured as 'required')
-        (ar_invoices - sale_ar_invoices)._l10n_ar_check_afip_auth_verify_required()
+        if ar_bills := ar_invoices - sale_ar_invoices:
+            ar_bills._l10n_ar_check_afip_auth_verify_required()
 
         # Send invoices to ARCA and get the return info
         ar_edi_invoices = ar_invoices.filtered(lambda x: x.journal_id.l10n_ar_afip_ws)
@@ -246,44 +252,51 @@ class AccountMove(models.Model):
 
         return validated + super(AccountMove, self - ar_edi_invoices)._post(soft=soft)
 
+    def _l10n_ar_edi_get_request_data_verify(self):
+        self.ensure_one()
+
+        if not self.l10n_ar_afip_auth_mode or not self.l10n_ar_afip_auth_code:
+            raise UserError(_('Please set AFIP Authorization Mode and Code to continue!'))
+
+        # get Issuer and Receptor depending on the document type
+        issuer, receptor = (self.commercial_partner_id, self.company_id.partner_id) \
+            if self.move_type in ['in_invoice', 'in_refund'] else (self.company_id.partner_id, self.commercial_partner_id)
+        issuer_vat = issuer.ensure_vat()
+
+        receptor_identification_code = receptor.l10n_latam_identification_type_id.l10n_ar_afip_code or '99'
+        receptor_id_number = (receptor_identification_code and str(receptor._get_id_number_sanitize()))
+
+        if self.l10n_latam_document_type_id.l10n_ar_letter in ['A', 'M'] and receptor_identification_code != '80' or not receptor_id_number:
+            raise UserError(_('For type A and M documents the receiver identification is mandatory and should be VAT'))
+
+        document_parts = self._l10n_ar_get_document_number_parts(self.l10n_latam_document_number, self.l10n_latam_document_type_id.code)
+        if not document_parts['point_of_sale'] or not document_parts['invoice_number']:
+            raise UserError(_('Point of sale and document number are required!'))
+        if not self.l10n_latam_document_type_id.code:
+            raise UserError(_('No document type selected or document type is not available for validation!'))
+        if not self.invoice_date:
+            raise UserError(_('Invoice Date is required!'))
+
+        return {
+            'CbteModo': self.l10n_ar_afip_auth_mode,
+            'CuitEmisor': issuer_vat,
+            'PtoVta': document_parts['point_of_sale'],
+            'CbteTipo': self.l10n_latam_document_type_id.code,
+            'CbteNro': document_parts['invoice_number'],
+            'CbteFch': self.invoice_date.strftime('%Y%m%d'),
+            'ImpTotal': float_repr(self.amount_total, precision_digits=2),
+            'CodAutorizacion': self.l10n_ar_afip_auth_code,
+            'DocTipoReceptor': receptor_identification_code,
+            'DocNroReceptor': receptor_id_number,
+        }
+
     def l10n_ar_verify_on_afip(self):
         """ This method let us to connect to ARCA using WSCDC webservice to verify if a vendor bill is valid on ARCA """
         for inv in self:
-            if not inv.l10n_ar_afip_auth_mode or not inv.l10n_ar_afip_auth_code:
-                raise UserError(_('Please set ARCA Authorization Mode and Code to continue!'))
-
-            # get Issuer and Receptor depending on the document type
-            issuer, receptor = (inv.commercial_partner_id, inv.company_id.partner_id) \
-                if inv.move_type in ['in_invoice', 'in_refund'] else (inv.company_id.partner_id, inv.commercial_partner_id)
-            issuer_vat = issuer.ensure_vat()
-
-            receptor_identification_code = receptor.l10n_latam_identification_type_id.l10n_ar_afip_code or '99'
-            receptor_id_number = (receptor_identification_code and str(receptor._get_id_number_sanitize()))
-
-            if inv.l10n_latam_document_type_id.l10n_ar_letter in ['A', 'M'] and receptor_identification_code != '80' or not receptor_id_number:
-                raise UserError(_('For type A and M documents the receiver identification is mandatory and should be VAT'))
-
-            document_parts = self._l10n_ar_get_document_number_parts(inv.l10n_latam_document_number, inv.l10n_latam_document_type_id.code)
-            if not document_parts['point_of_sale'] or not document_parts['invoice_number']:
-                raise UserError(_('Point of sale and document number are required!'))
-            if not inv.l10n_latam_document_type_id.code:
-                raise UserError(_('No document type selected or document type is not available for validation!'))
-            if not inv.invoice_date:
-                raise UserError(_('Invoice Date is required!'))
-
+            verfiy_request_data = inv._l10n_ar_edi_get_request_data_verify()
             connection = self.company_id._l10n_ar_get_connection('wscdc')
             client, auth = connection._get_client()
-            response = client.service.ComprobanteConstatar(auth, {
-                'CbteModo': inv.l10n_ar_afip_auth_mode,
-                'CuitEmisor': issuer_vat,
-                'PtoVta': document_parts['point_of_sale'],
-                'CbteTipo': inv.l10n_latam_document_type_id.code,
-                'CbteNro': document_parts['invoice_number'],
-                'CbteFch': inv.invoice_date.strftime('%Y%m%d'),
-                'ImpTotal': float_repr(inv.amount_total, precision_digits=2),
-                'CodAutorizacion': inv.l10n_ar_afip_auth_code,
-                'DocTipoReceptor': receptor_identification_code,
-                'DocNroReceptor': receptor_id_number})
+            response = client.service.ComprobanteConstatar(auth, verfiy_request_data)
             inv.write({'l10n_ar_afip_verification_result': response.Resultado})
             if response.Observaciones or response.Errors:
                 inv.message_post(body=_('ARCA authorization verification result: %(observations)s%(errors)s', observations=response.Observaciones, errors=response.Errors))
@@ -323,7 +336,9 @@ class AccountMove(models.Model):
                     arca_date=arca_date,
                 ))
 
+    # -------------------------------------------------------------------------
     # Main methods
+    # -------------------------------------------------------------------------
 
     def _l10n_ar_do_afip_ws_request_cae(self, client, auth, transport):
         """ Submits the invoice information to ARCA and gets a response of ARCA in return.
@@ -345,7 +360,6 @@ class AccountMove(models.Model):
         for inv in self.filtered(lambda x: x.journal_id.l10n_ar_afip_ws and not x.l10n_ar_afip_auth_code):
             afip_ws = inv.journal_id.l10n_ar_afip_ws
             errors = obs = events = ''
-            request_data = False
             return_codes = []
             values = {}
 
@@ -476,13 +490,15 @@ class AccountMove(models.Model):
             if return_info:
                 inv.message_post(body=Markup('<p><b>%s%s</b></p>') % (_('ARCA Messages'), plaintext2html(return_info, 'em')))
 
+    # -------------------------------------------------------------------------
     # Helpers
+    # -------------------------------------------------------------------------
 
     def _dummy_afip_validation(self):
         """ Only when we want to skip ARCA validation in testing environment. Fill the ARCA fields with dummy values in
         order to continue with the invoice validation without passing to ARCA validations
         """
-        self.write({'l10n_ar_afip_auth_mode': 'CAE',
+        self.sudo().write({'l10n_ar_afip_auth_mode': 'CAE',
                     'l10n_ar_afip_auth_code': '68448767638166',
                     'l10n_ar_afip_auth_code_due': self.invoice_date,
                     'l10n_ar_afip_result': ''})
@@ -556,20 +572,32 @@ class AccountMove(models.Model):
         else:
             return self.browse()
 
-    def _get_tributes(self):
+    def _get_tributes(self, base_lines=None):
         """ Applies on wsfe web service """
         res = []
-        not_vat_taxes = self.line_ids.filtered(lambda x: x.tax_line_id and x.tax_line_id.tax_group_id.l10n_ar_tribute_afip_code)
-        for tribute in not_vat_taxes:
-            base_imp = sum(self.invoice_line_ids.filtered(lambda x: x.tax_ids.filtered(
-                lambda y: y.tax_group_id.l10n_ar_tribute_afip_code == tribute.tax_line_id.tax_group_id.l10n_ar_tribute_afip_code)).mapped(
-                    'price_subtotal'))
-            res.append({'Id': tribute.tax_line_id.tax_group_id.l10n_ar_tribute_afip_code,
-                        'Alic': 0,
-                        'Desc': tribute.tax_line_id.tax_group_id.name,
-                        'BaseImp': float_repr(base_imp, precision_digits=2),
-                        'Importe': float_repr(abs(tribute.amount_currency), precision_digits=2)})
-        return res if res else None
+        base_lines = base_lines or []
+
+        def tax_grouping_by_tribute_afip_code(_arg_base_line, arg_tax_data):
+            arg_tax_data = arg_tax_data or {'tax': self.env['account.tax']}
+            return {
+                'tribute_afip_code': arg_tax_data['tax'].tax_group_id.l10n_ar_tribute_afip_code,
+                'group_name': arg_tax_data['tax'].tax_group_id.name,
+            }
+
+        base_lines_aggregated_values = self.env['account.tax']._aggregate_base_lines_tax_details(base_lines, tax_grouping_by_tribute_afip_code)
+        aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+
+        for grouping_key, values in aggregated_tax_details.items():
+            if grouping_key['tribute_afip_code']:
+                res.append({
+                    'Id': grouping_key['tribute_afip_code'],
+                    'Alic': 0,
+                    'Desc': grouping_key['group_name'],
+                    'BaseImp': float_round(values['base_amount_currency'], precision_digits=2),
+                    'Importe': float_round(values['tax_amount_currency'], precision_digits=2),
+                })
+
+        return res
 
     def _get_related_invoice_data(self):
         """ Applies on wsfe and wsfex web services """
@@ -605,61 +633,70 @@ class AccountMove(models.Model):
 
         return res
 
-    def _get_line_details(self):
+    def _get_line_details(self, base_lines=None):
         """ Used only in wsbfe and wsfex """
         self.ensure_one()
         details = []
         afip_ws = self.journal_id.l10n_ar_afip_ws
-        for line in self.invoice_line_ids.filtered(lambda x: x.display_type not in ('line_section', 'line_subsection', 'line_note')):
+        uom_precision_digits = min(self.env['decimal.precision'].precision_get('Product Unit of Measure'), 2)
+        price_precision_digits = min(self.env['decimal.precision'].precision_get('Product Price'), 3)
+
+        for base_line in base_lines:
+            line = base_line['record']
 
             # Unit of measure of the product if it sale in a unit of measures different from has been purchase
             if not line.product_uom_id.l10n_ar_afip_code:
                 raise UserError(_('No ARCA code in %s UOM', line.product_uom_id.name))
 
-            Pro_umed = line.product_uom_id.l10n_ar_afip_code
+            product_afip_code = line.product_uom_id.l10n_ar_afip_code
+            unit_price_truncated_amount = float_repr(line.price_unit, precision_digits=price_precision_digits)
             values = {
                 'Pro_ds': line.name,
-                'Pro_qty': line.quantity,
-                'Pro_umed': Pro_umed,
-                'Pro_precio_uni': line.price_unit,
+                'Pro_qty': float_repr(base_line['quantity'], precision_digits=uom_precision_digits),
+                'Pro_umed': product_afip_code,
+                'Pro_precio_uni': unit_price_truncated_amount,
             }
 
-            # We compute bonus by substracting theoretical minus amount
-            bonus = line.discount and \
-                float_repr(line.price_unit * line.quantity - line.price_subtotal, precision_digits=2) or 0.0
-
+            # We compute bonus by subtracting theoretical minus amount
+            bonus_amount = (
+                    base_line['discount'] and
+                    (float(unit_price_truncated_amount) * base_line['quantity'] - base_line['tax_details']['raw_total_excluded_currency']) or
+                    0.0
+            )
             if afip_ws == 'wsbfe':
                 if not line.product_id.uom_id.l10n_ar_afip_code:
                     raise UserError(_('No ARCA code in %s UOM', line.product_id.uom_id.name))
 
                 vat_tax = line.tax_ids.filtered(lambda x: x.tax_group_id.l10n_ar_vat_afip_code)
-                vat_taxes_amounts = vat_tax.compute_all(
-                    line.price_unit, self.currency_id, line.quantity, product=line.product_id, partner=self.partner_id,
-                )
 
                 line.product_id.product_tmpl_id._check_l10n_ar_ncm_code()
-                values.update({'Pro_codigo_ncm': line.product_id.l10n_ar_ncm_code or '',
-                               'Imp_bonif': bonus,
-                               'Iva_id': vat_tax.tax_group_id.l10n_ar_vat_afip_code,
-                               'Imp_total': vat_taxes_amounts['total_included']})
+                values.update({
+                    'Pro_codigo_ncm': line.product_id.l10n_ar_ncm_code or '',
+                    'Imp_bonif': float_repr(bonus_amount, precision_digits=2),
+                    'Iva_id': vat_tax.tax_group_id.l10n_ar_vat_afip_code,
+                    'Imp_total': float_repr(base_line['tax_details']['total_included_currency'], precision_digits=2),
+                })
             elif afip_ws == 'wsfex':
-                if Pro_umed != ['97', '99', '00']:
+                if product_afip_code not in ('97', '99', '00'):
                     if line._get_downpayment_lines():
-                        Pro_umed = '97'
+                        product_afip_code = '97'
                     elif line.price_unit < 0:
-                        Pro_umed = '99'
-                if Pro_umed in ['97', '99', '00']:
-                    values = {
-                        'Pro_ds': line.name,
-                        'Pro_umed': Pro_umed,
-                        'Pro_total_item': line.price_unit,
-                        'Pro_qty': 0,
-                        'Pro_precio_uni': 0,
-                        'Pro_bonificacion': 0,
-                    }
-                values.update({'Pro_codigo': line.product_id.default_code or '',
-                               'Pro_total_item': float_repr(line.price_subtotal, precision_digits=2),
-                               'Pro_bonificacion': bonus})
+                        product_afip_code = '99'
+
+                if product_afip_code in ('97', '99', '00'):
+                    values.update({
+                        'Pro_qty': '0.00',
+                        'Pro_precio_uni': '0.00',
+                    })
+
+                values.update({
+                    'Pro_codigo': line.product_id.default_code or '',
+                    'Pro_total_item': float_repr(
+                        base_line['tax_details']['total_excluded_currency'] + base_line['tax_details']['delta_total_excluded_currency'],
+                        precision_digits=2,
+                    ),
+                    'Pro_bonificacion': float_repr(bonus_amount, precision_digits=2),
+                })
             details.append(values)
 
         return details
@@ -684,10 +721,9 @@ class AccountMove(models.Model):
         ARCA it_Sigd identification type (Sin Categoria / Venta Global)
         """
         partner_id_code = partner.l10n_latam_identification_type_id.l10n_ar_afip_code
-        if partner_id_code:
-            return partner_id_code
         final_consumer = self.env.ref('l10n_ar.res_CF')
-        if partner.l10n_ar_afip_responsibility_type_id == final_consumer:
+        partner_number = partner._get_id_number_sanitize()
+        if partner.l10n_ar_afip_responsibility_type_id == final_consumer and not partner_number:
             return '99'
         return partner_id_code
 
@@ -721,26 +757,40 @@ class AccountMove(models.Model):
         except Exception as error:
             raise UserError(repr(error))
 
+    def _l10n_ar_check_final_consumer_doc_type(self, vat):
+        self.ensure_one()
+        partner = self.commercial_partner_id
+        if (
+            partner.country_id.code == 'AR'
+            and partner.l10n_ar_afip_responsibility_type_id == self.env.ref('l10n_ar.res_CF')
+            and not str(vat).isdigit()
+        ):
+            raise UserError(_(
+                'For Argentinean contacts with AFIP Responsibility Type "Consumidor Final", the identification type must be DNI or CUIL/CUIT.'
+            ))
+
+    # -------------------------------------------------------------------------
     # Prepare Request Data for webservices
+    # -------------------------------------------------------------------------
 
     def wsfe_get_cae_request(self, client=None):
         self.ensure_one()
+        base_lines, _tax_lines = self._get_rounded_base_and_tax_lines()
         partner_id_code = self._get_partner_code_id(self.commercial_partner_id)
-        invoice_number = self._l10n_ar_get_document_number_parts(
-            self.l10n_latam_document_number, self.l10n_latam_document_type_id.code)['invoice_number']
-        amounts = self._l10n_ar_get_amounts()
+        invoice_number = self._l10n_ar_get_document_number_parts(self.l10n_latam_document_number, self.l10n_latam_document_type_id.code)['invoice_number']
+        amounts = self._l10n_ar_get_amounts(base_lines=base_lines)
         due_payment_date = self._due_payment_date()
         service_start, service_end = self._service_dates()
 
         related_invoices = self._get_related_invoice_data()
-        vat_items = self._get_vat()
+        vat_items = self._get_vat(base_lines=base_lines)
         for item in vat_items:
             if 'BaseImp' in item and 'Importe' in item:
                 item['BaseImp'] = float_repr(item['BaseImp'], precision_digits=2)
                 item['Importe'] = float_repr(item['Importe'], precision_digits=2)
         vat = partner_id_code and self.commercial_partner_id._get_id_number_sanitize()
 
-        tributes = self._get_tributes()
+        tributes = self._get_tributes(base_lines=base_lines)
         optionals = self._get_optionals_data()
 
         ArrayOfAlicIva = client.get_type('ns0:ArrayOfAlicIva')
@@ -752,6 +802,8 @@ class AccountMove(models.Model):
             self.commercial_partner_id.l10n_ar_afip_responsibility_type_id == self.env.ref('l10n_ar.res_EXT') or
                 self.commercial_partner_id.country_id.code not in ['AR', False]):
             vat = self.get_vat_country()
+
+        self._l10n_ar_check_final_consumer_doc_type(vat)
 
         res = {
             'Concepto': int(self.l10n_ar_afip_concept),
@@ -779,7 +831,8 @@ class AccountMove(models.Model):
             'Tributos': ArrayOfTributo(tributes) if tributes else None,
             'Opcionales': ArrayOfOpcional(optionals) if optionals else None,
             'CondicionIVAReceptorId': self.partner_id.l10n_ar_afip_responsibility_type_id.code,
-            'Compradores': None}
+            'Compradores': None,
+        }
 
         if res.get('MonId') != 'PES':  # WSFE 10241
             # if currency date in future then do not send MonCotiz
@@ -789,9 +842,12 @@ class AccountMove(models.Model):
 
         return {
             'FeCabReq': {
-                'CantReg': 1, 'PtoVta': self.journal_id.l10n_ar_afip_pos_number,
-                'CbteTipo': self.l10n_latam_document_type_id.code},
-            'FeDetReq': [{'FECAEDetRequest': res}]}
+                'CantReg': 1,
+                'PtoVta': self.journal_id.l10n_ar_afip_pos_number,
+                'CbteTipo': self.l10n_latam_document_type_id.code,
+            },
+            'FeDetReq': [{'FECAEDetRequest': res}],
+        }
 
     def get_vat_country(self):
         """ CUIT PAIS: Is default VAT(CUIT) that ARCA define per country to identify a foreign country partner, We have
@@ -820,40 +876,46 @@ class AccountMove(models.Model):
             raise RedirectWarning(msg, self.env.ref('l10n_ar_edi.action_help_afip').id, _('Go to ARCA page'))
 
         related_invoices = self._get_related_invoice_data()
+        base_lines, _tax_lines = self._get_rounded_base_and_tax_lines()
 
         ArrayOfItem = client.get_type('ns0:ArrayOfItem')
         ArrayOfCmp_asoc = client.get_type('ns0:ArrayOfCmp_asoc')
 
-        res = {'Id': last_id,
-               'Fecha_cbte': self.invoice_date.strftime(WS_DATE_FORMAT['wsfex']),
-               'Cbte_Tipo': self.l10n_latam_document_type_id.code,
-               'Punto_vta': self.journal_id.l10n_ar_afip_pos_number,
-               'Cbte_nro': self._l10n_ar_get_document_number_parts(
-                   self.l10n_latam_document_number, self.l10n_latam_document_type_id.code)['invoice_number'],
-               'Tipo_expo': int(self.l10n_ar_afip_concept),
-               'permisos': None,
-               'Dst_cmp': self.commercial_partner_id.country_id.l10n_ar_afip_code,
-               'Cliente': self.commercial_partner_id.name,
-               'Domicilio_cliente': " - ".join([
-                   self.commercial_partner_id.name or '', self.commercial_partner_id.street or '',
-                   self.commercial_partner_id.street2 or '', self.commercial_partner_id.zip or '', self.commercial_partner_id.city or '']),
-               'Id_impositivo': self.commercial_partner_id.vat or "",
-               'Cuit_pais_cliente': self.get_vat_country(),
-               'Moneda_Id': self.currency_id.l10n_ar_afip_code,
-               'Moneda_ctz': float_repr(1 / self.invoice_currency_rate, precision_digits=6),
-               'Obs_comerciales': self.invoice_payment_term_id.name if self.invoice_payment_term_id else None,
-               'Imp_total': float_repr(self.amount_total, precision_digits=2),
-               'Obs': html2plaintext(self.narration),
-               'Forma_pago': self.invoice_payment_term_id.name if self.invoice_payment_term_id else None,
-               'Idioma_cbte': 1,  # invoice language: spanish / español
-               'Incoterms': self.invoice_incoterm_id.code if self.invoice_incoterm_id else None,
-               # incoterms_ds only admit max 20 characters admite
-               'Incoterms_Ds': self.invoice_incoterm_id.name[:20] if self.invoice_incoterm_id and self.invoice_incoterm_id.name else None,
-               # Is required only when afip concept = 1 (Products/Exportation) and if doc code = 19, for all the rest we
-               # pass empty string. At the moment we do not have feature to manage permission Id or send 'S'
-               'Permiso_existente': "N" if int(self.l10n_latam_document_type_id.code) == 19 and int(self.l10n_ar_afip_concept) == 1 else "",
-               'Items': ArrayOfItem(self._get_line_details()),
-               'Cmps_asoc': ArrayOfCmp_asoc([related_invoices]) if related_invoices else None}
+        res = {
+            'Id': last_id,
+            'Fecha_cbte': self.invoice_date.strftime(WS_DATE_FORMAT['wsfex']),
+            'Cbte_Tipo': self.l10n_latam_document_type_id.code,
+            'Punto_vta': self.journal_id.l10n_ar_afip_pos_number,
+            'Cbte_nro': self._l10n_ar_get_document_number_parts(self.l10n_latam_document_number, self.l10n_latam_document_type_id.code)['invoice_number'],
+            'Tipo_expo': int(self.l10n_ar_afip_concept),
+            'permisos': None,
+            'Dst_cmp': self.commercial_partner_id.country_id.l10n_ar_afip_code,
+            'Cliente': self.commercial_partner_id.name,
+            'Domicilio_cliente': " - ".join([
+                self.commercial_partner_id.name or '',
+                self.commercial_partner_id.street or '',
+                self.commercial_partner_id.street2 or '',
+                self.commercial_partner_id.zip or '',
+                self.commercial_partner_id.city or '',
+            ]),
+            'Id_impositivo': self.commercial_partner_id.vat or "",
+            'Cuit_pais_cliente': self.get_vat_country(),
+            'Moneda_Id': self.currency_id.l10n_ar_afip_code,
+            'Moneda_ctz': float_repr(1 / self.invoice_currency_rate, precision_digits=6),
+            'Obs_comerciales': self.invoice_payment_term_id.name if self.invoice_payment_term_id else None,
+            'Imp_total': float_repr(self.amount_total, precision_digits=2),
+            'Obs': html2plaintext(self.narration),
+            'Forma_pago': self.invoice_payment_term_id.name if self.invoice_payment_term_id else None,
+            'Idioma_cbte': 1,  # invoice language: spanish / español
+            'Incoterms': self.invoice_incoterm_id.code if self.invoice_incoterm_id else None,
+            # incoterms_ds only admit max 20 characters admite
+            'Incoterms_Ds': self.invoice_incoterm_id.name[:20] if self.invoice_incoterm_id and self.invoice_incoterm_id.name else None,
+            # Is required only when afip concept = 1 (Products/Exportation) and if doc code = 19, for all the rest we
+            # pass empty string. At the moment we do not have feature to manage permission Id or send 'S'
+            'Permiso_existente': "N" if int(self.l10n_latam_document_type_id.code) == 19 and int(self.l10n_ar_afip_concept) == 1 else "",
+            'Items': ArrayOfItem(self._get_line_details(base_lines=base_lines)),
+            'Cmps_asoc': ArrayOfCmp_asoc([related_invoices]) if related_invoices else None,
+        }
 
         # 1671 Report fecha_pago with format YYYMMDD
         # 1672 Is required only doc_type 19. concept (2,4)
@@ -870,35 +932,38 @@ class AccountMove(models.Model):
 
     def wsbfe_get_cae_request(self, last_id, client=None):
         partner_id_code = self._get_partner_code_id(self.commercial_partner_id)
-        amounts = self._l10n_ar_get_amounts()
+        base_lines, _tax_lines = self._get_rounded_base_and_tax_lines()
+        amounts = self._l10n_ar_get_amounts(base_lines=base_lines)
         related_invoices = self._get_related_invoice_data()
         ArrayOfItem = client.get_type('ns0:ArrayOfItem')
         ArrayOfCbteAsoc = client.get_type('ns0:ArrayOfCbteAsoc')
         vat = partner_id_code and self.commercial_partner_id._get_id_number_sanitize()
-        res = {'Id': last_id,
-               'Tipo_doc': int(partner_id_code) or 0,
-               'Nro_doc': vat and int(vat) or 0,
-               'Zona': 1,  # National (the only one returned by ARCA)
-               'Tipo_cbte': int(self.l10n_latam_document_type_id.code),
-               'Punto_vta': int(self.journal_id.l10n_ar_afip_pos_number),
-               'Cbte_nro': self._l10n_ar_get_document_number_parts(
-                   self.l10n_latam_document_number, self.l10n_latam_document_type_id.code)['invoice_number'],
-               'Imp_total': float_round(self.amount_total, precision_digits=2),
-               'Imp_tot_conc': float_round(amounts['vat_untaxed_base_amount'], precision_digits=2),  # Not Taxed VAT
-               'Imp_neto': float_round(amounts['vat_taxable_amount'], precision_digits=2),
-               'Impto_liq': amounts['vat_amount'],
-               'Impto_liq_rni': 0.0,  # "no categorizado / responsable no inscripto " figure is not used anymore
-               'Imp_op_ex': float_round(amounts['vat_exempt_base_amount'], precision_digits=2),
-               'Imp_perc': amounts['vat_perc_amount'] + amounts['profits_perc_amount'] + amounts['other_perc_amount'],
-               'Imp_iibb': amounts['iibb_perc_amount'],
-               'Imp_perc_mun': amounts['mun_perc_amount'],
-               'Imp_internos': amounts['intern_tax_amount'] + amounts['other_taxes_amount'],
-               'Imp_moneda_Id': self.currency_id.l10n_ar_afip_code,
-               'Imp_moneda_ctz': float_repr(1 / self.invoice_currency_rate, precision_digits=6),
-               'Fecha_cbte': self.invoice_date.strftime(WS_DATE_FORMAT['wsbfe']),
-               'CbtesAsoc': ArrayOfCbteAsoc([related_invoices]) if related_invoices else None,
-               'CondicionIVAReceptorId': int(self.partner_id.l10n_ar_afip_responsibility_type_id.code),
-               'Items': ArrayOfItem(self._get_line_details())}
+        self._l10n_ar_check_final_consumer_doc_type(vat)
+        res = {
+            'Id': last_id,
+            'Tipo_doc': int(partner_id_code) or 0,
+            'Nro_doc': vat and int(vat) or 0,
+            'Zona': 1,  # National (the only one returned by ARCA)
+            'Tipo_cbte': int(self.l10n_latam_document_type_id.code),
+            'Punto_vta': int(self.journal_id.l10n_ar_afip_pos_number),
+            'Cbte_nro': self._l10n_ar_get_document_number_parts(self.l10n_latam_document_number, self.l10n_latam_document_type_id.code)['invoice_number'],
+            'Imp_total': float_repr(self.amount_total, precision_digits=2),
+            'Imp_tot_conc': float_repr(amounts['vat_untaxed_base_amount'], precision_digits=2),  # Not Taxed VAT
+            'Imp_neto': float_repr(amounts['vat_taxable_amount'], precision_digits=2),
+            'Impto_liq': float_repr(amounts['vat_amount'], precision_digits=2),
+            'Impto_liq_rni': float_repr(0.0, precision_digits=2),  # "no categorizado / responsable no inscripto " figure is not used anymore
+            'Imp_op_ex': float_repr(amounts['vat_exempt_base_amount'], precision_digits=2),
+            'Imp_perc': float_repr(amounts['vat_perc_amount'] + amounts['profits_perc_amount'] + amounts['other_perc_amount'], precision_digits=2),
+            'Imp_iibb': float_repr(amounts['iibb_perc_amount'], precision_digits=2),
+            'Imp_perc_mun': float_repr(amounts['mun_perc_amount'], precision_digits=2),
+            'Imp_internos': float_repr(amounts['intern_tax_amount'] + amounts['other_taxes_amount'], precision_digits=2),
+            'Imp_moneda_Id': self.currency_id.l10n_ar_afip_code,
+            'Imp_moneda_ctz': float_repr(1 / self.invoice_currency_rate, precision_digits=6),
+            'Fecha_cbte': self.invoice_date.strftime(WS_DATE_FORMAT['wsbfe']),
+            'CbtesAsoc': ArrayOfCbteAsoc([related_invoices]) if related_invoices else None,
+            'CondicionIVAReceptorId': int(self.partner_id.l10n_ar_afip_responsibility_type_id.code),
+            'Items': ArrayOfItem(self._get_line_details(base_lines=base_lines)),
+        }
         if self.l10n_latam_document_type_id.code in ['201', '206']:  # WS4900
             res.update({'Fecha_vto_pago': self._due_payment_date().strftime(WS_DATE_FORMAT['wsbfe'])})
 

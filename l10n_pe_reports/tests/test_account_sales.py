@@ -282,3 +282,53 @@ class TestPeSales(TestAccountReportsCommon):
 0.00|0.00|0.00|0.00
 """[1:],
         )
+
+    def test_sale_report_withholding(self):
+        """The IGV withholding is a payment mechanism and must not reduce the total reported to SUNAT"""
+        AccountChartTemplate = self.env["account.chart.template"]
+        taxes = AccountChartTemplate.ref("sale_tax_igv_18") + AccountChartTemplate.ref("sale_tax_withholding_3")
+        move_vals = {
+            "partner_id": self.partner_a.id,
+            "invoice_date": "2022-07-01",
+            "invoice_date_due": "2022-07-01",
+            "date": "2022-07-01",
+            "invoice_payment_term_id": False,
+            "invoice_line_ids": [Command.create({
+                "name": "test",
+                "quantity": 1,
+                "price_unit": 1000,
+                "tax_ids": [Command.set(taxes.ids)],
+            })],
+        }
+        moves = self.env["account.move"].create([
+            {
+                **move_vals,
+                "move_type": "out_invoice",
+                "l10n_latam_document_type_id": self.env.ref("l10n_pe.document_type01").id,
+            },
+            {**move_vals, "move_type": "out_refund"},
+        ])
+        moves.action_post()
+        moves.write({"edi_state": "sent"})
+
+        report = self.env.ref("l10n_pe_reports.tax_report_ple_sales_14_1")
+        options = self._generate_options(
+            report, fields.Date.from_string("2022-01-01"), fields.Date.from_string("2022-12-31")
+        )
+
+        self.maxDiff = None
+        self.assertEqual(
+            "\n".join(
+                [
+                    "|".join(line.split("|")[14:26])
+                    for line in self.env[report.custom_handler_model_name]
+                    .export_to_txt(options)["file_content"]
+                    .decode()
+                    .split("\r\n")
+                ]
+            ),
+            """
+-1000.0|0.00|-180.0|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|-1180.0
+1000.0|0.00|180.0|0.00|0.00|0.00|0.00|0.00|0.00|0.00|0.00|1180.0
+"""[1:],
+        )

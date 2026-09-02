@@ -8,6 +8,18 @@ from odoo.tests import TransactionCase, tagged
 @tagged("post_install", "-at_install")
 class TestAIAgent(TransactionCase):
 
+    def test_deprecated_model_replacement_hint_shows_for_deprecated_models(self):
+        agent = self.env["ai.agent"].create({
+            "name": "Test AI Agent",
+            "llm_model": "gemini-1.5-flash",
+            "response_style": "analytical",
+        })
+
+        self.assertEqual(
+            agent.deprecated_model_replacement_hint,
+            "Using Gemini 3 Flash medium thinking based on your agent setup.",
+        )
+
     def test_close_chat_only_works_with_ai_channel(self):
         partner = self.env["res.partner"].create({
             "name": "Odoo AI"

@@ -6,6 +6,7 @@ from .common import TestPeEdiCommon, mocked_l10n_pe_edi_post_invoice_web_service
 from unittest.mock import patch
 
 from freezegun import freeze_time
+from lxml import etree
 
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
@@ -48,6 +49,43 @@ class TestEdiXmls(TestPeEdiCommon):
             current_etree = self.get_xml_tree_from_string(edi_xml)
             expected_etree = self.get_xml_tree_from_string(self.expected_invoice_xml_values)
             self.assertXmlTreeEqual(current_etree, expected_etree)
+
+    def test_invoice_address_nodes(self):
+        """ The address must set the district as cbc:District and the street2 as
+        cbc:CitySubdivisionName, and must not set cbc:PostalZone (UBL 2.1 / SUNAT). """
+        self.partner_a.write({
+            'street': 'Av. test 123',
+            'street2': 'Urb. test',
+            'zip': '15001',
+            'l10n_pe_district': self.env.ref('l10n_pe.district_pe_150101').id,
+        })
+        with freeze_time(self.frozen_today), \
+                patch(
+                    'odoo.addons.l10n_pe_edi.models.account_edi_format.AccountEdiFormat._l10n_pe_edi_post_invoice_web_service',
+                    new=mocked_l10n_pe_edi_post_invoice_web_service):
+            move = self._create_invoice()
+            move.action_post()
+            generated_files = self._process_documents_web_services(move, {'pe_ubl_2_1'})
+            self.assertTrue(generated_files)
+            edi_xml = self.edi_format._l10n_pe_edi_unzip_edi_document(generated_files[0])
+
+        invoice_etree = self.get_xml_tree_from_string(edi_xml)
+        address_node = invoice_etree.find('.//{*}AccountingCustomerParty//{*}PostalAddress')
+        expected_address = self.get_xml_tree_from_string(b'''
+            <cac:PostalAddress
+                xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+                xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+                <cbc:ID>150101</cbc:ID>
+                <cbc:StreetName>Av. test 123</cbc:StreetName>
+                <cbc:CitySubdivisionName>Urb. test</cbc:CitySubdivisionName>
+                <cbc:District>Lima</cbc:District>
+                <cac:Country>
+                    <cbc:IdentificationCode>PE</cbc:IdentificationCode>
+                    <cbc:Name>Peru</cbc:Name>
+                </cac:Country>
+            </cac:PostalAddress>
+        ''')
+        self.assertXmlTreeEqual(address_node, expected_address)
 
     def test_refund_simple_case(self):
         with freeze_time(self.frozen_today), \
@@ -137,6 +175,46 @@ class TestEdiXmls(TestPeEdiCommon):
         current_etree = self.get_xml_tree_from_string(edi_xml)
 
         with file_open('l10n_pe_edi/tests/test_files/invoice_detraction_with_decimal.xml', 'rb') as expected_invoice_file:
+            expected_etree = self.get_xml_tree_from_string(expected_invoice_file.read())
+        self.assertXmlTreeEqual(current_etree, expected_etree)
+
+    def test_invoice_detraction_usd_company_currency(self):
+        """ Invoice in USD with detraction when company currency is also USD (not PEN).
+        The detraction cbc:Amount must still be in PEN, converted via the exchange rate. """
+        self.product.l10n_pe_withhold_percentage = 10
+        self.product.l10n_pe_withhold_code = '019'
+
+        with freeze_time(self.frozen_today), \
+                patch('odoo.addons.l10n_pe_edi.models.account_edi_format.AccountEdiFormat._l10n_pe_edi_post_invoice_web_service',
+                   new=mocked_l10n_pe_edi_post_invoice_web_service):
+            self.company_data['company'].currency_id = self.other_currency
+            vals = {
+                'name': 'F FFI-%s1' % self.time_name,
+                'move_type': 'out_invoice',
+                'partner_id': self.partner_a.id,
+                'invoice_date': '2017-01-01',
+                'date': '2017-01-01',
+                'currency_id': self.other_currency.id,
+                'invoice_payment_term_id': self.env.ref("account.account_payment_term_end_following_month").id,
+                'l10n_latam_document_type_id': self.env.ref('l10n_pe.document_type01').id,
+                'l10n_pe_edi_operation_type': '1001',
+                'invoice_line_ids': [Command.create({
+                    'product_id': self.product.id,
+                    'price_unit': 990.0,
+                    'quantity': 1,
+                    'tax_ids': [Command.set(self.tax_18.ids)],
+                })],
+            }
+            invoice = self.env['account.move'].create(vals).with_context(edi_test_mode=True)
+            invoice.action_post()
+
+            generated_files = self._process_documents_web_services(invoice, {'pe_ubl_2_1'})
+            self.assertTrue(generated_files)
+        zip_edi_str = generated_files[0]
+        edi_xml = self.edi_format._l10n_pe_edi_unzip_edi_document(zip_edi_str)
+        current_etree = self.get_xml_tree_from_string(edi_xml)
+
+        with file_open('l10n_pe_edi/tests/test_files/invoice_detraction_with_decimal_foreign_currency.xml', 'rb') as expected_invoice_file:
             expected_etree = self.get_xml_tree_from_string(expected_invoice_file.read())
         self.assertXmlTreeEqual(current_etree, expected_etree)
 
@@ -257,6 +335,7 @@ class TestEdiXmls(TestPeEdiCommon):
             'amount_type': 'percent',
             'amount': 20,
             'include_base_amount': True,
+            'l10n_pe_edi_isc_type': '01',
             'l10n_pe_edi_tax_code': '2000',
             'l10n_pe_edi_unece_category': 'S',
             'type_tax_use': 'sale',
@@ -450,9 +529,91 @@ class TestEdiXmls(TestPeEdiCommon):
             expected_etree = self.get_xml_tree_from_string(expected_file.read())
         self.assertXmlTreeEqual(current_etree, expected_etree)
 
+    def test_invoice_down_payment_with_withholding_tax(self):
+        """
+        Test the UBL XML of a final invoice generated from a sale order with two fixed-amount
+        down payments and a withholding tax applied on the order line.
+
+        Withholding tax totals must be excluded from the XML.
+        """
+
+        if 'sale' not in self.env["ir.module.module"]._installed():
+            self.skipTest("Sale module is not installed")
+        self.env.user.group_ids |= self.env.ref('sales_team.group_sale_manager')
+
+        self.tax_18.include_base_amount = True
+        tax_withholding = self.env['account.tax'].create({
+            'name': 'tax_withholding',
+            'amount_type': 'percent',
+            'amount': -3.0,
+            'type_tax_use': 'sale',
+            'tax_group_id': self.env['account.chart.template'].ref('tax_group_igv_withholding').id,
+        })
+
+        with freeze_time(self.frozen_today):
+            sale_order = self.env['sale.order'].create({  # noqa: OLS03001
+                'partner_id': self.partner_a.id,
+                'order_line': [
+                    Command.create({
+                        'product_id': self.product.id,
+                        'product_uom_id': self.env.ref('uom.product_uom_kgm').id,
+                        'price_unit': 1000.0,
+                        'product_uom_qty': 5,
+                        'tax_ids': [Command.set([self.tax_18.id, tax_withholding.id])],
+                    })
+                ]
+            })
+            sale_order.action_confirm()
+
+            context = {
+                'active_model': 'sale.order',
+                'active_ids': [sale_order.id],
+                'active_id': sale_order.id,
+                'default_journal_id': self.company_data['default_journal_sale'].id,
+            }
+            downpayment_1 = self.env['sale.advance.payment.inv'].with_context(context).create({  # noqa: OLS03001
+                'advance_payment_method': 'fixed',
+                'fixed_amount': 115,
+            })._create_invoices(sale_order)
+            downpayment_1.action_post()
+
+            downpayment_to_reverse = self.env['sale.advance.payment.inv'].with_context(context).create({  # noqa: OLS03001
+                'advance_payment_method': 'fixed',
+                'fixed_amount': 115,
+            })._create_invoices(sale_order)
+            downpayment_to_reverse.action_post()
+
+            reversal_wizard = self.env['account.move.reversal'].with_context(
+                active_model="account.move",
+                active_ids=downpayment_to_reverse.ids
+            ).create({
+                'reason': 'Test reason',
+                'journal_id': downpayment_to_reverse.journal_id.id,
+                'l10n_pe_edi_refund_reason': '01',
+            })
+            action = reversal_wizard.modify_moves()
+            downpayment_2 = self.env['account.move'].browse(action['res_id'])
+            downpayment_2.action_post()
+
+            final = self.env['sale.advance.payment.inv'].with_context(context).create({})._create_invoices(sale_order)  # noqa: OLS03001
+            final.action_post()
+
+            with patch('odoo.addons.l10n_pe_edi.models.account_edi_format.AccountEdiFormat._l10n_pe_edi_post_invoice_web_service',
+                   new=mocked_l10n_pe_edi_post_invoice_web_service):
+                generated_files = self._process_documents_web_services(final, {'pe_ubl_2_1'})
+                self.assertTrue(generated_files)
+
+        zip_edi_str = generated_files[0]
+        edi_xml = self.edi_format._l10n_pe_edi_unzip_edi_document(zip_edi_str)
+        current_etree = self.get_xml_tree_from_string(edi_xml)
+        with file_open('l10n_pe_edi/tests/test_files/invoice_final_downpayment_withhold.xml', 'rb') as expected_file:
+            expected_etree = self.get_xml_tree_from_string(expected_file.read())
+        self.assertXmlTreeEqual(current_etree, expected_etree)
+
     def test_invoice_withholding(self):
         """ Invoice with withholding tax associated. There should be only one allowance node
             even though there are two lines with the withholding tax. """
+        self.tax_18.include_base_amount = True
         tax_withholding = self.env['account.tax'].create({
             'name': 'tax_withholding',
             'amount_type': 'percent',
@@ -469,15 +630,15 @@ class TestEdiXmls(TestPeEdiCommon):
                     Command.create({
                         'product_id': self.product.id,
                         'product_uom_id': self.env.ref('uom.product_uom_kgm').id,
-                        'price_unit': 2000.0,
-                        'quantity': 5,
+                        'price_unit': 0.481936,
+                        'quantity': 300,
                         'tax_ids': [(6, 0, [tax_withholding.id, self.tax_18.id])],
                     }),
                     Command.create({
                         'product_id': self.product.id,
                         'product_uom_id': self.env.ref('uom.product_uom_kgm').id,
-                        'price_unit': 2000.0,
-                        'quantity': 5,
+                        'price_unit': 0.747376,
+                        'quantity': 300,
                         'tax_ids': [(6, 0, [tax_withholding.id, self.tax_18.id])],
                     }),
                 ],
@@ -492,5 +653,279 @@ class TestEdiXmls(TestPeEdiCommon):
         current_etree = self.get_xml_tree_from_string(edi_xml)
 
         with file_open('l10n_pe_edi/tests/test_files/invoice_withholding.xml', 'rb') as expected_file:
+            expected_etree = self.get_xml_tree_from_string(expected_file.read())
+        self.assertXmlTreeEqual(current_etree, expected_etree)
+
+    def test_invoice_icbper_fixed_tax(self):
+        """ Test that an invoice with an ICBPER fixed-amount tax generates EDI XML without errors."""
+        tax_icbper = self.env['account.tax'].create({
+            'name': 'ICBPER',
+            'amount_type': 'fixed',
+            'amount': 0.5,
+            'l10n_pe_edi_tax_code': '7152',
+            'l10n_pe_edi_unece_category': 'S',
+            'type_tax_use': 'sale',
+            'tax_group_id': self.env['account.chart.template'].ref('tax_group_icbper').id,
+        })
+        with freeze_time(self.frozen_today), \
+             patch('odoo.addons.l10n_pe_edi.models.account_edi_format.AccountEdiFormat._l10n_pe_edi_post_invoice_web_service',
+                   new=mocked_l10n_pe_edi_post_invoice_web_service):
+            move = self._create_invoice(
+                invoice_line_ids=[Command.create({
+                    'product_id': self.product.id,
+                    'product_uom_id': self.env.ref('uom.product_uom_kgm').id,
+                    'price_unit': 2000.0,
+                    'quantity': 5,
+                    'tax_ids': [Command.set([tax_icbper.id])],
+                })],
+            )
+            move.action_post()
+
+            generated_files = self._process_documents_web_services(move, {'pe_ubl_2_1'})
+            self.assertTrue(generated_files)
+
+    def test_invoice_foreign_customer(self):
+        """Invoice for a foreign customer"""
+        co_identification_type = self.env['l10n_latam.identification.type'].sudo().create({
+            "name": "Cédula de ciudadanía (CO)",
+            "country_id": self.env.ref('base.co').id,
+        })
+        self.partner_a.write({
+            "l10n_latam_identification_type_id": co_identification_type.id,
+            "country_id": self.env.ref('base.co').id,
+        })
+        with freeze_time(self.frozen_today), \
+                patch('odoo.addons.l10n_pe_edi.models.account_edi_format.AccountEdiFormat._l10n_pe_edi_post_invoice_web_service',
+                   new=mocked_l10n_pe_edi_post_invoice_web_service):
+            vals = {
+                'name': 'F FFI-%s1' % self.time_name,
+                'move_type': 'out_invoice',
+                'partner_id': self.partner_a.id,
+                'invoice_date': '2017-01-01',
+                'date': '2017-01-01',
+                'currency_id': self.other_currency.id,
+                'invoice_payment_term_id': self.env.ref("account.account_payment_term_end_following_month").id,
+                'l10n_latam_document_type_id': self.env.ref('l10n_pe.document_type02').id,
+                'l10n_pe_edi_operation_type': '0200',
+                'invoice_line_ids': [Command.create({
+                    'product_id': self.product.id,
+                    'price_unit': 990.0,
+                    'quantity': 1,
+                    'tax_ids': [Command.set(self.tax_18.ids)],
+                })],
+            }
+            invoice = self.env['account.move'].create(vals).with_context(edi_test_mode=True)
+            invoice.action_post()
+
+            generated_files = self._process_documents_web_services(invoice, {'pe_ubl_2_1'})
+            self.assertTrue(generated_files)
+        zip_edi_str = generated_files[0]
+        edi_xml = self.edi_format._l10n_pe_edi_unzip_edi_document(zip_edi_str)
+        current_etree = self.get_xml_tree_from_string(edi_xml)
+
+        with file_open('l10n_pe_edi/tests/test_files/foreign_customer.xml', 'rb') as expected_invoice_file:
+            expected_etree = self.get_xml_tree_from_string(expected_invoice_file.read())
+        self.assertXmlTreeEqual(current_etree, expected_etree)
+
+    def test_invoice_payment_term_ordering(self):
+        """ Instalments (Cuota001/002/003) must be emitted in ascending due-date order.
+
+        When a 3-instalment payment term is used (e.g. 50 % / 30 % / 20 %), the
+        resulting cac:PaymentTerms nodes must be sorted by PaymentDueDate, not
+        by database row insertion order.  Regression for bug where the amounts
+        were mixed up between cuotas.
+        """
+        payment_term = self.env['account.payment.term'].create({
+            'name': '20/30/50 instalment',
+            # Lines intentionally created in descending nb_days order so that without the
+            # date_maturity sort fix, the DB insertion order would assign Cuota001 to the
+            # latest/largest instalment instead of the earliest/smallest one.
+            'line_ids': [
+                Command.create({'value': 'percent', 'value_amount': 50, 'nb_days': 15}),
+                Command.create({'value': 'percent', 'value_amount': 30, 'nb_days': 10}),
+                Command.create({'value': 'percent', 'value_amount': 20, 'nb_days': 5}),
+            ],
+        })
+
+        with freeze_time(self.frozen_today), \
+                patch('odoo.addons.l10n_pe_edi.models.account_edi_format.AccountEdiFormat._l10n_pe_edi_post_invoice_web_service',
+                   new=mocked_l10n_pe_edi_post_invoice_web_service):
+            vals = {
+                'name': 'F FFI-%s1' % self.time_name,
+                'move_type': 'out_invoice',
+                'partner_id': self.partner_a.id,
+                'invoice_date': '2017-01-01',
+                'date': '2017-01-01',
+                'invoice_payment_term_id': payment_term.id,
+                'l10n_latam_document_type_id': self.env.ref('l10n_pe.document_type01').id,
+                'invoice_line_ids': [Command.create({
+                    'product_id': self.product.id,
+                    'product_uom_id': self.env.ref('uom.product_uom_kgm').id,
+                    'price_unit': 530.0,
+                    'quantity': 1,
+                    'tax_ids': [Command.set(self.tax_18.ids)],
+                })],
+            }
+            invoice = self.env['account.move'].create(vals).with_context(edi_test_mode=True)
+            invoice.action_post()
+
+            generated_files = self._process_documents_web_services(invoice, {'pe_ubl_2_1'})
+            self.assertTrue(generated_files)
+        edi_xml = self.edi_format._l10n_pe_edi_unzip_edi_document(generated_files[0])
+        invoice_etree = self.get_xml_tree_from_string(edi_xml)
+
+        # Extract only the Cuota instalment nodes (skip the summary FormaPago/Credito node)
+        cuota_nodes = [
+            node for node in invoice_etree.findall('.//{*}PaymentTerms')
+            if (node.findtext('{*}PaymentMeansID') or '').startswith('Cuota')
+        ]
+
+        # Wrap extracted nodes in a root element so we can use assertXmlTreeEqual
+        generated_root = etree.Element('root')
+        for node in cuota_nodes:
+            generated_root.append(node)
+
+        expected_root = self.get_xml_tree_from_string(b'''<root
+                xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+                xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+            <cac:PaymentTerms>
+                <cbc:ID>FormaPago</cbc:ID>
+                <cbc:PaymentMeansID>Cuota001</cbc:PaymentMeansID>
+                <cbc:Amount currencyID="PEN">125.08</cbc:Amount>
+                <cbc:PaymentDueDate>2017-01-06</cbc:PaymentDueDate>
+            </cac:PaymentTerms>
+            <cac:PaymentTerms>
+                <cbc:ID>FormaPago</cbc:ID>
+                <cbc:PaymentMeansID>Cuota002</cbc:PaymentMeansID>
+                <cbc:Amount currencyID="PEN">187.62</cbc:Amount>
+                <cbc:PaymentDueDate>2017-01-11</cbc:PaymentDueDate>
+            </cac:PaymentTerms>
+            <cac:PaymentTerms>
+                <cbc:ID>FormaPago</cbc:ID>
+                <cbc:PaymentMeansID>Cuota003</cbc:PaymentMeansID>
+                <cbc:Amount currencyID="PEN">312.70</cbc:Amount>
+                <cbc:PaymentDueDate>2017-01-16</cbc:PaymentDueDate>
+            </cac:PaymentTerms>
+        </root>''')
+        self.assertXmlTreeEqual(generated_root, expected_root)
+
+    def test_reversal_cancel_reason_mapping(self):
+        """Test that the cancel and credit reason in the reversal wizard are correctly mapped to the fields in the Peruvian EDI tab."""
+
+        move = self._create_invoice()
+        move.action_post()
+
+        reversal_wizard = self.env['account.move.reversal'].with_context(
+            active_model="account.move",
+            active_ids=move.ids
+        ).create({
+            'reason': 'Test reason',
+            'journal_id': move.journal_id.id,
+            'l10n_pe_edi_refund_reason': '01',
+        })
+        action = reversal_wizard.reverse_moves()
+        reverse_move = self.env['account.move'].browse(action['res_id'])
+        self.assertEqual(reverse_move.l10n_pe_edi_cancel_reason, 'Test reason')
+        self.assertEqual(reverse_move.l10n_pe_edi_refund_reason, '01')
+
+    def test_invoice_downpayment_rounding(self):
+        """ Test a 40% down payment invoice on a sale order with several 0% taxes and
+            products having price unit with more than 2 decimals.
+        """
+        self.ensure_installed('sale')
+
+        self.env.user.group_ids |= self.env.ref('sales_team.group_sale_manager')
+        self.env.company.tax_calculation_rounding_method = 'round_globally'
+
+        tax_group_exo = self.env['account.tax.group'].create({
+            'name': 'EXO',
+            'l10n_pe_edi_code': 'EXO',
+        })
+        tax_group_ina = self.env['account.tax.group'].create({
+            'name': 'INA',
+            'l10n_pe_edi_code': 'INA',
+        })
+        tax_0_ina = self.env['account.tax'].create({
+            'name': 'tax_0_ina',
+            'amount_type': 'percent',
+            'amount': 0,
+            'l10n_pe_edi_tax_code': '9998',
+            'l10n_pe_edi_unece_category': 'Z',
+            'type_tax_use': 'sale',
+            'tax_group_id': tax_group_ina.id,
+        })
+        tax_0_exo = self.env['account.tax'].create({
+            'name': 'tax_0_exo',
+            'amount_type': 'percent',
+            'amount': 0,
+            'l10n_pe_edi_tax_code': '9997',
+            'l10n_pe_edi_unece_category': 'Z',
+            'type_tax_use': 'sale',
+            'tax_group_id': tax_group_exo.id,
+        })
+        product_a = self.env['product.product'].create({
+            'name': 'product_pe_a',
+            'uom_id': self.env.ref('uom.product_uom_unit').id,
+            'unspsc_code_id': self.env.ref('product_unspsc.unspsc_code_01010101').id,
+        })
+        product_b = self.env['product.product'].create({
+            'name': 'product_pe_b',
+            'uom_id': self.env.ref('uom.product_uom_unit').id,
+            'unspsc_code_id': self.env.ref('product_unspsc.unspsc_code_01010101').id,
+        })
+        product_c = self.env['product.product'].create({
+            'name': 'product_pe_c',
+            'uom_id': self.env.ref('uom.product_uom_unit').id,
+            'unspsc_code_id': self.env.ref('product_unspsc.unspsc_code_01010101').id,
+        })
+
+        with freeze_time(self.frozen_today):
+            sale_order = self.env['sale.order'].create({  # noqa: OLS03001
+                'partner_id': self.partner_a.id,
+                'order_line': [
+                    Command.create({
+                        'product_id': product_a.id,
+                        'price_unit': 123.50,
+                        'product_uom_qty': 3,
+                        'tax_ids': [Command.set(self.tax_18.ids)],
+                    }),
+                    Command.create({
+                        'product_id': product_b.id,
+                        'price_unit': 27.544216,
+                        'product_uom_qty': 2,
+                        'tax_ids': [Command.set(tax_0_ina.ids)],
+                    }),
+                    Command.create({
+                        'product_id': product_c.id,
+                        'price_unit': 43.490867,
+                        'product_uom_qty': 1,
+                        'tax_ids': [Command.set(tax_0_exo.ids)],
+                    }),
+                ]
+            })
+            sale_order.action_confirm()
+
+            context = {
+                'active_model': 'sale.order',
+                'active_ids': [sale_order.id],
+                'active_id': sale_order.id,
+                'default_journal_id': self.company_data['default_journal_sale'].id,
+            }
+            downpayment = self.env['sale.advance.payment.inv'].with_context(context).create({  # noqa: OLS03001
+                'advance_payment_method': 'percentage',
+                'amount': 40,
+            })._create_invoices(sale_order)
+
+            with patch('odoo.addons.l10n_pe_edi.models.account_edi_format.AccountEdiFormat._l10n_pe_edi_post_invoice_web_service',
+                   new=mocked_l10n_pe_edi_post_invoice_web_service):
+                downpayment.action_post()
+
+                generated_files = self._process_documents_web_services(downpayment, {'pe_ubl_2_1'})
+                self.assertTrue(generated_files)
+
+        zip_edi_str = generated_files[0]
+        edi_xml = self.edi_format._l10n_pe_edi_unzip_edi_document(zip_edi_str)
+        current_etree = self.get_xml_tree_from_string(edi_xml)
+        with file_open('l10n_pe_edi/tests/test_files/invoice_downpayment_rounding.xml', 'rb') as expected_file:
             expected_etree = self.get_xml_tree_from_string(expected_file.read())
         self.assertXmlTreeEqual(current_etree, expected_etree)

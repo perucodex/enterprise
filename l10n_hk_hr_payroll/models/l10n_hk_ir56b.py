@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
+from codecs import BOM_UTF8
 from collections import defaultdict
 
 from lxml.html import etree
@@ -101,7 +102,7 @@ class L10n_HkIr56b(models.Model):
         for payslip in all_payslips:
             employee_payslips[payslip.employee_id] |= payslip
 
-        line_codes = ['BASIC', 'COMMISSION', 'REFERRAL_FEE', 'END_OF_YEAR_PAYMENT', 'BACKPAY', 'ALW.INT', 'HRA', 'MPF_GROSS', 'EEMC', 'ERMC', 'EEVC', 'ERVC']
+        line_codes = ['BASIC', 'COMMISSION', 'REFERRAL_FEE', 'END_OF_YEAR_PAYMENT', 'BACKPAY', 'ALW.INT', 'HRA', 'MPF_GROSS', 'EEMC', 'ERMC', 'EEVC', 'ERVC', 'GLOBAL_REIMBURSEMENT', 'GLOBAL_DEDUCTION']
         all_line_values = all_payslips._get_line_values(line_codes, vals_list=['total', 'quantity'])
 
         sequence = 0
@@ -132,13 +133,13 @@ class L10n_HkIr56b(models.Model):
                 'RTN_ASS_YR': self.end_year,
                 'StartDateOfEmp': start_date,
                 'EndDateOfEmp': self.end_period,
-                'AmtOfSalary': int(mapped_total['BASIC']),
+                'AmtOfSalary': int(mapped_total['BASIC'] + mapped_total['GLOBAL_REIMBURSEMENT'] + mapped_total['GLOBAL_DEDUCTION']),
                 'AmtOfCommFee': int(mapped_total['COMMISSION']) + int(mapped_total['REFERRAL_FEE']),
                 'AmtOfBonus': int(mapped_total['END_OF_YEAR_PAYMENT']),
                 'AmtOfBpEtc': int(mapped_total['BACKPAY']),
                 'NatureOtherRAP1': 'Internet Allowance' if int(mapped_total['ALW.INT']) else '',
                 'AmtOfOtherRAP1': int(mapped_total['ALW.INT']),
-                'TotalIncome': int(mapped_total['MPF_GROSS']),
+                'TotalIncome': int(mapped_total['MPF_GROSS'] - mapped_total['HRA']),
                 'PlaceOfResInd': int(bool(rental_ids)),
                 'AddrOfPlace1': '',
                 'NatureOfPlace1': '',
@@ -184,7 +185,7 @@ class L10n_HkIr56b(models.Model):
 
         total_data = {
             'NoRecordBatch': '{:05}'.format(sheets_count),
-            'TotIncomeBatch': int(sum(all_line_values['MPF_GROSS'][p.id]['total'] for p in all_payslips)),
+            'TotIncomeBatch': int(sum(ed['TotalIncome'] for ed in employees_data)),
         }
 
         return {'data': report_info, 'employees_data': employees_data, 'total_data': total_data}
@@ -199,9 +200,10 @@ class L10n_HkIr56b(models.Model):
 
         # Prettify xml string
         root = etree.fromstring(xml_str, parser=etree.XMLParser(remove_blank_text=True))
-        xml_formatted_str = etree.tostring(root, pretty_print=True, encoding='utf-8', xml_declaration=True, standalone=True)
+        xml_formatted_str = etree.tostring(root, pretty_print=True, encoding='UTF-8', xml_declaration=True, standalone=True)
 
-        self.xml_file = base64.encodebytes(xml_formatted_str)
+        # Make sure to include BOMs as per the requirements to upload to the IRD platform.
+        self.xml_file = base64.encodebytes(BOM_UTF8 + xml_formatted_str)
         self.state = 'waiting'
 
     def _get_pdf_report(self):

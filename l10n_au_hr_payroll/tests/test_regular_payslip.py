@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from datetime import date
+from freezegun import freeze_time
 
 from odoo.tests import tagged
 from .common import TestPayrollCommon
@@ -10,7 +11,7 @@ class TestRegularPayslip(TestPayrollCommon):
 
     @classmethod
     def setUpClass(cls):
-        super(TestRegularPayslip, cls).setUpClass()
+        super().setUpClass()
         cls.default_payroll_structure = cls.env.ref("l10n_au_hr_payroll.hr_payroll_structure_au_regular")
         cls.tax_treatment_category = 'R'
 
@@ -470,4 +471,167 @@ class TestRegularPayslip(TestPayrollCommon):
             ],
             payslip_date_from=date(2025, 9, 29),
             payslip_date_to=date(2025, 10, 3)
+        )
+
+    def test_regular_11_qualifying_earnings(self):
+        # There will be a new line QE on the paslip from 1st July 2026
+        employee, contract = self._create_employee(contract_info={
+            'employee': 'Test Employee',
+            'employment_basis_code': 'F',
+            'wage_type': 'monthly',
+            'schedule_pay': 'weekly',
+            'wage': 2608.36,
+            'l10n_au_training_loan': True,
+            'l10n_au_tax_free_threshold': True})
+
+        self._test_payslip(
+            employee,
+            contract,
+            expected_worked_days=[
+                # (work_entry_type_id.id, number_of_day, number_of_hours, amount)
+                (self.work_entry_types['WORK100'].id, 5, 38, 2608.36),
+            ],
+            expected_lines=[
+                # (code, total)
+                ('BASIC', 2608.36),
+                ('OTE', 2608.36),
+                ('GROSS', 2608.36),
+                ('WITHHOLD', -659),
+                ('WITHHOLD.STUDY', -202),
+                ('MEDICARE', 0),
+                ('WITHHOLD.TOTAL', -861),
+                ('NET', 1747.32),
+                ('SUPER', 313),
+            ],
+            payslip_date_from=date(2026, 6, 1),
+            payslip_date_to=date(2026, 6, 7)
+        )
+
+        self._test_payslip(
+            employee,
+            contract,
+            expected_worked_days=[
+                # (work_entry_type_id.id, number_of_day, number_of_hours, amount)
+                (self.work_entry_types['WORK100'].id, 5, 38, 2608.36),
+            ],
+            expected_lines=[
+                # (code, total)
+                ('BASIC', 2608.36),
+                ('OTE', 2608.36),
+                ('GROSS', 2608.36),
+                ('QE', 2608.36),
+                ('WITHHOLD', -654),
+                ('WITHHOLD.STUDY', -193),
+                ('MEDICARE', 0),
+                ('WITHHOLD.TOTAL', -847),
+                ('NET', 1761.36),
+                ('SUPER', 313),
+            ],
+            payslip_date_from=date(2026, 7, 1),
+            payslip_date_to=date(2026, 7, 7)
+        )
+
+    @freeze_time('2026-07-15')
+    def test_regular_12_super_cap(self):
+        """ From 1 July 2026 the Super Guarantee is computed on the Qualifying Earnings
+        (QE) at the 12% rate, but only up to the yearly maximum contribution base (cap).
+        Once the cumulative QE of the financial year reaches the cap (270830) no further
+        super is accrued. Driven by ``rule_parameter_super_2026``: {"rate": 12, "cap": 270830}.
+        """
+        employee, contract = self._create_employee(contract_info={
+            'employee': 'Test Employee',
+            'employment_basis_code': 'F',
+            'wage_type': 'monthly',
+            'wage': 100000,
+            'l10n_au_training_loan': False,
+            'l10n_au_tax_free_threshold': True,
+        })
+
+        # Month 1: well below the cap -> full 12% on QE.
+        self._test_payslip(
+            employee,
+            contract,
+            expected_worked_days=[
+                (self.work_entry_types['WORK100'].id, 23, 174.8, 100000),
+            ],
+            expected_lines=[
+                ('BASIC', 100000),
+                ('OTE', 100000),
+                ('GROSS', 100000),
+                ('QE', 100000),
+                ('WITHHOLD', -44157),
+                ('MEDICARE', 0),
+                ('WITHHOLD.TOTAL', -44157),
+                ('NET', 55843),
+                ('SUPER', 12000),  # 100000 * 12%
+            ],
+            payslip_date_from=date(2026, 7, 1),
+            payslip_date_to=date(2026, 7, 31),
+        )
+
+        # Month 2: cumulative QE = 200000, still below the cap -> full 12%.
+        self._test_payslip(
+            employee,
+            contract,
+            expected_worked_days=[
+                (self.work_entry_types['WORK100'].id, 21, 159.6, 100000),
+            ],
+            expected_lines=[
+                ('BASIC', 100000),
+                ('OTE', 100000),
+                ('GROSS', 100000),
+                ('QE', 100000),
+                ('WITHHOLD', -44157),
+                ('MEDICARE', 0),
+                ('WITHHOLD.TOTAL', -44157),
+                ('NET', 55843),
+                ('SUPER', 12000),  # 100000 * 12%
+            ],
+            payslip_date_from=date(2026, 8, 1),
+            payslip_date_to=date(2026, 8, 31),
+        )
+
+        # Month 3: cumulative QE crosses the cap. Only 70830 (270830 - 200000) of QE
+        # remains eligible -> super is capped.
+        self._test_payslip(
+            employee,
+            contract,
+            expected_worked_days=[
+                (self.work_entry_types['WORK100'].id, 22, 167.2, 100000),
+            ],
+            expected_lines=[
+                ('BASIC', 100000),
+                ('OTE', 100000),
+                ('GROSS', 100000),
+                ('QE', 100000),
+                ('WITHHOLD', -44157),
+                ('MEDICARE', 0),
+                ('WITHHOLD.TOTAL', -44157),
+                ('NET', 55843),
+                ('SUPER', 8499.6),  # 70830 * 12%
+            ],
+            payslip_date_from=date(2026, 9, 1),
+            payslip_date_to=date(2026, 9, 30),
+        )
+
+        # Month 4: cap already reached -> no super accrued.
+        self._test_payslip(
+            employee,
+            contract,
+            expected_worked_days=[
+                (self.work_entry_types['WORK100'].id, 22, 167.2, 100000),
+            ],
+            expected_lines=[
+                ('BASIC', 100000),
+                ('OTE', 100000),
+                ('GROSS', 100000),
+                ('QE', 100000),
+                ('WITHHOLD', -44157),
+                ('MEDICARE', 0),
+                ('WITHHOLD.TOTAL', -44157),
+                ('NET', 55843),
+                ('SUPER', 0),  # cap reached
+            ],
+            payslip_date_from=date(2026, 10, 1),
+            payslip_date_to=date(2026, 10, 31),
         )

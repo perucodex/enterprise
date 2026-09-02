@@ -183,7 +183,7 @@ class AppointmentType(models.Model):
             end_time = datetime.combine(start_time + timedelta(days=max_schedule_days), time.max).astimezone(pytz.utc)
 
         slots = self._slots_generate(
-            start_time + timedelta(hours=self.min_schedule_hours),
+            start_time,
             end_time,
             'UTC',
             reference_date=start_time.replace(tzinfo=None),
@@ -202,7 +202,7 @@ class AppointmentType(models.Model):
             ]
         else:
             availability_values = self._slot_availability_prepare_resources_values(
-                self.resource_ids, start_time + timedelta(hours=self.min_schedule_hours), end_time)
+                self.resource_ids, start_time, end_time)
 
             for slot in slots:
                 availabilities += self._google_reserve_format_slot_availabilities_resources(slot, availability_values)
@@ -212,9 +212,11 @@ class AppointmentType(models.Model):
     def _google_reserve_format_slot_availabilities_users(self, slot):
         [start_utc, end_utc] = slot["UTC"]
 
+        spots_total = len(slot["slot"].restrict_to_user_ids or self.staff_user_ids)
+        spots_open = len(slot["available_staff_users"]) if "available_staff_users" in slot else 0
         return {
-            "spots_total": len(slot["slot"].restrict_to_user_ids or self.staff_user_ids),
-            "spots_open": len(slot["available_staff_users"]) if "available_staff_users" in slot else 0,
+            "spots_total": spots_total,
+            "spots_open": min(spots_open, spots_total),
             "duration_sec": int((end_utc - start_utc).total_seconds()),
             "start_sec": cal.timegm(start_utc.timetuple()),
         }
@@ -280,6 +282,7 @@ class AppointmentType(models.Model):
                     resource_to_bookings=availability_values.get('resource_to_bookings'),
                 ).items()
                 if isinstance(appointment_resource, models.BaseModel)  # see docstring for explanations
+                and self._slot_availability_is_resource_available(slot, resource, availability_values)
             }
             for resource in self.resource_ids
         }
@@ -326,7 +329,7 @@ class AppointmentType(models.Model):
                         break
 
             availabilities.append({
-                'spots_open': open_spots,
+                'spots_open': min(open_spots, total_spots),
                 'spots_total': total_spots,
                 'duration_sec': int((end_utc - start_utc).total_seconds()),
                 'start_sec': cal.timegm(start_utc.timetuple()),

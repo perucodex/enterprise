@@ -3,13 +3,11 @@ import {
     makeMockEnv,
     patchWithCleanup,
     MockServer,
-    mountWithCleanup,
 } from "@web/../tests/web_test_helpers";
 import { session } from "@web/session";
 import { registry } from "@web/core/registry";
 import { uuidv4 } from "@point_of_sale/utils";
 import { setupPosEnv } from "@point_of_sale/../tests/unit/utils";
-import { PrepDisplay } from "@pos_enterprise/app/components/preparation_display/preparation_display";
 import { unpatchPrepDataService } from "@pos_enterprise/app/services/data_service";
 import { unpatchDataServiceOptions } from "@pos_enterprise/app/models/data_service_options";
 
@@ -46,7 +44,6 @@ export const setupPosPrepDisplayEnv = async () => {
 
     await makeMockEnv();
     const store = getService("preparation_display");
-    await mountWithCleanup(PrepDisplay);
     return store;
 };
 

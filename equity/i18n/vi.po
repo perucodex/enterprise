@@ -2,15 +2,15 @@
 # This file contains the translation of the following modules:
 # * equity
 #
-# "Thi Huong Nguyen (thng)" <thng@odoo.com>, 2025.
+# "Thi Huong Nguyen (thng)" <thng@odoo.com>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
 # Odoo Translation Bot <c3p@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-30 18:41+0000\n"
-"PO-Revision-Date: 2025-12-24 08:44+0000\n"
+"POT-Creation-Date: 2026-05-08 17:40+0000\n"
+"PO-Revision-Date: 2026-04-09 11:26+0000\n"
 "Last-Translator: \"Thi Huong Nguyen (thng)\" <thng@odoo.com>\n"
 "Language-Team: Vietnamese <https://translate.odoo.com/projects/odoo-19/"
 "equity/vi/>\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 5.16.2\n"
 
 #. module: equity
 #: model:ir.model.fields,field_description:equity.field_equity_transaction__securities
@@ -220,7 +220,7 @@ msgid ""
 "<i title=\"To\" class=\"fa fa-fw fa-arrow-right mx-1\" "
 "invisible=\"transaction_type != 'exercise'\"/>"
 msgstr ""
-"<i title=\"To\" class=\"fa fa-fw fa-arrow-right mx-1\" "
+"<i title=\"Đến\" class=\"fa fa-fw fa-arrow-right mx-1\" "
 "invisible=\"transaction_type != 'thực hiện'\"/>"
 
 #. module: equity
@@ -229,7 +229,7 @@ msgid ""
 "<i title=\"To\" class=\"fa fa-fw fa-arrow-right mx-1\" "
 "invisible=\"transaction_type != 'transfer'\"/>"
 msgstr ""
-"<i title=\"To\" class=\"fa fa-fw fa-arrow-right mx-1\" "
+"<i title=\"Đến\" class=\"fa fa-fw fa-arrow-right mx-1\" "
 "invisible=\"transaction_type != 'chuyển nhượng'\"/>"
 
 #. module: equity
@@ -264,8 +264,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:equity.view_equity_transaction_form
 msgid "<span>Missing supporting documents! Attach them in the chatter.</span>"
 msgstr ""
-"<span>Thiếu tài liệu hỗ trợ! Vui lòng đính kèm chúng trong phần trò chuyện.</"
-"span>"
+"<span>Thiếu tài liệu hỗ trợ! Vui lòng đính kèm chúng trong cửa sổ trò chuyện."
+"</span>"
 
 #. module: equity
 #: model_terms:ir.ui.view,arch_db:equity.view_equity_security_class_form
@@ -298,7 +298,7 @@ msgstr "<strong>ID thuế:</strong>"
 msgid ""
 "= Your shares / Total number of shares (i.e., options not taken into account)"
 msgstr ""
-"= Số cổ phần của bạn / Tổng số cổ phần (tức là không tính các quyền chọn)"
+"= Số cổ phần của bạn/Tổng số cổ phần (tức là không tính các quyền chọn)"
 
 #. module: equity
 #: model_terms:ir.ui.view,arch_db:equity.portal_ubo_form
@@ -323,6 +323,12 @@ msgstr ""
 "Công ty niêm yết: là công ty có cổ phiếu được giao dịch trên một thị trường "
 "được quản lý tại các Quốc gia Thành viên của\n"
 "Khu vực Kinh tế Châu Âu; hoặc"
+
+#. module: equity
+#. odoo-python
+#: code:addons/equity/models/equity_transaction.py:0
+msgid "A partner cannot have transactions in different currencies."
+msgstr ""
 
 #. module: equity
 #: model_terms:ir.ui.view,arch_db:equity.equity_ubo_report
@@ -449,6 +455,11 @@ msgid "CEO"
 msgstr "CEO"
 
 #. module: equity
+#: model:ir.model.fields,field_description:equity.field_equity_transaction__can_change_currency
+msgid "Can Change Currency"
+msgstr ""
+
+#. module: equity
 #. odoo-python
 #: code:addons/equity/models/equity_transaction.py:0
 msgid "Can only exercise options, please select an options class"
@@ -501,6 +512,7 @@ msgid "Clear"
 msgstr "Xoá"
 
 #. module: equity
+#: model:ir.model.fields,field_description:equity.field_equity_cap_table__company_id
 #: model:ir.model.fields,field_description:equity.field_equity_transaction__partner_id
 #: model:ir.model.fields,field_description:equity.field_equity_ubo__partner_id
 #: model:ir.model.fields,field_description:equity.field_equity_valuation__partner_id
@@ -524,6 +536,13 @@ msgstr "Công ty - Loại 2. Kiểm soát bằng các phương tiện khác"
 #: model:ir.model.fields.selection,name:equity.selection__equity_ubo__control_method__co_3
 msgid "Company - Cat 3. Executive officer"
 msgstr "Công ty - Danh mục 3. Giám đốc điều hành"
+
+#. module: equity
+#: model:ir.model.fields,help:equity.field_equity_transaction__company_id
+#: model:ir.model.fields,help:equity.field_equity_ubo__company_id
+#: model:ir.model.fields,help:equity.field_equity_valuation__company_id
+msgid "Company to which this record is visible"
+msgstr ""
 
 #. module: equity
 #: model:ir.ui.menu,name:equity.menu_equity_configuration
@@ -619,7 +638,7 @@ msgstr "Tiền tệ"
 #. module: equity
 #: model:ir.ui.menu,name:equity.menu_equity_dashboard
 msgid "Dashboard"
-msgstr "Bảng điều khiển"
+msgstr "Báo cáo tổng quan"
 
 #. module: equity
 #: model:ir.model.fields,field_description:equity.field_equity_transaction__date
@@ -639,7 +658,7 @@ msgid ""
 "Definitions: \"beneficial owners\", \"control\", \"shareholder holding 25% "
 "or more\", \"decision makers\""
 msgstr ""
-"Định nghĩa: \"chủ sở hữu thực sự\", \"quyền kiểm soát\", \"cổ đông sở hữu "
+"Định nghĩa: \"chủ sở hữu hưởng lợi\", \"quyền kiểm soát\", \"cổ đông sở hữu "
 "25% trở lên\", \"người ra quyết định\""
 
 #. module: equity
@@ -652,7 +671,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/equity/models/equity_transaction.py:0
 msgid "Destination class can only be set in exercise transactions."
-msgstr "Lớp đích chỉ có thể được thiết lập trong các giao dịch tập luyện."
+msgstr "Lớp đích chỉ có thể được thiết lập trong các giao dịch thực hiện."
 
 #. module: equity
 #: model:ir.model.fields,field_description:equity.field_equity_cap_table__dilution
@@ -787,13 +806,13 @@ msgstr "Sự kiện"
 #. module: equity
 #: model_terms:ir.ui.view,arch_db:equity.portal_ubo_form
 msgid "Exemption from the identification of beneficial"
-msgstr "Miễn trừ việc xác định chủ sở hữu thực sự"
+msgstr "Miễn trừ việc xác định chủ sở hữu hưởng lợi"
 
 #. module: equity
 #. odoo-python
 #: code:addons/equity/models/equity_transaction.py:0
 msgid "Exercise transactions must have a destination 'Share' class"
-msgstr "Các giao dịch tập thể phải có lớp đích là 'Share'"
+msgstr "Các giao dịch thực hiện phải có lớp đích là 'Chia sẻ'"
 
 #. module: equity
 #: model:ir.model.fields,field_description:equity.field_equity_transaction__expiration_date
@@ -1150,7 +1169,7 @@ msgstr "NGO - Loại 1. Ban Giám đốc"
 #. module: equity
 #: model:ir.model.fields.selection,name:equity.selection__equity_ubo__control_method__ngo_2
 msgid "NGO - Cat 2. Individuals with representation authority"
-msgstr "Tổ chức phi chính phủ (NGO) - Loại 2. Cá nhân có quyền đại diện"
+msgstr "NGO - Loại 2. Cá nhân có quyền đại diện"
 
 #. module: equity
 #: model:ir.model.fields.selection,name:equity.selection__equity_ubo__control_method__ngo_3
@@ -1160,7 +1179,7 @@ msgstr "NGO - Loại 3. Các cá nhân chịu trách nhiệm quản lý hàng ng
 #. module: equity
 #: model:ir.model.fields.selection,name:equity.selection__equity_ubo__control_method__ngo_4
 msgid "NGO - Cat 4. Founders of a foundation"
-msgstr "NGO - Loại 4. Người sáng lập của một quỹ từ thiện"
+msgstr "NGO - Loại 4. Người sáng lập của một quỹ"
 
 #. module: equity
 #: model:ir.model.fields.selection,name:equity.selection__equity_ubo__control_method__ngo_5
@@ -1309,8 +1328,8 @@ msgid ""
 "Only %(seller_options)s %(security_class_name)s options available for "
 "transfer"
 msgstr ""
-"Chỉ có các tùy chọn %(seller_options)s %(security_class_name)s có sẵn cho "
-"việc chuyển đổi"
+"Chỉ có các tùy chọn %(seller_options)s %(security_class_name)s có thể chuyển "
+"nhượng"
 
 #. module: equity
 #. odoo-python
@@ -1318,7 +1337,7 @@ msgstr ""
 msgid ""
 "Only %(seller_shares)s %(security_class_name)s shares available for transfer"
 msgstr ""
-"Chỉ có cổ phiếu của %(seller_shares)s %(security_class_name)s có thể chuyển "
+"Chỉ có cổ phiếu %(seller_shares)s %(security_class_name)s có thể chuyển "
 "nhượng"
 
 #. module: equity
@@ -1328,8 +1347,8 @@ msgid ""
 "Only %(subscriber_options)s %(security_class_name)s options available for "
 "cancellation"
 msgstr ""
-"Chỉ có các tùy chọn %(subscriber_options)s %(security_class_name)s có sẵn "
-"cho việc hủy bỏ"
+"Chỉ có các tùy chọn %(subscriber_options)s %(security_class_name)s có thể "
+"hủy bỏ"
 
 #. module: equity
 #. odoo-python
@@ -1338,7 +1357,7 @@ msgid ""
 "Only %(subscriber_options)s %(security_class_name)s options available for "
 "exercise"
 msgstr ""
-"Chỉ có các tùy chọn %(subscriber_options)s %(security_class_name)s  có thể "
+"Chỉ có các tùy chọn %(subscriber_options)s %(security_class_name)s có thể "
 "được thực hiện"
 
 #. module: equity
@@ -1348,8 +1367,8 @@ msgid ""
 "Only %(subscriber_shares)s %(security_class_name)s shares available for "
 "cancellation"
 msgstr ""
-"Chỉ có cổ phiếu của %(subscriber_shares)s %(security_class_name)s có thể "
-"được hủy bỏ"
+"Chỉ có cổ phiếu %(subscriber_shares)s %(security_class_name)s có thể được "
+"hủy bỏ"
 
 #. module: equity
 #: model:ir.model.fields.selection,name:equity.selection__equity_transaction__transaction_type__exercise
@@ -1703,7 +1722,7 @@ msgstr "Hiện tại không có giao dịch nào cho tài khoản của bạn."
 #. module: equity
 #: model_terms:ir.ui.view,arch_db:equity.portal_ubo_form
 msgid "There are two classes of beneficial owners:"
-msgstr "Có hai loại chủ sở hữu thực sự:"
+msgstr "Có hai loại chủ sở hữu hưởng lợi:"
 
 #. module: equity
 #: model_terms:ir.ui.view,arch_db:equity.portal_my_equity
@@ -1742,7 +1761,6 @@ msgstr "Tổng giá trị"
 #. module: equity
 #: model:ir.model.fields.selection,name:equity.selection__equity_valuation__event__transaction
 #: model_terms:ir.ui.view,arch_db:equity.view_equity_transaction_form
-#: model_terms:ir.ui.view,arch_db:equity.view_equity_valuation_form
 #: model_terms:ir.ui.view,arch_db:equity.view_equity_valuation_search
 msgid "Transaction"
 msgstr "Giao dịch"
@@ -1763,7 +1781,6 @@ msgstr "Loại giao dịch"
 #: model:ir.actions.act_window,name:equity.action_equity_transaction
 #: model:ir.ui.menu,name:equity.menu_equity_ownership_transactions
 #: model_terms:ir.ui.view,arch_db:equity.view_equity_transaction_list
-#: model_terms:ir.ui.view,arch_db:equity.view_equity_valuation_list
 msgid "Transactions"
 msgstr "Giao dịch"
 
@@ -1879,12 +1896,14 @@ msgstr ""
 #: model:ir.model.fields,field_description:equity.field_equity_cap_table__valuation
 #: model:ir.model.fields,field_description:equity.field_equity_valuation__valuation
 #: model:ir.ui.menu,name:equity.menu_equity_reporting_valuation
+#: model_terms:ir.ui.view,arch_db:equity.view_equity_valuation_form
 msgid "Valuation"
 msgstr "Định giá"
 
 #. module: equity
 #: model:ir.actions.act_window,name:equity.action_equity_valuation
 #: model:ir.ui.menu,name:equity.menu_equity_ownership_valuations
+#: model_terms:ir.ui.view,arch_db:equity.view_equity_valuation_list
 msgid "Valuations"
 msgstr ""
 
@@ -1897,6 +1916,13 @@ msgstr "Thời gian chờ, hạn chót thực hiện, v.v."
 #: model:res.groups,name:equity.group_equity_viewer
 msgid "Viewer"
 msgstr "Người xem"
+
+#. module: equity
+#: model:ir.model.fields,field_description:equity.field_equity_transaction__company_id
+#: model:ir.model.fields,field_description:equity.field_equity_ubo__company_id
+#: model:ir.model.fields,field_description:equity.field_equity_valuation__company_id
+msgid "Visible to"
+msgstr ""
 
 #. module: equity
 #: model:ir.model.fields,field_description:equity.field_equity_cap_table__votes
@@ -1972,6 +1998,14 @@ msgid ""
 msgstr ""
 "Bạn có thể loại bỏ bất kỳ cổ đông nào sở hữu dưới 25% số cổ phần hoặc quyền "
 "biểu quyết."
+
+#. module: equity
+#. odoo-python
+#: code:addons/equity/models/equity_transaction.py:0
+msgid ""
+"You cannot change the equity currency because this partner already has "
+"existing transactions."
+msgstr ""
 
 #. module: equity
 #. odoo-javascript
@@ -2069,7 +2103,7 @@ msgstr "ngày"
 #. module: equity
 #: model_terms:ir.ui.view,arch_db:equity.equity_ubo_report
 msgid "declares that the beneficial owners of the company:"
-msgstr "xác nhận rằng các chủ sở hữu thực sự của công ty:"
+msgstr "xác nhận rằng các chủ sở hữu hưởng lợi của công ty:"
 
 #. module: equity
 #: model_terms:ir.ui.view,arch_db:equity.view_equity_security_class_form

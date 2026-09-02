@@ -1,6 +1,6 @@
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, models, fields
+from odoo import _, api, models, fields
 from odoo.exceptions import ValidationError
 
 
@@ -8,6 +8,14 @@ class EquityTransaction(models.Model):
     _name = 'equity.transaction'
     _inherit = ['mail.thread']
     _description = "Equity Transaction"
+    _check_company_auto = True
+
+    company_id = fields.Many2one(
+        'res.company',
+        related='partner_id.company_id',
+        string="Visible to",
+        help="Company to which this record is visible",
+    )
 
     transaction_type = fields.Selection(
         string="Transaction Type",
@@ -28,7 +36,8 @@ class EquityTransaction(models.Model):
         required=True,
         index='btree',
     )
-    equity_currency_id = fields.Many2one(comodel_name='res.currency', string="Currency", related='partner_id.equity_currency_id')
+    equity_currency_id = fields.Many2one(comodel_name='res.currency', string="Currency", related='partner_id.equity_currency_id', readonly=False)
+    can_change_currency = fields.Boolean(compute='_compute_can_change_currency')
     date = fields.Date(default=fields.Date.context_today, required=True)
     expiration_date = fields.Date(
         string="Expiration",
@@ -59,11 +68,12 @@ class EquityTransaction(models.Model):
     )
     notes = fields.Text()
 
-    seller_id = fields.Many2one(comodel_name='res.partner', string="Seller", tracking=True)
+    seller_id = fields.Many2one(comodel_name='res.partner', string="Seller", tracking=True, check_company=True)
     subscriber_id = fields.Many2one(
         comodel_name='res.partner',
         string="Subscriber",
         tracking=True,
+        check_company=True,
         help="Recipient of the securities of the transaction.",
     )
     subscriber_id_placeholder = fields.Char(compute='_compute_subscriber_id_placeholder')
@@ -205,7 +215,7 @@ class EquityTransaction(models.Model):
 
     @api.depends('date', 'partner_id')
     def _compute_security_price(self):
-        for transaction in self.filtered(lambda t: not bool(self._origin.id)):  # only set security price for newly created records
+        for transaction in self.filtered(lambda t: not bool(t._origin.id)):  # only set security price for newly created records
             transaction.security_price = self.search([
                 ('partner_id', '=', transaction.partner_id.id),
                 ('date', '<', transaction.date),
@@ -269,13 +279,23 @@ class EquityTransaction(models.Model):
             else:
                 transaction.display_name = ""
 
+    @api.depends('partner_id', 'partner_id.equity_transaction_ids')
+    def _compute_can_change_currency(self):
+        for transaction in self:
+            transaction.can_change_currency = not (transaction.partner_id.equity_transaction_ids - transaction)
+
     @api.model_create_multi
     def create(self, vals_list):
         transactions = super().create(vals_list)
+        if any(len(partner.equity_transaction_ids.equity_currency_id) > 1 for partner in transactions.partner_id):
+            raise ValidationError(_("A partner cannot have transactions in different currencies."))
         self.env['equity.cap.table'].invalidate_model()
         return transactions
 
     def write(self, vals):
+        if 'equity_currency_id' in vals:
+            if any(not transaction.can_change_currency and transaction.equity_currency_id.id != vals['equity_currency_id'] for transaction in self):
+                raise ValidationError(_("You cannot change the equity currency because this partner already has existing transactions."))
         transactions = super().write(vals)
         self.env['equity.cap.table'].invalidate_model()
         return transactions

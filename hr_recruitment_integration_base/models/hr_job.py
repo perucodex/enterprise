@@ -22,7 +22,7 @@ class HrJob(models.Model):
         ('monthly', 'Month'),
         ('yearly', 'Year'),
     ], string='Salary Time Unit', default='monthly', required=True, groups="hr.group_hr_user,hr_recruitment.group_hr_recruitment_user")
-    schedule_id = fields.Many2one('resource.calendar', string='Working Schedule', groups="hr.group_hr_user,hr_recruitment.group_hr_recruitment_user")
+    schedule_id = fields.Many2one('resource.calendar', string='Working Schedule', groups="hr.group_hr_user,hr_recruitment.group_hr_recruitment_user", check_company=True)
     date_from = fields.Date(help="Is set, update applicants availability once hired for that specific mission.", groups="hr.group_hr_user,hr_recruitment.group_hr_recruitment_user")
     date_to = fields.Date(groups="hr.group_hr_user,hr_recruitment.group_hr_recruitment_user")
 

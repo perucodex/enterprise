@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import http, fields
+from odoo.exceptions import UserError
 from odoo.fields import Domain
 from odoo.http import request
 from odoo.tools import consteq
@@ -77,6 +78,18 @@ class Frontdesk(http.Controller):
         frontdesk = request.env['frontdesk.frontdesk'].sudo().browse(frontdesk_id)
         if not frontdesk.exists() or not self._verify_token(frontdesk, token):
             return request.not_found()
+        domain = Domain(domain)
+
+        allowed_domain = {
+            'department_id': ('=',),
+            'display_name': ('ilike',),
+        }
+        for condition in domain.iter_conditions():
+            if condition.operator not in allowed_domain.get(condition.field_expr, ()):
+                raise UserError(self.env._(
+                    "Invalid domain. Allowed filters are: department_id with '=' and display_name with 'ilike'.",
+                ))
+
         base_domain = Domain([
             ('company_id', '=', frontdesk.company_id.id),
             '|',
@@ -157,7 +170,7 @@ class Frontdesk(http.Controller):
     @http.route('/frontdesk/visitor/check_out/<int:visitor_id>', type='http', auth='user')
     def frontdesk_visitor_check_out(self, visitor_id):
         visitor = request.env['frontdesk.visitor'].browse(visitor_id)
-        if not visitor.exists():
+        if not visitor.exists() or not request.env.user.has_group('frontdesk.frontdesk_group_user'):
             return request.not_found()
-        visitor.action_check_out()
+        visitor.sudo().action_check_out()
         return request.render("frontdesk.frontdesk_visitor_check_out")

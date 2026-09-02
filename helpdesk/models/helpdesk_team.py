@@ -30,10 +30,11 @@ class HelpdeskTeam(models.Model):
             if stage:
                 default_stages += stage
         if not default_stages:
+            email_template = self.env.ref('helpdesk.new_ticket_request_email_template', raise_if_not_found=False)
             default_stages = self.env['helpdesk.stage'].create({
                 'name': _("New"),
                 'sequence': 0,
-                'template_id': self.env.ref('helpdesk.new_ticket_request_email_template', raise_if_not_found=False).id or None
+                'template_id': email_template and email_template.id,
             })
         return [Command.set(default_stages.ids)]
 
@@ -586,6 +587,14 @@ class HelpdeskTeam(models.Model):
         return {alias.alias_name for alias in existing_aliases}
 
     # ------------------------------------------------------------
+    # Mail Thread
+    # ------------------------------------------------------------
+
+    def message_subscribe(self, partner_ids=None, subtype_ids=None):
+        self.check_access('write')
+        return super().message_subscribe(partner_ids=partner_ids, subtype_ids=subtype_ids)
+
+    # ------------------------------------------------------------
     # Business Methods
     # ------------------------------------------------------------
 
@@ -690,7 +699,7 @@ class HelpdeskTeam(models.Model):
                 ('res_model', '=', 'helpdesk.ticket'),
                 ('res_id', '!=', False),
                 ('write_date', '>', fields.Datetime.to_string(one_week_before)),
-                ('write_date', '<=', fields.Date.today()),
+                ('write_date', '<=', fields.Datetime.now()),
                 ('rating', '>=', RATING_LIMIT_MIN),
                 ('consumed', '=', True),
             ])
@@ -750,7 +759,10 @@ class HelpdeskTeam(models.Model):
         return action
 
     def action_view_ticket(self):
-        action = self.env["ir.actions.actions"]._for_xml_id("helpdesk.helpdesk_ticket_action_team")
+        action = self.env["ir.actions.actions"].with_context(
+            active_model=self._name,
+            active_id=self.id,
+        )._for_xml_id("helpdesk.helpdesk_ticket_action_team")
         action['display_name'] = self.name
         return action
 
@@ -841,11 +853,11 @@ class HelpdeskTeam(models.Model):
 
     def action_view_rating_today(self):
         #  call this method of on click "Customer Rating" button on dashbord for today rating of teams tickets
-        return self.search([('member_ids', 'in', self.env.uid)])._action_view_rating(period='today', user_id=self.env.uid)
+        return self.search([])._action_view_rating(period='today', user_id=self.env.uid)
 
     def action_view_rating_7days(self):
         #  call this method of on click "Customer Rating" button on dashbord for last 7days rating of teams tickets
-        return self.search([('member_ids', 'in', self.env.uid)])._action_view_rating(period='seven_days', user_id=self.env.uid)
+        return self.search([])._action_view_rating(period='seven_days', user_id=self.env.uid)
 
     def action_view_team_rating(self):
         self.ensure_one()

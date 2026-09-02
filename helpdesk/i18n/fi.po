@@ -43,8 +43,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-30 18:42+0000\n"
-"PO-Revision-Date: 2026-01-07 15:34+0000\n"
+"POT-Creation-Date: 2026-05-08 17:41+0000\n"
+"PO-Revision-Date: 2026-08-26 10:19+0000\n"
 "Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/helpdesk/"
 "fi/>\n"
@@ -53,7 +53,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__answered_customer_message_count
@@ -151,7 +151,7 @@ msgid ""
 "        Dear <t t-out=\"object.sudo().partner_id.name or 'Madam/Sir'\">Madam/"
 "Sir</t>,<br/><br/>\n"
 "        We would like to inform you that we have closed your ticket "
-"(reference <t t-out=\"object.id or ''\">15</t>). \n"
+"(reference <t t-out=\"object.ticket_ref or ''\">15</t>).\n"
 "        We trust that the services provided have met your expectations and "
 "that you have found a satisfactory resolution to your issue.<br/><br/>\n"
 "        However, if you have any further questions or comments, please do "
@@ -167,14 +167,14 @@ msgid ""
 "        "
 msgstr ""
 "<div>\n"
-"        Hyvä <t t-out=\"object.sudo().partner_id.name or 'Madam/"
-"Sir'\">vastaanottaja</t>,<br/><br/>\n"
-"        Haluamme ilmoittaa, että olemme sulkeneet tukipyyntönne (viite <t t-"
-"out=\"object.id or ''\">15</t>). \n"
+"        Hyvä <t t-out=\"object.sudo().partner_id.name or 'Madam/Sir'\">"
+"vastaanottaja</t>,<br/><br/>\n"
+"        Olemme sulkeneet tukipyyntönne (viite <t t-out=\"object.ticket_ref "
+"or ''\">15</t>). \n"
 "        Luotamme tarjottujen palveluiden vastanneen odotuksianne, ja että "
 "löysitte tyydyttävän ratkaisun ongelmaanne.<br/><br/>\n"
 "        Jos teillä on vielä kysymyksiä tai kommentteja, voitte vastata tähän "
-"sähköpostiin avataksenne tukipyyntönne uudelleen.\n"
+"sähköpostiin tukipyyntönne uudelleen avaamiseksi.\n"
 "        Tiimimme on aina valmiina auttamaan.<br/><br/>\n"
 "        Kiitos palvelumme valitsemisesta sekä yhteistyöstä tämän prosessin "
 "aikana. Arvostamme niin asiakkuuttasi kuin myös tilaisuutta tukea "
@@ -378,47 +378,47 @@ msgid ""
 "    <div style=\"text-align: center; padding: 16px 0px 16px 0px;\">\n"
 "        <t t-if=\"hasattr(object.team_id, 'website_id') and "
 "object.team_id.use_website_helpdesk_form\">\n"
-"            <a t-attf-style=\"background-color: "
-"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
-"8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size: 13px;\" t-att-href=\"'%s%s' % (object.team_id.website_id.domain "
+"            <a class=\"btn btn-fill-primary\" t-attf-style=\"background-"
+"color: {{object.company_id.email_secondary_color or 'rgb(113, 75, 103)'}}; "
+"padding: 5px 10px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 4px; "
+"font-size: 14px;\" t-att-href=\"'%s%s' % (object.team_id.website_id.domain "
 "or '', object.get_portal_url())\" target=\"_blank\">View Ticket</a>\n"
 "        </t>\n"
 "        <t t-else=\"\">\n"
-"            <a t-attf-style=\"background-color: "
-"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
-"8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size:13px;\" t-att-href=\"object.get_portal_url()\" "
+"            <a class=\"btn btn-fill-primary\" t-attf-style=\"background-"
+"color: {{object.company_id.email_secondary_color or 'rgb(113, 75, 103)'}}; "
+"padding: 5px 10px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 4px; "
+"font-size: 14px;\" t-att-href=\"object.get_portal_url()\" "
 "target=\"_blank\">View Ticket</a>\n"
 "        </t>\n"
 "        <t t-if=\"hasattr(object.team_id, 'website_id') and "
 "object.team_id.allow_portal_ticket_closing\">\n"
-"            <a t-attf-style=\"background-color: "
-"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
-"8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size:13px;\" t-att-href=\"'%s/my/ticket/close/%s/%s' % "
+"            <a class=\"btn btn-fill-primary\" t-attf-style=\"background-"
+"color: {{object.company_id.email_secondary_color or 'rgb(113, 75, 103)'}}; "
+"padding: 5px 10px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 4px; "
+"font-size: 14px;\" t-att-href=\"'%s/my/ticket/close/%s/%s' % "
 "(object.team_id.website_id.domain or '', object.id, object.access_token)\" "
 "target=\"_blank\">Close Ticket</a>\n"
 "        </t>\n"
 "        <t t-elif=\"object.team_id.allow_portal_ticket_closing\">\n"
-"            <a t-attf-style=\"background-color: "
-"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
-"8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size:13px;\" t-att-href=\"'/my/ticket/close/%s/%s' % (object.id, "
+"            <a class=\"btn btn-fill-primary\" t-attf-style=\"background-"
+"color: {{object.company_id.email_secondary_color or 'rgb(113, 75, 103)'}}; "
+"padding: 5px 10px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 4px; "
+"font-size: 14px;\" t-att-href=\"'/my/ticket/close/%s/%s' % (object.id, "
 "object.access_token)\" target=\"_blank\">Close Ticket</a>\n"
 "        </t>\n"
 "        <t t-if=\"object.team_id.use_website_helpdesk_forum or "
 "object.team_id.use_website_helpdesk_knowledge or "
 "object.team_id.use_website_helpdesk_slides\">\n"
-"            <a t-attf-style=\"background-color: "
-"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
-"8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size:13px;\" t-att-href=\"object.team_id.feature_form_url\" "
+"            <a class=\"btn btn-fill-primary\" t-attf-style=\"background-"
+"color: {{object.company_id.email_secondary_color or 'rgb(113, 75, 103)'}}; "
+"padding: 5px 10px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 4px; "
+"font-size: 14px;\" t-att-href=\"object.team_id.feature_form_url\" "
 "target=\"_blank\">Visit Help Center</a>\n"
 "        </t><br/><br/>\n"
 "    </div>\n"
@@ -430,81 +430,82 @@ msgid ""
 msgstr ""
 "<div>\n"
 "    Hyvä <t t-out=\"object.sudo().partner_id.name or "
-"object.sudo().partner_name or 'Madam/Sir'\">vastaanottaja</t>,<br/><br/>\n"
+"object.sudo().partner_name or 'Madam/Sir'\">rouva/herra</t>,<br/><br/>\n"
 "    Pyyntösi\n"
 "    <t t-if=\"hasattr(object.team_id, 'website_id') and "
 "object.get_portal_url()\">\n"
 "        <a t-attf-href=\"{{ object.team_id.website_id.domain }}/my/ticket/"
 "{{ object.id }}/{{ object.access_token }}\" t-out=\"object.name or "
-"''\">Pöydän jalat ovat epätasapainossa</a>\n"
+"''\">Pöydänjalat ovat epätasapainossa</a>\n"
 "    </t>\n"
-"    on vastaanotettu ja katsastetaan <t t-out=\"object.team_id.name or "
-"''\">VIP-tukitiimimme</t> toimesta.<br/><br/>\n"
+"    on vastaanotettu ja <t t-out=\"object.team_id.name or ''\">VIP-"
+"tukipalvelumme</t> läpikäytävänä.<br/><br/>\n"
 "    Tukipyyntösi viite on <strong><t t-out=\"object.ticket_ref or ''\">15</"
 "t></strong>.<br/><br/>\n"
 "\n"
-"    Vastaa tähän sähköpostiin, mikäli haluat antaa lisätietoja.<br/><br/>\n"
+"    Voit antaa mahdollisia lisätietoja yksinkertaisesti vastaamalla tähän "
+"viestiin.<br/><br/>\n"
 "    <t t-if=\"object.team_id.show_knowledge_base\">\n"
-"        Voit myös vierailla <a t-attf-"
+"        Ethän epäröi vierailla <a t-attf-"
 "href=\"{{ object.team_id.get_knowledge_base_url() }}\">Tukikeskuksessamme</"
 "a>. Saatat löytää sieltä vastauksen kysymykseesi.\n"
 "        <br/><br/>\n"
 "    </t>\n"
 "    <t t-if=\"object.team_id.allow_portal_ticket_closing\">\n"
-"        Voit sulkea tukipyyntölipukkeesi, jos et enää tarvitse apuamme. "
-"Kiitos yhteistyöstäsi.<br/><br/>\n"
+"        Voit sulkea tukipyyntösi, mikäli et enää tarvitse apuamme. Kiitos "
+"yhteistyöstänne.<br/><br/>\n"
 "    </t>\n"
 "\n"
 "    <div style=\"text-align: center; padding: 16px 0px 16px 0px;\">\n"
 "        <t t-if=\"hasattr(object.team_id, 'website_id') and "
 "object.team_id.use_website_helpdesk_form\">\n"
-"            <a t-attf-style=\"background-color: "
-"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
-"8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size: 13px;\" t-att-href=\"'%s%s' % (object.team_id.website_id.domain "
+"            <a class=\"btn btn-fill-primary\" t-attf-style=\"background-"
+"color: {{object.company_id.email_secondary_color or 'rgb(113, 75, 103)'}}; "
+"padding: 5px 10px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 4px; "
+"font-size: 14px;\" t-att-href=\"'%s%s' % (object.team_id.website_id.domain "
 "or '', object.get_portal_url())\" target=\"_blank\">Katso tukipyyntö</a>\n"
 "        </t>\n"
 "        <t t-else=\"\">\n"
-"            <a t-attf-style=\"background-color: "
-"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
-"8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size:13px;\" t-att-href=\"object.get_portal_url()\" "
+"            <a class=\"btn btn-fill-primary\" t-attf-style=\"background-"
+"color: {{object.company_id.email_secondary_color or 'rgb(113, 75, 103)'}}; "
+"padding: 5px 10px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 4px; "
+"font-size: 14px;\" t-att-href=\"object.get_portal_url()\" "
 "target=\"_blank\">Katso tukipyyntö</a>\n"
 "        </t>\n"
 "        <t t-if=\"hasattr(object.team_id, 'website_id') and "
 "object.team_id.allow_portal_ticket_closing\">\n"
-"            <a t-attf-style=\"background-color: "
-"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
-"8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size:13px;\" t-att-href=\"'%s/my/ticket/close/%s/%s' % "
+"            <a class=\"btn btn-fill-primary\" t-attf-style=\"background-"
+"color: {{object.company_id.email_secondary_color or 'rgb(113, 75, 103)'}}; "
+"padding: 5px 10px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 4px; "
+"font-size: 14px;\" t-att-href=\"'%s/my/ticket/close/%s/%s' % "
 "(object.team_id.website_id.domain or '', object.id, object.access_token)\" "
 "target=\"_blank\">Sulje tukipyyntö</a>\n"
 "        </t>\n"
 "        <t t-elif=\"object.team_id.allow_portal_ticket_closing\">\n"
-"            <a t-attf-style=\"background-color: "
-"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
-"8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size:13px;\" t-att-href=\"'/my/ticket/close/%s/%s' % (object.id, "
+"            <a class=\"btn btn-fill-primary\" t-attf-style=\"background-"
+"color: {{object.company_id.email_secondary_color or 'rgb(113, 75, 103)'}}; "
+"padding: 5px 10px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 4px; "
+"font-size: 14px;\" t-att-href=\"'/my/ticket/close/%s/%s' % (object.id, "
 "object.access_token)\" target=\"_blank\">Sulje tukipyyntö</a>\n"
 "        </t>\n"
 "        <t t-if=\"object.team_id.use_website_helpdesk_forum or "
 "object.team_id.use_website_helpdesk_knowledge or "
 "object.team_id.use_website_helpdesk_slides\">\n"
-"            <a t-attf-style=\"background-color: "
-"{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px "
-"8px 16px; text-decoration: none; color: "
-"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; "
-"font-size:13px;\" t-att-href=\"object.team_id.feature_form_url\" "
+"            <a class=\"btn btn-fill-primary\" t-attf-style=\"background-"
+"color: {{object.company_id.email_secondary_color or 'rgb(113, 75, 103)'}}; "
+"padding: 5px 10px; text-decoration: none; color: "
+"{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 4px; "
+"font-size: 14px;\" t-att-href=\"object.team_id.feature_form_url\" "
 "target=\"_blank\">Vieraile tukikeskuksessa</a>\n"
 "        </t><br/><br/>\n"
 "    </div>\n"
 "\n"
-"    Terveisin,<br/><br/>\n"
-"    <t t-out=\"object.team_id.name or 'Helpdesk'\">Asiakaspalvelu</t>-tiimi\n"
+"    Parhain terveisin,<br/><br/>\n"
+"    <t t-out=\"object.team_id.name or 'Helpdesk'\">Tukipalvelu</t>-tiimi\n"
 "</div>\n"
 "        "
 
@@ -568,10 +569,9 @@ msgid ""
 "reaches the corresponding stage with the email template set.</span>"
 msgstr ""
 "<i class=\"fa fa-lightbulb-o\"/>\n"
-"                                    <span class=\"ms-2\">Luokituspyyntö "
-"lähetetään automaattisesti sähköpostitse asiakkaalle, kun hänen "
-"tukipyyntönsä saavuttaa vastaavan vaiheen asetetun sähköpostimallin "
-"mukaisesti.</span>"
+"                                    <span class=\"ms-2\">Arvostelupyyntö "
+"lähetetään asiakkaalle automaattisesti sähköpostitse, kun tukipyyntö "
+"saavuttaa sähköpostipohjaa vastaavan vaiheen.</span>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -635,8 +635,8 @@ msgid ""
 "updated.\" invisible=\"not is_partner_phone_update\"/>"
 msgstr ""
 "<span class=\"fa fa-exclamation-triangle text-warning oe_edit_only\" "
-"title=\"Tämän muutoksen tallentamalla asiakkaan puhelinnumero päivitetään.\" "
-"invisible=\"not is_partner_phone_update\"/>"
+"title=\"Tämän muutoksen tallentaminen päivittää myös asiakkaan "
+"puhelinnumeron.\" invisible=\"not is_partner_phone_update\"/>"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_activity
@@ -896,7 +896,7 @@ msgstr "Alias"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__alias_contact
 msgid "Alias Contact Security"
-msgstr "Aliaksen kontaktien tietoturva"
+msgstr "Alias-yhteystiedon suojaus"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__alias_domain_id
@@ -1046,6 +1046,9 @@ msgid ""
 "cannot be accessed by the customer, as it belongs to a helpdesk team that is "
 "not publicly available, or there is no customer associated with the ticket."
 msgstr ""
+"Tällä hetkellä ei ole näytettäviä esikatseluita. Asiakas ei pääse käsiksi "
+"nykyiseen tukipyyntöön, koska se kuuluu joko asiakaspalvelutiimille joka ei "
+"ole julkisesti saatavilla, tai koska tukipyyntöön ei ole liitetty asiakasta."
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__message_attachment_count
@@ -1451,7 +1454,7 @@ msgstr "Luontipäivä"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_form
 msgid "Criteria"
-msgstr "Kriteeri"
+msgstr "Kriteerit"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__alias_bounced_content
@@ -1534,7 +1537,7 @@ msgstr "Päivämäärä, jolloin SLA-vaihe saavutettiin ensimmäisen kerran"
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__rotting_days
 msgid "Day count since this resource was last updated"
-msgstr ""
+msgstr "Päivien lukumäärä tämän resurssin viimeisimmän päivityksen jälkeen"
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_sla_report_analysis__sla_exceeded_hours
@@ -1546,12 +1549,12 @@ msgstr "Päivä SLA-vaiheeseen pääsemiseksi ottamatta huomioon työaikataulua"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__rotting_days
 msgid "Days Rotting"
-msgstr ""
+msgstr "Päivää erääntymisestä"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__rotting_threshold_days
 msgid "Days to rot"
-msgstr ""
+msgstr "Päivää erääntymiseen"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_status__deadline
@@ -1606,7 +1609,7 @@ msgstr "Kuvaus"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_form
 msgid "Description of the policy..."
-msgstr "Linjauksen kuvaus"
+msgstr "Linjauksen kuvaus..."
 
 #. module: helpdesk
 #: model:ir.model,name:helpdesk.model_digest_digest
@@ -1654,8 +1657,7 @@ msgstr "Näyttönimi"
 #: code:addons/helpdesk/models/digest.py:0
 msgid "Do not have access, skip this data for user's digest email"
 msgstr ""
-"Sinulla ei ole oikeutta tähän toimintoon. Et voi käyttää tätä tietoa "
-"käyttäjien  yhteenvetopostissa"
+"Ei pääsyoikeutta, jätä nämä tiedot pois käyttäjän yhteenvetosähköpostista"
 
 #. module: helpdesk
 #: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_team__assign_method__balanced
@@ -1677,7 +1679,7 @@ msgstr "Sähköpostialias"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_stage__template_id
 msgid "Email Template"
-msgstr "Sähköpostin mallipohja"
+msgstr "Sähköpostipohja"
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_stage__template_id
@@ -1773,7 +1775,7 @@ msgstr "Epäonnistuneet tukipyynnöt"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_fsm
 msgid "Field Service"
-msgstr "Kenttätyön ohjaus"
+msgstr "Kenttähuolto"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
@@ -1913,7 +1915,7 @@ msgstr "Harmaa kanban otsikko"
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search_base
 #: model_terms:ir.ui.view,arch_db:helpdesk.team_rating_progress_data
 msgid "Happy"
-msgstr "Iloinen"
+msgstr "Tyytyväinen"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
@@ -2066,7 +2068,7 @@ msgstr "Korkea prioriteetti"
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_stage__rotting_threshold_days
 msgid "Highlight tickets that haven't been updated for this many days."
-msgstr ""
+msgstr "Korosta tukipyynnöt, joita ei ole päivitetty näin moneen päivään."
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.tickets_followup
@@ -2431,7 +2433,7 @@ msgstr "Viesti"
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__message_has_error
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__message_has_error
 msgid "Message Delivery error"
-msgstr "Ongelma viestin toimituksessa"
+msgstr "Viestin toimitusvirhe"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__message_ids
@@ -2702,7 +2704,7 @@ msgstr "Pidossa"
 #. module: helpdesk
 #: model:ir.model.fields.selection,name:helpdesk.selection__helpdesk_sla_status__status__ongoing
 msgid "Ongoing"
-msgstr "Jatkuva"
+msgstr "Käynnissä"
 
 #. module: helpdesk
 #. odoo-python
@@ -2798,24 +2800,22 @@ msgid ""
 "be modified on each ticket individually by adding or removing the portal "
 "user as follower."
 msgstr ""
-"Henkilöt, joille tämä helpdesk-ryhmä ja sen tukipyynnöt näkyvät.\n"
+"Henkilöt, joille tämä asiakaspalvelutiimi ja sen tukipyynnöt näkyvät.\n"
 "\n"
-"- Kutsutut sisäiset käyttäjät: Sisäiset käyttäjät pääsevät tiimiin ja "
-"seuraamiinsa tukipyyntöihin. Tätä käyttöoikeutta voidaan muuttaa kunkin "
-"tukipyynnön kohdalla erikseen lisäämällä tai poistamalla käyttäjä "
-"seuraajaksi.\n"
-"Käyttäjä, jolla on helpdesk > järjestelmänvalvojan käyttöoikeustaso, voi "
-"silti käyttää tätä tiimiä ja sen tukipyyntöjä, vaikka hän ei nimenomaisesti "
-"kuuluisi seuraajiin.\n"
+"- Kutsutut sisäiset käyttäjät: Sisäiset käyttäjät näkevät tiimin ja "
+"seuraamansa tukipyynnöt. Tätä käyttöoikeutta voi muuttaa erikseen kunkin "
+"tukipyynnön kohdalla lisäämällä tai poistamalla käyttäjä seuraajista.\n"
+"Asiakaspalvelu > ylläpitäjä -käyttöoikeustason omaava käyttäjä näkee tämän "
+"tiimin ja sen tukipyynnöt, vaikka ei kuuluisi seuraajiin.\n"
 "\n"
-"- Kaikki sisäiset käyttäjät: Kaikki sisäiset käyttäjät voivat käyttää tiimiä "
-"ja kaikkia sen tukipyyntöjä erottelematta.\n"
+"- Kaikki sisäiset käyttäjät: Kaikki sisäiset käyttäjät näkevät tiimin ja sen "
+"tukipyynnöt.\n"
 "\n"
 "- Kutsutut portaalikäyttäjät ja kaikki sisäiset käyttäjät: Kaikki sisäiset "
-"käyttäjät voivat käyttää tiimiä ja sen kaikkia tukipyyntöjä erottelematta.\n"
-"Portaalikäyttäjät voivat käyttää vain niitä tukipyyntöjä, joita he "
-"seuraavat. Tätä käyttöoikeutta voidaan muuttaa kunkin tukipyynnön osalta "
-"erikseen lisäämällä tai poistamalla portaalikäyttäjä seuraajaksi."
+"käyttäjät näkevät tiimin ja sen kaikki tukipyynnöt.\n"
+"Portaalikäyttäjät näkevät vain tukipyynnöt, joita seuraavat. Tätä "
+"käyttöoikeutta voi muuttaa erikseen kunkin tukipyynnön osalta lisäämällä tai "
+"poistamalla portaalikäyttäjä seuraajista."
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -2966,7 +2966,7 @@ msgstr "Luokitus (1-5)"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__rating_avg_text
 msgid "Rating Avg Text"
-msgstr "Kekismääräisen luokituksen teksti"
+msgstr "Arvostelun keskimääräinen teksti"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__rating_last_feedback
@@ -2992,7 +2992,7 @@ msgstr "Arvion tyytyväisyys"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__rating_last_text
 msgid "Rating Text"
-msgstr "Luokitusteksti"
+msgstr "Arvioinnin teksti"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__rating_count
@@ -3003,7 +3003,7 @@ msgstr "Arvioiden määrä"
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__rating_ids
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__rating_ids
 msgid "Ratings"
-msgstr "Arviointi"
+msgstr "Arvostelut"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_sla_view_form
@@ -3072,7 +3072,7 @@ msgstr "Hyvitykset"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Reimburse customers with a voucher code for future purchases"
-msgstr ""
+msgstr "Myönnä asiakashyvitys kuponkikoodina tulevia ostoksia varten"
 
 #. module: helpdesk
 #: model:helpdesk.tag,name:helpdesk.tag_repair
@@ -3092,7 +3092,7 @@ msgstr "Korjaukset"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_product_replacements
 msgid "Replacements"
-msgstr ""
+msgstr "Korvikkeet"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.portal_helpdesk_ticket
@@ -3133,7 +3133,7 @@ msgstr "Palautukset"
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__is_rotting
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search
 msgid "Rotting"
-msgstr ""
+msgstr "Erääntyminen"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla_report_analysis__sla_id
@@ -3356,6 +3356,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Send customers a replacement for a lost, damaged, or returned item"
 msgstr ""
+"Lähetä asiakkaille korvaus kadonneesta, vahingoittuneesta tai palautetusta "
+"tuotteesta"
 
 #. module: helpdesk
 #: model:helpdesk.tag,name:helpdesk.tag_service
@@ -3365,7 +3367,7 @@ msgstr "Palvelu"
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
 msgid "Set an Email Template on Stages"
-msgstr "Aseta sähköpostimalli vaiheisiin"
+msgstr "Määritä vaiheisiin sähköpostipohja"
 
 #. module: helpdesk
 #: model:mail.template,description:helpdesk.solved_ticket_request_email_template
@@ -3583,13 +3585,13 @@ msgstr "Tiimin vaiheet"
 #. module: helpdesk
 #: model:ir.actions.act_window,name:helpdesk.email_template_action_helpdesk
 msgid "Templates"
-msgstr "Mallit"
+msgstr "Mallipohjat"
 
 #. module: helpdesk
 #. odoo-python
 #: code:addons/helpdesk/models/helpdesk_ticket.py:0
 msgid "The customer cannot belong to a different company than the ticket."
-msgstr ""
+msgstr "Asiakas ei voi kuulua eri yritykseen kuin tukipyyntö."
 
 #. module: helpdesk
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__alias_model_id
@@ -3734,8 +3736,12 @@ msgstr "Tukipyyntö suljettu"
 
 #. module: helpdesk
 #: model:mail.template,subject:helpdesk.solved_ticket_request_email_template
-msgid "Ticket Closed - Reference {{ object.id if object.id else 15 }}"
-msgstr "Tukipyyntö suljettu - Viite {{ object.id if object.id else 15 }}"
+msgid ""
+"Ticket Closed - Reference {{ object.ticket_ref if object.ticket_ref else "
+"15 }}"
+msgstr ""
+"Tukipyyntö suljettu - Viite {{ object.ticket_ref if object.ticket_ref else "
+"15 }}"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__ticket_count
@@ -3980,13 +3986,13 @@ msgstr "Vastuuttamaton"
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_ticket_view_search_analysis_closed
 msgid "Unassigned Tickets"
-msgstr "Vastuuttamattomat tukipyynnöt"
+msgstr "Kohdentamattomat tukipyynnöt"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_tickets_view_search_base
 #: model_terms:ir.ui.view,arch_db:helpdesk.team_rating_progress_data
 msgid "Unhappy"
-msgstr "Surullinen"
+msgstr "Tyytymätön"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_kanban
@@ -4029,7 +4035,7 @@ msgstr "Käytä kuponkeja"
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_ticket__use_giftcards
 msgid "Use Gift Cards"
-msgstr ""
+msgstr "Käytä lahjakortteja"
 
 #. module: helpdesk
 #. odoo-javascript
@@ -4128,7 +4134,7 @@ msgstr "Verkkosivun ilmoitukset"
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_team__website_message_ids
 #: model:ir.model.fields,help:helpdesk.field_helpdesk_ticket__website_message_ids
 msgid "Website communication history"
-msgstr "Verkkosivun viestihistoria"
+msgstr "Verkkosivun viestintähistoria"
 
 #. module: helpdesk
 #: model:ir.model.fields,field_description:helpdesk.field_helpdesk_sla__time
@@ -4188,6 +4194,11 @@ msgstr ""
 "tukipyynnöistä?"
 
 #. module: helpdesk
+#: model:ir.model.fields,field_description:helpdesk.field_helpdesk_team__use_twitter
+msgid "X"
+msgstr "X"
+
+#. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.view_helpdesk_stage_delete_wizard
 msgid ""
 "You cannot delete stages containing tickets. You can either archive them or "
@@ -4219,6 +4230,8 @@ msgid ""
 "You cannot update the company of this partner because it would lead to "
 "inconsistency with some of its tickets."
 msgstr ""
+"Et voi päivittää tämän kumppanin yritystietoja, koska se johtaisi "
+"epäjohdonmukaisuuksiin joidenkin sen tukipyyntöjen kanssa."
 
 #. module: helpdesk
 #: model_terms:ir.actions.act_window,help:helpdesk.helpdesk_ticket_action_sla
@@ -4286,7 +4299,7 @@ msgstr "luo tukipyyntöjä työnkulussa."
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.ticket_creation
 msgid "has been created from ticket:"
-msgstr "on alunperin luotu tukipyynnöstä: % :"
+msgstr "on luotu tukipyynnöstä:"
 
 #. module: helpdesk
 #: model_terms:ir.ui.view,arch_db:helpdesk.helpdesk_team_view_form
@@ -4317,8 +4330,8 @@ msgid ""
 "{{ object.company_id.name or object.user_id.company_id.name or "
 "'Helpdesk' }}: Service Rating Request"
 msgstr ""
-"{{ object.company_id.name tai object.user_id.company_id.name tai "
-"'Helpdesk' }}: Palvelun luokituspyyntö"
+"{{ object.company_id.name or object.user_id.company_id.name or "
+"'Helpdesk' }}: Palvelun arviointipyyntö"
 
 #. module: helpdesk
 #: model:mail.template,subject:helpdesk.new_ticket_request_email_template
@@ -4330,6 +4343,217 @@ msgstr "{{ object.name }}"
 #: code:addons/helpdesk/models/helpdesk_ticket.py:0
 msgid "👤 Unassigned"
 msgstr "👤 Ei määritetty"
+
+#~ msgid ""
+#~ "<div>\n"
+#~ "        Dear <t t-out=\"object.sudo().partner_id.name or 'Madam/"
+#~ "Sir'\">Madam/Sir</t>,<br/><br/>\n"
+#~ "        We would like to inform you that we have closed your ticket "
+#~ "(reference <t t-out=\"object.id or ''\">15</t>). \n"
+#~ "        We trust that the services provided have met your expectations "
+#~ "and that you have found a satisfactory resolution to your issue.<br/><br/"
+#~ ">\n"
+#~ "        However, if you have any further questions or comments, please do "
+#~ "not hesitate to reply to this email to re-open your ticket. \n"
+#~ "        Our team is always here to help you and we will be happy to "
+#~ "assist you with any further concerns you may have.<br/><br/>\n"
+#~ "        Thank you for choosing our services and for your cooperation "
+#~ "throughout this process. We truly value your business and appreciate the "
+#~ "opportunity to serve you.<br/><br/>\n"
+#~ "        Kind regards,<br/><br/>\n"
+#~ "        <t t-out=\"object.team_id.name or 'Helpdesk'\">Helpdesk</t> "
+#~ "Team.\n"
+#~ "    </div>\n"
+#~ "        "
+#~ msgstr ""
+#~ "<div>\n"
+#~ "        Hyvä <t t-out=\"object.sudo().partner_id.name or 'Madam/"
+#~ "Sir'\">vastaanottaja</t>,<br/><br/>\n"
+#~ "        Haluamme ilmoittaa, että olemme sulkeneet tukipyyntönne (viite <t "
+#~ "t-out=\"object.id or ''\">15</t>). \n"
+#~ "        Luotamme tarjottujen palveluiden vastanneen odotuksianne, ja että "
+#~ "löysitte tyydyttävän ratkaisun ongelmaanne.<br/><br/>\n"
+#~ "        Jos teillä on vielä kysymyksiä tai kommentteja, voitte vastata "
+#~ "tähän sähköpostiin avataksenne tukipyyntönne uudelleen.\n"
+#~ "        Tiimimme on aina valmiina auttamaan.<br/><br/>\n"
+#~ "        Kiitos palvelumme valitsemisesta sekä yhteistyöstä tämän "
+#~ "prosessin aikana. Arvostamme niin asiakkuuttasi kuin myös tilaisuutta "
+#~ "tukea toimintaasi.<br/><br/>\n"
+#~ "        Ystävällisin terveisin,<br/><br/>\n"
+#~ "       <t t-out=\"object.team_id.name or 'Helpdesk'\">Asiakaspalvelu-"
+#~ "tiimi</t>.\n"
+#~ "    </div>\n"
+#~ "        "
+
+#~ msgid "Ticket Closed - Reference {{ object.id if object.id else 15 }}"
+#~ msgstr "Tukipyyntö suljettu - Viite {{ object.id if object.id else 15 }}"
+
+#~ msgid ""
+#~ "<div>\n"
+#~ "    Dear <t t-out=\"object.sudo().partner_id.name or "
+#~ "object.sudo().partner_name or 'Madam/Sir'\">Madam/Sir</t>,<br/><br/>\n"
+#~ "    Your request\n"
+#~ "    <t t-if=\"hasattr(object.team_id, 'website_id') and "
+#~ "object.get_portal_url()\">\n"
+#~ "        <a t-attf-href=\"{{ object.team_id.website_id.domain }}/my/ticket/"
+#~ "{{ object.id }}/{{ object.access_token }}\" t-out=\"object.name or "
+#~ "''\">Table legs are unbalanced</a>\n"
+#~ "    </t>\n"
+#~ "    has been received and is being reviewed by our <t t-"
+#~ "out=\"object.team_id.name or ''\">VIP Support</t> team.<br/><br/>\n"
+#~ "    The reference for your ticket is <strong><t t-out=\"object.ticket_ref "
+#~ "or ''\">15</t></strong>.<br/><br/>\n"
+#~ "\n"
+#~ "    To provide any additional information, simply reply to this email.<br/"
+#~ "><br/>\n"
+#~ "    <t t-if=\"object.team_id.show_knowledge_base\">\n"
+#~ "        Don't hesitate to visit our <a t-attf-"
+#~ "href=\"{{ object.team_id.get_knowledge_base_url() }}\">Help Center</a>. "
+#~ "You might find the answer to your question.\n"
+#~ "        <br/><br/>\n"
+#~ "    </t>\n"
+#~ "    <t t-if=\"object.team_id.allow_portal_ticket_closing\">\n"
+#~ "        Feel free to close your ticket if our help is no longer needed. "
+#~ "Thank you for your collaboration.<br/><br/>\n"
+#~ "    </t>\n"
+#~ "\n"
+#~ "    <div style=\"text-align: center; padding: 16px 0px 16px 0px;\">\n"
+#~ "        <t t-if=\"hasattr(object.team_id, 'website_id') and "
+#~ "object.team_id.use_website_helpdesk_form\">\n"
+#~ "            <a t-attf-style=\"background-color: "
+#~ "{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px "
+#~ "16px 8px 16px; text-decoration: none; color: "
+#~ "{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: "
+#~ "5px; font-size: 13px;\" t-att-href=\"'%s%s' % "
+#~ "(object.team_id.website_id.domain or '', object.get_portal_url())\" "
+#~ "target=\"_blank\">View Ticket</a>\n"
+#~ "        </t>\n"
+#~ "        <t t-else=\"\">\n"
+#~ "            <a t-attf-style=\"background-color: "
+#~ "{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px "
+#~ "16px 8px 16px; text-decoration: none; color: "
+#~ "{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: "
+#~ "5px; font-size:13px;\" t-att-href=\"object.get_portal_url()\" "
+#~ "target=\"_blank\">View Ticket</a>\n"
+#~ "        </t>\n"
+#~ "        <t t-if=\"hasattr(object.team_id, 'website_id') and "
+#~ "object.team_id.allow_portal_ticket_closing\">\n"
+#~ "            <a t-attf-style=\"background-color: "
+#~ "{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px "
+#~ "16px 8px 16px; text-decoration: none; color: "
+#~ "{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: "
+#~ "5px; font-size:13px;\" t-att-href=\"'%s/my/ticket/close/%s/%s' % "
+#~ "(object.team_id.website_id.domain or '', object.id, object.access_token)"
+#~ "\" target=\"_blank\">Close Ticket</a>\n"
+#~ "        </t>\n"
+#~ "        <t t-elif=\"object.team_id.allow_portal_ticket_closing\">\n"
+#~ "            <a t-attf-style=\"background-color: "
+#~ "{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px "
+#~ "16px 8px 16px; text-decoration: none; color: "
+#~ "{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: "
+#~ "5px; font-size:13px;\" t-att-href=\"'/my/ticket/close/%s/%s' % "
+#~ "(object.id, object.access_token)\" target=\"_blank\">Close Ticket</a>\n"
+#~ "        </t>\n"
+#~ "        <t t-if=\"object.team_id.use_website_helpdesk_forum or "
+#~ "object.team_id.use_website_helpdesk_knowledge or "
+#~ "object.team_id.use_website_helpdesk_slides\">\n"
+#~ "            <a t-attf-style=\"background-color: "
+#~ "{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px "
+#~ "16px 8px 16px; text-decoration: none; color: "
+#~ "{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: "
+#~ "5px; font-size:13px;\" t-att-href=\"object.team_id.feature_form_url\" "
+#~ "target=\"_blank\">Visit Help Center</a>\n"
+#~ "        </t><br/><br/>\n"
+#~ "    </div>\n"
+#~ "\n"
+#~ "    Best regards,<br/><br/>\n"
+#~ "    <t t-out=\"object.team_id.name or 'Helpdesk'\">Helpdesk</t> Team\n"
+#~ "</div>\n"
+#~ "        "
+#~ msgstr ""
+#~ "<div>\n"
+#~ "    Hyvä <t t-out=\"object.sudo().partner_id.name or "
+#~ "object.sudo().partner_name or 'Madam/Sir'\">vastaanottaja</t>,<br/><br/>\n"
+#~ "    Pyyntösi\n"
+#~ "    <t t-if=\"hasattr(object.team_id, 'website_id') and "
+#~ "object.get_portal_url()\">\n"
+#~ "        <a t-attf-href=\"{{ object.team_id.website_id.domain }}/my/ticket/"
+#~ "{{ object.id }}/{{ object.access_token }}\" t-out=\"object.name or "
+#~ "''\">Pöydän jalat ovat epätasapainossa</a>\n"
+#~ "    </t>\n"
+#~ "    on vastaanotettu ja katsastetaan <t t-out=\"object.team_id.name or "
+#~ "''\">VIP-tukitiimimme</t> toimesta.<br/><br/>\n"
+#~ "    Tukipyyntösi viite on <strong><t t-out=\"object.ticket_ref or "
+#~ "''\">15</t></strong>.<br/><br/>\n"
+#~ "\n"
+#~ "    Vastaa tähän sähköpostiin, mikäli haluat antaa lisätietoja.<br/><br/"
+#~ ">\n"
+#~ "    <t t-if=\"object.team_id.show_knowledge_base\">\n"
+#~ "        Voit myös vierailla <a t-attf-"
+#~ "href=\"{{ object.team_id.get_knowledge_base_url() }}"
+#~ "\">Tukikeskuksessamme</a>. Saatat löytää sieltä vastauksen kysymykseesi.\n"
+#~ "        <br/><br/>\n"
+#~ "    </t>\n"
+#~ "    <t t-if=\"object.team_id.allow_portal_ticket_closing\">\n"
+#~ "        Voit sulkea tukipyyntölipukkeesi, jos et enää tarvitse apuamme. "
+#~ "Kiitos yhteistyöstäsi.<br/><br/>\n"
+#~ "    </t>\n"
+#~ "\n"
+#~ "    <div style=\"text-align: center; padding: 16px 0px 16px 0px;\">\n"
+#~ "        <t t-if=\"hasattr(object.team_id, 'website_id') and "
+#~ "object.team_id.use_website_helpdesk_form\">\n"
+#~ "            <a t-attf-style=\"background-color: "
+#~ "{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px "
+#~ "16px 8px 16px; text-decoration: none; color: "
+#~ "{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: "
+#~ "5px; font-size: 13px;\" t-att-href=\"'%s%s' % "
+#~ "(object.team_id.website_id.domain or '', object.get_portal_url())\" "
+#~ "target=\"_blank\">Katso tukipyyntö</a>\n"
+#~ "        </t>\n"
+#~ "        <t t-else=\"\">\n"
+#~ "            <a t-attf-style=\"background-color: "
+#~ "{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px "
+#~ "16px 8px 16px; text-decoration: none; color: "
+#~ "{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: "
+#~ "5px; font-size:13px;\" t-att-href=\"object.get_portal_url()\" "
+#~ "target=\"_blank\">Katso tukipyyntö</a>\n"
+#~ "        </t>\n"
+#~ "        <t t-if=\"hasattr(object.team_id, 'website_id') and "
+#~ "object.team_id.allow_portal_ticket_closing\">\n"
+#~ "            <a t-attf-style=\"background-color: "
+#~ "{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px "
+#~ "16px 8px 16px; text-decoration: none; color: "
+#~ "{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: "
+#~ "5px; font-size:13px;\" t-att-href=\"'%s/my/ticket/close/%s/%s' % "
+#~ "(object.team_id.website_id.domain or '', object.id, object.access_token)"
+#~ "\" target=\"_blank\">Sulje tukipyyntö</a>\n"
+#~ "        </t>\n"
+#~ "        <t t-elif=\"object.team_id.allow_portal_ticket_closing\">\n"
+#~ "            <a t-attf-style=\"background-color: "
+#~ "{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px "
+#~ "16px 8px 16px; text-decoration: none; color: "
+#~ "{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: "
+#~ "5px; font-size:13px;\" t-att-href=\"'/my/ticket/close/%s/%s' % "
+#~ "(object.id, object.access_token)\" target=\"_blank\">Sulje tukipyyntö</"
+#~ "a>\n"
+#~ "        </t>\n"
+#~ "        <t t-if=\"object.team_id.use_website_helpdesk_forum or "
+#~ "object.team_id.use_website_helpdesk_knowledge or "
+#~ "object.team_id.use_website_helpdesk_slides\">\n"
+#~ "            <a t-attf-style=\"background-color: "
+#~ "{{object.company_id.email_secondary_color or '#875A7B'}}; padding: 8px "
+#~ "16px 8px 16px; text-decoration: none; color: "
+#~ "{{object.company_id.email_primary_color or '#FFFFFF'}}; border-radius: "
+#~ "5px; font-size:13px;\" t-att-href=\"object.team_id.feature_form_url\" "
+#~ "target=\"_blank\">Vieraile tukikeskuksessa</a>\n"
+#~ "        </t><br/><br/>\n"
+#~ "    </div>\n"
+#~ "\n"
+#~ "    Terveisin,<br/><br/>\n"
+#~ "    <t t-out=\"object.team_id.name or 'Helpdesk'\">Asiakaspalvelu</t>-"
+#~ "tiimi\n"
+#~ "</div>\n"
+#~ "        "
 
 #~ msgid ""
 #~ "<b>Log notes</b> for internal communications (you will only notify the "

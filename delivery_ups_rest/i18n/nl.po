@@ -3,13 +3,13 @@
 # * delivery_ups_rest
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
-# Bren Driesen <brdri@odoo.com>, 2025.
+# Bren Driesen <brdri@odoo.com>, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.4+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-30 18:42+0000\n"
-"PO-Revision-Date: 2025-11-14 09:51+0000\n"
+"POT-Creation-Date: 2026-08-28 17:44+0000\n"
+"PO-Revision-Date: 2026-07-06 13:38+0000\n"
 "Last-Translator: Bren Driesen <brdri@odoo.com>\n"
 "Language-Team: Dutch <https://translate.odoo.com/projects/odoo-19/"
 "delivery_ups_rest/nl/>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_bill_my_account
@@ -80,13 +80,30 @@ msgid "Create an app"
 msgstr "Maak een app"
 
 #. module: delivery_ups_rest
+#. odoo-python
+#: code:addons/delivery_ups_rest/models/ups_request.py:0
+msgid ""
+"Detected a problem when validating delivery %(delivery_name)s. Invoicing "
+"address of the commercial invoice has been defaulted to %(ship_to_partner)s "
+"instead of %(sold_to_partner)s to avoid the following error from UPS: \"The "
+"Sold To party's country code must be the same as the Ship To party's country "
+"code with the exception of Canada and satellite countries.\""
+msgstr ""
+"Er is een probleem gedetecteerd bij het valideren van de levering %"
+"(delivery_name)s. Het factuuradres van de verkoopfactuur is standaard "
+"ingesteld op %(ship_to_partner)s in plaats van %(sold_to_partner)s om de "
+"volgende foutmelding van UPS te voorkomen: \"De landcode van de 'Sold To'-"
+"partij moet dezelfde zijn als de landcode van de 'Ship To'-partij, met "
+"uitzondering van Canada en satellietstaten.\""
+
+#. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__display_name
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_payment_provider__display_name
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_res_partner__display_name
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_sale_order__display_name
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_stock_package_type__display_name
 msgid "Display Name"
-msgstr "Weergavenaam"
+msgstr "Schermnaam"
 
 #. module: delivery_ups_rest
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
@@ -211,18 +228,18 @@ msgstr "PDF"
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_package_dimension_unit
 msgid "Package Size Unit"
-msgstr "Verpakkingseenheid"
+msgstr "Eenheid pakketgrootte"
 
 #. module: delivery_ups_rest
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
 msgid "Package Weight Unit"
-msgstr "Gewichtseenheid verpakking"
+msgstr "Gewichtseenheid pakket"
 
 #. module: delivery_ups_rest
 #. odoo-python
 #: code:addons/delivery_ups_rest/models/ups_request.py:0
 msgid "Packages %s do not have a positive shipping weight."
-msgstr "Verpakkingen %s hebben geen positief gewicht."
+msgstr "Pakketten %s hebben geen positief verzendgewicht."
 
 #. module: delivery_ups_rest
 #: model:ir.model,name:delivery_ups_rest.model_payment_provider
@@ -253,10 +270,8 @@ msgstr "Ontvanger"
 #. module: delivery_ups_rest
 #. odoo-python
 #: code:addons/delivery_ups_rest/models/ups_request.py:0
-msgid "Recipient Phone must be at least 10 alphanumeric characters."
+msgid "Recipient Phone must be between 1 and 15 alphanumeric characters."
 msgstr ""
-"Het telefoonnummer van de ontvanger moet minimaal 10 alfanumerieke tekens "
-"bevatten."
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_require_signature
@@ -270,8 +285,8 @@ msgid ""
 "Return label generated<br/><b>Tracking Numbers:</b> %(tracking_numbers)s<br/"
 "><b>Packages:</b> %(packages)s"
 msgstr ""
-"Retourlabel aangemaakt<br/><b>Traceernummers:</b> %(tracking_numbers)s<br/"
-"><b>Verpakkingen:</b> %(packages)s"
+"Retourlabel aangemaakt<br/><b>Trackingnummers:</b> %(tracking_numbers)s<br/"
+"><b>Pakketten:</b> %(packages)s"
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields.selection,name:delivery_ups_rest.selection__delivery_carrier__ups_label_file_type__spl
@@ -311,16 +326,14 @@ msgid ""
 "Shipment created into UPS<br/><b>Tracking Numbers:</b> %"
 "(tracking_numbers)s<br/><b>Packages:</b> %(packages)s"
 msgstr ""
-"Verzending aangemaakt in UPS<br/><b>Traceernummers:</b> %"
-"(tracking_numbers)s<br/><b>Verpakkingen:</b> %(packages)s"
+"Verzending aangemaakt in UPS<br/><b>Trackingnummers:</b> %"
+"(tracking_numbers)s<br/><b>Pakketten:</b> %(packages)s"
 
 #. module: delivery_ups_rest
 #. odoo-python
 #: code:addons/delivery_ups_rest/models/ups_request.py:0
-msgid "Shipper Phone must be at least 10 alphanumeric characters."
+msgid "Shipper Phone must be between 1 and 15 alphanumeric characters."
 msgstr ""
-"Het telefoonnummer van de verzender moet minstens 10 alfanumerieke tekens "
-"bevatten."
 
 #. module: delivery_ups_rest
 #: model:ir.model,name:delivery_ups_rest.model_delivery_carrier
@@ -336,7 +349,7 @@ msgstr "Er is iets misgegaan. Probeer het later opnieuw!!"
 #. module: delivery_ups_rest
 #: model:ir.model,name:delivery_ups_rest.model_stock_package_type
 msgid "Stock package type"
-msgstr "Verpakkingssoort voorraad"
+msgstr "Pakkettype"
 
 #. module: delivery_ups_rest
 #. odoo-python
@@ -487,7 +500,7 @@ msgstr "UPS Next Day Air Saver"
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_default_packaging_id
 msgid "UPS Package Type"
-msgstr "Verpakkingssoort UPS"
+msgstr "Pakkettype UPS"
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_saturday_delivery
@@ -560,15 +573,13 @@ msgstr "Ups Duty Payment"
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_package_weight_unit
 msgid "Ups Package Weight Unit"
-msgstr "Gewichtseenheid verpakking UPS"
+msgstr "Gewichtseenheid pakket UPS"
 
 #. module: delivery_ups_rest
 #. odoo-python
 #: code:addons/delivery_ups_rest/models/ups_request.py:0
-msgid "Warehouse Phone must be at least 10 alphanumeric characters."
+msgid "Warehouse Phone must be between 1 and 15 alphanumeric characters."
 msgstr ""
-"Het telefoonnummer van het magazijn mag minimaal 10 alfanumerieke tekens "
-"bevatten."
 
 #. module: delivery_ups_rest
 #. odoo-python
@@ -656,3 +667,18 @@ msgstr "ups.com"
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
 msgid "you're ready to go!"
 msgstr "je bent er klaar voor!"
+
+#~ msgid "Recipient Phone must be at least 10 alphanumeric characters."
+#~ msgstr ""
+#~ "Het telefoonnummer van de ontvanger moet minimaal 10 alfanumerieke tekens "
+#~ "bevatten."
+
+#~ msgid "Shipper Phone must be at least 10 alphanumeric characters."
+#~ msgstr ""
+#~ "Het telefoonnummer van de verzender moet minstens 10 alfanumerieke tekens "
+#~ "bevatten."
+
+#~ msgid "Warehouse Phone must be at least 10 alphanumeric characters."
+#~ msgstr ""
+#~ "Het telefoonnummer van het magazijn mag minimaal 10 alfanumerieke tekens "
+#~ "bevatten."

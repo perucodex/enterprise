@@ -25,7 +25,7 @@ patch(WithSearch.prototype, {
         result.action_id = config.actionId;
         result.view_id = config.viewId;
         result.model = searchModel.resModel;
-        result.available_view_types = config.viewSwitcherEntries.map((v) => v.type);
+        result.available_view_types = config.viewSwitcherEntries?.map((v) => v.type) || [];
         result.view_type = config.viewType;
         result.order_by = searchModel.orderBy;
         result.facets = searchModel.facets;

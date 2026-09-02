@@ -381,6 +381,35 @@ class TestApprovalsPurchase(TestApprovalsCommon):
         self.env.user.company_id = current_company
         self.env.user.company_ids -= new_company
 
+    def test_create_rfq_with_inaccessible_vendor(self):
+        """
+        Ensure an RFQ approval can be created when one of the product vendors
+        belongs to a company inaccessible to the current user.
+        """
+        vendors = accessible_vendor, inaccessible_vendor = self.env['res.partner'].create([
+            {'name': 'accessible vendor'},
+            {'name': 'inaccessible vendor'},
+        ])
+        self.product_mouse.seller_ids = [Command.create({
+            'partner_id': v.id,
+            'min_qty': 1,
+            'price': 5,
+        }) for v in vendors]
+        alt_company = self.env['res.company'].create({'name': 'Alternative Company'})
+        inaccessible_vendor.company_id = alt_company
+
+        request_form = self.create_request_form(approver=self.user_approver)
+        with request_form.product_line_ids.new() as line:
+            line.product_id = self.product_mouse
+            line.quantity = 1
+            line.seller_id = self.product_mouse.seller_ids.filtered(lambda s: s.partner_id == accessible_vendor)
+        request = request_form.save()
+
+        self.assertEqual(
+            request.product_line_ids.seller_id.partner_id,
+            accessible_vendor,
+        )
+
     def test_purchase_06_prevent_multiple_create_purchase(self):
         """ Check that creating RFQs can't be performed more than once. """
         request_form = self.create_request_form(approver=self.user_approver)
@@ -620,3 +649,17 @@ class TestApprovalsPurchase(TestApprovalsCommon):
             'price': 250,
         })]
         request_purchase.action_create_purchase_orders()  # Should not raise any error as we added a vendor
+
+    def test_cancel_approval_request_without_purchase_orders(self):
+        """ Check that canceling an approval request without purchase orders doesn't create an empty chatter message. """
+        request_purchase = self.env['approval.request'].create({
+            'category_id': self.purchase_category.id,
+            'approver_ids': [Command.create({'user_id': self.user_approver.id})],
+            'product_line_ids': [Command.create({'product_id': self.product_computer.id, 'quantity': 5})],
+        })
+        request_purchase.action_confirm()
+        messages_before_cancel = len(request_purchase.message_ids)
+        request_purchase.action_cancel()
+        messages_after_cancel = len(request_purchase.message_ids)
+
+        self.assertEqual(messages_before_cancel, messages_after_cancel)

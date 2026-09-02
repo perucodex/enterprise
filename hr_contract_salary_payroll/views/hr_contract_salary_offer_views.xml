@@ -66,10 +66,10 @@
                             </div>
                             <div/>
                             <div class="alert alert-info mt-2" colspan="2" role="alert" invisible="not context.get('is_hr_payroll', True) or applicant_id">
-                                Please note that this information may be inaccurate and should be used for reference only. The amounts are calculated based on a full time permanent contract, and benefits are computed from the selected employee and/or the selected contract template
+                                Please note that this information may be inaccurate and should be used for reference only.
                             </div>
                             <div class="alert alert-info mt-2" colspan="2" role="alert" invisible="context.get('is_hr_payroll', False) or employee_id">
-                                Please note that this information may be inaccurate and should be used for reference only. The amounts are calculated based on a full time permanent contract, and benefits are computed from the selected contract template
+                                Please note that this information may be inaccurate and should be used for reference only.
                             </div>
                         </div>
                     </div>
@@ -164,6 +164,10 @@
                 </footer>
             </form>
         </field>
+    </record>
+
+    <record id="hr_contract_salary.hr_contract_salary_offer_recruitment_action" model="ir.actions.act_window">
+        <field name="domain">[('employee_id', '=', False), ('is_simulation_offer', '=', False)]</field>
     </record>
 
     <record id="action_hr_salary_simulator" model="ir.actions.act_window">

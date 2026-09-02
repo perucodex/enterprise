@@ -7,8 +7,9 @@
             <field name="arch" type="xml">
                 <form>
                     <sheet>
+                        <field name="is_master_data" invisible="1"/>
                         <group>
-                            <field name="category" widget="radio" options="{'horizontal': true}"/>
+                            <field name="category" widget="radio" options="{'horizontal': true}" readonly="is_master_data"/>
                             <group colspan="2">
                                 <h1>
                                     <field name="name" placeholder="Tax Return" invisible="category != 'account_return'"/>
@@ -17,18 +18,18 @@
                             </group>
                             <group>
                                 <field name="deadline_periodicity"/>
-                                <field name="deadline_start_date"/>
+                                <field name="deadline_start_date" invisible="deadline_periodicity == 'fiscalyear'"/>
                                 <label for="deadline_days_delay" class="o_form_label"/>
                                 <div class="d-flex align-items-left">
                                     <field name="deadline_days_delay" style="width: 15%" class="o_form_field text-center"/>
                                     <span style="width: 85%">days after tax period</span>
                                 </div>
-                                <field name="states_workflow" invisible="category == 'audit'"/>
+                                <field name="states_workflow" invisible="category == 'audit'" readonly="is_master_data" required="1"/>
                             </group>
                             <group>
                                 <field name="country_id" string="Country" invisible="category == 'audit'"/>
                                 <field name="report_id"/>
-                                <field name="payment_partner_id" readonly="0" invisible="category == 'audit'"/>
+                                <field name="payment_partner_id" invisible="category == 'audit'"/>
                                 <field name="payment_partner_bank_id" invisible="category == 'audit'"/>
                             </group>
                         </group>
@@ -56,6 +57,7 @@
             <field name="model">account.return.type</field>
             <field name="arch" type="xml">
                 <search>
+                    <field name="name"/>
                     <field name="category"/>
                     <field name="report_id"/>
                     <field name="country_id"/>

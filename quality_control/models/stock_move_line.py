@@ -36,7 +36,7 @@ class StockMoveLine(models.Model):
 
     def write(self, vals):
         if self._create_quality_check_at_write(vals):
-            self.filtered(lambda ml: not ml.picked and not ml.sudo().check_ids)._create_check()
+            self.filtered(lambda ml: ml.state != 'done' and not ml.sudo().check_ids)._create_check()
         return super().write(vals)
 
     def unlink(self):
@@ -115,6 +115,5 @@ class StockMoveLine(models.Model):
         if self.product_uom_id.is_zero(self.quantity):
             return False
         if check_picked:
-            if not self._is_checkable_from_context():
-                return False
+            return self.picked
         return True

@@ -1,5 +1,6 @@
 from odoo import models, fields, api
 
+
 class PosConfig(models.Model):
     _inherit = 'pos.config'
 
@@ -19,15 +20,10 @@ class PosConfig(models.Model):
     @api.model
     def _default_settle_deposit_product_on_module_install(self):
         configs = self.env['pos.config'].search([])
-        open_configs = (
-            self.env['pos.session']
-            .search(['|', ('state', 'in', ['opened', 'closing_control']), ('rescue', '=', True)])
-            .mapped('config_id')
-        )
         product_settle = self._get_default_settle_product()
         product_deposit = self._get_default_deposit_product()
         product_settle_inv = self._get_default_settle_invoice_product()
-        for conf in (configs - open_configs):
+        for conf in configs:
             conf.settle_due_product_id = product_settle
             conf.deposit_product_id = product_deposit
             conf.settle_invoice_product_id = product_settle_inv

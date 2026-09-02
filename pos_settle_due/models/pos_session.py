@@ -32,6 +32,9 @@ class PosSession(models.Model):
             all_session_move_lines = self.order_ids.lines.settled_order_id.session_id.move_id.line_ids
             all_invoice_move_lines = self.order_ids.lines.settled_invoice_id.line_ids
 
+            # The entries of the plan are reconciled independently and in order, as if
+            # done one by one, but the recompute cascade of the ORM runs only once.
+            reconciliation_plan = []
             for (partner_id, account_id), move_lines in partner_account_lines.items():
                 session_move_lines = all_session_move_lines.filtered(
                     lambda l: l.partner_id.id == partner_id
@@ -45,5 +48,9 @@ class PosSession(models.Model):
                     and not l.reconciled
                     and l.parent_state == 'posted'
                 )
-                (self.env['account.move.line'].browse([l.id for l in move_lines]) | session_move_lines | invoice_move_lines).reconcile()
+                reconciliation_plan.append(
+                    self.env['account.move.line'].browse([l.id for l in move_lines]) | session_move_lines | invoice_move_lines
+                )
+            if reconciliation_plan:
+                self.env['account.move.line']._reconcile_plan(reconciliation_plan)
         return data

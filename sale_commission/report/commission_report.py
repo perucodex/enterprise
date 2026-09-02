@@ -171,7 +171,7 @@ LEFT JOIN currency_rate cr
 ), achievement AS (
     SELECT
         (
-            COALESCE(era.plan_id, 0) * 10^13 +
+            COALESCE(era.plan_id, 0) * 10^11 +
             COALESCE(u.user_id, 0) +
             10^5 * COALESCE(to_char(era.date_from, 'YYMMDD')::integer, 0)
         )::bigint AS id,

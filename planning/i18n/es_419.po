@@ -3,16 +3,16 @@
 # * planning
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
-# "Fernanda Alvarez (mfar)" <mfar@odoo.com>, 2025.
-# "Patricia Gutiérrez (pagc)" <pagc@odoo.com>, 2025.
+# "Fernanda Alvarez (mfar)" <mfar@odoo.com>, 2025, 2026.
+# "Patricia Gutiérrez (pagc)" <pagc@odoo.com>, 2025, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-09 18:43+0000\n"
-"PO-Revision-Date: 2025-12-06 10:01+0000\n"
-"Last-Translator: \"Patricia Gutiérrez (pagc)\" <pagc@odoo.com>\n"
+"POT-Creation-Date: 2026-07-17 17:43+0000\n"
+"PO-Revision-Date: 2026-08-27 16:09+0000\n"
+"Last-Translator: \"Fernanda Alvarez (mfar)\" <mfar@odoo.com>\n"
 "Language-Team: Spanish (Latin America) <https://translate.odoo.com/projects/"
 "odoo-19/planning/es_419/>\n"
 "Language: es_419\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.14.3\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: planning
 #. odoo-python
@@ -570,9 +570,9 @@ msgstr ""
 "out=\"ctx['employee_name']\">Anita Oliver</t>,</p>\n"
 "                    <p t-else=\"\">Hola,</p>\n"
 "                    <br/>\n"
-"                    <p t-if=\"ctx.get('open_shift_available')\">Hay un nuevo "
-"turno abierto disponible:</p>\n"
-"                    <p t-else=\"\">Tiene asignado el siguiente turno:</p>\n"
+"                    <p t-if=\"ctx.get('open_shift_available')\">Tenemos un "
+"nuevo turno disponible:</p>\n"
+"                    <p t-else=\"\">Te asignamos el siguiente turno:</p>\n"
 "                    <table style=\"margin-left: 30px;\">\n"
 "                        <tr t-if=\"(ctx.get('start_datetime') and "
 "ctx.get('end_datetime'))                                   or "
@@ -585,8 +585,8 @@ msgstr ""
 "ctx.get('end_datetime')\" t-out=\"'%s ⟶ %s' % "
 "(                                     ctx['start_datetime'],                                     "
 "ctx['end_datetime'],                                 )\">\n"
-"                                    05/31/2021, 8:00 AM ⟶ 05/31/2021, 4:00 "
-"PM\n"
+"                                    05/31/2021, 8:00 a. m. ⟶ 05/31/2021, "
+"4:00 p. m.\n"
 "                                </span>\n"
 "                                <span t-if=\"ctx.get('allocated_hours')\" "
 "style=\"opacity: 0.5;\">\n"
@@ -602,7 +602,7 @@ msgstr ""
 "                        </tr>\n"
 "                        <tr t-if=\"object.role_id\">\n"
 "                            <th style=\"padding: 5px; text-align: left;"
-"\">Función</th>\n"
+"\">Rol</th>\n"
 "                            <td style=\"padding: 5px;\" t-"
 "out=\"object.role_id.name or ''\">Bartender</td>\n"
 "                        </tr>\n"
@@ -637,17 +637,17 @@ msgstr ""
 "class=\"planning_mail_template_button top_button\">No estoy disponible</a>\n"
 "                        <a t-if=\"ctx.get('google_url')\" t-att-"
 "href=\"ctx['google_url']\" target=\"_blank\" "
-"class=\"planning_mail_template_button\">Agregar al calendario de Google</a>\n"
+"class=\"planning_mail_template_button\">Agregar a Google Calendar</a>\n"
 "                        <a t-if=\"ctx.get('iCal_url')\" t-att-"
 "href=\"ctx['iCal_url']\" target=\"_blank\" "
 "class=\"planning_mail_template_button\">Agregar a iCal/Outlook</a>\n"
 "                    </div>\n"
 "                    <br/>\n"
-"                    <p t-if=\"ctx.get('open_shift_available')\">Asígnese "
-"este turno si le interesa y está disponible.</p>\n"
-"                    <p t-else=\"\">En caso de que no pueda tomar este turno "
-"le invitamos a que se comunique con alguno de sus compañeros para que puedan "
-"cambiar de turno, puede que alguno quiera intercambiarlo.</p>\n"
+"                    <p t-if=\"ctx.get('open_shift_available')\">Si te "
+"interesa y estás disponible, asígnate este turno.</p>\n"
+"                    <p t-else=\"\">Si no puedes tomar este turno, habla con "
+"tus compañeros y pide un cambio de turno. Quizás alguno quiera intercambiar "
+"su turno contigo.</p>\n"
 "                </div>\n"
 "            </body>"
 
@@ -732,11 +732,11 @@ msgstr ""
 "                <body><div>\n"
 "                    <p t-if=\"ctx.get('employee')\">Apreciable <t t-"
 "out=\"ctx['employee'].name or ''\">Anita Oliver</t>,</p>\n"
-"                    <p t-else=\"\">Hola,</p>\n"
+"                    <p t-else=\"\">Hola:</p>\n"
 "                    <br/>\n"
 "                    <p t-if=\"ctx.get('start_datetime') and "
 "ctx.get('end_datetime')\">\n"
-"                        Sus turnos programados del <t t-"
+"                        Tus turnos programados del <t t-"
 "out=\"format_date(ctx['start_datetime'])\">05-05-2021</t>\n"
 "                        al <t t-out=\"format_date(ctx['end_datetime'])"
 "\">05-11-2021</t> ahora están publicados.\n"
@@ -748,7 +748,7 @@ msgstr ""
 "target=\"_blank\" class=\"planning_mail_template_button\" t-attf-"
 "style=\"color: {{object.company_id.email_primary_color or '#FFFFFF'}}; "
 "background-color: {{object.company_id.email_secondary_color or '#875A7B'}};"
-"\">Ver su planeación</a>\n"
+"\">Ver tu planeación</a>\n"
 "                        </div>\n"
 "                        <div t-if=\"ctx.get('planning_url_ics')\">\n"
 "                            <a t-att-href=\"ctx['planning_url_ics']\" "
@@ -761,13 +761,13 @@ msgstr ""
 "                    <p t-if=\"ctx.get('slot_unassigned') or "
 "(object.allow_self_unassign and object.self_unassign_days_before)\">\n"
 "                        <t t-if=\"ctx.get('slot_unassigned')\">\n"
-"                            Queremos recordarle que hay turnos disponibles. "
-"Asígneselos si le interesan y puede tomarlos.\n"
+"                            Queremos recordarte que hay turnos disponibles. "
+"Si te interesan, puedes asignártelos para tomarlos.\n"
 "                        </t>\n"
 "                        <t t-if=\"object.allow_self_unassign and "
 "object.self_unassign_days_before\">\n"
-"                            Si no puede cubrir alguno de los turnos que se "
-"le asignaron, asegúrese de cancelar la asignación al menos <t t-"
+"                            Si no puedes cubrir alguno de los turnos que se "
+"te asignaron, asegúrate de cancelar la asignación al menos <t t-"
 "out=\"object.self_unassign_days_before or ''\">5</t> día(s) antes del inicio "
 "del turno.\n"
 "                        </t>\n"
@@ -775,9 +775,9 @@ msgstr ""
 "                    <p t-if=\"ctx.get('message')\" t-out=\"ctx['message']\"/"
 ">\n"
 "                    <p t-if=\"object.allow_self_unassign\">En caso de que no "
-"pueda tomar este turno le invitamos a que se comunique con alguno de sus "
-"compañeros para que puedan cambiar de turno, puede que alguno quiera "
-"intercambiarlo.</p>\n"
+"puedas tomar este turno, te pedimos que contactes a alguno de tus compañeros "
+"para que puedan cambiar de turno, puede que alguno quiera tomar el tuyo.</"
+"p>\n"
 "                </div>\n"
 "            </body>"
 
@@ -1057,8 +1057,8 @@ msgid ""
 "Company linked to the material resource. Leave empty for the resource to be "
 "available in every company."
 msgstr ""
-"Empresa vinculada al recurso material. Deje en blanco para que el recurso "
-"esté disponible en todas las empresas."
+"Empresa vinculada al recurso material. Déjala vacía para que el recurso esté "
+"disponible en todas las empresas."
 
 #. module: planning
 #: model:ir.model,name:planning.model_res_config_settings
@@ -1248,6 +1248,7 @@ msgstr "Descartar"
 #: model:ir.model.fields,field_description:planning.field_hr_departure_wizard__display_name
 #: model:ir.model.fields,field_description:planning.field_hr_employee__display_name
 #: model:ir.model.fields,field_description:planning.field_hr_employee_public__display_name
+#: model:ir.model.fields,field_description:planning.field_ir_actions_report__display_name
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__display_name
 #: model:ir.model.fields,field_description:planning.field_planning_calendar_resource__display_name
 #: model:ir.model.fields,field_description:planning.field_planning_planning__display_name
@@ -1513,6 +1514,7 @@ msgstr "No estoy disponible"
 #: model:ir.model.fields,field_description:planning.field_hr_departure_wizard__id
 #: model:ir.model.fields,field_description:planning.field_hr_employee__id
 #: model:ir.model.fields,field_description:planning.field_hr_employee_public__id
+#: model:ir.model.fields,field_description:planning.field_ir_actions_report__id
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__id
 #: model:ir.model.fields,field_description:planning.field_planning_calendar_resource__id
 #: model:ir.model.fields,field_description:planning.field_planning_planning__id
@@ -2084,7 +2086,7 @@ msgstr "El mayor desafío multitarea:"
 #. odoo-javascript
 #: code:addons/planning/static/src/views/planning_gantt/planning_gantt_renderer_controls.xml:0
 msgid "Press Ctrl to duplicate the shift"
-msgstr "Presione ctrl para duplicar el turno"
+msgstr "Presiona CTRL para duplicar el turno"
 
 #. module: planning
 #. odoo-javascript
@@ -2251,6 +2253,11 @@ msgid "Repetitions"
 msgstr "Repeticiones"
 
 #. module: planning
+#: model:ir.model,name:planning.model_ir_actions_report
+msgid "Report Action"
+msgstr "Reporte de la acción"
+
+#. module: planning
 #: model:ir.ui.menu,name:planning.planning_menu_reporting
 msgid "Reporting"
 msgstr "Reportes"
@@ -2358,12 +2365,13 @@ msgid ""
 "Leave empty for the employee to be assigned shifts regardless of the role."
 msgstr ""
 "Funciones que el empleado puede desempeñar. Al crear un turno para este "
-"empleado, solo se mostrarán las plantillas de turnos para estas funciones.\n"
-"De forma similar, solo se enviarán los turnos abiertos disponibles para "
-"estas funciones cuando se publique el horario.\n"
-"Además, al empleado solo se le asignarán órdenes para estas funciones (la "
-"función de planeación predeterminada tiene prioridad sobre las demás).\n"
-"Déjelo en blanco para que al empleado se le asignen turnos sin importar su "
+"empleado, solo aparecerán las plantillas de turno de estas funciones.\n"
+"Del mismo modo, solo se enviarán al empleado los turnos abiertos disponibles "
+"para estas funciones cuando se publique el horario.\n"
+"Además, al empleado solo se le asignarán órdenes correspondientes a estas "
+"funciones (la función de planeación predeterminada tiene prioridad sobre las "
+"demás).\n"
+"Deja el campo vacío para asignarle turnos al empleado sin importar su "
 "función."
 
 #. module: planning
@@ -2427,7 +2435,7 @@ msgid ""
 "Schedule your human and material resources across roles, projects and sales "
 "orders."
 msgstr ""
-"Programe sus recursos humanos y materiales entre funciones, proyectos y "
+"Programa tus recursos humanos y materiales entre funciones, proyectos y "
 "órdenes de venta."
 
 #. module: planning
@@ -2583,6 +2591,8 @@ msgstr "Turnos del miembro de su equipo"
 #: code:addons/planning/wizard/planning_send.py:0
 msgid "Shifts published — employees without a work email were skipped"
 msgstr ""
+"Turnos publicados - Omitimos a los empleados que no tienen un correo de "
+"trabajo"
 
 #. module: planning
 #. odoo-python
@@ -2639,6 +2649,26 @@ msgstr "Fecha de finalización"
 #: model:ir.model.fields.selection,name:planning.selection__res_company__planning_employee_unavailabilities__switch
 msgid "Switch shifts with other employees"
 msgstr "Cambiar turnos con otros empleados"
+
+#. module: planning
+#. odoo-python
+#: code:addons/planning/models/ir_actions_report.py:0
+msgid ""
+"The Planning report cannot be added to the print menu. Please use the Print "
+"action available in the Planning calendar and Gantt views."
+msgstr ""
+"No puedes agregar el reporte de planeación al menú de impresión. Usa la "
+"acción Imprimir disponible en las vistas de calendario y Gantt de Planeación."
+
+#. module: planning
+#. odoo-python
+#: code:addons/planning/models/ir_actions_report.py:0
+msgid ""
+"The Planning report cannot be printed from here. Please use the Print action "
+"available in the Planning calendar and Gantt views."
+msgstr ""
+"El reporte de planificación no se puede imprimir desde aquí. Usa la acción "
+"Imprimir disponible en las vistas de Calendario de planificación y gantt."
 
 #. module: planning
 #: model:ir.model.constraint,message:planning.constraint_res_company_planning_self_unassign_days_before_positive
@@ -2724,10 +2754,10 @@ msgstr "La hora de inicio no puede ser negativa."
 #. odoo-python
 #: code:addons/planning/models/planning_template.py:0
 msgid ""
-"The start hour cannot be before the end hour for a one-day shift template."
+"The start hour cannot be after the end hour for a one-day shift template."
 msgstr ""
-"La hora de inicio no puede estar antes de la hora de finalización en la "
-"plantilla de turno de un día."
+"La hora de inicio no puede ser posterior a la hora de finalización en una "
+"plantilla de turno de un solo día."
 
 #. module: planning
 #. odoo-python
@@ -3123,6 +3153,11 @@ msgid "e.g. John Doe"
 msgstr "Por ejemplo, Juan Pérez"
 
 #. module: planning
+#: model_terms:ir.ui.view,arch_db:planning.planning_view_kanban
+msgid "h"
+msgstr "h"
+
+#. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_kanban_inherit
 msgid "other shift(s) in conflict."
 msgstr "otros turnos en conflicto."
@@ -3159,6 +3194,12 @@ msgstr "a"
 #: model:mail.template,subject:planning.email_template_slot_single
 msgid "{{ ctx.get('mail_subject', '') }} {{ ctx.get('start_datetime' , '') }}"
 msgstr "{{ ctx.get('mail_subject', '') }} {{ ctx.get('start_datetime' , '') }}"
+
+#~ msgid ""
+#~ "The start hour cannot be before the end hour for a one-day shift template."
+#~ msgstr ""
+#~ "La hora de inicio no puede estar antes de la hora de finalización en la "
+#~ "plantilla de turno de un día."
 
 #~ msgid "The work email is missing for the following employees:"
 #~ msgstr "Los siguientes empleados no tienen un correo electrónico laboral:"

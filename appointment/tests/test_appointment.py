@@ -174,8 +174,19 @@ class AppointmentTest(AppointmentCommon, HttpCaseWithUserDemo):
                     })
                 ],
             }, {
+                'category': 'custom',
+                'name': 'Custom Meeting 3',
+                'appointment_tz': 'UTC',
+                'staff_user_ids': [(4, employee.id)],
+                'slot_ids': [(0, 0, {
+                    'allday': False,
+                    'start_datetime': datetime(2026, 1, 9, 8, 0, 0),
+                    'end_datetime': datetime(2026, 1, 9, 8, 20, 0),
+                    })
+                ],
+            }, {
                 'category': 'recurring',
-                'name': 'Recurring Meeting 3',
+                'name': 'Recurring Meeting 4',
                 'staff_user_ids': [(4, employee.id)],
                 'appointment_duration': hour_fifty_float_repr_A,  # float presenting 1h 50min
                 'slot_creation_interval': hour_fifty_float_repr_A,
@@ -211,6 +222,27 @@ class AppointmentTest(AppointmentCommon, HttpCaseWithUserDemo):
             filter_users=employee)
 
         self.assertEqual(len(available_unique_slots), 1)
+
+        available_custom_3_slots = self._filter_appointment_slots(
+            apt_types[2]._get_appointment_slots('UTC', filter_users=employee),
+        )
+        self.assertEqual(len(available_custom_3_slots), 1)
+        self.assertEqual(
+            available_custom_3_slots[0]['slot_duration'],
+            (datetime(2026, 1, 9, 8, 20) - datetime(2026, 1, 9, 8, 0)).total_seconds() / 3600,
+        )
+        self.assertTrue(
+            apt_types[2]._check_appointment_is_valid_slot(
+                employee,
+                0,
+                0,
+                'UTC',
+                datetime(2026, 1, 9, 8, 0, tzinfo=timezone.utc),
+                duration=float(available_custom_3_slots[0]['slot_duration']),
+                allday=False,
+            ),
+            "Generated precise duration should validate the matching custom slot",
+        )
 
         for unique_slot, apt_type, is_available in zip(unique_slots, apt_types, [True, False]):
             duration = (unique_slot['end_datetime'] - unique_slot['start_datetime']).total_seconds() / 3600
@@ -1999,3 +2031,46 @@ class AppointmentTest(AppointmentCommon, HttpCaseWithUserDemo):
         self.assertIn(self.staff_user_bxls.id, available_user_1)
         # User is not available for other appointment when booking has been made for them.
         self.assertNotIn(self.staff_user_bxls.id, available_user_2)
+
+    @users('apt_manager')
+    def test_appointment_user_must_have_appointment_type_access(self):
+        appointment_type = self.env['appointment.type'].create([{
+            'name': 'Test appointment',
+            'staff_user_ids': [(6, 0, [self.apt_user.id])],
+        }])
+
+        # Case 1: Staff user should be allowed
+        event_staff = self.env['calendar.event'].create({
+            'name': 'Staff user event',
+            'appointment_type_id': appointment_type.id,
+            'booking_line_ids': [(0, 0, {
+                'appointment_user_id': self.apt_user.id,
+                'capacity_reserved': 1,
+            })],
+            'user_id': self.apt_user.id,
+        })
+        self.assertTrue(event_staff.exists())
+
+        # Case 2: appointment manager should be allowed
+        event_apt_manager = self.env['calendar.event'].create({
+            'name': 'Admin non-staff event',
+            'appointment_type_id': appointment_type.id,
+            'booking_line_ids': [(0, 0, {
+                'appointment_user_id': self.env.user.id,
+                'capacity_reserved': 1,
+            })],
+            'user_id': self.env.user.id,
+        })
+        self.assertTrue(event_apt_manager.exists())
+
+        # Case 3: User who cannot read the appointment type -> Should raise ValidationError
+        with self.assertRaises(ValidationError):
+            self.env['calendar.event'].create({
+                'name': 'Restricted event',
+                'appointment_type_id': appointment_type.id,
+                'booking_line_ids': [(0, 0, {
+                    'appointment_user_id': self.staff_user_bxls.id,
+                    'capacity_reserved': 1,
+                })],
+                'user_id': self.staff_user_bxls.id,
+            })

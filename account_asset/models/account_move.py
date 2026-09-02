@@ -24,10 +24,10 @@ class AccountMove(models.Model):
         compute="_compute_depreciation_value", inverse="_inverse_depreciation_value", store=True,
     )
 
-    asset_ids = fields.One2many('account.asset', string='Assets', compute="_compute_asset_ids")
-    asset_id_display_name = fields.Char(compute="_compute_asset_ids")   # just a button label. That's to avoid a plethora of different buttons defined in xml
-    count_asset = fields.Integer(compute="_compute_asset_ids")
-    draft_asset_exists = fields.Boolean(compute="_compute_asset_ids")
+    asset_ids = fields.One2many('account.asset', string='Assets', compute="_compute_asset_ids", compute_sudo=True)
+    asset_id_display_name = fields.Char(compute="_compute_asset_ids", compute_sudo=True)   # just a button label. That's to avoid a plethora of different buttons defined in xml
+    count_asset = fields.Integer(compute="_compute_asset_ids", compute_sudo=True)
+    draft_asset_exists = fields.Boolean(compute="_compute_asset_ids", compute_sudo=True)
     asset_move_type = fields.Selection(
         selection=[
             ('depreciation', 'Depreciation'),
@@ -371,7 +371,7 @@ class AccountMoveLine(models.Model):
         ).tax_id
 
         res = {}
-        if non_deductible_tax_ids:
+        if non_deductible_tax_ids and self.ids:
             domain = [('move_id', 'in', self.move_id.ids)]
             tax_details_query = self._get_query_tax_details_from_domain(domain)
 

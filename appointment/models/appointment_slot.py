@@ -118,7 +118,7 @@ class AppointmentSlot(models.Model):
 
     @api.depends('slot_type', 'weekday', 'start_datetime', 'end_datetime', 'start_hour', 'end_hour')
     def _compute_display_name(self):
-        weekdays = dict(self._fields['weekday'].selection)
+        weekdays = dict(self._fields['weekday']._description_selection(self.env))
         for slot in self:
             if slot.slot_type == 'recurring':
                 slot.display_name = "%s, %02d:%02d - %02d:%02d" % (weekdays.get(slot.weekday), int(slot.start_hour), int(round((slot.start_hour % 1) * 60)), int(slot.end_hour), int(round((slot.end_hour % 1) * 60)))

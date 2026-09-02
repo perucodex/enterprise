@@ -96,7 +96,7 @@ class StockMove(models.Model):
     def _action_done(self, cancel_backorder=False):
         # EXTENDS 'stock'
         res = super()._action_done(cancel_backorder=cancel_backorder)
-        if self.filtered(lambda m: m.l10n_ke_oscu_flow_type_code):
+        if res.filtered(lambda m: m.l10n_ke_oscu_flow_type_code):
             self.env.ref('l10n_ke_edi_oscu_stock.ir_cron_send_stock_moves')._trigger()
         return res
 

@@ -6,46 +6,41 @@ from odoo.addons.stock_barcode.tests.test_barcode_client_action import TestBarco
 
 
 class TestMRPBarcodeClientAction(TestBarcodeClientAction):
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.component01, cls.component_lot, cls.final_product, cls.final_product_lot, cls.by_product = cls.env['product.product'].create([
+            {
+                'name': 'Compo 01',
+                'is_storable': True,
+                'barcode': 'compo01',
+            }, {
+                'name': 'Compo Lot',
+                'is_storable': True,
+                'barcode': 'compo_lot',
+                'tracking': 'lot',
+            }, {
+                'name': 'Final Product',
+                'is_storable': True,
+                'barcode': 'final',
+            }, {
+                'name': 'Final Product2',
+                'is_storable': True,
+                'barcode': 'final_lot',
+                'tracking': 'lot',
+            }, {
+                'name': 'By Product',
+                'is_storable': True,
+                'barcode': 'byproduct'
+            },
+        ])
 
-        self.component01 = self.env['product.product'].create({
-            'name': 'Compo 01',
-            'is_storable': True,
-            'barcode': 'compo01',
-        })
-        self.component_lot = self.env['product.product'].create({
-            'name': 'Compo Lot',
-            'is_storable': True,
-            'barcode': 'compo_lot',
-            'tracking': 'lot',
-        })
-
-        self.final_product = self.env['product.product'].create({
-            'name': 'Final Product',
-            'is_storable': True,
-            'barcode': 'final',
-        })
-
-        self.final_product_lot = self.env['product.product'].create({
-            'name': 'Final Product2',
-            'is_storable': True,
-            'barcode': 'final_lot',
-            'tracking': 'lot',
-        })
-
-        self.by_product = self.env['product.product'].create({
-            'name': 'By Product',
-            'is_storable': True,
-            'barcode': 'byproduct'
-        })
-
-        self.bom_lot = self.env['mrp.bom'].create({
-            'product_tmpl_id': self.final_product_lot.product_tmpl_id.id,
+        cls.bom_lot = cls.env['mrp.bom'].create({
+            'product_tmpl_id': cls.final_product_lot.product_tmpl_id.id,
             'product_qty': 2.0,
             'bom_line_ids': [
-                (0, 0, {'product_id': self.component01.id, 'product_qty': 2.0}),
-                (0, 0, {'product_id': self.component_lot.id, 'product_qty': 2.0}),
+                Command.create({'product_id': cls.component01.id, 'product_qty': 2.0}),
+                Command.create({'product_id': cls.component_lot.id, 'product_qty': 2.0}),
             ],
         })
 
@@ -126,13 +121,14 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
 
         url = "/odoo/action-stock_barcode.stock_picking_type_action_kanban"
         self.start_tour(url, 'test_barcode_production_create_bom', login='admin')
-        mo = self.env['mrp.production'].search([], order='id desc', limit=1)
-        self.assertEqual(mo.state, 'done')
-        self.assertEqual(mo.qty_produced, 3)
-        self.assertRecordValues(mo.move_raw_ids, [
-            {'product_id': self.component01.id, 'product_uom_qty': 2, 'quantity': 6},
-            {'product_id': component02.id, 'product_uom_qty': 3, 'quantity': 9},
-        ])
+        manufacturing_orders = self.env['mrp.production'].search([], order='id desc', limit=2)
+        for mo in manufacturing_orders:
+            self.assertEqual(mo.state, 'done')
+            self.assertEqual(mo.qty_produced, 3)
+            self.assertRecordValues(mo.move_raw_ids, [
+                {'product_id': self.component01.id, 'product_uom_qty': 2, 'quantity': 6},
+                {'product_id': component02.id, 'product_uom_qty': 3, 'quantity': 9},
+            ])
 
     def test_barcode_production_create_tracked_bom(self):
         """Create a manufacturing order with bom from barcode app, with byproducts
@@ -181,18 +177,52 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
         sequence.write({'number_next_actual': 128})
         # Add enough components in stock.
         lot = self.env['stock.lot'].create({'name': "boptilot-001", 'product_id': self.component_lot.id})
+        self.env['stock.lot'].create([
+            {'name': name, 'product_id': self.final_product_lot.id}
+            for name in ('SN_X1', 'SN_X2')
+        ])
         self.env['stock.quant']._update_available_quantity(self.component01, self.stock_location, quantity=99)
         self.env['stock.quant']._update_available_quantity(self.component_lot, self.stock_location, quantity=99, lot_id=lot)
-        # Create and confirm MO for 1, 5 and 10 products.
+        # Create and confirm MO for 1, 5, 10 and 3 products.
         productions = self.env['mrp.production'].create([{
             'name': f'MO/TEST/{i}',
             'bom_id': self.bom_lot.id,
             'product_id': self.final_product_lot.id,
             'product_qty': qty,
-        } for (i, qty) in [(1, 1), (2, 5), (3, 10)]])
+        } for (i, qty) in enumerate([1, 5, 10, 3], 1)])
         productions.action_confirm()
-        # Process the three productions one after each other.
+        # Process the productions one after each other.
         self.start_tour('/odoo/barcode', 'test_barcode_production_generate_serial_numbers', login='admin')
+        mo4 = productions[3]
+        self.assertEqual(mo4.qty_producing, 3)
+        self.assertEqual(sorted(mo4.lot_producing_ids.mapped('name')), ['SN_NEW1', 'SN_X1', 'SN_X2'])
+
+    def test_barcode_production_lot_replace_on_scan(self):
+        """ For a lot-tracked finished product, scanning a different lot replaces
+        the registered lot without incrementing the produced quantity, while
+        scanning the same lot keeps incrementing it.
+        """
+        self.env.user.group_ids += self.env.ref('stock.group_production_lot')
+        self.env['stock.quant']._update_available_quantity(self.component01, self.stock_location, quantity=10)
+        self.env['stock.lot'].create({'name': 'EXIST_LOT', 'product_id': self.final_product_lot.id})
+        bom = self.env['mrp.bom'].create({
+            'product_tmpl_id': self.final_product_lot.product_tmpl_id.id,
+            'product_qty': 1.0,
+            'bom_line_ids': [Command.create({'product_id': self.component01.id, 'product_qty': 1.0})],
+        })
+        mo = self.env['mrp.production'].create({
+            'product_id': self.final_product_lot.id,
+            'product_qty': 2,
+            'bom_id': bom.id,
+        })
+        mo.action_confirm()
+        url = f'/odoo/{mo.id}/action-stock_barcode_mrp.stock_barcode_mo_client_action'
+        self.start_tour(url, 'test_barcode_production_lot_replace_on_scan', login='admin')
+        self.assertEqual(mo.state, 'done')
+        self.assertRecordValues(mo.finished_move_line_ids, [
+            {'product_id': self.final_product_lot.id, 'quantity': 2},
+        ])
+        self.assertEqual(mo.finished_move_line_ids.lot_id.name, 'NEW_LOT')
 
     def test_barcode_production_reserved_from_multiple_locations(self):
         """ Process a production with components reserved in different locations
@@ -345,6 +375,10 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
 
         url = f'/odoo/{mo.id}/action-stock_barcode_mrp.stock_barcode_mo_client_action'
         self.start_tour(url, 'test_mo_scrap_digipad_view', login='admin', timeout=180)
+
+        # Run same test without existing MO
+        url = '/odoo/action-stock_barcode_mrp.stock_barcode_mo_client_action'
+        self.start_tour(url, 'test_mo_scrap_digipad_view', login='admin')
 
     def test_barcode_production_components_reservation_state(self):
         """ When components are unreserved, they should not be visible in the
@@ -765,6 +799,23 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
             [{'quantity': 5, 'product_uom_qty': 5,}]
         )
 
+    def test_backorder_partial_completion_preserves_reserved_qty_on_exit(self):
+        manufacturing_order = self.env['mrp.production'].create({
+            'name': 'TBPCSNS mo',
+            'product_id': self.final_product.id,
+            'product_qty': 1,
+            'move_raw_ids': [
+                Command.create({
+                    'product_id': self.component01.id,
+                    'product_uom_qty': 6,
+                }),
+            ],
+        })
+        manufacturing_order.action_confirm()
+        action_id = self.env.ref('stock_barcode.stock_barcode_action_main_menu')
+        url = f"/web#action={action_id.id}"
+        self.start_tour(url, 'test_backorder_partial_completion_preserves_reserved_qty_on_exit', login='admin', timeout=180)
+
     def test_barcode_mo_creation_in_mo2(self):
         """
         Ensures that MO is created in another manufacturing operation type (MO2)
@@ -840,6 +891,44 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
 
         url = f'/odoo/{mo.id}/action-stock_barcode_mrp.stock_barcode_mo_client_action'
         self.start_tour(url, 'test_setting_barcode_mrp_allow_extra_product', login='admin')
+
+    def test_barcode_production_settings(self):
+        """ Ensure the barcode settings work as configured in the operation type."""
+        self.env.user.group_ids += self.env.ref('stock.group_production_lot')
+        # First operation type with no restrictions.
+        picking_type_manufacturing_1 = self.warehouse.manu_type_id
+        picking_type_manufacturing_1.restrict_scan_product = False
+        picking_type_manufacturing_1.restrict_scan_tracking_number = 'optional'
+        picking_type_manufacturing_1.barcode_validation_full = True
+        # Second operation type with restrictions.
+        picking_type_manufacturing_2 = self.env['stock.picking.type'].create({
+            'name': 'MO2',
+            'code': 'mrp_operation',
+            'sequence_code': 'MO2',
+            'warehouse_id': self.warehouse.id,
+            'restrict_scan_product': True,
+            'restrict_scan_tracking_number': 'mandatory',
+            'barcode_validation_full': False,
+        })
+        # Update `component_lot` to make it tracked by SN.
+        self.component_lot.write({'name': 'Compo Serial', 'barcode': 'compo_sn', 'tracking': 'serial'})
+        serial_numbers = self.env['stock.lot'].create([{
+            'name': f'sn-00{i}',
+            'product_id': self.component_lot.id,
+        } for i in range(1, 5)])
+        # Add products in stock.
+        self.env['stock.quant']._update_available_quantity(self.component01, self.stock_location, quantity=99)
+        for sn in serial_numbers:
+            self.env['stock.quant']._update_available_quantity(self.component_lot, self.stock_location, quantity=1, lot_id=sn)
+        # Create two MO, each using a different operation type and a BoM where the final product and one of its component are tracked.
+        manufacturing_orders = self.env['mrp.production'].create([{
+            'bom_id': self.bom_lot.id,
+            'picking_type_id': operation_type.id,
+        } for operation_type in (picking_type_manufacturing_1, picking_type_manufacturing_2)])
+        manufacturing_orders.action_confirm()
+        manufacturing_orders[0].name = "MO1"
+        manufacturing_orders[1].name = "MO2"
+        self.start_tour('/odoo/barcode', 'test_barcode_production_settings', login='admin')
 
     def test_no_split_uncompleted_done_move(self):
         """
@@ -1075,3 +1164,109 @@ class TestMRPBarcodeClientAction(TestBarcodeClientAction):
             {'product_id': self.component01.id, 'qty_done': 2, 'location_id': self.stock_location.id, 'lot_id': False, 'package_id': package.id, 'state': 'done'},
             {'product_id': self.component_lot.id, 'qty_done': 2, 'location_id': self.shelf1.id, 'lot_id': lot2.id, 'package_id': False, 'state': 'done'},
         ])
+
+    def test_gs1_qty_final_product(self):
+        barcodes_gs1_nomenclature = self.env.ref("barcodes_gs1_nomenclature.default_gs1_nomenclature")
+        self.env.company.write({
+            'nomenclature_id': barcodes_gs1_nomenclature.id
+        })
+        gs1_final_product = self.env['product.product'].create({
+            'name': 'PRO_FINAL_GTIN_8',
+            'is_storable': True,
+            'barcode': '82655853',  # GTIN-8 format
+            'uom_id': self.uom_unit.id
+        })
+        self.env['stock.quant'].create({
+            'quantity': 8,
+            'product_id': self.component01.id,
+            'location_id': self.stock_location.id,
+        })
+        bom = self.env['mrp.bom'].create({
+            'product_tmpl_id': gs1_final_product.product_tmpl_id.id,
+            'product_qty': 1.0,
+            'bom_line_ids': [
+                Command.create({'product_id': self.component01.id, 'product_qty': 2.0}),
+            ],
+        })
+        mo = self.env['mrp.production'].create({
+            'product_id': gs1_final_product.id,
+            'product_qty': 4,
+            'bom_id': bom.id,
+        })
+        mo.action_confirm()
+        action = self.env.ref('stock_barcode_mrp.stock_barcode_mo_client_action')
+        url = '/web#action=%s&active_id=%s' % (action.id, mo.id)
+        self.start_tour(url, 'test_gs1_qty_final_product', login='admin')
+        self.assertEqual(mo.state, 'done')
+
+    def test_barcode_production_create_bom_with_different_uom(self):
+        """Check that an MO with a BoM whose components have UoMs that are
+           distinct from their product UoMs will add the moves with the
+           correct UoMs."""
+        self.env.user.group_ids += self.env.ref('uom.group_uom')
+
+        uom_day_id = self.ref('uom.product_uom_day')
+        uom_m_id = self.ref('uom.product_uom_meter')
+        uom_kg_id = self.ref('uom.product_uom_kgm')
+
+        component01, component02 = self.env['product.product'].create([
+            {'name': 'Compo 01', 'uom_id': self.ref('uom.product_uom_gram')},
+            {'name': 'Compo 02', 'uom_id': self.ref('uom.product_uom_cm')},
+        ])
+        self.final_product.uom_id = self.ref('uom.product_uom_hour')
+
+        bom = self.env['mrp.bom'].create({
+            'product_tmpl_id': self.final_product.product_tmpl_id.id,
+            'product_qty': 1.2,
+            'product_uom_id': uom_day_id,
+            'bom_line_ids': [
+                Command.create({
+                    'product_id': component01.id,
+                    'product_qty': 3.4,
+                    'product_uom_id': uom_kg_id,
+                }),
+                Command.create({
+                    'product_id': component02.id,
+                    'product_qty': 5.6,
+                    'product_uom_id': uom_m_id,
+                }),
+            ],
+        })
+
+        self.start_tour('/odoo/barcode-mo', 'test_barcode_production_create_bom_with_different_uom', login='admin')
+
+        mo = self.env['mrp.production'].search([('bom_id', '=', bom.id)], limit=1)
+        self.assertRecordValues(mo, [
+            {'product_qty': 1.2, 'product_uom_id': uom_day_id},
+        ])
+        self.assertRecordValues(mo.move_raw_ids.sorted('product_uom_qty'), [
+            {'product_uom_qty': 3.4, 'product_uom': uom_kg_id},
+            {'product_uom_qty': 5.6, 'product_uom': uom_m_id},
+        ])
+
+        # Make sure we can still view the MO with the UoMs disabled without triggering an error.
+        self.env.user.group_ids -= self.env.ref('uom.group_uom')
+        url = f'odoo/{mo.id}/action-stock_barcode_mrp.stock_barcode_mo_client_action'
+        self.start_tour(url, 'test_barcode_production_disabled_uoms', login='admin')
+
+    def test_scan_mo_split_barcode(self):
+        """
+        Check that scanning an MO barcode finds all of its split.
+        """
+        mos = mo, _ = self.env['mrp.production'].create([
+            {
+                'name': barcode,
+                'product_id': self.final_product_lot.id,
+                'product_qty': 3,
+                'bom_id': self.bom_lot.id,
+                'warehouse_id': self.warehouse.id,
+            } for barcode in ('Lovely-MO-split', 'Extra-MO')
+        ])
+        self.env['stock.quant']._update_available_quantity(self.component01, self.warehouse.lot_stock_id, 10.0)
+        self.env['stock.quant']._update_available_quantity(self.component_lot, self.warehouse.lot_stock_id, 10.0)
+        mos.action_confirm()
+        split_wizard = Form.from_action(self.env, mo.action_split())
+        split_wizard.max_batch_size = 1
+        split_wizard.save().action_split()
+        self.assertEqual(len(mo.production_group_id.production_ids), 3)
+        self.start_tour('/odoo/barcode', 'test_scan_mo_split_barcode', login='admin')

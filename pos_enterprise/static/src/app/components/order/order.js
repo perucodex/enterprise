@@ -22,7 +22,11 @@ export class Order extends Component {
         this.actionInProgress = false;
         this._updateDuration();
         this.interval = setInterval(() => {
-            this._updateDuration();
+            if (this.order && this.order.pos_order_id) {
+                this._updateDuration();
+            } else {
+                clearInterval(this.interval);
+            }
         }, 1000);
         onWillUnmount(() => {
             clearInterval(this.interval);

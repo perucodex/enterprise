@@ -92,21 +92,20 @@ patch(StreamPostKanbanRecord.prototype, {
 
     async _onTwitterTweetLike() {
         const userLikes = this.record.twitter_user_likes.raw_value;
-        rpc(`/social_twitter/${encodeURIComponent(this.record.stream_id.raw_value)}/like_tweet`, {
-            tweet_id: this.record.twitter_tweet_id.raw_value,
-            like: !userLikes
-        });
-        const promises = this.props.group.model.root.groups.map((group) =>
-            group.list.records
-                .filter(
-                    (record) =>
-                        record.data.twitter_tweet_id === this.props.record.data.twitter_tweet_id
-                )
-                .map((record) =>
-                    this._updateLikesCount("twitter_user_likes", "twitter_likes_count", record)
-                )
+        await rpc(
+            `/social_twitter/${encodeURIComponent(this.record.stream_id.raw_value)}/like_tweet`,
+            {
+                tweet_id: this.record.twitter_tweet_id.raw_value,
+                like: !userLikes,
+            }
         );
-        await Promise.all(promises.flat());
+        for (const group of this.props.group.model.root.groups) {
+            for (const record of group.list.records) {
+                if (record.data.twitter_tweet_id === this.props.record.data.twitter_tweet_id) {
+                    await record.load();
+                }
+            }
+        }
     },
 
     _onTwitterRetweet(ev) {

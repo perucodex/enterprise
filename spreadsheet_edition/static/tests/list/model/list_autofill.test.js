@@ -192,6 +192,18 @@ test("Autofill list keeps format but neither style nor border", async function (
     // Check that the format of C2 has been correctly applied to C3 but not the style nor the border
     const filledCell = getCell(model, "C3");
     expect(filledCell.style).toBe(undefined);
-    expect(model.getters.getCellBorder({ sheetId, col, row: row + 1 })).toEqual({});
+    expect(model.getters.getCellBorder({ sheetId, col, row: row + 1 })).toBe(null);
     expect(filledCell.format).toBe("m/d/yyyy");
+});
+
+test("Autofill for a list that is not loaded yet", async function () {
+    const { model } = await createSpreadsheetWithList({ skipWaitForDataLoaded: true });
+
+    expect(getCellValue(model, "A1")).toBe("Loading...");
+    expect(getListAutofillValue(model, "A1", { direction: "bottom", steps: 1 })).toBe(
+        '=ODOO.LIST(1,1,"foo")' // Can autofill since the resulting formula doesn't depend on the list values
+    );
+    expect(model.getters.getTooltipListFormula(getCellFormula(model, "A1"), false)).toBe(
+        "Loading..."
+    );
 });

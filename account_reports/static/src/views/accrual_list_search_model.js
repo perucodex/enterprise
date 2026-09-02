@@ -1,5 +1,9 @@
 import { useSubEnv } from "@odoo/owl";
+import { serializeDate } from "@web/core/l10n/dates";
 import { SearchModel } from "@web/search/search_model";
+
+const { DateTime } = luxon;
+
 
 export class AccrualListSearchModel extends SearchModel {
     setup(services) {
@@ -8,9 +12,21 @@ export class AccrualListSearchModel extends SearchModel {
         useSubEnv({ accrualContext: this.accrualContext });
     }
 
+    exportState() {
+        return { ...super.exportState(), accrualContext: { ...this.accrualContext } };
+    }
+
+    _importState(state) {
+        super._importState(state);
+        Object.assign(this.accrualContext, state.accrualContext || {});
+    }
+
+    async load(config) {
+        await super.load(config);
+        this.accrualContext.accrual_entry_date ||= serializeDate(DateTime.now());
+    }
+
     _getContext() {
-        const context = super._getContext();
-        Object.assign(context, this.accrualContext);
-        return context;
+        return Object.assign(super._getContext(), this.accrualContext);
     }
 }

@@ -154,11 +154,29 @@ class TestMarketingAutomationSms(TestMACommon):
         # SMS are sent one call at a time
         self.assertEqual(self._sms_twilio_send_mock.call_count, 8)
 
-        # simulate ack reception from twilio
-        sms_batch = self._new_sms.filtered(
-            lambda sms: sms.mailing_trace_ids.res_id in test_records_1_ok.ids,
+        # simulate ack reception from twilio, except some of them who fail
+        sms_sent_batch = self._new_sms.filtered(
+            lambda sms: sms.mailing_trace_ids.res_id in test_records_1_ok[3:].ids,
         )
-        self.simulate_sms_twilio_status(sms_batch, self.user_marketing_automation.company_id)
+        sms_undelivered_batch = self._new_sms.filtered(
+            lambda sms: sms.mailing_trace_ids.res_id in test_records_1_ok[0:2].ids,
+        )
+        sms_blocked_batch = self._new_sms.filtered(
+            lambda sms: sms.mailing_trace_ids.res_id in test_records_1_ok[2].ids,
+        )
+        with self.mock_datetime_and_now(data_reference_start + relativedelta(hours=3)):
+            self.simulate_sms_twilio_status(
+                sms_sent_batch, self.user_marketing_automation.company_id,
+                sms_status='delivered',
+            )
+            self.simulate_sms_twilio_status(
+                sms_undelivered_batch, self.user_marketing_automation.company_id,
+                sms_status='undelivered', error_code=30005, error_message="Unknown destination handset",
+            )
+            self.simulate_sms_twilio_status(
+                sms_blocked_batch, self.user_marketing_automation.company_id,
+                sms_status='failed', error_code=30002, error_message="Account suspended",
+            )
 
         self.assertMarketAutoTraces(
             [{
@@ -166,7 +184,39 @@ class TestMarketingAutomationSms(TestMACommon):
                     'schedule_date': data_reference_start,
                     'state_msg': False,
                 },
-                'records': test_records_1_ok,
+                'records': test_records_1_ok[0:2],
+                'sms_values': {  # note that bounce did not update the sms.sms itself, only the trace / tracker
+                    'failure_type': False,
+                    'state': 'pending',
+                },
+                'status': 'processed',
+                'trace_failure_reason': "Unknown destination handset",
+                'trace_failure_type': 'sms_invalid_destination',
+                'trace_status': 'bounce',
+            }, {
+                'fields_values': {
+                    'schedule_date': data_reference_start,
+                    'state_msg': False,
+                },
+                'records': test_records_1_ok[2],
+                'sms_values': {  # note that error did not update the sms.sms itself, only the trace / tracker
+                    'failure_type': False,
+                    'state': 'pending',
+                },
+                'status': 'processed',  # FIXME: this is an error, should update status (not like bounce)
+                'trace_failure_reason': "Account suspended",
+                'trace_failure_type': 'sms_expired',
+                'trace_status': 'error',
+            }, {
+                'fields_values': {
+                    'schedule_date': data_reference_start,
+                    'state_msg': False,
+                },
+                'records': test_records_1_ok[3:],
+                'sms_values': {  # note that delivery report did not update the sms.sms itself, only the trace / tracker
+                    'failure_type': False,
+                    'state': 'pending',
+                },
                 'status': 'processed',
                 'trace_status': 'sent',
             }, {
@@ -199,8 +249,7 @@ class TestMarketingAutomationSms(TestMACommon):
                 },
                 'records': (test_records_1_ko - self.test_records_failure_wrong - self.test_records_failure_dupe),
                 'status': 'canceled',
-                # TDE checkme
-                'trace_failure_type': 'mail_email_missing',
+                'trace_failure_type': 'sms_number_missing',
                 'trace_status': 'cancel',
             }],
             act1,

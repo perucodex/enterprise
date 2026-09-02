@@ -569,7 +569,8 @@ class TestBudgetReport(TestAccountReportsCommon):
 
     def test_financial_budget_with_several_columns(self):
         """ Ensure that financial budget feature works properly on reports with several columns,
-        and that percentage column of budget is hidden is the case where multiple monetary columns exist """
+        and that percentage column of budget is computed based on the 'balance' column, considered the main one,
+        if there is more than one moneraty column. """
         self.report.write({
             'column_ids': [
                 Command.create({
@@ -602,25 +603,25 @@ class TestBudgetReport(TestAccountReportsCommon):
         # Ensure level header colspan is 3 for top header, 2 for the columns + 1 selected budget
         self.assertEqual(
             self.report._get_column_headers_render_data(options),
-            {'level_colspan': [3, 2], 'level_repetitions': [1, 2], 'custom_subheaders': []}
+            {'level_colspan': [4, 2], 'level_repetitions': [1, 2], 'custom_subheaders': []}
         )
 
         self.assertLinesValues(
             self.report._get_lines(options),
             #                                   [          2020                ]  [            2019              ]
-            #                                   [ col 1 ] [ col 2 ] [ budget 1 ]  [ col 1 ] [ col 2 ] [ budget 1 ]
-            [0,                                     1,        2,         3,          4,        5,         6],
+            #                                   [ col 1 ] [ col 2 ] [ budget 1 ] [ budget percentage ] [ col 1 ] [ col 2 ] [ budget 1 ] [ budget percentag ]
+            [0,                                     1,        2,         3,               4,               5,         6,        7,                 8],
             [
-                ('line_domain',                   600,        '',      1110,          0,       '',         0),
-                (self.account_1.display_name,     100,        '',      1000,          0,       '',         0),
-                (self.account_2.display_name,     200,        '',         0,          0,       '',         0),
-                (self.account_3.display_name,     300,        '',       100,          0,       '',         0),
-                (self.account_4.display_name,       0,        '',        10,          0,       '',         0),
-                ('line_account_codes',            600,        '',      1110,          0,       '',         0),
-                (self.account_1.display_name,     100,        '',      1000,          0,       '',         0),
-                (self.account_2.display_name,     200,        '',         0,          0,       '',         0),
-                (self.account_3.display_name,     300,        '',       100,          0,       '',         0),
-                (self.account_4.display_name,       0,        '',        10,          0,       '',         0),
+                ('line_domain',                   600,        '',      1110,           '54.1%',            0,        '',        0,             'n/a'),
+                (self.account_1.display_name,     100,        '',      1000,           '10.0%',            0,        '',        0,             'n/a'),
+                (self.account_2.display_name,     200,        '',         0,             'n/a',            0,        '',        0,             'n/a'),
+                (self.account_3.display_name,     300,        '',       100,          '300.0%',            0,        '',        0,             'n/a'),
+                (self.account_4.display_name,       0,        '',        10,            '0.0%',            0,        '',        0,             'n/a'),
+                ('line_account_codes',            600,        '',      1110,           '54.1%',            0,        '',        0,             'n/a'),
+                (self.account_1.display_name,     100,        '',      1000,           '10.0%',            0,        '',        0,             'n/a'),
+                (self.account_2.display_name,     200,        '',         0,             'n/a',            0,        '',        0,             'n/a'),
+                (self.account_3.display_name,     300,        '',       100,          '300.0%',            0,        '',        0,             'n/a'),
+                (self.account_4.display_name,       0,        '',        10,            '0.0%',            0,        '',        0,             'n/a'),
             ],
             options,
         )
@@ -809,3 +810,61 @@ class TestBudgetReport(TestAccountReportsCommon):
             {'amount': 100.0 - 75.00, 'date': fields.Date.to_date('2025-12-01')},
         ]
         self.assertRecordValues(budget.item_ids, expected_items)
+
+    def test_budget_filter_with_percentage_figure_type(self):
+        """
+        Test that budget filters don't crash when a report has lines with percentage
+        figure type that cannot be matched for budget comparison.
+        """
+        report_with_percentage = self.env['account.report'].create({
+            'name': "Report with Percentage Line",
+            'filter_date_range': True,
+            'filter_budgets': True,
+            'root_report_id': self.env.ref('account_reports.profit_and_loss').id,
+            'column_ids': [
+                Command.create({
+                    'name': "Balance",
+                    'expression_label': 'balance',
+                }),
+            ],
+            'line_ids': [
+                Command.create({
+                    'name': 'percentage_line',
+                    'expression_ids': [
+                        Command.create({
+                            'label': 'balance',
+                            'formula': '100',
+                            'engine': 'external',
+                            'figure_type': 'percentage',
+                        }),
+                    ],
+                }),
+                Command.create({
+                    'name': 'monetary_line',
+                    'groupby': 'account_id',
+                    'foldable': False,
+                    'expression_ids': [
+                        Command.create({
+                            'label': 'balance',
+                            'formula': "[('account_id.account_type', '=', 'income')]",
+                            'subformula': 'sum',
+                            'engine': 'domain',
+                        }),
+                    ],
+                }),
+            ],
+        })
+
+        self._create_moves(
+            {self.account_1.id: 100},
+            '2020-01-01',
+            '2020-01-01',
+        )
+        options = self._generate_options(
+            report_with_percentage,
+            '2020-01-01',
+            '2020-12-31',
+            default_options={'budgets': [{'id': self.budget_1.id, 'selected': True}]},
+        )
+        lines = report_with_percentage._get_lines(options)
+        self.assertTrue(lines)

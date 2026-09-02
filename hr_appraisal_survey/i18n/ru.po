@@ -5,13 +5,14 @@
 # Translators:
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# "Anastasiia Koroleva (koan)" <koan@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0+e\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-30 18:42+0000\n"
-"PO-Revision-Date: 2025-11-16 13:31+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"PO-Revision-Date: 2026-07-07 17:13+0000\n"
+"Last-Translator: \"Anastasiia Koroleva (koan)\" <koan@odoo.com>\n"
 "Language-Team: Russian <https://translate.odoo.com/projects/odoo-19/"
 "hr_appraisal_survey/ru/>\n"
 "Language: ru\n"
@@ -21,7 +22,7 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
 "(n%100>=11 && n%100<=14)? 2 : 3);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_survey_page_statistics_header
@@ -40,7 +41,7 @@ msgstr "360 отзывов"
 #. module: hr_appraisal_survey
 #: model:ir.model.fields,field_description:hr_appraisal_survey.field_hr_appraisal_template__survey_template_ids
 msgid "360 Feedback Survey"
-msgstr ""
+msgstr "Опрос для обратной связи по методу «360 градусов»"
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_survey_button_form_view
@@ -88,6 +89,43 @@ msgid ""
 "                \n"
 "            "
 msgstr ""
+"<p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    Здравствуйте, <t t-out="
+"\"object.partner_id.name or 'participant'\">[участник]</t>!\n"
+"                    <br/>\n"
+"                    Мы проводим оценку по методу «360 градусов», и <t t-out="
+"\"ctx.get('logged_user')\">[Текущий пользователь]</t> приглашает вас\n"
+"                    поделиться мнением о работе коллеги <t t-out="
+"\"ctx.get('employee')\">[сотрудник]</t>.\n"
+"                    <br/>\n"
+"                    Это поможет нам увидеть реальные достижения и понять, в "
+"каком направлении данному сотруднику стоит развиваться дальше.\n"
+"                    <br/>\n"
+"                    Опрос займет всего несколько минут. Вы можете пройти его "
+"по ссылке ниже:\n"
+"                    <br/>\n"
+"                    </p><div class=\"text-center my-4\">\n"
+"                        <a t-att-href=\"object.get_start_url()\" t-attf-style"
+"=\"background-color: {{user.company_id.email_secondary_color or '#875A7B'}}; "
+"padding: 8px 16px 8px 16px; text-decoration: none; color: {{"
+"user.company_id.email_primary_color or '#FFFFFF'}}; border-radius: 5px; font-"
+"size:13px;\">\n"
+"                            Оставить отзыв\n"
+"                        </a>\n"
+"                    </div>\n"
+"                    Пожалуйста, заполните анкету до <t t-out="
+"\"ctx.get('deadline')\">[крайний срок]</t>.\n"
+"                    <br/>\n"
+"                    Заранее благодарим за ваше время и искренние ответы!\n"
+"                    <br/>\n"
+"                    <t t-if=\"ctx.get('user_body')\">\n"
+"                        <div class=\"my-3 py-2 px-3 bg-secondary\">\n"
+"                            <t t-out=\"ctx.get('user_body')\">"
+"[Дополнительный комментарий]</t>\n"
+"                        </div>\n"
+"                    </t>\n"
+"                \n"
+"            "
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_view_form
@@ -169,7 +207,7 @@ msgstr "Признает свои ошибки"
 #: model:ir.model.fields,field_description:hr_appraisal_survey.field_appraisal_ask_feedback__allowed_survey_template_ids
 #: model:ir.model.fields,field_description:hr_appraisal_survey.field_appraisal_select_survey__allowed_survey_template_ids
 msgid "Allowed Survey Template"
-msgstr ""
+msgstr "Разрешенный шаблон опроса"
 
 #. module: hr_appraisal_survey
 #: model:survey.question.answer,value:hr_appraisal_survey.x_360_5_5
@@ -296,7 +334,7 @@ msgstr "Отменить"
 #: code:addons/hr_appraisal_survey/models/survey_survey.py:0
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.appraisal_select_survey_view_form
 msgid "Choose Survey"
-msgstr ""
+msgstr "Выбрать опрос"
 
 #. module: hr_appraisal_survey
 #: model:survey.question.answer,value:hr_appraisal_survey.y_360_5_3
@@ -453,7 +491,7 @@ msgstr "Энтузиазм и заинтересованность в проек
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_template_view_form
 msgid "Every template allowed"
-msgstr ""
+msgstr "Разрешены все шаблоны"
 
 #. module: hr_appraisal_survey
 #: model_terms:survey.question,description:hr_appraisal_survey.appraisal_3
@@ -480,7 +518,7 @@ msgstr "Перейти к оценке из"
 #. module: hr_appraisal_survey
 #: model:mail.template,name:hr_appraisal_survey.mail_template_appraisal_ask_feedback
 msgid "HR: Ask Feedback 360"
-msgstr ""
+msgstr "Отдел кадров: Запросить обратную связь 360"
 
 #. module: hr_appraisal_survey
 #: model:survey.question,title:hr_appraisal_survey.appraisal_360_5
@@ -526,7 +564,7 @@ msgstr ""
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_view_form
 msgid "If you need,"
-msgstr ""
+msgstr "Если вам необходимо,"
 
 #. module: hr_appraisal_survey
 #: model:survey.question.answer,value:hr_appraisal_survey.arow_3_1_5
@@ -617,7 +655,7 @@ msgstr "Ожидаемые стандарты и ожидания"
 #. odoo-python
 #: code:addons/hr_appraisal_survey/wizard/appraisal_ask_feedback.py:0
 msgid "Missing email"
-msgstr "Пропавшее письмо"
+msgstr "Отсутствует адрес эл. почты"
 
 #. module: hr_appraisal_survey
 #: model:survey.question,title:hr_appraisal_survey.appraisal_1_1
@@ -633,7 +671,7 @@ msgstr "Никогда"
 #. odoo-python
 #: code:addons/hr_appraisal_survey/models/survey_survey.py:0
 msgid "No surveys found for this appraisal."
-msgstr ""
+msgstr "Для этой оценки не найдено ни одного опроса."
 
 #. module: hr_appraisal_survey
 #: model:survey.question,title:hr_appraisal_survey.appraisal_2_1
@@ -648,7 +686,7 @@ msgstr "Часто"
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.appraisal_ask_feedback_view_form
 msgid "Optional comment..."
-msgstr ""
+msgstr "Дополнительный комментарий..."
 
 #. module: hr_appraisal_survey
 #: model:ir.model.fields,help:hr_appraisal_survey.field_appraisal_ask_feedback__lang
@@ -682,7 +720,7 @@ msgstr "Цели личной деятельности"
 #. odoo-python
 #: code:addons/hr_appraisal_survey/wizard/appraisal_ask_feedback.py:0
 msgid "Please set an Answer Deadline in the future"
-msgstr ""
+msgstr "Пожалуйста, установите срок ответа в будущем"
 
 #. module: hr_appraisal_survey
 #: model:survey.question,title:hr_appraisal_survey.appraisal_1_2
@@ -771,7 +809,7 @@ msgstr "Смотреть ответы"
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.appraisal_select_survey_view_form
 msgid "See Results"
-msgstr ""
+msgstr "Посмотреть результаты"
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_survey_user_input_view_tree
@@ -786,7 +824,7 @@ msgstr "Стремитесь понять проблему, прежде чем 
 #. module: hr_appraisal_survey
 #: model:ir.model,name:hr_appraisal_survey.model_appraisal_select_survey
 msgid "Select survey type for an appraisal to show its results"
-msgstr ""
+msgstr "Выберите тип опроса для оценки, чтобы увидеть результаты"
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.appraisal_ask_feedback_view_form
@@ -858,7 +896,7 @@ msgstr "Отзывы об исследовании"
 #. module: hr_appraisal_survey
 #: model:ir.model.fields,field_description:hr_appraisal_survey.field_appraisal_select_survey__survey_input_ids
 msgid "Survey Inputs"
-msgstr ""
+msgstr "Входные данные опроса"
 
 #. module: hr_appraisal_survey
 #: model:ir.model,name:hr_appraisal_survey.model_survey_question_answer
@@ -886,6 +924,8 @@ msgid ""
 "Take part in {{ ctx.get('employee_id') and ctx['employee_id'].name or "
 "'this' }} appraisal"
 msgstr ""
+"Принять участие в оценке «{{ ctx.get('employee_id') and ctx['employee_id']"
+".name or 'this' }}»"
 
 #. module: hr_appraisal_survey
 #: model:survey.question.answer,value:hr_appraisal_survey.arow_3_1_4
@@ -964,6 +1004,8 @@ msgid ""
 "The survey templates available to choose from for the appraisals that use "
 "this template."
 msgstr ""
+"Шаблоны опросов, доступные для выбора при проведении оценок, в которых "
+"используется этот шаблон."
 
 #. module: hr_appraisal_survey
 #: model_terms:survey.survey,description:hr_appraisal_survey.appraisal_feedback_template
@@ -1093,18 +1135,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_appraisal_survey/models/survey_survey.py:0
 msgid "You can't ask feedback for multiple appraisals at once."
-msgstr ""
+msgstr "Вы не можете запрашивать отзывы для нескольких оценок одновременно."
 
 #. module: hr_appraisal_survey
 #. odoo-python
 #: code:addons/hr_appraisal_survey/models/survey_survey.py:0
 msgid "You can't select multiple feedback templates."
-msgstr ""
+msgstr "Невозможно выбрать несколько шаблонов обратной связи."
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_view_form
 msgid "ask feedback"
-msgstr ""
+msgstr "запросить обратную связь"
 
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_survey_button_form_view
@@ -1114,7 +1156,7 @@ msgstr "или"
 #. module: hr_appraisal_survey
 #: model_terms:ir.ui.view,arch_db:hr_appraisal_survey.hr_appraisal_view_form
 msgid "to a selection of colleagues you work with."
-msgstr ""
+msgstr "у коллег, с которыми вы работаете."
 
 #~ msgid ""
 #~ "360 Degree Feedback is a system or process in which managers will ask "

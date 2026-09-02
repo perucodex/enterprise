@@ -98,22 +98,25 @@ class SignRequestItem(models.Model):
 
         :return: The result of the parent method if the message is sent via email, otherwise None
         """
-        is_whatsapp = self.sign_request_id.send_channel == 'whatsapp'
-        misconfiguration = is_whatsapp and not self._check_whatsapp_template_exists()
-        if misconfiguration:
-            self.sign_request_id.send_channel = 'email'
-        if misconfiguration or not is_whatsapp:
-            return super()._send_signature_access_message()
+        whatsapp_sign_items = self.filtered(lambda r: r.sign_request_id.send_channel == 'whatsapp')
+        if whatsapp_sign_items and not self._check_whatsapp_template_exists():
+            whatsapp_sign_items.sign_request_id.send_channel = 'email'
+            whatsapp_sign_items = self.env['sign.request.item']
+        other_sign_items = self - whatsapp_sign_items
 
-        template_id = self.env['ir.config_parameter'].sudo().get_param('whatsapp_sign.whatsapp_template_id')
-        whatsapp_template = self.env['whatsapp.template'].browse(int(template_id))
-        for sign_request_item in self:
-            # The sign link is calculated and assigned here to ensure the expiration time reflects the exact moment the sign request was sent
-            sign_link, _ = self._get_sign_and_cancel_links(sign_request_item)
-            sign_request_item.sudo().sign_link = sign_link  # sudo write to avoid ACL restrictions on sign_link
-            whatsapp_composer = self.env['whatsapp.composer'].with_context({'active_id': sign_request_item.id}).create({
-                'wa_template_id': whatsapp_template.id,
-                'res_model': 'sign.request.item'
-            })
-            whatsapp_composer.sudo()._send_whatsapp_template(force_send_by_cron=True)
-            sign_request_item.is_mail_sent = True
+        if whatsapp_sign_items:
+            template_id = self.env['ir.config_parameter'].sudo().get_param('whatsapp_sign.whatsapp_template_id')
+            whatsapp_template = self.env['whatsapp.template'].browse(int(template_id))
+            for sign_request_item in whatsapp_sign_items:
+                # The sign link is calculated and assigned here to ensure the expiration time reflects the exact moment the sign request was sent
+                sign_link, _ = self._get_sign_and_cancel_links(sign_request_item)
+                sign_request_item.sudo().sign_link = sign_link  # sudo write to avoid ACL restrictions on sign_link
+                whatsapp_composer = self.env['whatsapp.composer'].with_context(active_id=sign_request_item.id).create({
+                    'wa_template_id': whatsapp_template.id,
+                    'res_model': 'sign.request.item'
+                })
+                whatsapp_composer.sudo()._send_whatsapp_template(force_send_by_cron=True)
+                sign_request_item.is_mail_sent = True
+
+        if other_sign_items:
+            return super(SignRequestItem, other_sign_items)._send_signature_access_message()

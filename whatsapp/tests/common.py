@@ -27,7 +27,8 @@ class MockOutgoingWhatsApp(common.BaseCase):
     @contextmanager
     def mockWhatsappGateway(self, exp_json_data=None):
         self._init_wa_mock()
-        wa_msg_origin = WhatsappMessage.create
+        wa_msg_create_origin = WhatsappMessage.create
+        wa_msg_write_origin = WhatsappMessage.write
         partner_create_origin = ResPartner.create
 
         # ------------------------------------------------------------
@@ -46,12 +47,13 @@ class MockOutgoingWhatsApp(common.BaseCase):
         def _get_whatsapp_document(document_id):
             return self._wa_document_store.get(document_id, "abcd")
 
-        def _send_whatsapp(number, *, send_vals, **kwargs):
+        def _send_whatsapp_to_identifier(bsuid, number, message_type=None, send_vals=None, parent_message_id=False):
             if send_vals:
                 msg_uid = f'test_wa_{time.time() + len(self._wa_msg_sent):.9f}'
                 self._wa_msg_sent.append(msg_uid)
                 self._wa_msg_sent_vals.append(send_vals)
-                return msg_uid
+                self._wa_msg_sent_recipients.append({'bsuid': bsuid, 'number': number})
+                return {'msg_uid': msg_uid, 'wa_id': number or bsuid}
             raise WhatsAppError("Please make sure to define a template before proceeding.")
 
         def _submit_template_new(json_data):
@@ -103,7 +105,7 @@ class MockOutgoingWhatsApp(common.BaseCase):
             return records
 
         def _wa_message_create(model, *args, **kwargs):
-            res = wa_msg_origin(model, *args, **kwargs)
+            res = wa_msg_create_origin(model, *args, **kwargs)
             self._new_wa_msg += res.sudo()
             return res
 
@@ -113,12 +115,14 @@ class MockOutgoingWhatsApp(common.BaseCase):
              patch.object(WhatsAppApi, '_get_whatsapp_document', side_effect=_get_whatsapp_document), \
              patch.object(WhatsAppApi, '_upload_demo_document', side_effect=_upload_demo_document), \
              patch.object(WhatsAppApi, '_upload_whatsapp_document', side_effect=_upload_whatsapp_document), \
-             patch.object(WhatsAppApi, '_send_whatsapp', side_effect=_send_whatsapp), \
+             patch.object(WhatsAppApi, '_send_whatsapp_to_identifier', side_effect=_send_whatsapp_to_identifier), \
              patch.object(WhatsAppApi, '_submit_template_new', side_effect=_submit_template_new), \
              patch.object(WhatsAppApi, '_get_header_data_from_handle', side_effect=_get_header_data_from_handle), \
              patch.object(WhatsAppApi, '_get_phone_number', side_effect=_get_phone_number), \
-             patch.object(WhatsappMessage, 'create', autospec=True, wraps=WhatsappMessage, side_effect=_wa_message_create) as mock_wa_msg_create:
+             patch.object(WhatsappMessage, 'create', autospec=True, wraps=WhatsappMessage, side_effect=_wa_message_create) as mock_wa_msg_create, \
+             patch.object(WhatsappMessage, 'write', autospec=True, wraps=WhatsappMessage, side_effect=wa_msg_write_origin) as mock_wa_msg_write:
             self._mock_wa_msg_create = mock_wa_msg_create
+            self._mock_wa_msg_write = mock_wa_msg_write
             yield
 
     def _init_wa_mock(self):
@@ -129,15 +133,21 @@ class MockOutgoingWhatsApp(common.BaseCase):
         self._wa_document_store = {}
         self._wa_uploaded_document_count = 0
         self._wa_msg_sent_vals = []
+        self._wa_msg_sent_recipients = []
 
     @contextmanager
     def mockWhatsappHTTPResponse(self, response_map):
-        """Mock request response when testing response handling."""
+        """Mock request responses when testing response handling.
+
+        ``response_map`` may also be a callable taking the requested URL.  This
+        lets specialised test fixtures expose domain-level mock options without
+        duplicating the HTTP patching setup.
+        """
         self._init_wa_http_mock()
 
         def _make_request(request_type, call_url, params=None, headers=None, data=None, files=None, timeout=None):
             response = Response()
-            response_vals = response_map.get(call_url)
+            response_vals = response_map(call_url) if callable(response_map) else response_map.get(call_url)
             content = response_vals['content']
 
             response.status_code = response_vals.get('status_code', 200)
@@ -255,8 +265,9 @@ class MockIncomingWhatsApp(common.HttpCase):
         )
 
     def _receive_whatsapp_message(
-        self, account, body, sender_phone_number, message_type="text",
+        self, account, body, sender_phone_number='', message_type="text",
         additional_message_values=None, content_values=None, sender_name='',
+        sender_bsuid='',
     ):
         body = body or ""
         cnt = self.env['whatsapp.message'].sudo().search_count([])
@@ -268,6 +279,8 @@ class MockIncomingWhatsApp(common.HttpCase):
             "timestamp": f"{time.time():.0f}",
             "type": message_type,
         }
+        if sender_bsuid:
+            message_vals["from_user_id"] = sender_bsuid
         match message_type:
             case "text":
                 message_vals.update(text={"body": body} | content_values)
@@ -288,6 +301,13 @@ class MockIncomingWhatsApp(common.HttpCase):
             case _:
                 raise Exception(f"Unsupported whatsapp message type {message_type}")
         message_vals.update(additional_message_values)
+        contact_val = {"profile": {"name": sender_name}}
+        if sender_phone_number:
+            # In production wa_id is the customer's phone number without the '+'
+            # (it's stored as a string by WhatsApp). Match that so wa_id-based routing works.
+            contact_val["wa_id"] = sender_phone_number.lstrip('+')
+        if sender_bsuid:
+            contact_val["user_id"] = sender_bsuid
         message_data = json.dumps({
             "object": "whatsapp_business_account",
             "entry": [{
@@ -297,10 +317,7 @@ class MockIncomingWhatsApp(common.HttpCase):
                     "value": {
                         "messaging_product": "whatsapp",
                         "metadata": {"phone_number_id": account.phone_uid, "display_phone_number": "12345678912"},
-                        "contacts": [{
-                            "profile": {"name": sender_name},
-                            "wa_id": f"{time.time() % 9 // 1:.0f}{sender_phone_number[1:]}",  # not necessarily the actual phone number
-                        }],
+                        "contacts": [contact_val],
                         "messages": [message_vals],
                     }
                 }]
@@ -431,11 +448,13 @@ class WhatsAppCase(MockOutgoingWhatsApp):
             wa_msg_count=exp_wa_msg_count,
         )
 
-    def whatsapp_answer_with_records(self, records, body=None, mock=False):
+    def whatsapp_answer_with_records(self, records, body=None, find_in_mock=True, mock=False):
+        """ Simulate an answer through webhook """
         # if mock is used -> internal wa_msgs is reset, prepare beforehand
-        wa_msgs = []
-        for record in records:
-            wa_msgs.append(self._find_wa_msg_wrecord(record))
+        if find_in_mock:
+            wa_msgs = [self._find_wa_msg_wrecord(record) for record in records]
+        else:
+            wa_msgs = [self._find_wa_msg_inrecord(record) for record in records]
         with self.mockWhatsappGateway() if mock else nullcontext(), \
                 self.patchWhatsappCronTrigger() if mock else nullcontext():
             for record, wa_msg in zip(records, wa_msgs):
@@ -470,7 +489,7 @@ class WhatsAppCase(MockOutgoingWhatsApp):
             )
 
     def whatsapp_msg_click_with_records(self, records, body=False, button_index=None):
-        """ Simulate a 'read' message event through webhook """
+        """ Simulate a 'click' message event through calling 'add_click' """
         for record in records:
             wa_msg = self._find_wa_msg_wrecord(record)
             self.assertTrue(wa_msg)
@@ -495,21 +514,25 @@ class WhatsAppCase(MockOutgoingWhatsApp):
                 whatsapp_message_id=wa_msg_id,
             )
 
-    def whatsapp_msg_read_with_records(self, records):
+    def whatsapp_msg_read_with_records(self, records, find_in_mock=True, mock=False):
         """ Simulate a 'read' message event through webhook """
-        for record in records:
-            wa_msg = self._find_wa_msg_wrecord(record)
-            self.assertTrue(wa_msg)
-            self._receive_message_update(
-                account=self.whatsapp_account,
-                display_phone_number=wa_msg.mobile_number,
-                extra_value={
-                    "statuses": [{
-                        "id": wa_msg.msg_uid,
-                        "status": "read",
-                    }],
-                },
-            )
+        if find_in_mock:
+            wa_msgs = [self._find_wa_msg_wrecord(record) for record in records]
+        else:
+            wa_msgs = [self._find_wa_msg_inrecord(record) for record in records]
+        with self.mockWhatsappGateway() if mock else nullcontext(), \
+                self.patchWhatsappCronTrigger() if mock else nullcontext():
+            for record, wa_msg in zip(records, wa_msgs):
+                self._receive_message_update(
+                    account=self.whatsapp_account,
+                    display_phone_number=wa_msg.mobile_number,
+                    extra_value={
+                        "statuses": [{
+                            "id": wa_msg.msg_uid,
+                            "status": "read",
+                        }],
+                    },
+                )
 
     # ------------------------------------------------------------
     # MESSAGE FIND AND ASSERTS
@@ -525,7 +548,7 @@ class WhatsAppCase(MockOutgoingWhatsApp):
             for wa_sent in self._wa_msg_sent
         )
         raise AssertionError(
-            f'Sent whatsapp message not found for msg_uid {msg_uid}\n{debug_info})'
+            f'Sent whatsapp message not found for msg_uid {msg_uid}\n{debug_info}'
         )
 
     def _find_wa_msg_wnumber(self, mobile_number):
@@ -538,7 +561,7 @@ class WhatsAppCase(MockOutgoingWhatsApp):
             for wa_msg in self._new_wa_msg
         )
         raise AssertionError(
-            f'whatsapp.message not found for number {mobile_number}\n{debug_info})'
+            f'whatsapp.message not found for number {mobile_number}\n{debug_info}'
         )
 
     def _find_wa_msg_wrecord(self, record):
@@ -551,8 +574,17 @@ class WhatsAppCase(MockOutgoingWhatsApp):
             for wa_msg in self._new_wa_msg
         )
         raise AssertionError(
-            f'whatsapp.message not found for record {record.display_name} ({record._name}/{record.id}\n{debug_info})'
+            f'whatsapp.message not found for record {record.display_name} ({record._name}/{record.id})\n{debug_info}'
         )
+
+    def _find_wa_msg_inrecord(self, record):
+        """ Find a WA message, using linked record through its mail.message """
+        wa_msg = record.message_ids.wa_message_ids[0]
+        if not wa_msg:
+            raise AssertionError(
+                f'whatsapp.message not found for record {record.display_name} ({record._name}/{record.id})'
+            )
+        return wa_msg
 
     def _assertWAMessage(self, wa_message, status='sent',
                          fields_values=None, attachment_values=None,

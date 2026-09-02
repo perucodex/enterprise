@@ -4,13 +4,14 @@
 #
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# NEDŽAD BEUS <nedzad.beus@implex.si>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-09 18:45+0000\n"
-"PO-Revision-Date: 2025-11-08 20:04+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-08-28 17:46+0000\n"
+"PO-Revision-Date: 2026-08-03 11:23+0000\n"
+"Last-Translator: NEDŽAD BEUS <nedzad.beus@implex.si>\n"
 "Language-Team: Slovenian <https://translate.odoo.com/projects/odoo-19/ai/sl/"
 ">\n"
 "Language: sl\n"
@@ -19,32 +20,11 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
 "n%100==4 ? 2 : 3;\n"
-"X-Generator: Weblate 5.12.2\n"
-
-#. module: ai
-#: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_read_group
-msgid ""
-"\n"
-"            **Tool Name: Read group**\n"
-"\n"
-"            Searches a particular model using a domain. The provided domain "
-"must be in valid JSON format.\n"
-"        "
-msgstr ""
-
-#. module: ai
-#: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_search
-msgid ""
-"\n"
-"            **Tool Name: search**\n"
-"\n"
-"            Searches a particular model using a domain. The provided domain "
-"must be in valid JSON format.\n"
-"        "
-msgstr ""
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_get_fields
+#, fuzzy
 msgid ""
 "\n"
 "            Lists ONLY searchable fields for a single model that can be used "
@@ -84,9 +64,46 @@ msgid ""
 "Make 3 parallel calls.\n"
 "        "
 msgstr ""
+"            Navaja SAMO iskalna polja za posamezen model, ki jih je mogoče "
+"uporabiti v filtrih domen in združevanju.\n"
+"            Bistveno za ustvarjanje veljavnih domen – če polje ni navedeno "
+"tukaj, ga NI MOGOČE uporabiti.\n"
+"\n"
+"            Vrnjena oblika:\n"
+"            ```\n"
+"            field_name|display_name|type|sortable|groupable|description\n"
+"            partner_id|Stranka|many2one(res.partner)|true|true|Stranka za to "
+"naročilo\n"
+"            date_order|Datum naročila|datetime|true|true|Datum oddaje "
+"naročila\n"
+"            order_line|Postavke naročila|one2many(sale.order.line)|false|"
+"false|Postavke v tem naročilu\n"
+"            state|Stanje|selection|true|true|Stanje naročila\n"
+"            ```\n"
+"\n"
+"            Ključne točke:\n"
+"            - ⚠️ Vrne samo ISKALNA polja – drugih ni mogoče uporabiti v "
+"domenah\n"
+"            - Pri relacijah: prikaže povezani model v oklepajih (many2one, "
+"one2many, many2many)\n"
+"            - Za prehajanje na druge modele je mogoče uporabiti samo "
+"relacijska polja\n"
+"            - Dobesednih polj, kot so char/text/float, NI MOGOČE uporabiti "
+"za prehajanje\n"
+"            - 'sortable' označuje, ali je polje mogoče uporabiti v parametru "
+"order_by\n"
+"            - 'groupable' označuje, ali je polje mogoče uporabiti za "
+"združevanje, kadar ni na voljo v iskalnem pogledu\n"
+"\n"
+"            💡 Nasvet za zmogljivost: Pri raziskovanju več modelov pokličite "
+"to orodje večkrat v ENEM sporočilu\n"
+"            Primer: Raziskujete sale.order, product.product in res.partner? "
+"Izvedite 3 vzporedne klice.\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_compute_report_measures
+#, fuzzy
 msgid ""
 "\n"
 "            Lists numeric fields (measures) available for aggregation in "
@@ -112,9 +129,33 @@ msgid ""
 "            - Call multiple times in parallel if comparing different menus\n"
 "        "
 msgstr ""
+"\n"
+"            Izpiše seznam številskih polj (mere), ki so na voljo za "
+"agregacijo v pogledih pivot/graph.\n"
+"            MORA se klicati pred uporabo meritev v open_menu_pivot() ali "
+"open_menu_graph().\n"
+"\n"
+"            Vrne CSV z ločilom cevi (|):\n"
+"            ```\n"
+"            field_name|display_name|type|aggregator|sortable\n"
+"            __count|Count|integer||true\n"
+"            amount_total|Total|monetary|sum|true\n"
+"            margin|Margin|float|sum|true\n"
+"            quantity|Quantity|float|sum|true\n"
+"            ```\n"
+"\n"
+"            Ključne točke:\n"
+"            - __count je vedno na voljo (prešteje zapise)\n"
+"            - Vrnejo se samo številska polja z agregatorji\n"
+"            - Uporabite field_name v parametru measures\n"
+"            - Za razvrščanje v pivotu: dodajte vrstni red (npr. "
+"\"amount_total desc\")\n"
+"            - Kličite večkrat vzporedno, če primerjate različne menije\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_graph
+#, fuzzy
 msgid ""
 "\n"
 "            Opens a graph/chart view using search view elements.\n"
@@ -140,9 +181,35 @@ msgid ""
 "            ⚠️ Order must be exactly 'ASC' or 'DESC'\n"
 "        "
 msgstr ""
+"            Odpre pogled grafa/grafikona z uporabo elementov iskalnega "
+"pogleda.\n"
+"            Najbolj primerno za: trende, primerjave, porazdelitve, vizualne "
+"KPI-je.\n"
+"\n"
+"            Podprte vrste grafikonov:\n"
+"            - 'bar': Primerjava vrednosti po kategorijah\n"
+"            - 'line': Prikaz trendov skozi čas\n"
+"            - 'pie': Prikaz deležev celote\n"
+"\n"
+"            Funkcionalnosti:\n"
+"            - Uporaba filtrov iz razpoložljivih možnosti menija\n"
+"            - Vizualizacija ene same meritve\n"
+"            - Združevanje po enem polju za os grafikona\n"
+"            - Iskanje znotraj določenih polj\n"
+"            - Možnosti zlaganja in kumulacije\n"
+"            - Nadzor vrstnega reda (ASC/DESC)\n"
+"\n"
+"            💡 Najprej pokličite compute_report_measures(), da poiščete "
+"veljavne meritve\n"
+"            ⚠️ Vsak iskalni niz mora uporabljati obliko 'field=text'. Seznam "
+"lahko vsebuje več iskalnih nizov ali je prazen []\n"
+"            ⚠️ Način mora biti natančno 'bar', 'line' ali 'pie'\n"
+"            ⚠️ Vrstni red mora biti natančno 'ASC' ali 'DESC'\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_kanban
+#, fuzzy
 msgid ""
 "\n"
 "            Opens a kanban (card-based) view using search view elements.\n"
@@ -161,9 +228,27 @@ msgid ""
 "contain multiple search strings or be empty []\n"
 "        "
 msgstr ""
+"            Odpre kanban (kartični) pogled z uporabo elementov iskalnega "
+"pogleda.\n"
+"            Najbolj primerno za: vizualizacijo stopenj/stanj, poglede "
+"cevovodov, upravljanje delovnih tokov.\n"
+"\n"
+"            Ključne funkcije:\n"
+"            - Prikaz zapisov kot kartic v stolpcih\n"
+"            - Uporaba filtrov iz razpoložljivih možnosti menija\n"
+"            - Združevanje po stopnjah delovnega toka ali drugih poljih\n"
+"            - Iskanje znotraj določenih polj\n"
+"            - Idealno za CRM-cevovode, table opravil in projektne delovne "
+"tokove\n"
+"\n"
+"            ⚠️ Uporabljajte samo imena filtrov in polja groupby iz podatkov "
+"menija\n"
+"            ⚠️ Vsak iskalni niz mora uporabljati obliko 'field=text'. Matrika "
+"lahko vsebuje več iskalnih nizov ali je prazna []"
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_list
+#, fuzzy
 msgid ""
 "\n"
 "            Opens a list (table) view using search view elements.\n"
@@ -184,9 +269,28 @@ msgid ""
 "contain multiple search strings or be empty []\n"
 "        "
 msgstr ""
+"            Odpre pogled seznama (tabele) z uporabo elementov iskalnega "
+"pogleda.\n"
+"            Najbolj primerno za: \"Prikaži mi\", \"Prikaži vse\", podroben "
+"pregled zapisov, razvrščanje podatkov.\n"
+"\n"
+"            Ključne funkcije:\n"
+"            - Uporaba več filtrov po imenu (iz iskalnega pogleda menija)\n"
+"            - Združevanje zapisov po razpoložljivih poljih\n"
+"            - Iskanje besedila znotraj določenih polj\n"
+"            - Prikaz zapisov v razvrstljivi obliki tabele\n"
+"            - Idealno za pregledovanje, filtriranje in izvoz podatkov\n"
+"\n"
+"            💡 Uporabite parameter search za filtriranje po katerem koli "
+"polju, po katerem je mogoče iskati, PRED upoštevanjem domen po meri\n"
+"            ⚠️ Uporabite samo imena filtrov in polja groupby iz podatkov "
+"menija\n"
+"            ⚠️ Vsak iskalni niz mora uporabljati obliko 'field=text'. Polje "
+"lahko vsebuje več iskalnih nizov ali pa je prazno []"
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_pivot
+#, fuzzy
 msgid ""
 "\n"
 "            Opens a pivot table with advanced search and filtering.\n"
@@ -219,9 +323,41 @@ msgid ""
 "needs\n"
 "        "
 msgstr ""
+"\n"
+"            Odpre vrtilno preglednico z naprednim iskanjem in filtriranjem.\n"
+"            Najboljše za: poizvedbe \"Top N\", razvrstitve, križno analizo, "
+"kazalnike uspešnosti.\n"
+"\n"
+"            Ključne funkcije:\n"
+"            - Podpira filtre iz pogleda iskanja\n"
+"            - Hkrati združuje podatke po vrsticah IN stolpcih\n"
+"            - Agregira mere (sum, avg, count)\n"
+"            - Podpira besedilno iskanje po iskalnih poljih\n"
+"            - Funkcionalnost vrtilne preglednice, podobna Excelu\n"
+"\n"
+"            💡 VEDNO najprej pokličite compute_report_measures(), da dobite "
+"veljavne mere\n"
+"            💡 Za razvrstitve: vključite razvrščanje v mere (npr. "
+"[\"amount_total desc\"])\n"
+"            💡 Uporabite parameter search za filtriranje po kateremkoli "
+"iskalnem polju, preden upoštevate custom domains\n"
+"            ⚠️ Prednostno uporabljajte menije aplikacije \"Poročanje\" za "
+"najboljšo izkušnjo z vrtilno preglednico\n"
+"            ⚠️ Vsak iskalni niz mora uporabljati zapis 'field=text'. Polje "
+"lahko vsebuje več iskalnih nizov ali je lahko prazno []\n"
+"            ⚠️ Opomba: Uporablja row_groupbys/col_groupbys (arrays) namesto "
+"selected_groupbys\n"
+"\n"
+"            Primer: Za \"najboljše prodajalce pisarniških izdelkov\":\n"
+"            - Uporabite search=[\"categ_id\", \"office\"], če je polje "
+"categ_id iskalno\n"
+"            - Uporabite custom_domain samo, če nobeno iskalno polje ne "
+"ustreza vašim potrebam\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_get_menu_details
+#, fuzzy
 msgid ""
 "\n"
 "            Retrieves detailed information (context, domain, search_view) "
@@ -249,9 +385,51 @@ msgid ""
 "            ⚠️ Always validate the returned model matches your expectations\n"
 "        "
 msgstr ""
+"\n"
+"            Pridobi podrobne informacije (context, domain, search_view) za "
+"določene menije.\n"
+"            MORA biti poklican pred uporabo katerega koli orodja open_menu_* "
+"za pridobitev podrobnosti, specifičnih za posamezne menije.\n"
+"\n"
+"            Vrne CSV z ločilnikom cevi (|):\n"
+"            ```\n"
+"            menu_id|model_name|context|domain|search_view\n"
+"            389|sale.order|{\"search_default_my_quotation\": 1}|[]|"
+"<search><fields>...</fields></search>\n"
+"            172|account.move|{\"search_default_draft\": 1}|[[\"type\", "
+"\"=\", \"out_invoice\"]]|<search>...</search>\n"
+"            ```\n"
+"\n"
+"            Ključne informacije:\n"
+"            - Context: privzeti filtri in možnosti razvrščanja, ki se "
+"uporabijo ob odprtju menija\n"
+"            - Domain: trajni filtri, ki jih uporabniki ne morejo odstraniti\n"
+"            - Search_view: polna XML struktura z razpoložljivimi filtri, "
+"možnostmi razvrščanja po skupinah in iskalnimi polji\n"
+"\n"
+"            💡 Nasvet za zmogljivost: pri primerjanju možnosti zahtevajte "
+"podrobnosti več menijev v enem klicu\n"
+"            ⚠️ Vedno preverite, ali se vrnjen model ujema z vašimi "
+"pričakovanji\n"
+"        "
+
+#. module: ai
+#: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_read_group
+#: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_search
+#, fuzzy
+msgid ""
+"\n"
+"            Searches a particular model using a domain. The provided domain "
+"must be in valid JSON format.\n"
+"        "
+msgstr ""
+"            Išče določen model z uporabo domene. Podana domena mora biti v "
+"veljavni obliki JSON.\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_adjust_search
+#, fuzzy
 msgid ""
 "\n"
 "            The user can continue on asking questions and if you think that "
@@ -294,6 +472,48 @@ msgid ""
 "the current view info.\n"
 "        "
 msgstr ""
+"            Uporabnik lahko nadaljuje s postavljanjem vprašanj in če menite, "
+"da je mogoče trenutno iskanje samo prilagoditi, ne da bi odprli drug meni, "
+"lahko uporabite to orodje.\n"
+"\n"
+"            V <session_info_context> poziva so navedene informacije o "
+"trenutnem pogledu, ki vsebujejo aktivne iskalne fasete.\n"
+"            Faseta je lahko skupina filtrov, povezanih z `OR`, skupina "
+"združevanj ali skupina iskalnih izrazov, povezanih z `OR`.\n"
+"\n"
+"            **Razumevanje parametrov**:\n"
+"            - `remove_facets` – Odstranitev fasete odstrani celotno skupino "
+"filtrov/združevanj/iskalnih izrazov. Odstranitev filtra ali iskalne fasete "
+"zmanjša omejitve.\n"
+"            - `toggle_filters` – Preklapljanje filtra bo dodalo filter v "
+"aktivno faseto filtrov ali ga iz nje odstranilo.\n"
+"            - `toggle_groupbys` – Preklapljanje združevanja bo dodalo "
+"združevanje v aktivno faseto združevanj ali ga iz nje odstranilo.\n"
+"            - `apply_searches` – Uporaba iskanja bo iskalni izraz povezala z "
+"`OR` v aktivni iskalni faseti, ki vsebuje isto polje. Če je na primer "
+"prisotna faseta polja »name=John« in navedete iskanje »name=Jane«, bo "
+"rezultat iskanje »name=John OR name=Jane«.\n"
+"            - `measures` – Z navedbo meritev boste aktivirali izbrane "
+"meritve v trenutnem pogledu, če gre za vrtilni graf ali grafični pogled.\n"
+"            - `mode` – Samo za grafični pogled: To je vrsta grafikona. "
+"Izberite med »line«, »bar« ali »pie«, da spremenite vrsto grafikona v "
+"trenutnem grafičnem pogledu.\n"
+"            - `order` – Samo za grafični pogled: Z navedbo vrstnega reda "
+"boste spremenili razvrščanje rezultatov v trenutnem grafičnem pogledu.\n"
+"            - `stacked` – Samo za grafični pogled: Z navedbo možnosti "
+"stacked boste spremenili zlaganje rezultatov v trenutnem grafičnem pogledu.\n"
+"            - `cumulated` – Samo za grafični pogled: Z navedbo možnosti "
+"cumulated boste spremenili kumulacijo rezultatov v trenutnem grafičnem "
+"pogledu.\n"
+"            - `custom_domain` – Elementi iskalnega pogleda morda ne "
+"zadostujejo za izražanje potrebne domene. V tem primeru lahko navedete "
+"domeno po meri kot niz JSON.\n"
+"            - `switch_view_type` – Preklop vrste pogleda bo trenutni pogled "
+"spremenil v navedeno vrsto. Izberite med razpoložljivimi vrstami pogledov v "
+"informacijah o trenutnem pogledu.\n"
+"        \n"
+"Location: "
+"model:ir.actions.server,ai_tool_description:ai.ir_actions_server_adjust_search"
 
 #. module: ai
 #. odoo-python
@@ -304,35 +524,47 @@ msgstr "%s (kopija)"
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/llm_providers.py:0
+#, fuzzy
 msgid "%s is no longer available. Please select a newer model."
-msgstr ""
+msgstr "%s ni več na voljo. Prosimo, izberite novejši model."
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
+#, fuzzy
 msgid ""
 "<br/>\n"
 "            It used the following tools:"
 msgstr ""
+"<br/>\n"
+"            Uporabljena so bila naslednja orodja:"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
+#, fuzzy
 msgid ""
 "<i class=\"fa fa-warning text-warning me-2\" invisible=\"not "
 "ai_tool_show_warning\" aria-hidden=\"true\" title=\"The AI will not be "
 "limited by the groups defined on tools\"/>"
 msgstr ""
+"<i class=\"fa fa-warning text-warning me-2\" invisible=\"not "
+"ai_tool_show_warning\" aria-hidden=\"true\" title=\"Umetna inteligenca ne bo "
+"omejena s skupinami, določenimi v orodjih\"/>"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
+#, fuzzy
 msgid "<span>with arguments</span>"
-msgstr ""
+msgstr "<span>z argumenti</span>"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_agent__topic_ids
+#, fuzzy
 msgid ""
 "A topic includes instructions and tools that guide Odoo AI in helping the "
 "user complete their tasks."
 msgstr ""
+"Tema vključuje navodila in orodja, ki usmerjajo Odoo AI pri pomoči "
+"uporabniku pri dokončanju njegovih opravil."
 
 #. module: ai
 #. odoo-javascript
@@ -346,56 +578,66 @@ msgstr "UI"
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_action_prompt
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_action_prompt
+#, fuzzy
 msgid "AI Action Prompt"
-msgstr ""
+msgstr "Poziv za AI dejanje"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_agent
+#, fuzzy
 msgid "AI Agent"
-msgstr ""
+msgstr "AI agent"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_agent_source
+#, fuzzy
 msgid "AI Agent Source"
-msgstr ""
+msgstr "Vir AI agenta"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_cron_process_sources_ir_actions_server
+#, fuzzy
 msgid "AI Agent Sources: Process Sources"
-msgstr ""
+msgstr "Viri AI agentov: Obdelava virov"
 
 #. module: ai
 #: model:ir.model.constraint,message:ai.constraint_discuss_channel_ai_channel_type_check
+#, fuzzy
 msgid "AI Agent can only be set for ai_chat or livechat channels."
-msgstr ""
+msgstr "AI Agent je lahko nastavljen samo za kanale ai_chat ali livechat."
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_cron_generate_embedding_ir_actions_server
+#, fuzzy
 msgid "AI Embedding: Generate Embeddings"
-msgstr ""
+msgstr "AI vdelava: Ustvari vdelave"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_prompt_button__name
+#, fuzzy
 msgid "AI Prompt"
-msgstr ""
+msgstr "AI poziv"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
+#, fuzzy
 msgid "AI Prompt Tools"
-msgstr ""
+msgstr "Orodja za AI pozive"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_schema
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_schema
+#, fuzzy
 msgid "AI Schema"
-msgstr ""
+msgstr "Shema AI"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_description
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_description
+#, fuzzy
 msgid "AI Tool Description"
-msgstr ""
+msgstr "Opis AI orodja"
 
 #. module: ai
 #. odoo-javascript
@@ -406,94 +648,111 @@ msgstr "UI Orodja"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__discuss_channel__channel_type__ai_chat
+#, fuzzy
 msgid "AI chat"
-msgstr ""
+msgstr "AI klepet"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
+#, fuzzy
 msgid "AI is listening..."
-msgstr ""
+msgstr "AI posluša..."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/discuss/typing_patch.js:0
+#, fuzzy
 msgid "AI is thinking..."
-msgstr ""
+msgstr "AI razmišlja..."
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_composer
+#, fuzzy
 msgid "AI model configurations (system prompts) for text drafting."
-msgstr ""
+msgstr "Konfiguracije modelov AI (sistemski pozivi) za sestavo besedila."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/discuss_channel.py:0
+#, fuzzy
 msgid "AI not reachable, AI Agent not found."
-msgstr ""
+msgstr "AI ni dosegljiv, AI Agent ni bil najden."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/discuss_channel.py:0
+#, fuzzy
 msgid "AI: %(name)s"
-msgstr ""
+msgstr "AI: %(name)s"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_adjust_search
+#, fuzzy
 msgid "AI: Adjust Search"
-msgstr ""
+msgstr "AI: Prilagodi iskanje"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_compute_report_measures
+#, fuzzy
 msgid "AI: Compute Report Measures"
-msgstr ""
+msgstr "AI: Izračunaj mere poročila"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_get_fields
+#, fuzzy
 msgid "AI: Get Fields"
-msgstr ""
+msgstr "AI: Pridobi polja"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_get_menu_details
+#, fuzzy
 msgid "AI: Get Menu Details"
-msgstr ""
+msgstr "AI: Pridobi podrobnosti menija"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_open_menu_graph
+#, fuzzy
 msgid "AI: Open Menu Graph"
-msgstr ""
+msgstr "AI: Odpri graf menija"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_open_menu_kanban
+#, fuzzy
 msgid "AI: Open Menu Kanban"
-msgstr ""
+msgstr "AI: Odpri meni Kanban"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_open_menu_list
+#, fuzzy
 msgid "AI: Open Menu List"
-msgstr ""
+msgstr "AI: Odpri seznam menijev"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_open_menu_pivot
+#, fuzzy
 msgid "AI: Open Menu Pivot"
-msgstr ""
+msgstr "AI: Odpri pivot menija"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_read_group
+#, fuzzy
 msgid "AI: Read group"
-msgstr ""
+msgstr "AI: Branje skupine"
 
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_actions_server_search
+#, fuzzy
 msgid "AI: Search"
-msgstr ""
+msgstr "AI: Iskanje"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
+#, fuzzy
 msgid "Access error"
-msgstr ""
+msgstr "Napaka pri dostopu"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__interface_key
@@ -504,8 +763,9 @@ msgstr "Dejanje"
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
+#, fuzzy
 msgid "Action \"%(action)s\" done."
-msgstr ""
+msgstr "Dejanje \"%(action)s\" je bilo opravljeno."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__active
@@ -516,8 +776,9 @@ msgstr "Aktivno"
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
+#, fuzzy
 msgid "Activity created for %(user)s."
-msgstr ""
+msgstr "Aktivnost je bila ustvarjena za %(user)s."
 
 #. module: ai
 #. odoo-javascript
@@ -528,14 +789,16 @@ msgstr "Dodaj"
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
+#, fuzzy
 msgid "Add Links"
-msgstr ""
+msgstr "Dodaj povezave"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
+#, fuzzy
 msgid "Add Sources"
-msgstr ""
+msgstr "Dodaj vire"
 
 #. module: ai
 #. odoo-javascript
@@ -546,73 +809,86 @@ msgstr "Dodaj povezavo"
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
+#, fuzzy
 msgid "Add notes about your upcoming meeting"
-msgstr ""
+msgstr "Dodajte opombe o vašem prihajajočem sestanku"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
+#, fuzzy
 msgid "Add sources to your AI Agent to get answers based on specific content."
 msgstr ""
+"Dodajte vire v svoj AI Agent, da dobite odgovore na podlagi določene vsebine."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
+#, fuzzy
 msgid "Adding sources..."
-msgstr ""
+msgstr "Dodajanje virov..."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__agent_id
 #: model:ir.model.fields,field_description:ai.field_ai_composer__ai_agent
 #: model:ir.model.fields,field_description:ai.field_res_partner__agent_ids
 #: model:ir.model.fields,field_description:ai.field_res_users__agent_ids
+#, fuzzy
 msgid "Agent"
-msgstr ""
+msgstr "Agent"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__name
+#, fuzzy
 msgid "Agent Name"
-msgstr ""
+msgstr "Ime agenta"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_discuss_channel__ai_agent_id
+#, fuzzy
 msgid "Ai Agent"
-msgstr ""
+msgstr "AI agent"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_has_schema
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_has_schema
+#, fuzzy
 msgid "Ai Tool Has Schema"
-msgstr ""
+msgstr "Orodje AI ima shemo"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_is_candidate
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_is_candidate
+#, fuzzy
 msgid "Ai Tool Is Candidate"
-msgstr ""
+msgstr "AI orodje je kandidat"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_show_warning
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_show_warning
+#, fuzzy
 msgid "Ai Tool Show Warning"
-msgstr ""
+msgstr "Prikaži opozorilo orodja AI"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_allow_end_message
 #: model:ir.model.fields,field_description:ai.field_ir_cron__ai_tool_allow_end_message
+#, fuzzy
 msgid "Allow End Message"
-msgstr ""
+msgstr "Dovoli končno sporočilo"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
+#, fuzzy
 msgid "An error occured"
-msgstr ""
+msgstr "Prišlo je do napake"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent__response_style__analytical
+#, fuzzy
 msgid "Analytical"
-msgstr ""
+msgstr "Analitičen"
 
 #. module: ai
 #. odoo-javascript
@@ -625,8 +901,9 @@ msgstr "Vprašajte UI"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__systray_ai_button
+#, fuzzy
 msgid "Ask AI for help"
-msgstr ""
+msgstr "Vprašaj AI za pomoč"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ir_attachment
@@ -637,13 +914,15 @@ msgstr "Priponka"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_embedding
+#, fuzzy
 msgid "Attachment Chunks Embedding"
-msgstr ""
+msgstr "Vdelava kosov priponk"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__available_prompts
+#, fuzzy
 msgid "Available User Prompts"
-msgstr ""
+msgstr "Razpoložljivi uporabniški pozivi"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__avatar_128
@@ -652,8 +931,9 @@ msgstr "Avatar"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent__response_style__balanced
+#, fuzzy
 msgid "Balanced"
-msgstr ""
+msgstr "Uravnoteženo"
 
 #. module: ai
 #: model:ir.model,name:ai.model_base
@@ -687,8 +967,9 @@ msgstr "Checksum/SHA1"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__content
+#, fuzzy
 msgid "Chunk Content"
-msgstr ""
+msgstr "Vsebina segmenta"
 
 #. module: ai
 #. odoo-javascript
@@ -699,8 +980,9 @@ msgstr "Zaključi"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_prompt_button__composer_id
+#, fuzzy
 msgid "Composer"
-msgstr ""
+msgstr "Sestavljalnik"
 
 #. module: ai
 #: model:ir.model,name:ai.model_res_config_settings
@@ -720,21 +1002,26 @@ msgstr "Prispevki"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_discuss_channel__ai_env_context
+#, fuzzy
 msgid "Context for AI agent"
-msgstr ""
+msgstr "Kontekst za AI agenta"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__html_prompt_shortcut
+#, fuzzy
 msgid "Convert a prompt in an email"
-msgstr ""
+msgstr "Pretvori navodilo v e-pošto"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/tools_schema/validators.py:0
+#, fuzzy
 msgid ""
 "Could you please provide info about '%s' as it is required to process your "
 "request"
 msgstr ""
+"Ali lahko navedete informacije o '%s' saj je to potrebno za obdelavo vaše "
+"zahteve"
 
 #. module: ai
 #: model:ir.model,website_form_label:ai.model_res_partner
@@ -743,10 +1030,13 @@ msgstr "Ustvari stranko"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_topic
+#, fuzzy
 msgid ""
 "Create a topic that leverages instructions and tools to direct Odoo AI in "
 "assisting the user with their tasks."
 msgstr ""
+"Ustvarite temo, ki uporablja navodila in orodja za usmerjanje Odoo AI, da "
+"uporabniku pomaga pri njegovih nalogah."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__create_uid
@@ -770,12 +1060,19 @@ msgstr "Ustvarjeno"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent__response_style__creative
+#, fuzzy
 msgid "Creative"
-msgstr ""
+msgstr "Kreativno"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_agent__system_prompt
+#, fuzzy
 msgid "Customize to control relevance and formatting."
+msgstr "Prilagodite za nadzor relevantnosti in oblikovanja."
+
+#. module: ai
+#: model:ir.model.fields,field_description:ai.field_ai_agent__deprecated_model_replacement_hint
+msgid "Deprecated Model Replacement Hint"
 msgstr ""
 
 #. module: ai
@@ -789,8 +1086,9 @@ msgstr "Opis"
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
+#, fuzzy
 msgid "Dictate text or record a meeting"
-msgstr ""
+msgstr "Diktirajte besedilo ali snemajte sestanek"
 
 #. module: ai
 #. odoo-javascript
@@ -817,6 +1115,7 @@ msgstr "Kanal za razprave"
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__display_name
 #: model:ir.model.fields,field_description:ai.field_ir_attachment__display_name
 #: model:ir.model.fields,field_description:ai.field_ir_http__display_name
+#: model:ir.model.fields,field_description:ai.field_ir_model_fields__display_name
 #: model:ir.model.fields,field_description:ai.field_mail_composer_mixin__display_name
 #: model:ir.model.fields,field_description:ai.field_mail_render_mixin__display_name
 #: model:ir.model.fields,field_description:ai.field_mail_template__display_name
@@ -835,8 +1134,9 @@ msgstr "Uredi"
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_prompt.xml:0
+#, fuzzy
 msgid "Edit Field Prompt"
-msgstr ""
+msgstr "Uredi poziv polja"
 
 #. module: ai
 #. odoo-javascript
@@ -856,34 +1156,40 @@ msgstr "Obravnava z elektronsko pošto"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__embedding_model
+#, fuzzy
 msgid "Embedding Model"
-msgstr ""
+msgstr "Model vgradnje"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__embedding_vector
+#, fuzzy
 msgid "Embedding Vector"
-msgstr ""
+msgstr "Vektor vdelave"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent_source.py:0
+#, fuzzy
 msgid "Embedding generation failed using the current LLM model selected."
-msgstr ""
+msgstr "Generiranje embeddinga je spodletelo z izbranim trenutnim modelom LLM."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_res_config_settings__google_key_enabled
+#, fuzzy
 msgid "Enable custom Google API key"
-msgstr ""
+msgstr "Omogoči svoj Google API ključ"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_res_config_settings__openai_key_enabled
+#, fuzzy
 msgid "Enable custom OpenAI API key"
-msgstr ""
+msgstr "Omogoči prilagojen ključ OpenAI API"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__error_details
+#, fuzzy
 msgid "Error Details"
-msgstr ""
+msgstr "Podrobnosti napake"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__failed
@@ -893,26 +1199,42 @@ msgstr "Neuspešno"
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/html_extractor.py:0
+#, fuzzy
 msgid "Failed to fetch URL: %s"
-msgstr ""
+msgstr "Pridobivanje URL ni uspelo: %s"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent_source.py:0
+#, fuzzy
 msgid "Failed to fetch the content of the source."
-msgstr ""
+msgstr "Ni bilo mogoče pridobiti vsebine vira."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
+#, fuzzy
 msgid "Failed to get embeddings for the prompt."
-msgstr ""
+msgstr "Ni bilo mogoče pridobiti embeddingov za poziv."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
+#, fuzzy
 msgid "Field Selector"
-msgstr ""
+msgstr "Izbirnik polja"
+
+#. module: ai
+#: model:ir.model.fields,field_description:ai.field_ir_model_fields__ttype
+#, fuzzy
+msgid "Field Type"
+msgstr "Vrsta polja"
+
+#. module: ai
+#: model:ir.model,name:ai.model_ir_model_fields
+#, fuzzy
+msgid "Fields"
+msgstr "Polja"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__type__binary
@@ -925,25 +1247,35 @@ msgid "File Size"
 msgstr "Velikost datoteke"
 
 #. module: ai
+#: model:ir.model.fields,help:ai.field_ai_agent__response_style
+msgid ""
+"For thinking models (e.g. gpt-5): Analytical: Medium thinking, Balanced: Low "
+"thinking, Creative: Minimal thinking"
+msgstr ""
+
+#. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/plugins/chatgpt_plugin.js:0
+#, fuzzy
 msgid "Generate or transform content with AI"
-msgstr ""
+msgstr "Ustvarite ali preoblikujte vsebino z AI"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__chatter_ai_button
+#, fuzzy
 msgid "Get help on a record"
-msgstr ""
+msgstr "Pridobi pomoč za zapis"
 
 #. module: ai
-#: model:ir.model.fields.selection,name:ai.selection__ai_embedding__embedding_model__gemini-embedding-001
+#: model:ir.model.fields.selection,name:ai.selection__ai_embedding__embedding_model__gemini-embedding-2
 msgid "Google"
 msgstr "Google"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_res_config_settings__google_key
+#, fuzzy
 msgid "Google AI API key"
-msgstr ""
+msgstr "Ključ API za Google AI"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ir_http
@@ -952,14 +1284,16 @@ msgstr "HTTP usmerjanje"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_embedding__has_embedding_generation_failed
+#, fuzzy
 msgid "Has Embedding Generation Failed"
-msgstr ""
+msgstr "Generiranje embeddinga je spodletelo"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/discuss/thread_patch.js:0
+#, fuzzy
 msgid "Hello, what can I help you with?"
-msgstr ""
+msgstr "Pozdravljeni, s čim vam lahko pomagam?"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__id
@@ -972,6 +1306,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__id
 #: model:ir.model.fields,field_description:ai.field_ir_attachment__id
 #: model:ir.model.fields,field_description:ai.field_ir_http__id
+#: model:ir.model.fields,field_description:ai.field_ir_model_fields__id
 #: model:ir.model.fields,field_description:ai.field_mail_composer_mixin__id
 #: model:ir.model.fields,field_description:ai.field_mail_render_mixin__id
 #: model:ir.model.fields,field_description:ai.field_mail_template__id
@@ -983,13 +1318,15 @@ msgstr "ID"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_agent__restrict_to_sources
+#, fuzzy
 msgid "If checked, the agent will only respond based on the provided sources."
-msgstr ""
+msgstr "Če je označeno, bo agent odgovarjal samo na podlagi navedenih virov."
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_agent_source__is_active
+#, fuzzy
 msgid "If the source is active, it will be used in the RAG context."
-msgstr ""
+msgstr "Če je vir aktiven, bo uporabljen v kontekstu RAG."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__image_128
@@ -1017,20 +1354,23 @@ msgstr "Vstavi polje"
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/core/html_editor/prompt_plugin.js:0
+#, fuzzy
 msgid "Insert an AI prompt"
-msgstr ""
+msgstr "Vstavi AI poziv"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_records_selector_plugin.js:0
+#, fuzzy
 msgid "Insert records"
-msgstr ""
+msgstr "Vstavi zapise"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_prompt_field.js:0
+#, fuzzy
 msgid "Insert records the AI can use with the '/record' command"
-msgstr ""
+msgstr "Vstavite zapise, ki jih lahko uporablja AI z ukazom '/record'"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__default_prompt
@@ -1041,51 +1381,62 @@ msgstr "Navodila"
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
+#, fuzzy
 msgid "Invalid JSON schema (malformed JSON)."
-msgstr ""
+msgstr "Neveljavna shema JSON (nepravilno oblikovan JSON)."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_records_selector_plugin.js:0
+#, fuzzy
 msgid "Invalid Record"
-msgstr ""
+msgstr "Neveljaven zapis"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_embedding.py:0
+#, fuzzy
 msgid "Invalid attachment. Failed to extract content."
-msgstr ""
+msgstr "Neveljavna priloga. Vsebine ni bilo mogoče izluščiti."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
+#, fuzzy
 msgid "Invalid search operator."
-msgstr ""
+msgstr "Neveljaven iskalni operator."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__is_ask_ai_agent
+#, fuzzy
 msgid "Is Natural Language Query Agent"
-msgstr ""
+msgstr "Je agent za poizvedbe v naravnem jeziku"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__is_system_default
+#, fuzzy
 msgid "Is the rule a system default or user created"
-msgstr ""
+msgstr "Ali je pravilo sistemsko privzeto ali uporabniško ustvarjeno"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ir_actions_server__ai_tool_schema
 #: model:ir.model.fields,help:ai.field_ir_cron__ai_tool_schema
+#, fuzzy
 msgid ""
 "JSON containing the values that can be returned by the LLM along with their "
 "properties (type, length, ...)"
 msgstr ""
+"JSON, ki vsebuje vrednosti, ki jih lahko vrne LLM skupaj z njihovimi "
+"lastnostmi (tip, dolžina, ...)"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
+#, fuzzy
 msgid ""
 "JSON schema for the parameters of the action (leave empty if no arguments "
 "are needed)"
 msgstr ""
+"JSON shema za parametre dejanja (pustite prazno, če niso potrebni argumenti)"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.res_config_settings_view_form
@@ -1094,8 +1445,9 @@ msgstr "Ključ"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__llm_model
+#, fuzzy
 msgid "LLM Model"
-msgstr ""
+msgstr "Model LLM"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__write_uid
@@ -1126,8 +1478,9 @@ msgstr "Beležka"
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/discuss/message_actions_patch.js:0
+#, fuzzy
 msgid "Log as Note"
-msgstr ""
+msgstr "Zabeleži kot beležko"
 
 #. module: ai
 #: model:ir.model,name:ai.model_mail_composer_mixin
@@ -1142,8 +1495,9 @@ msgstr "Mešanica za upodabljanje pošte"
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
+#, fuzzy
 msgid "Max Length"
-msgstr ""
+msgstr "Največja dolžina"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__mimetype
@@ -1153,8 +1507,9 @@ msgstr "MIME tip"
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/tools_schema/validators.py:0
+#, fuzzy
 msgid "Missing definition for %(name)s"
-msgstr ""
+msgstr "Manjka definicija za %(name)s"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__focused_models
@@ -1171,57 +1526,68 @@ msgstr "Naziv"
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/llm_api_service.py:0
+#, fuzzy
 msgid "No API key set for provider '%s'"
-msgstr ""
+msgstr "Za ponudnika '%s' ni nastavljenega API ključa"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
+#, fuzzy
 msgid "No configured Ask AI agent. Please contact your administrator."
-msgstr ""
+msgstr "Ni konfiguriranega agenta Ask AI. Obrnite se na administratorja."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/llm_providers.py:0
+#, fuzzy
 msgid "No embedding configuration found for the provider"
-msgstr ""
+msgstr "Za tega ponudnika ni bilo najdene konfiguracije vdelave."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
+#, fuzzy
 msgid "No embedding model found for the selected provider"
-msgstr ""
+msgstr "Za izbranega ponudnika ni bilo najdenega modela vdelave"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/llm_providers.py:0
+#, fuzzy
 msgid "No provider found for the embedding model"
-msgstr ""
+msgstr "Za model vdelave ni najdenega ponudnika"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/llm_providers.py:0
+#, fuzzy
 msgid "No provider found for the selected model"
-msgstr ""
+msgstr "Za izbrani model ni bilo najdenega ponudnika"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
+#, fuzzy
 msgid "No tool was executed."
-msgstr ""
+msgstr "Nobeno orodje ni bilo izvedeno."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
+#, fuzzy
 msgid "No valid URLs found to process."
-msgstr ""
+msgstr "Ni bilo najdenih veljavnih URL-jev za obdelavo."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
+#, fuzzy
 msgid ""
 "No valid files to upload. Only PDF, Word, PowerPoint, Excel, Text, CSV, and "
 "OpenDocument files are allowed."
 msgstr ""
+"Ni veljavnih datotek za nalaganje. Dovoljene so samo datoteke PDF, Word, "
+"PowerPoint, Excel, Text, CSV in OpenDocument."
 
 #. module: ai
 #. odoo-javascript
@@ -1239,24 +1605,28 @@ msgstr "Spletno"
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent_source.py:0
+#, fuzzy
 msgid "Only administrators can create sources from URLs."
-msgstr ""
+msgstr "Samo skrbniki lahko ustvarijo vire iz URL-jev."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
+#, fuzzy
 msgid "Oops, it looks like our AI is unreachable"
-msgstr ""
+msgstr "Ups, zdi se, da je naš AI nedosegljiv"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_embedding__embedding_model__text-embedding-3-small
+#, fuzzy
 msgid "OpenAI"
-msgstr ""
+msgstr "OpenAI"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_res_config_settings__openai_key
+#, fuzzy
 msgid "OpenAI API key"
-msgstr ""
+msgstr "OpenAI API ključ"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__partner_id
@@ -1266,14 +1636,16 @@ msgstr "Partner"
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.xml:0
+#, fuzzy
 msgid "Paste your links, one per line"
-msgstr ""
+msgstr "Prilepite svoje povezave, eno v vsako vrstico"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
+#, fuzzy
 msgid "Pretty Edit"
-msgstr ""
+msgstr "Oblikovano urejanje"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__status__processing
@@ -1291,25 +1663,31 @@ msgstr "Obdelava..."
 #: code:addons/ai/static/src/ai_prompt/ai_prompt.xml:0
 #: code:addons/ai/static/src/core/html_editor/prompt_plugin.js:0
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
+#, fuzzy
 msgid "Prompt"
-msgstr ""
+msgstr "Poziv"
 
 #. module: ai
 #: model:ir.model,name:ai.model_ai_prompt_button
+#, fuzzy
 msgid ""
 "Prompt that can be attached to AI UI rules for quick access by the user."
 msgstr ""
+"Poziv, ki ga je mogoče pripeti k pravilom uporabniškega vmesnika AI za hiter "
+"dostop uporabnika."
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ir_actions_server__ai_action_prompt
 #: model:ir.model.fields,help:ai.field_ir_cron__ai_action_prompt
+#, fuzzy
 msgid "Prompt used by \"AI\" action"
-msgstr ""
+msgstr "Poziv, ki ga uporablja dejanje \"AI\""
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.res_config_settings_view_form
+#, fuzzy
 msgid "Provide your API key to connect with your account"
-msgstr ""
+msgstr "Za povezavo z vašim računom vnesite svoj API ključ"
 
 #. module: ai
 #. odoo-javascript
@@ -1320,8 +1698,9 @@ msgstr "Zapis"
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_records_selector_plugin.js:0
+#, fuzzy
 msgid "Records Selector"
-msgstr ""
+msgstr "Izbirnik zapisov"
 
 #. module: ai
 #. odoo-javascript
@@ -1331,18 +1710,21 @@ msgstr "Obvezno"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__response_style
+#, fuzzy
 msgid "Response Style"
-msgstr ""
+msgstr "Slog odgovora"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__restrict_to_sources
+#, fuzzy
 msgid "Restrict to Sources"
-msgstr ""
+msgstr "Omeji na vire"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__html_field_text_select
+#, fuzzy
 msgid "Rewrite content"
-msgstr ""
+msgstr "Prepiši vsebino"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__name
@@ -1358,20 +1740,23 @@ msgstr "Shrani"
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_prompt.xml:0
+#, fuzzy
 msgid "Save & Generate"
-msgstr ""
+msgstr "Shrani & Ustvari"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/records_selector_popover/records_selector_popover.xml:0
+#, fuzzy
 msgid "Select a records"
-msgstr ""
+msgstr "Izberite zapise"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_chat_launcher_service.js:0
+#, fuzzy
 msgid "Send Message"
-msgstr ""
+msgstr "Pošljite sporočilo"
 
 #. module: ai
 #. odoo-javascript
@@ -1393,41 +1778,52 @@ msgstr "Strežniško dejanje"
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
+#, fuzzy
 msgid "Share by email"
-msgstr ""
+msgstr "Deli po e-pošti"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
+#, fuzzy
 msgid "Share transcript summary"
-msgstr ""
+msgstr "Deli povzetek transkripta"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
+#, fuzzy
 msgid "Short explanation of what this does"
-msgstr ""
+msgstr "Kratek opis tega, kaj to počne"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
+#, fuzzy
 msgid ""
 "Some URLs are invalid and were skipped. URLs must start with http://, "
 "https://, or ftp://"
 msgstr ""
+"Nekateri URL-ji so neveljavni in so bili preskočeni. URL-ji se morajo začeti "
+"z http://, https://, ali ftp://"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
+#, fuzzy
 msgid ""
 "Some files have invalid formats and were skipped: %s. Only PDF, Word, "
 "PowerPoint, Excel, Text, CSV, and OpenDocument files are allowed."
 msgstr ""
+"Nekatere datoteke imajo neveljavne formate in so bile preskočene: %s. "
+"Dovoljene so samo datoteke PDF, Word, PowerPoint, Excel, Text, CSV in "
+"OpenDocument."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/views/fields/source_size_field.js:0
+#, fuzzy
 msgid "SourceSizeIntegerField"
-msgstr ""
+msgstr "SourceSizeIntegerField"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__sources_ids
@@ -1436,20 +1832,23 @@ msgstr "Izvori"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__sources_fully_processed
+#, fuzzy
 msgid "Sources Fully Processed"
-msgstr ""
+msgstr "Viri popolnoma obdelani"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
+#, fuzzy
 msgid "Start Recording"
-msgstr ""
+msgstr "Začni snemanje"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
+#, fuzzy
 msgid "Start recording to get a real-time transcript of the conversation"
-msgstr ""
+msgstr "Začnite snemanje, da dobite prepis pogovora v realnem času"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__status
@@ -1471,119 +1870,145 @@ msgstr "Povzetek"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__voice_transcription_component
+#, fuzzy
 msgid "Summary Buttons for Voice Transcription Component"
-msgstr ""
+msgstr "Gumbi za povzetek za komponento glasovne transkripcije"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__is_system_agent
+#, fuzzy
 msgid "System Agent"
-msgstr ""
+msgstr "Sistemski agent"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__system_prompt
+#, fuzzy
 msgid "System Prompt"
-msgstr ""
+msgstr "Sistemski poziv"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
+#, fuzzy
 msgid "System agents cannot be deleted."
-msgstr ""
+msgstr "Sistemski agenti ne morejo biti izbrisani."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_composer.py:0
+#, fuzzy
 msgid "System default prompts cannot be removed."
-msgstr ""
+msgstr "Sistemski privzeti pozivi ne morejo biti odstranjeni."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/plugins/chatgpt_plugin.js:0
+#, fuzzy
 msgid "Text Selection"
-msgstr ""
+msgstr "Izbira besedila"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
+#, fuzzy
 msgid "The action '%s' cannot be used as an AI tool."
-msgstr ""
+msgstr "Dejanje '%s' ni mogoče uporabiti kot AI orodje."
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_composer__name
+#, fuzzy
 msgid "The identifier for the interface component to agent rule"
-msgstr ""
+msgstr "Identifikator komponente vmesnika za pravilo agenta"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.js:0
+#, fuzzy
 msgid "The name should be unique"
-msgstr ""
+msgstr "Ime mora biti edinstveno"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
+#, fuzzy
 msgid "The partner linked to an AI agent can't be changed"
-msgstr ""
+msgstr "Partnerja, povezanega z agentom UI, ni mogoče spremeniti"
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ai_prompt_button__name
+#, fuzzy
 msgid "The prompt sent to the AI when clicked on"
-msgstr ""
+msgstr "Poziv, ki se pošlje AI-ju ob kliku"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/html_extractor.py:0
+#, fuzzy
 msgid "The site's rules (robots.txt) prevent reading this page."
-msgstr ""
+msgstr "Pravila spletnega mesta (robots.txt) preprečujejo branje te strani."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/tools_schema/validators.py:0
+#, fuzzy
 msgid ""
 "The type of the parameter '%(name)s' is incorrect. It should be '%"
 "(expected_param_type)s'."
 msgstr ""
+"Vrsta parametra '%(name)s' je napačna. Mora biti '%(expected_param_type)s'."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/tools_schema/validators.py:0
+#, fuzzy
 msgid ""
 "The value '%(value)s' of the parameter '%(name)s' doesn't match the expected "
 "pattern '%(expected_pattern)s'."
 msgstr ""
+"Vrednost '%(value)s' parametra '%(name)s' se ne ujema s pričakovanim vzorcem "
+"'%(expected_pattern)s'."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
+#, fuzzy
 msgid "This action cannot be executed by an AI."
-msgstr ""
+msgstr "To dejanje ni mogoče izvesti z AI."
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
+#, fuzzy
 msgid "This action is interactive and cannot be executed by the agent."
-msgstr ""
+msgstr "To dejanje je interaktivno in ga agent ne more izvesti."
 
 #. module: ai
 #: model:ir.model.fields,help:ai.field_ir_actions_server__ai_tool_allow_end_message
 #: model:ir.model.fields,help:ai.field_ir_cron__ai_tool_allow_end_message
+#, fuzzy
 msgid ""
 "This tool is automatically provided with `__end_message` param which when "
 "provided, the LLM processing loop is terminated."
 msgstr ""
+"To orodje je samodejno opremljeno s parametrom `__end_message`; če je ta "
+"podan, se zanka obdelave LLM zaključi."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
+#, fuzzy
 msgid "Those parameters will be passed as global variables of the actions."
-msgstr ""
+msgstr "Ti parametri bodo podani kot globalne spremenljivke dejanj."
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.mail_template_view_form
+#, fuzzy
 msgid ""
 "Tip: Write /field to insert values or /prompt to integrate AI-generated "
 "dynamic content!"
 msgstr ""
+"Namig: Vpišite /field za vstavljanje vrednosti ali /prompt za vključitev "
+"dinamične vsebine, ki jo generira AI!"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_topic__name
@@ -1592,8 +2017,11 @@ msgstr "Naslov"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ir_actions_server_view_form
+#, fuzzy
 msgid "To return a result to the AI agent, do <code>ai['result'] = ...</code>"
 msgstr ""
+"Če želite vrniti rezultat AI agentu, uporabite <code>ai['result'] = ...</"
+"code>."
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__ai_tool_ids
@@ -1603,21 +2031,25 @@ msgstr "Orodja"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__topic_ids
+#, fuzzy
 msgid "Topics"
-msgstr ""
+msgstr "Teme"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
+#, fuzzy
 msgid "Transcript"
-msgstr ""
+msgstr "Prepis"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_natural_language_service.js:0
+#, fuzzy
 msgid "Tried to switch to %s but the app is no longer in an action window."
 msgstr ""
+"Poskusili ste preklopiti na %s, vendar aplikacija ni več v oknu dejanja."
 
 #. module: ai
 #. odoo-javascript
@@ -1667,71 +2099,83 @@ msgstr "URL"
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/html_extractor.py:0
+#, fuzzy
 msgid "URL %(url)s returned non-HTML content: %(content_type)s"
-msgstr ""
+msgstr "URL %(url)s je vrnil vsebino, ki ni HTML: %(content_type)s"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/html_extractor.py:0
+#, fuzzy
 msgid "URL %s returned empty content"
-msgstr ""
+msgstr "URL %s je vrnil prazno vsebino"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
+#, fuzzy
 msgid "Unable to start the recording."
-msgstr ""
+msgstr "Snemanja ni mogoče začeti."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_natural_language_service.js:0
+#, fuzzy
 msgid "Unable to switch view"
-msgstr ""
+msgstr "Ni mogoče preklopiti pogleda"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/llm_api_service.py:0
+#, fuzzy
 msgid "Unsupported provider '%s'"
-msgstr ""
+msgstr "Nepodprt ponudnik '%s'"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/components/agent_add_source_dialog/agent_add_source_dialog.js:0
+#, fuzzy
 msgid "Upload a File"
-msgstr ""
+msgstr "Naloži datoteko"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__use_in_ai
 #: model:ir.model.fields,field_description:ai.field_ir_cron__use_in_ai
+#, fuzzy
 msgid "Use in AI"
-msgstr ""
+msgstr "Uporabi v AI"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/discuss/message_actions_patch.js:0
+#, fuzzy
 msgid "Use this"
-msgstr ""
+msgstr "Uporabi to"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.res_config_settings_view_form
+#, fuzzy
 msgid "Use your own ChatGPT account"
-msgstr ""
+msgstr "Uporabite svoj račun ChatGPT"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.res_config_settings_view_form
+#, fuzzy
 msgid "Use your own Google Gemini account"
-msgstr ""
+msgstr "Uporabite svoj račun Google Gemini"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent_source__user_has_access
+#, fuzzy
 msgid "User Has Access"
-msgstr ""
+msgstr "Uporabnik ima dostop"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
+#, fuzzy
 msgid "User error"
-msgstr ""
+msgstr "Uporabniška napaka"
 
 #. module: ai
 #. odoo-javascript
@@ -1740,73 +2184,131 @@ msgid "User is online"
 msgstr "Uporabnik je na spletu"
 
 #. module: ai
+#. odoo-python
+#: code:addons/ai/models/ai_agent.py:0
+msgid "Using %(llm_model_label)s based on your agent setup."
+msgstr ""
+
+#. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
+#, fuzzy
 msgid "Voice Recording"
-msgstr ""
+msgstr "Glasovno snemanje"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/plugins/voice_transcription_plugin.js:0
+#, fuzzy
 msgid "Voice Transcript"
-msgstr ""
+msgstr "Glasovni prepis"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__mail_composer
+#, fuzzy
 msgid "Write an email"
-msgstr ""
+msgstr "Napiši e-pošto"
 
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__html_field_record
+#, fuzzy
 msgid "Write in an HTML field"
-msgstr ""
+msgstr "Piši v polje HTML"
 
 #. module: ai
 #. odoo-python
 #: code:addons/ai/utils/tools_schema/validators.py:0
+#, fuzzy
 msgid "Wrong value %(value)s, should be in: %(enum)s"
-msgstr ""
+msgstr "Napačna vrednost %(value)s, mora biti med: %(enum)s"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
+#, fuzzy
 msgid ""
 "You must allow the access to your microphone to start the recording. Try "
 "refreshing the page and start again."
 msgstr ""
+"Za začetek snemanja morate omogočiti dostop do mikrofona. Poskusite osvežiti "
+"stran in začnite znova."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
+#, fuzzy
 msgid "eg: New name to write"
-msgstr ""
+msgstr "npr.: Novo ime za zapis"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
+#, fuzzy
 msgid "eg: ^(\\\\([0-9]{3}\\\\))?[0-9]{3}-[0-9]{4}$"
-msgstr ""
+msgstr "npr.: ^(\\([0-9]{3}\\))?[0-9]{3}-[0-9]{4}$"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
+#, fuzzy
 msgid "eg: name"
-msgstr ""
+msgstr "npr: name"
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
+#, fuzzy
 msgid "eg: red, blue, green"
-msgstr ""
+msgstr "npr.: rdeča, modra, zelena"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.ai_log_action
+#, fuzzy
 msgid "executed."
-msgstr ""
+msgstr "izvedeno."
 
 #. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
+#, fuzzy
 msgid "fa-hashtag"
-msgstr ""
+msgstr "fa-hashtag"
+
+#. module: ai
+#: model:ir.model.fields.selection,name:ai.selection__ir_model_fields__ttype__vector
+#, fuzzy
+msgid "vector"
+msgstr "vektor"
+
+#, fuzzy
+#~ msgid ""
+#~ "\n"
+#~ "            **Tool Name: Read group**\n"
+#~ "\n"
+#~ "            Searches a particular model using a domain. The provided "
+#~ "domain must be in valid JSON format.\n"
+#~ "        "
+#~ msgstr ""
+#~ "\n"
+#~ "            **Naziv orodja: Branje skupine**\n"
+#~ "\n"
+#~ "            Išče določen model z uporabo domene. Podana domena mora biti "
+#~ "v veljavnem formatu JSON.\n"
+#~ "        "
+
+#, fuzzy
+#~ msgid ""
+#~ "\n"
+#~ "            **Tool Name: search**\n"
+#~ "\n"
+#~ "            Searches a particular model using a domain. The provided "
+#~ "domain must be in valid JSON format.\n"
+#~ "        "
+#~ msgstr ""
+#~ "\n"
+#~ "            **Ime orodja: search**\n"
+#~ "\n"
+#~ "            Išče določen model z uporabo domene. Podana domena mora biti "
+#~ "v veljavni obliki JSON.\n"
+#~ "        "

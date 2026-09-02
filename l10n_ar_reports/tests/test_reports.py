@@ -1,6 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from freezegun import freeze_time
+
 from odoo import fields
-from odoo.addons.l10n_ar.tests.common import TestAr
+from odoo.addons.l10n_ar.tests.common import TestArCommon
 from odoo.addons.account_reports.tests.common import TestAccountReportsCommon
 from odoo.tests import Form, tagged
 from odoo.tools import file_open
@@ -11,7 +13,7 @@ _logger = logging.getLogger(__name__)
 
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
-class TestReports(TestAr, TestAccountReportsCommon):
+class TestArReports(TestArCommon, TestAccountReportsCommon):
 
     def _create_test_credit_notes_like_demo(self):
         """ Create in the unit tests the same credit notes created in demo data """
@@ -304,7 +306,7 @@ class TestReports(TestAr, TestAccountReportsCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.journal = cls._create_journal(cls, 'preprinted', data={'l10n_ar_afip_pos_number': 37928})
+        cls.journal = cls._create_journal('preprinted', data={'l10n_ar_afip_pos_number': 37928})
         cls.maxDiff = None
         cls.report = cls.env.ref('l10n_ar_reports.l10n_ar_vat_book_report')
 
@@ -319,7 +321,7 @@ class TestReports(TestAr, TestAccountReportsCommon):
         })
 
         # ==== Create VAT BOOK demo data ====
-        cls._create_test_invoices_like_demo(cls, use_current_date=False)
+        cls._create_test_invoices_like_demo(use_current_date=False)
         for inv in cls.demo_invoices.values():
             inv.action_post()
 
@@ -374,6 +376,67 @@ class TestReports(TestAr, TestAccountReportsCommon):
         self.options['ar_vat_book_tax_types_available']['sale']['selected'] = False
         self.options['txt_type'] = 'goods_import'
         self._test_txt_file('IVA_Importaciones_de_Bienes.txt', 'purchase')
+
+    @freeze_time("2021-04-19")
+    def test_07_sale_vat_book_vouchers_with_branch(self):
+        parent_company = self.env.company
+        branch_A, branch_B = self.env['res.company'].create([
+            {
+                'name': "Branch_A",
+                'parent_id': self.company.id,
+            }, {
+                'name': "Branch_B",
+                'parent_id': self.company.id,
+                'vat': '/'
+            }
+        ])
+
+        # Load CoA
+        self.cr.precommit.run()
+
+        invoice_B = self.env['account.move'].with_company(company=branch_B).create([
+            {
+                "ref": "test_invoice_007: Invoice to gritti support service, vat 21",
+                "company_id": branch_B.id,
+                "partner_id": self.res_partner_adhoc.id,
+                "move_type": "out_invoice",
+                "invoice_date": "2021-03-22",
+                "invoice_line_ids": [
+                    Command.create({'product_id': self.service_iva_21.id})
+                ]
+            },
+        ])
+
+        invoice_A = self.env['account.move'].with_company(company=branch_A).create([
+            {
+                "ref": "test_invoice_007: Invoice to gritti support service, vat 21",
+                "company_id": branch_A.id,
+                "partner_id": self.res_partner_gritti_mono.id,
+                "move_type": "out_invoice",
+                "invoice_date": "2021-03-22",
+                "invoice_line_ids": [
+                    Command.create({'product_id': self.service_iva_21.id})
+                ]
+            }
+        ])
+        invoice_B.action_post()
+        invoice_A.action_post()
+
+        options = self._generate_options(
+            self.report.with_context({"allowed_company_ids": (parent_company | branch_A | branch_B).ids})
+                .with_company(company=branch_A),
+            fields.Date.from_string('2021-03-22'),
+            fields.Date.from_string('2021-05-31'))
+        options['ar_vat_book_tax_types_available']['sale']['selected'] = True
+        options['ar_vat_book_tax_types_available']['purchase']['selected'] = False
+        options['txt_type'] = 'sale'
+
+        out_txt = self.env['l10n_ar.tax.report.handler']\
+            .with_context({"allowed_company_ids": (parent_company | branch_A | branch_B).ids})\
+            .with_company(company=branch_A)\
+            ._vat_book_get_txt_files(options, 'sale')[0].decode('ISO-8859-1')
+        res_file = file_open('l10n_ar_reports/tests/Ventas_branch.txt', 'rb').read().decode('ISO-8859-1')
+        self.assertEqual(out_txt, res_file)
 
     def test_vat_book_report(self):
         options = self._generate_options(self.report, date_from=fields.Date.from_string('2022-03-01'), date_to=fields.Date.from_string('2022-03-31'))
@@ -449,3 +512,33 @@ class TestReports(TestAr, TestAccountReportsCommon):
             ],
             options,
         )
+
+    def test_foreign_provider_vat_book_export(self):
+        """ Test that Proveedor del Exterior (code 8) partners with ForeignID
+            use the country-level VAT, just like Cliente del Exterior (code 9).
+        """
+        foreign_partner = self.env['res.partner'].create({
+            'name': 'foreign partner',
+            'is_company': True,
+            'country_id': self.env.ref('base.ie').id,
+            'l10n_latam_identification_type_id': self.env.ref('l10n_latam_base.it_fid').id,
+            'vat': 'IE1234567T',
+            'l10n_ar_afip_responsibility_type_id': self.env.ref('l10n_ar.res_EXT_Prov').id,
+        })
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': foreign_partner.id,
+            'invoice_date': '2021-03-15',
+            'invoice_line_ids': [
+                Command.create({
+                    'product_id': self.product_iva_exento.id,
+                    'price_unit': 100.0,
+                    'quantity': 1,
+                }),
+            ],
+        })
+        invoice.action_post()
+        self.options['ar_vat_book_tax_type_selected'] = 'sale'
+        self.options['txt_type'] = 'sale'
+        out = self.env['l10n_ar.tax.report.handler']._vat_book_get_txt_files(self.options, 'sale')
+        self.assertTrue(out)

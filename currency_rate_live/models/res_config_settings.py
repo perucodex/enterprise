@@ -44,6 +44,7 @@ MAP_CURRENCIES = {
     'Chinese Yuan - Offshore': 'CNH',
     'Chinese Yuan': 'CNY',
     'Colombian Peso': 'COP',
+    'Cuban Peso': 'CUP',
     'Czech Koruna': 'CZK',
     'Danish Krone': 'DKK',
     'Algerian Dinar': 'DZD',
@@ -105,6 +106,7 @@ MAP_CURRENCIES = {
     'Uruguayan Peso': 'UYU',
     'Uzbekistani som': 'UZS',
     'Vietnam Dong': 'VND',
+    'Caribbean Guilder': 'XCG',
     'Yemen Rial': 'YER',
     'South Africa Rand': 'ZAR',
     'Zambian Kwacha': 'ZMW',
@@ -144,18 +146,22 @@ CURRENCY_PROVIDER_SELECTION = [
     ([], 'ecb', 'European Central Bank'),
     (['IN', 'SA'], 'xe_com', 'xe.com'),
     (['AE'], 'cbuae', '[AE] Central Bank of the UAE'),
+    (['AZ'], 'cbar', '[AZ] Central Bank of Azerbaijan'),
     (['BG'], 'bnb', '[BG] Bulgaria National Bank'),
     (['BR'], 'bbr', '[BR] Central Bank of Brazil'),
     (['CA'], 'boc', '[CA] Bank of Canada'),
     (['CH'], 'fta', '[CH] Federal Tax Administration of Switzerland'),
     (['CL'], 'mindicador', '[CL] Central Bank of Chile via mindicador.cl'),
     (['CO'], 'banrepco', '[CO] Bank of the Republic'),
+    (['CU'], 'cu', '[CU] Central Bank of Cuba'),
     (['CZ'], 'cnb', '[CZ] Czech National Bank'),
     (['EG'], 'cbegy', '[EG] Central Bank of Egypt'),
+    (['GE'], 'nbg', '[GE] National Bank of Georgia'),
     (['GT'], 'banguat', '[GT] Bank of Guatemala'),
     (['HU'], 'mnb', '[HU] Magyar Nemzeti Bank'),
     (['ID'], 'bi', '[ID] Bank Indonesia'),
     (['IT'], 'boi', '[IT] Bank of Italy'),
+    (['KZ'], 'nbkz', '[KZ] National Bank of Kazakhstan'),
     (['MX'], 'banxico', '[MX] Bank of Mexico'),
     (['MY'], 'bnm', '[MY] Bank Negara Malaysia'),
     (['PE'], 'bcrp', '[PE] SUNAT (replaces Bank of Peru)'),
@@ -167,6 +173,7 @@ CURRENCY_PROVIDER_SELECTION = [
     (['TR'], 'tcmb', '[TR] Central Bank of the Republic of Türkiye'),
     (['UK'], 'hmrc', '[UK] HM Revenue & Customs'),
     (['UY'], 'bcu', '[UY] Uruguayan Central Bank'),
+    (['UZ'], 'cbu', '[UZ] Central Bank of Uzbekistan'),
 ]
 
 
@@ -419,6 +426,34 @@ class ResCompany(models.Model):
             rslt['AED'] = (1.0, date_rate)
         return rslt
 
+    def _parse_cbar_data(self, available_currencies):
+        """ This method is used to update the currencies by using the Central Bank of Azerbaijan service provider.
+            Exchange rates are expressed as 'quantity' units of the available currencies converted into AZN.
+        """
+
+        today_date = fields.Date.context_today(self.with_context(tz='Asia/Baku'))
+        date_str = today_date.strftime('%d.%m.%Y')
+        request_url = f"https://cbar.az/currencies/{date_str}.xml"
+        response = requests.get(request_url, timeout=30)
+        response.raise_for_status()
+        xml_tree = etree.fromstring(response.content)
+
+        rslt = {}
+        date_rate = datetime.datetime.strptime(xml_tree.get('Date'), '%d.%m.%Y').date()
+        available_currency_names = set(available_currencies.mapped('name'))
+        for currency in xml_tree.xpath(".//ValType[@Type='Xarici valyutalar']/Valute"):
+            code = currency.get('Code')
+            quantity = float(currency.findtext('Nominal'))
+            rate = float(currency.findtext('Value'))
+
+            if code in available_currency_names:
+                # Normalize the rate using the Quantity / Rate formula
+                rslt[code] = (quantity / rate, date_rate)
+
+        if 'AZN' in available_currency_names:
+            rslt['AZN'] = (1.0, date_rate)
+        return rslt
+
     def _parse_cbegy_data(self, available_currencies):
         ''' This method is used to update the currencies by using the Central Bank of Egypt service provider.
             Exchange rates are expressed as 1 unit of the foreign currency converted into EGP
@@ -445,6 +480,37 @@ class ResCompany(models.Model):
 
         if 'EGP' in available_currency_names:
             rslt['EGP'] = (1.0, date_rate)
+        return rslt
+
+    def _parse_nbg_data(self, available_currencies):
+        """This method is used to update the currencies by using the National Bank of Georgia service provider.
+            Exchange rates are expressed as 'quantity' units of the available currencies converted into GEL.
+        """
+
+        rslt = {}
+        request_url = "https://nbg.gov.ge/gw/api/ct/monetarypolicy/currencies/en/json/"
+        response = requests.get(request_url, headers={"Accept": "application/json"}, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        response_date = data[0].get('date')
+        date_rate = datetime.datetime.strptime(response_date, "%Y-%m-%dT%H:%M:%S.%fZ").date()
+        currencies = data[0].get('currencies', [])
+        available_currency_names = set(available_currencies.mapped('name'))
+        for currency in currencies:
+            code = currency.get('code')
+            rate = currency.get('rate')
+            quantity = currency.get('quantity')
+
+            if code in available_currency_names:
+                # NBG rates are expressed for a specific quantity of the available
+                # currency (e.g., 1 USD, 10 DKK, 100 JPY).
+                # We normalize this to find the value of 1 GEL in the available currency.
+                # Formula: quantity / rate
+                rslt[code] = (quantity / float(rate), date_rate)
+
+        if 'GEL' in available_currency_names:
+            rslt['GEL'] = (1.0, date_rate)
         return rslt
 
     def _parse_banguat_data(self, available_currencies):
@@ -729,7 +795,7 @@ class ResCompany(models.Model):
         ''' This method is used to update the currencies by using
         BNR service provider. Rates are given against RON
         '''
-        request_url = "https://www.bnr.ro/nbrfxrates.xml"
+        request_url = "https://curs.bnr.ro/nbrfxrates.xml"
         response = requests.get(request_url, timeout=30)
         response.raise_for_status()
 
@@ -846,6 +912,7 @@ class ResCompany(models.Model):
             "UF": "uf",
             "UTM": "utm",
         }
+        timeout = int(icp.get_param('mindicador_api_timeout', 30))
         available_currency_names = available_currencies.mapped('name')
         logger.debug('mindicador: available currency names: %s', available_currency_names)
         today_date = fields.Date.context_today(self.with_context(tz='America/Santiago'))
@@ -858,7 +925,7 @@ class ResCompany(models.Model):
                 logger.debug('Index %s not in available currency name', index)
                 continue
             url = server_url + '/%s/%s' % (currency, request_date)
-            res = requests.get(url, timeout=30)
+            res = requests.get(url, timeout=timeout)
             res.raise_for_status()
             if 'html' in res.text:
                 raise ValueError('Should be json')
@@ -893,6 +960,7 @@ class ResCompany(models.Model):
         - USD, AUD, DKK, EUR, GBP, CHF, SEK, CAD, KWD, NOK, SAR,
         - JPY, BGN, RON, RUB, IRR, CNY, PKR, QAR, KRW, AZN, AED
         """
+        # For TCMB, the selling rate is used instead of the average of buying and selling rates.
         server_url = 'https://www.tcmb.gov.tr/kurlar/today.xml'
         available_currency_names = set(available_currencies.mapped('name'))
 
@@ -907,7 +975,7 @@ class ResCompany(models.Model):
         root = etree.fromstring(res.text.encode())
         rate_date = fields.Date.to_string(datetime.datetime.strptime(root.attrib['Date'], '%m/%d/%Y'))
         rslt = {
-            currency.attrib['Kod']: (2 / (float(currency.find('ForexBuying').text) + float(currency.find('ForexSelling').text)), rate_date)
+            currency.attrib['Kod']: (1 / float(currency.find('ForexSelling').text), rate_date)
             for currency in root
             if currency.attrib['Kod'] in available_currency_names
         }
@@ -1065,7 +1133,7 @@ class ResCompany(models.Model):
 
     def _parse_bnb_data(self, available_currencies):
         """ This method is used to update the currencies by using BNB (Bulgaria National Bank) service API.
-            Rates are given against BGN in an XML file.
+            Rates are given against EUR in an XML file (since Bulgaria joined Eurozone in 2026).
             Source: https://www.bnb.bg/AboutUs/AUFAQ/Contr_Exchange_Rates_FAQ?toLang=_EN
 
             If a currency has no rate, it will be skipped.
@@ -1086,14 +1154,14 @@ class ResCompany(models.Model):
         # Skip the first ROW node that does not contain currency information
         for row in islice(rowset.iterfind('.//ROW'), 1, None):
             code = row.findtext('CODE')
-            rate = row.findtext('REVERSERATE')
+            rate = row.findtext('RATE')
             curr_date = datetime.datetime.strptime(row.findtext('CURR_DATE'), '%d.%m.%Y').date()
 
             if code in available_currency_names and rate:
                 result[code] = (float(rate), curr_date)
 
-        if result and 'BGN' in available_currency_names:
-            result['BGN'] = (1.0, curr_date)
+        if result and 'EUR' in available_currency_names:
+            result['EUR'] = (1.0, curr_date)
         return result
 
     def _parse_bot_data(self, available_currencies):
@@ -1289,6 +1357,106 @@ class ResCompany(models.Model):
 
         if 'HUF' not in result:
             result['HUF'] = (1.0, date)
+        return result
+
+    def _parse_nbkz_data(self, available_currencies):
+        """
+        This method is used to update the currencies by using National Bank of Kazakhstan.
+            Exchange rates are expressed as 1 unit of the foreign currency converted into KZT
+        """
+        request_url = 'https://nationalbank.kz/rss/rates_all.xml'
+        response = requests.get(request_url, timeout=30)
+        response.raise_for_status()
+
+        rates_dict = {}
+        available_currency_names = available_currencies.mapped('name')
+        xml_tree = etree.fromstring(response.content)
+        data = xml2json_from_elementtree(xml_tree.find('channel'))
+        for currency_item in filter(lambda child: child['tag'] == 'item', data['children']):
+            for attr in currency_item['children']:
+                val = attr['children'] and attr['children'][0]
+                match attr['tag']:
+                    case 'title':
+                        code = val
+                    case 'pubDate':
+                        date_rate = val
+                    case 'description':
+                        rate = val
+                    case 'quant':
+                        quant = val
+                    case _:
+                        pass
+
+            if code in available_currency_names:
+                rates_dict[code] = (float(quant) / float(rate), datetime.datetime.strptime(date_rate, "%d.%m.%Y").date()) if float(rate) else 0
+
+        if 'KZT' in available_currency_names:
+            rates_dict['KZT'] = (1.0, fields.Date.today())
+
+        return rates_dict
+
+    @api.model
+    def _parse_cu_data(self, available_currencies):
+        """ This method is used to update the currencies by using CU service provider.
+        They can be manually verified at: https://www.bc.gob.cu/tasas-de-cambio
+        """
+        url = "https://api.bc.gob.cu/v1/tasas-de-cambio/activas"
+        result = {}
+
+        response = requests.get(url, headers={"Accept": "application/json"}, timeout=30)
+        response.raise_for_status()
+
+        curr_iso_codes = available_currencies.mapped("name")
+        curr_list = response.json()["tasas"]
+        last_date = datetime.datetime.now()
+
+        rate_type = self.env['ir.config_parameter'].sudo().get_param('currency_rate_live.l10n_cu_currency_rate_type', 'tasaOficial')
+
+        for curr in curr_list:
+            code = curr["codigoMoneda"]
+            status = curr["estado"]
+
+            # Skip currencies not requested or not active
+            if code not in curr_iso_codes or status != "ACTIVA":
+                continue
+
+            last_date = fields.Date.to_date(curr["fechaDia"])
+            result[curr["codigoMoneda"]] = (float(1 / curr[rate_type]), last_date)
+
+        result['CUP'] = (1.0, last_date)
+        return result
+
+    @api.model
+    def _parse_cbu_data(self, available_currencies):
+        """
+        This method is used to update the currencies by using CBU (Central Bank of Uzbekistan) service API.
+        The bank's latest rates are accessible using the API: cbu.uz/en/arkhiv-kursov-valyut/json
+
+        Source: https://cbu.uz/en/arkhiv-kursov-valyut/json
+
+        If a currency has no rate, it will be skipped.
+        """
+        result = {}
+        available_currency_names = set(available_currencies.mapped('name'))
+        request_url = "https://cbu.uz/en/arkhiv-kursov-valyut/json"
+        try:
+            # 5 second connection timeout and 15 seconds read timeout
+            response = requests.get(request_url, timeout=(5, 15))
+            response.raise_for_status()
+            new_rates = response.json()
+        except (requests.RequestException, ValueError):
+            _logger.exception("Failed to fetch UZ currency rates from %s", request_url)
+            return result
+
+        for rate in new_rates:
+            code = rate.get('Ccy')
+            if code in available_currency_names:
+                rate_value, date = rate.get('Rate'), rate.get('Date')
+                if rate_value:
+                    result[code] = (1.0 / float(rate_value), datetime.datetime.strptime(date, '%d.%m.%Y').date())
+
+        if result and 'UZS' in available_currency_names:
+            result['UZS'] = (1.0, fields.Date.today())
         return result
 
     @api.model

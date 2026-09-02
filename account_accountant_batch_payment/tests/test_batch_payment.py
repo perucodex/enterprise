@@ -2,10 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import time
+from unittest.mock import patch
 
 from odoo import Command
 from odoo.addons.account_accountant.tests.test_account_bank_statement import TestAccountBankStatement
-from odoo.tests import tagged
+from odoo.tests import Form, tagged
 from odoo.exceptions import ValidationError
 
 
@@ -15,12 +16,20 @@ class TestBatchPayment(TestAccountBankStatement):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.env.user.group_ids |= cls.env.ref('account.group_validate_bank_account')
 
         # Create a bank journal
         cls.journal = cls.company_data['default_journal_bank']
         cls.batch_deposit_method = cls.env.ref('account_batch_payment.account_payment_method_batch_deposit')
         cls.batch_deposit = cls.journal.inbound_payment_method_line_ids.filtered(lambda l: l.code == 'batch_payment')
         cls.other_currency = cls.setup_other_currency('EUR')
+
+        cls.partner_bank_account = cls.env['res.partner.bank'].create({
+            'acc_number': 'BE32707171912447',
+            'partner_id': cls.partner_a.id,
+            'allow_out_payment': True,
+            'acc_type': 'bank',
+        })
 
     @classmethod
     def create_payment(cls, partner, amount, **kwargs):
@@ -198,6 +207,97 @@ class TestBatchPayment(TestAccountBankStatement):
         # When removing the payment line, the payment should go back to in_process but the batch remains untouched
         st_line.delete_reconciled_line(st_line.line_ids[-1].id)
         self.assertEqual(payment.state, 'in_process')
+
+    def test_unreconcile_keeps_invoice_posted_when_post_is_blocked(self):
+        """ Ensure that unreconciling a batch payment from a bank statement line keeps
+        the linked invoice posted even if the internal repost is blocked by a
+        third-party module (ex: Studio Approval).
+        """
+        invoice = self._create_invoice_one_line(price_unit=100, post=True)
+        payment = self.create_payment(
+            self.partner_a,
+            invoice.amount_total,
+            payment_method_line_id=self.batch_deposit.id,
+            invoice_ids=[Command.set(invoice.ids)],
+        )
+        payment.create_batch_payment()
+        st_line = self._create_st_line(amount=invoice.amount_total)
+        st_line.set_batch_payment_bank_statement_line(payment.batch_payment_id.id)
+
+        # Simulate an approval rule that silently rejects action_post
+        AccountMove = self.env.registry['account.move']
+        original_action_post = AccountMove.action_post
+
+        def gated_action_post(records, *args, **kwargs):
+            if records.env.su:
+                return original_action_post(records, *args, **kwargs)
+            return {'type': 'ir.actions.client', 'tag': 'display_notification', 'params': {}}
+
+        with patch.object(AccountMove, 'action_post', gated_action_post):
+            st_line.delete_reconciled_line(st_line.line_ids[-1].id)
+
+        self.assertEqual(invoice.state, 'posted')
+        self.assertEqual(payment.state, 'in_process')
+
+    def test_unreconcile_sepa_ct_batch_with_pending_online_status(self):
+        """ Ensure that delete_reconciled_line does not raise error when un-reconciling
+        a SEPA CT batch payment whose payment_online_status = 'pending'.
+        """
+        if self.env['ir.module.module']._get('account_online_payment').state != 'installed':
+            self.skipTest("account_online_payment not installed")
+
+        # Create a bank account for the company and a SEPA CT journal
+        company_bank = self.env['res.partner.bank'].create({
+            'partner_id': self.company_data['company'].partner_id.id,
+            'acc_number': 'BE48363523682327',
+        })
+        sepa_journal = self.env['account.journal'].create({
+            'name': 'SEPA CT Test',
+            'type': 'bank',
+            'code': 'SEPA',
+            'bank_account_id': company_bank.id,
+            'currency_id': self.other_currency.id,
+        })
+        sepa_ct_method = sepa_journal.outbound_payment_method_line_ids.filtered(
+            lambda l: l.code == 'sepa_ct'
+        )
+
+        invoice = self._create_invoice_one_line(
+            move_type='in_invoice',
+            currency_id=self.other_currency.id,
+            price_unit=100.0,
+            post=True,
+        )
+
+        payment = self.env['account.payment'].create({
+            'journal_id': sepa_journal.id,
+            'currency_id': self.other_currency.id,
+            'payment_method_line_id': sepa_ct_method.id,
+            'payment_type': 'outbound',
+            'partner_type': 'supplier',
+            'partner_id': self.partner_a.id,
+            'partner_bank_id': self.partner_bank_account.id,
+            'amount': invoice.amount_total,
+            'invoice_ids': [Command.set(invoice.ids)],
+        })
+        payment.action_post()
+
+        batch = self.env['account.batch.payment'].create({
+            'journal_id': sepa_journal.id,
+            'payment_ids': [Command.set(payment.ids)],
+            'payment_method_id': self.env.ref('account_iso20022.account_payment_method_sepa_ct').id,
+            'batch_type': 'outbound',
+        })
+        # Simulate the batch being sent to the bank online.
+        batch.payment_online_status = 'pending'
+
+        st_line = self._create_st_line(amount=-payment.amount, journal_id=sepa_journal.id, partner_id=False)
+        st_line.set_batch_payment_bank_statement_line(batch.id)
+
+        st_line.delete_reconciled_line(st_line.line_ids[-1].id)
+
+        self.assertEqual(payment.state, 'in_process')
+        self.assertEqual(invoice.state, 'posted')
 
     def test_batch_reconciliation_multiple_installments_payment_term(self):
         """ Test reconciliation of payments for multiple installments payment term lines """
@@ -646,3 +746,110 @@ class TestBatchPaymentAccountingOnly(TestBatchPayment):
         self.assertEqual(payment.state, 'paid')
         self.assertEqual(batch.state, 'reconciled')
         self.assertEqual(payment.amount, 110.0, "The creation of the payment with move during reconciliation should have diminished the grouped payment amount.")
+
+    def test_bank_rec_widget_batch_foreign_currency_journal_without_entries(self):
+        """ Tests a batch payment of payments recorded in another journal with
+            foreign currency and no outstanding account set.
+            - 2 invoices in company currency paid in foreign currency
+            - 1 bank transaction in foreign currency
+        """
+        chf_currency = self.setup_other_currency('CHF', rates=[('2019-01-01', 1.5)])
+        foreign_journal = self.env['account.journal'].create({'name': 'CHF journal', 'type': 'bank', 'code': 'BNKX', 'currency_id': chf_currency.id})
+        invoice_1 = self._create_invoice_line(
+            'out_invoice',
+            invoice_date='2019-01-01',
+            invoice_line_ids=[{'price_unit': 100.0}],
+        )
+        invoice_2 = self._create_invoice_line(
+            'out_invoice',
+            invoice_date='2019-01-01',
+            invoice_line_ids=[{'price_unit': 200.0}],
+        )
+        payment_1 = self.env['account.payment.register'].with_context(
+            active_model='account.move',
+            active_ids=invoice_1.move_id.ids,
+        ).create({
+            'amount': 150,
+            'payment_date': '2019-01-01',
+            'journal_id': foreign_journal.id,
+        })._create_payments()
+
+        payment_2 = self.env['account.payment.register'].with_context(
+            active_model='account.move',
+            active_ids=invoice_2.move_id.ids,
+        ).create({
+            'amount': 300,
+            'payment_date': '2019-01-01',
+            'journal_id': foreign_journal.id,
+        })._create_payments()
+
+        batch = self.env['account.batch.payment'].create({
+                'batch_type': payment_1.payment_type,
+                'journal_id': foreign_journal.id,
+                'payment_ids': [Command.set((payment_1 | payment_2).ids)],
+        })
+        batch.validate_batch()
+        st_line = self._create_st_line(450.0, date='2019-01-05', foreign_currency_id=chf_currency.id, journal_id=foreign_journal.id)
+        st_line.set_batch_payment_bank_statement_line(batch.id)
+
+        if self.env['account.move']._get_invoice_in_payment_state() == 'paid':
+            expected_account = self.env['account.payment']._get_outstanding_account(payment_1.payment_type).id
+        else:
+            expected_account = self.partner_a.property_account_receivable_id.id
+        self.assertRecordValues(st_line.line_ids, [
+            {'account_id': st_line.journal_id.default_account_id.id,    'amount_currency': 450.0,   'balance': 300.0,   'reconciled': False},
+            {'account_id': expected_account,                            'amount_currency': -150.0,  'balance': -100.0,   'reconciled': True},
+            {'account_id': expected_account,                            'amount_currency': -300.0,  'balance': -200.0,   'reconciled': True},
+        ])
+        self.assertEqual(invoice_1.move_id.payment_state, 'paid')
+        self.assertEqual(invoice_2.move_id.payment_state, 'paid')
+        self.assertEqual(batch.state, 'reconciled')
+
+    def test_payment_state_after_invoice_edition_without_journal_entry(self):
+        """ Test that a bank statement reconciled with a batch payment is unreconciled and the state of all the payments
+            is set to "In Process" when the amount of one of the invoices is modified.
+        """
+        self.partner_b.property_payment_term_id = self.pay_terms_a
+        invoice_1 = self.init_invoice('out_invoice', partner=self.partner_a, amounts=[90.0], post=True)
+        invoice_2 = self.init_invoice('out_invoice', partner=self.partner_a, amounts=[10.0], post=True)
+        invoice_3 = self.init_invoice('out_invoice', partner=self.partner_b, amounts=[50.0], post=True)
+        invoice_4 = self.init_invoice('out_invoice', partner=self.partner_b, amounts=[40.0], post=True)
+        # create a group payment for invoice 1 and 2
+        active_ids = (invoice_1 + invoice_2).ids
+        group_payment = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=active_ids).create({
+            'amount': 100.0,
+            'group_payment': True,
+            'payment_method_line_id': self.batch_deposit.id,
+        })._create_payments()
+        # create a simple payment for invoice 3
+        payment_3 = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=invoice_3.ids).create({
+            'amount': 50.0,
+            'payment_method_line_id': self.batch_deposit.id,
+        })._create_payments()
+        # create a simple payment for invoice 4
+        payment_4 = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=invoice_4.ids).create({
+            'amount': 40.0,
+            'payment_method_line_id': self.batch_deposit.id,
+        })._create_payments()
+        payments = group_payment + payment_3 + payment_4
+        payments.action_post()
+        # create a batch payment for the 3 payments
+        batch_payment_action = payments.create_batch_payment()
+        batch_payment = self.env['account.batch.payment'].browse(batch_payment_action.get('res_id'))
+        batch_payment.validate_batch()
+        # create a statement line and reconcile it with the batch payment
+        st_line = self._create_st_line(190.0, payment_ref=batch_payment.name)
+        st_line.set_batch_payment_bank_statement_line(batch_payment.id)
+
+        self.assertTrue(st_line.is_reconciled)
+        for payment in payments:
+            self.assertEqual(payment.state, 'paid')
+        # edit the price of invoice 3
+        invoice_3.button_draft()
+        with Form(invoice_3) as form:
+            with form.invoice_line_ids.edit(0) as line_form:
+                line_form.price_unit = 30.0
+
+        self.assertFalse(st_line.is_reconciled)
+        for payment in payments:
+            self.assertEqual(payment.state, 'in_process')

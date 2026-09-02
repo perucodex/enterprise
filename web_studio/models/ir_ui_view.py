@@ -8,7 +8,7 @@ import uuid
 import random
 
 from odoo import api, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from ..controllers.keyed_xml_differ import KeyedXmlDiffer
 from odoo.tools.template_inheritance import apply_inheritance_specs
 
@@ -119,7 +119,7 @@ class IrUiView(models.Model):
             group_definitions = self.env['res.groups']._get_group_definitions()
 
             node_groups = {}
-            set_invisible_nodes = set()
+            set_invisible_nodes = dict()
 
             for node in tree.xpath('//*[@groups]'):
                 if node.get('groups'):
@@ -136,7 +136,7 @@ class IrUiView(models.Model):
                 if not has_access(node.attrib.pop('__groups_key__')):
                     # Make invisible nodes for which the user is not part of the group,
                     # and remove the `groups` from the node before calling super so the nodes are not deleted.
-                    set_invisible_nodes.add(node)
+                    set_invisible_nodes[node] = node.get("invisible") or node.get("column_invisible") or "False"
 
                 if node.tag == 'field' and 'model_groups' in node.attrib and not has_access(node.attrib.pop('model_groups')):
                     # fields with `groups` in the Python model cannot be read at all by users not part of the group.
@@ -150,13 +150,14 @@ class IrUiView(models.Model):
                 parent = node.getparent()
                 return parent is not None and parent.tag == "list"
 
-            for node in set_invisible_nodes:
+            for node, invisible_value in set_invisible_nodes.items():
                 if is_in_list(node):
                     column_invisible = 'True'
                     node.set('column_invisible', column_invisible)
                 else:
                     invisible = 'True'
                     node.set('invisible', invisible)
+                node.set('actual_invisible', invisible_value)
 
             model = tree.get('model_access_rights')
             res = super()._postprocess_access_rights(tree)
@@ -367,6 +368,25 @@ class IrUiView(models.Model):
         filters = list()
         groupbys = list()
         fields.append(E.field(name=rec_name))
+        if isinstance(model, self.pool['mail.activity.mixin']):
+            filters.append(E.filter(
+                invisible="1", string=_('My Activities'), name="filter_activities_my",
+                domain="[['activity_user_id', '=', uid]]")
+            )
+            filters.append(E.separator())
+            filters.append(E.filter(
+                invisible="1", string=_('Late Activities'), name='activities_overdue',
+                domain="[('my_activity_date_deadline', '<', 'today')]")
+            )
+            filters.append(E.filter(
+                invisible="1", string=_('Today Activities'), name='activities_today',
+                domain="[('my_activity_date_deadline', '=', 'today')]")
+            )
+            filters.append(E.filter(
+                invisible="1", string=_('Future Activities'), name='activities_upcoming_all',
+                domain="[('my_activity_date_deadline', '>', 'today')]")
+            )
+            filters.append(E.separator())
         if 'x_studio_partner_id' in model._fields:
             fields.append(E.field(name='x_studio_partner_id', operator='child_of'))
             groupbys.append(E.filter(name='groupby_x_partner', string=_('Partner'), context="{'group_by': 'x_studio_partner_id'}", domain="[]"))
@@ -640,7 +660,11 @@ class IrUiView(models.Model):
         KeyedXmlDiffer.assign_node_ids_for_diff(old_tree)
         old_str = etree.tostring(old_tree)
 
-        new_tree = apply_inheritance_specs(old_tree, etree.fromstring(arch_to_normalize))
+        try:
+            new_tree = apply_inheritance_specs(old_tree, etree.fromstring(arch_to_normalize))
+        except ValueError as e:
+            # Convert so edit_view() can fall back gracefully instead of crashing.
+            raise ValidationError(str(e)) from e
 
         # Assign names to some node added to the tree, if they don't have one
         def on_new_node(node):

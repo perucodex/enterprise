@@ -29,7 +29,7 @@ class BacsDdi(models.Model):
     name = fields.Char(string='Identifier', required=True, help="The unique identifier of this DDI.", default=lambda self: datetime.now().strftime('%f%S%M%H%d%m%y'), copy=False)
     partner_id = fields.Many2one(comodel_name='res.partner', string='Customer', required=True, check_company=True, help="Customer whose payments are to be managed by this DDI.")
     company_id = fields.Many2one(comodel_name='res.company', default=lambda self: self.env.company, help="Company for whose invoices the DDI can be used.")
-    partner_bank_id = fields.Many2one(string='IBAN', comodel_name='res.partner.bank', domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", help="Account of the customer to collect payments from.")
+    partner_bank_id = fields.Many2one(string='Bank Account', comodel_name='res.partner.bank', domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", help="Account of the customer to collect payments from.")
     start_date = fields.Date(default=lambda self: fields.Date.today(), string='Date')
     state = fields.Selection([('draft', 'Draft'), ('active', 'Active'), ('revoked', 'Revoked'), ('closed', 'Closed')],
                             string="State",
@@ -134,11 +134,8 @@ class BacsDdi(models.Model):
             if record.state == 'draft':
                 if not record.partner_bank_id:
                     raise UserError(_("A debtor account is required to validate a BACS Direct Debit Instruction."))
-                if record.partner_bank_id.acc_type != 'iban':
-                    raise UserError(_("BACS Direct Debit scheme only accepts IBAN account numbers. Please select an IBAN-compliant debtor account for this BACS Direct Debit Instruction."))
-                if self.partner_bank_id.sanitized_acc_number[:2] != 'GB':
-                    raise UserError(_("BACS Direct Debit scheme only accepts UK bank accounts. Please select a UK bank account for this BACS Direct Debit Instruction."))
-
+                if not record.partner_bank_id._is_valid_uk_bank_account():
+                    raise UserError(_("BACS Direct Debit scheme only accepts UK bank accounts. Please select a UK bank account with valid Account Number and Sort Code for this BACS Direct Debit Instruction."))
                 record.state = 'active'
 
     def action_cancel_draft_ddi(self):
@@ -165,20 +162,15 @@ class BacsDdi(models.Model):
     def action_print_ddi(self):
         if not self.company_id.bacs_sun:
             raise UserError(_("BACS Service User Number is not set on the company."))
-        if not self.partner_bank_id.acc_type == 'iban':
-            raise UserError(_("BACS Direct Debit scheme only accepts IBAN account numbers. Please select an IBAN-compliant debtor account for this BACS Direct Debit Instruction."))
-        if self.partner_bank_id.sanitized_acc_number[:2] != 'GB':
-            raise UserError(_("BACS Direct Debit scheme only accepts UK bank accounts. Please select a UK bank account for this BACS Direct Debit Instruction."))
-        else:
-            return self.env.ref('l10n_uk_bacs.ddi_form_report_main').report_action(self)
+        if not self.partner_bank_id._is_valid_uk_bank_account():
+            raise UserError(_("BACS Direct Debit scheme only accepts UK bank accounts. Please select a UK bank account with valid Account Number and Sort Code for this BACS Direct Debit Instruction."))
+        return self.env.ref('l10n_uk_bacs.ddi_form_report_main').report_action(self)
 
     @api.constrains('payment_journal_id')
     def _validate_account_journal_id(self):
         for record in self:
-            if record.payment_journal_id.bank_account_id.acc_type != 'iban':
-                raise ValidationError(_("Only IBAN account numbers can receive BACS Direct Debit payments. Please select a journal associated to one."))
-            if record.payment_journal_id.bank_account_id.sanitized_acc_number[:2] != 'GB':
-                raise ValidationError(_("BACS Direct Debit scheme only accepts UK bank accounts. Please select a journal associated to one."))
+            if not record.payment_journal_id.bank_account_id._is_valid_uk_bank_account():
+                raise ValidationError(_("BACS Direct Debit payments require a valid UK bank account on the journal. Please configure an account number and sort code first."))
 
     @api.constrains('partner_id')
     def _validate_partner_id(self):

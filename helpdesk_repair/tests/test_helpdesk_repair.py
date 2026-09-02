@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo import Command
 from odoo.tests import Form
 from odoo.addons.helpdesk.tests.common import HelpdeskCommon
 
@@ -143,3 +144,45 @@ class TestRepair(HelpdeskCommon):
         self.assertRecordValues(delivery.move_ids, [{'product_id': product.id, 'quantity': 1.0}])
         return_picking = so.picking_ids.filtered(lambda p: p.picking_type_id == so.warehouse_id.in_type_id)
         self.assertRecordValues(return_picking.move_ids, [{'product_id': product.id, 'quantity': 1.0}])
+
+    def test_helpdesk_repair_sale_order_uses_customer_salesperson(self):
+        """Ensure quotation created from helpdesk repairs assign the customer's salesperson."""
+        self.test_team.use_product_repairs = True
+        self.partner.user_id = self.env.user
+
+        ticket = self.env['helpdesk.ticket'].create({
+            'name': 'Test ticket',
+            'partner_id': self.partner.id,
+            'team_id': self.test_team.id,
+        })
+
+        repair_action = ticket.action_repair_order_form()
+        repair_order = self.env['repair.order'].with_context(repair_action['context']).create({})
+
+        repair_order.action_create_sale_order()
+
+        self.assertFalse(repair_order.user_id)
+        self.assertEqual(repair_order.sale_order_id.user_id, self.env.user)
+
+    def test_repair_with_different_picking_product(self):
+        product1, product2 = self.env['product.product'].create([
+            {'name': 'Chair'},
+            {'name': 'Table'},
+        ])
+        picking = self.env['stock.picking'].create({
+            'partner_id': self.partner.id,
+            'picking_type_id': self.env.ref('stock.picking_type_in').id,
+            'move_ids': [Command.create({
+                'product_id': product2.id,
+                'product_uom_qty': 1,
+            })],
+        })
+        ticket = self.env['helpdesk.ticket'].create({
+            'name': 'Help me with my current purchase!',
+            'partner_id': self.partner.id,
+            'team_id': self.test_team.id,
+            'product_id': product1.id,
+            'picking_ids': [Command.link(picking.id)],
+        })
+        repair_action = ticket.action_repair_order_form()
+        self.assertFalse(repair_action['context']['default_repair_picking_id'])

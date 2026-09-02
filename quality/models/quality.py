@@ -127,6 +127,13 @@ class QualityAlertTeam(models.Model):
         for team in self:
             team.alert_count = alert_result.get(team.id, 0)
 
+    def write(self, vals):
+        result = super().write(vals)
+        if 'company_id' in vals:
+            for team in self:
+                team.alias_defaults = team._alias_get_creation_values().get('alias_defaults')
+        return result
+
     @api.model
     def _get_quality_team(self, domain):
         team_id = self.env['quality.alert.team'].search(domain, limit=1).id
@@ -141,7 +148,7 @@ class QualityAlertTeam(models.Model):
         if self.id:
             values['alias_defaults'] = defaults = ast.literal_eval(self.alias_defaults or "{}")
             defaults['team_id'] = self.id
-            defaults['company_id'] = self.company_id.id
+            defaults['company_id'] = self.company_id.id or self.env.company.id or self.env['res.company'].search([], limit=1).id
         return values
 
 
@@ -309,7 +316,7 @@ class QualityAlert(models.Model):
             team_id = self.env['quality.alert.team'].browse(self.env.context.get('active_id')).exists().id
         domain = Domain('team_ids', '=', False)
         if team_id:
-            domain &= Domain('team_ids', 'in', team_id)
+            domain |= Domain('team_ids', 'in', team_id)
         return self.env['quality.alert.stage'].search(domain, limit=1).id
 
     def _get_default_team_id(self):

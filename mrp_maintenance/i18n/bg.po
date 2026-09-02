@@ -9,13 +9,14 @@
 # Maria Boyadjieva <marabo2000@gmail.com>, 2023
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Rosen Vladimirov <vladimirov.rosen@gmail.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-30 18:46+0000\n"
-"PO-Revision-Date: 2025-11-16 17:51+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"PO-Revision-Date: 2026-07-25 20:10+0000\n"
+"Last-Translator: Rosen Vladimirov <vladimirov.rosen@gmail.com>\n"
 "Language-Team: Bulgarian <https://translate.odoo.com/projects/odoo-19/"
 "mrp_maintenance/bg/>\n"
 "Language: bg\n"
@@ -23,7 +24,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: mrp_maintenance
 #: model_terms:ir.ui.view,arch_db:mrp_maintenance.mrp_production_view_form_inherit_maintenance
@@ -33,7 +34,7 @@ msgstr "<span class=\"o_stat_text\">Поддръжка</span>"
 #. module: mrp_maintenance
 #: model_terms:ir.ui.view,arch_db:mrp_maintenance.maintenance_equipment_view_form_inherit_mrp
 msgid "<span class=\"o_stat_text\">Work Center</span>"
-msgstr ""
+msgstr "<span class=\"o_stat_text\">Работен център</span>"
 
 #. module: mrp_maintenance
 #: model:ir.model.fields,field_description:mrp_maintenance.field_mrp_workcenter__message_needaction
@@ -68,7 +69,7 @@ msgstr "Добави нова заявка за поддръжка"
 #. module: mrp_maintenance
 #: model:ir.model.fields,field_description:mrp_maintenance.field_maintenance_request__recurring_leaves_count
 msgid "Additional Leaves to Plan Ahead"
-msgstr ""
+msgstr "Допълнителни отсъствия за предварително планиране"
 
 #. module: mrp_maintenance
 #: model:ir.model.fields,field_description:mrp_maintenance.field_mrp_workcenter__message_attachment_count
@@ -83,7 +84,7 @@ msgstr "Блокирайте работен център"
 #. module: mrp_maintenance
 #: model:ir.model.fields,help:mrp_maintenance.field_maintenance_request__recurring_leaves_count
 msgid "Block the workcenter for this many time slots in the future in advance."
-msgstr ""
+msgstr "Блокира работния център за толкова времеви интервала напред в бъдещето."
 
 #. module: mrp_maintenance
 #: model:ir.model.fields,field_description:mrp_maintenance.field_maintenance_request__company_id
@@ -99,7 +100,7 @@ msgstr "Изчислен като последна дата на неуспех 
 #. module: mrp_maintenance
 #: model_terms:ir.actions.act_window,help:mrp_maintenance.maintenance_workcenter_action
 msgid "Create a new work center"
-msgstr ""
+msgstr "Създаване на нов работен център"
 
 #. module: mrp_maintenance
 #: model:maintenance.equipment,name:mrp_maintenance.equipment_furniture1
@@ -331,7 +332,7 @@ msgstr "Производствена поръчка"
 #. odoo-python
 #: code:addons/mrp_maintenance/models/mrp_maintenance.py:0
 msgid "Manufacturing Orders are already scheduled for this time slot."
-msgstr ""
+msgstr "Производствени поръчки вече са планирани за този времеви интервал."
 
 #. module: mrp_maintenance
 #: model_terms:ir.actions.act_window,help:mrp_maintenance.maintenance_workcenter_action
@@ -341,6 +342,10 @@ msgid ""
 "            workers and/or machines, they are used for costing, scheduling, "
 "capacity planning, etc."
 msgstr ""
+"Производствените операции се изпълняват в работните центрове. Работен център "
+"може да се състои от\n"
+"            работници и/или машини, използват се за калкулиране на "
+"себестойност, планиране, планиране на капацитета и др."
 
 #. module: mrp_maintenance
 #: model_terms:ir.ui.view,arch_db:mrp_maintenance.mrp_workcenter_view_form_inherit_maintenance
@@ -406,7 +411,7 @@ msgstr "Вид на следващо действие"
 #. odoo-python
 #: code:addons/mrp_maintenance/models/mrp_maintenance.py:0
 msgid "No available slot within 700 days after the planned start."
-msgstr ""
+msgstr "Няма свободен интервал в рамките на 700 дни след планирания старт."
 
 #. module: mrp_maintenance
 #: model:ir.model.fields,field_description:mrp_maintenance.field_mrp_workcenter__message_needaction_counter
@@ -522,12 +527,14 @@ msgid ""
 "The schedule has changed from %(desired_date)s to %(effective_date)s due to "
 "planned manufacturing orders."
 msgstr ""
+"Графикът е променен от %(desired_date)s на %(effective_date)s поради "
+"планирани производствени поръчки."
 
 #. module: mrp_maintenance
 #. odoo-python
 #: code:addons/mrp_maintenance/models/mrp_maintenance.py:0
 msgid "The workcenter is missing for %s."
-msgstr ""
+msgstr "Липсва работен център за %s."
 
 #. module: mrp_maintenance
 #: model:ir.model.fields,help:mrp_maintenance.field_mrp_workcenter__effective_date
@@ -560,6 +567,12 @@ msgid ""
 "listed duration, either at the specified date, or as soon as possible, if "
 "the work center is unavailable then."
 msgstr ""
+"Когато това поле е размаркирано и поддръжката е от тип 'Работен център', не "
+"се създава отсъствие на съответния работен център при създаване на заявка за "
+"поддръжка.\n"
+"Ако полето е маркирано, работният център автоматично се блокира за "
+"посочената продължителност, или на указаната дата, или възможно най-скоро, "
+"ако работният център не е наличен тогава."
 
 #. module: mrp_maintenance
 #: model:ir.model,name:mrp_maintenance.model_mrp_workcenter

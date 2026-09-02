@@ -313,3 +313,16 @@ class HelpdeskSLA(TransactionCase):
         with Form(ticket) as ticket_form:
             ticket_form.stage_id = self.stage_cancel
         self.assertEqual(ticket.stage_id, self.stage_cancel)
+
+    def test_sla_reached(self):
+        """ Ensure sla_reached is computed corectly"""
+        with self._ticket_patch_now(NOW):
+            ticket = self.create_ticket(team=self.test_team_reached, user_id=self.env.user.id)
+            self.assertFalse(ticket.sla_reached, "Newly created ticket should not be sla_reached")
+
+        with self._ticket_patch_now(NOW + relativedelta(days=10)):
+            ticket.write({'stage_id': self.stage_progress.id})
+            initial_values = {ticket.id: {'stage_id': self.stage_new}}
+            ticket._message_track(['stage_id'], initial_values)
+            self.assertTrue(ticket.sla_reached, "Ticket that reached target stage late should still be sla_reached")
+            self.assertTrue(ticket.sla_reached_late, "Should also be flagged late")

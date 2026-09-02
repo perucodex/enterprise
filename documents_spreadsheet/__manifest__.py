@@ -35,6 +35,7 @@
             'documents_spreadsheet/static/src/documents_view/**/*',
             ('remove', 'documents_spreadsheet/static/src/documents_view/activity/**'),
             'documents_spreadsheet/static/src/spreadsheet_clone_xlsx_dialog/**/*',
+            'documents_spreadsheet/static/src/spreadsheet_edition/**/*',
             'documents_spreadsheet/static/src/spreadsheet_template/**/*',
             'documents_spreadsheet/static/src/helpers.js',
             'documents_spreadsheet/static/src/spreadsheet_action_loader.js',

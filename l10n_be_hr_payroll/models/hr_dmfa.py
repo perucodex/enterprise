@@ -226,11 +226,18 @@ class DMFAWorker(DMFANode):
         # Group contracts with the same occupation
         # as they should be declared together
         # Put termination fees in it's own occupation
-        occupation_data = contracts._get_occupation_dates()
+        occupation_data = contracts.employee_id.version_ids.sorted('date_start', reverse=True)._get_occupation_dates()
         termination_occupations = []
+        considered_payslips = self.env['hr.payslip']
+        inactive_version_payslips = self.payslips.filtered(lambda p: not p.version_id.active)
+        active_version_payslips = self.payslips - inactive_version_payslips
         for data in occupation_data:
             occupation_contracts, date_from, date_to = data
-            payslips = self.payslips.filtered(lambda p: p.version_id in occupation_contracts)
+            payslips = active_version_payslips.filtered(lambda p: p not in considered_payslips and p.version_id in occupation_contracts)
+            for slip in inactive_version_payslips:
+                if slip not in considered_payslips and slip.date_from <= (date_to or quarter_end) and slip.date_to >= date_from:
+                    payslips += slip
+            considered_payslips += payslips
             termination_payslips = payslips.filtered(lambda p: p.struct_id.code == 'CP200TERM')
             if termination_payslips:
                 # Le salaire et les données relatives aux prestations se rapportant à une indemnité
@@ -331,7 +338,8 @@ class DMFAWorker(DMFANode):
                     remun.percentage_paid = -1
             if not termination_payslips and date_to and date_to > quarter_end:
                 date_to = False
-            values.append((occupation_contracts, payslips - termination_payslips, date_from, date_to, quarter_start))
+            if payslips - termination_payslips:
+                values.append((occupation_contracts, payslips - termination_payslips, date_from, date_to, quarter_start))
         return DMFAOccupation.init_multi(values) + termination_occupations
 
     def _prepare_deductions(self):
@@ -601,7 +609,11 @@ class DMFAOccupation(DMFANode):
             days_per_week = 5.0
             mean_working_hours = 38.0
         else:
-            days_per_week = 5 * contract.resource_calendar_id.work_time_rate / 100
+            if contract.resource_calendar_id.work_time_rate == 100:
+                days_per_week = contract.resource_calendar_id._get_days_per_week()
+            else:
+                reference_days_per_week = contract.company_id.resource_calendar_id._get_days_per_week() if contract.company_id.resource_calendar_id else 5
+                days_per_week = reference_days_per_week * contract.resource_calendar_id.work_time_rate / 100
             mean_working_hours = contract.resource_calendar_id.hours_per_week
 
         self.days_per_week = format_amount(days_per_week, width=3)
@@ -629,6 +641,8 @@ class DMFAOccupation(DMFANode):
             if wd.work_entry_type_id.dmfa_code != '-1' and wd.work_entry_type_id.code not in ['OUT', 'LEAVE300', 'LEAVE510', 'MEDIC01']:
                 services_by_dmfa_code[wd.work_entry_type_id.dmfa_code] |= wd
         skip_remun = all(dmfa_code in ['30', '50', '52'] for dmfa_code in services_by_dmfa_code.keys())
+        # Do not skip remun if there is some remunerations not linked to worked days (PFA, etc)
+        skip_remun = skip_remun and not any(p.basic_wage and p.struct_id.code in ['CP200TERM', 'CP200HOLN', 'CP200HOLN1', 'CP200THIRTEEN'] for p in self.payslips)
         return (DMFAService.init_multi([(wds,) for wds in services_by_dmfa_code.values()]), skip_remun)
 
     def _prepare_remunerations(self):
@@ -925,6 +939,10 @@ class L10n_BeDmfa(models.Model):
             onss_expeditor_number = dmfa.company_id.onss_expeditor_number
             if not onss_expeditor_number:
                 raise UserError(_('There is no defined expeditor number for the company.'))
+            if onss_expeditor_number.startswith('self_service_chaman_'):
+                expeditor = onss_expeditor_number.split('_')[3]
+            else:
+                expeditor = onss_expeditor_number
             # Declaration File
             if not dmfa._origin.dmfa_xml_filename:
                 num_suite = 0
@@ -934,7 +952,7 @@ class L10n_BeDmfa(models.Model):
             num_suite = str(num_suite).zfill(5)
             file_type = dmfa.file_type
 
-            filename_common = '.DMFA.%s.%s.%s.%s.1' % (onss_expeditor_number, now.strftime('%Y%m%d'), num_suite, file_type)
+            filename_common = '.DMFA.%s.%s.%s.%s.1' % (expeditor, now.strftime('%Y%m%d'), num_suite, file_type)
 
             filename = 'FI' + filename_common + '.1'
             dmfa.dmfa_xml_filename = filename
@@ -953,6 +971,11 @@ class L10n_BeDmfa(models.Model):
             onss_expeditor_number = dmfa.company_id.onss_expeditor_number
             if not onss_expeditor_number:
                 raise UserError(_('There is no defined expeditor number for the company.'))
+            if onss_expeditor_number.startswith('self_service_chaman_'):
+                expeditor = onss_expeditor_number.split('_')[3]
+            else:
+                expeditor = onss_expeditor_number
+
             if not dmfa._origin.dmfa_pdf_filename:
                 num_suite = 0
             else:
@@ -961,7 +984,7 @@ class L10n_BeDmfa(models.Model):
             num_suite = str(num_suite).zfill(5)
             file_type = dmfa.file_type
 
-            filename = 'FI.DMFA.%s.%s.%s.%s.1.1.pdf' % (onss_expeditor_number, now.strftime('%Y%m%d'), num_suite, file_type)
+            filename = 'FI.DMFA.%s.%s.%s.%s.1.1.pdf' % (expeditor, now.strftime('%Y%m%d'), num_suite, file_type)
             dmfa.dmfa_pdf_filename = filename
 
     @api.depends('year', 'quarter')
@@ -1256,6 +1279,8 @@ class L10n_BeDmfaLocationUnit(models.Model):
 
     def _get_code(self):
         self.ensure_one()
+        if self.code and not self.code.isdigit():
+            raise ValidationError(self.env._("The DMFA location code must contain only numbers."))
         return self.code
 
     _unique = models.Constraint(

@@ -111,7 +111,7 @@
                             <record id="account_financial_report_line_fr_cdrp6_balance" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">account_codes</field>
-                                <field name="formula">-781 - 649</field>
+                                <field name="formula">-781</field>
                             </record>
                         </field>
                     </record>
@@ -125,7 +125,7 @@
                             <record id="account_financial_report_line_fr_cdrp7_balance" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">account_codes</field>
-                                <field name="formula">-751 - 752 - 756 - 753 - 754 - 758\(7587,7588)</field>
+                                <field name="formula">-751 - 752 - 753 - 754 - 756 - 757 - 758\(7587,7588)</field>
                             </record>
                         </field>
                     </record>
@@ -140,7 +140,7 @@
                     <record id="account_financial_report_line_01_fr_cdr_char_exp_balance" model="account.report.expression">
                         <field name="label">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">ii_1.balance + ii_2.balance + ii_3.balance + ii_4.balance + ii_5.balance + ii_6.balance + ii_7.balance + ii_8.balance + ii_9.balance + ii_10.balance + ii_11.balance + ii_12.balance</field>
+                        <field name="formula">ii_1.balance + ii_2.balance + ii_3.balance + ii_4.balance + ii_5.balance + ii_6.balance + ii_7.balance + ii_8.balance + ii_9.balance + ii_10.balance + ii_11.balance + ii_12.balance + ii_13.balance</field>
                         <field name="green_on_positive" eval="False"/>
                     </record>
                 </field>
@@ -215,7 +215,7 @@
                             <record id="account_financial_report_line_fr_cdrc5_balance" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">account_codes</field>
-                                <field name="formula">604 + 605 + 606 + 6090 + 6093 + 6094 + 6095 + 6096 + 6098 + 6099 + 61 + 62 + 650 + 651 + 652 + 653 + 654 + 656 + 658\(6588) + 659</field>
+                                <field name="formula">604 + 605 + 606 + 6090 + 6093 + 6094 + 6095 + 6096 + 6098 + 6099 + 61 + 62</field>
                                 <field name="green_on_positive" eval="False"/>
                             </record>
                         </field>
@@ -245,7 +245,7 @@
                             <record id="account_financial_report_line_fr_cdrc9_balance" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">account_codes</field>
-                                <field name="formula">648 + 644 + 641</field>
+                                <field name="formula">649\(6492) + 648 + 644 + 641</field>
                                 <field name="green_on_positive" eval="False"/>
                             </record>
                         </field>
@@ -260,7 +260,7 @@
                             <record id="account_financial_report_line_fr_cdrc10_balance" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">account_codes</field>
-                                <field name="formula">645 + 633 + 646 + 631 + 647</field>
+                                <field name="formula">645 + 633 + 646 + 631 + 647 + 6492</field>
                                 <field name="green_on_positive" eval="False"/>
                             </record>
                         </field>
@@ -321,6 +321,20 @@
                                 <field name="label">balance</field>
                                 <field name="engine">account_codes</field>
                                 <field name="formula">6815</field>
+                                <field name="green_on_positive" eval="False"/>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="account_financial_report_line_fr_cdrc16" model="account.report.line">
+                        <field name="name">Other expenses</field>
+                        <field name="code">ii_13</field>
+                        <field name="groupby">account_id</field>
+                        <field name="foldable" eval="True"/>
+                        <field name="expression_ids">
+                            <record id="account_financial_report_line_fr_cdrc16_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">account_codes</field>
+                                <field name="formula">650 + 651 + 652 + 653 + 654 + 656 + 657 + 658\(6588) + 659</field>
                                 <field name="green_on_positive" eval="False"/>
                             </record>
                         </field>
@@ -654,7 +668,7 @@
                             <record id="account_financial_report_line_fr_cdrp16_balance" model="account.report.expression">
                                 <field name="label">balance</field>
                                 <field name="engine">account_codes</field>
-                                <field name="formula">-757 - 747</field>
+                                <field name="formula">-747</field>
                             </record>
                         </field>
                     </record>
@@ -676,14 +690,14 @@
             </record>
             <record id="account_financial_report_line_01_fr_cdr_char_exc" model="account.report.line">
                 <field name="name">Exceptional expenses (VIII)</field>
-                <field name="name@fr">Charges exceptionnels (VIII)</field>
+                <field name="name@fr">Charges exceptionnelles (VIII)</field>
                 <field name="code">VIII</field>
                 <field name="hierarchy_level">0</field>
                 <field name="expression_ids">
                     <record id="account_financial_report_line_01_fr_cdr_char_exc_balance" model="account.report.expression">
                         <field name="label">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">viii_1.balance + viii_2.balance + viii_3.balance + viii_4.balance</field>
+                        <field name="formula">viii_1.balance + viii_3.balance + viii_4.balance</field>
                         <field name="green_on_positive" eval="False"/>
                     </record>
                 </field>
@@ -714,21 +728,6 @@
                                 <field name="label">balance</field>
                                 <field name="engine">account_codes</field>
                                 <field name="formula">6588</field>
-                                <field name="green_on_positive" eval="False"/>
-                            </record>
-                        </field>
-                    </record>
-                    <record id="account_financial_report_line_fr_cdrc22" model="account.report.line">
-                        <field name="name">On capital transactions</field>
-                        <field name="name@fr">Sur opérations au capital</field>
-                        <field name="code">viii_2</field>
-                        <field name="groupby">account_id</field>
-                        <field name="foldable" eval="True"/>
-                        <field name="expression_ids">
-                            <record id="account_financial_report_line_fr_cdrc22_balance" model="account.report.expression">
-                                <field name="label">balance</field>
-                                <field name="engine">account_codes</field>
-                                <field name="formula">657</field>
                                 <field name="green_on_positive" eval="False"/>
                             </record>
                         </field>

@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from urllib.parse import quote
 
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import AccessError, ValidationError
@@ -23,19 +24,24 @@ class HrEmployee(models.Model):
 
     def _compute_document_count(self):
         # FIX in 18.3, to remove when documents hr setting won't be optional anymore.
-        if not self.hr_employee_folder_id:
+        employees_without_document_settings = self.filtered(
+            lambda e: not e.company_id.documents_hr_settings
+        )
+        if employees_without_document_settings:
             # Search everywhere if no employee folder configured.
-            # Method not optimized for batches since it is only used in the form view.
-            for employee in self:
-                if employee.work_contact_id:
-                    employee.document_count = self.env['documents.document'].search_count([
-                        ('partner_id', '=', self.work_contact_id.id)
-                    ])
-                else:
-                    employee.document_count = 0
+            document_count_by_partner = dict(self.env['documents.document']._read_group(
+                [('partner_id', 'in', employees_without_document_settings.work_contact_id.ids)],
+                groupby=['partner_id'], aggregates=['__count'],
+            ))
+            for employee in employees_without_document_settings:
+                employee.document_count = document_count_by_partner.get(employee.work_contact_id, 0)
+
+        employees_with_document_settings = self - employees_without_document_settings
+        if not employees_with_document_settings:
             return
+
         document_count_by_folder = dict(self.env['documents.document']._read_group([
-            ('id', 'child_of', self.hr_employee_folder_id.ids),
+            ('id', 'child_of', employees_with_document_settings.hr_employee_folder_id.ids),
             ('type', '!=', 'folder')
         ], groupby=['folder_id'], aggregates=['__count']))
 
@@ -43,15 +49,16 @@ class HrEmployee(models.Model):
             folder: sum(
                 count for doc_folder, count in document_count_by_folder.items()
                 if doc_folder.parent_path.startswith(folder.parent_path)
-            ) for folder in self.hr_employee_folder_id
+            ) for folder in employees_with_document_settings.hr_employee_folder_id
         }
-        for employee in self:
+        for employee in employees_with_document_settings:
             employee.document_count = document_count_by_employee_folder.get(employee.hr_employee_folder_id, 0)
 
     @api.model_create_multi
     def create(self, vals_list):
         employees = super().create(vals_list)
-        employees._generate_employee_documents_folders()
+        if not self.env.context.get('salary_simulation', False):
+            employees._generate_employee_documents_folders()
         return employees
 
     def write(self, vals):
@@ -76,6 +83,7 @@ class HrEmployee(models.Model):
                 'default_res_id': self.id,
                 'default_res_model': 'hr.employee',
             }
+            action['domain'] = [('partner_id', '=', self.work_contact_id.id)]
             return action
         if not self.hr_employee_folder_id:
             raise ValidationError(_('You must configure the HR Employee folder in document settings to use Document\'s features.'))
@@ -83,7 +91,10 @@ class HrEmployee(models.Model):
             raise AccessError(_('You cannot access the employee\'s folder.'))
         return {
             'type': 'ir.actions.act_url',
-            'url': self.hr_employee_folder_id.sudo().access_url,
+            'target': 'self',
+            # do not use the document's access_url, as it uses the web.base.url and could redirect on a domain you are not connected
+            # on if web.base.url points to a different domain than the one you are connected on (and web.base.url.freeze is set)
+            'url': f"/odoo/documents/{quote(self.hr_employee_folder_id.sudo().access_token, safe='')}",
         }
 
     def _generate_employee_documents_folders(self, skip_subfolders=False):

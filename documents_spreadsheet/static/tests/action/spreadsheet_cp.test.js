@@ -8,7 +8,13 @@ import { createSpreadsheet } from "@documents_spreadsheet/../tests/helpers/sprea
 import { beforeEach, describe, expect, getFixture, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { Model } from "@odoo/o-spreadsheet";
-import { contains, getService, MockServer, mockService } from "@web/../tests/web_test_helpers";
+import {
+    contains,
+    getService,
+    MockServer,
+    mockService,
+    patchWithCleanup,
+} from "@web/../tests/web_test_helpers";
 
 defineDocumentSpreadsheetModels();
 describe.current.tags("desktop");
@@ -152,7 +158,7 @@ test("Freeze&Share spreadsheet from control panel", async function () {
             expect.step("open_share");
         },
     });
-    await createSpreadsheet({
+    const { model: modelBis } = await createSpreadsheet({
         serverData,
         spreadsheetId,
         mockRPC: async function (route, args) {
@@ -168,12 +174,22 @@ test("Freeze&Share spreadsheet from control panel", async function () {
             }
         },
     });
+    const dispatched = [];
+    const oldDispatch = modelBis.dispatch;
+    patchWithCleanup(modelBis, {
+        dispatch: (command, args) => {
+            dispatched.push(command);
+            return oldDispatch(command, args);
+        },
+    });
+
     expect(target.querySelector(".spreadsheet_share_dropdown")).toBe(null);
     await contains(".o-topbar-menu[data-id=file]").click();
     await contains(".o-menu-item[data-name=share]").click();
     await contains(".o-menu-item[data-name=freeze_and_share]").click();
 
     expect.verifySteps(["spreadsheet_shared", "open_share"]);
+    expect(dispatched).toInclude("LOG_DATASOURCE_EXPORT");
 });
 
 test("Share spreadsheet from control panel", async function () {

@@ -4,13 +4,14 @@
 #
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Saara Hakanen <sahak@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.4+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-30 18:42+0000\n"
-"PO-Revision-Date: 2025-11-14 15:22+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-08-28 17:44+0000\n"
+"PO-Revision-Date: 2026-08-05 09:09+0000\n"
+"Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/"
 "delivery_ups_rest/fi/>\n"
 "Language: fi\n"
@@ -18,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_bill_my_account
@@ -36,7 +37,7 @@ msgstr "Postiennakko-rahoitusvaihtoehto"
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_stock_package_type__package_carrier_type
 msgid "Carrier"
-msgstr "Huolitsija"
+msgstr "Kuljetusyritys"
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields.selection,name:delivery_ups_rest.selection__delivery_carrier__ups_cod_funds_code__8
@@ -80,6 +81,22 @@ msgid "Create an app"
 msgstr "Luo sovellus"
 
 #. module: delivery_ups_rest
+#. odoo-python
+#: code:addons/delivery_ups_rest/models/ups_request.py:0
+msgid ""
+"Detected a problem when validating delivery %(delivery_name)s. Invoicing "
+"address of the commercial invoice has been defaulted to %(ship_to_partner)s "
+"instead of %(sold_to_partner)s to avoid the following error from UPS: \"The "
+"Sold To party's country code must be the same as the Ship To party's country "
+"code with the exception of Canada and satellite countries.\""
+msgstr ""
+"Toimitusta %(delivery_name)s vahvistettaessa havaittiin ongelma. Kaupallisen "
+"laskun oletuslaskutusosoite on %(ship_to_partner)s, eikä %"
+"(sold_to_partner)s, jotta seuraava UPS:n virheilmoitus vältettäisiin: "
+"”Ostajan maakoodin on oltava sama kuin vastaanottajan maakoodi, lukuun "
+"ottamatta Kanadaa ja sen satelliittimaita.”"
+
+#. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__display_name
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_payment_provider__display_name
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_res_partner__display_name
@@ -121,7 +138,7 @@ msgstr "Sieltä saat <b>tilinumerosi</b>"
 #. module: delivery_ups_rest
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
 msgid "How to setup UPS?"
-msgstr "Miten UPS asennetaan?"
+msgstr "Miten UPS otetaan käyttöön?"
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__id
@@ -141,8 +158,7 @@ msgid ""
 "If checked, ecommerce users will be prompted their UPS account number\n"
 "and delivery fees will be charged on it."
 msgstr ""
-"Jos valintaruutu on valittuna, verkkokaupan käyttäjiltä kysytään UPS-"
-"tilinumeroa\n"
+"Jos ruksittu, verkkokaupan käyttäjiltä kysytään UPS-tilinumeroa\n"
 "ja toimitusmaksut veloitetaan sen perusteella."
 
 #. module: delivery_ups_rest
@@ -157,8 +173,8 @@ msgid ""
 "Invalid Authentication Information: Please check your credentials and "
 "configuration within UPS's system."
 msgstr ""
-"Virheelliset todennustiedot: Tarkista tunnistustiedot ja konfigurointi UPS:n "
-"järjestelmässä."
+"Virheelliset todennustiedot: Tarkista kirjautumistietosi sekä UPS-"
+"järjestelmän asetukset."
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields.selection,name:delivery_ups_rest.selection__delivery_carrier__ups_package_weight_unit__kgs
@@ -173,7 +189,7 @@ msgstr "Etiketin muoto"
 #. module: delivery_ups_rest
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
 msgid "Log in with your account on"
-msgstr "Kirjaudu sisään tililläsi osoitteessa"
+msgstr "Kirjaudu sisään tilillesi:"
 
 #. module: delivery_ups_rest
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
@@ -254,9 +270,8 @@ msgstr "Vastaanottaja"
 #. module: delivery_ups_rest
 #. odoo-python
 #: code:addons/delivery_ups_rest/models/ups_request.py:0
-msgid "Recipient Phone must be at least 10 alphanumeric characters."
+msgid "Recipient Phone must be between 1 and 15 alphanumeric characters."
 msgstr ""
-"Vastaanottajan puhelimen on oltava vähintään 10 aakkosnumeerista merkkiä."
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_require_signature
@@ -311,14 +326,14 @@ msgid ""
 "Shipment created into UPS<br/><b>Tracking Numbers:</b> %"
 "(tracking_numbers)s<br/><b>Packages:</b> %(packages)s"
 msgstr ""
-"Lähetys luotu UPS:n<br/><b>seurantanumeroilla:</b> %(tracking_numbers)s<br/"
-"><b>Paketit</b>: %(packages)s"
+"UPS-lähetys luotu<br/><b>Seurantanumerot:</b> %(tracking_numbers)s<br/"
+"><b>Paketit:</b> %(packages)s"
 
 #. module: delivery_ups_rest
 #. odoo-python
 #: code:addons/delivery_ups_rest/models/ups_request.py:0
-msgid "Shipper Phone must be at least 10 alphanumeric characters."
-msgstr "Lähettäjän puhelimen on oltava vähintään 10 aakkosnumeerista merkkiä."
+msgid "Shipper Phone must be between 1 and 15 alphanumeric characters."
+msgstr ""
 
 #. module: delivery_ups_rest
 #: model:ir.model,name:delivery_ups_rest.model_delivery_carrier
@@ -329,7 +344,7 @@ msgstr "Toimitustavat"
 #. odoo-python
 #: code:addons/delivery_ups_rest/models/ups_request.py:0
 msgid "Something went wrong, please try again later!!"
-msgstr "Jokin meni pieleen, yritä myöhemmin uudelleen!!!"
+msgstr "Jokin meni pieleen, yritä myöhemmin uudelleen!"
 
 #. module: delivery_ups_rest
 #: model:ir.model,name:delivery_ups_rest.model_stock_package_type
@@ -361,7 +376,7 @@ msgstr ""
 #: code:addons/delivery_ups_rest/models/ups_request.py:0
 msgid ""
 "The delivery cannot be done because the weight of your product %s is missing."
-msgstr "Toimitusta ei voida suorittaa, koska tuotteen %s paino puuttuu."
+msgstr "Toimitus ei onnistu, koska tuotteen %s paino puuttuu."
 
 #. module: delivery_ups_rest
 #. odoo-python
@@ -371,8 +386,8 @@ msgid ""
 "missing for the following product(s): \n"
 " %s"
 msgstr ""
-"Arvioitua toimitushintaa ei voida laskea, koska seuraavan tuotteen "
-"(seuraavien tuotteiden) paino puuttuu:\n"
+"Toimitushinnan arviota ei voi laskea, koska seuraavien tuotteiden paino "
+"puuttuu:\n"
 " %s"
 
 #. module: delivery_ups_rest
@@ -414,7 +429,7 @@ msgstr "UPS"
 #. module: delivery_ups_rest
 #: model:ir.model.fields.selection,name:delivery_ups_rest.selection__delivery_carrier__ups_default_service_type__02
 msgid "UPS 2nd Day"
-msgstr "UPS ylihuomiseksi"
+msgstr "UPS ylihuomenna"
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields.selection,name:delivery_ups_rest.selection__delivery_carrier__ups_default_service_type__59
@@ -429,7 +444,7 @@ msgstr "UPS kolmen päivän päästä"
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_access_token
 msgid "UPS Access Token"
-msgstr "UPS pääsyoikeustunniste"
+msgstr "UPS-käyttöoikeustunniste"
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_shipper_number
@@ -441,12 +456,12 @@ msgstr "UPS-tilin numero"
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_client_id
 msgid "UPS Client ID"
-msgstr "UPS Client ID"
+msgstr "UPS-asiakastunnus"
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_client_secret
 msgid "UPS Client Secret"
-msgstr "UPS:n asiakkaan salaisuus"
+msgstr "UPS-asiakassalaus"
 
 #. module: delivery_ups_rest
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
@@ -461,7 +476,7 @@ msgstr "UPS Ground"
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_label_file_type
 msgid "UPS Label File Type"
-msgstr "UPS-tarran tiedostotyyppi"
+msgstr "UPS-etiketin tiedostotyyppi"
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields.selection,name:delivery_ups_rest.selection__delivery_carrier__ups_default_service_type__01
@@ -476,7 +491,7 @@ msgstr "UPS Seuraava aamupäivä"
 #. module: delivery_ups_rest
 #: model:ir.model.fields.selection,name:delivery_ups_rest.selection__delivery_carrier__ups_default_service_type__13
 msgid "UPS Next Day Air Saver"
-msgstr "UPS seuraavan päivän lentosäästö"
+msgstr "UPS Next Day Air Saver"
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_default_packaging_id
@@ -486,7 +501,7 @@ msgstr "UPS-paketin tyyppi"
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_saturday_delivery
 msgid "UPS Saturday Delivery"
-msgstr "UPS lauantaitoimitus"
+msgstr "UPS-lauantaitoimitus"
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields.selection,name:delivery_ups_rest.selection__delivery_carrier__ups_default_service_type__65
@@ -549,7 +564,7 @@ msgstr ""
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_duty_payment
 msgid "Ups Duty Payment"
-msgstr "UPS tullien maksu"
+msgstr "UPS-tullimaksu"
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields,field_description:delivery_ups_rest.field_delivery_carrier__ups_package_weight_unit
@@ -559,9 +574,8 @@ msgstr "UPS paketin painoyksikkö"
 #. module: delivery_ups_rest
 #. odoo-python
 #: code:addons/delivery_ups_rest/models/ups_request.py:0
-msgid "Warehouse Phone must be at least 10 alphanumeric characters."
+msgid "Warehouse Phone must be between 1 and 15 alphanumeric characters."
 msgstr ""
-"Varaston puhelinnumeron on oltava vähintään 10 aakkosnumeerista merkkiä."
 
 #. module: delivery_ups_rest
 #. odoo-python
@@ -574,8 +588,7 @@ msgstr "Sinun on annettava UPS-tilin numero."
 #: code:addons/delivery_ups_rest/models/ups_request.py:0
 msgid "You must setup a client ID and secret on the carrier first"
 msgstr ""
-"Sinun täytyy ensin määrittää asiakastunnus ja salainen tunnus "
-"kuljetusyritykseen"
+"Sinun täytyy ensin määrittää kuljetusyritykselle asiakastunnus ja -salaus"
 
 #. module: delivery_ups_rest
 #: model:ir.model.fields.selection,name:delivery_ups_rest.selection__delivery_carrier__ups_label_file_type__zpl
@@ -615,32 +628,32 @@ msgstr "paluukutsu on Odoo-osoitteesi https://\"mycompany\".odoo.com"
 #. module: delivery_ups_rest
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
 msgid "ups step 1"
-msgstr "UPS askel 1"
+msgstr "UPS vaihe 1"
 
 #. module: delivery_ups_rest
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
 msgid "ups step 2"
-msgstr "UPS askel 2"
+msgstr "UPS vaihe 2"
 
 #. module: delivery_ups_rest
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
 msgid "ups step 3"
-msgstr "UPS askel 3"
+msgstr "UPS vaihe 3"
 
 #. module: delivery_ups_rest
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
 msgid "ups step 4"
-msgstr "UPS askel 4"
+msgstr "UPS vaihe 4"
 
 #. module: delivery_ups_rest
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
 msgid "ups step 5"
-msgstr "UPS askel 5"
+msgstr "UPS vaihe 5"
 
 #. module: delivery_ups_rest
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
 msgid "ups step 6"
-msgstr "UPS askel6"
+msgstr "UPS vaihe 6"
 
 #. module: delivery_ups_rest
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
@@ -651,3 +664,15 @@ msgstr "ups.com"
 #: model_terms:ir.ui.view,arch_db:delivery_ups_rest.view_delivery_carrier_form
 msgid "you're ready to go!"
 msgstr "olet valmis!"
+
+#~ msgid "Recipient Phone must be at least 10 alphanumeric characters."
+#~ msgstr ""
+#~ "Vastaanottajan puhelimen on oltava vähintään 10 aakkosnumeerista merkkiä."
+
+#~ msgid "Shipper Phone must be at least 10 alphanumeric characters."
+#~ msgstr ""
+#~ "Lähettäjän puhelimen on oltava vähintään 10 aakkosnumeerista merkkiä."
+
+#~ msgid "Warehouse Phone must be at least 10 alphanumeric characters."
+#~ msgstr ""
+#~ "Varaston puhelinnumeron on oltava vähintään 10 aakkosnumeerista merkkiä."

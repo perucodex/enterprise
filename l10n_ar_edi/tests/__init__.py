@@ -4,4 +4,5 @@ from . import test_fe
 from . import test_fex
 from . import test_mocked
 from . import test_monotributista
+from . import test_qr_code
 from . import test_connection

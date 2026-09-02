@@ -74,7 +74,7 @@ class MrpProduction(models.Model):
         products = self.product_id | (self.move_raw_ids + self.move_byproduct_ids).product_id
         moves = self.move_raw_ids | self.move_byproduct_ids
 
-        uoms = products.uom_id | move_lines.product_uom_id | products.uom_ids
+        uoms = products.uom_id | move_lines.product_uom_id | products.uom_ids | self.bom_id.product_uom_id | moves.bom_line_id.product_uom_id
         # If UoM setting is active, fetch all UoM's data.
         if self.env.user.has_group('uom.group_uom'):
             uoms |= self.env['uom.uom'].search([])
@@ -160,7 +160,7 @@ class MrpProduction(models.Model):
                     mo_nums = self.search_count(base_domain + [('move_raw_ids.product_id', '=', product.id)])
                     additional_context['search_default_move_raw_ids'] = barcode
         if not barcode_type and not mo_nums:  # Nothing found yet, try to find picking by name.
-            mo_nums = self.search_count(base_domain + [('name', '=', barcode)])
+            mo_nums = self.search_count(base_domain + [('name', 'ilike', barcode)])
             additional_context['search_default_name'] = barcode
 
         if not mo_nums:

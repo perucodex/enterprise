@@ -22,4 +22,4 @@ class HrEmployee(models.Model):
     def _get_invalid_iban_employee_ids(self, employees_data=False):
         if not employees_data:
             employees_data = self._get_account_holder_employees_data()
-        return [employee['id'] for employee in employees_data if not _is_iban_valid(employee['acc_number'])]
+        return list({employee['id'] for employee in employees_data if not _is_iban_valid(employee['acc_number'])})

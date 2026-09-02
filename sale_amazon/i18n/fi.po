@@ -3,13 +3,14 @@
 # * sale_amazon
 #
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
+# Saara Hakanen <sahak@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.4+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-30 18:42+0000\n"
-"PO-Revision-Date: 2025-09-16 17:06+0000\n"
-"Last-Translator: \"Tiffany Chang (tic)\" <tic@odoo.com>\n"
+"POT-Creation-Date: 2026-08-28 17:45+0000\n"
+"PO-Revision-Date: 2026-08-06 08:10+0000\n"
+"Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-19/"
 "sale_amazon/fi/>\n"
 "Language: fi\n"
@@ -17,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: sale_amazon
 #: model:mail.template,body_html:sale_amazon.order_sync_failure
@@ -47,22 +48,21 @@ msgid ""
 "        "
 msgstr ""
 "<div>\n"
-"            <p>Amazon-tilauksen synkronoinnissa viite <t t-"
-"out=\"ctx.get('amazon_order_ref') or ''\">REF:n</t> kanssa tapahtui virhe, "
-"eikä sitä saatu päätökseen.</p>\n"
-"            <p>Ellei tilausta peruuteta SellerCentralissa, uutta "
-"synkronointia ei yritetä.</p>\n"
-"            <p>Jos haluat ajoittaa uuden synkronointiyrityksen, toimi "
-"seuraavasti:\n"
+"            <p>Amazon-tilauksen synkronointi viitteellä <t t-"
+"out=\"ctx.get('amazon_order_ref') or ''\">REF</t> epäonnistui ja jäi kesken."
+"</p>\n"
+"            <p>Ellei tilausta peruuteta SellerCentralissa, muita "
+"synkronointiyrityksiä ei tehdä.</p>\n"
+"            <p>Voit ajoittaa uuden synkronointiyrityksen seuraavasti:\n"
 "                </p><ol>\n"
-"                    <li>Siirry Kehittäjätyökalut.</li>\n"
-"                    <li>Avaa sen Amazon-tilin lomake, jolla tilaus tehtiin.</"
+"                    <li>Siirry kehittäjätyökaluihin.</li>\n"
+"                    <li>Avaa Amazon-tilin lomake, jolla tilaus tehtiin.</"
 "li>\n"
 "                    <li>Siirry Tilauksen seuranta -välilehdelle.</li>\n"
-"                    <li>Aseta <em>Viimeisten tilausten synkronoinnille</em> "
-"päivämäärä, joka on aikaisempi kuin tilauksen viimeinen tilapäivitys.</li>\n"
-"                    <li>Tallenna muutokset ja napsauta <em>SYNC ORDERS</em> "
-"-painiketta.</li>\n"
+"                    <li>Aseta <em>Viimeinen tilauksen synkronointipäivä</em> "
+"joka on ennen tilauksen viimeisintä tilapäivitystä.</li>\n"
+"                    <li>Tallenna muutokset ja klikkaa <em>SYNKRONOI "
+"TILAUKSET</em> -painiketta.</li>\n"
 "                </ol>\n"
 "            \n"
 "            <p>Jos ongelma jatkuu, ota yhteyttä <a href=\"https://"
@@ -863,7 +863,7 @@ msgstr "Fulfilled by Amazon"
 #: model:ir.model.fields.selection,name:sale_amazon.selection__amazon_offer__amazon_channel__fbm
 #: model_terms:ir.ui.view,arch_db:sale_amazon.amazon_order_view_form
 msgid "Fulfilled by Merchant"
-msgstr "Fulfilled by Merchant"
+msgstr "Kauppiaan täyttämä"
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_offer__amazon_channel
@@ -946,8 +946,8 @@ msgid ""
 "If the sale is locked, you can not modify it anymore. However, you will "
 "still be able to invoice or deliver."
 msgstr ""
-"Jos myyntitilaus on lukittu, et voi enää muuttaa sitä. Voit silti vielä "
-"laskuttaa ja toimittaa tälle myyntitilaukselle."
+"Jos myynti on lukittu, et voi enää muokata sitä. Voit kuitenkin edelleen "
+"laskuttaa tai toimittaa."
 
 #. module: sale_amazon
 #: model_terms:ir.ui.view,arch_db:sale_amazon.picking_view_form
@@ -1023,6 +1023,12 @@ msgstr "Markkinapaikka"
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_offer__active_marketplace_ids
 msgid "Marketplaces"
 msgstr "Markkinapaikat"
+
+#. module: sale_amazon
+#. odoo-python
+#: code:addons/sale_amazon/models/amazon_account.py:0
+msgid "Missing product name"
+msgstr ""
 
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_account__name
@@ -1106,12 +1112,12 @@ msgstr "Tuote"
 #. module: sale_amazon
 #: model:ir.model.fields,field_description:sale_amazon.field_amazon_offer__product_template_id
 msgid "Product Template"
-msgstr "Tuotemalli"
+msgstr "Tuotepohja"
 
 #. module: sale_amazon
 #: model:ir.model,name:sale_amazon.model_product_product
 msgid "Product Variant"
-msgstr "Tuotevariaatio"
+msgstr "Tuotevariantti"
 
 #. module: sale_amazon
 #. odoo-python
@@ -1678,4 +1684,4 @@ msgstr "esim. Amerikan markkinat"
 #. odoo-python
 #: code:addons/sale_amazon/models/amazon_account.py:0
 msgid "id"
-msgstr "tunniste"
+msgstr "tunnus"

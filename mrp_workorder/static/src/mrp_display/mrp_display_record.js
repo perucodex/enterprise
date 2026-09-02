@@ -173,7 +173,7 @@ export class MrpDisplayRecord extends Component {
 
     get moves() {
         const moMoves = this.props.production.data.move_raw_ids.records.filter(
-            (move) => !move.data.scrapped && !move.data.bom_line_id && !move.data.operation_id
+            (move) => !move.data.scrapped && !move.data.bom_line_id && !move.data.workorder_id
         );
         if (this.resModel === "mrp.production") {
             return moMoves;
@@ -181,7 +181,7 @@ export class MrpDisplayRecord extends Component {
         const woMovesNoCheck = this.props.record.data.move_raw_ids.records.filter(
             (move) =>
                 !move.data.scrapped &&
-                move.data.operation_id.id === this.props.record.data.operation_id.id &&
+                move.data.workorder_id.id === this.props.record.data.id &&
                 !move.data.check_id.count
         );
         return [...woMovesNoCheck, ...moMoves];
@@ -287,7 +287,6 @@ export class MrpDisplayRecord extends Component {
     }
 
     onClickHeader() {
-        this.env.searchModel.removeMOFilter();
         return this.startWorking(true);
     }
 
@@ -382,7 +381,9 @@ export class MrpDisplayRecord extends Component {
             }
             this.state.underValidation = false;
         }
-        this.env.searchModel.removeMOFilter();
+        if (!this.props.record.context.shouldKeepMoFilter) {
+            this.env.searchModel.removeMOFilter();
+        }
     }
 
     _doAction(action) {

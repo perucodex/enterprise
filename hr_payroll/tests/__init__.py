@@ -1,13 +1,17 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from . import common
+from . import common_payment_report
 from . import test_payslip_flow
 from . import test_contract_calendar_2_weeks
 from . import test_dashboard
 from . import test_multi_contract
+from . import test_new_employee_worked_days
 from . import test_rule_parameter
+from . import test_payrun
 from . import test_payslip_computation
 from . import test_payment_report
+from . import test_payslip_empty_contract
 from . import test_performance
 from . import test_work_entry
 from . import test_resource
@@ -23,3 +27,4 @@ from . import test_payroll_properties
 from . import test_payslip_allocations
 from . import test_work_entry_reset
 from . import test_rule_section
+from . import test_payslip_email_settings

@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import dateutil.parser
+import json
 import logging
 import requests
 import urllib.parse
@@ -151,6 +152,22 @@ class SocialStreamPost(models.Model):
         else:
             requests.delete(comments_like_endpoint_url, data=params)
 
+    def _facebook_update_likes(self, like):
+        """Like the post in SUDO for social users."""
+        for post in self:
+            if post.facebook_user_likes == like:
+                continue
+
+            increment = 1 if like else -1
+            likes_count = max(0, post.facebook_likes_count + increment)
+            reactions_count = json.loads(post.facebook_reactions_count or '{}')
+            reactions_count['LIKE'] = max(0, reactions_count.get('LIKE', 0) + increment)
+            post.sudo().write({
+                'facebook_likes_count': likes_count,
+                'facebook_reactions_count': json.dumps(reactions_count),
+                'facebook_user_likes': like,
+            })
+
     # ========================================================
     # MISC / UTILITY
     # ========================================================
@@ -185,7 +202,12 @@ class SocialStreamPost(models.Model):
         }
         if "from" not in comment:
             comment["from"] = {"name": _("Unknown")}
+
         if comment.get('attachment', {}).get('type') == 'sticker':
             # stickers are just image
             comment['attachment']['type'] = 'photo'
+        elif comment.get('attachment', {}).get('type') == 'animated_image_share':
+            # GIF from the Facebook "GIF button"
+            comment['attachment']['type'] = 'animated_image_video'
+
         return comment

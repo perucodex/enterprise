@@ -668,6 +668,30 @@ class TestPayrollMisc(TestPayrollCommon):
             'l10n_au_tax_free_threshold': True,
             'medicare_exemption': 'H'})
 
+        # Pre July 2024
+        self._test_payslip(
+            employee,
+            contract,
+            expected_worked_days=[
+                # (work_entry_type_id.id, number_of_day, number_of_hours, amount)
+                (self.work_entry_types['WORK100'].id, 20, 152, 3100),
+            ],
+            expected_lines=[
+                # (code, total)
+                ('BASIC', 3100),
+                ('OTE', 3100),
+                ('GROSS', 3100),
+                ('WITHHOLD', -295),
+                ('MEDICARE', 31),
+                ('WITHHOLD.TOTAL', -264),
+                ('NET', 2836),
+                ('SUPER', 341),
+            ],
+            payslip_date_from=date(2024, 6, 1),
+            payslip_date_to=date(2024, 6, 30),
+        )
+
+        # Post July 2024
         self._test_payslip(
             employee,
             contract,
@@ -681,9 +705,9 @@ class TestPayrollMisc(TestPayrollCommon):
                 ('OTE', 3100),
                 ('GROSS', 3100),
                 ('WITHHOLD', -247),
-                ('MEDICARE', 31),
-                ('WITHHOLD.TOTAL', -216),
-                ('NET', 2884),
+                ('MEDICARE', 0),
+                ('WITHHOLD.TOTAL', -247),
+                ('NET', 2853),
                 ('SUPER', 356.5),
             ],
             payslip_date_from=date(2024, 7, 1),
@@ -826,4 +850,104 @@ class TestPayrollMisc(TestPayrollCommon):
             payslip_date_from=date(2024, 7, 1),
             payslip_date_to=date(2024, 7, 5),
             payslip=payslip
+        )
+
+    def test_misc_payslip_21_child_support_version(self):
+        """Test that payslip uses child support amount from its version, not current employee version.
+
+        Scenario:
+        - Version 1: child_support = 200
+        - Version 2 (Feb 2026): child_support = 250
+        - Payslip prior to Feb 2026 should use 200 (from Version 1), not 250 (from Version 2)
+        """
+        # Create employee with initial contract (Version 1)
+        self.tax_treatment_category = 'R'
+        employee, contract = self._create_employee(contract_info={
+            'employee': 'Test Employee',
+            'employment_basis_code': 'F',
+            'tfn_declaration': 'provided',
+            'tfn': '999999661',
+            'wage_type': 'monthly',
+            'schedule_pay': 'bi-weekly',
+            'wage': 2800,
+            'l10n_au_training_loan': False,
+            'l10n_au_tax_free_threshold': True,
+            'l10n_au_child_support_garnishee_amount': 0.25
+        })
+
+        # Create Version 2 starting Feb 2026
+        employee.create_version({
+            'date_version': fields.Date.to_date('2026-02-01'),
+            'date_start': fields.Date.to_date('2026-02-01'),
+            'name': 'Feb 2026',
+            'l10n_au_child_support_garnishee_amount': 0.1,
+        })
+
+        # Verify the payslip uses the amount from Version 1 (0.25), not Version 2 (0.1)
+        self._test_payslip(
+            employee,
+            contract,
+            expected_worked_days=[
+                # (work_entry_type_id.id, number_of_day, number_of_hours, amount)
+                (self.work_entry_types['WORK100'].id, 10, 76, 2800),
+            ],
+            expected_lines=[
+                # (code, total)
+                ('BASIC', 2800),
+                ('OTE', 2800),
+                ('GROSS', 2800),
+                ('WITHHOLD', -542),
+                ('MEDICARE', 0),
+                ('WITHHOLD.TOTAL', -542),
+                ('CHILD.SUPPORT.GARNISHEE', -564),
+                ('CHILD.SUPPORT', -564),
+                ('NET', 1693.38),
+                ('SUPER', 322),
+            ],
+            payslip_date_from=date(2024, 7, 1),
+            payslip_date_to=date(2024, 7, 12),
+        )
+
+    def test_misc_payslip_21_recompute_income_stream_type(self):
+        self.tax_treatment_category = 'R'
+        employee, contract = self._create_employee(contract_info={
+            'employee': 'Test Employee',
+            'employment_basis_code': 'C',
+            'tfn_declaration': '111111111',
+            'wage_type': 'monthly',
+            'wage': 5000,
+            'casual_loading': 0,
+        })
+
+        payslip = self.env["hr.payslip"].create({
+            "name": "Test payslip",
+            "employee_id": employee.id,
+            "version_id": contract.id,
+            "struct_id": self.default_payroll_structure.id,
+            "date_from": date(2024, 7, 1),
+            "date_to": date(2024, 7, 31),
+        })
+        self.assertEqual(payslip.l10n_au_income_stream_type, 'SAW')
+        employee.l10n_au_income_stream_type = 'OSP'
+        payslip.compute_sheet()
+        self.assertEqual(payslip.l10n_au_income_stream_type, employee.l10n_au_income_stream_type)
+
+        self._test_payslip(
+            employee,
+            contract,
+            payslip=payslip,
+            expected_worked_days=[
+                # (work_entry_type_id.id, number_of_day, number_of_hours, amount)
+                (self.work_entry_types["WORK100"].id, 23, 174.8, 5000),
+            ],
+            expected_lines=[
+                # (code, total)
+                ('BASIC', 5000),
+                ('OTE', 5000),
+                ('GROSS', 5000),
+                ('WITHHOLD', -1317),
+                ('WITHHOLD.TOTAL', -1317),
+                ('NET', 3683),
+                ('SUPER', 575),
+            ],
         )

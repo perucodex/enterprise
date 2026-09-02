@@ -1,7 +1,38 @@
 <?xml version="1.0"?>
 <odoo>
 
+    <template id="l10n_gt_edi_nit_cf_template">
+        <div t-if="
+            o.company_id.account_fiscal_country_id.code == 'GT'
+            and o._l10n_gt_edi_is_vat_void()
+            and abs(o.amount_total_signed) &lt; 2500
+        ">
+            NIT: CF
+        </div>
+    </template>
+
     <template id="report_invoice_document" inherit_id="account.report_invoice_document" primary="True">
+
+        <xpath expr="//div[@id='partner_vat_address_not_same_as_shipping']" position="attributes">
+            <attribute name="t-if" separator="and" add="not o._l10n_gt_edi_is_vat_void()"/>
+        </xpath>
+        <xpath expr="//div[@id='partner_vat_address_not_same_as_shipping']" position="after">
+            <t t-call="l10n_gt_edi.l10n_gt_edi_nit_cf_template"/>
+        </xpath>
+
+        <xpath expr="//div[@id='partner_vat_address_same_as_shipping']" position="attributes">
+            <attribute name="t-if" separator="and" add="not o._l10n_gt_edi_is_vat_void()"/>
+        </xpath>
+        <xpath expr="//div[@id='partner_vat_address_same_as_shipping']" position="after">
+            <t t-call="l10n_gt_edi.l10n_gt_edi_nit_cf_template"/>
+        </xpath>
+
+        <xpath expr="//div[@id='partner_vat_no_shipping']" position="attributes">
+            <attribute name="t-if" separator="and" add="not o._l10n_gt_edi_is_vat_void()"/>
+        </xpath>
+        <xpath expr="//div[@id='partner_vat_no_shipping']" position="after">
+            <t t-call="l10n_gt_edi.l10n_gt_edi_nit_cf_template"/>
+        </xpath>
 
         <xpath expr="//t[@t-set='layout_document_title']" position="before">
             <div>Régimen FEL - Documento Tributario Electrónico</div>
@@ -30,7 +61,7 @@
                     <div>Certificador: INFILE, S.A.</div>
                     <div>Certificador NIT: 12521337</div>
                 </div>
-                <div class="col-6" t-attf-style="font-size: {{'12px' if gt_values['have_exportacion'] or gt_values['have_referencias'] else '16px'}} !important;">
+                <div class="col-6" t-attf-style="font-size: {{'12px' if gt_values['have_exportacion'] or gt_values['have_referencias'] or gt_values['have_cambiaria'] or gt_values['is_especial_fectura'] else '16px'}} !important;">
                     <div>Nombre de la Empresa: <t t-out="gt_values['company_name']"/></div>
                     <div>NIT de la Empresa: <t t-out="gt_values['company_vat']"/></div>
                     <hr class="my-1 me-3"/>
@@ -54,6 +85,22 @@
                         <div>Numero Autorizacion Documento Origen: <t t-out="gt_values['referencias_numero_autorizacion_documento_origen']"/></div>
                         <div>Numero Documento Origen: <t t-out="gt_values['referencias_numero_documento_origen']"/></div>
                         <div>Serie Documento Origen: <t t-out="gt_values['referencias_serie_documento_origen']"/></div>
+                    </t>
+                    <t t-if="gt_values['have_cambiaria']">
+                        <hr class="my-1 me-3"/>
+                        <div class="fw-bold">Complemento - Cambiaria</div>
+                        <t t-foreach="gt_values['abonos']" t-as="abonos">
+                            <div>Numero Abono: <t t-out="abonos['numero_abono']"/></div>
+                            <div>Fecha Vencimiento: <t t-out="abonos['fecha_vencimiento']"/></div>
+                            <div>Monto Abono: <t t-out="abonos['monto_abono']"/></div>
+                        </t>
+                    </t>
+                    <t t-if="gt_values['is_especial_fectura']">
+                        <hr class="my-1 me-3"/>
+                        <div class="fw-bold">Complemento - Retenciones Factura Especial</div>
+                        <div>Retencion IVA: <t t-out="gt_values['retencion_iva']"/></div>
+                        <div>Retencion ISR: <t t-out="gt_values['retencion_isr']"/></div>
+                        <div>Total Menos Retenciones: <t t-out="gt_values['retencion_gran_total']"/></div>
                     </t>
                 </div>
             </div>

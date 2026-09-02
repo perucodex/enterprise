@@ -64,9 +64,11 @@ class AccountReturn(models.Model):
         returns = super().create(vals_list)
         returns_type_ext_ids = set(returns.mapped('type_external_id'))
         if 'l10n_be_reports.be_vat_return_type' in returns_type_ext_ids:
-            self.env.ref('l10n_be_reports.partner_fps_belgium').active = True
+            if partner_fps_belgium := self.env.ref('l10n_be_reports.partner_fps_belgium', raise_if_not_found=False):
+                partner_fps_belgium.active = True
         if 'l10n_be_reports.be_isoc_prepayment_return_type' in returns_type_ext_ids:
-            self.env.ref('l10n_be_reports.partner_centre_de_perception_belgium').active = True
+            if partner_centre_de_perception_belgium := self.env.ref('l10n_be_reports.partner_centre_de_perception_belgium', raise_if_not_found=False):
+                partner_centre_de_perception_belgium.active = True
         return returns
 
     @api.model
@@ -95,6 +97,29 @@ class AccountReturn(models.Model):
             # If the amount is to be recovered, we don't want to open the wizard and just continue to the next state
             if self.amount_to_pay_currency_id.compare_amounts(self.total_amount_to_pay, 0) == -1:
                 return
+
+            # Check that we use the right bank account (change on 2026-05-01)
+            pivot_date = fields.Date.from_string('2026-04-01')
+            old_bank_account = 'BE22679200300047'  # 'VAT Current Account': Bank account BEFORE April 2026
+            new_bank_account = 'BE41679200364210'  # 'VAT Provision Account': Bank account AFTER April 2026
+            bank_accounts = self.env['res.partner.bank'].search([
+                ('active', '=', True),
+                ('sanitized_acc_number', 'in', [old_bank_account, new_bank_account]),
+            ])
+            account_number = old_bank_account if self.date_to < pivot_date else new_bank_account
+            fps_account = bank_accounts.filtered(lambda bank: bank.sanitized_acc_number == account_number)
+            if not fps_account:
+                fps_partner = (
+                        bank_accounts.partner_id
+                        or self.env.ref('l10n_be_reports.partner_fps_belgium', raise_if_not_found=False)
+                        or self.env['res.partner'].create({'name': 'VAT Revenue Services'})
+                )
+                fps_account = self.env['res.partner.bank'].create({
+                    'partner_id': fps_partner.id,
+                    'acc_number': account_number,
+                    'allow_out_payment': True,
+                })
+            self.type_id.payment_partner_bank_id = fps_account
 
             vat_pay_wizard = self.env['l10n_be_reports.vat.pay.wizard'].create([{
                 'company_id': self.company_id.id,
@@ -153,8 +178,44 @@ class AccountReturn(models.Model):
     def _run_checks(self, check_codes_to_ignore):
         checks = super()._run_checks(check_codes_to_ignore)
 
+        if self.type_external_id == 'l10n_be_reports.be_vat_return_type':
+            checks += self._check_suite_be_tax_report_vat(check_codes_to_ignore)
+
         if self.type_external_id == 'l10n_be_reports.be_vat_listing_return_type':
             checks += self._check_suite_be_partner_vat_listing(check_codes_to_ignore)
+
+        return checks
+
+    def _check_suite_be_tax_report_vat(self, check_codes_to_ignore):
+        checks = []
+        report = self.type_id.report_id
+        if 'be_vat_compliance' not in check_codes_to_ignore:
+
+            options = self._get_closing_report_options()
+            warnings = {}
+
+            report._get_lines(options, all_column_groups_expression_totals=None, warnings=warnings)
+            submission_warnings = 'l10n_be_reports.tax_report_warning_checks' in warnings
+
+            if submission_warnings:
+                action = {
+                    'type': 'ir.actions.client',
+                    'name': _("VAT Report (BE)"),
+                    'tag': 'account_report',
+                    'context': {'report_id': self.type_id.report_id.id},
+                    'params': {
+                        'options': options,
+                        'ignore_session': True,
+                    }
+                }
+
+                checks.append({
+                    'name': _lt("Intervat Validation"),
+                    'message': _lt("A validation rule failed. Intervat may reject your VAT report. Open the report to view the warning."),
+                    'code': 'be_vat_compliance',
+                    'action': action,
+                    'result': 'anomaly',
+                })
 
         return checks
 

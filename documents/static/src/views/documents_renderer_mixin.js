@@ -59,6 +59,10 @@ export const DocumentsRendererMixin = (component) =>
                 }
             });
             useBus(this.documentService.bus, "UPDATE-DOCUMENT-FOLDER", (ev) => {
+                if (this.env.isSmall && this.rightPanelState.visible) {
+                    // Avoid empty view by resetting chatter on selection removal
+                    this.documentService.toggleRightPanelVisibility();
+                }
                 this.documentService.focusRecord(this.getContainerRecord());
             });
         }

@@ -27,16 +27,22 @@
                         <td><div t-if="o.version_id.job_id"><strong>Job Position: </strong><span t-field="o.version_id.job_id"/></div></td>
                     </tr>
                     <tr>
-                        <td><strong>Entry Date: </strong><span t-field="o.version_id.date_start"/></td>
+                        <td><strong>Entry Date: </strong><span t-out="o.l10n_ch_entry"/></td>
                     </tr>
                     <tr>
-                        <td><div t-if="o.version_id.date_end"><strong>Withdrawal Date: </strong><span t-field="o.version_id.date_end"/></div></td>
+                        <td><div t-if="o.l10n_ch_withdrawal"><strong>Withdrawal Date: </strong><span t-field="o.l10n_ch_withdrawal"/></div></td>
                     </tr>
                     <tr>
                         <td><div t-if="not o.version_id.irregular_working_time"><strong>Activity Rate: </strong><span t-field="o.version_id.l10n_ch_current_occupation_rate"/> %</div></td>
                     </tr>
                     <tr>
                         <td t-if="o.l10n_ch_is_code"><strong>Source-Tax Code: </strong><span t-field="o.l10n_ch_is_code"/></td>
+                    </tr>
+                    <tr>
+                        <t t-set="source_tax_line" t-value="o.line_ids.filtered(lambda line: line.salary_rule_id.l10n_ch_code == '9075')"/>
+                        <td t-if="source_tax_line">
+                            <strong>Source-Tax Rate: </strong><span t-out="str(round(source_tax_line.total, 4)) + ' %'"/>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -62,7 +68,7 @@
                             <td class="text-end"><span t-esc="line.amount"
                                     t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
                             <td class="text-end">
-                                <span t-if="line.rate &lt; 100" t-out="str(line.rate) + ' %'"/>
+                                <span t-if="line.rate &lt; 100" t-out="str(round(line.rate, 4)) + ' %'"/>
                                 <span t-if="line.rate > 100" t-out="round(line.rate / 100, 2)"/>
                             </td>
                             <td class="text-end"><span t-esc="line.total"
@@ -75,7 +81,7 @@
                             <td class="fw-bold"><span t-field="line.name"/></td>
                             <td class="text-end fw-bold"><span t-if="line.quantity > 1 or line.rate != 100" t-esc="line.amount"
                                     t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
-                            <td class="text-end fw-bold"><span t-if="line.rate != 100" t-out="str(line.rate) + ' %'"/></td>
+                            <td class="text-end fw-bold"><span t-if="line.rate != 100" t-out="str(round(line.rate, 4)) + ' %'"/></td>
                             <td class="text-end fw-bold"><span t-esc="line.total"
                                     t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
                         </tr>
@@ -89,7 +95,7 @@
                             <td><span t-field="line.name"/></td>
                             <td class="text-end"><span t-if="line.quantity > 1 or line.rate != 100" t-esc="line.amount"
                                     t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
-                            <td class="text-end"><span t-if="line.rate != 100" t-out="str(abs(line.rate)) + ' %'"/></td>
+                            <td class="text-end"><span t-if="line.rate != 100" t-out="str(round(abs(line.rate), 4)) + ' %'"/></td>
                             <td class="text-end"><span t-esc="line.total"
                                     t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
                         </tr>
@@ -103,7 +109,7 @@
                             <td><span t-field="line.name"/></td>
                             <td class="text-end"><span t-if="line.quantity > 1 or line.rate != 100" t-esc="line.amount"
                                     t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
-                            <td class="text-end"><span t-if="line.rate != 100" t-out="str(abs(line.rate)) + ' %'"/></td>
+                            <td class="text-end"><span t-if="line.rate != 100" t-out="str(round(abs(line.rate), 4)) + ' %'"/></td>
                             <td class="text-end"><span t-esc="line.total"
                                     t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
                         </tr>
@@ -159,7 +165,7 @@
                         <t t-foreach="o.employee_id.bank_account_ids" t-as="ba">
                             <li>
                                 <span  class="fw-bold" t-out="ba.display_name"/>
-                                of <span class="fst-italic" t-field="o.employee_id"/>:
+                                of <span class="fst-italic" t-field="ba.acc_holder_name"/>:
                                 <t t-esc="allocations.get(str(ba.id), 0.0)"/>
                             </li>
                         </t>

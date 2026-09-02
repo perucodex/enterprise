@@ -155,7 +155,9 @@ export class Keypad extends Component {
                     break;
                 }
             }
-            const phoneMatch = matchPhoneNumber(contact.phone, searchTerms);
+            const phoneMatch =
+                matchPhoneNumber(contact.phone, searchTerms) ??
+                (contact.phone_sanitized ? matchPhoneNumber(contact.phone_sanitized, searchTerms) : null);
             if (!phoneMatch) {
                 continue;
             }

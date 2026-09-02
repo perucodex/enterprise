@@ -25,22 +25,23 @@ const documentMenuItems = [
     documentsCogMenuItemAutomations,
 ];
 
-/**
- * Temporary override to only show the menu entries that are working on Document
- * (ex.: "spreadsheet-cog-menu" is currently not working).
- */
 export class DocumentsCogMenu extends CogMenu {
     async _registryItems() {
-        const enabledItems = [];
-        for (const item of documentMenuItems) {
-            if (await item.isDisplayed(this.env)) {
-                enabledItems.push({
-                    Component: item.Component,
-                    groupNumber: item.groupNumber,
-                    key: item.Component.name,
-                });
-            }
-        }
-        return enabledItems;
+        const documentItemsPromise = documentMenuItems.map(async (item) =>
+            (await item.isDisplayed(this.env)) ? formatRegistryItem(item) : false
+        );
+        const [enabledItems, items] = await Promise.all([
+            super._registryItems(),
+            Promise.all(documentItemsPromise),
+        ]);
+        return enabledItems.concat(items.filter(Boolean));
     }
+}
+
+function formatRegistryItem(item) {
+    return {
+        Component: item.Component,
+        groupNumber: item.groupNumber,
+        key: item.Component.name,
+    };
 }

@@ -2,14 +2,14 @@
 
 from odoo.tests import tagged
 
-from odoo.addons.delivery_ups_rest.tests.test_delivery_ups import TestDeliveryUPS
+from odoo.addons.delivery_ups_rest.tests.common import DeliveryUPSCommon
 from odoo.addons.payment_custom.tests.common import PaymentCustomCommon
 
 
 @tagged('post_install', '-at_install')
-class TestCashOnDeliveryPaymentProvider(PaymentCustomCommon, TestDeliveryUPS):
+class TestCashOnDeliveryPaymentProvider(DeliveryUPSCommon, PaymentCustomCommon):
 
-    def test_when_shiprocket_cod_enabled_only_cod_pms_are_available(self):
+    def test_when_ups_cod_enabled_only_cod_pms_are_available(self):
         self.ups_delivery.allow_cash_on_delivery = True
         order = self.env['sale.order'].create({
             'partner_id': self.partner.id,

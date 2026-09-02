@@ -179,8 +179,8 @@
         <GLPostingDate t-out="move_vals['date']"/>
         <t t-if="move_vals['partner_id']">
             <t t-set="partner_vals" t-value="partner_detail_map[move_vals['partner_id']]"/>
-            <CustomerID t-if="partner_vals['type'] == 'customer'" t-out="move_vals['partner_id']"/>
-            <SupplierID t-if="partner_vals['type'] == 'supplier'" t-out="move_vals['partner_id']"/>
+            <CustomerID t-if="'customer' in partner_vals['types']" t-out="move_vals['partner_id']"/>
+            <SupplierID t-if="'supplier' in partner_vals['types']" t-out="move_vals['partner_id']"/>
         </t>
         <t t-else="">
             <CustomerID>N/A</CustomerID>
@@ -198,8 +198,8 @@
         <SourceDocumentID t-out="move_vals['id']"/>
         <t t-if="line_vals['partner_id']">
             <t t-set="partner_vals" t-value="partner_detail_map[line_vals['partner_id']]"/>
-            <CustomerID t-if="partner_vals['type'] == 'customer'" t-out="line_vals['partner_id']"/>
-            <SupplierID t-if="partner_vals['type'] == 'supplier'" t-out="line_vals['partner_id']"/>
+            <CustomerID t-if="line_vals['account_type'] == 'asset_receivable' or not line_vals['account_type'] == 'liability_payable' and partner_vals['type'] == 'customer'" t-out="line_vals['partner_id']"/>
+            <SupplierID t-if="line_vals['account_type'] == 'liability_payable' or not line_vals['account_type'] == 'asset_receivable' and partner_vals['type'] == 'supplier'" t-out="line_vals['partner_id']"/>
         </t>
         <t t-else="">
             <CustomerID>N/A</CustomerID>

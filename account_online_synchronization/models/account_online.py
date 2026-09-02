@@ -20,6 +20,8 @@ from odoo.addons.account_online_synchronization.models.odoofin_auth import OdooF
 from odoo.tools.misc import format_amount, format_date, get_lang
 from odoo.tools import _, LazyTranslate
 
+NON_BLOCKING_ERROR = 'non_blocking_error'
+
 _lt = LazyTranslate(__name__)
 _logger = logging.getLogger(__name__)
 pattern = re.compile("^[a-z0-9-_]+$")
@@ -224,7 +226,7 @@ class AccountOnlineAccount(models.Model):
 
     def _retrieve_transactions(self, date=None, transactions_type='posted'):
         last_stmt_line = self.env['account.bank.statement.line'].search([
-                ('date', '<=', self.last_sync or fields.Date().today()),
+                ('date', '<=', date or self.last_sync or fields.Date().today()),
                 ('online_transaction_identifier', '!=', False),
                 ('journal_id', 'in', self.journal_ids.ids),
                 ('online_account_id', '=', self.id)
@@ -448,11 +450,12 @@ class AccountOnlineLink(models.Model):
                 'bic': data.get('swift_code'),
             })
 
-        bank_account = self.env['res.partner.bank'].sudo().create({
-            'acc_number': data.get('account_number'),
-            'bank_id': bank.id,
-            'partner_id': self.company_id.partner_id.id,
-        })
+        bank_account = self.env['res.partner.bank']._find_or_create_bank_account(
+            account_number=data.get('account_number'),
+            partner=self.company_id.partner_id, allow_company_account_creation=True,
+            company=self.company_id,
+            extra_create_vals={'bank_id': bank.id},
+        )
 
         self.env['account.journal'].sudo().create({
             'name': data.get('account_number'),
@@ -663,7 +666,10 @@ class AccountOnlineLink(models.Model):
             error_details = error.get('data')
             subject = error.get('message')
             message = error_details.get('message')
-            state = error_details.get('odoofin_state') or 'error'
+            state = error_details.get('odoofin_state')
+            if state is None:
+                # None blocking errors must not change the connection state, anything else is a real error
+                state = self.state if error_details.get('exception_type') == NON_BLOCKING_ERROR else 'error'
             ctx = self.env.context.copy()
             ctx['error_reference'] = error_details.get('error_reference')
             ctx['provider_type'] = error_details.get('provider_type')
@@ -960,6 +966,10 @@ class AccountOnlineLink(models.Model):
             # doesn't send us a new consent expiring date
             self.expiring_synchronization_date = None
 
+    @api.model
+    def _get_institution_data(self):
+        return self._fetch_odoo_fin('/proxy/v1/get_user_institution_data')
+
     def _update_connection_status(self):
         self.ensure_one()
         resp_json = self._fetch_odoo_fin('/proxy/v2/connection_status', ignore_status=True)
@@ -1012,14 +1022,15 @@ class AccountOnlineLink(models.Model):
         journal_type = 'bank'
         if data:
             journal_type = data.pop('journal_type', None) or 'bank'
-            self.write(data)
-
-            self._update_connection_status()
-            if data.get('manage_consent'):
-                url = self._get_odoofin_url(f'/manage-consent?client_id={self.client_id}&access_token={self.access_token}')
+            if consent_token := data.pop('manage_consent', None):
+                url = self._get_odoofin_url(f'/manage-consent?consent_token={consent_token}')
                 self.message_post(
                     body=_("You can manage your bank synchronization consent for this connection %s", Markup("<a href='%s' target='_blank'>%s</a>") % (url, _("here.")))
                 )
+
+            self.write(data)
+
+            self._update_connection_status()
 
         # if for some reason we just have to update the record without doing anything else, the mode will be set to 'none'
         if mode == 'none':
@@ -1101,10 +1112,10 @@ class AccountOnlineLink(models.Model):
     def action_new_synchronization(self, preferred_inst=None, journal_id=False, journal_type='bank'):
         # Search for an existing link that was not fully connected
         online_link = self
-        if not online_link:
-            online_link = self.search([('account_online_account_ids', '=', False)], limit=1)
+        if not online_link or online_link.provider_type:
+            online_link = self.search([('account_online_account_ids', '=', False), ('provider_type', '=', False)], limit=1)
         # If not found, create a new one
-        if not online_link:
+        if not online_link or online_link.provider_type:
             online_link = self.create({})
         return online_link._open_iframe('link', preferred_institution=preferred_inst, journal_id=journal_id, journal_type=journal_type)
 

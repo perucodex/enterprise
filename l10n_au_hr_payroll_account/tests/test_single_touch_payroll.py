@@ -267,6 +267,7 @@ class TestSingleTouchPayroll(L10nPayrollAccountCommon):
         )
         self._submit_stp(stp_update)
 
+    @freeze_time("2024-03-31")
     @mock_skip_stp_api_calls()
     def test_out_of_cycle_termination(self):
         self.contract_1.write({"l10n_au_salary_sacrifice_superannuation": 100})
@@ -321,13 +322,14 @@ class TestSingleTouchPayroll(L10nPayrollAccountCommon):
         self.assertEqual(rendering_data[1][0]["EmploymentEndD"], fields.Date.from_string("2024-05-31"))
         self._submit_stp(stp)
 
+    @freeze_time("2024-10-31")
     @mock_skip_stp_api_calls()
     def test_out_of_cycle_termination_genuine(self):
         self.contract_1.write({
             "wage": 2000,
             "schedule_pay": "weekly",
-            "date_start": "2011-09-01",
-            "date_end": "2024-11-01",
+            "contract_date_start": "2011-09-01",
+            "contract_date_end": "2024-11-01",
         })
         self.allocate_leaves(
             self.employee_1,
@@ -742,25 +744,16 @@ class TestSingleTouchPayroll(L10nPayrollAccountCommon):
         data_2 = stp_2._get_complex_rendering_data()
         remuneration_collection = data_2[self.employee_1.id]["Remuneration"]
         remuneration_collection = sorted(remuneration_collection, key=lambda x: x["IncomeStreamTypeC"])
-        self.assertEqual(len(remuneration_collection), 2)
+        self.assertEqual(len(remuneration_collection), 1)
         self.assertStpTupleEqual(
             remuneration_collection[0],
             {
-                "GrossA": 12000,
-                "IncomeStreamTypeC": "SAW",
-                "IncomeTaxPayAsYouGoWithholdingTaxWithheldA": 3402.0,
+                "GrossA": 17000.0,
+                "IncomeStreamTypeC": "WHM",
+                "IncomeTaxPayAsYouGoWithholdingTaxWithheldA": 4368.0,
 
             }
         )
-        self.assertStpTupleEqual(
-            remuneration_collection[1],
-            {
-                "GrossA": 5000,
-                "IncomeStreamTypeC": "WHM",
-                "IncomeTaxPayAsYouGoWithholdingTaxWithheldA": 966.0,
-            }
-        )
-        self.assertStpTupleEqual(remuneration_collection[0], data[self.employee_1.id]["Remuneration"][0])
         self._submit_stp(stp_2)
 
     @mock_skip_stp_api_calls()
@@ -947,3 +940,183 @@ class TestSingleTouchPayroll(L10nPayrollAccountCommon):
 
         seq_2 = stp_sequence.next_by_id()
         self.assertNotEqual(seq_2, seq_1, "The sequence should be unique")
+
+    @mock_skip_stp_api_calls()
+    def test_missed_reporting(self):
+        # Payrun for January
+        with freeze_time("2024-01-31"):
+            self.env.cr._now = datetime.now()
+            batch = self._prepare_payslip_run(employee_ids=self.employee_1 + self.employee_2, start_date="2024-01-01", end_date="2024-01-31")
+            stp = self.env["l10n_au.stp"].search([("payslip_batch_id", "=", batch.id)])
+            self.assertEqual(stp.payevent_type, "submit", "The STP record should be an Submit type")
+            self._submit_stp(stp)
+
+        # Payrun for March without submitting the STP for February (Payment date set in the next pay period)
+        with freeze_time("2024-03-31"):
+            self.env.cr._now = datetime.now()
+            batch = self._prepare_payslip_run(employee_ids=self.employee_1 + self.employee_2, start_date="2024-03-01", end_date="2024-03-31")
+            stp = self.env["l10n_au.stp"].search([("payslip_batch_id", "=", batch.id)])
+            self.assertEqual(stp.payevent_type, "submit", "The STP record should be an Submit type")
+            stp.submit_date = date(2024, 4, 1)
+            self._submit_stp(stp)
+
+        # Payslip for February, created at a later time. This should create an update STP
+        with freeze_time("2024-04-01"):
+            self.env.cr._now = datetime.now()
+            batch = self._prepare_payslip_run(employee_ids=self.employee_1 + self.employee_2, start_date="2024-02-01", end_date="2024-02-29")
+            self.assertTrue(all(slip._is_past_period() for slip in batch.slip_ids))
+            stp = batch.slip_ids._get_payslip_stp()[batch.slip_ids[0].id]
+            self.assertEqual(stp.payevent_type, "update", "The STP record should be an update type")
+            self._submit_stp(stp)
+
+        # Overlaping payment date on STP should not create an update action for April
+        with freeze_time("2024-04-30"):
+            self.env.cr._now = datetime.now()
+            batch = self._prepare_payslip_run(employee_ids=self.employee_1 + self.employee_2, start_date="2024-04-01", end_date="2024-04-30")
+            stp = batch.slip_ids._get_payslip_stp()[batch.slip_ids[0].id]
+            self.assertEqual(stp.payevent_type, "submit", "The STP record should be an Submit type")
+            self._submit_stp(stp)
+
+    def test_get_payslip_stp(self):
+        # _compute_stp_count calls _get_payslip_stp, so we can test both with the same assertions
+        batch = self._prepare_payslip_run(employee_ids=self.employee_1 + self.employee_2)
+        self.assertEqual(batch.l10n_au_stp_count, 1, "There should be 1 STP record for the 2 employees")
+
+        # Deleting the payslips
+        batch.action_draft()
+        batch.slip_ids.unlink()
+        self.assertEqual(batch.l10n_au_stp_count, 0, "There should be no STP record as there is no payslip")
+
+    @freeze_time("2026-07-31")
+    @mock_skip_stp_api_calls()
+    def test_stp_qe(self):
+        self.employee_1.write({
+            'l10n_au_child_support_garnishee_amount': 0.15,
+            'l10n_au_child_support_deduction': 120,
+            'contract_date_end': "2026-12-31",
+            'contract_date_start': "2026-01-01",
+            'l10n_au_salary_sacrifice_superannuation': 100,
+        })
+
+        self.employee_2.write({
+            'contract_date_end': "2026-12-31",
+            'contract_date_start': "2026-01-01",
+        })
+
+        batch = self._prepare_payslip_run(
+            self.employee_1 + self.employee_2,
+            {
+                "l10n_au_hr_payroll.input_child_support_garnishee_lump_sum": 1000,
+                "l10n_au_hr_payroll.input_bonus_commissions": 7000,
+                "l10n_au_hr_payroll.input_bonus_commissions_overtime": 1000,
+            },
+                start_date="2026-07-02",
+                end_date="2026-08-01",
+        )
+
+        self.assertTrue(
+            all(state == "ready" for state in batch.slip_ids.mapped("l10n_au_stp_status")),
+            "All payslips should be ready to be sent to STP"
+        )
+
+        stp = self.env["l10n_au.stp"].search([("payslip_batch_id", "=", batch.id)])
+        stp.submit_date = date.today()
+        data = stp._get_complex_rendering_data()
+        # Gross remains the same.
+        self.assertEqual(data[self.employee_1.id]["Remuneration"][0]["GrossA"], 5000)
+        self.assertEqual(data[self.employee_2.id]["Remuneration"][0]["GrossA"], 7000)
+        # Remuneration G should be a little bit more as QE is bigger.
+        self.assertListEqual(
+            data[self.employee_1.id]["Deduction"],
+            [
+                {"RemunerationTypeC": "G", "RemunerationA": 2266.3},
+                {"RemunerationTypeC": "D", "RemunerationA": 120.0},
+            ],
+        )
+        self.assertEqual(data[self.employee_1.id]["contributions"][0]["EntitlementTypeC"], "Q")
+        self.assertEqual(data[self.employee_1.id]["contributions"][0]["EmployerContributionsYearToDateA"], 13000)
+        self._submit_stp(stp)
+
+    def test_stp_without_payslips_and_employees(self):
+        stp = self.env["l10n_au.stp"].create({
+            "company_id": self.company.id,
+            "payevent_type": "submit",
+        })
+        with self.assertRaisesRegex(ValidationError, "There are no payslips for STP submission."):
+            stp.submit()
+
+        stp.payevent_type = "update"
+        with self.assertRaisesRegex(ValidationError, "There are no employees for STP submission."):
+            stp.submit()
+
+    @mock_skip_stp_api_calls()
+    @freeze_time("2026-07-31")
+    def test_stp_deductions(self):
+        self.employee_2.l10n_au_child_support_garnishee_amount = 0.15
+        self.employee_2.l10n_au_child_support_deduction = 120
+        self.contract_2.l10n_au_salary_sacrifice_superannuation = 100
+        self.contract_2.l10n_au_salary_sacrifice_other = 200
+
+        # Create a pre-tax deduction input type
+        pre_tax_rule = self.env["hr.payslip.input.type"].create({
+            "name": "Pre-tax Deduction Other",
+            "code": "SS.O",
+            "l10n_au_payment_type": "deduction",
+            "l10n_au_superannuation_treatment": "ote"
+        })
+
+        # Payrun for July with pre-tax deductions
+        batch = self.env["hr.payslip.run"].create(
+            {
+                "date_start": "2026-07-01",
+                "date_end": "2026-07-31",
+                "name": "July Batch",
+                "company_id": self.company.id,
+            }
+        )
+        batch.generate_payslips(employee_ids=self.employee_2.ids)
+        batch.slip_ids.write({"input_line_ids": [
+            (0, 0, {
+                "input_type_id": pre_tax_rule.id,
+                "amount": 100,
+            }),
+        ]})
+        batch.slip_ids.compute_sheet()
+        self.assertAlmostEqual(batch.slip_ids.net_wage, 4362.9)
+
+        # Add a post-tax deduction input type - net wage should be reduced by 300
+        batch.slip_ids.write({"input_line_ids": [
+            (0, 0, {
+                "input_type_id": self.env.ref("l10n_au_hr_payroll.input_post_tax_deduction").id,
+                "amount": -300,
+            })
+        ]})
+        batch.slip_ids.compute_sheet()
+        batch.action_validate()
+        self.assertAlmostEqual(batch.slip_ids.net_wage, 4062.9)
+
+        # Validate STP data
+        stp = batch.slip_ids._get_payslip_stp()[batch.slip_ids.id]
+        stp.submit_date = date.today()
+        data = stp._get_complex_rendering_data()
+        # Post tax not to be reported
+        self.assertEqual(data[self.employee_2.id]["Remuneration"][0]["GrossA"], 7000)
+        self.assertListEqual(
+            sorted(data[self.employee_2.id]["Deduction"], key=lambda x: x["RemunerationTypeC"]),
+            [
+                {"RemunerationTypeC": "D", "RemunerationA": 120.0},
+                {"RemunerationTypeC": "G", "RemunerationA": 791.1},
+            ],
+            "Post tax deductions should not be reported in STP."
+        )
+
+        # Pre-tax deductions to be reported under salary sacrifice other
+        self.assertListEqual(
+            sorted(data[self.employee_2.id]["Remuneration"][0]["SalarySacrificeCollection"], key=lambda x: x["TypeC"]),
+            [
+                {'TypeC': 'O', 'PaymentA': 300.0},
+                {'TypeC': 'S', 'PaymentA': 100.0},
+            ],
+            "Pre-tax deductions should be reported under salary sacrifice other in STP."
+        )
+        self._submit_stp(stp)

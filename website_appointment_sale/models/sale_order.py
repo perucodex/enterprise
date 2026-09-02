@@ -2,6 +2,7 @@
 
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.tools import str2bool
 
 
 class SaleOrder(models.Model):
@@ -77,9 +78,9 @@ class SaleOrder(models.Model):
             return values
         booking_sudo = self.env['calendar.booking'].sudo().browse(calendar_booking_id)
         values['calendar_booking_ids'] = [Command.link(calendar_booking_id)]
-        # Using partner's lang, same as usual behavior in _compute_name.
+        # Using order's lang (via _get_lang()), same as usual behavior in _compute_name.
         # It is linked to partner created / linked on appointment form submission.
-        values['name'] = booking_sudo.with_context(tz=calendar_booking_tz, lang=self.partner_id.lang)._get_description()
+        values['name'] = booking_sudo.with_context(tz=calendar_booking_tz, lang=self._get_lang())._get_description()
         return values
 
     def unlink(self):
@@ -87,3 +88,19 @@ class SaleOrder(models.Model):
         bookings_to_unlink = self.order_line.calendar_booking_ids
         bookings_to_unlink.unlink()
         return super().unlink()
+
+    def _needs_customer_address(self):
+        """Override of `website_sale` to avoid requesting full address details for appointments."""
+        res = super()._needs_customer_address()
+
+        if (
+            self.order_line
+            and all(line.calendar_booking_ids for line in self.order_line)
+        ):
+            return str2bool(
+                self.env["ir.config_parameter"].sudo().get_param(
+                    "website_appointment_sale.require_billing_details_for_appointments", "False"
+                )
+            )
+
+        return res

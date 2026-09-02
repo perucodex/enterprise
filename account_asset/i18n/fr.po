@@ -12,14 +12,15 @@
 # Martin Trigaux, 2022
 # Jolien De Paepe, 2023
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
-# "Manon Rondou (ronm)" <ronm@odoo.com>, 2025.
+# "Manon Rondou (ronm)" <ronm@odoo.com>, 2025, 2026.
+# "Cécile Collart (cco)" <cco@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-30 18:42+0000\n"
-"PO-Revision-Date: 2025-11-12 08:52+0000\n"
-"Last-Translator: \"Manon Rondou (ronm)\" <ronm@odoo.com>\n"
+"POT-Creation-Date: 2026-08-21 17:44+0000\n"
+"PO-Revision-Date: 2026-08-27 16:09+0000\n"
+"Last-Translator: \"Cécile Collart (cco)\" <cco@odoo.com>\n"
 "Language-Team: French <https://translate.odoo.com/projects/odoo-19/"
 "account_asset/fr/>\n"
 "Language: fr\n"
@@ -28,7 +29,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : ((n != 0 && n % "
 "1000000 == 0) ? 1 : 2);\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #. module: account_asset
 #: model:ir.model.fields,field_description:account_asset.field_account_asset__total_depreciation_entries_count
@@ -301,7 +302,7 @@ msgstr "Activités"
 #. module: account_asset
 #: model:ir.model.fields,field_description:account_asset.field_account_asset__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr "Activité exception décoration"
+msgstr "Indicateur d’exception d’activité"
 
 #. module: account_asset
 #: model:ir.model.fields,field_description:account_asset.field_account_asset__activity_state
@@ -502,8 +503,8 @@ msgstr "Immobilisation créée à partir de la facture : %s"
 #. module: account_asset
 #. odoo-python
 #: code:addons/account_asset/models/account_asset.py:0
-msgid "Asset disposed. %s"
-msgstr "Immobilisation cédée. %s"
+msgid "Asset disposed. %(message)s"
+msgstr "Immobilisation cédée. %(message)s"
 
 #. module: account_asset
 #: model:account.return.check.template,name:account_asset.account_return_check_template_asset_movement_and_accounting_treatment
@@ -519,8 +520,14 @@ msgstr "Immobilisation en pause. %s"
 #. module: account_asset
 #. odoo-python
 #: code:addons/account_asset/models/account_asset.py:0
-msgid "Asset sold. %s"
-msgstr "Immobilisation vendue. %s"
+msgid "Asset sold. %(message)s See %(invoice_links)s"
+msgstr "Immobilisation vendue. %(message)s Voir %(invoice_links)s"
+
+#. module: account_asset
+#. odoo-python
+#: code:addons/account_asset/models/account_asset.py:0
+msgid "Asset sold: %s"
+msgstr "Immobilisation vendue : %s"
 
 #. module: account_asset
 #. odoo-python
@@ -882,13 +889,13 @@ msgstr "Tableau des amortissements"
 #. module: account_asset
 #: model_terms:ir.ui.view,arch_db:account_asset.view_account_asset_form
 msgid "Depreciation Date"
-msgstr "Date de dépréciation"
+msgstr "Date d'amortissement"
 
 #. module: account_asset
 #: model:ir.model.fields,field_description:account_asset.field_account_asset__depreciation_move_ids
 #: model_terms:ir.ui.view,arch_db:account_asset.view_account_asset_form
 msgid "Depreciation Lines"
-msgstr "Lignes de dépréciation"
+msgstr "Lignes d'amortissement"
 
 #. module: account_asset
 #: model_terms:ir.ui.view,arch_db:account_asset.view_account_asset_form
@@ -1014,6 +1021,20 @@ msgid ""
 msgstr ""
 "Soit \"Mois\" soit \"Années\" (insensible à la casse). Spécifie l’unité de "
 "durée."
+
+#. module: account_asset
+#: model:account.return.check.template,description:account_asset.account_return_check_template_monitoring_of_depreciation
+msgid ""
+"Ensure compliance with local tax rules on depreciation.\n"
+"Verify that the depreciation methods, depreciation period, and start dates "
+"align with tax requirements (e.g. linear depreciation, pro rata temporis "
+"application, no double declining for tax purposes)."
+msgstr ""
+"Veillez au respect des règles fiscales locales en matière d’amortissement.\n"
+"Vérifiez que les méthodes d’amortissement, la durée d’amortissement et les "
+"dates de début sont conformes aux exigences fiscales (par exemple : "
+"amortissement linéaire, application du pro rata temporis, absence "
+"d’amortissement dégressif à des fins fiscales)."
 
 #. module: account_asset
 #. odoo-python
@@ -1235,7 +1256,7 @@ msgstr "Pièces comptables"
 #: model:ir.model,name:account_asset.model_account_move
 #: model_terms:ir.ui.view,arch_db:account_asset.view_account_asset_form
 msgid "Journal Entry"
-msgstr "Écriture comptable"
+msgstr "Pièce comptable"
 
 #. module: account_asset
 #: model:ir.model,name:account_asset.model_account_move_line
@@ -1358,6 +1379,11 @@ msgstr "Modifier l'immobilisation"
 #: model_terms:ir.ui.view,arch_db:account_asset.view_account_asset_form
 msgid "Modify Depreciation"
 msgstr "Modifier l'amortissement"
+
+#. module: account_asset
+#: model:account.return.check.template,name:account_asset.account_return_check_template_monitoring_of_depreciation
+msgid "Monitoring of Depreciation "
+msgstr "Suivi des amortissements "
 
 #. module: account_asset
 #: model:ir.model.fields.selection,name:account_asset.selection__account_asset__method_period__1
@@ -1924,8 +1950,8 @@ msgid ""
 "Vendor Bills)."
 msgstr ""
 "Le code ou le nom du journal associé dans Odoo pour les écritures "
-"d’amortissement (ex. : MISC – Opérations diverses, INV – Factures clients, "
-"BILL – Factures fournisseurs)."
+"d’amortissement (ex. : MISC - Opérations diverses, INV - Factures clients, "
+"BILL - Factures fournisseurs)."
 
 #. module: account_asset
 #: model:ir.model.fields,help:account_asset.field_asset_modify__invoice_ids
@@ -1933,7 +1959,7 @@ msgid ""
 "The disposal invoice is needed in order to generate the closing journal "
 "entry."
 msgstr ""
-"La facture de cession est nécessaire pour générer l’écriture comptable de "
+"La facture de cession est nécessaire pour générer la pièce comptable de "
 "clôture."
 
 #. module: account_asset
@@ -1958,6 +1984,12 @@ msgstr ""
 "Le compte de charges pour l’enregistrement des écritures d’amortissement "
 "périodiques (ex. : \"630000 Charges d’amortissement\"). Doit exister dans "
 "Odoo et être de type \"Amortissement\" ou \"Charge\"."
+
+#. module: account_asset
+#. odoo-javascript
+#: code:addons/account_asset/static/src/components/depreciation_schedule/warnings.xml:0
+msgid "The fixed asset account differs from the account on the bill. Click"
+msgstr ""
 
 #. module: account_asset
 #: model:ir.model.fields,help:account_asset.field_account_asset__method_number
@@ -2090,8 +2122,8 @@ msgid ""
 "You can manually close an asset when the depreciation is over.\n"
 "By cancelling an asset, all depreciation entries will be reversed"
 msgstr ""
-"Lorsqu'une immobilisation est créée, son statut est \"Brouillon\".\n"
-"Si l'immobilisation est confirmée, le statut passe à \"En cours\" et les "
+"Lorsqu'une immobilisation est créée, son statut est 'Brouillon'.\n"
+"Si l'immobilisation est confirmée, le statut passe à 'En cours' et les "
 "lignes d'amortissement peuvent être comptabilisées.\n"
 "Le statut \"En attente\" peut être défini manuellement lorsque vous "
 "souhaitez suspendre temporairement l'amortissement d'une immobilisation.\n"
@@ -2159,9 +2191,9 @@ msgid ""
 "You cannot automate the journal entry for an asset that has a running gross "
 "increase. Please use 'Dispose' on the increase(s)."
 msgstr ""
-"Vous ne pouvez pas automatiser l’écriture comptable pour une immobilisation "
+"Vous ne pouvez pas automatiser la pièce comptable pour une immobilisation "
 "dont une augmentation de valeur est en cours. Veuillez utiliser l’option "
-"\"Céder\" pour cette ou ces augmentations."
+"\"Céder\" pour cette ou ces augmentation(s)."
 
 #. module: account_asset
 #. odoo-python
@@ -2352,6 +2384,12 @@ msgid "gain/loss"
 msgstr "bénéfices/pertes"
 
 #. module: account_asset
+#. odoo-javascript
+#: code:addons/account_asset/static/src/components/depreciation_schedule/warnings.xml:0
+msgid "here"
+msgstr ""
+
+#. module: account_asset
 #. odoo-python
 #: code:addons/account_asset/controller/asset_template_controller.py:0
 msgid "journal_id"
@@ -2428,6 +2466,12 @@ msgstr "salvage_value"
 #: code:addons/account_asset/wizard/asset_modify.py:0
 msgid "sell"
 msgstr "vendre"
+
+#~ msgid "Asset disposed. %s"
+#~ msgstr "Immobilisation cédée. %s"
+
+#~ msgid "Asset sold. %s"
+#~ msgstr "Immobilisation vendue. %s"
 
 #~ msgid " (%s of %s)"
 #~ msgstr " (%s de %s)"

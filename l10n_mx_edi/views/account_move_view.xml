@@ -25,7 +25,7 @@
                             invisible="not l10n_mx_edi_update_sat_needed"/>
                 </xpath>
 
-                <xpath expr="//sheet/group//group[last()]" position="inside">
+                <xpath expr="//group[@id='header_right_group']" position="inside">
                     <field name="l10n_mx_edi_cfdi_state"
                            invisible="not l10n_mx_edi_cfdi_state"/>
                     <field name="l10n_mx_edi_cfdi_sat_state"
@@ -53,20 +53,24 @@
                 </xpath>
 
                 <xpath expr="//page[@id='other_tab']//group[@name='sale_info_group']" position="inside">
-                    <field name="l10n_mx_edi_addenda_ids" invisible="not l10n_mx_edi_is_cfdi_needed" widget="many2many_tags"/>
+                    <field name="l10n_mx_edi_addenda_ids" 
+                           invisible="not l10n_mx_edi_is_cfdi_needed"
+                           widget="many2many_tags"
+                           groups="account.group_account_invoice"/>
                 </xpath>
 
                 <!-- Publico General -->
                 <xpath expr="//label[@for='invoice_date']" position="before">
+                    <field name="l10n_mx_edi_partner_address_complete" invisible="1"/>
                     <field name="l10n_mx_edi_cfdi_to_public"
                            invisible="not l10n_mx_edi_is_cfdi_needed"
-                           readonly="l10n_mx_edi_cfdi_state in ('sent', 'global_sent')"/>
+                           readonly="l10n_mx_edi_cfdi_state in ('sent', 'global_sent') or (partner_id and not l10n_mx_edi_partner_address_complete)"/>
                 </xpath>
 
                 <!-- Invoice lines -->
                 <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='price_total']" position="after">
                     <field name="l10n_mx_edi_tax_object"
-                           required="parent.l10n_mx_edi_is_cfdi_needed and display_type not in ('line_section', 'line_note')"
+                           required="parent.l10n_mx_edi_is_cfdi_needed and display_type not in ('line_section', 'line_note') and price_unit and quantity"
                            column_invisible="not parent.l10n_mx_edi_is_cfdi_needed"
                            readonly="parent.l10n_mx_edi_cfdi_state in ('sent', 'global_sent')"
                            optional="hide"
@@ -116,7 +120,7 @@
                                 <button name="action_force_payment_cfdi"
                                         type="object"
                                         string="Force CFDI"
-                                        invisible="state != 'payment_sent_pue'"/>
+                                        invisible="1"/>
                                 <button name="action_cancel"
                                         type="object"
                                         string="Cancel"

@@ -23,6 +23,9 @@
         'web.assets_tests': [
             'l10n_ec_edi_pos/static/tests/tours/**/*',
         ],
+        'web.assets_unit_tests': [
+            'l10n_ec_edi_pos/static/tests/unit/**/*',
+        ],
     },
     'installable': True,
     'auto_install': True,

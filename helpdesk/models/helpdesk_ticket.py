@@ -200,7 +200,7 @@ class HelpdeskTicket(models.Model):
     @api.depends('sla_status_ids.deadline', 'sla_status_ids.reached_datetime')
     def _compute_sla_reached(self):
         sla_status_read_group = self.env['helpdesk.sla.status']._read_group(
-            [('exceeded_hours', '<', 0), ('ticket_id', 'in', self.ids)],
+            [('reached_datetime', '!=', False), ('ticket_id', 'in', self.ids)],
             ['ticket_id'],
         )
         sla_status_ids_per_ticket = {ticket.id for [ticket] in sla_status_read_group}
@@ -391,8 +391,8 @@ class HelpdeskTicket(models.Model):
         self.ensure_one()
         if self.partner_id.email and self.partner_email and self.partner_email != self.partner_id.email:
             ticket_email_normalized = tools.email_normalize(self.partner_email) or self.partner_email or False
-            partner_email_normalized = tools.email_normalize(self.partner_id.email) or self.partner_id.email or False
-            return ticket_email_normalized != partner_email_normalized
+            partner_emails_normalized = tools.email_normalize_all(self.partner_id.email) or self.partner_id.email or False
+            return ticket_email_normalized not in partner_emails_normalized
         return False
 
     def _get_partner_phone_update(self):
@@ -734,6 +734,12 @@ class HelpdeskTicket(models.Model):
 
     def _unsubscribe_portal_users(self):
         self.message_unsubscribe(partner_ids=self.message_partner_ids.filtered('user_ids.share').ids)
+
+    def website_form_input_filter(self, request, values):
+        if 'partner_id' in values:
+            values.pop('partner_name', None)
+            values.pop('partner_email', None)
+        return values
 
     # ------------------------------------------------------------
     # Actions and Business methods

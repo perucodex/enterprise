@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-09 18:45+0000\n"
-"PO-Revision-Date: 2026-01-02 11:37+0000\n"
+"POT-Creation-Date: 2026-08-28 17:46+0000\n"
+"PO-Revision-Date: 2026-02-20 09:18+0000\n"
 "Last-Translator: \"Kwanghee Park (kwpa)\" <kwpa@odoo.com>\n"
 "Language-Team: Korean <https://translate.odoo.com/projects/odoo-19/ai/ko/>\n"
 "Language: ko\n"
@@ -19,40 +19,6 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Weblate 5.14.3\n"
-
-#. module: ai
-#: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_read_group
-msgid ""
-"\n"
-"            **Tool Name: Read group**\n"
-"\n"
-"            Searches a particular model using a domain. The provided domain "
-"must be in valid JSON format.\n"
-"        "
-msgstr ""
-"\n"
-"            **도구 이름: 읽기 그룹**\n"
-"\n"
-"            도메인으로 특정 모델을 검색합니다. 도메인은 반드시 유효한 JSON 형"
-"식이어야 합니다.\n"
-"        "
-
-#. module: ai
-#: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_search
-msgid ""
-"\n"
-"            **Tool Name: search**\n"
-"\n"
-"            Searches a particular model using a domain. The provided domain "
-"must be in valid JSON format.\n"
-"        "
-msgstr ""
-"\n"
-"            **도구 이름: 검색**\n"
-"\n"
-"            도메인으로 특정 모델을 검색합니다. 도메인은 반드시 유효한 JSON 형"
-"식을 입력해야 합니다.\n"
-"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_get_fields
@@ -157,6 +123,29 @@ msgid ""
 "            - Call multiple times in parallel if comparing different menus\n"
 "        "
 msgstr ""
+"\n"
+"            피벗/그래프 뷰에서 집계 가능한 숫자 필드(측정값) 목록을 반환합니"
+"다.\n"
+"            open_menu_pivot() 또는 open_menu_graph()에서 측정값을 사용하기 전"
+"에 반드시 호출해야 합니다.\n"
+"\n"
+"            파이프(|) 구분자를 사용한 CSV를 반환합니다:\n"
+"            ```\n"
+"            field_name|display_name|type|aggregator|sortable\n"
+"            __count|Count|integer||true\n"
+"            amount_total|Total|monetary|sum|true\n"
+"            margin|Margin|float|sum|true\n"
+"            quantity|Quantity|float|sum|true\n"
+"            ```\n"
+"\n"
+"            주요 사항:\n"
+"            - __count는 항상 사용 가능 (레코드 수 집계)\n"
+"            - 집계 함수가 적용된 숫자형 필드만 반환\n"
+"            - 측정값 매개변수에는 field_name 사용\n"
+"            - 피벗에서 순위 지정: 정렬 조건 추가 (예: \"amount_total "
+"desc\")\n"
+"            - 서로 다른 메뉴 비교 시 병렬로 여러 번 호출\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_graph
@@ -230,6 +219,21 @@ msgid ""
 "contain multiple search strings or be empty []\n"
 "        "
 msgstr ""
+"\n"
+"            칸반(카드) 보기를 검색 보기 요소를 이용하여 엽니다.\n"
+"            대상: 단계나 상태 시각화, 파이프라인 보기, 업무 프로세스 관리.\n"
+"\n"
+"            주요 기능:\n"
+"            - 레코드를 카드 형태로 열 안에 표시\n"
+"            - 메뉴에서 제공되는 옵션을 통해 필터 적용\n"
+"            - 업무 프로세스 단계나 다른 필드별로 그룹화 가능\n"
+"            - 필드에서 검색 가능\n"
+"            - CRM 파이프라인, 작업 보드, 프로젝트 작업 프로세스에 매우 유용\n"
+"\n"
+"            ⚠️ 메뉴 데이터의 필터 이름과 그룹화 필드만 사용해야 함\n"
+"            ⚠️ 검색 문제열은 반드시 'field=text' 형식을 따라야 함. 배열은 여"
+"러 개의 검색 문자열을 포함할 수 있으며 []과 같이 빈 문자열 가능\n"
+"        "
 
 #. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_open_menu_list
@@ -394,6 +398,16 @@ msgstr ""
 "        "
 
 #. module: ai
+#: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_read_group
+#: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_search
+msgid ""
+"\n"
+"            Searches a particular model using a domain. The provided domain "
+"must be in valid JSON format.\n"
+"        "
+msgstr ""
+
+#. module: ai
 #: model:ir.actions.server,ai_tool_description:ai.ir_actions_server_adjust_search
 msgid ""
 "\n"
@@ -544,7 +558,7 @@ msgstr "AI 에이전트 출처"
 #. module: ai
 #: model:ir.actions.server,name:ai.ir_cron_process_sources_ir_actions_server
 msgid "AI Agent Sources: Process Sources"
-msgstr ""
+msgstr "AI 에이전트 소스: 프로세스 소스"
 
 #. module: ai
 #: model:ir.model.constraint,message:ai.constraint_discuss_channel_ai_channel_type_check
@@ -963,6 +977,11 @@ msgid "Customize to control relevance and formatting."
 msgstr "관련성 및 형식을 제어하도록 사용자 지정합니다."
 
 #. module: ai
+#: model:ir.model.fields,field_description:ai.field_ai_agent__deprecated_model_replacement_hint
+msgid "Deprecated Model Replacement Hint"
+msgstr ""
+
+#. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 #: model:ir.model.fields,field_description:ai.field_ai_agent__subtitle
@@ -1001,6 +1020,7 @@ msgstr "메일 및 채팅 채널"
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__display_name
 #: model:ir.model.fields,field_description:ai.field_ir_attachment__display_name
 #: model:ir.model.fields,field_description:ai.field_ir_http__display_name
+#: model:ir.model.fields,field_description:ai.field_ir_model_fields__display_name
 #: model:ir.model.fields,field_description:ai.field_mail_composer_mixin__display_name
 #: model:ir.model.fields,field_description:ai.field_mail_render_mixin__display_name
 #: model:ir.model.fields,field_description:ai.field_mail_template__display_name
@@ -1099,6 +1119,16 @@ msgid "Field Selector"
 msgstr "필드 선택기"
 
 #. module: ai
+#: model:ir.model.fields,field_description:ai.field_ir_model_fields__ttype
+msgid "Field Type"
+msgstr ""
+
+#. module: ai
+#: model:ir.model,name:ai.model_ir_model_fields
+msgid "Fields"
+msgstr "필드"
+
+#. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_agent_source__type__binary
 msgid "File"
 msgstr "파일"
@@ -1109,6 +1139,13 @@ msgid "File Size"
 msgstr "파일 크기"
 
 #. module: ai
+#: model:ir.model.fields,help:ai.field_ai_agent__response_style
+msgid ""
+"For thinking models (e.g. gpt-5): Analytical: Medium thinking, Balanced: Low "
+"thinking, Creative: Minimal thinking"
+msgstr ""
+
+#. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/plugins/chatgpt_plugin.js:0
 msgid "Generate or transform content with AI"
@@ -1117,10 +1154,10 @@ msgstr "AI로 콘텐츠 생성 또는 변환"
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__chatter_ai_button
 msgid "Get help on a record"
-msgstr ""
+msgstr "레코드 관련 지원 요청"
 
 #. module: ai
-#: model:ir.model.fields.selection,name:ai.selection__ai_embedding__embedding_model__gemini-embedding-001
+#: model:ir.model.fields.selection,name:ai.selection__ai_embedding__embedding_model__gemini-embedding-2
 msgid "Google"
 msgstr "구글"
 
@@ -1156,6 +1193,7 @@ msgstr "안녕하세요, 무엇을 도와드릴까요?"
 #: model:ir.model.fields,field_description:ai.field_ir_actions_server__id
 #: model:ir.model.fields,field_description:ai.field_ir_attachment__id
 #: model:ir.model.fields,field_description:ai.field_ir_http__id
+#: model:ir.model.fields,field_description:ai.field_ir_model_fields__id
 #: model:ir.model.fields,field_description:ai.field_mail_composer_mixin__id
 #: model:ir.model.fields,field_description:ai.field_mail_render_mixin__id
 #: model:ir.model.fields,field_description:ai.field_mail_template__id
@@ -1226,7 +1264,7 @@ msgstr "지침"
 #. odoo-python
 #: code:addons/ai/models/ir_actions_server.py:0
 msgid "Invalid JSON schema (malformed JSON)."
-msgstr ""
+msgstr "잘못된 JSON 스키마(잘못된 JSON)입니다."
 
 #. module: ai
 #. odoo-javascript
@@ -1249,7 +1287,7 @@ msgstr "잘못된 검색 연산자입니다."
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_agent__is_ask_ai_agent
 msgid "Is Natural Language Query Agent"
-msgstr ""
+msgstr "자연어 쿼리 에이전트 여부"
 
 #. module: ai
 #: model:ir.model.fields,field_description:ai.field_ai_composer__is_system_default
@@ -1488,7 +1526,7 @@ msgstr ""
 #: model:ir.model.fields,help:ai.field_ir_actions_server__ai_action_prompt
 #: model:ir.model.fields,help:ai.field_ir_cron__ai_action_prompt
 msgid "Prompt used by \"AI\" action"
-msgstr ""
+msgstr "\"AI\" 작업에 사용된 프롬프트"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.res_config_settings_view_form
@@ -1672,7 +1710,7 @@ msgstr "시스템 프롬프트"
 #. odoo-python
 #: code:addons/ai/models/ai_agent.py:0
 msgid "System agents cannot be deleted."
-msgstr ""
+msgstr "시스템 에이전트는 삭제할 수 없습니다."
 
 #. module: ai
 #. odoo-python
@@ -1701,7 +1739,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.js:0
 msgid "The name should be unique"
-msgstr ""
+msgstr "이름은 고유해야 합니다"
 
 #. module: ai
 #. odoo-python
@@ -1863,7 +1901,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.js:0
 msgid "Unable to start the recording."
-msgstr ""
+msgstr "녹화를 시작할 수 없습니다."
 
 #. module: ai
 #. odoo-javascript
@@ -1898,7 +1936,7 @@ msgstr "다음 내용 사용:"
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.res_config_settings_view_form
 msgid "Use your own ChatGPT account"
-msgstr ""
+msgstr "본인의 ChatGPT 계정을 사용하세요"
 
 #. module: ai
 #: model_terms:ir.ui.view,arch_db:ai.res_config_settings_view_form
@@ -1923,6 +1961,12 @@ msgid "User is online"
 msgstr "사용자 온라인"
 
 #. module: ai
+#. odoo-python
+#: code:addons/ai/models/ai_agent.py:0
+msgid "Using %(llm_model_label)s based on your agent setup."
+msgstr ""
+
+#. module: ai
 #. odoo-javascript
 #: code:addons/ai/static/src/editor/embedded_components/core/readonly_voice_transcription.xml:0
 #: code:addons/ai/static/src/editor/embedded_components/core/voice_transcription.xml:0
@@ -1943,7 +1987,7 @@ msgstr "이메일 작성"
 #. module: ai
 #: model:ir.model.fields.selection,name:ai.selection__ai_composer__interface_key__html_field_record
 msgid "Write in an HTML field"
-msgstr ""
+msgstr "HTML 필드에 입력하세요"
 
 #. module: ai
 #. odoo-python
@@ -1963,7 +2007,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/ai/static/src/ai_json_schema/ai_json_schema.xml:0
 msgid "eg: New name to write"
-msgstr ""
+msgstr "예: 새 작성자 이름"
 
 #. module: ai
 #. odoo-javascript
@@ -1993,3 +2037,38 @@ msgstr "실행 완료."
 #: code:addons/ai/static/src/ai_prompt/ai_field_selector_plugin.js:0
 msgid "fa-hashtag"
 msgstr "fa-hashtag"
+
+#. module: ai
+#: model:ir.model.fields.selection,name:ai.selection__ir_model_fields__ttype__vector
+msgid "vector"
+msgstr "벡터"
+
+#~ msgid ""
+#~ "\n"
+#~ "            **Tool Name: Read group**\n"
+#~ "\n"
+#~ "            Searches a particular model using a domain. The provided "
+#~ "domain must be in valid JSON format.\n"
+#~ "        "
+#~ msgstr ""
+#~ "\n"
+#~ "            **도구 이름: 읽기 그룹**\n"
+#~ "\n"
+#~ "            도메인으로 특정 모델을 검색합니다. 도메인은 반드시 유효한 "
+#~ "JSON 형식이어야 합니다.\n"
+#~ "        "
+
+#~ msgid ""
+#~ "\n"
+#~ "            **Tool Name: search**\n"
+#~ "\n"
+#~ "            Searches a particular model using a domain. The provided "
+#~ "domain must be in valid JSON format.\n"
+#~ "        "
+#~ msgstr ""
+#~ "\n"
+#~ "            **도구 이름: 검색**\n"
+#~ "\n"
+#~ "            도메인으로 특정 모델을 검색합니다. 도메인은 반드시 유효한 "
+#~ "JSON 형식을 입력해야 합니다.\n"
+#~ "        "

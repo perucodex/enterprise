@@ -106,7 +106,7 @@ class GeneralLedgerCustomHandler(models.AbstractModel):
             amount_currency = line.amount_currency
             amount = abs(amount_currency)
             currency_provider = dict(
-                line.company_id._fields['currency_provider'].selection
+                line.company_id._fields['currency_provider']._description_selection(self.env)
             ).get(line.company_id.currency_provider)
 
             # Update Dictionary

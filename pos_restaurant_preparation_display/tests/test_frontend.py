@@ -77,6 +77,7 @@ class TestUi(test_frontend.TestFrontendCommon, TestPreparationDisplayHttpCommon)
         self.assertEqual(json.loads(pdis_order1.prep_line_ids[0].internal_note)[0]['text'], "Test Internal Notes")
         self.assertEqual(pdis_order1.prep_line_ids[1].quantity, 1)
         self.assertEqual(pdis_order1.prep_line_ids[1].internal_note, "[]")
+        self.assertEqual(sum(pdis_order1.prep_line_ids.mapped('cancelled')), 0)
 
     def test_cancel_order_notifies_display(self):
         category = self.env['pos.category'].create({'name': 'Food'})
@@ -430,3 +431,12 @@ class TestUi(test_frontend.TestFrontendCommon, TestPreparationDisplayHttpCommon)
             ("Cocktail", 1, 0),
             ("Champagne", 2, 1),
         ])
+
+    def test_table_merge_with_unsynced_order(self):
+        self.setup_table_actions()
+        self.pos_config.printer_ids.unlink()
+        self.pos_config.with_user(self.pos_admin).open_ui()
+        self.start_pos_tour('test_table_merge_with_unsynced_order', login='pos_admin')
+
+        pos_order = self.pos_config.current_session_id.order_ids[-1]
+        self.assertTrue(pos_order.table_id.parent_id)

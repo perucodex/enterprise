@@ -4,6 +4,7 @@ from lxml import etree
 
 from odoo import _, fields, models
 from odoo.exceptions import RedirectWarning, UserError
+from odoo.tools import cleanup_xml_node
 
 
 class L10n_Nl_ReportsTaxReportHandler(models.AbstractModel):
@@ -15,7 +16,6 @@ class L10n_Nl_ReportsTaxReportHandler(models.AbstractModel):
         super()._custom_options_initializer(report, options, previous_options=previous_options)
         options['buttons'].append({'name': "XBRL", 'sequence': 30, 'action': 'open_xbrl_wizard', 'file_export_type': 'XBRL'})
         options['l10n_nl_is_correction'] = previous_options.get('l10n_nl_is_correction', False)
-        options['return_id'] = previous_options.get('return_id', False)
 
     def open_xbrl_wizard(self, options):
         report = self.env['account.report'].browse(options['report_id'])
@@ -56,11 +56,16 @@ class L10n_Nl_ReportsTaxReportHandler(models.AbstractModel):
         date_to = fields.Date.to_date(options['date']['date_to'])
         if options['l10n_nl_is_correction']:
             template_xmlid = 'l10n_nl_reports.suppletie_tax_report_sbr'
+            if date_to.year == 2025:
+                template_xmlid = 'l10n_nl_reports.suppletie_tax_report_sbr_nt19'
         else:
             template_xmlid = 'l10n_nl_reports.tax_report_sbr'
             if date_to.year == 2024:
                 # We still need to support the NT18 taxonomy for 2024 until that declaration period is over.
                 template_xmlid = 'l10n_nl_reports.tax_report_sbr_nt18'
+            elif date_to.year == 2025:
+                # We still need to support the NT19 taxonomy for 2025 until that declaration period is over.
+                template_xmlid = 'l10n_nl_reports.tax_report_sbr_nt19'
 
         report_template = self.env.ref(template_xmlid, raise_if_not_found=False)
         if not report_template:
@@ -79,7 +84,7 @@ class L10n_Nl_ReportsTaxReportHandler(models.AbstractModel):
 
         xbrl = self.env['ir.qweb']._render(report_template.id, data)
         xbrl_element = etree.fromstring(xbrl)
-        xbrl_file = etree.tostring(xbrl_element, xml_declaration=True, encoding='utf-8')
+        xbrl_file = etree.tostring(cleanup_xml_node(xbrl_element, remove_blank_nodes=False), xml_declaration=True, encoding='utf-8')
         xbrl_file_name = report.get_default_report_filename(options, 'xbrl')
         if options['l10n_nl_is_correction']:
             xbrl_file_name = xbrl_file_name.replace('.xbrl', '_suppletie.xbrl')
@@ -174,13 +179,14 @@ class L10n_Nl_ReportsTaxReportHandler(models.AbstractModel):
                 case _:
                     new_lines.append(line)
 
+        current_return = self.env['account.return']._get_return_from_report_options(options)
         return_generic_domain = [
             ('company_id', '=', report._get_sender_company_for_export(options).id),
             ('type_id', 'in', (
                 self.env.ref('l10n_nl_reports.nl_tax_return_type').id,
                 self.env.ref('l10n_nl_reports.nl_tax_correction_return_type').id,
             )),
-            ('id', '!=', options['return_id']),
+            ('id', '!=', current_return.id),
         ]
 
         # Fill the values in the columns for the new lines.

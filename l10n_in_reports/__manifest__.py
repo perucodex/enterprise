@@ -1,6 +1,6 @@
 {
     'name': 'Indian - Accounting Reports',
-    'version': '1.1',
+    'version': '1.3',
     'description': """
 Accounting reports for India
 ================================

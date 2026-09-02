@@ -20,6 +20,8 @@
         'pos_appointment.html_editor': [
             ('include', 'html_editor.assets_editor'),
             'html_editor/static/src/others/dynamic_placeholder_plugin.js',
+            'html_editor/static/src/others/editor_dynamic_placeholder_popover.js',
+            'html_editor/static/src/others/editor_dynamic_placeholder_popover.xml',
             'html_editor/static/src/main/placeholder_plugin.js',
             'html_editor/static/src/backend/**/*',
             ("remove", "html_editor/static/src/utils/regex.js"),
@@ -49,6 +51,9 @@
         ],
         'web.assets_unit_tests': [
             'pos_appointment/static/tests/unit/**/*'
+        ],
+        'web.assets_tests': [
+            'pos_appointment/static/tests/tours/**/*',
         ],
     }
 }

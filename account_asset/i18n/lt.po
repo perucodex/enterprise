@@ -20,13 +20,14 @@
 # Arunas V. <arunas@devoro.com>, 2023
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# Ulevičienė <vilma.uleviciene@mededu.lt>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-30 18:42+0000\n"
-"PO-Revision-Date: 2025-11-16 17:46+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-08-21 17:44+0000\n"
+"PO-Revision-Date: 2026-08-24 07:13+0000\n"
+"Last-Translator: Ulevičienė <vilma.uleviciene@mededu.lt>\n"
 "Language-Team: Lithuanian <https://translate.odoo.com/projects/odoo-19/"
 "account_asset/lt/>\n"
 "Language: lt\n"
@@ -34,9 +35,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=4; plural=(n % 10 == 1 && (n % 100 > 19 || n % 100 < "
-"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? "
-"1 : n % 1 != 0 ? 2: 3);\n"
-"X-Generator: Weblate 5.12.2\n"
+"11) ? 0 : (n % 10 >= 2 && n % 10 <=9) && (n % 100 > 19 || n % 100 < 11) ? 1 "
+": n % 1 != 0 ? 2: 3);\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: account_asset
 #: model:ir.model.fields,field_description:account_asset.field_account_asset__total_depreciation_entries_count
@@ -485,8 +486,8 @@ msgstr "Turtas sukurtas iš sąskaitos faktūros: %s"
 #. module: account_asset
 #. odoo-python
 #: code:addons/account_asset/models/account_asset.py:0
-msgid "Asset disposed. %s"
-msgstr "Turtas perduotas. %s"
+msgid "Asset disposed. %(message)s"
+msgstr ""
 
 #. module: account_asset
 #: model:account.return.check.template,name:account_asset.account_return_check_template_asset_movement_and_accounting_treatment
@@ -502,8 +503,14 @@ msgstr "Turto nudėvėjimas sustabdytas. %s"
 #. module: account_asset
 #. odoo-python
 #: code:addons/account_asset/models/account_asset.py:0
-msgid "Asset sold. %s"
-msgstr "Turto parduotas. %s"
+msgid "Asset sold. %(message)s See %(invoice_links)s"
+msgstr ""
+
+#. module: account_asset
+#. odoo-python
+#: code:addons/account_asset/models/account_asset.py:0
+msgid "Asset sold: %s"
+msgstr ""
 
 #. module: account_asset
 #. odoo-python
@@ -985,6 +992,15 @@ msgid ""
 msgstr ""
 
 #. module: account_asset
+#: model:account.return.check.template,description:account_asset.account_return_check_template_monitoring_of_depreciation
+msgid ""
+"Ensure compliance with local tax rules on depreciation.\n"
+"Verify that the depreciation methods, depreciation period, and start dates "
+"align with tax requirements (e.g. linear depreciation, pro rata temporis "
+"application, no double declining for tax purposes)."
+msgstr ""
+
+#. module: account_asset
 #. odoo-python
 #: code:addons/account_asset/controller/asset_template_controller.py:0
 #: model:ir.model.fields,field_description:account_asset.field_account_asset__account_depreciation_expense_id
@@ -1320,6 +1336,11 @@ msgstr "Keisti ilgalaikį turtą"
 #: model_terms:ir.ui.view,arch_db:account_asset.view_account_asset_form
 msgid "Modify Depreciation"
 msgstr "Keisti nusidėvėjimą"
+
+#. module: account_asset
+#: model:account.return.check.template,name:account_asset.account_return_check_template_monitoring_of_depreciation
+msgid "Monitoring of Depreciation "
+msgstr ""
 
 #. module: account_asset
 #: model:ir.model.fields.selection,name:account_asset.selection__account_asset__method_period__1
@@ -1875,6 +1896,13 @@ msgid ""
 msgstr ""
 
 #. module: account_asset
+#. odoo-javascript
+#: code:addons/account_asset/static/src/components/depreciation_schedule/warnings.xml:0
+msgid "The fixed asset account differs from the account on the bill. Click"
+msgstr ""
+"Ilgalaikio turto sąskaita skiriasi nuo sąskaitos sąskaitoje. Spustelėkite"
+
+#. module: account_asset
 #: model:ir.model.fields,help:account_asset.field_account_asset__method_number
 msgid "The number of depreciations needed to depreciate your asset"
 msgstr "Nusidėvėjimų skaičius, per kuriuos nudėvimas ilgalaikis turtas"
@@ -1883,7 +1911,7 @@ msgstr "Nusidėvėjimų skaičius, per kuriuos nudėvimas ilgalaikis turtas"
 #. odoo-python
 #: code:addons/account_asset/models/account_asset.py:0
 msgid "The remaining value on the last depreciation line must be 0"
-msgstr "Paskutinio nudėvėjimo likutinė vertė privalo būti lygi 0"
+msgstr "Likusi vertė paskutinėje nusidėvėjimo eilutėje turi būti 0"
 
 #. module: account_asset
 #. odoo-python
@@ -1892,6 +1920,8 @@ msgid ""
 "The total amount of depreciation already recorded for the asset before "
 "import. This amount will be considered in company currency."
 msgstr ""
+"Bendras turto nusidėvėjimo suma, jau įtraukta į apskaitą prieš importą. Ši "
+"suma bus nurodyta įmonės valiuta."
 
 #. module: account_asset
 #: model:ir.model.fields,help:account_asset.field_asset_modify__invoice_line_ids
@@ -1905,6 +1935,8 @@ msgid ""
 "There are unposted depreciations prior to the selected operation date, "
 "please deal with them first."
 msgstr ""
+"Yra neapmokėtų įsiskolinimų, susidariusių iki pasirinktos operacijos datos, "
+"todėl pirmiausia juos reikia padengti."
 
 #. module: account_asset
 #. odoo-javascript
@@ -2223,6 +2255,12 @@ msgid "gain/loss"
 msgstr ""
 
 #. module: account_asset
+#. odoo-javascript
+#: code:addons/account_asset/static/src/components/depreciation_schedule/warnings.xml:0
+msgid "here"
+msgstr ""
+
+#. module: account_asset
 #. odoo-python
 #: code:addons/account_asset/controller/asset_template_controller.py:0
 msgid "journal_id"
@@ -2299,6 +2337,12 @@ msgstr ""
 #: code:addons/account_asset/wizard/asset_modify.py:0
 msgid "sell"
 msgstr ""
+
+#~ msgid "Asset disposed. %s"
+#~ msgstr "Turtas perduotas. %s"
+
+#~ msgid "Asset sold. %s"
+#~ msgstr "Turto parduotas. %s"
 
 #~ msgid " (copy)"
 #~ msgstr " (kopija)"

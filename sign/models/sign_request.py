@@ -9,7 +9,7 @@ from markupsafe import Markup
 
 from odoo import _, api, fields, models, Command
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import get_lang, is_html_empty, format_date
+from odoo.tools import get_lang, is_html_empty, format_date, formataddr
 from odoo.tools.urls import urljoin as url_join
 
 
@@ -121,7 +121,7 @@ class SignRequest(models.Model):
             return NotImplemented
         my_partner_id = self.env.user.partner_id
         documents_ids = self.env['sign.request.item'].search([('partner_id', '=', my_partner_id.id), ('state', '=', 'sent'), ('is_mail_sent', '=', True)]).mapped('sign_request_id').ids
-        return [('id', 'not in', documents_ids)]
+        return [('id', 'in', documents_ids)]
 
     @api.depends('request_item_ids.state')
     def _compute_stats(self):
@@ -215,8 +215,13 @@ class SignRequest(models.Model):
         if vals.get('validity') and fields.Date.from_string(vals['validity']) < today:
             vals['state'] = 'expired'
 
-        res = super().write(vals)
-        return res
+        if vals.get('reference_doc'):
+            model, rec = vals['reference_doc'].split(',')
+            record = self.env[model].browse(int(rec)).exists()
+            if not record or not record.has_access('read'):
+                raise ValidationError(self.env._("You don't have access to the linked document."))
+
+        return super().write(vals)
 
     def copy_data(self, default=None):
         default = dict(default or {})
@@ -370,7 +375,7 @@ class SignRequest(models.Model):
         # check if frontend user or backend
         action = self.env["ir.actions.actions"]._for_xml_id("sign.sign_request_action")
         result = {"action": action, "label": _("Close"), "custom_action": False}
-        if self.reference_doc and self.reference_doc.exists():
+        if self.reference_doc and self.reference_doc.exists() and self.reference_doc.has_access('read'):
             action = self._get_linked_record_action(action)
             result = {"action": action, "label": _("Back to %s", self.reference_doc._description), "custom_action": True}
         return result
@@ -413,9 +418,9 @@ class SignRequest(models.Model):
         self.ensure_one()
         if access_token is None:
             access_token = self.access_token
-        subject = _("The document %(template_name)s has been rejected by %(partner_name)s",
+        subject = _("The document %(template_name)s has been rejected by %(refuser_name)s",
             template_name=self.template_id.name,
-            partner_name=partner.name,
+            refuser_name=refuser.name,
         )
         base_url = self.get_base_url()
         partner_lang = get_lang(self.env, lang_code=partner.lang).code
@@ -438,6 +443,7 @@ class SignRequest(models.Model):
             },
             mail_values={
                 'subject': subject,
+                **({'email_to': formataddr((sign_request_item.partner_id.name, sign_request_item.signer_email))} if sign_request_item else {}),
             },
             force_send=force_send,
         )
@@ -505,15 +511,17 @@ class SignRequest(models.Model):
                 self.env["ir.attachment"].create(attachment_values)
 
     def cancel(self):
-        for sign_request in self:
+        # Exclude sign requests that are in 'signed' state as they mustn't be canceled.
+        sign_requests = self.filtered(lambda request: request.state != 'signed')
+        for sign_request in sign_requests:
             sign_request.write({'access_token': self._default_access_token(), 'state': 'canceled'})
-        self.request_item_ids._cancel()
+        sign_requests.request_item_ids._cancel()
 
         # cancel activities for signers
-        for user in self.request_item_ids.sudo().partner_id.user_ids.filtered(lambda u: u.has_group('sign.group_sign_user')):
-            self.activity_unlink(['sign.mail_activity_data_signature_request'], user_id=user.id)
+        for user in sign_requests.request_item_ids.sudo().partner_id.user_ids.filtered(lambda u: u.has_group('sign.group_sign_user')):
+            sign_requests.activity_unlink(['sign.mail_activity_data_signature_request'], user_id=user.id)
 
-        self.env['sign.log'].sudo().create([{'sign_request_id': sign_request.id, 'action': 'cancel'} for sign_request in self])
+        self.env['sign.log'].sudo().create([{'sign_request_id': sign_request.id, 'action': 'cancel'} for sign_request in sign_requests])
 
     def _send_completed_documents(self):
         """ Send the completed document to signers and Contacts in copy with emails
@@ -579,6 +587,7 @@ class SignRequest(models.Model):
             mail_values={
                 'attachment_ids': self.attachment_ids.ids + self.completed_document_attachment_ids.ids,
                 'subject': _('%s has been edited and signed', self.reference) if request_edited else _('%s has been signed', self.reference),
+                **({'email_to': formataddr((sign_request_item.partner_id.name, sign_request_item.signer_email))} if sign_request_item else {}),
             },
             force_send=force_send,
         )
@@ -689,7 +698,7 @@ class SignRequest(models.Model):
             mail_values['email_to'] = partner.email_formatted
 
         if partner and len(partner.user_ids) == 1 and partner.user_ids.notification_type == "inbox":
-            return self.message_notify(
+            self.message_notify(
                 attachment_ids=mail_values.get("attachment_ids"),
                 author_id=self.create_uid.partner_id.id,
                 body=body,

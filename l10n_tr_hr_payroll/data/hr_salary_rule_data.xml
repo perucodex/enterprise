@@ -62,14 +62,11 @@ result = GFNET if version.l10n_tr_is_net_to_gross else payslip.paid_amount
             <field name="category_id" ref="l10n_tr_hr_payroll.hr_salary_rule_category_tr_ssid"/>
             <field name="code">SSIEDED</field>
             <field name="sequence">10</field>
-            <field name="condition_select">python</field>
-            <field name="condition_python">
-result = categories['BASIC'] &gt; payslip._rule_parameter('l10n_tr_min_wage')
-            </field>
+            <field name="condition_select">none</field>
             <field name="amount_select">code</field>
             <field name="amount_python_compute">
-result = -min(categories['BASIC'], payslip._rule_parameter('l10n_tr_ssi_base_ceiling'))
-result_rate = 14
+result = -min(max(categories['BASIC'], payslip._rule_parameter('l10n_tr_ssi_base_minimum')), payslip._rule_parameter('l10n_tr_ssi_base_ceiling'))
+result_rate = payslip._rule_parameter('l10n_tr_ssi_employee_contribution_rates')
             </field>
             <field name="struct_id" ref="l10n_tr_hr_payroll.hr_payroll_structure_tr_employee_salary"/>
         </record>
@@ -79,13 +76,10 @@ result_rate = 14
             <field name="category_id" ref="l10n_tr_hr_payroll.hr_salary_rule_category_tr_ssid" />
             <field name="code">SSIDED</field>
             <field name="sequence">20</field>
-            <field name="condition_select">python</field>
-            <field name="condition_python">
-result = categories['BASIC'] &gt; payslip._rule_parameter('l10n_tr_min_wage')
-            </field>
+            <field name="condition_select">none</field>
             <field name="amount_select">code</field>
             <field name="amount_python_compute">
-result = -min(categories['BASIC'], payslip._rule_parameter('l10n_tr_ssi_base_ceiling'))
+result = -min(max(categories['BASIC'], payslip._rule_parameter('l10n_tr_ssi_base_minimum')), payslip._rule_parameter('l10n_tr_ssi_base_ceiling'))
 result_rate = 1
             </field>
             <field name="struct_id" ref="l10n_tr_hr_payroll.hr_payroll_structure_tr_employee_salary"/>
@@ -97,12 +91,9 @@ result_rate = 1
             <field name="code">SSICDED</field>
             <field name="sequence">30</field>
             <field name="amount_select">code</field>
-            <field name="condition_select">python</field>
-            <field name="condition_python">
-result = categories['BASIC'] &gt; payslip._rule_parameter('l10n_tr_min_wage')
-            </field>
+            <field name="condition_select">none</field>
             <field name="amount_python_compute">
-result = min(categories['BASIC'], payslip._rule_parameter('l10n_tr_ssi_base_ceiling'))
+result = min(max(categories['BASIC'], payslip._rule_parameter('l10n_tr_ssi_base_minimum')), payslip._rule_parameter('l10n_tr_ssi_base_ceiling'))
 result_rate = payslip._rule_parameter('l10n_tr_ssi_company_contribution_rates')
             </field>
             <field name="struct_id" ref="l10n_tr_hr_payroll.hr_payroll_structure_tr_employee_salary"/>
@@ -114,12 +105,9 @@ result_rate = payslip._rule_parameter('l10n_tr_ssi_company_contribution_rates')
             <field name="code">SSIUCDED</field>
             <field name="sequence">40</field>
             <field name="amount_select">code</field>
-            <field name="condition_select">python</field>
-            <field name="condition_python">
-result = categories['BASIC'] &gt; payslip._rule_parameter('l10n_tr_min_wage')
-            </field>
+            <field name="condition_select">none</field>
             <field name="amount_python_compute">
-result = min(categories['BASIC'], payslip._rule_parameter('l10n_tr_ssi_base_ceiling'))
+result = min(max(categories['BASIC'], payslip._rule_parameter('l10n_tr_ssi_base_minimum')), payslip._rule_parameter('l10n_tr_ssi_base_ceiling'))
 result_rate = 2
             </field>
             <field name="struct_id" ref="l10n_tr_hr_payroll.hr_payroll_structure_tr_employee_salary"/>

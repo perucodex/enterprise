@@ -44,6 +44,62 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                 },
             ))
 
+    def _l10n_de_datev_build_line(
+        self,
+        *,
+        line_amount_currency,
+        line_amount,
+        currency,
+        company_currency,
+        account_code,
+        counterpart_code,
+        code_correction,
+        move,
+        receipt1,
+        receipt2,
+        reference_text,
+        force_debit_credit=None,
+    ):
+        """
+        Build and return a 125-field DATEV export row.
+        """
+        # Idiotic program needs to have a line with 125 elements ordered in a given fashion as it
+        # does not take into account the header and non mandatory fields
+        array = ['' for _ in range(125)]
+        # For DateV, we can't have negative amount on a line, so we need to inverse the amount and inverse the
+        # credit/debit symbol.
+        if force_debit_credit:
+            array[1] = force_debit_credit
+        else:
+            array[1] = 'H' if currency.compare_amounts(line_amount, 0) < 0 else 'S'
+        line_amount = abs(line_amount)
+        # Column A: the amount in the currency that was used. It can be a foreign one, it can be the company's.
+        array[0] = float_repr(line_amount_currency, currency.decimal_places).replace('.', ',')
+        # Column C: the corresponding foreign currency used on the original record (invoice, bill, entry, ....)
+        array[2] = currency.name
+        if currency != company_currency:
+            # Column D: ratio is E/A if D !=0, else no rate.
+            if not company_currency.is_zero(line_amount) and not currency.is_zero(line_amount_currency):
+                rate = round(line_amount_currency / line_amount, 6) or 1.0
+            else:
+                rate = 1.0
+            array[3] = str(rate).replace('.', ',')
+            # Column E: the amount converted in the company currency if the original record was in a foreign currency
+            array[4] = float_repr(line_amount, company_currency.decimal_places).replace('.', ',')
+            # Column F: the company currency if the original record was in a foreign currency
+            array[5] = company_currency.name
+        array[6] = account_code
+        array[7] = counterpart_code
+        array[8] = code_correction
+        array[9] = datetime.strftime(move.date, '%-d%m')
+        array[10] = receipt1[-36:]
+        array[11] = receipt2
+        array[13] = reference_text or ''
+        if move.message_main_attachment_id:
+            array[19] = f'BEDI "{move._l10n_de_datev_get_guid()}"'
+
+        return array
+
     def l10_de_datev_export_to_zip_and_attach(self, options):
         options['add_attachments'] = True
         return self.l10n_de_datev_export_to_zip(options)
@@ -82,7 +138,9 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                     for move in moves.filtered(lambda m: m.message_main_attachment_id):
                         # '\' is not allowed in file name, replace by '-'
                         base_name = slash_re.sub('-', move.name)
-                        attachment = move.message_main_attachment_id
+                        # The message_main_attachment_id may not be linked to the associated move causing AccessError
+                        # For example, with an image, the res_id is 0 and the res_model is False
+                        attachment = move.sudo().message_main_attachment_id
                         extension = f".{attachment.name.split('.')[-1]}"
                         name = '%(base)s%(extension)s' % {'base': base_name, 'extension': extension}
                         zf.writestr(name, attachment.raw)
@@ -207,22 +265,30 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                             AND aml.partner_id IS NOT NULL"""
             self.env.cr.execute(select, (tuple(move_line_ids), move_types))
         partners = self.env['res.partner'].browse([p.get('partner_id') for p in self.env.cr.dictfetchall()])
+        eu_country_codes = self.env.ref('base.europe').country_ids.mapped('code')
         for partner in partners:
             if customer:
                 code = self._l10n_de_datev_find_partner_account(partner.property_account_receivable_id, partner)
             else:
                 code = self._l10n_de_datev_find_partner_account(partner.property_account_payable_id, partner)
             vat_is_valid = False
+
+            country_code = ''
             if partner.vat and len(partner.vat) > 2:
                 vat_country, vat_id_no = partner._split_vat(partner.vat)
                 vat_is_valid = vat_country and partner._check_vat_number(vat_country, vat_id_no)
+                if vat_country.isalpha():
+                    country_code = 'GR' if vat_country.upper() == 'EL' else vat_country.upper()
+            is_eu_vat_number = country_code in eu_country_codes
+
             line_value = {
                 'code': code,
                 'company_name': partner.name if partner.is_company else '',
                 'person_name': '' if partner.is_company else partner.name,
                 'natural': partner.is_company and '2' or '1',
-                'vat_country': vat_country if vat_is_valid else '',
-                'vat_id_no': vat_id_no if vat_is_valid else partner.vat or '',
+                'eu_vat_country': vat_country.upper() if vat_is_valid and is_eu_vat_number and vat_country.isalpha() else '',
+                'eu_vat_id_no': vat_id_no if vat_is_valid and is_eu_vat_number else '',
+                'country_code': partner.country_code or country_code or '',
             }
             # Idiotic program needs to have a line with 243 elements ordered in a given fashion as it
             # does not take into account the header and non mandatory fields
@@ -231,8 +297,9 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
             array[1] = line_value.get('company_name')
             array[3] = line_value.get('person_name')
             array[6] = line_value.get('natural')
-            array[8] = line_value.get('vat_country')
-            array[9] = line_value.get('vat_id_no')
+            array[8] = line_value.get('eu_vat_country')
+            array[9] = line_value.get('eu_vat_id_no')
+            array[19] = line_value.get('country_code')
             lines.append(array)
         writer.writerows(lines)
         return output.getvalue()
@@ -324,7 +391,7 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                 amls_by_group = defaultdict(list)
                 # Get the modified tax group amounts
                 actual_values_by_group = {
-                    self.env['account.tax.group'].browse(tax_group['id']): tax_group['tax_amount']
+                    self.env['account.tax.group'].browse(tax_group['id']): tax_group['tax_amount_currency']
                     for subtotal in m.tax_totals['subtotals']
                     for tax_group in subtotal['tax_groups']
                 }
@@ -332,8 +399,11 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                 original_values_by_group = defaultdict(float)
                 for line in m.invoice_line_ids:
                     line_taxes = line.tax_ids.compute_all(line.amount_currency, line.currency_id, partner=line.partner_id, handle_price_include=False)
-                    tax_amounts = {tax_data['id']: tax_data['amount'] for tax_data in line_taxes['taxes']}
-                    for tax in line.tax_ids:
+                    tax_amounts = defaultdict(float)
+                    for tax_data in line_taxes['taxes']:
+                        tax_amounts[tax_data['id']] += tax_data['amount']
+                    for tax_id in tax_amounts:
+                        tax = self.env['account.tax'].browse(tax_id)
                         original_values_by_group[tax.tax_group_id] += tax_amounts[tax.id]
                         amls_by_group[tax.tax_group_id].append(line)
                 # Compute deltas by tax group and assign the difference
@@ -354,7 +424,46 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
             move_balance = 0
             counterpart_amount = 0
             last_tax_line_index = 0
+
+            # Check for three currency case
+            # A three-currency case occurs when a bank transaction involves:
+            # - the payer's transaction currency,
+            # - the bank journal's currency,
+            # - the company's currency.
+            # DATEV cannot represent both foreign currencies on the same journal item,
+            # so foreign AR/AP lines are routed through a clearing account.
+            clearing_account = ''
+            foreign_arap_lines = self.env['account.move.line']
+            emit_bank_line = True
+            if m.statement_line_id:
+                liquidity_lines, _, other_lines = m.statement_line_id._seek_for_lines()
+                if len(liquidity_lines) == 1:
+                    foreign_arap_lines = other_lines.filtered(
+                        lambda aml: (
+                            aml.account_id.account_type in (
+                                'asset_receivable',
+                                'liability_payable',
+                            )
+                            and not aml.is_same_currency
+                            and aml.currency_id != liquidity_lines[0].currency_id
+                        )
+                    )
+                    if foreign_arap_lines:
+                        account_length = self._l10n_de_datev_get_account_length()
+                        clearing_base = (
+                            "1460"
+                            if m.company_id.chart_template == "de_skr04"
+                            else "1360"
+                        )
+                        clearing_account = clearing_base.ljust(account_length, '0')
+
+            def _get_code_correction(taxes):
+                codes = set(taxes.mapped('l10n_de_datev_code'))
+                # there should be exactly one, else skip code
+                return len(codes) == 1 and codes.pop() or ''
+
             for aml in m.line_ids:
+                code_correction = ''
                 if aml.debit == aml.credit:
                     # Ignore debit = credit = 0
                     continue
@@ -368,6 +477,9 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                 # and replace bank account for outstanding payment/receipt for the other line
 
                 if aml.payment_id:
+                    # An expense may be encoded with a tax, we should report the corresponding tax code
+                    if not code_correction:
+                        code_correction = _get_code_correction(m.line_ids.tax_ids)
                     if payment_account == 0:
                         payment_account = account_code
                         counterpart_amount += aml.balance
@@ -380,6 +492,7 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                     if aml.statement_line_id and not aml.payment_id:
                         counterpart_amount += aml.balance
                     continue
+
                 # If line is a tax ignore it as datev requires single line with gross amount and deduct tax itself based
                 # on account or on the control key code
                 if aml.tax_line_id:
@@ -394,25 +507,20 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                     line_amount_currency = aml_taxes['total_included']
                 # convert line_amount in company currency
                 if aml.currency_id != aml.company_id.currency_id:
-                    line_amount = aml.currency_id._convert(
-                        from_amount=line_amount_currency,
-                        to_currency=aml.company_id.currency_id,
-                        company=aml.company_id,
-                        date=aml.date
-                    )
+                    if not aml.currency_id.is_zero(line_amount_currency):
+                        rate = m._get_product_base_line_currency_rate(aml)
+                        line_amount = line_amount_currency / rate
+                    else:
+                        line_amount = aml.balance
                 else:
                     line_amount = line_amount_currency
 
                 move_balance += line_amount
 
-                code_correction = ''
                 if aml.tax_ids:
                     last_tax_line_index = len(lines)
                     last_tax_line_amount = line_amount
-                    codes = set(aml.tax_ids.mapped('l10n_de_datev_code'))
-                    if len(codes) == 1:
-                        # there should only be one max, else skip code
-                        code_correction = codes.pop() or ''
+                    code_correction = _get_code_correction(aml.tax_ids)
 
                 # reference
                 receipt1 = ref = aml.move_id.name
@@ -424,36 +532,35 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
                 if to_account_code == account_code and aml.date_maturity:
                     receipt2 = aml.date
 
-                # Idiotic program needs to have a line with 125 elements ordered in a given fashion as it
-                # does not take into account the header and non mandatory fields
-                array = ['' for x in range(125)]
-                # For DateV, we can't have negative amount on a line, so we need to inverse the amount and inverse the
-                # credit/debit symbol.
-                array[1] = 'H' if aml.currency_id.compare_amounts(line_amount, 0) < 0 else 'S'
-                line_amount = abs(line_amount)
-                line_amount_currency = abs(line_amount_currency) + delta_by_aml[aml]
-                # Column A: the amount in the currency that was used. It can be a foreign one, it can be the company's.
-                array[0] = float_repr(line_amount_currency, aml.currency_id.decimal_places).replace('.', ',')
-                # Column C: the corresponding foreign currency used on the original record (invoice, bill, entry, ....)
-                array[2] = aml.currency_id.name
-                if aml.currency_id != aml.company_id.currency_id:
-                    # Column D: ratio is E/A if D !=0, else no rate.
-                    rate = line_amount / line_amount_currency if line_amount_currency != 0 else 1.0
-                    array[3] = str(rate).replace('.', ',')
-                    # Column E: the amount converted in the company currency if the original record was in a foreign currency
-                    array[4] = float_repr(line_amount, aml.company_id.currency_id.decimal_places).replace('.', ',')
-                    # Column F: the company currency if the original record was in a foreign currency
-                    array[5] = aml.company_id.currency_id.name
-                array[6] = account_code
-                array[7] = to_account_code
-                array[8] = code_correction
-                array[9] = datetime.strftime(aml.move_id.date, '%-d%m')
-                array[10] = receipt1[-36:]
-                array[11] = receipt2
-                array[13] = (aml.name or ref).replace('\n', ' ')
-                if m.message_main_attachment_id:
-                    array[19] = f'BEDI "{m._l10n_de_datev_get_guid()}"'
-                lines.append(array)
+                if aml in foreign_arap_lines:
+                    if emit_bank_line:
+                        lines.append(
+                            self._l10n_de_datev_build_clearing_liquidity_line(
+                                m,
+                                liquidity_lines[0],
+                                clearing_account,
+                                foreign_arap_lines,
+                            )
+                        )
+                        emit_bank_line = False
+
+                    to_account_code = clearing_account
+
+                lines.append(
+                    self._l10n_de_datev_build_line(
+                        line_amount_currency=abs(line_amount_currency) + delta_by_aml[aml],
+                        line_amount=line_amount,
+                        currency=aml.currency_id,
+                        company_currency=aml.company_id.currency_id,
+                        account_code=account_code,
+                        counterpart_code=to_account_code,
+                        code_correction=code_correction,
+                        move=m,
+                        receipt1=receipt1,
+                        receipt2=receipt2,
+                        reference_text=aml.name or ref,
+                    )
+                )
             # In case of epd we actively fix rounding issues by checking the base line and tax line
             # amounts against the move amount missing cent and adjust the vals accordingly.
             # Since here we have to recompute the tax values for each line with tax, we need
@@ -466,3 +573,31 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
 
         writer.writerows(lines)
         return output.getvalue()
+
+    def _l10n_de_datev_build_clearing_liquidity_line(self, move, liquidity_line, clearing_account, foreign_arap_lines):
+        """
+        Build the liquidity leg through the clearing account, using the combined balance of the foreign AR/AP lines.
+        """
+        company_currency = move.company_id.currency_id
+        liquidity_account_code = str(
+            self._l10n_de_datev_find_partner_account(
+                liquidity_line.account_id,
+                liquidity_line.partner_id,
+            )
+        )
+        liq_sh = "S" if company_currency.compare_amounts(liquidity_line.balance, 0.0) > 0 else "H"
+        clearing_balance = sum(foreign_arap_lines.mapped('balance'))
+        return self._l10n_de_datev_build_line(
+            line_amount_currency=abs(liquidity_line.amount_currency),
+            line_amount=clearing_balance,
+            currency=liquidity_line.currency_id,
+            company_currency=company_currency,
+            account_code=liquidity_account_code,
+            counterpart_code=clearing_account,
+            code_correction='',
+            move=move,
+            receipt1=move.name,
+            receipt2='',
+            reference_text=liquidity_line.name or liquidity_line.ref,
+            force_debit_credit=liq_sh,
+        )

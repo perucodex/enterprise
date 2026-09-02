@@ -1,7 +1,9 @@
+import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { PosStore } from "@point_of_sale/app/services/pos_store";
 import { PartnerList } from "@point_of_sale/app/screens/partner_list/partner_list";
 import { PosOrder } from "@point_of_sale/app/models/pos_order";
 import { patch } from "@web/core/utils/patch";
+import { _t } from "@web/core/l10n/translation";
 
 patch(PosStore.prototype, {
     // @Override
@@ -15,15 +17,15 @@ patch(PosStore.prototype, {
     isEcuadorianCompany() {
         return this.company.country_id?.code == "EC";
     },
-    createNewOrder() {
-        const order = super.createNewOrder(...arguments);
-        if (!order.partner_id && this.isEcuadorianCompany()) {
-            order.partner_id = this.config._final_consumer_id;
+    getDefaultPartnerId() {
+        if (this.isEcuadorianCompany()) {
+            return this.config._final_consumer_id;
         }
-        return order;
+        return super.getDefaultPartnerId();
     },
     // @Override
     // For EC, if the partner on the refund was End Consumer we need to allow the user to change it.
+    // we also ensure, a customer is always selected
     async selectPartner() {
         if (!this.isEcuadorianCompany()) {
             return super.selectPartner(...arguments);
@@ -33,14 +35,28 @@ patch(PosStore.prototype, {
             return;
         }
         const currentPartner = currentOrder.getPartner();
-        if (currentPartner && currentPartner.id === this.config._final_consumer_id) {
-            this.dialog.add(PartnerList, {
-                partner: currentPartner,
-                getPayload: (newPartner) => currentOrder.setPartner(newPartner),
-            });
-            return currentPartner;
+        if (
+            currentOrder.getHasRefundLines() &&
+            currentPartner?.id !== this.config._final_consumer_id
+        ) {
+            return super.selectPartner(...arguments);
         }
-        return super.selectPartner(...arguments);
+
+        this.dialog.add(PartnerList, {
+            partner: currentPartner,
+            getPayload: (newPartner) => {
+                if (!newPartner) {
+                    this.dialog.add(AlertDialog, {
+                        title: _t("Warning"),
+                        body: _t("A customer is required. Select another to replace this one."),
+                    });
+                    return;
+                }
+                currentOrder.setPartner(newPartner);
+            },
+        });
+
+        return currentPartner;
     },
 });
 

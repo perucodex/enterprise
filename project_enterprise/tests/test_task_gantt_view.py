@@ -81,6 +81,29 @@ class TestTaskGanttView(TestProjectCommon):
         )
         self.assertTrue(project_test in gantt_projects_data, 'Project Test should be displayed in the Gantt view')
 
+    def test_group_expand_project_ids_dynamic_dates(self):
+        project_test = self.env['project.project'].create({'name': 'Project Test'})
+        domain = [
+            ('project_id', 'ilike', 'Project Test'),
+            ('planned_date_begin', '>=', 'today'),
+            ('date_deadline', '>=', 'today +2d'),
+        ]
+        self.env['project.task'].create([
+            {
+                'name': 'Task',
+                'project_id': project_test.id,
+                'partner_id': self.partner_1.id,
+                'planned_date_begin': Datetime.now(),
+                'date_deadline': Datetime.now() + relativedelta(days=5),
+            }
+        ])
+        Task = self.env['project.task'].with_context({
+            'gantt_start_date': Datetime.now(),
+            'gantt_scale': 'week',
+        })
+        gantt_projects_data = Task._group_expand_project_ids(None, domain)
+        self.assertEqual(gantt_projects_data, project_test)
+
     def test_group_expand_partner_ids(self):
         """
         Validate that a partner with tasks planned in the last or current period
@@ -308,3 +331,25 @@ class TestTaskGanttView(TestProjectCommon):
         start_date, stop_date = Datetime.now().strftime('%Y-%m-%d 00:00:00'), (Datetime.now() + relativedelta(days=30)).strftime('%Y-%m-%d 23:59:59')
         gantt_data = Task.get_gantt_data([], group_by, {'display_name': {}}, unavailability_fields=group_by, progress_bar_fields=group_by, start_date=start_date, stop_date=stop_date, scale='month')
         self.assertEqual(gantt_data["unavailabilities"]['user_ids'][False], [], 'There should be no unavailability intervals when the company calendar has flexible hours.')
+
+    def test_gantt_unavailability_flexible_employee_no_leaves(self):
+        """Flex employee with no leaves should have no Gantt unavailabilities."""
+        flex_calendar = self.env['resource.calendar'].create({
+            'name': 'Flexible Test Calendar',
+            'flexible_hours': True,
+        })
+        self.env['resource.resource'].create({
+            'name': self.user_gantt_test_1.name,
+            'user_id': self.user_gantt_test_1.id,
+            'calendar_id': flex_calendar.id,
+            'company_id': self.env.company.id,
+        })
+        start = Datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        stop = start + relativedelta(days=30)
+        result = self.env['project.task']._gantt_unavailability(
+            'user_ids', [self.user_gantt_test_1.id], start, stop, 'month'
+        )
+        self.assertEqual(
+            result[self.user_gantt_test_1.id], [],
+            "Flex employee with no leaves should have no unavailabilities.",
+        )

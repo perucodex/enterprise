@@ -23,29 +23,14 @@ export class StreamPostKanbanRecord extends KanbanRecord {
     //---------------------------------------
 
     /**
-     * Calculate the new likes count and then update the record.
+     * TODO: remove in master.
      */
     async _updateLikesCount(userLikeField, likesCountField, record = null) {
-        record = record || this.props.record;
-        const userLikes = record.data[userLikeField];
-        let likesCount = record.data[likesCountField];
-        if (userLikes) {
-            if (likesCount > 0) {
-                likesCount--;
-            }
-        } else {
-            likesCount++;
-        }
-
-        // Update the record with the "user liked" and likes count values.
-        await record.update({
-            [userLikeField]: !userLikes,
-            [likesCountField]: likesCount,
-            ...this._prepareLikeAdditionnalValues(likesCount, !userLikes),
-        });
-        await record.save();
     }
 
+    /**
+     * TODO: remove in master.
+     */
     _prepareLikeAdditionnalValues(likesCount, userLikes) {
         return {};
     }

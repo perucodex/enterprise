@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import pytz
+
 from datetime import datetime, timedelta
 from freezegun import freeze_time
 
@@ -615,6 +617,84 @@ class AppointmentResourceBookingTest(AppointmentCommon):
         self.assertEqual(set(available_resources_c2), set(table_c3.ids),
             "Only the table for 3 should be available as the other is booked")
         self._test_slot_generate_available_resources(self.apt_type_resource, 2, 'UTC', start, end, table_c3, available_resources_c2, reference_date=self.reference_now)
+
+    @users('apt_manager')
+    def test_appointment_resource_unmanaged_capacity_remains_until_max_bookings(self):
+        """ When capacity is not managed, a resource accepts up to ``max_bookings``
+        bookings per slot. A single existing booking must therefore not remove the
+        resource from the slot's available resources: it should stay available as
+        long as the number of bookings is below ``max_bookings``.
+        """
+        appointment = self.env['appointment.type'].create([{
+            'appointment_tz': 'UTC',
+            'min_schedule_hours': 1.0,
+            'max_schedule_days': 8,
+            'name': 'Unmanaged Test',
+            'manage_capacity': False,
+            'max_bookings': 3,
+            'schedule_based_on': 'resources',
+            'slot_ids': [(0, 0, {
+                'weekday': str(self.reference_monday.isoweekday()),
+                'start_hour': 6,
+                'end_hour': 18,
+            })],
+        }])
+        resource = self.env['appointment.resource'].create([{
+            'appointment_type_ids': appointment.ids,
+            'capacity': 1,
+            'name': 'Resource 3',
+            'sequence': 3
+        }])
+
+        start = datetime(2022, 2, 14, 8, 0, 0)
+        end = start + timedelta(hours=1)
+
+        # One booking on the resource: with max_bookings=3, two bookings remain.
+        self.env['calendar.event'].with_context(self._test_context).create({
+            'appointment_type_id': appointment.id,
+            'booking_line_ids': [(0, 0, {'appointment_resource_id': resource.id, 'capacity_reserved': 1})],
+            'name': 'Booking 1',
+            'start': start,
+            'stop': end,
+        })
+
+        slots = appointment._slots_generate(
+            start.astimezone(pytz.utc), end.astimezone(pytz.utc), 'UTC', reference_date=self.reference_now)
+        slots = [slot for slot in slots if slot['UTC'] == (start.replace(tzinfo=None), end.replace(tzinfo=None))]
+        appointment._slots_fill_resources_availability(slots, start, end, filter_resources=resource, asked_capacity=1)
+        self.assertEqual(
+            slots[0].get('available_resource_ids', self.env['appointment.resource']),
+            resource,
+            "An unmanaged-capacity resource with one booking but max_bookings=3 must stay available",
+        )
+
+        # add 2 more bookings on the resource: with max_bookings=3, none should remain
+        self.env["calendar.event"].with_context(self._test_context).create(
+            [
+                {
+                    "appointment_type_id": appointment.id,
+                    "booking_line_ids": [(0, 0, {"appointment_resource_id": resource.id, "capacity_reserved": 1})],
+                    "name": "Booking 2",
+                    "start": start,
+                    "stop": end,
+                },
+                {
+                    "appointment_type_id": appointment.id,
+                    "booking_line_ids": [(0, 0, {"appointment_resource_id": resource.id, "capacity_reserved": 1})],
+                    "name": "Booking 3",
+                    "start": start,
+                    "stop": end,
+                },
+            ]
+        )
+        slots = appointment._slots_generate(
+            start.astimezone(pytz.utc), end.astimezone(pytz.utc), 'UTC', reference_date=self.reference_now)
+        slots = [slot for slot in slots if slot['UTC'] == (start.replace(tzinfo=None), end.replace(tzinfo=None))]
+        appointment._slots_fill_resources_availability(slots, start, end, filter_resources=resource, asked_capacity=1)
+        self.assertFalse(
+            slots[0].get('available_resource_ids', self.env['appointment.resource']),
+            "An unmanaged-capacity resource with max bookings must be unavailable",
+        )
 
     @users('apt_manager')
     def test_appointment_resources_combinable_performance(self):
@@ -1298,3 +1378,41 @@ class AppointmentResourceBookingTest(AppointmentCommon):
         available_resources = [resource['id'] for resource in resource_slots[0]['available_resources']]
         self.assertListEqual(available_resources, resource_2.ids,
             "The first resource should now be unavailable and the second one is chosen")
+
+    @users('apt_manager')
+    def test_generate_slots_until_midnight_resources(self):
+        """ Check end of day slot, e.g. 23:00-00:00 for a 1h duration """
+
+        self.apt_type_resource.appointment_duration = 1
+        self.apt_type_resource.max_schedule_days = 1
+        # 22:00-23:00 range in UTC will correspond to 23:00-00:00 in UTC+1.
+        # So, this matches the attendance ending at midnight in the resource calendar.
+        # The corresponding interval bound ends up as 22.59.999999 in UTC unavailabilities.
+        self.env.ref('appointment.appointment_default_resource_calendar').sudo().tz = "Europe/Brussels"
+        self.apt_type_resource.slot_ids.write({
+            'start_hour': 22,
+            'end_hour': 23,
+        })
+
+        self.env['appointment.resource'].create({
+            'appointment_type_ids': self.apt_type_resource.ids,
+            'name': 'Resource',
+            'resource_calendar_id': self.env.ref('appointment.appointment_default_resource_calendar').id,
+        })
+
+        with freeze_time(self.reference_now):
+            slots = self.apt_type_resource._get_appointment_slots('UTC')
+        self.assertSlots(
+            slots,
+            [{'name_formated': 'February 2022',
+              'month_date': datetime(2022, 2, 1),
+              'weeks_count': 5,  # 31/01 -> 28/02 (06/03)
+              }
+             ],
+            {'enddate': self.global_slots_enddate,
+             'startdate': self.reference_now_monthweekstart,
+             'slots_start_hours': [22],
+             'slots_startdate': self.reference_monday.date(),
+             'slots_enddate': self.reference_monday.date(),
+             }
+        )

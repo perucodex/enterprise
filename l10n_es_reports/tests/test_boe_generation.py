@@ -5,6 +5,7 @@ from freezegun import freeze_time
 from odoo.addons.l10n_es_reports.tests.common import TestEsAccountReportsCommon
 from odoo import fields
 from odoo.tests import tagged
+from odoo.tests.common import new_test_user
 
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
@@ -31,6 +32,33 @@ class TestBOEGeneration(TestEsAccountReportsCommon):
         self._check_boe_111_to_303('130')
 
     @freeze_time('2020-12-22')
+    def test_boe_mod_115_no_company_write_access_required(self):
+        """
+        Generating a mod 115 BOE file should not require write access on res.company.
+        """
+        self._create_invoice(
+            partner_id=self.spanish_partner,
+            invoice_date=fields.Date.today(),
+            invoice_line_ids=[self._prepare_invoice_line(price_unit=10000, tax_ids=self.spanish_test_tax)],
+            post=True,
+        )
+        report = self.env.ref('l10n_es.mod_115')
+        options = self._generate_options(report, fields.Date.from_string('2020-12-01'), fields.Date.from_string('2020-12-31'))
+
+        accountant = new_test_user(self.env, login='accountant_no_settings_access', groups='account.group_account_user')
+        self.assertFalse(accountant.has_group('base.group_erp_manager'), "Test user should not have write access on res.company")
+
+        wizard_model = self.env[report.custom_handler_model_name].with_user(accountant)
+        wizard_action = wizard_model.open_boe_wizard(options, 115)
+        wizard = self.env[wizard_action['res_model']].with_context(wizard_action['context']).with_user(accountant).create({
+            # Mimics the value the web client sends back on save, since the field is
+            # present (albeit invisible) in the wizard view.
+            'company_partner_id': self.env.company.partner_id.id,
+        })
+        options['l10n_es_reports_boe_wizard_id'] = wizard.id
+        self.assertTrue(wizard_model.export_boe(options), "Empty BOE")
+
+    @freeze_time('2020-12-22')
     def test_boe_mod_303(self):
         self._check_boe_111_to_303('303')
 
@@ -51,24 +79,38 @@ class TestBOEGeneration(TestEsAccountReportsCommon):
         })
         invoice_2 = self.init_invoice('out_invoice', partner=spanish_partner_2, amounts=[5000], invoice_date=fields.Date.today())
         invoice_2.action_post()
+        invoice_3 = self.init_invoice('out_invoice', partner=spanish_partner_2, amounts=[4000], invoice_date=fields.Date.today())
+        invoice_3.l10n_es_reports_mod347_invoice_type = 'insurance'
+        invoice_3._post()
         report = self.env.ref('l10n_es_reports.mod_347')
         options = self._generate_options(report, fields.Date.from_string('2020-01-01'), fields.Date.from_string('2020-12-31'))
         self._check_boe_export(report, options, 347)
 
         # Check file content
         report._get_lines(options)
-        vals = self.env[report.custom_handler_model_name].export_boe(options)
+        handler = self.env[report.custom_handler_model_name]
+        vals = handler.export_boe(options)
         expected = [
             # For information about data position, see page 7 & 16 of
             # https://sede.agenciatributaria.gob.es/static_files/Sede/Disenyo_registro/DR_300_399/archivos/347.pdf
             # 1,347,year,company vat
-            "13472020A12345674COMPANY_1_DATA                          T         BECAUSE I AM ACCOUNTMAN!                3470000000002  0000000000000000000002 000000001500000000000000 000000000000000                                                                                                                                                                                                                                                                                                                           ",
+            "13472020A12345674COMPANY_1_DATA                          T         BECAUSE I AM ACCOUNTMAN!                3470000000002  0000000000000000000002 000000001900000000000000 000000000000000                                                                                                                                                                                                                                                                                                                           ",
             # 2,347,year,company vat,partner vat
-            "23472020A12345674A12345674         BERNARDO GANADOR                        D28   B 000000001000000  000000000000000 0000000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000001000000 000000000000000                     000000000000000                                                                                                                                                                                                         ",
-            "23472020A1234567474280274A         PARTNER 2                               D28   B 000000000500000  000000000000000 0000000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000500000 000000000000000                     000000000000000                                                                                                                                                                                                         ",
+            "23472020A1234567474280274A         PARTNER 2                               D28   B 000000000400000X 000000000000000 0000000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000400000 000000000000000                     000000000000000000000                                                                                                                                                                                                   ",
+            "23472020A12345674A12345674         BERNARDO GANADOR                        D28   B 000000001000000  000000000000000 0000000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000001000000 000000000000000                     000000000000000000000                                                                                                                                                                                                   ",
+            "23472020A1234567474280274A         PARTNER 2                               D28   B 000000000500000  000000000000000 0000000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000000000 000000000500000 000000000000000                     000000000000000000000                                                                                                                                                                                                   ",
         ]
         for generated_line, expected_line in zip(vals['file_content'].decode('utf-8').splitlines(), expected):
             self.assertEqual(generated_line, expected_line)
+
+        handler._retrieve_boe_manual_wizard(options, 347).write({
+            'complementary_declaration': True,
+            'substitutive_declaration': True,
+        })
+        vals = handler.export_boe(options)
+        header_line = vals['file_content'].decode('utf-8').splitlines()[0]
+        self.assertEqual('C', header_line[120], "Complementary declaration should use 'C'")
+        self.assertEqual('S', header_line[121], "Substitutive declaration should use 'S'")
 
     @freeze_time('2020-12-22')
     def test_boe_mod_349(self):
@@ -115,6 +157,21 @@ class TestBOEGeneration(TestEsAccountReportsCommon):
             'journal_id': cash_journal.id,
         })._create_payments()
 
+        other_spanish_partner = self.env['res.partner'].create({
+            'name': "Other Partner",
+            'state_id': self.env.ref('base.state_es_m').id,
+            'country_id': self.env.ref('base.es').id,
+            'vat': "ESA12345674",
+        })
+        other_invoice = self.init_invoice('out_invoice', partner=other_spanish_partner, amounts=[4000], invoice_date=fields.Date.today())
+        other_invoice.l10n_es_reports_mod347_invoice_type = 'regular'
+        other_invoice._post()
+        self.env['account.payment.register'].with_context(active_ids=other_invoice.ids, active_model='account.move').create({
+            'amount': 4000,
+            'payment_date': other_invoice.date,
+            'journal_id': cash_journal.id,
+        })._create_payments()
+
         report = self.env.ref('l10n_es_reports.mod_347')
         options = self._generate_options(report, '2020-01-01', '2020-12-31')
         wizard_model = self.env[report.custom_handler_model_name]
@@ -124,6 +181,8 @@ class TestBOEGeneration(TestEsAccountReportsCommon):
 
         boe_result = self.env[report.custom_handler_model_name].export_boe(options)
         self.assertTrue(self.spanish_partner.name.upper() not in boe_result['file_content'].decode())
+        # Only the other partner is above the 3 005,06 € threshold must be reported
+        self.assertIn(other_spanish_partner.name.upper(), boe_result['file_content'].decode())
 
     @freeze_time('2025-05-15')
     def test_boe_includes_null_lines_mod_349(self):
@@ -273,3 +332,28 @@ class TestBOEGeneration(TestEsAccountReportsCommon):
         # - and the previously declared tax base (1000.00).
         # Under REGISTRO DE RECTIFICACIONES https://www.boe.es/buscar/doc.php?id=BOE-A-2010-5098
         self.assertNotIn('20250500000000000000000000100000', boe_file['file_content'].decode('utf-8'))
+
+    @freeze_time('2020-12-22')
+    def test_boe_button_branch_allowed(self):
+        """
+        Test when a parent company has branches with different VATs and not all
+        branches are in the company selector
+        """
+        parent_company = self.company_data['company']
+        self.env['res.company'].create({
+            'name': 'ES Branch',
+            'parent_id': parent_company.id,
+            'vat': 'B88431804',
+            'country_id': self.env.ref('base.es').id,
+        })
+        report = self.env.ref('l10n_es.mod_390').with_context(
+            allowed_company_ids=parent_company.ids,
+        )
+        options = self._generate_options(report, '2020-01-01', '2020-12-31')
+        boe_button = next(b for b in options['buttons'] if b.get('action_param') == 390)
+        action = boe_button.get('error_action') or boe_button['action']
+        wizard_action = report.dispatch_report_action(options, action, boe_button['action_param'])
+        self.assertEqual(
+            'l10n_es_reports.aeat.boe.mod390.export.wizard',
+            wizard_action['res_model'],
+        )

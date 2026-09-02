@@ -10,10 +10,9 @@ import urllib.parse
 from werkzeug.exceptions import Forbidden
 
 from odoo import http, _
-from odoo.http import request
+from odoo.http import fragment_to_query_string, request
 from odoo.tools import consteq
 from odoo.tools.urls import urljoin as url_join
-from odoo.addons.auth_oauth.controllers.main import fragment_to_query_string
 from odoo.addons.social.controllers.main import SocialController
 from odoo.addons.social.controllers.main import SocialValidationException
 
@@ -106,6 +105,7 @@ class SocialFacebookController(SocialController):
     def social_facebook_like_post(self, stream_post_id, like):
         stream_post = self._get_social_stream_post(stream_post_id, 'facebook')
         stream_post._facebook_like(stream_post.facebook_post_id, like)
+        stream_post._facebook_update_likes(like)
 
     # ========================================================
     # MISC / UTILITY

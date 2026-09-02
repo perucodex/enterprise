@@ -42,7 +42,7 @@ class StockPicking(models.Model):
             if not sale_order or move.location_dest_id.usage != 'customer' or not move.picked:
                 continue
 
-            if sale_order.subscription_state == "7_upsell":
+            if sale_order.sudo().subscription_state == "7_upsell":
                 # we need to compute the parent id, because it was not computed when we created the SOL in _subscription_update_line_data
                 self.env.add_to_compute(self.env['sale.order.line']._fields['parent_line_id'], move.sale_line_id)
                 for line in move.sale_line_id:
@@ -51,7 +51,7 @@ class StockPicking(models.Model):
             elif sale_order.subscription_state and sale_order.id not in picking_per_so:
                 for sol in sale_order.order_line:
                     line_invoiced_date = sol.last_invoiced_date
-                    order_invoice_date = sol.order_id.invoice_ids and sol.order_id.last_invoice_date and sol.order_id.last_invoice_date - relativedelta(days=1)
+                    order_invoice_date = sol.order_id.sudo().invoice_ids and sol.order_id.sudo().last_invoice_date and sol.order_id.sudo().last_invoice_date - relativedelta(days=1)
                     last_invoiced_date = line_invoiced_date or order_invoice_date
                     if last_invoiced_date and picking.date_done.date() <= last_invoiced_date:
                         picking_per_so[sol.order_id.id] += move.picking_id

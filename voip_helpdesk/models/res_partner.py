@@ -5,12 +5,12 @@ class ResPartner(models.Model):
     _inherit = "res.partner"
 
     ticket_ids = fields.One2many("helpdesk.ticket", "partner_id")
-    open_ticket_count = fields.Integer(compute="_compute_open_ticket_count")
+    open_ticket_count = fields.Integer(compute="_compute_open_ticket_count", groups="helpdesk.group_helpdesk_user")
 
     @api.depends("ticket_ids.fold")
     def _compute_open_ticket_count(self):
-        def is_open(ticket):
-            return not ticket.fold
-
+        count_by_partner_id = self._count_tickets_by_partner_id(
+            extra_domain=[("fold", "=", False)],
+        )
         for partner in self:
-            partner.open_ticket_count = len(partner.ticket_ids.filtered(is_open))
+            partner.open_ticket_count = count_by_partner_id.get(partner.id, 0)

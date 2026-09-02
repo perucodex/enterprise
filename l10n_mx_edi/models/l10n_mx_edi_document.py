@@ -16,10 +16,11 @@ from pytz import timezone
 from werkzeug.urls import url_quote_plus
 
 from odoo import _, api, models, modules, fields, tools, SUPERUSER_ID
+from odoo.exceptions import UserError
 from odoo.fields import Domain
-from odoo.tools import frozendict, remove_accents
 from odoo.tools.float_utils import float_is_zero, float_round
 from odoo.addons.base.models.ir_qweb import keep_query
+from odoo.tools.misc import clean_context
 
 CFDI_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S'
 CANCELLATION_REASON_SELECTION = [
@@ -252,7 +253,7 @@ class L10n_Mx_EdiDocument(models.Model):
                 lambda x: x._action_retry_invoice_try_cancel(),
             ),
             'payment_sent_failed': (
-                None,
+                lambda x: x.move_id,
                 lambda x: x.move_id._l10n_mx_edi_cfdi_payment_try_send(),
             ),
             'payment_cancel_failed': (
@@ -287,6 +288,9 @@ class L10n_Mx_EdiDocument(models.Model):
     def _compute_show_button_needed(self):
         """ Compute whatever or not the 'show' button should be displayed. """
         for doc in self:
+            if doc.state.startswith('payment_') and not doc.move_id:
+                doc.show_button_needed = False
+                continue
             doc.show_button_needed = doc.state.startswith('payment_') or doc.state.startswith('ginvoice_')
 
     # -------------------------------------------------------------------------
@@ -357,6 +361,20 @@ class L10n_Mx_EdiDocument(models.Model):
             limit=1,
         )
 
+    def _get_original_document(self):
+        """
+        Get the document for which the current document is the substitution.
+        """
+        self.ensure_one()
+        if not self.attachment_origin:
+            return self.env['l10n_mx_edi.document']
+        origin_uuid = self.attachment_origin
+        doc_id = self.id
+        return self.env['l10n_mx_edi.document'].search(
+            [('id', '!=', doc_id), ('attachment_uuid', '=like', origin_uuid[3:])],
+            limit=1,
+        )
+
     def action_show_document(self):
         """ View the record(s) owning this document. """
         self.ensure_one()
@@ -393,8 +411,7 @@ class L10n_Mx_EdiDocument(models.Model):
 
     def action_force_payment_cfdi(self):
         """ Force the CFDI for the PUE payment document."""
-        self.ensure_one()
-        self.move_id.l10n_mx_edi_cfdi_payment_force_try_send()
+        raise UserError(_("You can no longer send a CFDI for a PUE payment."))
 
     def action_cancel(self):
         """ Cancel the document. """
@@ -495,15 +512,13 @@ class L10n_Mx_EdiDocument(models.Model):
 
     @api.model
     def _cfdi_sanitize_to_legal_name(self, name):
-        """ We remove the SA de CV / SL de CV / S de RL de CV and accents as they are never in the official name in the XML.
+        """ We remove the SA de CV / SL de CV / S de RL de CV as they are never in the official name in the XML.
 
         :param name: The name to clean.
         :return: The formatted name.
         """
         regex = r"(?i:\s+(s\.?\s?(a\.?)( de c\.?v\.?|)|(s\.?\s?(a\.?s\.?)|s\.? en c\.?( por a\.?)?|s\.?\s?c\.?\s?(l\.?(\s?\(?limitada)?\)?|s\.?(\s?\(?suplementada\)?)?)|s\.? de r\.?l\.?)))\s*$"
-        unaccented = remove_accents(re.sub(regex, "", name or ''))
-        # ñ character should stay as-is because unlike accents, the mexican government saves this letter that way...
-        return ''.join(c if name[i] not in 'üÜñÑ' else name[i] for i, c in enumerate(unaccented)).upper()
+        return re.sub(regex, "", name or '').upper()
 
     @api.model
     def _add_base_cfdi_values(self, cfdi_values):
@@ -792,7 +807,6 @@ class L10n_Mx_EdiDocument(models.Model):
         """
         receptor = cfdi_values['receptor']
         customer = receptor['customer']
-        ieps_breakdown = receptor['to_public'] or customer.l10n_mx_edi_ieps_breakdown
         if 'tax_objected' not in base_line:
             taxes = base_line['tax_ids'].flatten_taxes_hierarchy().filtered(lambda tax: tax.l10n_mx_tax_type != 'local')
             if not taxes:
@@ -815,14 +829,18 @@ class L10n_Mx_EdiDocument(models.Model):
                 # No VAT
                 and all(tax.l10n_mx_tax_type != 'iva' for tax in taxes if tax.amount >= 0.0)
                 # Partner IEPS breakdown
-                and ieps_breakdown
+                and customer.l10n_mx_edi_ieps_breakdown
             ):
                 tax_objected = '07'
             else:
                 tax_objected = '02'
             base_line['tax_objected'] = tax_objected
 
-        base_line['ieps_breakdown'] = base_line['tax_objected'] != '08' and ieps_breakdown
+        base_line['ieps_breakdown'] = (
+            cfdi_values.get('is_global')
+            or base_line['tax_objected'] == '07'
+            or customer.l10n_mx_edi_ieps_breakdown and base_line['tax_objected'] != '08'
+        )
 
     @api.model
     def _add_tax_objected_cfdi_values(self, cfdi_values, base_lines):
@@ -852,7 +870,7 @@ class L10n_Mx_EdiDocument(models.Model):
 
         for base_line in base_lines:
             is_negative = base_line['tax_details']['raw_total_excluded_currency'] < 0.0
-            if is_negative and not base_line['special_type']:
+            if is_negative:
                 base_line['special_type'] = 'global_discount'
         return base_lines
 
@@ -1001,7 +1019,7 @@ class L10n_Mx_EdiDocument(models.Model):
             elif is_refund_gi:
                 base_line_cfdi_values['clave_prod_serv'] = '84111506'
                 base_line_cfdi_values['clave_unidad'] = 'ACT'
-                base_line_cfdi_values['description'] = "Devoluciones, descuentos o bonificaciones"
+                base_line_cfdi_values['description'] = base_line['name']
                 base_line_cfdi_values['no_identificacion'] = product.default_code
                 base_line_cfdi_values['cuenta_predial'] = product.l10n_mx_edi_predial_account
                 base_line_cfdi_values['unidad'] = (base_line['uom_id'].name or '').upper()
@@ -1220,7 +1238,7 @@ class L10n_Mx_EdiDocument(models.Model):
         if currency.is_zero(cfdi_values['descuento']):
             cfdi_values['descuento'] = None
         for concepto in cfdi_values['conceptos_list']:
-            if currency.is_zero(concepto['descuento']):
+            if float_is_zero(concepto['descuento'], precision_digits=6):
                 concepto['descuento'] = None
             for key in ('traslados_list', 'retenciones_list'):
                 for tax_values in concepto[key]:
@@ -1314,7 +1332,7 @@ class L10n_Mx_EdiDocument(models.Model):
         :param number_next:     The consumed number.
         :return:
         """
-        sequence.number_next = number_next + 1
+        sequence.sudo().number_next = number_next + 1
         sequence.flush_recordset(fnames=['number_next'])
 
     @api.model
@@ -1339,6 +1357,7 @@ class L10n_Mx_EdiDocument(models.Model):
                     rates.append(1 / line['rate'])
         rate = sum(rates) / len(rates) if rates else None
 
+        cfdi_values['is_global'] = True
         self._add_base_cfdi_values(cfdi_values)
         self._add_currency_cfdi_values(cfdi_values, currency)
         self._add_document_origin_cfdi_values(cfdi_values, origin)
@@ -1723,7 +1742,7 @@ class L10n_Mx_EdiDocument(models.Model):
                 data=payload,
                 headers=headers,
                 verify=True,
-                timeout=20,
+                timeout=(20, 120),
             )
         except requests.exceptions.RequestException as req_e:
             return {'status': 'error', 'message': str(req_e)}
@@ -1864,7 +1883,7 @@ Content-Disposition: form-data; name="xml"; filename="xml"
         :return                     The newly created or updated document.
         """
         def create_attachment(attachment_values):
-            return self.env['ir.attachment'].with_user(SUPERUSER_ID).create({
+            return self.env['ir.attachment'].with_context(clean_context(self.env.context)).with_user(SUPERUSER_ID).create({
                 **attachment_values,
                 'res_model': records._name,
                 'res_id': records.id if len(records) == 1 else None,
@@ -2385,7 +2404,8 @@ Content-Disposition: form-data; name="xml"; filename="xml"
             self.move_id._l10n_mx_edi_cfdi_invoice_update_sat_state(self, sat_state, error=error)
             return True
         elif self.state in ('payment_sent', 'payment_cancel'):
-            self.move_id._l10n_mx_edi_cfdi_payment_update_sat_state(self, sat_state, error=error)
+            if self.move_id:
+                self.move_id._l10n_mx_edi_cfdi_payment_update_sat_state(self, sat_state, error=error)
             return True
         else:
             source_records = self._get_source_records()
@@ -2401,6 +2421,7 @@ Content-Disposition: form-data; name="xml"; filename="xml"
         :param: cadena:         The path to the cadenaoriginal xslt file.
         """
         self.ensure_one()
+        self.sat_state = self.sat_state  # force update write_date - see _fetch_and_update_sat_status
 
         cfdi_infos = self.env['l10n_mx_edi.document']._decode_cfdi_attachment(self.attachment_id.raw)
         if not cfdi_infos:
@@ -2416,8 +2437,8 @@ Content-Disposition: form-data; name="xml"; filename="xml"
         if self.sat_state != sat_results['value']:
             self._update_document_sat_state(sat_results['value'], error=sat_results.get('error'))
 
-            if self._can_commit():
-                self.env.cr.commit()
+        if self._can_commit():
+            self.env.cr.commit()
 
         return sat_results
 
@@ -2484,12 +2505,31 @@ Content-Disposition: form-data; name="xml"; filename="xml"
         :param batch_size:      The maximum size of the batch of documents to process to avoid timeout.
         :param extra_domain:    An optional extra domain to be injected when searching for documents to update.
         """
+        now = fields.Datetime.now()
         domain = self._get_update_sat_status_domain(extra_domain=extra_domain)
-        domain = Domain.AND([domain, [('write_date', '>=', fields.Date.today() - timedelta(days=60))]])
-        documents = self.search(domain, limit=batch_size + 1, order='write_date')
 
-        for counter, document in enumerate(documents):
-            if counter == batch_size:
-                self.env.ref('l10n_mx_edi.ir_cron_update_pac_status_invoice')._trigger()
-            else:
-                document._update_sat_state()
+        # 1. Outgoing documents (state != 'invoice_received', checked up to 60 days, re-checked if > 4h ago)
+        out_domain = Domain.AND([domain, [
+            ('state', '!=', 'invoice_received'),
+            ('write_date', '<=', now - timedelta(hours=4)),
+            ('create_date', '>=', now - timedelta(days=60)),
+        ]])
+        documents = self.search(out_domain, limit=batch_size + 1, order='create_date, id')
+
+        # 2. Vendor bills (state == 'invoice_received', checked up to 7 days, re-checked if > 12 hours ago)
+        if len(documents) <= batch_size:  # we want to enter even if we are exactly at the batch size to check if we need to retrigger
+            in_domain = Domain.AND([domain, [
+                ('state', '=', 'invoice_received'),
+                ('write_date', '<=', now - timedelta(hours=12)),
+                ('create_date', '>=', now - timedelta(days=7)),
+            ]])
+            remaining_limit = batch_size + 1 - len(documents)
+            vendor_docs = self.search(in_domain, limit=remaining_limit, order='create_date, id')
+            documents |= vendor_docs
+
+        need_retrigger = len(documents) > batch_size
+        for document in documents[:batch_size]:
+            document._update_sat_state()
+
+        if need_retrigger:
+            self.env.ref('l10n_mx_edi.ir_cron_update_pac_status_invoice')._trigger()

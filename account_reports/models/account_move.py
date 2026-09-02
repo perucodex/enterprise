@@ -52,9 +52,10 @@ class AccountMove(models.Model):
         if not self:
             return
 
-        all_statuses = self.env['account.audit.account.status'].search([
+        all_statuses = self.env['account.audit.account.status'].sudo().search([
             ('account_id', 'in', self.line_ids.account_id.ids),
             ('status', 'in', (False, 'reviewed', 'supervised')),
+            ('audit_id.company_ids', 'in', self.company_id.ids),
         ])
 
         if not all_statuses:

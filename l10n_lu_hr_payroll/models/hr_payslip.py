@@ -28,7 +28,7 @@ class HrPayslip(models.Model):
         ('without', 'Without')],
         compute='_compute_l10n_lu_tax_classification', store=True, readonly=False)
     l10n_lu_tax_rate_no_classification = fields.Float(
-        compute="_compute_l10n_lu_tax_id_number", store=True, readonly=False)
+        compute="_compute_l10n_lu_tax_rate_no_classification", store=True, readonly=False)
 
     l10n_lu_deduction_fd_daily = fields.Monetary(
         compute="_compute_l10n_lu_deduction_fd_daily", store=True, readonly=False)

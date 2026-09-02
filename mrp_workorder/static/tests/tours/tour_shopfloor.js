@@ -70,9 +70,23 @@ registry.category("web_tour.tours").add("test_shop_floor", {
         },
         // Handle mrp.production.serials wizard
         {
+            content: "Edit the quantity produced",
+            trigger: ".o_mrp_register_production_dialog input.o_input",
+            run: "edit 1.00",
+        },
+        {
             content: "Register production: Giraffe",
             trigger: ".o_workorder_bar_content:contains('Generate Lot') .btn-primary",
             run: "click",
+        },
+        {
+            content: "Check if the button clear is visible",
+            trigger: ".o_mrp_register_production_dialog .btn-secondary:contains('Clear')",
+        },
+        {
+            content: "Check that the value is still 1.00 then Edit the quantity produced",
+            trigger: ".o_mrp_register_production_dialog input.o_input:value(1.00)",
+            run: "edit 2.00",
         },
         {
             trigger: ".btn-primary:contains('Validate')",
@@ -304,6 +318,40 @@ registry.category("web_tour.tours").add("test_shop_floor", {
     ],
 });
 
+registry.category("web_tour.tours").add("test_shop_floor_disable_serial_create", {
+    steps: () => [
+        ...stepUtils.openWorkcentersSelector(),
+        ...stepUtils.confirmWorkcentersSelection(),
+        {
+            trigger: ".o_mrp_record_line:contains('Product 2') .btn-outline-secondary .fa-plus",
+            run: "click",
+        },
+        {
+            trigger: ".modal-dialog:has(.modal-title:contains('Add line: Product 2')) .o_create_button:contains(New)",
+            run: "click",
+        },
+        {
+            trigger: ".modal-dialog:has(.modal-title:contains('Create Move Line for Product 2')) .o_field_many2one_selection input",
+            run: "edit 00001",
+        },
+        {
+            trigger: "li.o_m2o_dropdown_option_create a:contains('00001')",
+            run: "click",
+        },
+        {
+            trigger: ".modal-dialog:has(.modal-body:contains('You are not allowed to create or edit')) .btn:contains(Close)",
+            run: "click",
+        },
+        {
+            trigger: ".modal-dialog:has(.modal-title:contains('Create Move Line for Product 2')) .btn:contains(Discard)",
+            run: "click",
+        },
+        {
+            trigger: "body:not(:has(.modal-dialog))",
+        },
+    ],
+});
+
 registry.category("web_tour.tours").add("test_shop_floor_auto_select_workcenter", {
     steps: () => [
         // Select 3 available Work Centers.
@@ -343,8 +391,10 @@ registry.category("web_tour.tours").add("test_shop_floor_auto_select_workcenter"
         ...stepUtils.clickOnWorkcenterButton("Furnace"),
         { trigger: ".o_mrp_display_record .card-footer button.o_btn_icon", run: "click" },
         { trigger: 'button[name="openMO"]', run: "click" },
+        // In the MO form view, click the breadcrumb “Shop Floor”, to go back to ShopFloor
         { trigger: ".o_breadcrumb a:contains('Shop Floor')", run: "click" },
         {
+            content: "Check the active Work-Center is Furnace",
             trigger: ".o_work_centers",
             run: () => {
                 helper.assertWorkcenterButtons([
@@ -368,6 +418,33 @@ registry.category("web_tour.tours").add("test_shop_floor_auto_select_workcenter"
             trigger: ".o_action.o_mrp_display",
             run: () => {
                 helper.assertWorkcenterButtons([{ name: "Furnace", count: 1, active: true }]);
+            },
+        },
+        {
+            content: "Start the workorder",
+            trigger:
+                ".o_mrp_display_record:contains(TWH/MO/00001):not(:has(.o_active)) .o_mrp_display_record_start_btn",
+            run: "click",
+        },
+        {
+            content: "Check that the default search filter is set to the current MO",
+            trigger: ".o_mrp_display_record:contains(TWH/MO/00001).o_active",
+            run() {
+                helper.assertSearchFacets([
+                    { label: "Manufacturing Order", value: "TWH/MO/00001" },
+                ]);
+            },
+        },
+        {
+            content: "Scan the operation",
+            trigger: ".o_mrp_display_records",
+            run: "scan bake it lovely",
+        },
+        {
+            content: "Check the default search filter has been removed",
+            trigger: ".o_mrp_display_record:contains(TWH/MO/00002)",
+            run() {
+                helper.assertSearchFacets([]);
             },
         },
     ],
@@ -489,67 +566,136 @@ registry.category("web_tour.tours").add("test_shop_floor_my_wo_filter_with_pin_u
 
 registry.category("web_tour.tours").add("test_generate_serials_in_shopfloor", {
     steps: () => [
+        ...stepUtils.openWorkcentersSelector(),
+        ...stepUtils.addWorkcenterToDisplay("Assembly Line"),
+        ...stepUtils.confirmWorkcentersSelection(),
+        ...stepUtils.clickOnWorkcenterButton("Assembly Line"),
         {
-            content: "Make sure workcenter is available",
-            trigger: '.form-check:has(input[name="Assembly Line"])',
+            content: "Start the workorder",
+            trigger: ".o_mrp_display_record:not(o_active) .card-header",
             run: "click",
         },
+        { trigger: ".o_mrp_display_record.o_active" },
         {
-            trigger: '.form-check:has(input[name="Assembly Line"]:checked)',
-        },
-        {
-            content: "Confirm workcenter",
-            trigger: 'button:contains("Confirm")',
-            run: "click",
-        },
-        {
-            content: "Select workcenter",
-            trigger: 'button.btn-light:contains("Assembly Line")',
-            run: "click",
-        },
-        {
-            content: "Open the wizard",
-            trigger: '.o_mrp_record_line .text-truncate:contains("Register byprod")',
-            run: "click",
-        },
-        {
-            content: "Open the serials generation wizard",
-            trigger: ".o_widget_generate_serials button",
+            content: "Open the by-product wizard",
+            trigger: ".o_mrp_record_line:contains('By-product: byprod')",
             run: "click",
         },
         {
             content: "Input a serial",
-            trigger: "#next_serial_0",
+            trigger: ".o_field_many2one[name='lot_id'] input",
             run: "edit 00001",
         },
         {
             content: "Generate the serials",
-            trigger: 'button.btn-primary:contains("Generate")',
+            trigger: "li.o_m2o_dropdown_option_create a",
             run: "click",
         },
         {
             content: "Save and close the wizard",
-            trigger: '.o_form_button_save:contains("Save")',
+            trigger: ".modal-footer button.o_form_button_save",
             run: "click",
         },
         {
             trigger:
-                ".o_mrp_display_record:first .o_mrp_record_line.text-muted:contains(Register byprod)",
+                ".o_mrp_display_record .o_mrp_record_line .o_line_label.text-decoration-line-through:contains('By-product: byprod')",
+        },
+        {
+            trigger: ".o_mrp_record_line:contains('By-product: By Product 1')",
+            run: "click",
+        },
+        {
+            trigger: ".o_field_many2one[name='lot_id'] input",
+            run: "edit 00002",
+        },
+        {
+            trigger: "li.o_m2o_dropdown_option_create a",
+            run: "click",
+        },
+        {
+            trigger: ".modal-footer button.o_form_button_save",
+            run: "click",
+        },
+        {
+            trigger:
+                ".o_mrp_display_record .o_mrp_record_line .o_line_label.text-decoration-line-through:contains('By-product: By Product 1')",
         },
         {
             content: "Set production as done",
-            trigger: 'button.btn-primary:contains("Close Production")',
+            trigger: ".card-footer button.btn-primary[barcode_trigger='CLMO']",
             run: "click",
         },
+        { trigger: ".o_view_nocontent" },
+    ],
+});
+
+registry.category("web_tour.tours").add("test_byproduct_serial_with_prefill_lots", {
+    steps: () => [
+        ...stepUtils.openWorkcentersSelector(),
+        ...stepUtils.addWorkcenterToDisplay("Assembly Line"),
+        ...stepUtils.confirmWorkcentersSelection(),
+        ...stepUtils.clickOnWorkcenterButton("Assembly Line"),
+        {
+            content: "Start the workorder",
+            trigger: ".o_mrp_display_record:not(o_active) .card-header",
+            run: "click",
+        },
+        { trigger: ".o_mrp_display_record.o_active" },
+        {
+            content: "Check that the by-product has no pre-filled indented lines",
+            trigger:
+                ".o_mrp_record_line:last-child:not(.o_mrp_record_line_indented):contains('By-product: byprod')",
+        },
+        {
+            content: "Open the by-product wizard",
+            trigger: ".o_mrp_record_line:contains('By-product: byprod')",
+            run: "click",
+        },
+        {
+            content: "Input a serial",
+            trigger: ".o_field_many2one[name='lot_id'] input",
+            run: "edit 00001",
+        },
+        {
+            content: "Generate the serials",
+            trigger: "li.o_m2o_dropdown_option_create a",
+            run: "click",
+        },
+        {
+            content: "Save and close the wizard",
+            trigger: ".modal-footer button.o_form_button_save",
+            run: "click",
+        },
+        {
+            trigger:
+                ".o_mrp_display_record .o_mrp_record_line .o_line_label.text-decoration-line-through:contains('By-product: byprod')",
+        },
+        {
+            content: "Set production as done",
+            trigger: ".card-footer button.btn-primary[barcode_trigger='CLMO']",
+            run: "click",
+        },
+        { trigger: ".o_view_nocontent" },
     ],
 });
 
 registry.category("web_tour.tours").add("test_partial_backorder_with_multiple_operations", {
     steps: () => [
+        {
+            trigger: ".o_data_row:contains('MOBACK-002') td.o_data_cell",
+            run: "click",
+        },
+        {
+            trigger: 'button[name="action_open_shop_floor"]',
+            run: "click",
+        },
         // Make sure workcenter is available.
         ...stepUtils.openWorkcentersSelector(),
         ...stepUtils.addWorkcenterToDisplay("Assembly Line"),
         ...stepUtils.confirmWorkcentersSelection(),
+        {
+            trigger: ".o_searchview_facet:last:contains(MOBACK-002)",
+        },
         {
             content: "Select workcenter",
             trigger: 'button.btn-light:contains("Assembly Line")',
@@ -567,6 +713,33 @@ registry.category("web_tour.tours").add("test_partial_backorder_with_multiple_op
         {
             trigger:
                 ".o_mrp_display_record:has(.card-title:contains(MOBACK-002)) .o_quantity:contains(5 Units)",
+        },
+        {
+            trigger:
+                ".o_mrp_display_record:has(.card-title:contains(MOBACK-002)) button:contains(Close Production)",
+        },
+        // Refresh the view to make sure the filter is updated.
+        {
+            trigger: 'button.btn-light:contains("Overview")',
+            run: "click",
+        },
+        {
+            trigger: '.o_mrp_record_line:has(.o_tag:contains("Assembly Line"))',
+        },
+        {
+            trigger: 'button.btn-light:contains("Assembly Line"):has(span:contains("1"))',
+            run: "click",
+        },
+        {
+            trigger: ".o_mrp_display_record_start_btn",
+        },
+        {
+            trigger: ".o_searchview_facet:last:contains(MOBACK-002)",
+        },
+        {
+            trigger:
+                ".o_mrp_display_record:has(.card-title:contains(MOBACK-002)) button:contains(Close Production)",
+            run: "click",
         },
     ],
 });
@@ -977,8 +1150,12 @@ registry.category("web_tour.tours").add("test_product_consumption", {
         ...stepUtils.clickOnWorkcenterButton("Workcenter1"),
         {
             content: "Click on consumption button",
-            trigger: '.o_mrp_record_line button.btn .fa-plus',
+            trigger: ".o_mrp_record_line button.btn .fa-plus",
             run: "click",
+        },
+        {
+            content: "Check lot from TWH2 warehouse is not visible in the list",
+            trigger: "table.o_list_table:not(:has([data-tooltip='TWH2/Stock']))",
         },
         {
             content: "Select first lot",
@@ -994,5 +1171,181 @@ registry.category("web_tour.tours").add("test_product_consumption", {
             content: "Check that there are no open work orders",
             trigger: ".o_nocontent_help",
         },
+    ],
+});
+
+registry.category("web_tour.tours").add("test_add_component_from_shop_floor", {
+    steps: () => [
+        ...stepUtils.openWorkcentersSelector(),
+        ...stepUtils.addWorkcenterToDisplay("Lovecenter"),
+        ...stepUtils.confirmWorkcentersSelection(),
+        {
+            content: "Check that we are in the MO view",
+            trigger:
+                ".o_mrp_display_record:contains('First Love') .o_mrp_record_line:contains(Lovecenter)",
+        },
+        {
+            content: "Add Product 1 to the MO components",
+            trigger: ".o_mrp_display_record:contains('First Love') .card-footer button.o_btn_icon",
+            run: "click",
+        },
+        {
+            trigger: ".modal:not(.o_inactive_modal) button[name=addComponent]",
+            run: "click",
+        },
+        {
+            content: "Ensure the catalog is opened",
+            trigger: ".modal:not(.o_inactive_modal) .o_product_kanban_catalog_view",
+        },
+        {
+            trigger: ".modal-content .o_kanban_record:contains('Product 1')",
+            run: "click",
+        },
+        {
+            content: "Await for the Component to be added",
+            trigger: ".modal-content .o_kanban_record:contains('Product 1') .fa-trash",
+        },
+        {
+            trigger: ".modal-content button.btn-close",
+            run: "click",
+        },
+        {
+            content: "Check that the Product 1 are visible on the MO",
+            trigger:
+                ".o_mrp_display_record:contains('First Love') .o_mrp_record_line:contains('Product 1')",
+        },
+        {
+            content: "Swap to the WO view of the Lovecenter",
+            trigger:
+                ".o_mrp_display_record:contains('First Love') .o_mrp_record_line:contains(Lovecenter)",
+            run: "click",
+        },
+        {
+            content: "Check that we are in the WO view",
+            trigger: ".o_mrp_display_record:contains('First Love') .o_mrp_display_record_start_btn",
+        },
+        {
+            content: "Add Product 2 to the WO components",
+            trigger: ".o_mrp_display_record:contains('First Love') .card-footer button.o_btn_icon",
+            run: "click",
+        },
+        {
+            trigger: ".modal:not(.o_inactive_modal) button[name=addComponent]",
+            run: "click",
+        },
+        {
+            content: "Ensure the catalog is opened",
+            trigger: ".modal:not(.o_inactive_modal) .o_product_kanban_catalog_view",
+        },
+        {
+            trigger: ".modal-content .o_kanban_record:contains('Product 2')",
+            run: "click",
+        },
+        {
+            content: "Await for the Component to be added",
+            trigger: ".modal-content .o_kanban_record:contains('Product 2') .fa-trash",
+        },
+        {
+            content: "Add some Product 1 once more",
+            trigger: ".modal-content .o_kanban_record:contains('Product 1')",
+            run: "click",
+        },
+        {
+            trigger:
+                ".modal-content .o_kanban_record:contains('Product 1') div[name=o_kanban_qty_available_and_on_hand]:contains(8)",
+        },
+        {
+            trigger: ".modal-content button.btn-close",
+            run: "click",
+        },
+        {
+            content: "Check that the Product 2 are visible on the WO",
+            trigger:
+                ".o_mrp_display_record:contains('First Love') .o_mrp_record_line:contains('Product 2')",
+        },
+    ],
+});
+
+registry.category("web_tour.tours").add("test_barcode_scan_returns_stock_quant_not_vendor_quant", {
+    steps: () => [
+        ...stepUtils.openWorkcentersSelector(),
+        ...stepUtils.addWorkcenterToDisplay("Assembly"),
+        ...stepUtils.confirmWorkcentersSelection(),
+        ...stepUtils.clickOnWorkcenterButton("Assembly"),
+        {
+            content: "Start the workorder",
+            trigger: ".o_mrp_display_record:not(.o_active) .card-header",
+            run: "click",
+        },
+        {
+            content: "Open the Hand Piece component registration dialog",
+            trigger:
+                ".o_mrp_display_record.o_active .o_mrp_record_line:contains('Hand Piece') .o_btn_icon .fa-plus",
+            run: "click",
+        },
+        {
+            content: "Scan serial number barcode SN-TEST-001",
+            trigger: ".o_dialog .o_list_table",
+            run: "scan SN-TEST-001",
+        },
+        {
+            content: "Verify Hand Piece component is marked as consumed",
+            trigger:
+                ".o_mrp_display_record.o_active .o_mrp_record_line:contains('Hand Piece') .o_line_label.text-decoration-line-through",
+        },
+    ],
+});
+
+registry.category("web_tour.tours").add("test_shop_floor_workorders_sorting", {
+    steps: () => [
+        {
+            trigger: "body",
+            run: () => {
+                // remove MOs from cache to force load and sort
+                localStorage.clear();
+            }
+        },
+        ...stepUtils.openWorkcentersSelector(),
+        ...stepUtils.addWorkcenterToDisplay("WC Sorting"),
+        ...stepUtils.confirmWorkcentersSelection(),
+        ...stepUtils.clickOnWorkcenterButton("WC Sorting"),
+        {
+            trigger: ".o_work_centers",
+            run: () => {
+                const workorders = Array.from(document.querySelectorAll('.o_mrp_display_record'));
+                const names = workorders.map(el => el.querySelector('.card-header h4').innerText);
+                if (names[0] !== 'MO_PLANNED' || names[1] !== 'MO_UNPLANNED') {
+                    console.error("Wrong sorting, got " + names.join(", "));
+                } else {
+                    document.body.classList.add('sort-test-passed');
+                }
+            }
+        },
+        {
+            trigger: "body.sort-test-passed",
+        }
     ]
-})
+});
+
+registry.category("web_tour.tours").add("test_barcode_scan_product", {
+    steps: () => [
+        ...stepUtils.openWorkcentersSelector(),
+        ...stepUtils.addWorkcenterToDisplay("Assembly"),
+        ...stepUtils.confirmWorkcentersSelection(),
+        ...stepUtils.clickOnWorkcenterButton("Assembly"),
+        {
+            content: "Start the workorder",
+            trigger: ".o_mrp_display_record:not(.o_active) .card-header",
+            run: "click",
+        },
+        {
+            content: "Scan product barcode 1234567890123",
+            trigger: "body",
+            run: "scan 1234567890123",
+        },
+        {
+            content: "Verify quantity popup is opened",
+            trigger: ".o_dialog .modal-title:contains('Quantity')",
+        },
+    ],
+});

@@ -173,6 +173,21 @@ class SocialTwitterCase(SocialCase):
         ])
         self.assertEqual(len(tweets), 2)
 
+    def test_social_user_update_likes(self):
+        tweet = self.env['social.stream.post'].create({
+            'stream_id': self.social_stream_1.id,
+            'twitter_likes_count': 4,
+            'twitter_tweet_id': '5',
+        })
+
+        tweet.with_user(self.social_user)._twitter_update_likes(True)
+        self.assertEqual(tweet.twitter_likes_count, 5)
+        self.assertTrue(tweet.twitter_user_likes)
+
+        tweet.with_user(self.social_user)._twitter_update_likes(False)
+        self.assertEqual(tweet.twitter_likes_count, 4)
+        self.assertFalse(tweet.twitter_user_likes)
+
     def test_remove_mentions(self):
         self.env['ir.config_parameter'].set_param('social_twitter.disable_mentions', True)
 

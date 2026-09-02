@@ -39,7 +39,7 @@ class ResCompany(models.Model):
             max_possible_day = calendar.monthrange(2023, int(company.ytd_reset_month))[1]
             if company.ytd_reset_day < 1 or company.ytd_reset_day > max_possible_day:
                 raise ValidationError(self.env._("The YTD reset day must be a valid day of the month : since the current month is %(month)s, it should be between 1 and %(day)s.",
-                    month=company._fields['ytd_reset_month'].selection[int(company.ytd_reset_month) - 1][1],
+                    month=company._fields['ytd_reset_month']._description_selection(self.env)[int(company.ytd_reset_month) - 1][1],
                     day=max_possible_day
                 ))
 

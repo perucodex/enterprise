@@ -568,8 +568,6 @@ class AccountExternalTaxMixin(models.AbstractModel):
     @api.model
     def _extract_tax_values_from_l10n_br_avatax_detail(self, service_params, line_detail, tax_detail):
         tax_amount = tax_detail['tax']
-        if service_params['is_return']:
-            tax_amount = -tax_amount
 
         if tax_detail['taxImpact']['impactOnNetAmount'] == 'Subtracted':
             tax_amount *= -1
@@ -633,7 +631,7 @@ class AccountExternalTaxMixin(models.AbstractModel):
                     tax_values_list = []
                     for tax_detail in line_results['taxDetails']:
                         if tax_detail['taxImpact']['impactOnNetAmount'] != 'Informative' and tax_detail['taxImpact']['accounting'] != 'none':
-                            tax_values_list.append(self._extract_tax_values_from_l10n_br_avatax_detail(service_params, line_results, tax_detail))
+                            tax_values_list.append(record._extract_tax_values_from_l10n_br_avatax_detail(service_params, line_results, tax_detail))
                     base_line_with_tax_values.append((base_line, tax_values_list))
 
             if errors:

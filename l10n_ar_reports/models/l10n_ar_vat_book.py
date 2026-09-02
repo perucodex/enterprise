@@ -115,6 +115,7 @@ class L10n_ArTaxReportHandler(models.AbstractModel):
             'action': 'export_file',
             'action_param': 'vat_book_export_files_to_zip',
             'file_export_type': _('ZIP'),
+            'branch_allowed': True,
         }
 
         options['buttons'].append(zip_export_button)
@@ -275,7 +276,7 @@ class L10n_ArTaxReportHandler(models.AbstractModel):
 
     @api.model
     def _vat_book_get_lines_domain(self, options):
-        company_ids = self.env.company.ids
+        company_ids = self.env['account.report'].get_report_company_ids(options)
         selected_journal_types = self._vat_book_get_selected_tax_types(options)
         domain = [('journal_id.type', 'in', selected_journal_types),
                   ('l10n_latam_use_documents', '=', True), ('company_id', 'in', company_ids)]
@@ -312,7 +313,7 @@ class L10n_ArTaxReportHandler(models.AbstractModel):
             doc_number = partner.vat or ''
             # we clean the letters that are not supported
             doc_number = re.sub("[^0-9]", "", doc_number)
-        elif partner.l10n_ar_afip_responsibility_type_id.code == '9':
+        elif partner.l10n_ar_afip_responsibility_type_id.code in ('8', '9'):
             commercial_partner = partner.commercial_partner_id
             doc_number = partner.l10n_ar_vat or (commercial_partner.country_id.l10n_ar_legal_entity_vat
                 if commercial_partner.is_company else commercial_partner.country_id.l10n_ar_natural_vat)
@@ -421,7 +422,8 @@ class L10n_ArTaxReportHandler(models.AbstractModel):
             invoice_number, pos_number = self._vat_book_get_pos_and_invoice_invoice_number(inv)
             doc_code, doc_number = self._vat_book_get_partner_document_code_and_number(inv.partner_id)
 
-            amounts = inv._l10n_ar_get_amounts()
+            base_lines, _tax_lines = inv._get_rounded_base_and_tax_lines()
+            amounts = inv._l10n_ar_get_amounts(base_lines=base_lines)
             vat_amount = amounts['vat_amount']
             vat_exempt_base_amount = amounts['vat_exempt_base_amount']
             vat_untaxed_base_amount = amounts['vat_untaxed_base_amount']

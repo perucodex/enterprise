@@ -24,6 +24,8 @@ export class Session {
      */
     static preferredInputDevice = "";
 
+    /** @type {string} */
+    controlHandle = "";
     /** @type {import("@voip/core/call_service").CallService} */
     callService;
     /**
@@ -41,6 +43,12 @@ export class Session {
      * @type {HTMLAudioElement|null}
      */
     remoteAudio = null;
+    /**
+     * Whether the session is responsible for playing the incoming ringtone.
+     *
+     * @type {boolean}
+     */
+    ringleader = false;
     /** @type {string|undefined} */
     transferTarget;
     /** @type {import("@voip/core/call_model").Call} */
@@ -239,13 +247,26 @@ export class Session {
      *
      * @param {SIP.IncomingRequestMessage} message
      */
-    _onIncomingInviteCanceled() {
+    async _onIncomingInviteCanceled(message) {
         if (this.isActiveSession) {
             this.ringtones.stopPlaying();
             this.voip.softphone.activeTab = "recent";
         }
         this.sipSession.reject({ statusCode: 487 /* Request Terminated */ });
-        this.callService.miss(this.call);
+        const reason = message.getHeader("Reason");
+        if (/Call completed elsewhere/i.test(reason)) {
+            // Terminated calls are expected to have a start date on 19.0.
+            await this.callService.start(this.call);
+            await this.callService.end(this.call);
+        } else if (
+            /\bSIP\s*;\s*cause\s*=\s*603\b/i.test(reason) ||
+            /\bQ\.850\s*;\s*cause\s*=\s*21\b/i.test(reason)
+        ) {
+            // Another registered SIP endpoint explicitly declined the call.
+            await this.callService.reject(this.call);
+        } else {
+            await this.callService.miss(this.call);
+        }
     }
 
     /**

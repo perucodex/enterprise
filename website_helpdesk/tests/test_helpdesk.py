@@ -73,6 +73,50 @@ class TestHelpdeskMenu(TransactionCase):
         team.use_website_helpdesk_form = False
         self.assertFalse(team.website_menu_id.is_visible)
 
+    def test_ticket_base_url_uses_team_website(self):
+        """ A ticket's base URL must follow its team's website, not the company default,
+        so notification links target the website the ticket was created from. """
+        websites = self.env['website'].create([
+            {'name': 'W1', 'domain': 'https://w1.example.com', 'sequence': 1},
+            {'name': 'W2', 'domain': 'https://w2.example.com', 'sequence': 2},
+        ])
+        team_w2 = self.env['helpdesk.team'].create({
+            'name': 'Team W2',
+            'use_website_helpdesk_form': True,
+            'website_id': websites[1].id,
+        })
+        ticket = self.env['helpdesk.ticket'].create({
+            'name': 'Test ticket',
+            'team_id': team_w2.id,
+        })
+        self.assertEqual(ticket.get_base_url(), 'https://w2.example.com')
+
+    def test_website_form_keeps_translations(self):
+        """ The website form of a team must keep the template's translations, so
+        it is rendered in the visitor's language regardless of the language of
+        the user creating the team. """
+        self.env['res.lang']._activate_lang('fr_FR')
+        fr_lang = self.env['res.lang'].search([('code', '=', 'fr_FR')])
+        website = self.env['website'].create({'name': 'French website'})
+        website.write({'language_ids': [(4, fr_lang.id)], 'default_lang_id': fr_lang.id})
+
+        # Translate the form title to French so the languages are distinguishable.
+        submit_form = self.env.ref('website_helpdesk.ticket_submit_form')
+        submit_form.update_field_translations('arch_db', {'fr_FR': {'Submit a Ticket': 'Soumettre un ticket'}})
+
+        # The user configuring the team uses English while the website is French.
+        team = self.env['helpdesk.team'].with_context(lang='en_US').create({
+            'name': 'French Team',
+            'use_website_helpdesk_form': True,
+            'website_id': website.id,
+        })
+
+        form_view = team.website_form_view_id
+        self.assertIn('Submit a Ticket', form_view.with_context(lang='en_US').arch,
+            "The generated form should keep its English translation.")
+        self.assertIn('Soumettre un ticket', form_view.with_context(lang='fr_FR').arch,
+            "The generated form should keep its French translation.")
+
     def test_archive_multiple_teams_different_websites(self):
         """ Test archiving multiple helpdesk teams linked to different websites. """
         websites = self.env['website'].create([{'name': 'W1'}, {'name': 'W2'}])

@@ -24,6 +24,7 @@ class HrPayslip(models.Model):
         else:
             iso20022_uetr = False
 
+        index = 1
         allocations = self.compute_salary_allocations()
         for ba in self.employee_id.bank_account_ids:
             amount = allocations[str(ba.id)]
@@ -31,14 +32,14 @@ class HrPayslip(models.Model):
                 continue
             payment = {
                 'id': self.id,
-                'name': str(self.id),
+                'name': str(self.id) if len(self.employee_id.bank_account_ids) == 1 else f'{self.id}-{index}',
                 'payment_date': payment_date,
                 'amount': amount,
                 'journal_id': journal_id.id,
                 'currency_id': journal_id.currency_id.id,
                 'payment_type': 'outbound',
-                'memo': str(self.id),
-                'partner_id': self.employee_id.work_contact_id.id,
+                'memo': self._get_iso20022_communication(ba),
+                'partner_id': ba.partner_id.id or self.employee_id.work_contact_id.id,
                 'partner_bank_id': ba.id,
                 'iso20022_charge_bearer': journal_id.iso20022_charge_bearer,
                 # The "High" priority level is a payment attribute that we should specify for salary payments :
@@ -49,19 +50,27 @@ class HrPayslip(models.Model):
             if iso20022_uetr:
                 payment['iso20022_uetr'] = iso20022_uetr
             payments.append(payment)
+            index += 1
         return payments
 
-    def action_payslip_payment_report(self, export_format='sepa'):
+    def _get_iso20022_communication(self, bank_account):
+        """ Communication displayed to the payee on their bank statement (RmtInf/Ustrd). """
         self.ensure_one()
-        return {
-            'type': 'ir.actions.act_window',
-            'res_model': 'hr.payroll.payment.report.wizard',
-            'view_mode': 'form',
-            'views': [(False, 'form')],
-            'target': 'new',
-            'context': {
-                'default_payslip_ids': self.ids,
-                'default_payslip_run_id': self.payslip_run_id.id,
-                'default_export_format': export_format,
-            },
-        }
+        return str(self.id)
+
+    def action_payslip_payment_report(self, export_format='sepa'):
+        action = super().action_payslip_payment_report()
+        default_export_format = None
+        if self.company_id.country_code == 'CH':
+            default_export_format = 'iso20022_ch'
+        elif self.company_id.currency_id.name == 'EUR':
+            default_export_format = export_format
+
+        if default_export_format:
+            action.update({
+                'context': {
+                    **action['context'],
+                    'default_export_format': default_export_format,
+                },
+            })
+        return action

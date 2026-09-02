@@ -138,7 +138,9 @@ export class DocumentsKanbanRecord extends KanbanRecord {
         this.touchStartMs = Date.now();
         if (this.longTouchTimer === null) {
             this.longTouchTimer = browser.setTimeout(() => {
-                this.props.record.toggleSelection(true);
+                if (!this.props.record.selected) {
+                    this.props.toggleSelection(this.props.record);
+                }
                 this.resetLongTouchTimer();
             }, this.LONG_TOUCH_THRESHOLD);
         }

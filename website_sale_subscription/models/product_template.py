@@ -88,7 +88,8 @@ class ProductTemplate(models.Model):
         found_plan_ids = set()
         for pricing in all_pricings:
             if (
-                (plan_id := pricing.plan_id.id) not in found_plan_ids
+                pricing.plan_id.sudo().active
+                and (plan_id := pricing.plan_id.id) not in found_plan_ids
                 # No need for uom conversion since multi-uom is not supported for recurring
                 # products atm.
                 and pricing._is_applicable_for(product=variant or self, qty_in_product_uom=quantity)
@@ -120,9 +121,9 @@ class ProductTemplate(models.Model):
 
         to_year = {'year': 1, 'month': 12, 'week': 52}
         translation_mapping = {
-            'year': _('year'),
-            'month': _('month'),
-            'week': _('week'),
+            'year': (self.env._('year'), self.env._('years')),
+            'month': (self.env._('month'), self.env._('months')),
+            'week': (self.env._('week'), self.env._('weeks')),
         }
 
         # Find the plan with the shortest billing period to use as base for comparison
@@ -131,7 +132,7 @@ class ProductTemplate(models.Model):
 
         # Compute base period price and max price for discount calculation
         base_plan_pricings = pricings.filtered(lambda pr: pr.plan_id == base_plan)
-        base_period_price = min(base_plan_pricings.mapped('fixed_price'), default=0.0)
+        base_period_price = min(base_plan_pricings.mapped('fixed_price'), default=0.0) / base_plan.billing_period_value
         max_price = max(pricings.mapped('fixed_price'), default=0.0)
 
         currency = website.currency_id
@@ -173,13 +174,17 @@ class ProductTemplate(models.Model):
             )
 
             if product_or_template.type == 'consu':
-                # For consumable products, use billing period (e.g., "3 month") instead of plan name
+                # For consumable products, use billing period (e.g., "3 months") instead of plan name
                 value = pricing.plan_id.billing_period_value
-                table_name = f"{value if value != 1 else ''} {translation_mapping.get(pricing.plan_id.billing_period_unit, pricing.plan_id.billing_period_unit)}".strip()
+                unit = pricing.plan_id.billing_period_unit
+                singular_unit, plural_unit = translation_mapping.get(unit)
+                unit_label = singular_unit if value == 1 else plural_unit
+                table_name = f"{value if value != 1 else ''} {unit_label}".strip()
             else:
                 # For non-consumable products, use plan name with non-breaking spaces
                 table_name = pricing.plan_id.name.replace(" ", "\u00A0")
 
+            minimum_billing_period, _ = translation_mapping.get(minimum_period)
             pricing_data = {
                 'plan_id': pricing_plan_sudo.id,
                 'price': f"{pricing.plan_id.name}: {price_format}",
@@ -187,12 +192,14 @@ class ProductTemplate(models.Model):
                 'table_price': price_format,
                 'table_name': table_name,
                 'to_minimum_billing_period': f'{format_amount(self.env, amount=price_in_minimum_period, currency=currency)}'
-                                             f' / {translation_mapping.get(minimum_period, minimum_period)}',
+                                             f' / {minimum_billing_period}',
                 'can_be_added': request.cart.plan_id.id in (pricing_plan_sudo.id, False),
             }
 
             # Calculate discount percentage
-            if product_or_template.allow_one_time_sale and 0 < price <= sales_price:  # One-time sale: compare against sale price
+            if pricing.compute_price == 'percentage':  # Percentage discount: use the value directly
+                discount = pricing.percent_price
+            elif product_or_template.allow_one_time_sale and 0 < price <= sales_price:  # One-time sale: compare against sale price
                 discount = ((sales_price - price) * 100) / sales_price
             elif (product_or_template.type == 'consu' and 0 < price <= max_price):  # Consumables: compare against max price
                 discount = ((max_price - price) * 100) / max_price
@@ -227,6 +234,7 @@ class ProductTemplate(models.Model):
             'allow_one_time_sale': not request.cart.plan_id and self.allow_one_time_sale,
             'allow_recurring': not request.cart._has_one_time_sale(),
             'product_type': product_or_template.type,  # Used to change pricing text in template based on product type
+            "temporal_unit_display": chosen_pricing.plan_id.sudo().billing_period_display_sentence if chosen_pricing else "",
         }
 
     # Search bar
@@ -271,11 +279,11 @@ class ProductTemplate(models.Model):
                 date=date,
                 uom=template.uom_id,
                 currency=currency,
-                plan_id=so_plan_id,
+                plan_id=pricing.plan_id.id,
             )
 
             # taxes application
-            product_taxes = template.sudo().taxes_id.filtered(lambda t: t.company_id == t.env.company)
+            product_taxes = template.sudo().taxes_id._filter_taxes_by_company(self.env.company)
             if product_taxes:
                 taxes = fiscal_position_sudo.map_tax(product_taxes)
                 unit_price = self.env['product.template']._apply_taxes_to_price(
@@ -290,6 +298,14 @@ class ProductTemplate(models.Model):
             })
 
         return prices
+
+    def _get_contextual_pricelist(self):
+        pricelist = super()._get_contextual_pricelist()
+        if plan_id := self.env.context.get('plan_id'):
+            # This pricelist is used in _get_contextual_price to compute
+            # the price of a product according to the plan_id selected
+            return pricelist.with_context(plan_id=plan_id)
+        return pricelist
 
     def _website_show_quick_add(self):
         self.ensure_one()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import fields
+from odoo import Command, fields
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.l10n_uk_bacs.models.account_journal import format_communication
 from odoo.tests import tagged
@@ -46,13 +46,16 @@ class TestBACS(AccountTestInvoicingCommon):
         cls.bacs_dd = cls.bank_journal.inbound_payment_method_line_ids.filtered(lambda l: l.code == 'bacs_dd')
         cls.bacs_dd_method = cls.env.ref('l10n_uk_bacs.payment_method_bacs_dd')
 
-    def create_account(self, number, partner, bank):
-        return self.env['res.partner.bank'].create({
+    def create_account(self, number, partner, bank, clearing_number=False):
+        vals = {
             'acc_number': number,
             'partner_id': partner.id,
             'bank_id': bank.id,
             'allow_out_payment': True,
-        })
+        }
+        if clearing_number:
+            vals['clearing_number'] = clearing_number
+        return self.env['res.partner.bank'].create(vals)
 
     def create_ddi(self, partner, partner_bank, company, payment_journal):
         return self.env['bacs.ddi'].create({
@@ -311,3 +314,74 @@ class TestBACS(AccountTestInvoicingCommon):
 
         # test multi payment with multi mode
         self.verify_multi_payments(company, vendor_superlux, True, self.bacs_dc_method, self.bacs_dc, 'outbound', vendor_bank_superlux)
+
+    def testBacsLocalBankAccount_vendor(self):
+        """
+        BACS Direct Credit with a local UK bank account (sort code + bare account number).
+        """
+        vendor_local = self.env['res.partner'].create({'name': 'Vendor Local UK'})
+        vendor_bank_local = self.create_account(
+            '12345678', vendor_local, self.bank_barclays, clearing_number='20-30-40',
+        )
+        payment_dc = self.create_payment(
+            vendor_local, 100, self.bacs_dc, self.bank_journal,
+            datetime.date.today() + datetime.timedelta(days=5),
+            'outbound', vendor_bank_local,
+        )
+        payment_dc.action_post()
+        self.assertEqual(payment_dc.state, 'in_process')
+
+        batch_dc = self.env['account.batch.payment'].create({
+            'batch_type': 'outbound',
+            'bacs_processing_date': fields.Date.today(),
+            'bacs_multi_mode': False,
+            'payment_ids': [Command.link(payment_dc.id)],
+            'journal_id': self.bank_journal.id,
+            'payment_method_id': self.bacs_dc_method.id,
+        })
+        wizard_action = batch_dc.validate_batch()
+        self.assertFalse(wizard_action)
+
+        raw_dc = base64.b64decode(batch_dc.export_file).decode('utf-8')
+        lines_dc = raw_dc.rstrip('\n').split('\n')
+        dc_transaction = lines_dc[4]
+        self.assertEqual(dc_transaction[:6], '203040', "Sort code (hyphens stripped) must appear in bytes 0–5")
+        self.assertEqual(dc_transaction[6:14], '12345678', "Account number must appear in bytes 6–13")
+
+    def testBacsLocalBankAccount_customer(self):
+        """
+        BACS Direct Debit via DDI with a local UK bank account (sort code + bare account number).
+        """
+        customer_local = self.env['res.partner'].create({'name': 'Customer Local UK'})
+        customer_bank_local = self.create_account(
+            '87654321', customer_local, self.bank_barclays, clearing_number='10-20-30',
+        )
+
+        ddi_local = self.create_ddi(customer_local, customer_bank_local, self.env.company, self.bank_journal)
+        ddi_local.action_validate_ddi()
+        self.assertEqual(ddi_local.state, 'active')
+
+        invoice_local = self.create_invoice(customer_local)
+        self.pay_with_mandate(invoice_local, ddi_local)
+        self.assertEqual(
+            invoice_local.payment_state,
+            self.env['account.move']._get_invoice_in_payment_state(),
+        )
+
+        payment_dd = invoice_local.matched_payment_ids
+        batch_dd = self.env['account.batch.payment'].create({
+            'batch_type': 'inbound',
+            'bacs_processing_date': fields.Date.today(),
+            'bacs_multi_mode': False,
+            'payment_ids': [Command.link(payment_dd.id)],
+            'journal_id': self.bank_journal.id,
+            'payment_method_id': self.bacs_dd_method.id,
+        })
+        wizard_action = batch_dd.validate_batch()
+        self.assertFalse(wizard_action)
+
+        raw_dd = base64.b64decode(batch_dd.export_file).decode('utf-8')
+        lines_dd = raw_dd.rstrip('\n').split('\n')
+        dd_transaction = lines_dd[4]
+        self.assertEqual(dd_transaction[:6], '102030', "Sort code (hyphens stripped) must appear in bytes 0–5")
+        self.assertEqual(dd_transaction[6:14], '87654321', "Account number must appear in bytes 6–13")

@@ -83,11 +83,12 @@ class InsertEmbeddedViewMenu extends Component {
             // Store the context of the search model:
             Object.assign(
                 context,
-                omit(this.env.searchModel.context, ...Object.keys(user.context))
+                omit(this.env.searchModel.context, ...Object.keys(user.context)),
+                this.env.searchModel.knowledgeViewContext || {}
             );
             // Store the state of the search model:
             Object.assign(context, {
-                knowledge_search_model_state: JSON.stringify(this.env.searchModel.exportState()),
+                knowledge_search_model_state: JSON.stringify(this.env.searchModel.exportKnowledgeState()),
             });
         }
         // Store the "local context" of the view:

@@ -39,4 +39,7 @@ export const unpatchPrepDataService = patch(PosData.prototype, {
     async missingRecursive(recordMap) {
         return recordMap;
     },
+    async deleteRecordsInIndexedDB(model, ids) {
+        return true;
+    },
 });

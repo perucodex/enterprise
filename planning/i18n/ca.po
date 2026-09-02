@@ -4,13 +4,14 @@
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025.
+# "Noemi Pla Garcia (nopl)" <nopl@odoo.com>, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-09 18:43+0000\n"
-"PO-Revision-Date: 2025-11-08 19:52+0000\n"
-"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
+"POT-Creation-Date: 2026-07-17 17:43+0000\n"
+"PO-Revision-Date: 2026-08-21 10:16+0000\n"
+"Last-Translator: \"Noemi Pla Garcia (nopl)\" <nopl@odoo.com>\n"
 "Language-Team: Catalan <https://translate.odoo.com/projects/odoo-19/planning/"
 "ca/>\n"
 "Language: ca\n"
@@ -18,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.12.2\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #. module: planning
 #. odoo-python
@@ -704,7 +705,7 @@ msgstr ""
 "                    text-decoration: none;\n"
 "                    border: 1px;\n"
 "                    border-radius: 3px;\n"
-"                    display: inline-block; \n"
+"                    display: inline-block;\n"
 "                    width: 190px;\n"
 "                    text-align: center;\n"
 "                }\n"
@@ -714,12 +715,12 @@ msgstr ""
 "out=\"ctx['employee'].name or ''\">Anita Oliver</t>:</p>\n"
 "                    <p t-else=\"\">Hola:</p>\n"
 "                    <br/>\n"
-"                    <p t-if=\"ctx.get('start_datetime') and "
-"ctx.get('end_datetime')\">\n"
-"                        S'han publicat els seus torns de treball pel període "
-"del <t t-out=\"format_date(ctx['start_datetime'])\">05-05-2021</t>\n"
-"                        al <t t-out=\"format_date(ctx['end_datetime'])"
-"\">11-05-2021</t>.\n"
+"                    <p t-if=\"ctx.get('start_datetime') and ctx.get"
+"('end_datetime')\">\n"
+"                        Els teus pròxims torns de treball del <t t-"
+"out=\"format_date(ctx['start_datetime'])\">05-05-2021</t>\n"
+"                        al <t t-out=\"format_date(ctx['end_datetime'])\">11-"
+"05-2021</t> ja s'han publicat.\n"
 "                    </p>\n"
 "                    <div style=\"display: flex; margin: 15px;\">\n"
 "                        <div t-if=\"ctx.get('planning_url')\" style=\"margin-"
@@ -727,8 +728,8 @@ msgstr ""
 "                            <a t-att-href=\"ctx['planning_url']\" "
 "target=\"_blank\" class=\"planning_mail_template_button\" t-attf-"
 "style=\"color: {{object.company_id.email_primary_color or '#FFFFFF'}}; "
-"background-color: {{object.company_id.email_secondary_color or '#875A7B'}};"
-"\">Visualitzar la planificació</a>\n"
+"background-color: {{object.company_id.email_secondary_color or '#875A7B'}}"
+";\">Consulta els teus horaris</a>\n"
 "                        </div>\n"
 "                        <div t-if=\"ctx.get('planning_url_ics')\">\n"
 "                            <a t-att-href=\"ctx['planning_url_ics']\" "
@@ -741,24 +742,21 @@ msgstr ""
 "                    <p t-if=\"ctx.get('slot_unassigned') or "
 "(object.allow_self_unassign and object.self_unassign_days_before)\">\n"
 "                        <t t-if=\"ctx.get('slot_unassigned')\">\n"
-"                            També volíem fer un recordatori sobre els torns "
-"de treball disponibles. Si està interessat/da i disponible si us plau, "
-"assigni's vostè mateix el torn de treball.\n"
+"                            Et recordem que hi ha alguns torns disponibles. "
+"Si t'interessen i tens disponibilitat, pots assignar-te'ls.\n"
 "                        </t>\n"
 "                        <t t-if=\"object.allow_self_unassign and "
 "object.self_unassign_days_before\">\n"
-"                            Si finalment no pot cobrir el torn que té "
-"assignat, si us plau, desassigni's vostè mateix <t t-"
-"out=\"object.self_unassign_days_before or ''\">5</t> dies abans del "
-"començament del torn de treball.\n"
+"                            Si no pots cobrir un torn que tens assignat, "
+"desassigna-te'n com a mínim <t t-out=\"object.self_unassign_days_before or "
+"''\">5</t> dies abans que comenci.\n"
 "                        </t>\n"
 "                    </p>\n"
-"                    <p t-if=\"ctx.get('message')\" t-out=\"ctx['message']\"/"
-">\n"
-"                    <p t-if=\"object.allow_self_unassign\">En cas que "
-"l'horari actual no li vagi bé, li recomanem que es posi en contacte amb els "
-"seus companys i els demani fer un canvi. Potser estan interessats a "
-"intercanviar-lo amb vostè.</p>\n"
+"                    <p t-if=\"ctx.get('message')\" t-out=\"ctx['message']\"/>"
+"\n"
+"                    <p t-if=\"object.allow_self_unassign\">Si algun dels "
+"torns que tens assignats no et va bé, pots parlar amb els teus companys per "
+"veure si algú te'l pot canviar.</p>\n"
 "                </div>\n"
 "            </body>"
 
@@ -1213,6 +1211,7 @@ msgstr "Descartar"
 #: model:ir.model.fields,field_description:planning.field_hr_departure_wizard__display_name
 #: model:ir.model.fields,field_description:planning.field_hr_employee__display_name
 #: model:ir.model.fields,field_description:planning.field_hr_employee_public__display_name
+#: model:ir.model.fields,field_description:planning.field_ir_actions_report__display_name
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__display_name
 #: model:ir.model.fields,field_description:planning.field_planning_calendar_resource__display_name
 #: model:ir.model.fields,field_description:planning.field_planning_planning__display_name
@@ -1472,6 +1471,7 @@ msgstr "No estic disponible"
 #: model:ir.model.fields,field_description:planning.field_hr_departure_wizard__id
 #: model:ir.model.fields,field_description:planning.field_hr_employee__id
 #: model:ir.model.fields,field_description:planning.field_hr_employee_public__id
+#: model:ir.model.fields,field_description:planning.field_ir_actions_report__id
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__id
 #: model:ir.model.fields,field_description:planning.field_planning_calendar_resource__id
 #: model:ir.model.fields,field_description:planning.field_planning_planning__id
@@ -2200,6 +2200,11 @@ msgid "Repetitions"
 msgstr "Repeticions"
 
 #. module: planning
+#: model:ir.model,name:planning.model_ir_actions_report
+msgid "Report Action"
+msgstr ""
+
+#. module: planning
 #: model:ir.ui.menu,name:planning.planning_menu_reporting
 msgid "Reporting"
 msgstr "Informes"
@@ -2564,7 +2569,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:planning.field_planning_slot__start_datetime
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_search_base
 msgid "Start Date"
-msgstr "Data inicial"
+msgstr "Data d'inici"
 
 #. module: planning
 #: model:ir.model.fields,field_description:planning.field_planning_analysis_report__state
@@ -2581,6 +2586,22 @@ msgstr "Data d'aturada"
 #. module: planning
 #: model:ir.model.fields.selection,name:planning.selection__res_company__planning_employee_unavailabilities__switch
 msgid "Switch shifts with other employees"
+msgstr ""
+
+#. module: planning
+#. odoo-python
+#: code:addons/planning/models/ir_actions_report.py:0
+msgid ""
+"The Planning report cannot be added to the print menu. Please use the Print "
+"action available in the Planning calendar and Gantt views."
+msgstr ""
+
+#. module: planning
+#. odoo-python
+#: code:addons/planning/models/ir_actions_report.py:0
+msgid ""
+"The Planning report cannot be printed from here. Please use the Print action "
+"available in the Planning calendar and Gantt views."
 msgstr ""
 
 #. module: planning
@@ -2665,7 +2686,7 @@ msgstr "L'hora d'inici no pot ser negativa."
 #. odoo-python
 #: code:addons/planning/models/planning_template.py:0
 msgid ""
-"The start hour cannot be before the end hour for a one-day shift template."
+"The start hour cannot be after the end hour for a one-day shift template."
 msgstr ""
 
 #. module: planning
@@ -3047,6 +3068,11 @@ msgstr "p. ex. Grua"
 #: model_terms:ir.ui.view,arch_db:planning.planning_role_view_tree
 msgid "e.g. John Doe"
 msgstr "p. ex.: John Doe"
+
+#. module: planning
+#: model_terms:ir.ui.view,arch_db:planning.planning_view_kanban
+msgid "h"
+msgstr ""
 
 #. module: planning
 #: model_terms:ir.ui.view,arch_db:planning.planning_view_kanban_inherit

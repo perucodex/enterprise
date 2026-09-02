@@ -42,7 +42,7 @@
                             invisible="count_linked_asset == 0 or not warning_count_assets">
                             <field string="Asset(s)" name="count_linked_asset" widget="statinfo"/>
                         </button>
-                        <button class="oe_stat_button" name="open_entries"  type="object" icon="fa-bars" data-hotkey="p">
+                        <button class="oe_stat_button" name="open_entries"  type="object" icon="fa-bars" data-hotkey="shift+p">
                             <field string="Posted Entries" name="depreciation_entries_count" widget="statinfo" />
                         </button>
                         <button class="oe_stat_button" name="open_increase"  type="object" icon="fa-chevron-circle-up" invisible="gross_increase_count == 0">
@@ -360,10 +360,11 @@
                 <field name="method" readonly="state not in ['draft', 'model']"/>
                 <field name="book_value" readonly="1"/>
                 <field name="value_residual" widget="monetary" readonly="1"/>
-                <field name="account_asset_id" readonly="state not in ['draft', 'open']"/>
+                <field name="account_asset_id" optional="show" readonly="state not in ['draft', 'open']"/>
                 <field name="account_depreciation_id" readonly="state not in ['draft', 'open']"/>
                 <field name="account_depreciation_expense_id" readonly="state not in ['draft', 'open']"/>
-                <field name="analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting" readonly="state not in ['draft', 'open']"/>
+                <field name="analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting"
+                       options="{'multi_edit': true}"/>
                 <field name="currency_id" groups="base.group_multi_currency" optional="hide"/>
                 <field name="company_id" groups="base.group_multi_company" optional="hide" readonly="state != 'draft'"/>
                 <field name="company_id" groups="!base.group_multi_company" column_invisible="True" readonly="state != 'draft'"/>

@@ -19,7 +19,7 @@ patch(IotHttpService.prototype, {
         try {
             return await super._longpolling(...arguments);
         } catch (error) {
-            const isKiosk = !odoo.pos_config_id;
+            const isKiosk = odoo.access_token;
             if (error.message === "Longpolling action failed" && !isKiosk) {
                 this.dialog.add(AlertDialog, {
                     title: _t("IoT Box Warning"),

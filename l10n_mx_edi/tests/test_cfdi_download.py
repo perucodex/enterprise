@@ -51,14 +51,13 @@ class TestCFDIDownload(TestMxEdiCommon, HttpCase):
         payment = self.env['account.payment.register']\
             .with_context(active_model='account.move', active_ids=invoice.ids)\
             .create([{
-                'payment_date': '2017-06-01',
+                'payment_date': '2017-01-01',
                 'amount': 1160.0,
             }])\
             ._create_payments()
 
         with freeze_time('2017-01-01'), self.with_mocked_pac_sign_success():
             invoice.l10n_mx_edi_cfdi_invoice_try_update_payments()
-            payment.l10n_mx_edi_payment_document_ids.action_force_payment_cfdi()
 
         action_download = payment.l10n_mx_edi_payment_document_ids[0].action_download_file()
         self.authenticate(self.env.user.login, self.env.user.login)
@@ -83,7 +82,6 @@ class TestCFDIDownload(TestMxEdiCommon, HttpCase):
         bank_statement.set_line_bank_statement_line(invoice.line_ids.filtered(lambda account: account.account_type == 'asset_receivable').ids)
         with freeze_time('2017-01-01'), self.with_mocked_pac_sign_success():
             invoice.l10n_mx_edi_cfdi_invoice_try_update_payments()
-            bank_statement.l10n_mx_edi_payment_document_ids.action_force_payment_cfdi()
 
         action_download = bank_statement.l10n_mx_edi_payment_document_ids[0].action_download_file()
         self.authenticate(self.env.user.login, self.env.user.login)

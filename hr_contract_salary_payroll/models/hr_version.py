@@ -1,8 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from datetime import datetime, time
+from dateutil.relativedelta import relativedelta
+
 from odoo import fields, models
 
-from datetime import datetime, time
+from odoo.addons.hr_contract_salary.utils.hr_version import requires_hr_version_context
 
 
 class HrVersion(models.Model):
@@ -14,7 +17,7 @@ class HrVersion(models.Model):
     monthly_yearly_costs = fields.Monetary(groups="hr_payroll.group_hr_payroll_user")
     salary_offer_ids = fields.One2many(groups="hr_payroll.group_hr_payroll_manager")
 
-    # DO NOT CALL THIS FUNCTION OUTSIDE OF A ROLLBACK SAVEPOINT
+    @requires_hr_version_context()
     def _generate_salary_simulation_payslip(self):
         self.ensure_one()
         payslip = self.env['hr.payslip'].sudo().create({
@@ -23,6 +26,7 @@ class HrVersion(models.Model):
             'struct_id': self.structure_type_id.default_struct_id.id,
             'company_id': self.employee_id.company_id.id,
             'name': 'Payslip Simulation',
+            'date_from': self.contract_date_start + relativedelta(months=1, day=1),
         })
 
         # For hourly wage contracts generate the worked_days_line_ids manually
@@ -31,7 +35,7 @@ class HrVersion(models.Model):
                 datetime.combine(payslip.date_from, time.min), datetime.combine(payslip.date_to, time.max),
                 compute_leaves=False, calendar=self.resource_calendar_id,
             )[self.employee_id.id]
-            payslip.worked_days_line_ids = self.env['hr.payslip.worked_days'].with_context(salary_simulation=True).sudo().create({
+            payslip.worked_days_line_ids = self.env['hr.payslip.worked_days'].sudo().create({
                 'payslip_id': payslip.id,
                 'work_entry_type_id': self._get_default_work_entry_type_id(),
                 'number_of_days': work_days_data.get('days', 0),
@@ -88,14 +92,7 @@ class HrVersion(models.Model):
             })
 
         else:
-            work_time_rate = payslip.version_id.work_time_rate
-            new_wage_on_payroll = old_wage_on_payroll * work_time_rate
-            new_wage = old_wage * work_time_rate
-            is_full_time = work_time_rate == 1.0
-            new_payslip_vals.update({
-                'wage_on_signature': new_wage_on_payroll,
-                'wage': new_wage,
-            })
+            is_full_time = True
 
         payslip = payslip.with_context(
             salary_simulation=True,

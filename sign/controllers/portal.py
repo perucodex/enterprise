@@ -21,7 +21,7 @@ class CustomerPortal(portal.CustomerPortal):
         if 'to_sign_count' in counters:
             partner_id = request.env.user.partner_id
             values['to_sign_count'] = request.env['sign.request.item'].sudo().search_count([
-                ('partner_id', '=', partner_id.id), ('sign_request_id.state', '=', 'sent'), ('is_mail_sent', '=', True),
+                ('partner_id', '=', partner_id.id), ('sign_request_id.state', '=', 'sent'), ('state', '=', 'sent'), ('is_mail_sent', '=', True),
             ])
         if 'sign_count' in counters:
             partner_id = request.env.user.partner_id
@@ -121,7 +121,6 @@ class CustomerPortal(portal.CustomerPortal):
         sign_item_sudo = request.env['sign.request.item'].sudo().browse(item_id)
         if not sign_item_sudo.exists()\
                 or sign_item_sudo.partner_id != partner_id \
-                or sign_item_sudo.sign_request_id.state == 'canceled' \
                 or (sign_item_sudo.state == 'sent' and sign_item_sudo.is_mail_sent is False):
             return request.redirect('/my/')
         url = f'/sign/document/{sign_item_sudo.sign_request_id.id}/{sign_item_sudo.access_token}?portal=1'

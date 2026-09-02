@@ -6,7 +6,9 @@ import {
 } from "@account_accountant/components/bank_reconciliation/kanban_renderer";
 import { UploadDropZone } from "@account/components/upload_drop_zone/upload_drop_zone";
 import { registry } from "@web/core/registry";
-import { useState } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
+import { onWillStart, useState } from "@odoo/owl";
+import { fetchBankStatementsSourceInto } from "./utils";
 
 const synchronizedModes = ["online_sync", "l10n_be_codabox"]
 
@@ -15,6 +17,12 @@ export class BankRecKanbanUploadController extends BankRecKanbanController {
         ...BankRecKanbanController.components,
         AccountFileUploader,
     };
+
+    setup() {
+        super.setup();
+        this.orm = useService("orm");
+        onWillStart(() => fetchBankStatementsSourceInto(this.orm, this.props.context));
+    }
 
     get showUploadButton() {
         return !synchronizedModes.includes(this.props.context?.bank_statements_source);
@@ -29,7 +37,9 @@ export class BankRecKanbanUploadRenderer extends BankRecKanbanRenderer {
 
     setup() {
         super.setup();
+        this.orm = useService("orm");
         this.dropzoneState = useState({ visible: false });
+        onWillStart(() => fetchBankStatementsSourceInto(this.orm, this.env.model.config.context));
     }
 
     onDragStart(ev) {

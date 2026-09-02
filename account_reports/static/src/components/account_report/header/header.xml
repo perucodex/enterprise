@@ -45,6 +45,15 @@
                         </t>
                     </t>
 
+                    <!-- Analytic coverage column -->
+                    <t t-if="controller.needsAnalyticCoverageColumn">
+                        <t t-if="columnHeader_index == 1">
+                            <th>
+                                <t>Analytic coverage</t>
+                            </th>
+                        </t>
+                    </t>
+
                     <!-- Debug column -->
                     <t t-if="controller.hasDebugColumn">
                         <!-- We only want to display it once on the first row -->
@@ -90,6 +99,7 @@
                 <t t-foreach="subheaders" t-as="subheader" t-key="subheader_index">
                     <th
                         t-att-colspan="subheader.colspan || 1"
+                        t-att-class="subheader.class"
                         t-att-data-expression_label="subheader.expression_label"
                     >
                         <!-- Sortable -->

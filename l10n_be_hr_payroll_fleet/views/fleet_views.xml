@@ -58,7 +58,8 @@
         <field name="inherit_id" ref="fleet.fleet_vehicle_model_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//group[@name='group_engine']" position="before">
-                <group string="Salary">
+                <field name="current_country_code" invisible="1"/>
+                <group string="Salary" invisible="current_country_code != 'BE'">
                     <field name="can_be_requested"/>
                     <label for="default_car_value"/>
                     <div class="o_row">
@@ -80,18 +81,18 @@
                         <span> / month</span>
                     </div>
                     <field name="current_country_code" invisible="1"/>
-                    <label for="default_atn" invisible="vehicle_type != 'car' or current_country_code != 'BE'"/>
-                    <div class="o_row" invisible="vehicle_type != 'car' or current_country_code != 'BE'">
+                    <label for="default_atn" invisible="vehicle_type != 'car'"/>
+                    <div class="o_row" invisible="vehicle_type != 'car'">
                         <field name="default_atn" nolabel="1"/>
                         <span> / month</span>
                     </div>
                 </group>
             </xpath>
             <xpath expr="//field[@name='horsepower_tax']" position="after">
-                <field name="tax_deduction" widget="percentage"/>
+                <field name="tax_deduction" widget="percentage" invisible="current_country_code != 'BE'"/>
             </xpath>
             <xpath expr="//field[@name='electric_assistance']" position="after">
-                <field name="tax_deduction" widget="percentage"/>
+                <field name="tax_deduction" widget="percentage" invisible="current_country_code != 'BE'"/>
             </xpath>
         </field>
     </record>

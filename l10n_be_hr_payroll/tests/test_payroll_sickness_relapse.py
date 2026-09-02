@@ -445,3 +445,76 @@ class TestPayrollSicknessRelapse(TestPayrollCommon):
         self.assertFalse(second_leave.l10n_be_sickness_can_relapse)
         self.assertTrue(third_leave.l10n_be_sickness_can_relapse)
         self.assertTrue(fourth_leave.l10n_be_sickness_can_relapse)
+
+    def test_sickness_relapse_starting_from_2026(self):
+        """
+        Example (all dates are inclusive):
+        | Leave | Date from   | Date to     | Relapse | Calendar Days | Work Days  |
+        | ----- | ----------- | ----------- | ------- | ------------- | ---------- |
+        | 1st   | 10/Jan/26   | 30/Jan/26   | False   | 21 (c)days    | 15 (w)days |
+        | 2nd   | 01/Apr/26   | 15/Apr/26   | False   | 15 (c)days    | 11 (w)days |
+        | 3rd   | 11/May/26   | 30/May/26   | True    | 20 (c)days    | 15 (w)days |
+        | 4th   | 10/Aug/26   | 20/Aug/26   | False   | 11 (c)days    | 8 (w)days  |
+        The first leave is shorter than 30 (calendar) days.
+        All (work) days within this leave have a guaranteed salary.
+        The second leave is shorter than 30 (c) days.
+        The gap between it and the first leave is greater than 56 days.
+        It is not considered as a relapse.
+        All (w) days within this leave have a guaranteed salary.
+        The third leave is shorter than 30 (c) days.
+        The gap between it and the second leave is less than 56 days.
+        It is a relapse, sum the duration of this and previous related leaves.
+        The sum is 15 + 20 = 35 (c) days, which is greater than 30 days.
+        The first 30 (c) days have a guaranteed salary.
+        (w) days 26/05 - 30/05 do not have a guaranteed salary.
+        The fourth leave is shorter than 30 (c) days.
+        The gap between it and the third leave is greater than 56 days.
+        It is not considered as a relapse.
+        """
+
+        first_leave = self.env["hr.leave"].create({
+            "holiday_status_id": self.sick_time_off_type.id,
+            "employee_id": self.employee_test.id,
+            "request_date_from": date(2026, 1, 10),
+            "request_date_to": date(2026, 1, 30),
+        })
+
+        second_leave = self.env["hr.leave"].create({
+            "holiday_status_id": self.sick_time_off_type.id,
+            "employee_id": self.employee_test.id,
+            "request_date_from": date(2026, 4, 1),
+            "request_date_to": date(2026, 4, 15),
+        })
+
+        third_leave = self.env["hr.leave"].create({
+            "holiday_status_id": self.sick_time_off_type.id,
+            "employee_id": self.employee_test.id,
+            "request_date_from": date(2026, 5, 11),
+            "request_date_to": date(2026, 5, 30),
+        })
+
+        fourth_leave = self.env["hr.leave"].create({
+            "holiday_status_id": self.sick_time_off_type.id,
+            "employee_id": self.employee_test.id,
+            "request_date_from": date(2026, 8, 10),
+            "request_date_to": date(2026, 8, 20),
+        })
+        (first_leave + second_leave + third_leave + fourth_leave).action_approve()
+
+        work_entries = self.employee_test.version_ids.generate_work_entries(
+            date(2026, 5, 21), date(2026, 5, 30)
+        )
+        work_entries.action_validate()
+
+        paid_date = work_entries.filtered(lambda entry: entry.date.day == 22)
+        unpaid_date = work_entries.filtered(lambda entry: entry.date.day == 29)
+        work_entry_paid_code = set(paid_date.mapped("code"))
+        work_entry_unpaid_code = set(unpaid_date.mapped("code"))
+
+        self.assertSetEqual(work_entry_paid_code, {"LEAVE110"})
+        self.assertSetEqual(work_entry_unpaid_code, {"LEAVE214"})
+
+        self.assertFalse(first_leave.l10n_be_sickness_can_relapse)
+        self.assertFalse(second_leave.l10n_be_sickness_can_relapse)
+        self.assertTrue(third_leave.l10n_be_sickness_can_relapse)
+        self.assertFalse(fourth_leave.l10n_be_sickness_can_relapse)

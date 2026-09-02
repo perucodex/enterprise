@@ -28,9 +28,9 @@ class AccountReturnType(models.Model):
                 'tax_unit': 'company_only' if not tax_unit else tax_unit.id,
             }
             company_ids = self.env['account.return'].sudo()._get_company_ids(main_company, tax_unit, intrastat_return_type.report_id)
-            options = intrastat_return_type.report_id.with_context(allowed_company_ids=company_ids.ids).get_options(previous_options=options)
+            options = intrastat_return_type.report_id.sudo().with_context(allowed_company_ids=company_ids.ids).get_options(previous_options=options)
 
-            expression_totals_per_col_group = self.env.ref('l10n_be_reports.be_vat_return_type').report_id._compute_expression_totals_for_each_column_group(
+            expression_totals_per_col_group = self.env.ref('l10n_be_reports.be_vat_return_type').sudo().report_id._compute_expression_totals_for_each_column_group(
                 expression,
                 options,
                 warnings={}

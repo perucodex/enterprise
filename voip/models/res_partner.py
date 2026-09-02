@@ -128,6 +128,7 @@ class ResPartner(models.Model):
             "is_company",
             "name",
             "phone",
+            "phone_sanitized",
             Store.One("phone_country_id", self.env["res.country"]._voip_get_store_fields()),
             "t9_name",
         ]

@@ -35,15 +35,19 @@ export class GanttRendererControls extends Component {
         this.state = useState(pick(this.model.metaData, ...KEYS));
     }
 
+    get displayModeTitle() {
+        return this.model.displayParams.displayMode === "dense"
+            ? _t("Activate sparse mode")
+            : _t("Activate dense mode");
+    }
+
     getGanttScaleSelectorProps() {
         return {
             scales: {
                 ...this.model.metaData.ranges,
                 custom: {
-                    description: _t("From: %(from_date)s to: %(to_date)s", {
-                        from_date: formatDate(this.state.startDate),
-                        to_date: formatDate(this.state.stopDate),
-                    }),
+                    from_date: formatDate(this.state.startDate),
+                    to_date: formatDate(this.state.stopDate),
                 },
             },
             currentScale: this.state.rangeId,

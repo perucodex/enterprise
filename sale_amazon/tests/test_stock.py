@@ -23,7 +23,7 @@ class TestStock(common.TestAmazonCommon, TestStockCommon):
 
         # Create sales order
         self.partner = self.env['res.partner'].create({'name': "Gederic Frilson"})
-        amazon_offer = self.account._find_or_create_offer(
+        self.amazon_offer = self.account._find_or_create_offer(
             'test SKU', self.account.base_marketplace_id
         )
         self.sale_order = self.env['sale.order'].create({
@@ -33,7 +33,7 @@ class TestStock(common.TestAmazonCommon, TestStockCommon):
                 'product_id': self.productA.id,
                 'product_uom_qty': 2,
                 'amazon_item_ref': '123456789',
-                'amazon_offer_id': amazon_offer.id,
+                "amazon_offer_id": self.amazon_offer.id,
             })],
             'amazon_order_ref': '123456789',
         })
@@ -307,10 +307,17 @@ class TestStock(common.TestAmazonCommon, TestStockCommon):
             """ Return a mock response without making an actual call to the Selling Partner API. """
             base_response_ = common.OPERATIONS_RESPONSES_MAP[operation_]
             if operation_ == 'getOrder':
-                response_ = {'payload': dict(common.ORDER_MOCK, OrderStatus='Shipped')}
-            else:
-                response_ = base_response_
-            return response_
+                order_mock = base_response_['order']
+                return {
+                    "order": {
+                        **order_mock,
+                        "fulfillment": {
+                            **order_mock["fulfillment"],
+                            "fulfillmentStatus": "SHIPPED",
+                        },
+                    }
+                }
+            return base_response_
 
         with patch(
             'odoo.addons.sale_amazon.utils.make_sp_api_request', new=get_sp_api_response_mock
@@ -357,10 +364,17 @@ class TestStock(common.TestAmazonCommon, TestStockCommon):
             """ Return a mock response without making an actual call to the Selling Partner API. """
             base_response_ = common.OPERATIONS_RESPONSES_MAP[operation_]
             if operation_ == 'getOrder':
-                response_ = {'payload': dict(common.ORDER_MOCK, OrderStatus='Shipped')}
-            else:
-                response_ = base_response_
-            return response_
+                order_mock = base_response_["order"]
+                return {
+                    "order": {
+                        **order_mock,
+                        "fulfillment": {
+                            **order_mock["fulfillment"],
+                            "fulfillmentStatus": "SHIPPED",
+                        },
+                    }
+                }
+            return base_response_
 
         with patch(
             'odoo.addons.sale_amazon.utils.make_sp_api_request', new=get_sp_api_response_mock
@@ -435,3 +449,25 @@ class TestStock(common.TestAmazonCommon, TestStockCommon):
 
         msg = "All moves should be set as done."
         self.assertEqual(new_moves.state, 'done', msg=msg)
+
+    def test_move_reference_without_picking(self):
+        """Ensure an Amazon move correctly references the SO when not linked to a picking."""
+        amazon_sale_order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "order_line": [
+                Command.create({
+                    "name": "test",
+                    "product_id": self.productA.id,
+                    "product_uom_qty": 2,
+                    "amazon_item_ref": '0123456789',
+                    "amazon_offer_id": self.amazon_offer.id,
+                })
+            ],
+            "amazon_order_ref": "0123456789",
+            "amazon_channel": "fba",
+        })
+
+        self.account._generate_stock_moves(amazon_sale_order)
+
+        amazon_move = amazon_sale_order.order_line.move_ids
+        self.assertEqual(amazon_move.reference, f"Amazon move: {amazon_sale_order.name}")

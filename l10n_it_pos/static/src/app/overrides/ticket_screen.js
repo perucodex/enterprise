@@ -21,7 +21,7 @@ patch(TicketScreen.prototype, {
     async onDoRefund() {
         await super.onDoRefund(...arguments);
         if (isFiscalPrinterActive(this.pos.config)) {
-            this.pos.navigate("PaymentScreen", { orderUuid: this.state.selectedOrderUuid });
+            this.pos.navigate("PaymentScreen", { orderUuid: this.pos.selectedOrderUuid });
         }
     },
 });

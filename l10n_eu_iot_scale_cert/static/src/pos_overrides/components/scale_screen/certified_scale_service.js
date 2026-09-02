@@ -1,14 +1,12 @@
-import { floatCompare } from "@point_of_sale/utils";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { formatFloat, roundPrecision } from "@web/core/utils/numbers";
+import { floatIsZero, formatFloat, roundDecimals } from "@web/core/utils/numbers";
 import { Reactive } from "@web/core/utils/reactive";
 
 // This is functionally identical to the base ScaleService with `pos_iot` patch applied.
 // Having a separate copy allows us to keep a certified version that will only change
 // if absolutely necessary, whilst the base service is free to change.
 
-const TARE_TIMEOUT_MS = 3000;
 
 export class CertifiedScaleService extends Reactive {
     constructor(env, deps) {
@@ -21,6 +19,7 @@ export class CertifiedScaleService extends Reactive {
         this.hardwareProxy = deps.hardware_proxy;
         this.lastWeight = null;
         this.weight = 0;
+        this.iotHttpService = deps.hardware_proxy.iotHttp;
         this.reset();
     }
 
@@ -33,12 +32,6 @@ export class CertifiedScaleService extends Reactive {
     }
 
     reset() {
-        if (this.isMeasuring) {
-            this._scaleDevice?.removeListener();
-            this._scaleDevice?.action({ action: "stop_reading" });
-        }
-        this.tare = 0;
-        this.tareRequested = false;
         this.loading = false;
         this.isMeasuring = false;
         this.product = null;
@@ -53,7 +46,6 @@ export class CertifiedScaleService extends Reactive {
     async readWeight() {
         this.loading = true;
         try {
-            this._checkScaleIsConnected();
             this.weight = await this._getWeightFromScale();
             this._clearLastWeightIfValid();
         } catch (error) {
@@ -61,63 +53,56 @@ export class CertifiedScaleService extends Reactive {
             this.onError?.(error.message);
         }
         this.loading = false;
-        this._setTareIfRequested();
-    }
-
-    _checkScaleIsConnected() {
-        if (this.hardwareProxy.connectionInfo.status !== "connected") {
-            throw new Error(_t("Cannot weigh product - IoT Box is disconnected"));
-        }
-        if (this.hardwareProxy.connectionInfo.drivers.scale?.status !== "connected") {
-            throw new Error(_t("Cannot weigh product - Scale is not connected to IoT Box"));
-        }
     }
 
     async _getWeightFromScale() {
-        const weightPromise = new Promise((resolve, reject) => {
-            this._scaleDevice.addListener((data) => {
+        return new Promise((resolve, reject) => {
+            const { iotId, identifier } = this._scaleDevice;
+            const callback = (data) => {
                 try {
                     resolve(this._handleScaleMessage(data));
                 } catch (error) {
                     reject(error);
                 }
-                this._scaleDevice.removeListener();
-            });
+            };
+
+            this.iotHttpService.action(
+                iotId,
+                identifier,
+                { action: "read_once" },
+                callback,
+                () => {} // avoid timeout notification
+            );
         });
-        await this._scaleDevice.action({ action: "read_once" });
-        return weightPromise;
     }
 
-    _readWeightContinuously() {
-        try {
-            this._checkScaleIsConnected();
-        } catch (error) {
-            this.onError?.(error.message);
-            this.isMeasuring = false;
-            return;
-        }
-
-        this._scaleDevice.addListener((data) => {
+    async _readWeightContinuously() {
+        const { iotId, identifier } = this._scaleDevice;
+        const callback = (data) => {
             try {
                 this.weight = this._handleScaleMessage(data);
                 this._clearLastWeightIfValid();
-                this._setTareIfRequested();
             } catch (error) {
                 this.onError?.(error.message);
             }
-        });
-        // The IoT box only sends the weight when it changes, so we
-        // manually read to get the initial value.
-        this._scaleDevice.action({ action: "read_once" });
-        this._scaleDevice.action({ action: "start_reading" });
+            if (this.isMeasuring) {
+                this.iotHttpService.onMessage(iotId, identifier, callback, callback);
+            }
+        };
+        this.iotHttpService.onMessage(iotId, identifier, callback, () => {});
+        // there is not always an event waiting in the iot, so we trigger one
+        this.iotHttpService.action(iotId, identifier, { action: "read_once" }, callback, () => {});
     }
 
     _handleScaleMessage(data) {
         if (data.status.status === "error") {
             throw new Error(`Cannot weigh product - ${data.status.message_body}`);
-        } else {
-            return data.value || 0;
+        } else if (data.status.status === "connected" || data.status === "success") {
+            return data.result || 0;
         }
+        // else, do nothing to avoid data.status === "error"
+        // corresponding to timeout because weight did not change
+        return this.weight;
     }
 
     setProduct(product, decimalAccuracy, unitPrice) {
@@ -130,25 +115,9 @@ export class CertifiedScaleService extends Reactive {
         };
     }
 
-    _setTareIfRequested() {
-        if (this.tareRequested) {
-            this.tare = this.weight;
-            this.tareRequested = false;
-        }
-    }
-
     _clearLastWeightIfValid() {
         if (this.lastWeight && this.isWeightValid) {
             this.lastWeight = null;
-        }
-    }
-
-    requestTare() {
-        this.tareRequested = true;
-        if (this.isManualMeasurement && !this.loading) {
-            this.readWeight();
-        } else {
-            setTimeout(() => this._setTareIfRequested(), TARE_TIMEOUT_MS);
         }
     }
 
@@ -156,11 +125,9 @@ export class CertifiedScaleService extends Reactive {
         // LNE requires that the weight changes from the previously
         // added value before another product is allowed to be added.
         return (
-            (!this.lastWeight ||
-                floatCompare(this.weight, this.lastWeight, {
-                    decimals: this.product.decimalAccuracy,
-                }) !== 0) &&
-            this.netWeight > 0
+            !this.lastWeight ||
+            (!floatIsZero(this.lastWeight - this.weight, this.product.decimalAccuracy) &&
+                this.netWeight > 0)
         );
     }
 
@@ -169,25 +136,11 @@ export class CertifiedScaleService extends Reactive {
     }
 
     get netWeight() {
-        return roundPrecision(this.weight - (this.tare || 0), this.product.decimalAccuracy);
+        return roundDecimals(this.weight, this.product.decimalAccuracy);
     }
 
     get netWeightString() {
         const weightString = formatFloat(this.netWeight, {
-            digits: [0, this.product.decimalAccuracy],
-        });
-        return `${weightString} ${this.product.unitOfMeasure}`;
-    }
-
-    get tareWeightString() {
-        const weightString = formatFloat(this.tare || 0, {
-            digits: [0, this.product.decimalAccuracy],
-        });
-        return `${weightString} ${this.product.unitOfMeasure}`;
-    }
-
-    get grossWeightString() {
-        const weightString = formatFloat(this.weight, {
             digits: [0, this.product.decimalAccuracy],
         });
         return `${weightString} ${this.product.unitOfMeasure}`;

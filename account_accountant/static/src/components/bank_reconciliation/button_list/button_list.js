@@ -6,11 +6,15 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import { BankRecSelectCreateDialog } from "../search_dialog/search_dialog";
+import { MEDIAS_BREAKPOINTS, SIZES } from "@web/core/ui/ui_service";
 import { _t } from "@web/core/l10n/translation";
 import { getCurrency } from "@web/core/currency";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { useBankReconciliation } from "../bank_reconciliation_service";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
+import { floatIsZero } from "@web/core/utils/numbers";
+
+const mediaBreakpointLarge = MEDIAS_BREAKPOINTS[SIZES.LG];
 
 export class BankRecButtonList extends Component {
     static template = "account_accountant.BankRecButtonList";
@@ -23,7 +27,7 @@ export class BankRecButtonList extends Component {
     static props = {
         statementLineRootRef: { type: Object },
         statementLine: { type: Object },
-        suspenseAccountLine: { type: Object, optional: true },
+        suspenseAccountLine: { type: [Object, Boolean], optional: true },
         reconcileLineCount: { type: [Number, { value: null }], optional: true },
         reconcileModels: Array,
         preSelectedReconciliationModel: { type: Object, optional: true },
@@ -86,6 +90,14 @@ export class BankRecButtonList extends Component {
                 multiSelect: false,
                 resModel: "res.partner",
                 context: { default_name: this.statementLineData.partner_name },
+                domain: [
+                    "|",
+                        ["company_id", "in", [false, this.statementLineData.company_id.id]],
+                        ["company_id", "parent_of", this.statementLineData.company_id.id],
+                    "|",
+                        ["parent_id", "=", false],
+                        ["is_company", "=", true],
+                ],
                 onSelected: async (partner) => await this._setPartnerOnReconcileLine(partner[0]),
             },
             {
@@ -179,9 +191,15 @@ export class BankRecButtonList extends Component {
         if (this.statementLineData.partner_id.property_account_receivable_id.id) {
             accountId = this.statementLineData.partner_id.property_account_receivable_id.id;
         } else {
-            accountId = await this.orm.webSearchRead("account.account", [
-                ["account_type", "=", "asset_receivable"],
-            ]);
+            const account = await this.orm.webSearchRead(
+                "account.account",
+                [
+                    ["company_ids", "=", this.statementLineData.company_id.id],
+                    ["account_type", "=", "asset_receivable"],
+                ],
+                { specification: {}, limit: 1 }
+            );
+            accountId = account.records[0].id;
         }
         await this._setAccountOnReconcileLine(this.lastAccountMoveLine.data.id, accountId);
         this.props.statementLine.load();
@@ -189,16 +207,22 @@ export class BankRecButtonList extends Component {
     }
 
     /**
-     * Sets the account payable on the current reconcile line..
+     * Sets the account payable on the current reconcile line.
      */
     async setAccountPayableOnReconcileLine() {
         let accountId;
         if (this.statementLineData.partner_id.property_account_payable_id.id) {
             accountId = this.statementLineData.partner_id.property_account_payable_id.id;
         } else {
-            accountId = await this.orm.webSearchRead("account.account", [
-                ["account_type", "=", "liability_payable"],
-            ]);
+            const account = await this.orm.webSearchRead(
+                "account.account",
+                [
+                    ["company_ids", "=", this.statementLineData.company_id.id],
+                    ["account_type", "=", "liability_payable"],
+                ],
+                { specification: {}, limit: 1 }
+            );
+            accountId = account.records[0].id;
         }
         await this._setAccountOnReconcileLine(this.lastAccountMoveLine.data.id, accountId);
         this.props.statementLine.load();
@@ -210,13 +234,14 @@ export class BankRecButtonList extends Component {
      */
     reconcileOnReconcileLine() {
         const context = {
+            kanban_view_ref: "account_accountant.view_account_move_line_kanban_bank_rec_widget",
             list_view_ref: "account_accountant.view_account_move_line_list_bank_rec_widget",
             search_view_ref: "account_accountant.view_account_move_line_search_bank_rec_widget",
             preferred_aml_value: -this.props.suspenseAccountLine.amount_currency,
             preferred_aml_currency_id: this.props.suspenseAccountLine.currency_id.id,
             ...(this.statementLineData.partner_id
                 ? { search_default_partner_id: this.statementLineData.partner_id.id }
-                : { search_default_posted: 1 }),
+                : {}),
         };
 
         this.addDialog(
@@ -250,6 +275,23 @@ export class BankRecButtonList extends Component {
                     this.restoreFocus();
                 },
             }
+        );
+    }
+
+    get availableReconcileLines() {
+        // No need to compute the number of lines that could be reconciled with the statement line
+        // because having a partner will trigger the try_auto_reconcile function and it should be reconciled
+        if (this.statementLineData.partner_id) {
+            return [];
+        }
+
+        const statementLineAmount =
+            this.statementLineData.amount_currency || this.statementLineData.amount;
+        const decimalPlaces =
+            this.statementLineData.foreign_currency_id?.decimal_places ||
+            this.statementLineData.currency_id?.decimal_places;
+        return this.bankReconciliation.availableReconcileLines.filter((line) =>
+            floatIsZero(line.amount_currency - statementLineAmount, decimalPlaces)
         );
     }
 
@@ -415,7 +457,8 @@ export class BankRecButtonList extends Component {
                     this.props.statementLineRootRef.el.querySelector(".btn-primary") &&
                     this.isLineSelected,
                 action: () => {
-                    const primaryButtons = this.props.statementLineRootRef.el.querySelectorAll(".btn-primary");
+                    const primaryButtons =
+                        this.props.statementLineRootRef.el.querySelectorAll(".btn-primary");
                     if (primaryButtons.length > 0) {
                         primaryButtons[0].click();
                     }
@@ -478,7 +521,11 @@ export class BankRecButtonList extends Component {
     // ACTION
     // -----------------------------------------------------------------------------
     actionViewRecoModels() {
-        return this.action.doAction("account.action_account_reconcile_model");
+        return this.action.doAction("account.action_account_reconcile_model", {
+            additionalContext: {
+                search_default_match_journal_ids: [this.statementLineData.journal_id.id],
+            },
+        });
     }
 
     // -----------------------------------------------------------------------------
@@ -534,7 +581,7 @@ export class BankRecButtonList extends Component {
     }
 
     get reconcileModelsInDropdown() {
-        if (this.ui.isSmall) {
+        if (this.ui.isSmall || screen.width <= mediaBreakpointLarge.maxWidth) {
             return this.props.reconcileModels;
         }
         return this.props.reconcileModels.filter(
@@ -549,9 +596,10 @@ export class BankRecButtonList extends Component {
      */
     get buttons() {
         const buttonsToDisplay = {};
+        const isMediumScreen = screen.width <= mediaBreakpointLarge.maxWidth;
         if (this.isSetPartnerButtonShown) {
             buttonsToDisplay.partner = {
-                label: _t("Set Partner"),
+                label: isMediumScreen ? _t("Partner") : _t("Set Partner"),
                 action: this.setPartnerOnReconcileLine.bind(this),
                 classes: "set-partner-btn",
             };
@@ -574,12 +622,13 @@ export class BankRecButtonList extends Component {
                 action: this.reconcileOnReconcileLine.bind(this),
                 count: this.props.reconcileLineCount,
                 classes: "reconcile-btn",
+                suggestion: this.availableReconcileLines.length,
             };
         }
 
         if (this.isSetAccountButtonShown) {
             buttonsToDisplay.account = {
-                label: _t("Set Account"),
+                label: isMediumScreen ? _t("Account") : _t("Set Account"),
                 action: this.setAccountOnReconcileLine.bind(this),
                 classes: "set-account-btn",
             };
@@ -637,5 +686,10 @@ export class BankRecButtonList extends Component {
         return Object.values(buttons).filter(
             (button) => !buttonToDisplayClasses.includes(button.classes)
         );
+    }
+
+    get displaySuggestionPill() {
+        // Override that function to display the suggestion pill on the dropdown
+        return this.availableReconcileLines.length;
     }
 }

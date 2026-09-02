@@ -349,6 +349,7 @@ class TestSubscriptionController(PaymentHttpCommon, PaymentCommon, TestSubscript
                     'partner_id': self.partner.id,
                     'company_id': self.company.id,
                     'sale_order_template_id': self.subscription_tmpl.id,
+                    'require_signature': False,
                 })
                 self.pricing_month.price = 100
                 subscription._onchange_sale_order_template_id()
@@ -396,6 +397,7 @@ class TestSubscriptionController(PaymentHttpCommon, PaymentCommon, TestSubscript
                 subscription._create_recurring_invoice()
                 action = subscription.prepare_renewal_order()
                 renewal_so = self.env['sale.order'].browse(action['res_id'])
+                renewal_so.require_signature = False
                 renewal_so.prepayment_percent = 0.5
                 self.amount = renewal_so.amount_total / 2.0
 

@@ -19,6 +19,7 @@ _logger = logging.getLogger(__name__)
 class TestSwissdecCommon(TestSwissdecMinorCommon):
 
     @classmethod
+    @freeze_time("2022-01-01")
     def setUpClass(cls):
         super().setUpClass()
         cls.laac_1 = cls.env['l10n.ch.additional.accident.insurance'].create({
@@ -85,11 +86,11 @@ class TestSwissdecCommon(TestSwissdecMinorCommon):
 
 
         cls.employee_male = cls.env['hr.employee'].with_context(tracking_disable=True).create([
-            {'registration_number': '3', 'certificate': 'vocEducationCompl', 'name': "Lusser Pia", 'sex': 'female', 'country_id': cls.env.ref('base.ch').id, 'l10n_ch_sv_as_number': '756.6417.0995.23', 'birthday': date(1958, 2, 5), 'marital': 'married', 'l10n_ch_marital_from': date(1979, 8, 14), 'private_street': 'Buochserstrasse 4', 'private_zip': '6370', 'private_city': 'Stans', 'private_country_id': cls.env.ref('base.ch').id, 'l10n_ch_municipality': 1509, 'l10n_ch_residence_category': False, 'l10n_ch_canton': 'NW', 'lang': 'de_DE', "l10n_ch_job_type": "noCadre", 'l10n_ch_lpp_percentage_employee': 10.45, 'l10n_ch_lpp_percentage_employer': 12.643, 'l10n_ch_lpp_in_percentage': True, 'l10n_ch_sickness_insurance_line_ids': [(4, cls.ijm_solution.id)], 'l10n_ch_additional_accident_insurance_line_ids': [(4, cls.laac_solution.id)], 'l10n_ch_location_unit_id': cls.location_unit_2.id, 'lpp_employee_amount': 385, 'company_id': cls.muster_ag_company.id, 'date_generated_from': datetime(2020, 9, 1, 0, 0, 0), 'date_generated_to': datetime(2020, 9, 1, 0, 0, 0), 'structure_type_id': cls.env.ref('l10n_ch_hr_payroll.structure_type_employee_ch').id, 'contract_date_start': date(2022, 1, 1), 'wage_type': "monthly", 'l10n_ch_has_monthly': True, "l10n_ch_contractual_13th_month_rate": (1/12)*100, 'wage': 10000, 'hourly_wage': 0, 'l10n_ch_social_insurance_id': cls.avs_2.id, 'l10n_ch_laa_group': cls.laa_group_A, 'laa_solution_number': '1', "l10n_ch_lpp_not_insured": True,  'l10n_ch_lpp_insurance_id': cls.lpp_0.id, 'l10n_ch_compensation_fund_id': cls.caf_lu_2.id, 'l10n_ch_thirteen_month': False, 'l10n_ch_yearly_holidays': 30},
+            {'registration_number': '3', 'certificate': 'vocEducationCompl', 'name': "Lusser Pia", 'sex': 'female', 'country_id': cls.env.ref('base.ch').id, 'l10n_ch_sv_as_number': '756.6417.0995.23', 'birthday': date(1958, 2, 5), 'marital': 'married', 'l10n_ch_marital_from': date(1979, 8, 14), 'private_street': 'Buochserstrasse 4', 'private_zip': '6370', 'private_city': 'Stans', 'private_country_id': cls.env.ref('base.ch').id, 'l10n_ch_municipality': 1509, 'l10n_ch_residence_category': False, 'l10n_ch_canton': 'NW', 'lang': 'de_DE', "l10n_ch_job_type": "noCadre", 'l10n_ch_lpp_percentage_employee': 10.45, 'l10n_ch_lpp_percentage_employer': 12.643, 'l10n_ch_lpp_in_percentage': True, 'l10n_ch_sickness_insurance_line_ids': [(4, cls.ijm_solution.id)], 'l10n_ch_additional_accident_insurance_line_ids': [(4, cls.laac_solution.id)], 'l10n_ch_location_unit_id': cls.location_unit_2.id, 'lpp_employee_amount': 385, 'company_id': cls.muster_ag_company.id, 'date_generated_from': datetime(2020, 9, 1, 0, 0, 0), 'date_generated_to': datetime(2020, 9, 1, 0, 0, 0), 'structure_type_id': cls.env.ref('l10n_ch_hr_payroll.structure_type_employee_ch').id, 'contract_date_start': date(2022, 1, 1), 'wage_type': "monthly", 'l10n_ch_has_monthly': True, "l10n_ch_contractual_13th_month_rate": (1 / 12) * 100, 'wage': 10000, 'hourly_wage': 0, 'l10n_ch_social_insurance_id': cls.avs_2.id, 'l10n_ch_laa_group': cls.laa_group_A, 'laa_solution_number': '1', "l10n_ch_lpp_not_insured": False, 'l10n_ch_lpp_insurance_id': cls.lpp_0.id, 'l10n_ch_compensation_fund_id': cls.caf_lu_2.id, 'l10n_ch_thirteen_month': False, 'l10n_ch_yearly_holidays': 30},
         ])
 
         cls.employee_female = cls.env['hr.employee'].with_context(tracking_disable=True).create([
-            {'registration_number': '4','certificate': 'vocEducationCompl', 'name': "Lusser Pia", 'sex': 'male', 'country_id': cls.env.ref('base.ch').id, 'l10n_ch_sv_as_number': '756.6417.0995.23', 'birthday': date(1958, 2, 5), 'marital': 'married', 'l10n_ch_marital_from': date(1979, 8, 14), 'private_street': 'Buochserstrasse 4', 'private_zip': '6370', 'private_city': 'Stans', 'private_country_id': cls.env.ref('base.ch').id, 'l10n_ch_municipality': 1509, 'l10n_ch_residence_category': False, 'l10n_ch_canton': 'NW', 'lang': 'de_DE', "l10n_ch_job_type": "noCadre", 'l10n_ch_lpp_percentage_employee': 9.1245, 'l10n_ch_lpp_percentage_employer': 4.643, 'l10n_ch_lpp_in_percentage': True, 'l10n_ch_sickness_insurance_line_ids': [(4, cls.ijm_solution.id)], 'l10n_ch_additional_accident_insurance_line_ids': [(4, cls.laac_solution.id)], 'l10n_ch_location_unit_id': cls.location_unit_2.id, 'lpp_employee_amount': 385, 'company_id': cls.muster_ag_company.id, 'date_generated_from': datetime(2020, 9, 1, 0, 0, 0), 'date_generated_to': datetime(2020, 9, 1, 0, 0, 0), 'structure_type_id': cls.env.ref('l10n_ch_hr_payroll.structure_type_employee_ch').id, 'contract_date_start': date(2022, 1, 1), 'wage_type': "monthly", 'l10n_ch_has_monthly': True, "l10n_ch_contractual_13th_month_rate": (1/12)*100, 'wage': 10000, 'hourly_wage': 0, 'l10n_ch_social_insurance_id': cls.avs_2.id, 'l10n_ch_laa_group': cls.laa_group_A, 'laa_solution_number': '1', "l10n_ch_lpp_not_insured": True,  'l10n_ch_lpp_insurance_id': cls.lpp_0.id, 'l10n_ch_compensation_fund_id': cls.caf_lu_2.id, 'l10n_ch_thirteen_month': False, 'l10n_ch_yearly_holidays': 30},
+            {'registration_number': '4', 'certificate': 'vocEducationCompl', 'name': "Lusser Pia", 'sex': 'male', 'country_id': cls.env.ref('base.ch').id, 'l10n_ch_sv_as_number': '756.6417.0995.23', 'birthday': date(1958, 2, 5), 'marital': 'married', 'l10n_ch_marital_from': date(1979, 8, 14), 'private_street': 'Buochserstrasse 4', 'private_zip': '6370', 'private_city': 'Stans', 'private_country_id': cls.env.ref('base.ch').id, 'l10n_ch_municipality': 1509, 'l10n_ch_residence_category': False, 'l10n_ch_canton': 'NW', 'lang': 'de_DE', "l10n_ch_job_type": "noCadre", 'l10n_ch_lpp_percentage_employee': 9.1245, 'l10n_ch_lpp_percentage_employer': 4.643, 'l10n_ch_lpp_in_percentage': True, 'l10n_ch_sickness_insurance_line_ids': [(4, cls.ijm_solution.id)], 'l10n_ch_additional_accident_insurance_line_ids': [(4, cls.laac_solution.id)], 'l10n_ch_location_unit_id': cls.location_unit_2.id, 'lpp_employee_amount': 385, 'company_id': cls.muster_ag_company.id, 'date_generated_from': datetime(2020, 9, 1, 0, 0, 0), 'date_generated_to': datetime(2020, 9, 1, 0, 0, 0), 'structure_type_id': cls.env.ref('l10n_ch_hr_payroll.structure_type_employee_ch').id, 'contract_date_start': date(2022, 1, 1), 'wage_type': "monthly", 'l10n_ch_has_monthly': True, "l10n_ch_contractual_13th_month_rate": (1 / 12) * 100, 'wage': 10000, 'hourly_wage': 0, 'l10n_ch_social_insurance_id': cls.avs_2.id, 'l10n_ch_laa_group': cls.laa_group_A, 'laa_solution_number': '1', "l10n_ch_lpp_not_insured": False, 'l10n_ch_lpp_insurance_id': cls.lpp_0.id, 'l10n_ch_compensation_fund_id': cls.caf_lu_2.id, 'l10n_ch_thirteen_month': False, 'l10n_ch_yearly_holidays': 30},
         ])
 
 
@@ -174,13 +175,13 @@ class TestSwissdecCommon(TestSwissdecMinorCommon):
     def test_03_lpp_in_percentage(self):
         slips = self._l10n_ch_create_batch(self.muster_ag_company, 1).slip_ids
         slip_by_sex = slips.grouped(lambda p: p.employee_id.sex)
-        self.assertEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "LPPSALARY").total, 7560, 2)
-        self.assertAlmostEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE").total, -790, 2)
-        self.assertAlmostEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE.COMP").total, 955.8, 2)
+        self.assertEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "LPPSALARY").total, 5355, 2)
+        self.assertAlmostEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE").total, -559.6, 2)
+        self.assertAlmostEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE.COMP").total, 677.05, 2)
 
-        self.assertEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "LPPSALARY").total, 7560, 2)
-        self.assertAlmostEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE").total, -689.8, 2)
-        self.assertAlmostEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE.COMP").total, 351, 2)
+        self.assertEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "LPPSALARY").total, 5355, 2)
+        self.assertAlmostEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE").total, -488.6, 2)
+        self.assertAlmostEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE.COMP").total, 248.65, 2)
 
     @freeze_time("2022-01-01")
     def test_04_lpp_negative_avs_salary(self):
@@ -193,14 +194,14 @@ class TestSwissdecCommon(TestSwissdecMinorCommon):
         slips = self._l10n_ch_create_batch(self.muster_ag_company, 1).slip_ids
         slip_by_sex = slips.grouped(lambda p: p.employee_id.sex)
         self.assertEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "AVSSALARY").total, -20000, 2)
-        self.assertEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "LPPSALARY").total, 7560.0, 2)
-        self.assertAlmostEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE").total, -790, 2)
-        self.assertAlmostEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE.COMP").total, 955.8, 2)
+        self.assertEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "LPPSALARY").total, 5355.0, 2)
+        self.assertAlmostEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE").total, -559.6, 2)
+        self.assertAlmostEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE.COMP").total, 677.05, 2)
 
         self.assertEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "AVSSALARY").total, -20000, 2)
-        self.assertEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "LPPSALARY").total, 7560.0, 2)
-        self.assertAlmostEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE").total, -689.8, 2)
-        self.assertAlmostEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE.COMP").total, 351, 2)
+        self.assertEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "LPPSALARY").total, 5355.0, 2)
+        self.assertAlmostEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE").total, -488.6, 2)
+        self.assertAlmostEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE.COMP").total, 248.65, 2)
 
     @freeze_time("2022-01-01")
     def test_05_lpp_lower_than_coordination(self):
@@ -211,14 +212,14 @@ class TestSwissdecCommon(TestSwissdecMinorCommon):
         slips = self._l10n_ch_create_batch(self.muster_ag_company, 1).slip_ids
         slip_by_sex = slips.grouped(lambda p: p.employee_id.sex)
         self.assertEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "AVSSALARY").total, 2500, 2)
-        self.assertEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "LPPSALARY").total, 295, 2)
-        self.assertAlmostEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE").total, -30.85, 2)
-        self.assertAlmostEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE.COMP").total, 37.30, 2)
+        self.assertEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "LPPSALARY").total, 315, 2)
+        self.assertAlmostEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE").total, -32.9, 2)
+        self.assertAlmostEqual(slip_by_sex['female'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE.COMP").total, 39.85, 2)
 
         self.assertEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "AVSSALARY").total, 2500, 2)
-        self.assertEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "LPPSALARY").total, 295, 2)
-        self.assertAlmostEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE").total, -26.90, 2)
-        self.assertAlmostEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE.COMP").total, 13.70, 2)
+        self.assertEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "LPPSALARY").total, 315, 2)
+        self.assertAlmostEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE").total, -28.75, 2)
+        self.assertAlmostEqual(slip_by_sex['male'].line_ids.filtered(lambda l: l.code == "PP.PERCENTAGE.COMP").total, 14.65, 2)
 
     @freeze_time("2022-01-01")
     def test_06_family_allowances_logic(self):

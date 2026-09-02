@@ -79,7 +79,7 @@ class IotDevice(models.Model):
     @api.depends('name', 'iot_id', 'connection')
     @api.depends_context('formatted_display_name')
     def _compute_display_name(self):
-        connection_display_values = dict(self._fields['connection'].selection)
+        connection_display_values = dict(self._fields['connection']._description_selection(self.env))
         for device in self:
             if device.env.context.get("formatted_display_name"):
                 connection = connection_display_values.get(device.connection, device.connection) if device.connection else ''

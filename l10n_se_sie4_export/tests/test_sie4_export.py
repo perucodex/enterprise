@@ -138,3 +138,77 @@ class AccountTestSIE4Export(TestAccountReportsCommon):
             '    #TRANS 4533 {} -1000.0',
             '}',
         ])
+
+    @freeze_time('2026-02-01')
+    def test_sie4_export_not_include_cancelled_entry(self):
+        move = self.create_move('2026-02-15', [('4000', 1000), ('2440', -1000)])
+        move.button_cancel()
+        options = self._generate_options(self.report, '2026-02-01', '2026-12-28')
+        res = self.export_sie4_result_list(options)
+
+        self.assertListEqual(res[-10:], [
+            '#KONTO 9991 "Cash Difference Gain"',
+            '#KTYP  9991 I',
+            '#KONTO 9992 "Cash Difference Loss"',
+            '#KTYP  9992 K',
+            '#KONTO 9993 "Cash Discount Loss"',
+            '#KTYP  9993 K',
+            '#KONTO 9994 "Cash Discount Gain"',
+            '#KTYP  9994 I',
+            '#KONTO 999999 "Profit or Loss Appropriation"',
+            '#KTYP  999999 S',
+        ])
+
+    def test_sie4_export_fiscal_years(self):
+        company = self.company_data['company']
+        # Create custom fiscal year covering the 6 first months of 2017.
+        _prev_fiscal_year, fiscal_year = self.env['account.fiscal.year'].create([
+        {
+            'name': 'June-July 2017-18',
+            'date_from': '2017-06-01',
+            'date_to': '2018-06-30',
+            'company_id': company.id,
+        }, {
+            'name': '2018 change date',
+            'date_from': '2018-07-01',
+            'date_to': '2018-12-31',
+            'company_id': company.id,
+        }])
+        for account_a, account_b in {('1931', '1932'), ('3000', '4533')}:
+            # Before fiscal year 1
+            self.create_move('2017-02-15', [(account_a, 1000), (account_b, -1000)])
+            # Begining of fiscal year 1
+            self.create_move('2018-02-15', [(account_a, 1000), (account_b, -1000)])
+            self.create_move('2018-06-15', [(account_a, 1000), (account_b, -1000)])
+            # Ending of fiscal year 1
+            # Begining of fiscal year 2
+            self.create_move('2018-12-15', [(account_a, 1000), (account_b, -1000)])
+            # Ending of fiscal year 2
+            self.create_move('2019-01-01', [(account_a, 1000), (account_b, -1000)])
+
+        options = self._generate_options(self.report, fiscal_year.date_from, fiscal_year.date_to)
+        res = self.export_sie4_result_list(options)
+
+        self.assertListEqual(res[6:8], ['#RAR -1 20170601 20180630', '#RAR  0 20180701 20181231'])
+        self.assertListEqual(
+            list(filter(lambda l: '#UB ' in l or '#IB ' in l, res)),
+            [
+                '#IB  -1 1931 1000.0',
+                '#UB  -1 1931 3000.0',
+                '#IB   0 1931 3000.0',
+                '#UB   0 1931 4000.0',
+                '#IB  -1 1932 -1000.0',
+                '#UB  -1 1932 -3000.0',
+                '#IB   0 1932 -3000.0',
+                '#UB   0 1932 -4000.0',
+            ]
+        )
+        self.assertListEqual(
+            list(filter(lambda l: '#RES ' in l, res)),
+            [
+                '#RES -1 3000 2000.0',
+                '#RES  0 3000 1000.0',
+                '#RES -1 4533 -2000.0',
+                '#RES  0 4533 -1000.0',
+            ]
+        )

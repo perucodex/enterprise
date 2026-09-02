@@ -2,13 +2,18 @@
 
 from dateutil.relativedelta import relativedelta
 
+
 from odoo import Command, fields
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import Form, users
 from odoo.tools import formataddr
+from odoo.tools.pdf import PageObject
+
 
 from odoo.addons.mail.tests.common import MockEmail
 from .sign_request_common import SignRequestCommon, freeze_time
+from unittest.mock import patch, PropertyMock, Mock
+
 
 from datetime import timedelta
 
@@ -110,10 +115,6 @@ class TestSignRequest(SignRequestCommon, MockEmail):
         sign_request_no_item_token = sign_request_no_item.access_token
         sign_request_no_item.cancel()
         self.assertEqual(sign_request_item.state, 'completed', 'The sign.request.item should be completed')
-        self.assertEqual(sign_request_no_item.state, 'canceled', 'The sign request should be canceled')
-        self.assertNotEqual(sign_request_item.access_token, sign_request_item_token, 'The access token should be changed')
-        self.assertNotEqual(sign_request_no_item.access_token, sign_request_no_item_token, 'The access token should be changed')
-        self.assertEqual(len(sign_request_no_item.sign_log_ids.filtered(lambda log: log.action == 'cancel')), 1, 'A log with action="cancel" should be created')
 
         # copy
         new_sign_request_no_item = sign_request_no_item.copy()
@@ -376,6 +377,8 @@ class TestSignRequest(SignRequestCommon, MockEmail):
                 'mail_sent_order': 2,
             })],
         })
+        self.partner_4.user_ids.notification_type = 'inbox'
+        sign_request_3_roles.message_subscribe(partner_ids=[self.partner_4.id])
         role2sign_request_item = dict([(sign_request_item.role_id, sign_request_item) for sign_request_item in sign_request_3_roles.request_item_ids])
         sign_request_item_signer_1 = role2sign_request_item[self.role_signer_1]
         sign_request_item_signer_2 = role2sign_request_item[self.role_signer_2]
@@ -398,6 +401,8 @@ class TestSignRequest(SignRequestCommon, MockEmail):
         sign_request_item_signer_2.sign(self.signer_2_sign_values)
         sign_request_item_signer_3.sign(self.signer_3_sign_values)
         self.assertEqual(sign_request_3_roles.state, 'signed', 'The sign request should be signed')
+        notification = self.env['mail.message'].search([('partner_ids', '=', self.partner_4.id)])
+        self.assertEqual(notification.subject, 'template_3_roles has been signed')
 
     def test_sign_request_mail_reply_to_exists(self):
         sign_request = self.create_sign_request_1_role(self.partner_1, self.env['res.partner'])
@@ -525,9 +530,10 @@ class TestSignRequest(SignRequestCommon, MockEmail):
             self.assertEqual(sign_request.state, 'signed', 'The sign request should be signed')
 
             completion_mail_to_user = self.env['mail.mail'].search([
-                ('email_to', '=', formataddr((self.env.user.partner_id.name, self.env.user.partner_id.email)))
+                ('email_to', '=', formataddr((self.env.user.partner_id.name, self.env.user.partner_id.email))),
+                ('subject', 'ilike', sign_request.reference),
             ])
-            self.assertEqual(0, len(completion_mail_to_user), 'No completion email should be sent to the admin user')
+            self.assertEqual(1, len(completion_mail_to_user), 'Completion email should be sent to the admin user')
 
             completion_mail_to_partner = self.env['mail.mail'].search([
                 ('email_to', '=', formataddr((self.partner_1.name, self.partner_1.email)))
@@ -657,3 +663,44 @@ class TestSignRequest(SignRequestCommon, MockEmail):
             [s.mail_sent_order for s in request.signer_ids],
             [3, 2, 1],
         )
+
+    def test_sign_request_cancel_signed_document(self):
+        """ Ensure that a fully signed document cannot be canceled. """
+        sign_request = self.create_sign_request_no_item(signer=self.partner_1, cc_partners=self.partner_4)
+        sign_request_item = sign_request.request_item_ids[0]
+
+        # Sign the document.
+        sign_request_item.sign(self.signature_fake)
+        self.assertEqual(sign_request.state, 'signed', 'The sign request should be signed.')
+
+        # Attempt to cancel, document should remain signed.
+        sign_request.cancel()
+        self.assertEqual(sign_request.state, 'signed', 'A fully signed document should not be canceled.')
+
+    @users('admin')
+    def test_search_need_my_signature(self):
+        self.env.user.email = "admin@test.com"
+        sign_request_1 = self.create_sign_request_no_item(signer=self.env.user.partner_id, cc_partners=self.partner_4)
+        sign_request_2 = self.create_sign_request_no_item(signer=self.partner_2, cc_partners=self.partner_4)
+
+        # Search for documents waiting for admin
+        waiting_for_me = self.env['sign.request'].search([('need_my_signature', '=', True)]).ids
+        self.assertIn(sign_request_1.id, waiting_for_me, "Document where admin is a signer should be in 'Waiting for me'")
+        self.assertNotIn(sign_request_2.id, waiting_for_me, "Document where admin is NOT a signer should NOT be in 'Waiting for me'")
+
+    def test_origin_offset_translation(self):
+        sign_request = self.create_sign_request_no_item(signer=self.partner_1, cc_partners=self.partner_4)
+        offset_box = Mock()
+        offset_box.lower_left = (-1000, -1000)
+        offset_box.getWidth.return_value = 1000
+        offset_box.getHeight.return_value = 1000
+        with patch.object(PageObject, 'add_transformation', create=True) as mock_add, \
+            patch.object(PageObject, 'cropbox', new_callable=PropertyMock, return_value=offset_box):
+            sign_request.write({'state': 'signed'})
+            sign_request.template_document_ids.render_document_with_items()
+            self.assertTrue(mock_add.called, "The origin offset was ignored.")
+            transformation_matrix = mock_add.call_args[0][-1]
+            self.assertEqual(transformation_matrix[0], 1)
+            self.assertEqual(transformation_matrix[3], 1)
+            self.assertEqual(transformation_matrix[4], -1000)
+            self.assertEqual(transformation_matrix[5], -1000)

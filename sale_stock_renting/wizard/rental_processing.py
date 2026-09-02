@@ -152,7 +152,8 @@ class RentalOrderWizardLine(models.TransientModel):
                     raise ValidationError(_("Please specify the serial numbers returned for the tracked products."))
 
     def _apply(self):
-        serial_lines = self.filtered(lambda line: line.tracking == 'serial')
+        wizard_lines = self.with_context(rental_direct_stock_move=True)
+        serial_lines = wizard_lines.filtered(lambda line: line.tracking == 'serial')
 
         # First, we deduct from the wizard the lots already picked up/returned
         for line in serial_lines:
@@ -170,7 +171,7 @@ class RentalOrderWizardLine(models.TransientModel):
                     'returned_lot_ids': [(6, 0, returned_lot_ids.ids)],
                 })
 
-        msg = super()._apply()
+        msg = super(RentalOrderWizardLine, wizard_lines)._apply()
         for line in serial_lines:
             sol = line.order_line_id
             if line.status == 'pickup':

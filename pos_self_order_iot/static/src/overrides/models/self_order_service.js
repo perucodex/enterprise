@@ -12,6 +12,7 @@ patch(SelfOrder.prototype, {
         this.iot_longpolling = services.iot_longpolling;
         this.iotHttpService = services.iot_http;
         await super.setup(...arguments);
+        this.iot_longpolling.setLna(odoo.use_lna);
 
         this.iotHttpService.cacheIotBoxRecords(this.models["iot.box"].getAll());
 
@@ -35,6 +36,22 @@ patch(SelfOrder.prototype, {
             (paymentMethod) => paymentMethod.iot_device_id != null
         );
         return [...new Set([...otherPaymentMethods, ...iotPaymentMethods])];
+    },
+
+    /**
+     * Print from mobile self-ordering is originally disabled
+     * as clients are not on the same network as the printers.
+     * However, if the printer is an IoT printer, it is possible
+     * thanks to the WebSocket connection.
+     */
+    async confirmationPage(screen_mode, device, access_token) {
+        await super.confirmationPage(...arguments);
+        const iotKitchenPrinters = this.kitchenPrinters.filter(
+            (printer) => printer instanceof IoTPrinter
+        );
+        if (this.config.self_ordering_mode === "mobile" && iotKitchenPrinters.length > 0) {
+            this.printKioskChanges(access_token);
+        }
     },
 
     createPrinter(printer) {

@@ -145,6 +145,9 @@ registry.category("web_tour.tours").add('knowledge_calendar_command_tour', {
 // Create a new start property
 ...stepUtils.editSelectMenuInput('.o_knowledge_item_calendar_dialog_date_start .o_select_menu_input', 'Start Property'),
 {
+    trigger: '.o_select_menu_menu:not(:has(.o_select_menu_group))',
+},
+{
     trigger: '.o_select_menu_menu .o_select_menu_item.o_create_datetime',
     run: 'click',
 }, { // Open the stop dropwdown
@@ -153,6 +156,9 @@ registry.category("web_tour.tours").add('knowledge_calendar_command_tour', {
 },
 // Create a new stop property
 ...stepUtils.editSelectMenuInput('.o_knowledge_item_calendar_dialog_date_stop .o_select_menu_input', 'Stop Property'),
+{
+    trigger: '.o_select_menu_menu:not(:has(.o_select_menu_group))',
+},
 {
     trigger: '.o_select_menu_menu .o_select_menu_item.o_create_choice',
     run: 'click',
@@ -223,7 +229,7 @@ registry.category("web_tour.tours").add('knowledge_calendar_command_tour', {
     run: 'click',
 }, {
     trigger: '.o_field_property_definition_header',
-    run: "edit Date Property",
+    run: "fill Date Property",
 }, {
     trigger: '.o_field_property_definition_type button.dropdown-toggle',
     run: 'click',
@@ -238,7 +244,7 @@ registry.category("web_tour.tours").add('knowledge_calendar_command_tour', {
     run: 'click',
 }, {
     trigger: '.o_field_property_definition_header',
-    run: "edit Boolean Property",
+    run: "fill Boolean Property",
 }, {
     trigger: '.o_field_property_definition_type button.dropdown-toggle',
     run: 'click',
@@ -253,7 +259,7 @@ registry.category("web_tour.tours").add('knowledge_calendar_command_tour', {
     run: 'click',
 }, {
     trigger: '.o_field_property_definition_header',
-    run: "edit Text Property",
+    run: "fill Text Property",
 }, {
     trigger: '.o_field_property_definition_type button.dropdown-toggle',
     run: 'click',

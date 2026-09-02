@@ -1,6 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { useActiveActions, useOpenMany2XRecord } from "@web/views/fields/relational_utils";
 import { useService } from "@web/core/utils/hooks";
+import { formatFloat } from "@web/core/utils/numbers";
 import { QualityCheck } from "./quality_check";
 import { MrpQuantityDialog } from "../dialog/mrp_quantity_dialog";
 import { MrpSelectQuantDialog } from "../dialog/mrp_select_quant_dialog"; // TODO remove in master
@@ -64,7 +65,12 @@ export class StockMove extends QualityCheck {
         const moveLines = this.props.record.data.move_line_ids.records.filter(
             (ml) => (this.isTracked ? ml.data.lot_id : true) && ml.data.picked
         );
-        return moveLines.reduce((total, ml) => total + ml.data.quantity, 0);
+        return parseFloat(
+            formatFloat(
+                moveLines.reduce((total, ml) => total + ml.data.quantity, 0),
+                { digits: this.props.record.fields?.quantity?.digits }
+            )
+        );
     }
 
     get uom() {
@@ -87,7 +93,7 @@ export class StockMove extends QualityCheck {
             return [];
         }
         const { move_line_ids, picking_type_prefill_shop_floor_lots } = this.props.record.data;
-        return picking_type_prefill_shop_floor_lots
+        return picking_type_prefill_shop_floor_lots && !this.byproduct
             ? move_line_ids.records
             : move_line_ids.records.filter((ml) => ml.data.picked);
     }
@@ -106,17 +112,26 @@ export class StockMove extends QualityCheck {
     }
 
     get byproduct() {
-        return this.props.record.data.byproduct_id;
+        if (this.props.production.data.move_byproduct_ids.records.includes(this.props.record)) {
+            return this.props.record;
+        }
+        return false;
     }
 
     //TODO remove in master
     addMoveLine() {
         const product = this.props.record.data.product_id;
+        const locationSrc = this.props.production.data.location_src_id;
         this.dialog.add(MrpSelectQuantDialog, {
             resModel: "stock.quant",
             noCreate: !this.isTracked,
             multiSelect: false,
-            domain: [["product_id", "=", product.id], ['location_id.usage', '=', 'internal'], ["on_hand", "=", true], ["quantity", ">", 0.0]],
+            domain: [
+                ["product_id", "=", product.id],
+                ["location_id", "child_of", locationSrc.id],
+                ["on_hand", "=", true],
+                ["quantity", ">", 0.0],
+            ],
             title: _t("Add line: %(productName)s", { productName: product.display_name }),
             context: {
                 single_product: true,
@@ -158,9 +173,8 @@ export class StockMove extends QualityCheck {
             if (this.displayCheck) {
                 await this.markAsDone(); // check button: accept prefilled values and confirm QC
             } else {
-                if (this.byproduct)
-                {
-                    this.createQuant(); // plus button: create a new move line. Create a new quant for the byproduct.
+                if (this.byproduct) {
+                    return this.createQuant(); // plus button: create a new move line. Create a new quant for the byproduct.
                 } else {
                     this.addMoveLine(); // plus button: create a new move line. Show a list of quants  to take from.
                 }
@@ -190,6 +204,8 @@ export class StockMove extends QualityCheck {
                 form_view_ref: "stock.view_stock_quant_form",
                 default_product_id: this.props.record.data.product_id.id,
                 default_location_id: defaultLocationId,
+                from_shopfloor: true,
+                active_mo_id: this.props.record.data.raw_material_production_id.id,
             },
             immediate: true,
             title: _t("Create Move Line for %(product)s", {

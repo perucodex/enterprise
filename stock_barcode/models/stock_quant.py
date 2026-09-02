@@ -14,6 +14,12 @@ class StockQuant(models.Model):
     def _inverse_dummy_id(self):
         pass
 
+    @api.depends_context('barcode_view')
+    def _compute_display_name(self):
+        if not self.env.context.get('barcode_view'):
+            return super()._compute_display_name()
+        self.display_name = "Inventory Count"
+
     @api.model
     def barcode_write(self, vals):
         """ Specially made to handle barcode app saving. Avoids overriding write method because pickings in barcode
@@ -111,7 +117,7 @@ class StockQuant(models.Model):
         uoms = products.uom_id | products.uom_ids
         # If UoM setting is active, fetch all UoM's data.
         if self.env.user.has_group('uom.group_uom'):
-            uoms = self.env['uom.uom'].search([])
+            uoms = self.env['uom.uom'].with_context(active_test=False).search([])
 
         data = {
             "records": {
@@ -137,6 +143,7 @@ class StockQuant(models.Model):
             'inventory_quantity',
             'inventory_quantity_set',
             'quantity',
+            'available_quantity',
             'product_uom_id',
             'lot_id',
             'package_id',

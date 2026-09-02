@@ -20,10 +20,10 @@ import {
     mountWithCleanup,
     patchWithCleanup,
     onRpc,
-    mockService,
 } from "@web/../tests/web_test_helpers";
 import { downloadFile } from "@web/core/network/download";
 import { WebClient } from "@web/webclient/webclient";
+import { TEST_LOCALES } from "@spreadsheet/../tests/helpers/locale";
 
 const { topbarMenuRegistry } = spreadsheet.registries;
 const { toZone } = spreadsheet.helpers;
@@ -33,36 +33,6 @@ defineDocumentSpreadsheetModels();
 describe.current.tags("desktop");
 
 /** @typedef {import("@spreadsheet/o_spreadsheet/o_spreadsheet").Model} Model */
-
-const TEST_LOCALES = [
-    {
-        name: "United States",
-        code: "en_US",
-        thousandsSeparator: ",",
-        decimalSeparator: ".",
-        dateFormat: "m/d/yyyy",
-        timeFormat: "hh:mm:ss a",
-        formulaArgSeparator: ",",
-    },
-    {
-        name: "France",
-        code: "fr_FR",
-        thousandsSeparator: " ",
-        decimalSeparator: ",",
-        dateFormat: "dd/mm/yyyy",
-        timeFormat: "hh:mm:ss",
-        formulaArgSeparator: ";",
-    },
-    {
-        name: "Odooland",
-        code: "od_OO",
-        thousandsSeparator: "*",
-        decimalSeparator: ".",
-        dateFormat: "yyyy/mm/dd",
-        timeFormat: "hh:mm:ss",
-        formulaArgSeparator: ",",
-    },
-];
 
 test("open spreadsheet with deprecated `active_id` params", async function () {
     await prepareWebClientForSpreadsheet();
@@ -82,56 +52,6 @@ test("open spreadsheet with deprecated `active_id` params", async function () {
         message: "It should have opened the spreadsheet",
     });
     expect.verifySteps(["spreadsheet-loaded"]);
-});
-
-test("should redirect to home menu when spreadsheet is not found", async function () {
-    onRpc("/spreadsheet/data/documents.document/2", () => {
-        expect.step("try-open-spreadsheet");
-        return new Response("{}", { status: 404 });
-    });
-    mockService("action", {
-        doAction(actionRequest) {
-            if (actionRequest === "menu") {
-                expect.step("redirect-to-home-menu");
-            } else {
-                return super.doAction(...arguments);
-            }
-        },
-    });
-    await mountWithCleanup(WebClient);
-    await getService("action").doAction({
-        type: "ir.actions.client",
-        tag: "action_open_spreadsheet",
-        params: {
-            spreadsheet_id: 2,
-        },
-    });
-    expect.verifySteps(["try-open-spreadsheet", "redirect-to-home-menu"]);
-});
-
-test("should redirect to home menu when spreadsheet access is denied", async function () {
-    onRpc("/spreadsheet/data/documents.document/2", () => {
-        expect.step("try-open-spreadsheet");
-        return new Response("{}", { status: 403 });
-    });
-    mockService("action", {
-        doAction(actionRequest) {
-            if (actionRequest === "menu") {
-                expect.step("redirect-to-home-menu");
-            } else {
-                return super.doAction(...arguments);
-            }
-        },
-    });
-    await mountWithCleanup(WebClient);
-    await getService("action").doAction({
-        type: "ir.actions.client",
-        tag: "action_open_spreadsheet",
-        params: {
-            spreadsheet_id: 2,
-        },
-    });
-    expect.verifySteps(["try-open-spreadsheet", "redirect-to-home-menu"]);
 });
 
 test("breadcrumb is rendered the navbar", async function () {
@@ -258,6 +178,22 @@ test("ask confirmation when merging", async function () {
     expect(model.getters.isSingleCellOrMerge(sheetId, toZone("A1:A2"))).toBe(true);
 });
 
+test("Cancel callback of askConfirmation is called when using the cancel button", async function () {
+    const { env } = await createSpreadsheet();
+    env.askConfirmation(
+        "Dialog title",
+        () => {},
+        () => {
+            expect.step("cancel callback");
+        }
+    );
+    await animationFrame();
+    expect(".o_dialog .btn-primary").toHaveText("Yes");
+    expect(".o_dialog .btn-secondary").toHaveText("No");
+    await contains(".o_dialog .btn-secondary").click();
+    expect.verifySteps(["cancel callback"]);
+});
+
 test("Grid has still the focus after a dialog", async function () {
     const { model, env } = await createSpreadsheet();
     selectCell(model, "F4");
@@ -334,7 +270,7 @@ test("Spreadsheet is created with locale in data", async function () {
             {
                 id: 3000,
                 name: "My template spreadsheet",
-                spreadsheet_data: JSON.stringify({ settings: { locale: TEST_LOCALES[1] } }),
+                spreadsheet_data: JSON.stringify({ settings: { locale: TEST_LOCALES.fr_FR } }),
             },
         ],
     };
@@ -347,7 +283,7 @@ test("Odoo locales are displayed in setting side panel", async function () {
     const { env } = await createSpreadsheet({
         mockRPC: function (route, { method, model }) {
             if (method === "get_locales_for_spreadsheet") {
-                return TEST_LOCALES;
+                return Object.values(TEST_LOCALES);
             }
         },
     });
@@ -379,4 +315,16 @@ test("sheetName should not be left empty", async function () {
 
     await contains(".modal-dialog .btn-primary").click();
     expect(".o-sheet-name-editable").toHaveCount(1);
+});
+
+test("Frozen spreadsheet should restrict copy", async function () {
+    onRpc("/spreadsheet/data/documents.document/*", () => ({
+        data: {},
+        name: "name",
+        revisions: [],
+        handler: "frozen_spreadsheet",
+        isReadonly: false,
+    }));
+    const { model } = await createSpreadsheet();
+    expect(model.canDispatch("COPY", {}).isSuccessful).toBe(false);
 });

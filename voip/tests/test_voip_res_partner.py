@@ -56,6 +56,27 @@ class TestVoipResPartner(common.TransactionCase):
         self.assertIdNotInStoreData(self.partner1.id, store_data)
         self.assertIdNotInStoreData(self.partner2.id, store_data)
 
+    def test_voip_get_contacts_search_by_phone_sanitized(self):
+        """Test that phone_sanitized =like search works correctly."""
+        search_term = "+32111"
+        # Before setting phone_sanitized, partner1 should NOT be found
+        store_data = self.env["res.partner"].get_contacts(
+            offset=0,
+            limit=10,
+            search_terms=search_term,
+        )
+        self.assertIdNotInStoreData(self.partner1.id, store_data)
+
+        # Manually set phone_sanitized and re-search
+        self.partner1.phone_sanitized = "+321111111"
+        self.env.flush_all()
+        store_data = self.env["res.partner"].get_contacts(
+            offset=0,
+            limit=10,
+            search_terms=search_term,
+        )
+        self.assertIdInStoreData(self.partner1.id, store_data)
+
     def test_voip_get_contacts_search_by_T9_name(self):
         # "partner" in T9 is 7278637
         store_data = self.env["res.partner"].get_contacts(
@@ -86,4 +107,4 @@ class TestVoipResPartner(common.TransactionCase):
             limit=10,
             search_terms="1" * (self.min_length - 1),
         )
-        self.assertFalse(store_data)
+        self.assertIdNotInStoreData(self.partner1.id, store_data)

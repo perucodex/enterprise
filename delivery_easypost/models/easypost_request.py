@@ -143,7 +143,8 @@ class EasypostRequest():
         shipment = {}
         for shp_id, pkg in enumerate(packages):
             shipment.update(self._prepare_parcel(carrier, shp_id, pkg, carrier.easypost_label_file_type))
-            shipment.update(self._customs_info(carrier, shp_id, pkg.commodities, pkg.currency_id))
+            currency_id = pkg.picking_id.sale_id.currency_id if (pkg.picking_id and pkg.picking_id.sale_id) else pkg.currency_id
+            shipment.update(self._customs_info(carrier, shp_id, pkg.commodities, currency_id))
             shipment.update(self._options(shp_id, carrier))
         if is_return:
             shipment.update({'order[is_return]': True})
@@ -389,7 +390,9 @@ class EasypostRequest():
         endpoint = "orders/%s" % order_id
         response = self._make_api_request(endpoint)
         for shipment in response.get('shipments'):
-            tracking_public_urls.append([shipment['tracking_code'], shipment['tracker']['public_url']])
+            public_url = (shipment.get('tracker') or {}).get('public_url')
+            if public_url:
+                tracking_public_urls.append([shipment['tracking_code'], public_url])
         return tracking_public_urls
 
     def get_tracking_link_from_code(self, code):
@@ -420,7 +423,7 @@ class EasypostRequest():
         """
         # With multiples shipments, some carrier will return a message explaining that
         # the rates are on the first shipments and not on the next ones.
-        if response.get('messages') and carrier.easypost_delivery_type in ['Purolator', 'DPD UK', 'UPS'] and \
+        if response.get('messages') and carrier.easypost_delivery_type in ['Purolator', 'DPD UK', 'UPS', 'DHL Express'] and \
                 len(response.get('shipments', [])) > 1 and \
                 len(response.get('shipments')[0].get('rates', [])) > 0 and \
                 all(len(s.get('rates', [])) == 0 for s in response['shipments'][1:]):
@@ -428,11 +431,11 @@ class EasypostRequest():
                 # UPS also send a message on following shipments explaining that their rates is in the
                 # first shipment (other carrier just return an empty list).
                 return response
-            if carrier.easypost_delivery_type in ['Purolator', 'DPD UK'] and (
+            if carrier.easypost_delivery_type in ['Purolator', 'DPD UK', 'DHL Express'] and (
                     len(response['messages']) != 1 or
                     response['messages'][0].get('type', '') != 'rate_error' or
                     "multi-shipment rate includes this shipment." not in response['messages'][0].get('message', '')):
-                # Purolator & DPD UK send a rate_error message for this situation.
+                # Purolator, DPD UK & DHL Express send a rate_error message for this situation.
                 return response
 
             if picking:

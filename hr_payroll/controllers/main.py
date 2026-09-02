@@ -4,6 +4,8 @@
 import io
 import re
 
+from odoo.addons.base.models.ir_qweb import QWebError
+from odoo.exceptions import UserError
 from odoo.http import request, route, Controller, content_disposition
 from odoo.tools.pdf import PdfFileReader, PdfFileWriter
 from odoo.tools.safe_eval import safe_eval
@@ -21,17 +23,35 @@ class HrPayroll(Controller):
 
         pdf_writer = PdfFileWriter()
         payslip_reports = payslips._get_pdf_reports()
+        pdf_generic_name = request.env._("Payslip")
+        attachments_vals_list = []
 
         for report, slips in payslip_reports.items():
             for payslip in slips:
-                pdf_content, _ = request.env['ir.actions.report'].\
-                    with_context(lang=payslip.employee_id.lang or payslip.env.lang).\
-                    sudo().\
-                    _render_qweb_pdf(report, payslip.id, data={'company_id': payslip.company_id})
-                reader = PdfFileReader(io.BytesIO(pdf_content), strict=False, overwriteWarnings=False)
+                try:
+                    pdf_content, _ = request.env['ir.actions.report'].\
+                        with_context(lang=payslip.employee_id.lang or payslip.env.lang).\
+                        sudo().\
+                        _render_qweb_pdf(report, payslip.id, data={'company_id': payslip.company_id})
+                    reader = PdfFileReader(io.BytesIO(pdf_content), strict=False, overwriteWarnings=False)
+                except QWebError as error:
+                    raise UserError(error)
 
                 for page in range(reader.getNumPages()):
                     pdf_writer.addPage(reader.getPage(page))
+
+                if report.print_report_name:
+                    pdf_name = safe_eval(report.print_report_name, {'object': payslip})
+                else:
+                    pdf_name = pdf_generic_name
+
+                attachments_vals_list.append({
+                    'name': pdf_name,
+                    'type': 'binary',
+                    'raw': pdf_content,
+                    'res_model': payslip._name,
+                    'res_id': payslip.id
+                })
 
         _buffer = io.BytesIO()
         pdf_writer.write(_buffer)
@@ -45,6 +65,8 @@ class HrPayroll(Controller):
             employees = payslips.employee_id.mapped('name')
             if len(employees) == 1:
                 report_name = '%s - %s' % (report_name, employees[0])
+
+        request.env['ir.attachment'].sudo().create(attachments_vals_list)
 
         pdfhttpheaders = [
             ('Content-Type', 'application/pdf'),

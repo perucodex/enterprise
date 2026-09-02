@@ -265,11 +265,13 @@ class ResPartner(models.Model):
             options = {}
         if not options.get('join_invoices', options.get('followup_line', self.followup_line_id).join_invoices):
             return self.env['account.move']
-        invoices_to_print = self.unreconciled_aml_ids.move_id.filtered(lambda l: l.is_invoice(include_receipts=True))
+        invoices_to_print = self.unreconciled_aml_ids.filtered(
+            lambda l: not l.no_followup and l.move_id.is_invoice(include_receipts=True)
+        ).move_id
         if options.get('manual_followup'):
             # For manual reminders, only print invoices with the selected attachments
-            return invoices_to_print.filtered(lambda inv: inv.message_main_attachment_id.id in options.get('attachment_ids', []))
-        return invoices_to_print.filtered(lambda inv: inv.message_main_attachment_id)
+            return invoices_to_print.filtered(lambda inv: inv.invoice_pdf_report_id.id in options.get('attachment_ids', []))
+        return invoices_to_print.filtered(lambda inv: inv.invoice_pdf_report_id)
 
     @api.model
     def _get_first_followup_level(self):
@@ -385,7 +387,7 @@ class ResPartner(models.Model):
         return f"""
             SELECT partner.id as partner_id,
                    ful.id as followup_line_id,
-                   CASE WHEN partner.balance <= 0 THEN 'no_action_needed'
+                   CASE WHEN partner.amount_residual <= 0 THEN 'no_action_needed'
                         WHEN in_need_of_action_aml.id IS NOT NULL AND (followup_next_action_date IS NULL OR followup_next_action_date <= %(current_date)s) THEN 'in_need_of_action'
                         WHEN exceeded_unreconciled_aml.id IS NOT NULL THEN 'with_overdue_invoices'
                         ELSE 'no_action_needed' END as followup_status
@@ -393,7 +395,7 @@ class ResPartner(models.Model):
           SELECT partner.id,
                  {self.env.cr.mogrify(ResPartner._field_to_sql('partner', 'followup_next_action_date')).decode(self.env.cr.connection.encoding)} AS followup_next_action_date,
                  MAX(COALESCE(next_ful.delay, ful.delay)) as followup_delay,
-                 SUM(aml.balance) as balance
+                 SUM(aml.amount_residual) as amount_residual
             FROM res_partner partner
             JOIN account_move_line aml ON aml.partner_id = partner.id
             JOIN account_account account ON account.id = aml.account_id
@@ -471,7 +473,15 @@ class ResPartner(models.Model):
 
     def _get_followup_report(self, options):
         followup_report = self.env.ref('account_reports.followup_report')
-        return self._get_partner_account_report_attachment(followup_report).id
+        options = followup_report.get_options({
+            'forced_companies': self.env.company.search([('id', 'child_of', self.env.context.get('allowed_company_ids', self.env.company.id))]).ids,
+            'partner_ids': self.ids,
+            'unfold_all': True,
+            'unreconciled': True,
+            'all_entries': False,
+            'export_mode': 'print',
+        })
+        return self._get_partner_account_report_attachment(followup_report, options=options).id
 
     def _get_followup_attachments(self, options):
         res_attachment_ids = []
@@ -505,7 +515,7 @@ class ResPartner(models.Model):
             return res_attachment_ids
 
         # Add the PDFs from overdue invoices
-        res_attachment_ids += self._get_invoices_to_print(options).message_main_attachment_id.ids
+        res_attachment_ids += self._get_invoices_to_print(options).invoice_pdf_report_id.ids
         return res_attachment_ids
 
     def _execute_followup_partner(self, options=None):
@@ -604,11 +614,16 @@ class ResPartner(models.Model):
         if partners_with_missing_info:
             return partners_with_missing_info._create_followup_missing_information_wizard()
 
-    def _cron_execute_followup_company(self):
+    def _cron_execute_followup_company(self, batch_size=1000):
+        """Execute pending followups for the current company.
+        :param batch_size: maximum number of followup to process
+        :return: Return True if all followup were processed, False otherwise
+        :rtype: boolean
+        """
         followup_data = self._query_followup_data(all_partners=True)
         in_need_of_action = self.env['res.partner'].browse([d['partner_id'] for d in followup_data.values() if d['followup_status'] == 'in_need_of_action'])
         in_need_of_action_auto = in_need_of_action.filtered(lambda p: p.followup_line_id.auto_execute and p.followup_reminder_type == 'automatic')
-        for partner in in_need_of_action_auto[:1000]:
+        for partner in in_need_of_action_auto[:batch_size]:
             try:
                 partner._execute_followup_partner()
             except UserError as e:
@@ -616,26 +631,42 @@ class ResPartner(models.Model):
                 # i.e. partner missing email
                 partner._message_log(body=e)
                 _logger.warning(e, exc_info=True)
+        return bool(not in_need_of_action_auto[batch_size:])
 
-    def _cron_execute_followup(self):
-        for company in self.env["res.company"].search([]):
+    def _cron_execute_followup(self, batch_size=1000):
+        """Execute pending followups for all companies.
+        :param batch_size: maximum number of followup to process for each company
+        """
+        all_companies = self.env["res.company"].search([])
+        self.env["ir.cron"]._commit_progress(remaining=len(all_companies))
+        unfinished = 0
+        for company in all_companies:
             # Since the cache is done by database and not by company, we need to invalidate in this special case
             # where the context is changing in the same transaction
             self.env.cr.cache.pop('res_partner_all_followup', None)
-            self.with_context(allowed_company_ids=company.ids)._cron_execute_followup_company()
+            all_done = self.with_context(allowed_company_ids=company.ids)._cron_execute_followup_company(batch_size=batch_size)
+            if not all_done:
+                unfinished += 1
+            self.env["ir.cron"]._commit_progress(1)
+        if unfinished:
+            # if not all followups could be processed, let the cron be retriggered
+            self.env["ir.cron"]._commit_progress(remaining=unfinished)
 
     def _show_pay_now_button(self):
         invoice_online_payment = bool(self.env['ir.config_parameter'].sudo().get_param('account_payment.enable_portal_payment'))
-        payment_method_available = bool(self.env['payment.method'].sudo().search_count([('active', '=', 'True')]))
-        return invoice_online_payment and payment_method_available
+        payment_method_available = bool('payment.method' in self.env and self.env['payment.method'].sudo().search_count([('active', '=', 'True')]))
+        partner_has_user = bool(self.user_ids)
+        return invoice_online_payment and payment_method_available and partner_has_user
 
     def _compute_has_moves(self):
         field_names = ['partner_id', 'partner_shipping_id', 'commercial_partner_id']
         partner_ids = {row[0] for row in self.env.execute_query(SQL("\nUNION ").join(
-            self.env['account.move']._search(
+            [self.env['account.move']._search(
                 [('company_id', 'in', self.env.companies.ids), (name, 'in', self.ids)]
-            ).subselect(name)
-            for name in field_names
+            ).subselect('account_move.' + name) for name in field_names] +
+            [self.env['account.move.line']._search(
+                [('company_id', 'in', self.env.companies.ids), ('partner_id', 'in', self.ids)]
+            ).subselect('account_move_line.partner_id')]
         ))}
 
         for partner in self:

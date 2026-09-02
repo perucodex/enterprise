@@ -73,3 +73,19 @@ class TestRentalSchedule(SaleRentingCommon):
         self.assertTrue(  # Notify the user
             any(notif['code'] == 'rental_price_update' for notif in result['notifications'])
         )
+
+    def test_schedule_with_delivery_partner_without_name(self):
+        """Ensure schedule works when delivery partner has no name."""
+        delivery_partner = self.env['res.partner'].create({
+            'name': False,
+            'type': 'delivery',
+            'parent_id': self.company.partner_id.id,
+        })
+        rental_order = self._create_rental_order(partner_id=delivery_partner.id)
+        rental_sol = rental_order.order_line[0]
+        expected_name = (
+            f"{delivery_partner.display_name}, "
+            f"{self.projector.display_name}, "
+            f"{rental_order.name}"
+        )
+        self.assertEqual(rental_sol.with_context(sale_renting_short_display_name=True).display_name, expected_name)

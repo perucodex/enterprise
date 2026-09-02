@@ -119,7 +119,7 @@
         <field name="view_mode">list</field>
         <field name="search_view_id" ref="view_account_move_line_reconcile_search"/>
         <field name="view_id" ref="view_move_line_reconcile_tree"/>
-        <field name="domain">[('display_type', 'not in', ('line_section', 'line_subsection', 'line_note')), ('account_id.reconcile', '=', True), ('full_reconcile_id', '=', False)]</field>
+        <field name="domain">[('display_type', 'not in', ('line_section', 'line_subsection', 'line_note')), ('account_id.reconcile', '=', True), ('full_reconcile_id', '=', False), ('parent_state', '!=', 'cancel')]</field>
         <field name="context">{'auto_statement_processing': True, 'journal_type': 'general', 'search_default_posted_lines': True, 'search_default_unreconciled': True, 'search_default_group_by_account': True, 'search_default_group_by_partner': True}</field>
     </record>
 
@@ -129,6 +129,13 @@
         <field name="inherit_id" ref="account.view_account_reconcile_model_search"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='name']" position="after">
+                <field name="match_journal_ids"
+                    string="Journal" 
+                    filter_domain="[
+                        '|',
+                        ('match_journal_ids', '=', self),
+                        ('match_journal_ids', '=', False)
+                    ]"/>
                 <filter string="Created by User" name="created_by_user" domain="[('created_automatically', '=', False)]"/>
                 <filter string="Created Automatically" name="created_automatically" domain="[('created_automatically', '=', True)]"/>
             </xpath>

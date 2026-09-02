@@ -32,10 +32,11 @@ class TestDocumentsBridgeProject(TestProjectCommon, TransactionCaseDocuments):
 
     def test_archive_folder_on_projects_unlinked(self):
         """
-        Projects folders should be archived if every related projects have been unlinked.
+        Projects folders should be archived if every related projects have been
+        unlinked, an archived project still counting as a related project.
         """
-        folder_1, folder_2, folder_3, folder_4 = self.env['documents.document'].create(
-            [{'name': f'F{i}', 'type': 'folder'} for i in range(4)]
+        folder_1, folder_2, folder_3, folder_4, folder_5 = self.env['documents.document'].create(
+            [{'name': f'F{i}', 'type': 'folder'} for i in range(5)]
         )
 
         (
@@ -45,19 +46,24 @@ class TestDocumentsBridgeProject(TestProjectCommon, TransactionCaseDocuments):
             {'name': f'p{i}', 'documents_folder_id': folder.id}
             for i, folder in enumerate([folder_1] * 4 + [folder_2] * 3 + [folder_3])
         ])
+        archived_project = self.env['project.project'].create({
+            'name': 'p_archived',
+            'documents_folder_id': folder_5.id,
+            'active': False,
+        })
 
         cases = [
             (
                 project_1 | project_4,
-                folder_1 | folder_2 | folder_3 | folder_4,
+                folder_1 | folder_2 | folder_3 | folder_4 | folder_5,
                 self.env['documents.document']
             ), (
                 project_2,
-                folder_1 | folder_2 | folder_3 | folder_4,
+                folder_1 | folder_2 | folder_3 | folder_4 | folder_5,
                 self.env['documents.document']
             ), (
                 project_0 | project_3 | project_5 | project_6,
-                folder_3 | folder_4,
+                folder_3 | folder_4 | folder_5,
                 folder_1 | folder_2
             ),
         ]
@@ -69,6 +75,10 @@ class TestDocumentsBridgeProject(TestProjectCommon, TransactionCaseDocuments):
                 projects_to_unlink.unlink()
                 self.assertTrue(all(active_folders.mapped('active')))
                 self.assertFalse(any(inactive_folders.mapped('active')))
+
+        self.assertTrue(
+            archived_project.documents_folder_id.active,
+            "The folder of an archived project should be kept, no matter which other projects are unlinked")
 
         count_end = self.env['documents.document'].search_count([('active', '=', True)])
         self.assertEqual(count_end, count_start - 2)
@@ -85,6 +95,29 @@ class TestDocumentsBridgeProject(TestProjectCommon, TransactionCaseDocuments):
             'name': 'Project',
         })
         self.assertTrue(project.documents_folder_id, "A folder should be created for the project")
+
+    def test_change_visibility_updates_document_access(self):
+        """Changing project visibility updates document access when its folder
+        contains a shortcut."""
+        folder = self.project_pigs.documents_folder_id
+        document = self.env['documents.document'].create({
+            'datas': TEXT,
+            'name': 'in_folder.txt',
+            'mimetype': 'text/plain',
+            'folder_id': folder.id,
+        })
+        shortcut = self.document_txt_2.action_create_shortcut(location_user_folder_id=str(folder.id))
+        self.assertEqual(shortcut.folder_id, folder)
+        self.assertEqual(folder.access_internal, 'edit')
+        self.assertEqual(document.access_internal, 'edit')
+        self.assertEqual(shortcut.access_internal, 'view')
+        self.assertEqual(self.document_txt_2.access_internal, 'view')
+
+        self.project_pigs.privacy_visibility = 'followers'
+        self.assertEqual(folder.access_internal, 'none')
+        self.assertEqual(document.access_internal, 'none')
+        self.assertEqual(shortcut.access_internal, 'view')
+        self.assertEqual(self.document_txt_2.access_internal, 'view')
 
     def test_project_task_access_document(self):
         """
@@ -228,3 +261,18 @@ class TestDocumentsBridgeProject(TestProjectCommon, TransactionCaseDocuments):
             len(copied_project_documents), 1,
             "The copied project should have one document copied."
         )
+
+    def test_project_document_unarchive_on_revert(self):
+        """ Ensure project documents are unarchived when a project is reverted
+        Steps:
+            1. Create a project
+            2. Convert the project into a project template
+            3. Undo the project
+            4. Check project documents
+        """
+        client_action = self.project_pigs.action_create_template_from_project()
+        self.env['project.project'].browse(client_action['params']['project_id']).unlink()
+        self.project_pigs.create_template_from_project_undo_callback(
+            client_action['params']['callback_data']['args'][1]
+        )
+        self.project_pigs.action_create_template_from_project()

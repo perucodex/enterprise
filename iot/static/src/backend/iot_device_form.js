@@ -16,7 +16,7 @@ class IoTDeviceController extends formView.Controller {
         useSubEnv({ onClickViewButton: this.onClickButtonTest.bind(this) });
     }
 
-    async onWillSaveRecord(record) {
+    async onRecordSaved(record) {
         if (["keyboard", "scanner"].includes(record.data.type)) {
             await this.updateKeyboardLayout(record.data);
         } else if (record.data.type === "display") {
@@ -46,7 +46,7 @@ class IoTDeviceController extends formView.Controller {
         if (keyboard_layout) {
             const [keyboard] = await this.model.orm.read(
                 "iot.keyboard.layout",
-                [keyboard_layout[0]],
+                [keyboard_layout.id],
                 ["layout", "variant"]
             );
             return this.iotHttp.action(

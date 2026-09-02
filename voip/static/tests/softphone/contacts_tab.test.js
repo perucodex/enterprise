@@ -42,6 +42,22 @@ test("Typing in the search bar fetches and displays the matching contacts", asyn
     await contains(".o-voip-TabEntry span", { text: "Gargamel", count: 0 });
 });
 
+test("Contact search matches phone_sanitized", async () => {
+    const pyEnv = await startServer();
+    pyEnv["res.partner"].create({
+        name: "John Doe",
+        phone: "1234567890",
+        phone_sanitized: "+11234567890",
+    });
+    await start();
+    await click(".o_menu_systray button[title='Show Softphone']");
+    await click("button span:contains('Contacts')");
+    // Search term carries a country-code prefix that does not match the raw
+    // `phone`, but should match `phone_sanitized` via fallback.
+    await insertText("input[id='o-voip-Tab-searchInput']", "+11234567890");
+    await contains(".o-voip-TabEntry span", { text: "John Doe" });
+});
+
 test("Scrolling to bottom loads more contacts", async () => {
     const pyEnv = await startServer();
     let rpcCount = 0;

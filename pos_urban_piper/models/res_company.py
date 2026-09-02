@@ -6,9 +6,11 @@ class ResCompany(models.Model):
 
     pos_urbanpiper_username = fields.Char(
         string='UrbanPiper Username',
-        help='The username of the UrbanPiper api account.'
+        help='The username of the UrbanPiper api account.',
+        groups="base.group_system"
     )
     pos_urbanpiper_apikey = fields.Char(
         string='UrbanPiper API Key',
-        help='The API key for accessing the UrbanPiper services.'
+        help='The API key for accessing the UrbanPiper services.',
+        groups="base.group_system"
     )

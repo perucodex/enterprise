@@ -119,6 +119,7 @@ export const DocumentsSpreadsheetControllerMixin = () => ({
         );
         const model = await fetchSpreadsheetModel(this.env, "documents.document", doc.resId);
         const spreadsheetData = JSON.stringify(await freezeOdooData(model));
+        model.dispatch("LOG_DATASOURCE_EXPORT", { action: "freeze" });
         const excelFiles = model.exportXLSX().files;
 
         // Create a new <documents.document> with the frozen data
@@ -139,7 +140,7 @@ export const DocumentsSpreadsheetControllerMixin = () => ({
         const singleSelection = selectionCount === 1 && this.targetRecords[0];
         menuItems.download.isAvailable = () =>
             this.model.targetRecords.some(
-                (r) => !r.isRequest() && r.data.handler !== "spreadsheet"
+                (r) => !r.isRequest() && r.data.handler !== "spreadsheet" && r.data.type !== "url"
             );
         const prevShareAvailable = menuItems.share.isAvailable || (() => true);
         menuItems.share.isAvailable = () =>
@@ -164,6 +165,12 @@ export const DocumentsSpreadsheetControllerMixin = () => ({
     getStaticActionMenuItems() {
         const menuItems = super.getStaticActionMenuItems(...arguments);
         menuItems.insert.isAvailable = () => this.documentService.userIsInternal;
+        const superVersionIsAvailable = menuItems.version.isAvailable;
+        menuItems.version.isAvailable = () =>
+            superVersionIsAvailable() &&
+            !["spreadsheet", "frozen_spreadsheet"].includes(
+                this.model.targetRecords[0].data.handler
+            );
         return menuItems;
     },
 });

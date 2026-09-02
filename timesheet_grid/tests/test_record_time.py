@@ -23,6 +23,7 @@ class TestRecordTime(TestCommonTimesheet, HttpCase):
 
     def test_timesheet_overtime(self):
         self.empl_employee.resource_calendar_id.flexible_hours = True
+        self.empl_employee.resource_calendar_id.hours_per_week = 30.0
         # Get this week's Monday (or next Monday if today is Sunday)
         relevant_monday = date.today() + timedelta(
             days=-date.today().weekday() + (7 if date.today().weekday() == 6 else 0)
@@ -66,6 +67,7 @@ class TestRecordTime(TestCommonTimesheet, HttpCase):
             'tz': 'UTC',
             'full_time_required_hours': 8.0,
             'hours_per_day': 8.0,
+            'hours_per_week': 8.0,
             'flexible_hours': True,
         })
 

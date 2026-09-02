@@ -197,7 +197,7 @@ class SaleOrderLine(models.Model):
         """
         if (
             not any(key in vals for key in ['qty_delivered', 'pickedup_lot_ids', 'qty_returned', 'returned_lot_ids'])
-            or self._are_rental_pickings_enabled()
+            or (self._are_rental_pickings_enabled() and not self.env.context.get('rental_direct_stock_move'))
         ):
             # If nothing to catch for rental: usual write behavior
             return super().write(vals)
@@ -483,7 +483,7 @@ class SaleOrderLine(models.Model):
     def _create_procurements(self, product_qty, procurement_uom, values):
         """ Change the destination for rental procurement. """
         if self.is_rental and self._are_rental_pickings_enabled():
-            values['route_ids'] = values.get('route_ids') or self.env.ref('sale_stock_renting.route_rental')
+            values['route_ids'] = values.get('route_ids', self.env['stock.route']) | (self.env.ref('sale_stock_renting.route_rental', raise_if_not_found=False) or self.env['stock.route'])
             delivery_values = {
                 **values,
                 'date_planned': self.order_id.rental_start_date,
@@ -531,7 +531,7 @@ class SaleOrderLine(models.Model):
                     'move_orig_ids': [Command.link(pick.id) for pick in moves['picks']],
                     'procure_method': 'make_to_order'
                 })
-                moves['returns'].picking_id.return_id = moves['picks'].picking_id
+                moves['returns'].picking_id.return_id = moves['picks'].picking_id[:1]
             returns._recompute_state()
         else:
             other_lines = self.filtered(lambda sol: not sol.is_rental)
